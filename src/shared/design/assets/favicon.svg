@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img">
+	<title>eDoctor</title>
+	<rect width="96" height="96" rx="20" fill="#0f7dd9" />
+	<path
+		d="M48 21c14.9 0 27 12.1 27 27S62.9 75 48 75 21 62.9 21 48s12.1-27 27-27Z"
+		fill="#ecfeff"
+	/>
+	<path
+		d="M47 32h8v12h12v8H55v12h-8V52H35v-8h12V32Z"
+		fill="#0f7dd9"
+	/>
+	<path
+		d="M30 67c4.7-6.3 11-9.4 18.7-9.4 7 0 12.8 2.6 17.3 7.8A26.9 26.9 0 0 1 48 75a26.8 26.8 0 0 1-18-8Z"
+		fill="#86efac"
+		fill-opacity=".9"
+	/>
+</svg>
