@@ -367,25 +367,30 @@ In this repo, Atomic Design is applied differently in shared UI and feature modu
 
 Shared UI uses this hierarchy:
 
+Current buckets in the tree:
+
 ```txt
 src/shared/ui/
   primitives/
-  atoms/
   molecules/
   organisms/
   templates/
-  icons/
 ```
 
 Definitions:
 
 - `primitives/`: shadcn-svelte and Bits UI wrappers. Domain-free, low-level, accessible controls.
-- `atoms/`: project-specific domain-free pieces smaller than a molecule. Add only when primitives
-  are not enough.
+  This is the atomic base of the system.
 - `molecules/`: composed controls with a focused app-wide job, such as language switcher or theme
   toggle.
 - `organisms/`: larger reusable app-wide sections, such as app shell.
 - `templates/`: reusable layout structures. Keep them generic and prop-driven.
+
+Optional, create-on-demand buckets (not currently present — add only when an existing bucket is
+insufficient, do not pre-create empty layers):
+
+- `atoms/`: project-specific domain-free pieces smaller than a molecule, when `primitives` are not
+  enough.
 - `icons/`: project icon wrappers only when virtual Icones imports are not enough.
 
 `src/shared/ui/primitives` is where shadcn-svelte generated components belong.
@@ -460,7 +465,6 @@ Once promoted, the shared component must not import from the original module.
 src/shared/
   config/       app env, variants, public config parsing
   design/       design assets, tokens, design-system helpers
-  hooks/        app-wide Svelte hooks/runes
   lib/          pure framework-agnostic helpers
   preferences/ theme, language, and preference resolution
   providers/   root and subtree providers
@@ -469,6 +473,9 @@ src/shared/
   storage/      browser/server-safe storage adapters
   ui/           reusable UI hierarchy
 ```
+
+Add a new top-level shared folder (for example `hooks/` for app-wide Svelte hooks/runes) only when a
+real cross-cutting need exists; do not pre-create empty folders.
 
 Shared code should be:
 

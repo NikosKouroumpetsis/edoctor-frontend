@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "copyUnchanged": [
+    ".claude/agents",
+    ".claude/skills",
+    ".claude/scripts/pipeline.cjs",
+    ".claude/pipeline/templates",
+    ".claude/pipeline/portable-manifest.json",
+    ".claude/pipeline/adapters"
+  ],
+  "adaptBeforeUse": [
+    ".claude/pipeline/config.json",
+    ".claude/pipeline/project-profile.md",
+    "CLAUDE.md"
+  ],
+  "doNotCopyAsProjectState": [
+    ".claude/tasks",
+    "docs/runs"
+  ],
+  "runtimeRequirements": [
+    "Claude Code with project skills, custom subagents, Agent Teams, and runtime cleanup controls",
+    "Node.js available only when using .claude/scripts/pipeline.cjs"
+  ],
+  "forbiddenPortablePatterns": [
+    "edoctor",
+    "TypeScript contracts",
+    "backend or general software",
+    "documentation/tests-instructions.md",
+    "documentation/architecture-pattern.md",
+    "src/modules",
+    "src/shared",
+    "prisma/.generated"
+  ]
+}

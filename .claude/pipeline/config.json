@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "archiveRoot": ".claude/tasks/runs",
+  "currentPointer": ".claude/tasks/CURRENT.md",
+  "templateRoot": ".claude/pipeline/templates",
+  "projectProfile": ".claude/pipeline/project-profile.md",
+  "instructionSources": ["CLAUDE.md"],
+  "commandManifest": "package.json",
+  "commandPolicy": "package-json-scripts-only",
+  "launcher": {
+    "display": "bun run claude:pipeline --",
+    "validation": {
+      "type": "package-json-script",
+      "path": "package.json",
+      "script": "claude:pipeline",
+      "expected": "node .claude/scripts/pipeline.cjs"
+    }
+  },
+  "defaults": {
+    "pipeline": "subagents",
+    "mode": "hybrid",
+    "level": "standard"
+  },
+  "limits": {
+    "debugging": 3,
+    "qa": 5,
+    "review": 5
+  },
+  "optionalGates": {
+    "security": "risk-based",
+    "documentation": "change-based"
+  }
+}

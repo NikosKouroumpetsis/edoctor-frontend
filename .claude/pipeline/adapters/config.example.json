@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "archiveRoot": ".claude/tasks/runs",
+  "currentPointer": ".claude/tasks/CURRENT.md",
+  "templateRoot": ".claude/pipeline/templates",
+  "projectProfile": ".claude/pipeline/project-profile.md",
+  "instructionSources": ["CLAUDE.md"],
+  "commandManifest": null,
+  "commandPolicy": "repository-defined",
+  "launcher": {
+    "display": "node .claude/scripts/pipeline.js",
+    "validation": {
+      "type": "none"
+    }
+  },
+  "defaults": {
+    "pipeline": "team-agents",
+    "mode": "hybrid",
+    "level": "standard"
+  },
+  "limits": {
+    "debugging": 3,
+    "qa": 5,
+    "review": 5
+  },
+  "optionalGates": {
+    "security": "risk-based",
+    "documentation": "change-based"
+  }
+}
