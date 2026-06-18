@@ -7,6 +7,8 @@
 	import { Button } from '$shared/ui/primitives/button';
 	import LanguageSwitcher from '$shared/ui/molecules/language-switcher';
 	import ThemeToggle from '$shared/ui/molecules/theme-toggle';
+	import BottomNav from '$shared/ui/organisms/bottom-nav';
+	import SiteFooter from '$shared/ui/organisms/site-footer';
 	import { m } from '$paraglide/messages.js';
 	import { deLocalizeHref, locales, localizeHref } from '$paraglide/runtime';
 
@@ -23,11 +25,11 @@
 		resolve(localizeHref(basePath, { locale }) as Pathname);
 </script>
 
-<div class="min-h-dvh bg-background text-foreground">
+<div class="flex min-h-dvh flex-col bg-background text-foreground">
 	<header
 		class="sticky top-0 z-50 border-b border-border/80 bg-background/92 backdrop-blur supports-backdrop-filter:bg-background/75"
 	>
-		<div class="mx-auto flex h-16 w-full max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+		<div class="container-page flex h-16 items-center gap-4">
 			<a
 				href={localizedHref('/')}
 				class="flex shrink-0 items-center gap-2.5 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -43,7 +45,7 @@
 			</a>
 
 			<nav
-				class="ml-4 hidden items-center gap-1 md:flex"
+				class="ml-4 hidden items-center gap-1 lg:flex"
 				aria-label={m.primary_navigation({}, messageOptions)}
 			>
 				<a
@@ -81,7 +83,12 @@
 		</div>
 	</header>
 
-	{@render children()}
+	<div class="flex-1">
+		{@render children()}
+	</div>
+
+	<SiteFooter />
+	<BottomNav />
 </div>
 
 <div style="display:none">

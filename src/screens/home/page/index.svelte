@@ -1,5 +1,5 @@
 <script lang="ts">
-	import HomeLanding from '$modules/marketing/ui/home-landing';
+	import DiscoveryHome from '$modules/search-doctors/ui/discovery-home';
 </script>
 
-<HomeLanding />
+<DiscoveryHome />
