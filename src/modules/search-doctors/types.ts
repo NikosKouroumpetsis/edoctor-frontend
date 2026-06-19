@@ -8,6 +8,15 @@ export type CategoryId =
 
 export type SectionId = 'popular-athens' | 'online-this-week' | 'preventive-checkup';
 
+export type CategorySeed = {
+	id: CategoryId;
+};
+
+/**
+ * Display card for the discovery home, adapted from the backend marketplace card view
+ * (`card-adapter.ts`). It carries no category `tags`: category scoping is performed
+ * server-side by the section query, never by client-side tag filtering.
+ */
 export type DoctorCard = {
 	id: string;
 	doctorSlug: string;
@@ -20,16 +29,10 @@ export type DoctorCard = {
 	reviewCount: number;
 	badgeLabel?: string;
 	imageUrl: string;
-	tags: CategoryId[];
 };
 
-export type DiscoverySection = {
+/** A home section resolved to display cards. */
+export type HomeSection = {
 	id: SectionId;
-	doctorSlugs: string[];
-};
-
-export type DiscoveryData = {
-	categories: { id: CategoryId }[];
-	sections: DiscoverySection[];
 	doctors: DoctorCard[];
 };

@@ -32,6 +32,8 @@
 	"favorite_toggle": "Save doctor",
 	"no_results_title": "No doctors match this filter yet",
 	"no_results_body": "Try another category or clear the filters to see more doctors.",
+	"section_error_title": "Couldn't load this section",
+	"section_error_body": "Something went wrong while loading these doctors. Please try again shortly.",
 	"footer_tagline": "Find a doctor, compare availability, and book a visit — in person or online.",
 	"footer_support_title": "Support",
 	"footer_help": "Help center",

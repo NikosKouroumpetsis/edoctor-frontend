@@ -21,6 +21,46 @@ Defaults:
 
 Use invalidation/refetch instead of copying server entities into rune state.
 
+## Marketplace data and the discovery home
+
+The discovery home reads the public doctor marketplace backend
+(`GET /api/v1/doctor/public/*`). The integration mirrors the `edoctor-application`
+contract: `src/shared/lib/http` is the fetch/envelope/error/media-URL layer,
+`src/shared/config/api.ts` resolves the base URL, and
+`src/modules/search-doctors/api/marketplace` owns the typed endpoints, the
+server-side card adapter, the per-section scope configs, and the slug/id resolvers.
+
+Two complementary mechanisms drive the home, each used where it is strongest:
+
+- **Initial paint — SvelteKit streaming SSR.** `routes/+page.server.ts` returns the
+  category rail immediately and each home section as an un-awaited promise
+  (`home/load.ts`). SvelteKit streams them into the document, so sections reveal
+  serially as the backend responds — skeleton while pending, cards once resolved.
+  Streamed promises never reject: a failed section degrades to a per-section error
+  state instead of crashing the response.
+- **Category filtering — TanStack Svelte Query.** Selecting a rail category is a
+  client interaction owned by `useHomeSections`. The category is resolved into a
+  server-side scope fragment (professional ids / service slugs / text) embedded in
+  each section's query key, so a category change refetches server-scoped results.
+  `keepPreviousData` swaps content in place instead of flashing the skeleton, and
+  caching bounds backend load. The `all` view stays disabled here because it is
+  served by the streamed SSR load.
+
+Category filtering is server-scoped, not client-side tag filtering: backend cards
+carry no category tags, and the `online` category requires a service scope only the
+server can apply.
+
+The base URL comes from `PUBLIC_API_BASE_URL` (public by design — used by both the
+SSR load and browser refetch), defaulting to `http://localhost:8081/api/v1` for the
+local seed-mock server.
+
+Two seed-data alignments live in the marketplace layer: section/category scoping maps
+each rail specialty to its professional display term (`SPECIALTY_SEARCH_TERMS`) so the
+`/suggestions` lookup resolves real `professionalId`s, and home sections fall back to a
+text term the backend matcher recognizes (e.g. `online`) when no service slug applies.
+Cards with no backend image resolve to a local `static/doctor-placeholder.svg` via
+`resolveMediaUrl`, so a missing photo never renders as a broken image.
+
 ## Svelte runes
 
 Use `.svelte.ts` files for local state that needs Svelte reactivity outside components.
