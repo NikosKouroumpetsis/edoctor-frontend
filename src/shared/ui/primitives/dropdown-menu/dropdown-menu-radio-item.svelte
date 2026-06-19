@@ -1,31 +1,42 @@
 <script lang="ts">
-	import { DropdownMenu as DropdownMenuPrimitive } from 'bits-ui';
+	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import CircleIcon from '~icons/lucide/circle';
-	import { cn, type WithoutChild } from '$shared/lib/utils';
+	import { cn, type WithElementRef } from '$shared/lib/utils';
+	import { getDropdownMenuRadioContext } from './dropdown-menu-radio-group.svelte';
 
 	let {
 		ref = $bindable(null),
+		value,
 		class: className,
-		children: childrenProp,
+		disabled,
+		children,
 		...restProps
-	}: WithoutChild<DropdownMenuPrimitive.RadioItemProps> = $props();
+	}: WithElementRef<HTMLButtonAttributes, HTMLButtonElement> & { value: string } = $props();
+
+	const group = getDropdownMenuRadioContext();
+	const checked = $derived(group.value === value);
 </script>
 
-<DropdownMenuPrimitive.RadioItem
-	bind:ref
+<button
+	bind:this={ref}
+	type="button"
+	role="menuitemradio"
+	aria-checked={checked}
 	data-slot="dropdown-menu-radio-item"
+	data-state={checked ? 'checked' : 'unchecked'}
+	data-roving-item
+	data-disabled={disabled ? '' : undefined}
+	{disabled}
+	tabindex={-1}
+	onclick={() => !disabled && group.select(value)}
 	class={cn(
-		"relative flex cursor-default items-center gap-2 rounded-sm py-1.5 ps-8 pe-2 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		'relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-body-sm outline-none select-none hover:bg-accent/10 focus:bg-accent/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
 		className
 	)}
 	{...restProps}
 >
-	{#snippet children({ checked })}
-		<span class="pointer-events-none absolute start-2 flex size-3.5 items-center justify-center">
-			{#if checked}
-				<CircleIcon class="size-2 fill-current" />
-			{/if}
-		</span>
-		{@render childrenProp?.({ checked })}
-	{/snippet}
-</DropdownMenuPrimitive.RadioItem>
+	<span class="absolute left-2 flex size-4 items-center justify-center">
+		{#if checked}<CircleIcon class="size-2 fill-current" />{/if}
+	</span>
+	{@render children?.()}
+</button>

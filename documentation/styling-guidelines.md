@@ -88,8 +88,9 @@ restyling per feature.
 
 ## Components
 
-- Use shadcn-svelte primitives for common controls.
-- Use Bits UI through shadcn-svelte wrappers unless a component needs a custom primitive.
+- Use the in-house primitives in `src/shared/ui/primitives` for common controls.
+- Build new headless behaviour on `src/shared/lib/headless`; do not add an
+  external UI component library (no Bits UI).
 - Keep primitives low-level and domain-free.
 - Put domain composition in module UI slices.
 - Do not create nested card layouts unless the inner card is a repeated item, modal, or genuinely framed tool.

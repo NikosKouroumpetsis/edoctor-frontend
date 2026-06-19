@@ -9,8 +9,14 @@ but does not override them.
 
 - Framework: SvelteKit with Svelte 5 runes, TypeScript.
 - Runtime/package manager: Bun only.
-- Styling: Tailwind CSS v4 with semantic tokens, shadcn-svelte (`new-york`
-  style) on Bits UI primitives.
+- Styling: Tailwind CSS v4 with semantic tokens, shadcn-svelte (`new-york`)
+  visual style implemented as in-house components. There is no external UI
+  component library: the headless behaviour (focus trap, dismissable layers,
+  roving focus, scroll lock, typeahead, floating positioning, context, ids)
+  lives in `src/shared/lib/headless` and the styled primitives are built on top
+  of it. No new code may depend on an external UI kit. (Bits UI is being phased
+  out — its last consumers, `select` and `dropdown-menu`, are rewritten in the
+  overlays phase; do not add new Bits UI usage or reintroduce another kit.)
 - Icons: Icones/Iconify virtual imports only (e.g. `~icons/lucide/search`); do
   not add direct icon packages.
 - i18n: Paraglide JS with URL routing. Greek is canonical at `/`; English under
@@ -91,8 +97,9 @@ Hard boundaries:
 Reusable UI lives under `src/shared/ui/` in an atomic hierarchy. The current
 canonical buckets are:
 
-- `primitives/`: shadcn-svelte (`new-york`) generated primitives on Bits UI —
-  the atomic base of the system.
+- `primitives/`: shadcn-svelte (`new-york`) styled primitives built on the
+  in-house headless layer (`src/shared/lib/headless`) — the atomic base of the
+  system. No external UI component library.
 - `molecules/`: small compositions of primitives (e.g. `language-switcher`,
   `theme-toggle`).
 - `organisms/`: larger composite UI (e.g. `app-shell`).
@@ -100,7 +107,8 @@ canonical buckets are:
 
 Shared UI placement rules:
 
-- Keep shadcn-svelte generated primitives in `src/shared/ui/primitives`.
+- Keep shadcn-styled primitives in `src/shared/ui/primitives`; keep their
+  shared headless behaviour in `src/shared/lib/headless`.
 - One folder per molecule, organism, or template; parent shared UI folders
   export children through explicit `index.ts` barrels with named exports only —
   do not use wildcard `export *`.
@@ -152,6 +160,9 @@ Rules:
 
 - TanStack Svelte Query owns remote/async/server state.
 - Svelte 5 runes in `.svelte.ts` files own local app/UI state and preferences.
+- Form state uses the in-house, runes-based `createForm` in `src/shared/lib/form`
+  (values/errors/touched/dirty/validation/submit, fine-grained per field). Do not
+  add an external form library; connect fields via `form.field(name)`.
 - Do not copy API responses into rune state.
 - Do not keep mutable user/request state in module-level variables that can run
   on the server.
@@ -163,8 +174,9 @@ Rules:
 ## Styling And i18n
 
 - Use Tailwind v4 semantic tokens from `src/routes/layout.css`.
-- Use shadcn-svelte `new-york` style; keep generated primitives in the shared UI
-  primitives layer.
+- Use the shadcn-svelte `new-york` visual style; keep the in-house styled
+  primitives in the shared UI primitives layer and their headless behaviour in
+  `src/shared/lib/headless`. Do not add an external UI component library.
 - Do not use raw palette utilities in feature code unless the value is a
   deliberate one-off that belongs close to that feature.
 - Use Icones/Iconify virtual imports (e.g. `~icons/lucide/search`); do not add
@@ -205,10 +217,16 @@ Current state and targets:
 - `bun run lint` (Prettier check + ESLint) for implementation work.
 - `bun run build` when routing, SvelteKit config, env behavior, providers, or
   public UI flows changed.
-- Target test baseline (as tooling is added): Vitest + Svelte Testing Library
-  for unit/component tests, architecture contract tests for route mirrors,
-  module slices, shared imports, and i18n parity, and Playwright for browser
-  flows.
+- Automated tests run on Vitest + Svelte Testing Library (jsdom). Use
+  `bun run test` (single run), `bun run test:watch`, or `bun run test:coverage`.
+  Config: `vitest.config.ts` + `vitest-setup-client.ts`; jest-dom matcher types
+  are declared in `src/vitest.d.ts`. Co-locate specs as `*.test.ts` next to the
+  unit under test. Every shared headless utility and UI primitive ships with
+  tests, plus integration tests for realistic component+primitive and form
+  compositions.
+- Remaining test targets (as tooling is added): architecture contract tests for
+  route mirrors, module slices, shared imports, and i18n parity, and Playwright
+  for browser flows.
 
 Use only scripts defined in `package.json`. Never claim that an unrun check
 passed. Distinguish implementation defects, test defects, flaky behavior, and

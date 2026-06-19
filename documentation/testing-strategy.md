@@ -2,39 +2,45 @@
 
 ## Current gate
 
-The current required quality gate is:
+The required quality gates are:
 
 ```txt
-bun run check
+bun run check    # Paraglide compile + svelte-kit sync + svelte-check
+bun run lint     # Prettier + ESLint (implementation work)
+bun run test     # Vitest run (unit + component)
+bun run build    # routing / provider / config / env / public UI changes
 ```
 
-For implementation work also run:
+## Tooling in place
 
-```txt
-bun run lint
-```
-
-For routing, provider, config, env, or public UI changes also run:
-
-```txt
-bun run build
-```
-
-## Target tooling
-
-Add these when the first behavior tests are needed:
-
-- Vitest for unit and architecture tests.
-- Svelte Testing Library for component tests.
-- Playwright for browser flows.
+- **Vitest** `^4` (jsdom) — `vitest.config.ts` loads only the Svelte + icons
+  plugins and mirrors the `$`/`$app` aliases; `vitest-setup-client.ts` registers
+  jest-dom matchers and shims jsdom gaps (matchMedia, ResizeObserver,
+  `Element.animate`, pointer-capture). jest-dom matcher types are declared in
+  `src/vitest.d.ts`.
+- **Svelte Testing Library** `^5` + `@testing-library/user-event`.
+- **SvelteKit virtual modules** (`$app/environment`, `$app/state`, `$app/paths`)
+  are mocked for jsdom under `vitest-mocks/` and aliased in the Vitest config.
+- Playwright (browser flows) is still to be added.
 
 ## File placement
 
-- Unit/helper tests: colocated under `src/**` with `.unit.spec.ts`.
-- Svelte component tests: colocated with `.unit.spec.ts`.
-- Architecture tests: `tests/architecture/**`.
-- Browser tests: `tests/browser/**`.
-- Shared test utilities: `tests/utils/**`.
+- Unit/helper and component tests: colocated under `src/**` as `*.test.ts`.
+- Component tests that need children/slots or composition render a small
+  colocated `*.harness.svelte` (or `*.form-harness.svelte`) component.
+- Architecture tests: `tests/architecture/**` (to be added).
+- Browser tests: `tests/browser/**` (to be added).
+
+## Component & form testing notes
+
+- Prefer role/label queries (`getByRole`, `getByLabelText`) and assert ARIA
+  state (`aria-checked`, `aria-expanded`, `aria-selected`) over implementation
+  details.
+- Overlays portal to `document.body`; query them through `screen`/`within` and
+  use `findBy`/`waitFor` for transition-driven mount/unmount.
+- Form fields wired through `createForm` support fine-grained reactivity; cover
+  it with per-field render probes (`$effect` reading only one field's value) and
+  assert no `console.error`/`warn` during interaction.
 
 ## Architecture coverage
 

@@ -13,9 +13,11 @@ i18n, testing, environment, and documentation rules are owned by the mandatory
 project architecture contract below. Do not maintain a duplicate summary here.
 
 In one line: this is a SvelteKit (Svelte 5 runes) web app using Tailwind v4,
-shadcn-svelte (`new-york`) on Bits UI, Paraglide i18n, TanStack Svelte Query,
-and Bun, organized with an atomic design / per-feature-module architecture and a
-`src/shared` layer for generic building blocks.
+in-house shadcn-styled (`new-york`) components on our own headless primitives
+layer (no external UI library; Bits UI is being phased out), Paraglide i18n,
+TanStack Svelte Query, Vitest + Svelte Testing Library, and Bun, organized with
+an atomic design / per-feature-module architecture and a `src/shared` layer for
+generic building blocks.
 
 ## Mandatory Project Architecture
 

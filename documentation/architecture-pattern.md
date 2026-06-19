@@ -379,8 +379,9 @@ src/shared/ui/
 
 Definitions:
 
-- `primitives/`: shadcn-svelte and Bits UI wrappers. Domain-free, low-level, accessible controls.
-  This is the atomic base of the system.
+- `primitives/`: in-house shadcn-styled (`new-york`) controls built on the
+  headless layer in `src/shared/lib/headless` (no external UI library).
+  Domain-free, low-level, accessible controls. This is the atomic base of the system.
 - `molecules/`: composed controls with a focused app-wide job, such as language switcher or theme
   toggle.
 - `organisms/`: larger reusable app-wide sections, such as app shell.

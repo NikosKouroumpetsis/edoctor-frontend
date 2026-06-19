@@ -6,7 +6,9 @@ This repository is the eDoctor web frontend.
 
 - Framework: SvelteKit with Svelte 5 runes.
 - Runtime/package manager: Bun only.
-- Styling: Tailwind CSS v4, shadcn-svelte, `new-york` style, Bits UI primitives.
+- Styling: Tailwind CSS v4, in-house shadcn-styled (`new-york`) components on
+  our own headless layer (`src/shared/lib/headless`); no external UI library
+  (Bits UI being phased out).
 - Icons: Icones/Iconify virtual imports only, for example `~icons/lucide/search`.
 - i18n: Paraglide JS with URL routing. Greek is canonical at `/`; English lives under `/en`; `/el/**` redirects to the Greek canonical URL.
 - Architecture: SvelteKit route files stay thin, screens mirror routes, features live in module slices, app-wide contracts live in shared.

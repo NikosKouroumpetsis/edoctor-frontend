@@ -23,7 +23,9 @@ this Claude pipeline.
 
 - Framework: SvelteKit, Svelte 5 runes, TypeScript.
 - Runtime/package manager: Bun only.
-- Styling: Tailwind v4 semantic tokens, shadcn-svelte (`new-york`) on Bits UI.
+- Styling: Tailwind v4 semantic tokens, in-house shadcn-styled (`new-york`)
+  components on the headless layer in `src/shared/lib/headless` (no external UI
+  library; Bits UI being phased out).
 - i18n: Paraglide JS (URL routing); generated output in `src/generated/paraglide`.
 - State: TanStack Svelte Query (server state) and Svelte runes (local/UI state).
 - Architecture: thin `src/routes` glue, mirrored `src/screens`, per-feature

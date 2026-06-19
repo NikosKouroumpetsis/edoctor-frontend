@@ -1,7 +1,21 @@
 <script lang="ts">
-	import { DropdownMenu as DropdownMenuPrimitive } from 'bits-ui';
+	import type { HTMLAttributes } from 'svelte/elements';
+	import { cn, type WithElementRef } from '$shared/lib/utils';
 
-	let { ref = $bindable(null), ...restProps }: DropdownMenuPrimitive.GroupProps = $props();
+	let {
+		ref = $bindable(null),
+		class: className,
+		children,
+		...restProps
+	}: WithElementRef<HTMLAttributes<HTMLDivElement>> = $props();
 </script>
 
-<DropdownMenuPrimitive.Group bind:ref data-slot="dropdown-menu-group" {...restProps} />
+<div
+	bind:this={ref}
+	role="group"
+	data-slot="dropdown-menu-group"
+	class={cn(className)}
+	{...restProps}
+>
+	{@render children?.()}
+</div>

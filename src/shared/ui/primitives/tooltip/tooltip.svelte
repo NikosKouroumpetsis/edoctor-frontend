@@ -1,0 +1,71 @@
+<script lang="ts" module>
+	import { createContext } from '$shared/lib/headless';
+
+	export type TooltipContext = {
+		readonly open: boolean;
+		readonly contentId: string;
+		readonly triggerEl: HTMLElement | null;
+		setTriggerEl: (el: HTMLElement | null) => void;
+		openWithDelay: () => void;
+		close: () => void;
+	};
+	export const [getTooltipContext, setTooltipContext] = createContext<TooltipContext>('Tooltip');
+</script>
+
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import { useId } from '$shared/lib/headless';
+
+	let {
+		open = $bindable(false),
+		openDelay = 500,
+		closeDelay = 150,
+		onOpenChange,
+		children
+	}: {
+		open?: boolean;
+		openDelay?: number;
+		closeDelay?: number;
+		onOpenChange?: (open: boolean) => void;
+		children?: Snippet;
+	} = $props();
+
+	const id = useId(undefined, 'tooltip');
+	let triggerEl = $state<HTMLElement | null>(null);
+	let openTimer: ReturnType<typeof setTimeout> | null = null;
+	let closeTimer: ReturnType<typeof setTimeout> | null = null;
+
+	function set(next: boolean) {
+		open = next;
+		onOpenChange?.(next);
+	}
+
+	function clearTimers() {
+		if (openTimer) clearTimeout(openTimer);
+		if (closeTimer) clearTimeout(closeTimer);
+		openTimer = closeTimer = null;
+	}
+
+	setTooltipContext({
+		get open() {
+			return open;
+		},
+		contentId: `${id}-content`,
+		get triggerEl() {
+			return triggerEl;
+		},
+		setTriggerEl(el) {
+			triggerEl = el;
+		},
+		openWithDelay() {
+			clearTimers();
+			openTimer = setTimeout(() => set(true), openDelay);
+		},
+		close() {
+			clearTimers();
+			closeTimer = setTimeout(() => set(false), closeDelay);
+		}
+	});
+</script>
+
+{@render children?.()}

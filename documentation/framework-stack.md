@@ -28,9 +28,12 @@
 ## Styling and UI
 
 - Tailwind CSS `^4.2.2`
-- shadcn-svelte `^1.2.7`
+- shadcn-svelte `^1.2.7` (style reference / CLI for the `new-york` look)
 - shadcn-svelte style: `new-york`
-- Bits UI `^2.18.1`
+- UI components are in-house, built on the headless layer in
+  `src/shared/lib/headless`. No external UI component library is allowed for new
+  code. Bits UI `^2.18.1` is being phased out — only `select` and
+  `dropdown-menu` still import it, pending their rewrite.
 - Tailwind helpers: `clsx`, `tailwind-merge`, `tailwind-variants`, `tw-animate-css`
 - Font: `@fontsource-variable/inter`
 - Icons: Icones through `unplugin-icons` and Iconify icon JSON packages.
@@ -40,10 +43,13 @@
 - Current required checks:
   - `bun run check`
   - `bun run lint`
+  - `bun run test` (Vitest, single run)
   - `bun run build` for routing, provider, config, env, or public UI changes
-- Target test stack:
-  - Vitest
-  - Svelte Testing Library
+- Test stack in place:
+  - Vitest `^4` (`vitest.config.ts`, jsdom)
+  - Svelte Testing Library `^5` + `@testing-library/user-event`
+  - `@testing-library/jest-dom` matchers (types in `src/vitest.d.ts`)
+- Target test stack (not yet added):
   - Playwright for browser flows
   - architecture contract tests under `tests/architecture`
 

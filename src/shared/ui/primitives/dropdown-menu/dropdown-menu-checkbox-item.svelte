@@ -1,41 +1,46 @@
 <script lang="ts">
-	import { DropdownMenu as DropdownMenuPrimitive } from 'bits-ui';
+	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import CheckIcon from '~icons/lucide/check';
-	import MinusIcon from '~icons/lucide/minus';
-	import { cn, type WithoutChildrenOrChild } from '$shared/lib/utils';
-	import type { Snippet } from 'svelte';
+	import { cn, type WithElementRef } from '$shared/lib/utils';
 
 	let {
 		ref = $bindable(null),
 		checked = $bindable(false),
-		indeterminate = $bindable(false),
 		class: className,
-		children: childrenProp,
+		disabled,
+		onCheckedChange,
+		children,
 		...restProps
-	}: WithoutChildrenOrChild<DropdownMenuPrimitive.CheckboxItemProps> & {
-		children?: Snippet;
+	}: WithElementRef<HTMLButtonAttributes, HTMLButtonElement> & {
+		checked?: boolean;
+		onCheckedChange?: (checked: boolean) => void;
 	} = $props();
 </script>
 
-<DropdownMenuPrimitive.CheckboxItem
-	bind:ref
-	bind:checked
-	bind:indeterminate
+<button
+	bind:this={ref}
+	type="button"
+	role="menuitemcheckbox"
+	aria-checked={checked}
 	data-slot="dropdown-menu-checkbox-item"
+	data-state={checked ? 'checked' : 'unchecked'}
+	data-roving-item
+	data-disabled={disabled ? '' : undefined}
+	{disabled}
+	tabindex={-1}
+	onclick={() => {
+		if (disabled) return;
+		checked = !checked;
+		onCheckedChange?.(checked);
+	}}
 	class={cn(
-		"relative flex cursor-default items-center gap-2 rounded-sm py-1.5 ps-8 pe-2 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		'relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-body-sm outline-none select-none hover:bg-accent/10 focus:bg-accent/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
 		className
 	)}
 	{...restProps}
 >
-	{#snippet children({ checked, indeterminate })}
-		<span class="pointer-events-none absolute start-2 flex size-3.5 items-center justify-center">
-			{#if indeterminate}
-				<MinusIcon class="size-4" />
-			{:else}
-				<CheckIcon class={cn('size-4', !checked && 'text-transparent')} />
-			{/if}
-		</span>
-		{@render childrenProp?.()}
-	{/snippet}
-</DropdownMenuPrimitive.CheckboxItem>
+	<span class="absolute left-2 flex size-4 items-center justify-center">
+		{#if checked}<CheckIcon class="size-4" />{/if}
+	</span>
+	{@render children?.()}
+</button>

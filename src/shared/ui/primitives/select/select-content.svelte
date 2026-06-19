@@ -1,45 +1,79 @@
 <script lang="ts">
-	import { Select as SelectPrimitive } from 'bits-ui';
-	import SelectPortal from './select-portal.svelte';
-	import SelectScrollUpButton from './select-scroll-up-button.svelte';
-	import SelectScrollDownButton from './select-scroll-down-button.svelte';
-	import { cn, type WithoutChild } from '$shared/lib/utils';
-	import type { ComponentProps } from 'svelte';
-	import type { WithoutChildrenOrChild } from '$shared/lib/utils';
+	import type { HTMLAttributes } from 'svelte/elements';
+	import { scale } from 'svelte/transition';
+	import { cn, type WithElementRef } from '$shared/lib/utils';
+	import {
+		portal,
+		dismissable,
+		floating,
+		handleRovingKeydown,
+		createTypeahead,
+		getRovingItems
+	} from '$shared/lib/headless';
+	import { getSelectContext } from './select.svelte';
 
 	let {
 		ref = $bindable(null),
 		class: className,
-		sideOffset = 4,
-		portalProps,
 		children,
-		preventScroll = true,
 		...restProps
-	}: WithoutChild<SelectPrimitive.ContentProps> & {
-		portalProps?: WithoutChildrenOrChild<ComponentProps<typeof SelectPortal>>;
-	} = $props();
+	}: WithElementRef<HTMLAttributes<HTMLDivElement>> = $props();
+
+	const ctx = getSelectContext();
+	const typeahead = createTypeahead();
+
+	// On open, focus the selected option (or the first) so keyboard nav starts there.
+	function autofocusSelected(node: HTMLElement) {
+		const items = getRovingItems(node);
+		const selected = items.find((i) => i.dataset.value === ctx.value);
+		(selected ?? items[0])?.focus();
+	}
+
+	function onkeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape') {
+			ctx.setOpen(false);
+			ctx.triggerEl?.focus();
+			return;
+		}
+		const moved = handleRovingKeydown(event, ref!, { orientation: 'vertical' });
+		if (moved) return;
+		if (event.key.length === 1) {
+			typeahead.onInput(event.key, getRovingItems(ref!));
+		}
+	}
+
+	function setMinWidth(result: { x: number; y: number }) {
+		void result;
+		if (ref && ctx.triggerEl) ref.style.minWidth = `${ctx.triggerEl.offsetWidth}px`;
+	}
 </script>
 
-<SelectPortal {...portalProps}>
-	<SelectPrimitive.Content
-		bind:ref
-		{sideOffset}
-		{preventScroll}
+{#if ctx.open}
+	<div
+		bind:this={ref}
+		use:portal
+		role="listbox"
+		id={ctx.contentId}
+		aria-labelledby={ctx.triggerId}
 		data-slot="select-content"
+		data-state="open"
+		tabindex={-1}
+		use:floating={{
+			reference: ctx.triggerEl,
+			placement: 'bottom-start',
+			sideOffset: 4,
+			onPlaced: setMinWidth
+		}}
+		use:dismissable={{ onDismiss: () => ctx.setOpen(false), ignore: [ctx.triggerEl] }}
+		use:autofocusSelected
+		{onkeydown}
+		transition:scale={{ start: 0.95, duration: 120 }}
 		class={cn(
-			'relative z-50 max-h-(--bits-select-content-available-height) min-w-[8rem] origin-(--bits-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md data-[side=bottom]:translate-y-1 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:-translate-x-1 data-[side=left]:slide-in-from-end-2 data-[side=right]:translate-x-1 data-[side=right]:slide-in-from-start-2 data-[side=top]:-translate-y-1 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
+			'z-50 max-h-72 overflow-y-auto rounded-control border border-border bg-popover p-1 text-popover-foreground shadow-overlay outline-none',
 			className
 		)}
 		{...restProps}
 	>
-		<SelectScrollUpButton />
-		<SelectPrimitive.Viewport
-			class={cn(
-				'h-(--bits-select-anchor-height) w-full min-w-(--bits-select-anchor-width) scroll-my-1 p-1'
-			)}
-		>
-			{@render children?.()}
-		</SelectPrimitive.Viewport>
-		<SelectScrollDownButton />
-	</SelectPrimitive.Content>
-</SelectPortal>
+		{@render children?.()}
+	</div>
+{/if}

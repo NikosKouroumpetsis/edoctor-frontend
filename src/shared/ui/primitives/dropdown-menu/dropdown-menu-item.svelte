@@ -1,27 +1,48 @@
 <script lang="ts">
-	import { cn } from '$shared/lib/utils';
-	import { DropdownMenu as DropdownMenuPrimitive } from 'bits-ui';
+	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import { cn, type WithElementRef } from '$shared/lib/utils';
+	import { getDropdownMenuContext } from './dropdown-menu.svelte';
 
 	let {
 		ref = $bindable(null),
 		class: className,
-		inset,
 		variant = 'default',
+		closeOnSelect = true,
+		disabled,
+		children,
+		onclick,
 		...restProps
-	}: DropdownMenuPrimitive.ItemProps & {
-		inset?: boolean;
+	}: WithElementRef<HTMLButtonAttributes, HTMLButtonElement> & {
 		variant?: 'default' | 'destructive';
+		closeOnSelect?: boolean;
 	} = $props();
+
+	const ctx = getDropdownMenuContext();
 </script>
 
-<DropdownMenuPrimitive.Item
-	bind:ref
+<button
+	bind:this={ref}
+	type="button"
+	role="menuitem"
 	data-slot="dropdown-menu-item"
-	data-inset={inset}
 	data-variant={variant}
+	data-roving-item
+	data-disabled={disabled ? '' : undefined}
+	{disabled}
+	tabindex={-1}
+	onclick={(e) => {
+		if (disabled) return;
+		onclick?.(e);
+		if (closeOnSelect) {
+			ctx.setOpen(false);
+			ctx.triggerEl?.focus();
+		}
+	}}
 	class={cn(
-		"relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:ps-8 data-[variant=destructive]:text-destructive data-[variant=destructive]:data-highlighted:bg-destructive/10 data-[variant=destructive]:data-highlighted:text-destructive dark:data-[variant=destructive]:data-highlighted:bg-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground data-[variant=destructive]:*:[svg]:!text-destructive",
+		"relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-body-sm outline-none select-none hover:bg-accent/10 focus:bg-accent/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 data-[variant=destructive]:focus:bg-destructive/10 [&_svg:not([class*='size-'])]:size-4",
 		className
 	)}
 	{...restProps}
-/>
+>
+	{@render children?.()}
+</button>
