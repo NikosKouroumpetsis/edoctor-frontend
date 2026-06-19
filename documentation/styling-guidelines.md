@@ -3,7 +3,10 @@
 ## Baseline
 
 - Tailwind CSS v4 is the styling engine.
-- Theme tokens live in `src/routes/layout.css`.
+- Color tokens live in `src/routes/layout.css`; non-color sizing tokens
+  (typography, spacing, radius, elevation, breakpoints, containers, icons) are
+  defined in `src/shared/design/tokens/tokens.ts` and generated into the theme.
+  See [`design-tokens.md`](./design-tokens.md).
 - shadcn-svelte uses `new-york` style.
 - shadcn-svelte primitives belong in `src/shared/ui/primitives`.
 - Feature-specific UI belongs in modules unless it has a real shared contract.
@@ -49,17 +52,32 @@ as a low-contrast background.
 ## Named tokens over raw values
 
 Do not scatter raw/arbitrary utilities (`max-w-360`, `size-5.5`, `size-[18px]`,
-repeated `px-4 sm:px-6 md:px-8 lg:px-12`). Use the named tokens/utilities
-defined in `src/routes/layout.css`:
+`text-[18px]`, repeated `font-semibold`, ad-hoc shadows). Use the named non-color
+tokens — typography, spacing, radius, elevation, breakpoints, containers, icons.
 
-- Container: `container-page` utility (centered, `max-w-page` = 1440, shared
-  responsive gutters). Named widths `max-w-page` (1440) and `max-w-tablet` (744).
-- Icons: `icon-xs` 14 · `icon-sm` 16 · `icon-md` 18 · `icon-lg` 20 · `icon-xl` 22.
+These sizing tokens are **not** hand-written in CSS anymore: they are defined
+once in `src/shared/design/tokens/tokens.ts` and generated into
+`src/routes/layout.css` (via `src/generated/design-tokens.css`). Edit the `.ts`
+source and the change propagates globally.
+
+Quick reference (full tables and rules in
+[`design-tokens.md`](./design-tokens.md)):
+
+- Typography: `text-display-* | heading-* | title-* | body-* | label-*`. Each
+  bakes size + weight + line-height — add `font-*` only for an intentional
+  override (e.g. `text-body-sm font-medium` nav links).
+- Spacing: semantic `gap-section` (32), `p-card` (24), `gap-gutter` (16),
+  `gap-inline` (8) on top of the numeric scale.
 - Radii: `rounded-panel` (28, cards), `rounded-control` (13, inputs/selects),
   `rounded-media` (24, images), plus the base `rounded-sm…4xl` scale.
+- Elevation: `shadow-raised` (resting), `shadow-overlay` (menus), `shadow-soft`
+  (large float).
+- Icons: `icon-xs` 14 · `icon-sm` 16 · `icon-md` 18 · `icon-lg` 20 · `icon-xl` 22.
+- Container: `container-page` utility (centered, `max-w-page` = 1440, shared
+  responsive gutters). Named widths `max-w-page` (1440) and `max-w-tablet` (744).
 
-When a dimension repeats or encodes a design decision, add a named token rather
-than inlining a raw value.
+When a dimension repeats or encodes a design decision, add a named token in
+`tokens.ts` rather than inlining a raw value.
 
 ## Shared control spec
 

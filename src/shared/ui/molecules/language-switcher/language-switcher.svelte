@@ -20,7 +20,7 @@
 			href={localizedHref(language.locale)}
 			variant={currentLocale === language.locale ? 'secondary' : 'ghost'}
 			size="sm"
-			class="h-7 min-w-8 rounded-[calc(var(--radius)-2px)] px-2 text-xs"
+			class="h-7 min-w-8 rounded-[calc(var(--radius)-2px)] px-2 text-label-md"
 			aria-label={language.label}
 		>
 			{language.shortLabel}

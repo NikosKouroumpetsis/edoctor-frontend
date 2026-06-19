@@ -8,5 +8,9 @@ bun.lockb
 # Miscellaneous
 /static/
 
+# Claude Code tooling/workflow files (not application source)
+.claude/
+
 # Generated
 src/generated/paraglide/
+src/generated/design-tokens.css

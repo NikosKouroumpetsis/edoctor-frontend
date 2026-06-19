@@ -38,7 +38,7 @@
 
 		{#if doctor.badgeLabel}
 			<span
-				class="absolute top-3 left-3 rounded-full bg-card px-3 py-1.5 text-label-md font-medium text-foreground shadow-soft"
+				class="absolute top-3 left-3 rounded-full bg-card px-3 py-1.5 text-label-md text-foreground shadow-soft"
 			>
 				{doctor.badgeLabel}
 			</span>
@@ -58,7 +58,7 @@
 	</div>
 
 	<div class="flex flex-col gap-1">
-		<p class="truncate font-semibold text-foreground">{doctor.name}</p>
+		<p class="truncate text-body-lg font-semibold text-foreground">{doctor.name}</p>
 		<p class="truncate text-body-md text-muted-foreground">{doctor.specialty}</p>
 		<p class="truncate text-label-lg text-muted-foreground">{doctor.city}</p>
 		<p class="text-label-md font-semibold text-primary">{doctor.availabilityLabel}</p>

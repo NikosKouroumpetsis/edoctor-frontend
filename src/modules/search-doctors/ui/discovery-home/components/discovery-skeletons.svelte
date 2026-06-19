@@ -6,7 +6,7 @@
 	const sectionPlaceholders = Array.from({ length: 3 }, (_, index) => index);
 </script>
 
-<div class="flex flex-col gap-8">
+<div class="flex flex-col gap-section">
 	<!-- Category rail skeleton -->
 	<div class="-mx-1 flex gap-5 px-1 py-2">
 		{#each categoryPlaceholders as index (index)}

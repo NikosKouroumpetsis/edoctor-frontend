@@ -71,7 +71,7 @@
 		<SearchHeader placeholder={m.search_discovery_placeholder({}, messageOptions)} />
 	</div>
 
-	<div class="flex flex-col gap-8 pb-12">
+	<div class="flex flex-col gap-section pb-12">
 		<CategoryRail
 			{categories}
 			activeCategory={discovery.activeCategory}
@@ -96,8 +96,8 @@
 							onToggleFavorite={discovery.toggleFavorite}
 						/>
 					{:else if result.status === 'error'}
-						<div class="rounded-panel border border-border/70 bg-card p-6 shadow-soft">
-							<h2 class="text-heading-sm font-semibold text-foreground">
+						<div class="rounded-panel border border-border/70 bg-card p-card shadow-soft">
+							<h2 class="text-heading-sm text-foreground">
 								{m.section_error_title({}, messageOptions)}
 							</h2>
 							<p class="mt-1 text-body-md text-muted-foreground">
@@ -112,8 +112,8 @@
 				<SectionSkeleton />
 			{/each}
 		{:else if home.isError}
-			<div class="rounded-panel border border-border/70 bg-card p-6 shadow-soft">
-				<h2 class="text-heading-sm font-semibold text-foreground">
+			<div class="rounded-panel border border-border/70 bg-card p-card shadow-soft">
+				<h2 class="text-heading-sm text-foreground">
 					{m.section_error_title({}, messageOptions)}
 				</h2>
 				<p class="mt-1 text-body-md text-muted-foreground">
@@ -134,8 +134,8 @@
 				/>
 			{/each}
 		{:else}
-			<div class="rounded-panel border border-border/70 bg-card p-6 shadow-soft">
-				<h2 class="text-heading-sm font-semibold text-foreground">
+			<div class="rounded-panel border border-border/70 bg-card p-card shadow-soft">
+				<h2 class="text-heading-sm text-foreground">
 					{m.no_results_title({}, messageOptions)}
 				</h2>
 				<p class="mt-1 text-body-md text-muted-foreground">

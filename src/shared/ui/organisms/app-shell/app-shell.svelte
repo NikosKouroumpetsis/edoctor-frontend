@@ -35,13 +35,11 @@
 				class="flex shrink-0 items-center gap-2.5 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
 			>
 				<span
-					class="grid size-9 place-items-center rounded-md bg-primary text-sm font-semibold text-primary-foreground shadow-xs"
+					class="grid size-9 place-items-center rounded-md bg-primary text-body-sm font-semibold text-primary-foreground shadow-xs"
 				>
 					e+
 				</span>
-				<span class="text-base font-semibold tracking-normal"
-					>{m.brand_name({}, messageOptions)}</span
-				>
+				<span class="text-body-lg font-semibold">{m.brand_name({}, messageOptions)}</span>
 			</a>
 
 			<nav
@@ -50,19 +48,19 @@
 			>
 				<a
 					href={localizedHref('/doctors')}
-					class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+					class="rounded-md px-3 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 				>
 					{m.nav_doctors({}, messageOptions)}
 				</a>
 				<a
 					href={localizedHref('/clinics')}
-					class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+					class="rounded-md px-3 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 				>
 					{m.nav_clinics({}, messageOptions)}
 				</a>
 				<a
 					href={localizedHref('/plans')}
-					class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+					class="rounded-md px-3 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 				>
 					{m.nav_plans({}, messageOptions)}
 				</a>

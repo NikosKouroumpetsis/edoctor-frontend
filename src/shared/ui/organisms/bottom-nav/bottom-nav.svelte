@@ -35,7 +35,7 @@
 				]}
 			>
 				<SearchIcon class="icon-xl" />
-				<span class="text-label-sm font-medium">{m.tab_search({}, messageOptions)}</span>
+				<span class="text-label-sm">{m.tab_search({}, messageOptions)}</span>
 			</a>
 		</li>
 		<li>
@@ -44,7 +44,7 @@
 				class="flex flex-col items-center gap-1 px-3 py-1 text-muted-foreground outline-none"
 			>
 				<HeartIcon class="icon-xl" />
-				<span class="text-label-sm font-medium">{m.tab_favorites({}, messageOptions)}</span>
+				<span class="text-label-sm">{m.tab_favorites({}, messageOptions)}</span>
 			</button>
 		</li>
 		<li>
@@ -53,7 +53,7 @@
 				class="flex flex-col items-center gap-1 px-3 py-1 text-muted-foreground outline-none"
 			>
 				<CalendarIcon class="icon-xl" />
-				<span class="text-label-sm font-medium">{m.tab_appointments({}, messageOptions)}</span>
+				<span class="text-label-sm">{m.tab_appointments({}, messageOptions)}</span>
 			</button>
 		</li>
 		<li>
@@ -62,7 +62,7 @@
 				class="flex flex-col items-center gap-1 px-3 py-1 text-muted-foreground outline-none"
 			>
 				<MessageIcon class="icon-xl" />
-				<span class="text-label-sm font-medium">{m.tab_messages({}, messageOptions)}</span>
+				<span class="text-label-sm">{m.tab_messages({}, messageOptions)}</span>
 			</button>
 		</li>
 		<li>
@@ -71,7 +71,7 @@
 				class="flex flex-col items-center gap-1 px-3 py-1 text-muted-foreground outline-none"
 			>
 				<UserIcon class="icon-xl" />
-				<span class="text-label-sm font-medium">{m.tab_profile({}, messageOptions)}</span>
+				<span class="text-label-sm">{m.tab_profile({}, messageOptions)}</span>
 			</button>
 		</li>
 	</ul>

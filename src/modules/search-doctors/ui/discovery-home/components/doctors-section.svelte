@@ -25,11 +25,11 @@
 <section class="flex flex-col gap-3.5">
 	<div class="flex items-start justify-between gap-4">
 		<div class="flex flex-1 flex-col gap-1">
-			<h2 class="text-heading-md leading-tight font-semibold text-foreground md:text-heading-lg">
+			<h2 class="text-heading-md text-foreground md:text-heading-lg">
 				{title}
 			</h2>
 			{#if subtitle}
-				<p class="text-body-md leading-6 text-muted-foreground">{subtitle}</p>
+				<p class="text-body-md text-muted-foreground">{subtitle}</p>
 			{/if}
 		</div>
 		<button

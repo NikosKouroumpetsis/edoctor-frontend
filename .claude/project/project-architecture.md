@@ -261,6 +261,7 @@ Read supporting documentation when relevant:
 - `documentation/shared.md`
 - `documentation/state-management.md`
 - `documentation/styling-guidelines.md`
+- `documentation/design-tokens.md`
 - `documentation/testing-strategy.md`
 - `documentation/framework-stack.md`
 - `documentation/development-workflow.md`
