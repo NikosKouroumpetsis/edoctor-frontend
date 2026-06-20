@@ -181,6 +181,13 @@ state.
 - For implementation work, also run `bun run lint`. Run `bun run build` when
   routing, SvelteKit config, env behavior, providers, or public UI flows
   changed.
+- Storybook is the component workshop: `bun run storybook` (dev, port 6006) and
+  `bun run build-storybook` (static build). When changing a `src/shared/ui/**`
+  component or its co-located `*.stories.svelte`, run `bun run build-storybook`
+  to confirm stories still compile (currently an informational gate, not a hard
+  blocker). Stories live next to components as Svelte CSF; see
+  `documentation/framework-stack.md`. Doctor-specific components
+  (`src/modules/doctors/**`) are intentionally out of Storybook scope.
 - Generated Paraglide output under `src/generated/paraglide` is produced by
   `bun run paraglide:compile`; do not hand-edit it.
 - Request environment approval when localhost services, network access, or

@@ -22,6 +22,29 @@ bun run build    # routing / provider / config / env / public UI changes
 - **SvelteKit virtual modules** (`$app/environment`, `$app/state`, `$app/paths`)
   are mocked for jsdom under `vitest-mocks/` and aliased in the Vitest config.
 - Playwright (browser flows) is still to be added.
+- **Storybook** `^10` (`@storybook/sveltekit`) is the component workshop. Stories
+  are Svelte CSF (`*.stories.svelte`) co-located next to every `src/shared/ui/**`
+  component, with an axe a11y panel (`@storybook/addon-a11y`) and autodocs.
+  `bun run build-storybook` compiles and bundles every story and is the new
+  Storybook gate (currently informational, not yet a hard CLAUDE.md blocker).
+
+## Storybook story tests (deferred)
+
+Browser-mode story tests via `@storybook/addon-vitest` are **not yet wired**.
+When added they would:
+
+- install `@vitest/browser` + `@vitest/browser-playwright` and run
+  `bunx playwright install chromium`,
+- convert `vitest.config.ts` into a two-project workspace (`unit` jsdom +
+  `storybook` browser) so the fast jsdom suite stays the default `bun run test`,
+- add `.storybook/vitest.setup.ts` (`setProjectAnnotations`) and
+  `test:stories` / `test:all` scripts.
+
+Until then, story `play` functions (e.g. dialog/popover/tabs open, cookie-consent
+accept, account-menu) run only in the Storybook UI's interactions panel and are
+not executed headlessly. The existing jsdom specs remain the authoritative
+component test coverage, so `play` stories are kept minimal (one per
+overlay/interactive component) to avoid duplicating them.
 
 ## File placement
 

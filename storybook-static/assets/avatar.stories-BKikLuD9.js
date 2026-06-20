@@ -1,0 +1,14 @@
+import{n as e}from"./chunk-DnJy8xQt.js";import{B as t,H as n,Ot as r,Pt as i,W as a,bt as o,c as s,ct as c,kt as l,ot as u,st as d,xt as f}from"./iframe-COaZrb5e.js";import{i as p,n as m,r as h,t as g}from"./create-runtime-stories-HGa4yC6Q.js";import{i as _,n as v,r as y,t as b}from"./avatar-D6ZF2Xm5.js";function x(e,n){f(n,!0);var i=D(),s=d(i);C(s,{name:`With image`,template:e=>{_(e,{children:(e,n)=>{var i=w(),o=d(i);y(o,{src:`https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=128&q=80`,alt:`Dr. Jane Doe`}),v(c(o,2),{children:(e,n)=>{r(),t(e,a(`JD`))},$$slots:{default:!0}}),t(e,i)},$$slots:{default:!0}})},$$slots:{template:!0},parameters:{__svelteCsf:{rawCode:`<Avatar>
+	<AvatarImage
+		src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=128&q=80"
+		alt="Dr. Jane Doe"
+	/>
+	<AvatarFallback>JD</AvatarFallback>
+</Avatar>`}}});var p=c(s,2);C(p,{name:`Fallback (broken src)`,template:e=>{_(e,{children:(e,n)=>{var i=T(),o=d(i);y(o,{src:`https://invalid.example/broken.png`,alt:`Dr. Jane Doe`}),v(c(o,2),{children:(e,n)=>{r(),t(e,a(`JD`))},$$slots:{default:!0}}),t(e,i)},$$slots:{default:!0}})},$$slots:{template:!0},parameters:{__svelteCsf:{rawCode:`<Avatar>
+	<AvatarImage src="https://invalid.example/broken.png" alt="Dr. Jane Doe" />
+	<AvatarFallback>JD</AvatarFallback>
+</Avatar>`}}});var m=c(p,2);C(m,{name:`Sizes`,template:e=>{var n=E(),i=u(n);_(i,{class:`size-8`,children:(e,n)=>{v(e,{children:(e,n)=>{r(),t(e,a(`SM`))},$$slots:{default:!0}})},$$slots:{default:!0}});var o=c(i,2);_(o,{class:`size-10`,children:(e,n)=>{v(e,{children:(e,n)=>{r(),t(e,a(`MD`))},$$slots:{default:!0}})},$$slots:{default:!0}}),_(c(o,2),{class:`size-14`,children:(e,n)=>{v(e,{children:(e,n)=>{r(),t(e,a(`LG`))},$$slots:{default:!0}})},$$slots:{default:!0}}),l(n),t(e,n)},$$slots:{template:!0},parameters:{__svelteCsf:{rawCode:`<div class="flex items-center gap-3">
+	<Avatar class="size-8"><AvatarFallback>SM</AvatarFallback></Avatar>
+	<Avatar class="size-10"><AvatarFallback>MD</AvatarFallback></Avatar>
+	<Avatar class="size-14"><AvatarFallback>LG</AvatarFallback></Avatar>
+</div>`}}}),t(e,i),o()}var S,C,w,T,E,D,O,k,A,j,M;e((()=>{i(),p(),b(),s(),m(),S={title:`Primitives/Avatar`,component:_,tags:[`autodocs`]},{Story:C}=h(S),w=n(`<!> <!>`,1),T=n(`<!> <!>`,1),E=n(`<div class="flex items-center gap-3"><!> <!> <!></div>`),D=n(`<!> <!> <!>`,1),x.__docgen={data:[],name:`avatar.stories.svelte`},O=g(x,S),k=[`WithImage`,`FallbackBrokenSrc`,`Sizes`],A={...O.WithImage,tags:[`svelte-csf-v5`]},j={...O.FallbackBrokenSrc,tags:[`svelte-csf-v5`]},M={...O.Sizes,tags:[`svelte-csf-v5`]}}))();export{j as FallbackBrokenSrc,M as Sizes,A as WithImage,k as __namedExportsOrder,S as default};

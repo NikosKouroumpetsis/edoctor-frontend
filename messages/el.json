@@ -52,5 +52,15 @@
 	"plans_page_title": "Πλάνα eDoctor",
 	"plans_page_body": "Αυτό είναι το πρώτο file route για τα πλάνα. Εδώ θα αποφασίσουμε πακέτα, συνεργασίες και εμπορική λογική.",
 	"login_page_title": "Σύνδεση στο eDoctor",
-	"login_page_body": "Αυτό είναι το πρώτο file route για τη σύνδεση. Εδώ θα κουμπώσει αργότερα το authentication flow."
+	"login_page_body": "Αυτό είναι το πρώτο file route για τη σύνδεση. Εδώ θα κουμπώσει αργότερα το authentication flow.",
+	"dob_label": "Ημερομηνία γέννησης",
+	"dob_day": "Ημέρα",
+	"dob_month": "Μήνας",
+	"dob_year": "Έτος",
+	"dob_day_placeholder": "ΗΗ",
+	"dob_month_placeholder": "ΜΜ",
+	"dob_year_placeholder": "ΕΕΕΕ",
+	"dob_error_invalid": "Δώσε μια έγκυρη ημερομηνία",
+	"dob_error_future": "Η ημερομηνία δεν μπορεί να είναι μελλοντική",
+	"combobox_no_results": "Δεν βρέθηκαν αποτελέσματα"
 }

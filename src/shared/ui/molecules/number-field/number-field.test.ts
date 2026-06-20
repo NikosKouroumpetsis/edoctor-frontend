@@ -26,4 +26,15 @@ describe('NumberField', () => {
 		await user.click(screen.getByRole('button', { name: 'Increase' }));
 		expect(input).toHaveValue('2'); // clamped at max
 	});
+
+	it('forwards the placeholder and reveals it only while focused', async () => {
+		const user = userEvent.setup({ delay: null });
+		render(NumberField, { props: { label: 'Quantity', placeholder: 'e.g. 3' } });
+		const input = screen.getByLabelText('Quantity');
+
+		expect(input).toHaveAttribute('placeholder', ' ');
+		await user.click(input);
+		expect(input).toHaveAttribute('placeholder', 'e.g. 3');
+		expect(input.className).not.toContain('placeholder:text-transparent');
+	});
 });

@@ -52,5 +52,15 @@
 	"plans_page_title": "eDoctor plans",
 	"plans_page_body": "This is the first file route for plans. Packages, partnerships, and commercial logic will be decided here.",
 	"login_page_title": "Sign in to eDoctor",
-	"login_page_body": "This is the first file route for sign-in. The authentication flow will connect here later."
+	"login_page_body": "This is the first file route for sign-in. The authentication flow will connect here later.",
+	"dob_label": "Date of birth",
+	"dob_day": "Day",
+	"dob_month": "Month",
+	"dob_year": "Year",
+	"dob_day_placeholder": "DD",
+	"dob_month_placeholder": "MM",
+	"dob_year_placeholder": "YYYY",
+	"dob_error_invalid": "Please enter a valid date",
+	"dob_error_future": "Date cannot be in the future",
+	"combobox_no_results": "No results found"
 }

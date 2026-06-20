@@ -16,4 +16,15 @@ describe('PasswordField', () => {
 		await user.click(screen.getByRole('button', { name: 'Hide password' }));
 		expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'password');
 	});
+
+	it('forwards the placeholder and reveals it only while focused', async () => {
+		const user = userEvent.setup({ delay: null });
+		render(PasswordField, { props: { label: 'Password', placeholder: 'Enter your password' } });
+		const input = screen.getByLabelText('Password');
+
+		expect(input).toHaveAttribute('placeholder', ' ');
+		await user.click(input);
+		expect(input).toHaveAttribute('placeholder', 'Enter your password');
+		expect(input.className).not.toContain('placeholder:text-transparent');
+	});
 });

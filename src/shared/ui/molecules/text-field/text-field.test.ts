@@ -25,6 +25,30 @@ describe('TextField (standalone)', () => {
 		expect(screen.getByText('Required')).toBeInTheDocument();
 		expect(input).toHaveAttribute('aria-describedby', screen.getByText('Required').id);
 	});
+
+	it('reveals the placeholder only while focused', async () => {
+		const user = userEvent.setup({ delay: null });
+		render(TextField, { props: { label: 'Email', placeholder: 'you@example.com' } });
+		const input = screen.getByLabelText('Email');
+
+		// Unfocused: a blank space keeps `:placeholder-shown` working (floating label)
+		// without showing any visible placeholder text.
+		expect(input).toHaveAttribute('placeholder', ' ');
+
+		await user.click(input);
+		expect(input).toHaveAttribute('placeholder', 'you@example.com');
+
+		await user.tab();
+		expect(input).toHaveAttribute('placeholder', ' ');
+	});
+
+	it('styles the placeholder as visible (not transparent)', () => {
+		render(TextField, { props: { label: 'Email', placeholder: 'you@example.com' } });
+		const input = screen.getByLabelText('Email');
+		// Regression guard: a transparent placeholder would stay invisible on focus.
+		expect(input.className).toContain('placeholder:text-muted-foreground');
+		expect(input.className).not.toContain('placeholder:text-transparent');
+	});
 });
 
 describe('TextField (form-connected)', () => {

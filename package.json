@@ -21,7 +21,9 @@
 		"format": "prettier --write .",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"test:coverage": "vitest run --coverage"
+		"test:coverage": "vitest run --coverage",
+		"storybook": "storybook dev -p 6006",
+		"build-storybook": "storybook build"
 	},
 	"dependencies": {
 		"@fontsource-variable/inter": "^5.2.8",
@@ -38,6 +40,10 @@
 		"@eslint/js": "^10.0.1",
 		"@iconify-json/lucide": "^1.2.105",
 		"@inlang/paraglide-js": "^2.15.2",
+		"@storybook/addon-a11y": "^10.4.6",
+		"@storybook/addon-docs": "^10.4.6",
+		"@storybook/addon-svelte-csf": "^5.1.2",
+		"@storybook/sveltekit": "^10.4.6",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/kit": "^2.57.0",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
@@ -55,6 +61,7 @@
 		"prettier": "^3.8.1",
 		"prettier-plugin-svelte": "^3.5.1",
 		"prettier-plugin-tailwindcss": "^0.7.2",
+		"storybook": "^10.4.6",
 		"svelte": "^5.55.2",
 		"svelte-check": "^4.4.6",
 		"tailwindcss": "^4.2.2",

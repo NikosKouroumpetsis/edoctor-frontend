@@ -116,6 +116,13 @@ Shared UI placement rules:
   (templates is the one screen-level exception that lives in `templates/`).
 - Introduce additional buckets (such as `atoms/`) only when an existing one is
   insufficient; do not pre-create empty layers.
+- Storybook stories are co-located next to the component as
+  `*.stories.svelte` (Svelte CSF). Every `src/shared/ui/**` component (primitives,
+  molecules, organisms, templates) has stories plus a `Showcases/Registration
+  form` under `src/shared/ui/_showcases/`. Doctor-specific components under
+  `src/modules/doctors/**` are intentionally excluded from Storybook (the stories
+  glob in `.storybook/main.ts` is scoped to `src/shared/ui/**`). See
+  `documentation/framework-stack.md`.
 
 Feature-local UI under `src/modules/<feature>/ui/<slice>/` follows the same
 folder-entrypoint convention. Once a slice grows, introduce a local hierarchy
@@ -177,6 +184,15 @@ Rules:
 - Use the shadcn-svelte `new-york` visual style; keep the in-house styled
   primitives in the shared UI primitives layer and their headless behaviour in
   `src/shared/lib/headless`. Do not add an external UI component library.
+- Deliberate, documented deviation from stock shadcn-`new-york` (product
+  decision): form controls (`input`, `textarea`, `select` trigger, and the
+  `text-field`/`number-field`/`password-field`/`phone-field`/`date-of-birth-field`
+  molecules) use a **border-color focus indicator** (`focus-visible:border-ring`)
+  instead of the shadcn 3px focus ring, and share a control **size scale**
+  `sm | default | lg | xl` where `default` is the shadcn-normal height
+  (`h-9`/36px), not an oversized one. The size class map is owned by
+  `input.svelte` (`inputSizes`) and reused by the textarea/select-trigger/field
+  molecules. Buttons keep the standard shadcn focus ring.
 - Do not use raw palette utilities in feature code unless the value is a
   deliberate one-off that belongs close to that feature.
 - Use Icones/Iconify virtual imports (e.g. `~icons/lucide/search`); do not add

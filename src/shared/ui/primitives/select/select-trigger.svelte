@@ -2,6 +2,7 @@
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import ChevronDownIcon from '~icons/lucide/chevron-down';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
+	import { inputSizes, type InputSize } from '$shared/ui/primitives/input';
 	import { getSelectContext } from './select.svelte';
 
 	let {
@@ -11,7 +12,7 @@
 		children,
 		...restProps
 	}: WithElementRef<HTMLButtonAttributes, HTMLButtonElement> & {
-		size?: 'sm' | 'default';
+		size?: InputSize;
 	} = $props();
 
 	const ctx = getSelectContext();
@@ -48,7 +49,8 @@
 	onclick={() => ctx.setOpen(!ctx.open)}
 	{onkeydown}
 	class={cn(
-		"flex w-fit items-center justify-between gap-2 rounded-control border border-input bg-card px-3 py-2 text-base whitespace-nowrap transition-[color,box-shadow] outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[size=default]:h-13 data-[size=sm]:h-9 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		"flex w-fit items-center justify-between gap-2 rounded-md border-[1.5px] border-input bg-card whitespace-nowrap transition-[color,box-shadow] outline-none select-none focus-visible:border-ring focus-visible:ring-[0.5px] focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		inputSizes[size],
 		className
 	)}
 	{...restProps}

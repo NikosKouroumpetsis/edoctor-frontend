@@ -150,6 +150,16 @@ export const floating: Action<HTMLElement, FloatingOptions> = (node, params) => 
 
 	function update() {
 		if (!opts.reference || opts.enabled === false) return;
+		// Apply fixed positioning BEFORE measuring the floating element. A node still
+		// in normal flow (position: static) is block-level and stretches to its
+		// container's width — so an overlay without an explicit width (e.g. the
+		// select listbox, whose min-width is only applied afterwards) would measure
+		// roughly the full viewport width. That corrupted width then feeds the shift
+		// clamp and pushes the element hard against the viewport edge (the dropdown
+		// jumps to the far left). Switching to fixed first lets the node shrink to
+		// its content, so the rect used by the placement math is correct.
+		node.style.position = 'fixed';
+		node.style.margin = '0';
 		const refRect = opts.reference.getBoundingClientRect();
 		const floatRect = node.getBoundingClientRect();
 		const result = computePosition(
@@ -158,10 +168,8 @@ export const floating: Action<HTMLElement, FloatingOptions> = (node, params) => 
 			{ width: window.innerWidth, height: window.innerHeight },
 			opts
 		);
-		node.style.position = 'fixed';
 		node.style.left = `${result.x}px`;
 		node.style.top = `${result.y}px`;
-		node.style.margin = '0';
 		opts.onPlaced?.(result);
 	}
 

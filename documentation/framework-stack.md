@@ -38,6 +38,29 @@
 - Font: `@fontsource-variable/inter`
 - Icons: Icones through `unplugin-icons` and Iconify icon JSON packages.
 
+## Component workshop (Storybook)
+
+- Storybook `^10.4.6` with the `@storybook/sveltekit` framework, which reuses the
+  project `vite.config.ts` (design tokens, Tailwind v4, `unplugin-icons`,
+  Paraglide) so stories render exactly like the app.
+- Stories are **Svelte CSF** (`@storybook/addon-svelte-csf`): `*.stories.svelte`
+  files co-located next to each component, using `defineMeta` + `<Story>`.
+- Addons: `@storybook/addon-a11y` (axe) and `@storybook/addon-docs` (autodocs via
+  `tags: ['autodocs']`).
+- Config lives in `.storybook/main.ts` (stories glob + addons) and
+  `.storybook/preview.ts` (imports `src/routes/layout.css`, a Light/Dark theme
+  toolbar that toggles the app's `.dark` class, and `a11y: { test: 'error' }`).
+- Scope: every component under `src/shared/ui/**` (primitives, molecules,
+  organisms, templates) plus a `Showcases/Registration form`. Doctor-specific
+  components under `src/modules/doctors/**` are intentionally excluded (the
+  stories glob is scoped to `src/shared/ui/**`).
+- Commands: `bun run storybook` (dev server on port 6006) and
+  `bun run build-storybook` (static build to `storybook-static/`, git-ignored).
+- Not yet wired: browser-mode story tests via `@storybook/addon-vitest` (would
+  need `@vitest/browser` + `@vitest/browser-playwright` and a Vitest workspace) —
+  deferred follow-up. Story `play` functions are authored as in-UI interaction
+  demos but are not yet run headlessly.
+
 ## Testing and quality
 
 - Current required checks:

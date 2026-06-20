@@ -46,10 +46,10 @@
 				{disabled}
 				onclick={() => toggle(option.value)}
 				class={cn(
-					'inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-body-sm transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
+					'inline-flex items-center gap-1.5 rounded-md border-2 bg-card px-4 py-2 text-body-sm whitespace-nowrap transition-[color,border-color,box-shadow] outline-none select-none focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50',
 					checked
-						? 'border-primary bg-primary text-primary-foreground'
-						: 'border-input bg-card hover:bg-muted'
+						? 'border-foreground text-foreground shadow-md'
+						: 'border-input text-muted-foreground hover:text-foreground'
 				)}
 			>
 				{#if checked}<CheckIcon class="size-3.5" />{/if}

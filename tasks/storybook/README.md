@@ -1,9 +1,21 @@
 # Storybook adoption — planning dossier
 
-> Status: **PLANNED, not yet implemented.** This folder is the complete,
-> resume-ready specification for adding Storybook to the eDoctor `frontend`.
-> Nothing in `src/`, `package.json`, or build config has been changed yet.
-> When we come back to implement, follow these documents in order.
+> Status: **IMPLEMENTED (S0–S3, browser story-tests deferred).** Storybook
+> `^10.4.6` (`@storybook/sveltekit` + Svelte CSF) is installed and configured
+> (`.storybook/main.ts`, `.storybook/preview.ts`); `storybook` /
+> `build-storybook` scripts are in `package.json`; and `*.stories.svelte` files
+> are co-located next to **every** `src/shared/ui/**` component (primitives,
+> molecules, organisms, templates) plus a `Showcases/Registration form`.
+> Canonical docs updated: `documentation/framework-stack.md`,
+> `documentation/testing-strategy.md`, `.claude/project/project-architecture.md`,
+> `CLAUDE.md`.
+>
+> **Deferred follow-up:** the `@storybook/addon-vitest` browser-mode story-test
+> runner (Vitest workspace + `@vitest/browser` + `@vitest/browser-playwright` +
+> Chromium) — see `04-phases.md` S3 and `documentation/testing-strategy.md`.
+> Note: on Vitest 4 the addon needs `@vitest/browser-playwright` (not just
+> `@vitest/browser` + `playwright` as the original `01-setup.md` listed).
+> This folder remains the resume-ready specification for that follow-up.
 
 ## Why
 

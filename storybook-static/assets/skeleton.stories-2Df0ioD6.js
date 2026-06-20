@@ -1,0 +1,11 @@
+import{n as e}from"./chunk-DnJy8xQt.js";import{B as t,H as n,Pt as r,bt as i,c as a,ct as o,f as s,h as c,kt as l,l as u,ot as d,st as f,u as p,xt as m}from"./iframe-COaZrb5e.js";import{i as h,n as g,r as _,t as v}from"./create-runtime-stories-HGa4yC6Q.js";import{n as y,t as b}from"./utils-BvJoj25T.js";function x(e,n){m(n,!0);let r=u(n,`ref`,15,null),a=p(n,[`$$slots`,`$$events`,`$$legacy`,`ref`,`class`]);var o=S();c(o,e=>({"data-slot":`skeleton`,class:e,...a}),[()=>b(`animate-pulse rounded-md bg-muted`,n.class)]),s(o,e=>r(e),()=>r()),t(e,o),i()}var S,C=e((()=>{r(),a(),y(),S=n(`<div></div>`),x.__docgen={data:[{name:`ref`,visibility:`public`,keywords:[],kind:`let`,type:{kind:`type`,type:`object`,text:`HTMLElement`},static:!1,readonly:!1,defaultValue:`...`}],name:`skeleton.svelte`}})),w=e((()=>{C()}));function T(e,n){m(n,!0);var r=A(),a=f(r);D(a,{name:`Line`,template:e=>{var n=O(),r=d(n);x(r,{class:`h-4 w-full`});var i=o(r,2);x(i,{class:`h-4 w-4/5`}),x(o(i,2),{class:`h-4 w-2/3`}),l(n),t(e,n)},$$slots:{template:!0},parameters:{__svelteCsf:{rawCode:`<div class="flex w-72 flex-col gap-2">
+	<Skeleton class="h-4 w-full" />
+	<Skeleton class="h-4 w-4/5" />
+	<Skeleton class="h-4 w-2/3" />
+</div>`}}});var s=o(a,2);D(s,{name:`Card placeholder`,template:e=>{var n=k(),r=d(n);x(r,{class:`size-12 rounded-full`});var i=o(r,2),a=d(i);x(a,{class:`h-4 w-3/4`}),x(o(a,2),{class:`h-3 w-1/2`}),l(i),l(n),t(e,n)},$$slots:{template:!0},parameters:{__svelteCsf:{rawCode:`<div class="flex w-72 items-center gap-3">
+	<Skeleton class="size-12 rounded-full" />
+	<div class="flex flex-1 flex-col gap-2">
+		<Skeleton class="h-4 w-3/4" />
+		<Skeleton class="h-3 w-1/2" />
+	</div>
+</div>`}}}),t(e,r),i()}var E,D,O,k,A,j,M,N,P;e((()=>{r(),h(),w(),a(),g(),E={title:`Primitives/Skeleton`,component:x,tags:[`autodocs`]},{Story:D}=_(E),O=n(`<div class="flex w-72 flex-col gap-2"><!> <!> <!></div>`),k=n(`<div class="flex w-72 items-center gap-3"><!> <div class="flex flex-1 flex-col gap-2"><!> <!></div></div>`),A=n(`<!> <!>`,1),T.__docgen={data:[],name:`skeleton.stories.svelte`},j=v(T,E),M=[`Line`,`CardPlaceholder`],N={...j.Line,tags:[`svelte-csf-v5`]},P={...j.CardPlaceholder,tags:[`svelte-csf-v5`]}}))();export{P as CardPlaceholder,N as Line,M as __namedExportsOrder,E as default};

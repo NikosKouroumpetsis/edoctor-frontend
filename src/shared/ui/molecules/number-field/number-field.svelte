@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ChevronUpIcon from '~icons/lucide/chevron-up';
 	import ChevronDownIcon from '~icons/lucide/chevron-down';
-	import { TextField } from '$shared/ui/molecules/text-field';
+	import { TextField, type TextFieldSize } from '$shared/ui/molecules/text-field';
 	import type { FieldApi } from '$shared/lib/form';
 
 	let {
@@ -10,6 +10,8 @@
 		field,
 		error,
 		name,
+		size = 'default',
+		placeholder = '',
 		min,
 		max,
 		step = 1,
@@ -20,6 +22,8 @@
 		field?: FieldApi<string>;
 		error?: string;
 		name?: string;
+		size?: TextFieldSize;
+		placeholder?: string;
 		min?: number;
 		max?: number;
 		step?: number;
@@ -43,7 +47,18 @@
 	}
 </script>
 
-<TextField {label} {field} bind:value {error} {name} {disabled} type="text" inputmode="numeric">
+<TextField
+	{label}
+	{field}
+	bind:value
+	{error}
+	{name}
+	{size}
+	{placeholder}
+	{disabled}
+	type="text"
+	inputmode="numeric"
+>
 	{#snippet trailing()}
 		<div class="flex flex-col">
 			<button

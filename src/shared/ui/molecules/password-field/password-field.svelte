@@ -1,7 +1,7 @@
 <script lang="ts">
 	import EyeIcon from '~icons/lucide/eye';
 	import EyeOffIcon from '~icons/lucide/eye-off';
-	import { TextField } from '$shared/ui/molecules/text-field';
+	import { TextField, type TextFieldSize } from '$shared/ui/molecules/text-field';
 	import type { FieldApi } from '$shared/lib/form';
 
 	let {
@@ -10,6 +10,8 @@
 		field,
 		error,
 		name,
+		size = 'default',
+		placeholder = '',
 		disabled = false,
 		required = false,
 		autocomplete = 'current-password'
@@ -19,6 +21,8 @@
 		field?: FieldApi<string>;
 		error?: string;
 		name?: string;
+		size?: TextFieldSize;
+		placeholder?: string;
 		disabled?: boolean;
 		required?: boolean;
 		autocomplete?: 'current-password' | 'new-password';
@@ -33,6 +37,8 @@
 	bind:value
 	{error}
 	{name}
+	{size}
+	{placeholder}
 	{disabled}
 	{required}
 	{autocomplete}

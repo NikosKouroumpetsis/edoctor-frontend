@@ -1,3 +1,17 @@
+<script lang="ts" module>
+	import type { InputSize } from '$shared/ui/primitives/input';
+
+	export type TextareaSize = InputSize;
+
+	/** Textarea grows with content, so size tunes min-height, padding and text. */
+	const textareaSizes: Record<TextareaSize, string> = {
+		sm: 'min-h-16 px-2.5 py-1.5 text-sm',
+		default: 'min-h-20 px-3 py-2 text-sm',
+		lg: 'min-h-24 px-3.5 py-2.5 text-base',
+		xl: 'min-h-28 px-4 py-3 text-base'
+	};
+</script>
+
 <script lang="ts">
 	import type { HTMLTextareaAttributes } from 'svelte/elements';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
@@ -5,9 +19,12 @@
 	let {
 		ref = $bindable(null),
 		value = $bindable(),
+		size = 'default',
 		class: className,
 		...restProps
-	}: WithElementRef<HTMLTextareaAttributes, HTMLTextAreaElement> = $props();
+	}: WithElementRef<HTMLTextareaAttributes, HTMLTextAreaElement> & {
+		size?: TextareaSize;
+	} = $props();
 </script>
 
 <textarea
@@ -15,9 +32,8 @@
 	bind:value
 	data-slot="textarea"
 	class={cn(
-		'flex field-sizing-content min-h-20 w-full rounded-control border border-input bg-card px-3 py-2 text-base shadow-xs ring-offset-background transition-[color,box-shadow] outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
-		'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
-		'aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40',
+		'flex field-sizing-content w-full rounded-md border-[1.5px] border-input bg-card text-foreground shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[0.5px] focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:bg-destructive/10',
+		textareaSizes[size],
 		className
 	)}
 	{...restProps}
