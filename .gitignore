@@ -24,3 +24,6 @@ vite.config.ts.timestamp-*
 # Paraglide
 src/generated/paraglide
 project.inlang/cache/
+
+
+storybook-static
