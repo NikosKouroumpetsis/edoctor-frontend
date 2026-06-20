@@ -8,24 +8,24 @@
 	// shared. The select column stretches to this height and centers its content.
 	const SIZES: Record<TextFieldSize, { input: string; label: string; code: string }> = {
 		sm: {
+			input: 'pl-2 pt-3 pb-1 text-xs',
+			label: 'left-2 top-2.5 text-xs -translate-y-2.5 peer-focus:-translate-y-2.5',
+			code: 'px-2 text-xs'
+		},
+		default: {
 			input: 'pl-2.5 pt-4 pb-1.5 text-sm',
 			label: 'left-2.5 top-3 text-sm -translate-y-3 peer-focus:-translate-y-3',
 			code: 'px-2.5 text-sm'
 		},
-		default: {
+		lg: {
 			input: 'pl-2.5 pt-5 pb-2.5 text-base',
 			label: 'left-2.5 top-4 text-base -translate-y-4 peer-focus:-translate-y-4',
 			code: 'px-3.5 text-base'
 		},
-		lg: {
+		xl: {
 			input: 'pl-3 pt-6 pb-3 text-lg',
 			label: 'left-3 top-5 text-lg -translate-y-5 peer-focus:-translate-y-5',
 			code: 'px-4 text-lg'
-		},
-		xl: {
-			input: 'pl-3.5 pt-7 pb-3.5 text-xl',
-			label: 'left-3.5 top-6 text-xl -translate-y-6 peer-focus:-translate-y-6',
-			code: 'px-4 text-xl'
 		}
 	};
 </script>

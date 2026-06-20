@@ -11,11 +11,15 @@
 			placeholder: 'Αναζήτηση ειδικότητας…',
 			size: 'default',
 			allowFreeText: true,
+			searchIcon: true,
+			chevron: true,
 			disabled: false
 		},
 		argTypes: {
 			size: { control: 'select', options: ['sm', 'default', 'lg', 'xl'] },
 			allowFreeText: { control: 'boolean' },
+			searchIcon: { control: 'boolean' },
+			chevron: { control: 'boolean' },
 			disabled: { control: 'boolean' }
 		}
 	});
@@ -54,6 +58,30 @@
 	{#snippet template()}
 		<div class="w-80">
 			<Combobox label="Specialty" options={specialties} allowFreeText={false} />
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="No search icon">
+	{#snippet template()}
+		<div class="w-80">
+			<Combobox label="Specialty" options={specialties} searchIcon={false} />
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="No chevron">
+	{#snippet template()}
+		<div class="w-80">
+			<Combobox label="Specialty" options={specialties} chevron={false} />
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Bare (no icons)">
+	{#snippet template()}
+		<div class="w-80">
+			<Combobox label="Specialty" options={specialties} searchIcon={false} chevron={false} />
 		</div>
 	{/snippet}
 </Story>

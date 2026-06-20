@@ -1,12 +1,13 @@
 <script lang="ts" module>
 	export type InputSize = 'sm' | 'default' | 'lg' | 'xl';
 
-	/** Shared control-size scale (shadcn-normal default; no oversized heights). */
+	/** Shared control-size scale (compact; `default` is denser than shadcn-normal,
+	 * `lg` matches the shadcn-normal h-9/36px height). */
 	export const inputSizes: Record<InputSize, string> = {
-		sm: 'h-8 px-2.5 text-sm',
-		default: 'h-9 px-3 text-sm',
-		lg: 'h-11 px-3.5 text-base',
-		xl: 'h-13 px-4 text-base'
+		sm: 'h-7 px-2 text-xs',
+		default: 'h-8 px-2.5 text-sm',
+		lg: 'h-9 px-3 text-sm',
+		xl: 'h-11 px-3.5 text-base'
 	};
 </script>
 

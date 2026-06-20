@@ -4,23 +4,43 @@
 	export type ComboboxSize = InputSize;
 	export type ComboboxOption = { label: string; value: string; icon?: string };
 
-	/** Floating-label geometry per size (matches the text-field family). */
-	const SIZES: Record<ComboboxSize, { input: string; label: string }> = {
+	/**
+	 * Floating-label geometry per size (matches the text-field family).
+	 * `pl`/`pr`/`labelLeft` are the natural horizontal paddings used when the
+	 * leading search icon / trailing chevron are hidden; with them visible the
+	 * input reserves fixed `pl-9`/`pr-10` and the label sits at `left-9` instead.
+	 */
+	const SIZES: Record<
+		ComboboxSize,
+		{ input: string; label: string; pl: string; pr: string; labelLeft: string }
+	> = {
 		sm: {
-			input: 'pt-4 pb-1.5 text-sm',
-			label: 'top-3 text-sm -translate-y-3 peer-focus:-translate-y-3'
+			input: 'pt-3 pb-1 text-xs',
+			label: 'top-2.5 text-xs -translate-y-2.5 peer-focus:-translate-y-2.5',
+			pl: 'pl-2',
+			pr: 'pr-2',
+			labelLeft: 'left-2'
 		},
 		default: {
-			input: 'pt-5 pb-2.5 text-base',
-			label: 'top-4 text-base -translate-y-4 peer-focus:-translate-y-4'
+			input: 'pt-4 pb-1.5 text-sm',
+			label: 'top-3 text-sm -translate-y-3 peer-focus:-translate-y-3',
+			pl: 'pl-2.5',
+			pr: 'pr-2.5',
+			labelLeft: 'left-2.5'
 		},
 		lg: {
-			input: 'pt-6 pb-3 text-lg',
-			label: 'top-5 text-lg -translate-y-5 peer-focus:-translate-y-5'
+			input: 'pt-5 pb-2.5 text-base',
+			label: 'top-4 text-base -translate-y-4 peer-focus:-translate-y-4',
+			pl: 'pl-2.5',
+			pr: 'pr-2.5',
+			labelLeft: 'left-2.5'
 		},
 		xl: {
-			input: 'pt-7 pb-3.5 text-xl',
-			label: 'top-6 text-xl -translate-y-6 peer-focus:-translate-y-6'
+			input: 'pt-6 pb-3 text-lg',
+			label: 'top-5 text-lg -translate-y-5 peer-focus:-translate-y-5',
+			pl: 'pl-3',
+			pr: 'pr-3',
+			labelLeft: 'left-3'
 		}
 	};
 
@@ -75,6 +95,8 @@
 		disabled = false,
 		placeholder = '',
 		allowFreeText = true,
+		searchIcon = true,
+		chevron = true,
 		name,
 		class: className
 	}: {
@@ -90,9 +112,19 @@
 		placeholder?: string;
 		/** Allow committing typed text that matches no option (default true, 1:1 Vue). */
 		allowFreeText?: boolean;
+		/** Show the leading search icon; when false the input/label start at the edge. */
+		searchIcon?: boolean;
+		/** Show the trailing toggle/clear button (chevron when empty, clear when filled). */
+		chevron?: boolean;
 		name?: string;
 		class?: string;
 	} = $props();
+
+	// Reserve fixed space for the leading icon / trailing button when shown,
+	// otherwise fall back to the size's natural horizontal padding.
+	const leadPad = $derived(searchIcon ? 'pl-9' : SIZES[size].pl);
+	const trailPad = $derived(chevron ? 'pr-10' : SIZES[size].pr);
+	const labelLeft = $derived(searchIcon ? 'left-9' : SIZES[size].labelLeft);
 
 	const inputId = useId(untrack(() => id) ?? undefined, 'combobox');
 	const listId = `${inputId}-list`;
@@ -237,9 +269,11 @@
 	use:dismissable={{ enabled: open, onDismiss: () => (open = false) }}
 >
 	<div class="relative">
-		<SearchIcon
-			class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-		/>
+		{#if searchIcon}
+			<SearchIcon
+				class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+			/>
+		{/if}
 
 		<input
 			bind:this={inputEl}
@@ -260,11 +294,13 @@
 			onblur={onBlur}
 			data-slot="combobox-input"
 			class={cn(
-				'peer block w-full appearance-none rounded-md border-[1.5px] border-input bg-card pr-10 pl-9 text-foreground transition-[color,box-shadow] outline-none',
+				'peer block w-full appearance-none rounded-md border-[1.5px] border-input bg-card text-foreground transition-[color,box-shadow] outline-none',
 				'placeholder:text-muted-foreground focus:border-ring focus:ring-[0.5px] focus:ring-ring',
 				'disabled:cursor-not-allowed disabled:opacity-50',
 				'aria-[invalid=true]:border-destructive aria-[invalid=true]:bg-destructive/10',
-				SIZES[size].input
+				SIZES[size].input,
+				leadPad,
+				trailPad
 			)}
 		/>
 
@@ -272,26 +308,29 @@
 			for={inputId}
 			data-slot="combobox-label"
 			class={cn(
-				'pointer-events-none absolute left-9 z-10 origin-[0] scale-75 transform truncate pr-3 text-muted-foreground duration-200',
+				'pointer-events-none absolute z-10 origin-[0] scale-75 transform truncate pr-3 text-muted-foreground duration-200',
 				'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
 				'peer-focus:scale-75 peer-focus:text-foreground',
 				'peer-aria-[invalid=true]:text-destructive',
-				SIZES[size].label
+				SIZES[size].label,
+				labelLeft
 			)}
 		>
 			{label}
 		</label>
 
-		<button
-			type="button"
-			tabindex={-1}
-			{disabled}
-			onclick={onButton}
-			aria-label={search ? 'Clear' : 'Toggle options'}
-			class="absolute top-1/2 right-2 grid size-7 -translate-y-1/2 place-items-center rounded-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
-		>
-			{#if search}<XIcon class="size-4" />{:else}<ChevronDownIcon class="size-4" />{/if}
-		</button>
+		{#if chevron}
+			<button
+				type="button"
+				tabindex={-1}
+				{disabled}
+				onclick={onButton}
+				aria-label={search ? 'Clear' : 'Toggle options'}
+				class="absolute top-1/2 right-2 grid size-7 -translate-y-1/2 place-items-center rounded-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
+			>
+				{#if search}<XIcon class="size-4" />{:else}<ChevronDownIcon class="size-4" />{/if}
+			</button>
+		{/if}
 	</div>
 
 	{#if open}

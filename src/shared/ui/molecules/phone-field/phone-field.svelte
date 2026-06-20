@@ -4,10 +4,10 @@
 	// Padding-based geometry that matches the text-field family per size, so the
 	// stacked country select and the number input share the exact same height.
 	const TRIGGER_PAD: Record<TextFieldSize, string> = {
-		sm: 'h-auto px-2.5 pt-4 pb-1.5 text-sm',
-		default: 'h-auto px-2.5 pt-5 pb-2.5 text-base',
-		lg: 'h-auto px-3.5 pt-6 pb-3 text-lg',
-		xl: 'h-auto px-4 pt-7 pb-3.5 text-xl'
+		sm: 'h-auto px-2 pt-3 pb-1 text-xs',
+		default: 'h-auto px-2.5 pt-4 pb-1.5 text-sm',
+		lg: 'h-auto px-2.5 pt-5 pb-2.5 text-base',
+		xl: 'h-auto px-3.5 pt-6 pb-3 text-lg'
 	};
 </script>
 

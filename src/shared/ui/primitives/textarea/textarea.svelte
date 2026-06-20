@@ -5,10 +5,10 @@
 
 	/** Textarea grows with content, so size tunes min-height, padding and text. */
 	const textareaSizes: Record<TextareaSize, string> = {
-		sm: 'min-h-16 px-2.5 py-1.5 text-sm',
-		default: 'min-h-20 px-3 py-2 text-sm',
-		lg: 'min-h-24 px-3.5 py-2.5 text-base',
-		xl: 'min-h-28 px-4 py-3 text-base'
+		sm: 'min-h-14 px-2 py-1 text-xs',
+		default: 'min-h-16 px-2.5 py-1.5 text-sm',
+		lg: 'min-h-20 px-3 py-2 text-sm',
+		xl: 'min-h-24 px-3.5 py-2.5 text-base'
 	};
 </script>
 

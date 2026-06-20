@@ -188,11 +188,14 @@ Rules:
   decision): form controls (`input`, `textarea`, `select` trigger, and the
   `text-field`/`number-field`/`password-field`/`phone-field`/`date-of-birth-field`
   molecules) use a **border-color focus indicator** (`focus-visible:border-ring`)
-  instead of the shadcn 3px focus ring, and share a control **size scale**
-  `sm | default | lg | xl` where `default` is the shadcn-normal height
-  (`h-9`/36px), not an oversized one. The size class map is owned by
-  `input.svelte` (`inputSizes`) and reused by the textarea/select-trigger/field
-  molecules. Buttons keep the standard shadcn focus ring.
+  instead of the shadcn 3px focus ring, and share a compact control **size
+  scale** `sm | default | lg | xl` (`h-7` / `h-8` / `h-9` / `h-11`, i.e.
+  28 / 32 / 36 / 44px) where `default` is intentionally denser than
+  shadcn-normal and `lg` equals the shadcn-normal `h-9`/36px height. The size
+  class map is owned by `input.svelte` (`inputSizes`) and reused by the
+  textarea/select-trigger/combobox/field molecules. Buttons are a separate scale
+  (`sm | default | lg | icon`, following stock shadcn) and keep the standard
+  shadcn focus ring.
 - Do not use raw palette utilities in feature code unless the value is a
   deliberate one-off that belongs close to that feature.
 - Use Icones/Iconify virtual imports (e.g. `~icons/lucide/search`); do not add

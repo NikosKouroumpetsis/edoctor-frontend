@@ -82,8 +82,12 @@ When a dimension repeats or encodes a design decision, add a named token in
 ## Shared control spec
 
 Text inputs, selects, and search controls share one look with the application:
-height `h-13` (52px), radius `rounded-control`, `border-input`, `bg-card`. The
-`input` and `select` primitives already encode this; reuse them rather than
+`rounded-control`, `border-input`, `bg-card`, and one compact height scale
+`sm | default | lg | xl` (`h-7` / `h-8` / `h-9` / `h-11`, i.e. 28 / 32 / 36 /
+44px) where `default` is denser than shadcn-normal and `lg` equals the
+shadcn-normal `h-9`/36px. The scale is owned by `inputSizes` in `input.svelte`
+and reused by the textarea, select trigger, combobox, and field molecules; the
+`input` and `select` primitives already encode this, so reuse them rather than
 restyling per feature.
 
 ## Components
