@@ -5,7 +5,9 @@
 	const { Story } = defineMeta({
 		title: 'Primitives/Switch',
 		component: Switch,
-		tags: ['autodocs']
+		tags: ['autodocs'],
+		args: { showCheck: true },
+		argTypes: { showCheck: { control: 'boolean' } }
 	});
 </script>
 
@@ -22,11 +24,28 @@
 	{/snippet}
 </Story>
 
+<Story name="Checked">
+	{#snippet template()}
+		<Switch checked aria-label="Checked" />
+	{/snippet}
+</Story>
+
 <Story name="Disabled">
 	{#snippet template()}
 		<div class="flex items-center gap-4">
 			<Switch disabled aria-label="Off disabled" />
 			<Switch checked disabled aria-label="On disabled" />
+		</div>
+	{/snippet}
+</Story>
+
+<!-- The ON-state check is opt-out: left keeps the default check, right is the
+     same ON state with showCheck={false}. -->
+<Story name="Optional check">
+	{#snippet template()}
+		<div class="flex items-center gap-4">
+			<Switch checked aria-label="With check (default)" />
+			<Switch checked showCheck={false} aria-label="Without check" />
 		</div>
 	{/snippet}
 </Story>

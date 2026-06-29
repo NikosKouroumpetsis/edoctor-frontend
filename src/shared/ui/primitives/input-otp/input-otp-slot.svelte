@@ -19,14 +19,17 @@
 	data-slot="input-otp-slot"
 	data-active={slot.isActive ? '' : undefined}
 	class={cn(
-		'relative flex h-10 w-10 items-center justify-center border-y border-r border-input text-base font-medium shadow-raised transition-all',
-		'first:rounded-l-md first:border-l last:rounded-r-md',
-		slot.isActive && 'z-10 border-ring ring-[0.5px] ring-ring',
+		'relative flex h-full flex-1 items-center justify-center text-lg font-medium transition-colors',
+		slot.char === undefined ? 'text-muted-foreground' : 'text-foreground',
 		className
 	)}
 	{...restProps}
 >
-	{slot.char ?? ''}
+	{#if slot.char !== undefined}
+		{slot.char}
+	{:else if !slot.hasFakeCaret}
+		-
+	{/if}
 	{#if slot.hasFakeCaret}
 		<div
 			aria-hidden="true"

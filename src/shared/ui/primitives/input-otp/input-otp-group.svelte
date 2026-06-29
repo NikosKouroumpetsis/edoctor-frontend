@@ -14,7 +14,7 @@
 <div
 	bind:this={ref}
 	data-slot="input-otp-group"
-	class={cn('flex items-center', className)}
+	class={cn('flex w-full items-center', className)}
 	{...restProps}
 >
 	{@render children?.()}

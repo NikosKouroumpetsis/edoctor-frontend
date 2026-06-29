@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import CheckIcon from '~icons/lucide/check';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
 
 	let {
@@ -11,6 +12,7 @@
 		value = 'on',
 		required,
 		onCheckedChange,
+		showCheck = true,
 		...restProps
 	}: WithElementRef<HTMLButtonAttributes, HTMLButtonElement> & {
 		checked?: boolean;
@@ -18,6 +20,8 @@
 		value?: string;
 		required?: boolean;
 		onCheckedChange?: (checked: boolean) => void;
+		/** Show the in-thumb checkmark in the ON state. Default true. */
+		showCheck?: boolean;
 	} = $props();
 
 	function toggle() {
@@ -49,11 +53,18 @@
 	<span
 		data-slot="switch-thumb"
 		class={cn(
-			'pointer-events-none block size-4 rounded-full bg-background ring-0 transition-transform',
+			'pointer-events-none relative block size-4 rounded-full bg-background ring-0 transition-transform',
 			'data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0'
 		)}
 		data-state={checked ? 'checked' : 'unchecked'}
-	></span>
+	>
+		{#if showCheck && checked}
+			<CheckIcon
+				class="absolute top-1/2 left-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 text-primary"
+				aria-hidden="true"
+			/>
+		{/if}
+	</span>
 </button>
 
 {#if name}

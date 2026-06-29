@@ -46,4 +46,34 @@ describe('InputOTP', () => {
 		expect(screen.getByTestId('otp-value')).toHaveTextContent('1234');
 		expect(onComplete).toHaveBeenCalledWith('1234');
 	});
+
+	it('shows a dash placeholder in empty slots and the digit once filled', async () => {
+		const user = userEvent.setup();
+		const { container } = render(Harness, { props: { maxlength: 6 } });
+		const slotText = () =>
+			Array.from(container.querySelectorAll('[data-slot="input-otp-slot"]')).map((s) =>
+				s.textContent?.trim()
+			);
+
+		// Unfocused: every slot shows the placeholder dash.
+		expect(slotText()).toEqual(['-', '-', '-', '-', '-', '-']);
+
+		await user.click(screen.getByLabelText('One-time passcode'));
+		await user.keyboard('84');
+
+		// Filled slots show their digit; trailing empty slots keep the dash.
+		const text = slotText();
+		expect(text[0]).toBe('8');
+		expect(text[1]).toBe('4');
+		expect(text.slice(3)).toEqual(['-', '-', '-']);
+	});
+
+	it('renders borderless slots (no per-slot divider segments)', () => {
+		const { container } = render(Harness, { props: { maxlength: 6 } });
+		const slots = container.querySelectorAll('[data-slot="input-otp-slot"]');
+		expect(slots).toHaveLength(6);
+		slots.forEach((slot) => {
+			expect((slot as HTMLElement).className).not.toMatch(/border/);
+		});
+	});
 });

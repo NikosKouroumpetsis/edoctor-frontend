@@ -111,7 +111,12 @@
 <div
 	data-slot="input-otp"
 	data-disabled={disabled ? '' : undefined}
-	class={cn('relative flex items-center gap-2', disabled && 'opacity-50', containerClass)}
+	class={cn(
+		'relative flex h-12 w-full items-center rounded-2xl border border-input bg-card px-3 transition-[color,box-shadow]',
+		isFocused && 'border-ring',
+		disabled && 'opacity-50',
+		containerClass
+	)}
 >
 	{@render children?.()}
 	<input

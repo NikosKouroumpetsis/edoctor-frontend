@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from './index';
+	import { InputOTP, InputOTPGroup, InputOTPSlot } from './index';
 
 	let { maxlength = 6, onComplete }: { maxlength?: number; onComplete?: (value: string) => void } =
 		$props();
@@ -9,15 +9,9 @@
 
 <InputOTP bind:value {maxlength} {onComplete}>
 	<InputOTPGroup>
-		<InputOTPSlot index={0} />
-		<InputOTPSlot index={1} />
-		<InputOTPSlot index={2} />
-	</InputOTPGroup>
-	<InputOTPSeparator />
-	<InputOTPGroup>
-		<InputOTPSlot index={3} />
-		<InputOTPSlot index={4} />
-		<InputOTPSlot index={5} />
+		{#each [...Array(maxlength).keys()] as index (index)}
+			<InputOTPSlot {index} />
+		{/each}
 	</InputOTPGroup>
 </InputOTP>
 
