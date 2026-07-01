@@ -26,6 +26,18 @@ describe('Dialog', () => {
 		await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
 	});
 
+	it('defaults the panel to max-w-lg and applies the size prop', async () => {
+		const user = userEvent.setup();
+		const def = render(Harness);
+		await user.click(def.getByRole('button', { name: 'Open dialog' }));
+		expect(def.getByRole('dialog')).toHaveClass('max-w-lg');
+		def.unmount();
+
+		const lg = render(Harness, { props: { size: 'lg' } });
+		await user.click(lg.getByRole('button', { name: 'Open dialog' }));
+		expect(lg.getByRole('dialog')).toHaveClass('max-w-2xl');
+	});
+
 	it('closes via a DialogClose button', async () => {
 		const user = userEvent.setup();
 		render(Harness);

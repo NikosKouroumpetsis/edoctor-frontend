@@ -15,6 +15,18 @@ describe('Drawer', () => {
 		expect(drawer.querySelector('[data-slot="drawer-handle"]')).toBeInTheDocument();
 	});
 
+	it('defaults the bottom panel to max-h-[85vh] and applies the size prop', async () => {
+		const user = userEvent.setup();
+		const def = render(Harness, { props: { direction: 'bottom' } });
+		await user.click(def.getByRole('button', { name: 'Open drawer' }));
+		expect(def.getByRole('dialog')).toHaveClass('max-h-[85vh]');
+		def.unmount();
+
+		const sm = render(Harness, { props: { direction: 'bottom', size: 'sm' } });
+		await user.click(sm.getByRole('button', { name: 'Open drawer' }));
+		expect(sm.getByRole('dialog')).toHaveClass('max-h-[70vh]');
+	});
+
 	it('closes on Escape', async () => {
 		const user = userEvent.setup();
 		render(Harness);

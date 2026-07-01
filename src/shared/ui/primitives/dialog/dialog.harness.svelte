@@ -6,15 +6,17 @@
 		DialogHeader,
 		DialogTitle,
 		DialogDescription,
-		DialogClose
+		DialogClose,
+		type DialogSize
 	} from './index';
 
-	let { open = $bindable(false) }: { open?: boolean } = $props();
+	let { open = $bindable(false), size = 'default' }: { open?: boolean; size?: DialogSize } =
+		$props();
 </script>
 
 <Dialog bind:open>
 	<DialogTrigger>Open dialog</DialogTrigger>
-	<DialogContent>
+	<DialogContent {size}>
 		<DialogHeader>
 			<DialogTitle>Confirm booking</DialogTitle>
 			<DialogDescription>Please confirm your appointment.</DialogDescription>

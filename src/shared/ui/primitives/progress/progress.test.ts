@@ -22,4 +22,17 @@ describe('Progress', () => {
 		render(Progress, { props: { value: null } });
 		expect(screen.getByRole('progressbar')).toHaveAttribute('data-state', 'indeterminate');
 	});
+
+	it('defaults the track to h-2 and scales with the size prop', () => {
+		const def = render(Progress, { props: { value: 40 } });
+		expect(def.getByRole('progressbar')).toHaveClass('h-2');
+		def.unmount();
+
+		const sm = render(Progress, { props: { value: 40, size: 'sm' } });
+		expect(sm.getByRole('progressbar')).toHaveClass('h-1.5');
+		sm.unmount();
+
+		const lg = render(Progress, { props: { value: 40, size: 'lg' } });
+		expect(lg.getByRole('progressbar')).toHaveClass('h-3');
+	});
 });

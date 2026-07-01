@@ -1,3 +1,14 @@
+<script lang="ts" module>
+	export type PopoverSize = 'sm' | 'default' | 'lg';
+
+	/** Panel width. */
+	const popoverSizes: Record<PopoverSize, string> = {
+		sm: 'w-56',
+		default: 'w-72',
+		lg: 'w-80'
+	};
+</script>
+
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { scale } from 'svelte/transition';
@@ -11,12 +22,14 @@
 		placement = 'bottom',
 		sideOffset = 8,
 		align = 'center',
+		size = 'default',
 		children,
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
 		placement?: 'top' | 'bottom' | 'left' | 'right';
 		sideOffset?: number;
 		align?: 'start' | 'center' | 'end';
+		size?: PopoverSize;
 	} = $props();
 
 	const ctx = getPopoverContext();
@@ -49,7 +62,8 @@
 		use:autofocus
 		transition:scale={{ start: 0.95, duration: 120 }}
 		class={cn(
-			'z-50 w-72 rounded-control border border-border bg-popover p-4 text-popover-foreground shadow-overlay outline-none',
+			'z-50 rounded-control border border-border bg-popover p-4 text-popover-foreground shadow-overlay outline-none',
+			popoverSizes[size],
 			className
 		)}
 		{...restProps}

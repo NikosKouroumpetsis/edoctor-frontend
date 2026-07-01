@@ -61,6 +61,27 @@
 	{/snippet}
 </Story>
 
+<Story name="Sizes">
+	{#snippet template()}
+		<div class="flex flex-wrap gap-3">
+			{#each ['sm', 'default', 'lg'] as const as size (size)}
+				<Drawer>
+					<DrawerTrigger class={buttonVariants({ variant: 'outline' })}>Bottom {size}</DrawerTrigger
+					>
+					<DrawerContent direction="bottom" {size}>
+						<DrawerHeader>
+							<DrawerTitle>Size {size}</DrawerTitle>
+							<DrawerDescription
+								>The {size} panel sets the bottom drawer height cap.</DrawerDescription
+							>
+						</DrawerHeader>
+					</DrawerContent>
+				</Drawer>
+			{/each}
+		</div>
+	{/snippet}
+</Story>
+
 <Story name="Scrollable content">
 	{#snippet template()}
 		<Drawer>

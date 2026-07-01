@@ -16,4 +16,16 @@ describe('Sheet', () => {
 		await user.keyboard('{Escape}');
 		await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
 	});
+
+	it('defaults the right panel width to max-w-sm and applies the size prop', async () => {
+		const user = userEvent.setup();
+		const def = render(Harness, { props: { side: 'right' } });
+		await user.click(def.getByRole('button', { name: 'Open sheet' }));
+		expect(def.getByRole('dialog')).toHaveClass('max-w-sm');
+		def.unmount();
+
+		const sm = render(Harness, { props: { side: 'right', size: 'sm' } });
+		await user.click(sm.getByRole('button', { name: 'Open sheet' }));
+		expect(sm.getByRole('dialog')).toHaveClass('max-w-xs');
+	});
 });

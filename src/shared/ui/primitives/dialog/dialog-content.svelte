@@ -1,3 +1,14 @@
+<script lang="ts" module>
+	export type DialogSize = 'sm' | 'default' | 'lg';
+
+	/** Panel max-width. */
+	const dialogSizes: Record<DialogSize, string> = {
+		sm: 'max-w-md',
+		default: 'max-w-lg',
+		lg: 'max-w-2xl'
+	};
+</script>
+
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
@@ -10,10 +21,12 @@
 	let {
 		ref = $bindable(null),
 		class: className,
+		size = 'default',
 		showClose = true,
 		children,
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
+		size?: DialogSize;
 		showClose?: boolean;
 		children?: Snippet;
 	} = $props();
@@ -45,7 +58,8 @@
 		use:scrollLock={ctx.modal}
 		transition:scale={{ start: 0.95, duration: 150 }}
 		class={cn(
-			'fixed top-1/2 left-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-panel border border-border bg-card p-card shadow-soft',
+			'fixed top-1/2 left-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 gap-4 rounded-panel border border-border bg-card p-card shadow-soft',
+			dialogSizes[size],
 			className
 		)}
 		{...restProps}

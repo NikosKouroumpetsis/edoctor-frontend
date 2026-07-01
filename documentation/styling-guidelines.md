@@ -90,6 +90,20 @@ and reused by the textarea, select trigger, combobox, and field molecules; the
 `input` and `select` primitives already encode this, so reuse them rather than
 restyling per feature.
 
+Separately, several visual primitives and overlays expose an **opt-in**,
+generic `size` prop with a `sm | default | lg` scale (a distinct concept from the
+`InputSize` control scale above, and from the button scale). It is additive and
+`default` reproduces each component's prior fixed rendering exactly, so existing
+usages are unchanged. Each component owns its own per-component type
+(`AvatarSize`, `BadgeSize`, `CheckboxSize`, `RadioGroupItemSize`, `SwitchSize`,
+`ProgressSize`, `SliderSize`, `DialogSize`, `SheetSize`, `DrawerSize`,
+`PopoverSize`, `HoverCardSize`, `CardSize`) and applies it through a local size
+map (mirroring `inputSizes`). `size` scales the coupled dimensions together: the
+box and its glyph for checkbox/radio, the track + thumb + travel for switch and
+slider, the panel max-width/height for dialog/sheet/drawer/popover/hover-card
+(sheet/drawer combine `size` with their `side`/`direction`), and the vertical
+padding/gap for card.
+
 ## Components
 
 - Use the in-house primitives in `src/shared/ui/primitives` for common controls.

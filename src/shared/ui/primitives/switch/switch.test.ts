@@ -49,6 +49,22 @@ describe('Switch', () => {
 		expect(thumbCheck()).toBeNull();
 	});
 
+	it('defaults the track/thumb to the default scale and applies sm/lg', () => {
+		const def = render(Switch, { props: { 'aria-label': 'd' } });
+		expect(screen.getByRole('switch', { name: 'd' })).toHaveClass('w-8');
+		expect(def.container.querySelector('[data-slot="switch-thumb"]')).toHaveClass('size-4');
+		def.unmount();
+
+		const sm = render(Switch, { props: { 'aria-label': 's', size: 'sm' } });
+		expect(screen.getByRole('switch', { name: 's' })).toHaveClass('w-6');
+		expect(sm.container.querySelector('[data-slot="switch-thumb"]')).toHaveClass('size-3');
+		sm.unmount();
+
+		const lg = render(Switch, { props: { 'aria-label': 'l', size: 'lg' } });
+		expect(screen.getByRole('switch', { name: 'l' })).toHaveClass('w-10');
+		expect(lg.container.querySelector('[data-slot="switch-thumb"]')).toHaveClass('size-5');
+	});
+
 	it('never renders the check when showCheck is false, even if checked', () => {
 		const { container } = render(Switch, {
 			props: { 'aria-label': 'Plain', checked: true, showCheck: false }

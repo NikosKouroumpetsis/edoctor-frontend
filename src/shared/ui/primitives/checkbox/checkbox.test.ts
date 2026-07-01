@@ -31,6 +31,19 @@ describe('Checkbox', () => {
 		expect(onCheckedChange).not.toHaveBeenCalled();
 	});
 
+	it('defaults the box to size-5 and scales with the size prop', () => {
+		const def = render(Checkbox, { props: { 'aria-label': 'd' } });
+		expect(def.getByRole('checkbox', { name: 'd' })).toHaveClass('size-5');
+		def.unmount();
+
+		const sm = render(Checkbox, { props: { 'aria-label': 's', size: 'sm' } });
+		expect(sm.getByRole('checkbox', { name: 's' })).toHaveClass('size-4');
+		sm.unmount();
+
+		const lg = render(Checkbox, { props: { 'aria-label': 'l', size: 'lg' } });
+		expect(lg.getByRole('checkbox', { name: 'l' })).toHaveClass('size-6');
+	});
+
 	it('mirrors a hidden form control when a name is given', () => {
 		const { container } = render(Checkbox, {
 			props: { 'aria-label': 'terms', name: 'terms', value: 'yes', checked: true }

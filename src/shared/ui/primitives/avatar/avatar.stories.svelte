@@ -33,9 +33,9 @@
 <Story name="Sizes">
 	{#snippet template()}
 		<div class="flex items-center gap-3">
-			<Avatar class="size-8"><AvatarFallback>SM</AvatarFallback></Avatar>
-			<Avatar class="size-10"><AvatarFallback>MD</AvatarFallback></Avatar>
-			<Avatar class="size-14"><AvatarFallback>LG</AvatarFallback></Avatar>
+			<Avatar size="sm"><AvatarFallback>SM</AvatarFallback></Avatar>
+			<Avatar size="default"><AvatarFallback>MD</AvatarFallback></Avatar>
+			<Avatar size="lg"><AvatarFallback>LG</AvatarFallback></Avatar>
 		</div>
 	{/snippet}
 </Story>

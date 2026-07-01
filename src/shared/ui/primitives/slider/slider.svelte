@@ -1,3 +1,19 @@
+<script lang="ts" module>
+	export type SliderSize = 'sm' | 'default' | 'lg';
+
+	/** Track thickness and thumb diameter scale together. */
+	const sliderTrackSizes: Record<SliderSize, string> = {
+		sm: 'h-1',
+		default: 'h-1.5',
+		lg: 'h-2'
+	};
+	const sliderThumbSizes: Record<SliderSize, string> = {
+		sm: 'size-3',
+		default: 'size-4',
+		lg: 'size-5'
+	};
+</script>
+
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
@@ -9,6 +25,7 @@
 		max = 100,
 		step = 1,
 		disabled = false,
+		size = 'default',
 		class: className,
 		onValueChange,
 		'aria-label': ariaLabel,
@@ -19,6 +36,7 @@
 		max?: number;
 		step?: number;
 		disabled?: boolean;
+		size?: SliderSize;
 		onValueChange?: (value: number | number[]) => void;
 	} = $props();
 
@@ -142,7 +160,7 @@
 		bind:this={trackEl}
 		data-slot="slider-track"
 		onpointerdown={onTrackPointerDown}
-		class="relative h-1.5 w-full grow rounded-full bg-muted"
+		class={cn('relative w-full grow rounded-full bg-muted', sliderTrackSizes[size])}
 	>
 		<div
 			data-slot="slider-range"
@@ -165,7 +183,10 @@
 			tabindex={disabled ? -1 : 0}
 			onkeydown={(e) => onThumbKeydown(e, index)}
 			style={`left: ${percent(thumb)}%`}
-			class="absolute size-4 -translate-x-1/2 rounded-full border border-primary bg-card shadow-sm transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none"
+			class={cn(
+				'absolute -translate-x-1/2 rounded-full border border-primary bg-card shadow-sm transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none',
+				sliderThumbSizes[size]
+			)}
 		></button>
 	{/each}
 </div>

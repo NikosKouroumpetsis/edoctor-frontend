@@ -1,5 +1,15 @@
 <script lang="ts" module>
 	export type DrawerDirection = 'top' | 'bottom' | 'left' | 'right';
+	export type DrawerSize = 'sm' | 'default' | 'lg';
+
+	// Panel extent along the open axis: max-height for top/bottom, max-width for
+	// left/right. `default` reproduces the previous fixed extent.
+	const drawerExtent: Record<DrawerDirection, Record<DrawerSize, string>> = {
+		bottom: { sm: 'max-h-[70vh]', default: 'max-h-[85vh]', lg: 'max-h-[95vh]' },
+		top: { sm: 'max-h-[70vh]', default: 'max-h-[85vh]', lg: 'max-h-[95vh]' },
+		left: { sm: 'max-w-xs', default: 'max-w-sm', lg: 'max-w-md' },
+		right: { sm: 'max-w-xs', default: 'max-w-sm', lg: 'max-w-md' }
+	};
 </script>
 
 <script lang="ts">
@@ -15,12 +25,14 @@
 		ref = $bindable(null),
 		class: className,
 		direction = 'bottom',
+		size: panelSize = 'default',
 		showHandle = true,
 		showClose = false,
 		children,
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
 		direction?: DrawerDirection;
+		size?: DrawerSize;
 		showHandle?: boolean;
 		showClose?: boolean;
 		children?: Snippet;
@@ -29,12 +41,13 @@
 	const ctx = getDialogContext();
 
 	// Per-direction layout: which screen edge the drawer is pinned to and how it
-	// is rounded/sized. Mirrors `sheet` but with a grabbable rounded edge.
+	// is rounded. Mirrors `sheet` but with a grabbable rounded edge. The open-axis
+	// extent is applied separately from `drawerExtent[direction][panelSize]`.
 	const directionClasses: Record<DrawerDirection, string> = {
-		bottom: 'inset-x-0 bottom-0 mt-24 max-h-[85vh] flex-col rounded-t-panel border-t',
-		top: 'inset-x-0 top-0 mb-24 max-h-[85vh] flex-col-reverse rounded-b-panel border-b',
-		left: 'inset-y-0 left-0 w-3/4 max-w-sm flex-row rounded-r-panel border-r',
-		right: 'inset-y-0 right-0 w-3/4 max-w-sm flex-row-reverse rounded-l-panel border-l'
+		bottom: 'inset-x-0 bottom-0 mt-24 flex-col rounded-t-panel border-t',
+		top: 'inset-x-0 top-0 mb-24 flex-col-reverse rounded-b-panel border-b',
+		left: 'inset-y-0 left-0 w-3/4 flex-row rounded-r-panel border-r',
+		right: 'inset-y-0 right-0 w-3/4 flex-row-reverse rounded-l-panel border-l'
 	};
 
 	// Drag axis + the sign of the dismiss direction along that axis.
@@ -239,6 +252,7 @@
 			dragging && 'select-none',
 			snapping && 'transition-transform duration-300 ease-out',
 			directionClasses[direction],
+			drawerExtent[direction][panelSize],
 			className
 		)}
 		{...restProps}

@@ -1,3 +1,14 @@
+<script lang="ts" module>
+	export type ProgressSize = 'sm' | 'default' | 'lg';
+
+	/** Track thickness. */
+	const progressSizes: Record<ProgressSize, string> = {
+		sm: 'h-1.5',
+		default: 'h-2',
+		lg: 'h-3'
+	};
+</script>
+
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
@@ -7,10 +18,12 @@
 		class: className,
 		value = 0,
 		max = 100,
+		size = 'default',
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
 		value?: number | null;
 		max?: number;
+		size?: ProgressSize;
 	} = $props();
 
 	const clamped = $derived(value == null ? null : Math.min(Math.max(value, 0), max));
@@ -25,7 +38,11 @@
 	aria-valuemax={max}
 	aria-valuenow={clamped ?? undefined}
 	data-state={clamped == null ? 'indeterminate' : clamped >= max ? 'complete' : 'loading'}
-	class={cn('relative h-2 w-full overflow-hidden rounded-full bg-muted', className)}
+	class={cn(
+		'relative w-full overflow-hidden rounded-full bg-muted',
+		progressSizes[size],
+		className
+	)}
 	{...restProps}
 >
 	<div

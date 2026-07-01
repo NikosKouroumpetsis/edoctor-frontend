@@ -28,3 +28,13 @@
 		<div class="w-80"><Progress value={100} /></div>
 	{/snippet}
 </Story>
+
+<Story name="Sizes">
+	{#snippet template()}
+		<div class="flex w-80 flex-col gap-3">
+			<Progress size="sm" value={40} />
+			<Progress size="default" value={40} />
+			<Progress size="lg" value={40} />
+		</div>
+	{/snippet}
+</Story>

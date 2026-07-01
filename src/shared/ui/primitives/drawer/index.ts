@@ -7,7 +7,7 @@ import Header from '$shared/ui/primitives/dialog/dialog-header.svelte';
 import Footer from '$shared/ui/primitives/dialog/dialog-footer.svelte';
 import Title from '$shared/ui/primitives/dialog/dialog-title.svelte';
 import Description from '$shared/ui/primitives/dialog/dialog-description.svelte';
-import Content, { type DrawerDirection } from './drawer-content.svelte';
+import Content, { type DrawerDirection, type DrawerSize } from './drawer-content.svelte';
 
 export {
 	Root,
@@ -19,6 +19,7 @@ export {
 	Title,
 	Description,
 	type DrawerDirection,
+	type DrawerSize,
 	//
 	Root as Drawer,
 	Trigger as DrawerTrigger,

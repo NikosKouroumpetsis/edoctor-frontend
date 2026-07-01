@@ -1,7 +1,8 @@
-import Root from './slider.svelte';
+import Root, { type SliderSize } from './slider.svelte';
 
 export {
 	Root,
+	type SliderSize,
 	//
 	Root as Slider
 };

@@ -1,3 +1,19 @@
+<script lang="ts" module>
+	export type CheckboxSize = 'sm' | 'default' | 'lg';
+
+	/** Box and check/indeterminate icon scale together. */
+	const checkboxBoxSizes: Record<CheckboxSize, string> = {
+		sm: 'size-4',
+		default: 'size-5',
+		lg: 'size-6'
+	};
+	const checkboxIconSizes: Record<CheckboxSize, string> = {
+		sm: 'size-3',
+		default: 'size-3.5',
+		lg: 'size-4'
+	};
+</script>
+
 <script lang="ts">
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import CheckIcon from '~icons/lucide/check';
@@ -8,6 +24,7 @@
 		ref = $bindable(null),
 		checked = $bindable(false),
 		indeterminate = $bindable(false),
+		size = 'default',
 		class: className,
 		disabled,
 		name,
@@ -18,6 +35,7 @@
 	}: WithElementRef<HTMLButtonAttributes, HTMLButtonElement> & {
 		checked?: boolean;
 		indeterminate?: boolean;
+		size?: CheckboxSize;
 		name?: string;
 		value?: string;
 		required?: boolean;
@@ -45,7 +63,8 @@
 	{disabled}
 	onclick={toggle}
 	class={cn(
-		'peer flex size-5 shrink-0 items-center justify-center rounded-[5px] border border-input bg-card shadow-xs transition-shadow outline-none',
+		'peer flex shrink-0 items-center justify-center rounded-[5px] border border-input bg-card shadow-xs transition-shadow outline-none',
+		checkboxBoxSizes[size],
 		'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
 		'data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground',
 		'data-[state=indeterminate]:border-primary data-[state=indeterminate]:bg-primary data-[state=indeterminate]:text-primary-foreground',
@@ -55,9 +74,9 @@
 	{...restProps}
 >
 	{#if indeterminate}
-		<MinusIcon class="size-3.5" />
+		<MinusIcon class={checkboxIconSizes[size]} />
 	{:else if checked}
-		<CheckIcon class="size-3.5" />
+		<CheckIcon class={checkboxIconSizes[size]} />
 	{/if}
 </button>
 

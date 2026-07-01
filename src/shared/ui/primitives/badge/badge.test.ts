@@ -18,4 +18,17 @@ describe('Badge', () => {
 		const link = screen.getByRole('link', { name: 'Link' });
 		expect(link).toHaveAttribute('href', '/x');
 	});
+
+	it('defaults to the default size scale and applies sm/lg', () => {
+		const def = render(Badge, { props: { children: label('A') } });
+		expect(def.container.querySelector('[data-slot="badge"]')).toHaveClass('text-label-md', 'px-2');
+		def.unmount();
+
+		const sm = render(Badge, { props: { size: 'sm', children: label('B') } });
+		expect(sm.container.querySelector('[data-slot="badge"]')).toHaveClass('text-label-sm');
+		sm.unmount();
+
+		const lg = render(Badge, { props: { size: 'lg', children: label('C') } });
+		expect(lg.container.querySelector('[data-slot="badge"]')).toHaveClass('text-label-lg');
+	});
 });

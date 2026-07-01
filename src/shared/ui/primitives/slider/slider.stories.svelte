@@ -13,6 +13,9 @@
 	let single = $state(50);
 	let range = $state([20, 80]);
 	let stepped = $state(40);
+	let small = $state(50);
+	let medium = $state(50);
+	let large = $state(50);
 </script>
 
 <Story name="Single">
@@ -45,5 +48,15 @@
 <Story name="Disabled">
 	{#snippet template()}
 		<div class="w-80"><Slider value={30} disabled aria-label="Disabled" /></div>
+	{/snippet}
+</Story>
+
+<Story name="Sizes">
+	{#snippet template()}
+		<div class="flex w-80 flex-col gap-6">
+			<Slider bind:value={small} size="sm" aria-label="Small" />
+			<Slider bind:value={medium} size="default" aria-label="Default" />
+			<Slider bind:value={large} size="lg" aria-label="Large" />
+		</div>
 	{/snippet}
 </Story>

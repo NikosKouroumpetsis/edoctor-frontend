@@ -33,6 +33,22 @@ describe('Slider', () => {
 		expect(thumb).toHaveAttribute('aria-valuenow', '0');
 	});
 
+	it('defaults the track/thumb to the default scale and applies sm/lg', () => {
+		const def = render(Slider, { props: { value: 50, 'aria-label': 'd' } });
+		expect(def.container.querySelector('[data-slot="slider-track"]')).toHaveClass('h-1.5');
+		expect(def.container.querySelector('[data-slot="slider-thumb"]')).toHaveClass('size-4');
+		def.unmount();
+
+		const sm = render(Slider, { props: { value: 50, 'aria-label': 's', size: 'sm' } });
+		expect(sm.container.querySelector('[data-slot="slider-track"]')).toHaveClass('h-1');
+		expect(sm.container.querySelector('[data-slot="slider-thumb"]')).toHaveClass('size-3');
+		sm.unmount();
+
+		const lg = render(Slider, { props: { value: 50, 'aria-label': 'l', size: 'lg' } });
+		expect(lg.container.querySelector('[data-slot="slider-track"]')).toHaveClass('h-2');
+		expect(lg.container.querySelector('[data-slot="slider-thumb"]')).toHaveClass('size-5');
+	});
+
 	it('renders two thumbs for a range and prevents them from crossing', async () => {
 		const user = userEvent.setup({ delay: null });
 		render(Slider, { props: { value: [20, 30], 'aria-label': 'Range' } });

@@ -1,6 +1,6 @@
 import Root from './dialog.svelte';
 import Trigger from './dialog-trigger.svelte';
-import Content from './dialog-content.svelte';
+import Content, { type DialogSize } from './dialog-content.svelte';
 import Close from './dialog-close.svelte';
 import Header from './dialog-header.svelte';
 import Footer from './dialog-footer.svelte';
@@ -16,6 +16,7 @@ export {
 	Footer,
 	Title,
 	Description,
+	type DialogSize,
 	//
 	Root as Dialog,
 	Trigger as DialogTrigger,

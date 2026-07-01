@@ -1,7 +1,8 @@
-import Root from './switch.svelte';
+import Root, { type SwitchSize } from './switch.svelte';
 
 export {
 	Root,
+	type SwitchSize,
 	//
 	Root as Switch
 };

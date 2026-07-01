@@ -7,7 +7,7 @@ import Header from '$shared/ui/primitives/dialog/dialog-header.svelte';
 import Footer from '$shared/ui/primitives/dialog/dialog-footer.svelte';
 import Title from '$shared/ui/primitives/dialog/dialog-title.svelte';
 import Description from '$shared/ui/primitives/dialog/dialog-description.svelte';
-import Content from './sheet-content.svelte';
+import Content, { type SheetSide, type SheetSize } from './sheet-content.svelte';
 
 export {
 	Root,
@@ -18,6 +18,8 @@ export {
 	Footer,
 	Title,
 	Description,
+	type SheetSide,
+	type SheetSize,
 	//
 	Root as Sheet,
 	Trigger as SheetTrigger,

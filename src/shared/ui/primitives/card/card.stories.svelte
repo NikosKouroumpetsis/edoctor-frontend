@@ -51,6 +51,24 @@
 	{/snippet}
 </Story>
 
+<Story name="Sizes">
+	{#snippet template()}
+		<div class="flex flex-col gap-4">
+			{#each ['sm', 'default', 'lg'] as const as size (size)}
+				<Card {size} class="w-80">
+					<CardHeader>
+						<CardTitle>Size {size}</CardTitle>
+						<CardDescription>Vertical padding and section gap scale with size.</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<p class="text-body-sm text-muted-foreground">Card body content.</p>
+					</CardContent>
+				</Card>
+			{/each}
+		</div>
+	{/snippet}
+</Story>
+
 <Story name="With footer">
 	{#snippet template()}
 		<Card class="w-80">

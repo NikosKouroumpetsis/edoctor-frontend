@@ -1,3 +1,18 @@
+<script lang="ts" module>
+	export type SheetSide = 'top' | 'bottom' | 'left' | 'right';
+	export type SheetSize = 'sm' | 'default' | 'lg';
+
+	// Cross-axis extent depends on the side: max-width for left/right, height for
+	// top/bottom. `default` reproduces the previous fixed extent (`max-w-sm` /
+	// `h-auto`); sm/lg pin a smaller/larger panel.
+	const sheetSizeBySide: Record<SheetSide, Record<SheetSize, string>> = {
+		right: { sm: 'max-w-xs', default: 'max-w-sm', lg: 'max-w-md' },
+		left: { sm: 'max-w-xs', default: 'max-w-sm', lg: 'max-w-md' },
+		top: { sm: 'h-1/4', default: 'h-auto', lg: 'h-1/2' },
+		bottom: { sm: 'h-1/4', default: 'h-auto', lg: 'h-1/2' }
+	};
+</script>
+
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
@@ -11,22 +26,24 @@
 		ref = $bindable(null),
 		class: className,
 		side = 'right',
+		size = 'default',
 		showClose = true,
 		children,
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
-		side?: 'top' | 'bottom' | 'left' | 'right';
+		side?: SheetSide;
+		size?: SheetSize;
 		showClose?: boolean;
 		children?: Snippet;
 	} = $props();
 
 	const ctx = getDialogContext();
 
-	const sideClasses = {
-		right: 'inset-y-0 right-0 h-full w-3/4 max-w-sm border-l',
-		left: 'inset-y-0 left-0 h-full w-3/4 max-w-sm border-r',
-		top: 'inset-x-0 top-0 h-auto border-b',
-		bottom: 'inset-x-0 bottom-0 h-auto border-t'
+	const sideClasses: Record<SheetSide, string> = {
+		right: 'inset-y-0 right-0 h-full w-3/4 border-l',
+		left: 'inset-y-0 left-0 h-full w-3/4 border-r',
+		top: 'inset-x-0 top-0 border-b',
+		bottom: 'inset-x-0 bottom-0 border-t'
 	};
 
 	const flyParams = $derived(
@@ -65,6 +82,7 @@
 		class={cn(
 			'fixed z-50 flex flex-col gap-4 bg-card p-card shadow-soft',
 			sideClasses[side],
+			sheetSizeBySide[side][size],
 			className
 		)}
 		{...restProps}

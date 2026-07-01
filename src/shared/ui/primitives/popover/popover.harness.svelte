@@ -1,13 +1,14 @@
 <script lang="ts">
-	import { Popover, PopoverTrigger, PopoverContent } from './index';
+	import { Popover, PopoverTrigger, PopoverContent, type PopoverSize } from './index';
 
-	let { open = $bindable(false) }: { open?: boolean } = $props();
+	let { open = $bindable(false), size = 'default' }: { open?: boolean; size?: PopoverSize } =
+		$props();
 </script>
 
 <div>
 	<Popover bind:open>
 		<PopoverTrigger>Open popover</PopoverTrigger>
-		<PopoverContent>
+		<PopoverContent {size}>
 			<p>Popover body</p>
 			<button type="button">Inner action</button>
 		</PopoverContent>

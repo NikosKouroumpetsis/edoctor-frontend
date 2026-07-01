@@ -35,3 +35,19 @@
 		</div>
 	{/snippet}
 </Story>
+
+<Story name="Sizes">
+	{#snippet template()}
+		<div class="flex items-center gap-4">
+			<label class="flex items-center gap-2 text-body-sm"
+				><Checkbox size="sm" checked /> Small</label
+			>
+			<label class="flex items-center gap-2 text-body-sm">
+				<Checkbox size="default" checked /> Default
+			</label>
+			<label class="flex items-center gap-2 text-body-sm"
+				><Checkbox size="lg" checked /> Large</label
+			>
+		</div>
+	{/snippet}
+</Story>

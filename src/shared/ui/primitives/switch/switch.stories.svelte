@@ -39,6 +39,16 @@
 	{/snippet}
 </Story>
 
+<Story name="Sizes">
+	{#snippet template()}
+		<div class="flex items-center gap-4">
+			<Switch size="sm" checked aria-label="Small" />
+			<Switch size="default" checked aria-label="Default" />
+			<Switch size="lg" checked aria-label="Large" />
+		</div>
+	{/snippet}
+</Story>
+
 <!-- The ON-state check is opt-out: left keeps the default check, right is the
      same ON state with showCheck={false}. -->
 <Story name="Optional check">

@@ -14,6 +14,7 @@
 	let plan = $state('');
 	let preselected = $state('pro');
 	let horizontal = $state('email');
+	let sized = $state('default');
 </script>
 
 <Story name="Default">
@@ -66,6 +67,24 @@
 			</div>
 			<div class="flex items-center gap-2">
 				<RadioGroupItem value="sms" id="h-sms" /><Label for="h-sms">SMS</Label>
+			</div>
+		</RadioGroup>
+	{/snippet}
+</Story>
+
+<Story name="Sizes">
+	{#snippet template()}
+		<RadioGroup bind:value={sized} name="plan-sizes">
+			<div class="flex items-center gap-2">
+				<RadioGroupItem value="sm" id="s-sm" size="sm" /><Label for="s-sm">Small</Label>
+			</div>
+			<div class="flex items-center gap-2">
+				<RadioGroupItem value="default" id="s-default" size="default" /><Label for="s-default">
+					Default
+				</Label>
+			</div>
+			<div class="flex items-center gap-2">
+				<RadioGroupItem value="lg" id="s-lg" size="lg" /><Label for="s-lg">Large</Label>
 			</div>
 		</RadioGroup>
 	{/snippet}

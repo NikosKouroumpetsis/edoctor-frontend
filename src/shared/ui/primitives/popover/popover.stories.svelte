@@ -38,6 +38,21 @@
 	{/snippet}
 </Story>
 
+<Story name="Sizes">
+	{#snippet template()}
+		<div class="flex flex-wrap gap-3">
+			{#each ['sm', 'default', 'lg'] as const as size (size)}
+				<Popover>
+					<PopoverTrigger class={buttonVariants({ variant: 'outline' })}>{size}</PopoverTrigger>
+					<PopoverContent {size}>
+						<p class="text-body-sm">The {size} popover sets the panel width.</p>
+					</PopoverContent>
+				</Popover>
+			{/each}
+		</div>
+	{/snippet}
+</Story>
+
 <Story
 	name="Opened"
 	play={async ({ canvas }) => {

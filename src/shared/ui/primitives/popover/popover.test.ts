@@ -27,6 +27,22 @@ describe('Popover', () => {
 		await waitFor(() => expect(screen.queryByText('Popover body')).not.toBeInTheDocument());
 	});
 
+	it('defaults the panel width to w-72 and applies the size prop', async () => {
+		const user = userEvent.setup();
+		const def = render(Harness);
+		await user.click(def.getByRole('button', { name: 'Open popover' }));
+		expect(def.getByText('Popover body').closest('[data-slot="popover-content"]')).toHaveClass(
+			'w-72'
+		);
+		def.unmount();
+
+		const lg = render(Harness, { props: { size: 'lg' } });
+		await user.click(lg.getByRole('button', { name: 'Open popover' }));
+		expect(lg.getByText('Popover body').closest('[data-slot="popover-content"]')).toHaveClass(
+			'w-80'
+		);
+	});
+
 	it('closes on Escape', async () => {
 		const user = userEvent.setup();
 		render(Harness);

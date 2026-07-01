@@ -1,3 +1,19 @@
+<script lang="ts" module>
+	export type RadioGroupItemSize = 'sm' | 'default' | 'lg';
+
+	/** Box and the selected dot scale together. */
+	const radioBoxSizes: Record<RadioGroupItemSize, string> = {
+		sm: 'size-4',
+		default: 'size-5',
+		lg: 'size-6'
+	};
+	const radioDotSizes: Record<RadioGroupItemSize, string> = {
+		sm: 'size-2',
+		default: 'size-2.5',
+		lg: 'size-3'
+	};
+</script>
+
 <script lang="ts">
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { onMount } from 'svelte';
@@ -8,12 +24,14 @@
 	let {
 		ref = $bindable(null),
 		value,
+		size = 'default',
 		class: className,
 		disabled,
 		children,
 		...restProps
 	}: WithElementRef<HTMLButtonAttributes, HTMLButtonElement> & {
 		value: string;
+		size?: RadioGroupItemSize;
 	} = $props();
 
 	const group = getRadioGroupContext();
@@ -47,7 +65,8 @@
 	tabindex={tabbable ? 0 : -1}
 	onclick={select}
 	class={cn(
-		'relative flex aspect-square size-5 items-center justify-center rounded-full border border-input bg-card text-primary shadow-xs transition-shadow outline-none',
+		'relative flex aspect-square items-center justify-center rounded-full border border-input bg-card text-primary shadow-xs transition-shadow outline-none',
+		radioBoxSizes[size],
 		'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
 		'disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:border-primary',
 		className
@@ -55,7 +74,7 @@
 	{...restProps}
 >
 	{#if checked}
-		<CircleIcon class="size-2.5 fill-primary text-primary" />
+		<CircleIcon class={cn(radioDotSizes[size], 'fill-primary text-primary')} />
 	{/if}
 	{@render children?.()}
 </button>
