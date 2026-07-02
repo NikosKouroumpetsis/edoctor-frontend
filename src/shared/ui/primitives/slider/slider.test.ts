@@ -49,6 +49,21 @@ describe('Slider', () => {
 		expect(lg.container.querySelector('[data-slot="slider-thumb"]')).toHaveClass('size-5');
 	});
 
+	it('defaults to the primary tone and repaints range/thumb for tone="accent"', () => {
+		const def = render(Slider, { props: { value: [20, 80], 'aria-label': 'p' } });
+		expect(def.container.querySelector('[data-slot="slider-range"]')).toHaveClass('bg-primary');
+		expect(def.container.querySelector('[data-slot="slider-thumb"]')).toHaveClass('border-primary');
+		def.unmount();
+
+		const accent = render(Slider, {
+			props: { value: [20, 80], tone: 'accent', 'aria-label': 'a' }
+		});
+		expect(accent.container.querySelector('[data-slot="slider-range"]')).toHaveClass('bg-accent');
+		expect(accent.container.querySelector('[data-slot="slider-thumb"]')).toHaveClass(
+			'border-accent'
+		);
+	});
+
 	it('renders two thumbs for a range and prevents them from crossing', async () => {
 		const user = userEvent.setup({ delay: null });
 		render(Slider, { props: { value: [20, 30], 'aria-label': 'Range' } });

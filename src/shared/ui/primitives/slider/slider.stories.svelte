@@ -12,6 +12,7 @@
 <script lang="ts">
 	let single = $state(50);
 	let range = $state([20, 80]);
+	let accent = $state([20, 80]);
 	let stepped = $state(40);
 	let small = $state(50);
 	let medium = $state(50);
@@ -41,6 +42,15 @@
 		<div class="w-80">
 			<Slider bind:value={stepped} min={0} max={100} step={10} aria-label="Stepped" />
 			<p class="mt-2 text-body-sm text-muted-foreground">Value: {stepped} (step 10)</p>
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Accent tone">
+	{#snippet template()}
+		<div class="w-80">
+			<Slider bind:value={accent} tone="accent" aria-label="Accent range" />
+			<p class="mt-2 text-body-sm text-muted-foreground">Range: {accent.join(' – ')}</p>
 		</div>
 	{/snippet}
 </Story>

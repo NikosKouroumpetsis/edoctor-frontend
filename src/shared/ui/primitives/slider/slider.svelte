@@ -1,6 +1,11 @@
 <script lang="ts" module>
 	export type SliderSize = 'sm' | 'default' | 'lg';
 
+	/** Range-fill / thumb-border colour. `primary` is the default; `accent`
+	 * repaints the selected range and thumb borders with the accent token (used
+	 * by the range-histogram molecule). Additive and backward-compatible. */
+	export type SliderTone = 'primary' | 'accent';
+
 	/** Track thickness and thumb diameter scale together. */
 	const sliderTrackSizes: Record<SliderSize, string> = {
 		sm: 'h-1',
@@ -26,6 +31,10 @@
 		step = 1,
 		disabled = false,
 		size = 'default',
+		tone = 'primary',
+		trackClass,
+		rangeClass,
+		thumbClass,
 		class: className,
 		onValueChange,
 		'aria-label': ariaLabel,
@@ -37,8 +46,18 @@
 		step?: number;
 		disabled?: boolean;
 		size?: SliderSize;
+		tone?: SliderTone;
+		/** Extra classes merged onto the track / selected-range / thumb elements
+		 * (they win over the defaults via tailwind-merge) for higher-fidelity
+		 * variants such as the range-histogram. */
+		trackClass?: string;
+		rangeClass?: string;
+		thumbClass?: string;
 		onValueChange?: (value: number | number[]) => void;
 	} = $props();
+
+	const rangeToneClass = $derived(tone === 'accent' ? 'bg-accent' : 'bg-primary');
+	const thumbToneClass = $derived(tone === 'accent' ? 'border-accent' : 'border-primary');
 
 	const isRange = $derived(Array.isArray(value));
 	const thumbs = $derived(Array.isArray(value) ? value : [value]);
@@ -92,6 +111,18 @@
 		const index = closestThumb(target);
 		activeThumb = index;
 		commit(index, target);
+		window.addEventListener('pointermove', onPointerMove);
+		window.addEventListener('pointerup', onPointerUp);
+	}
+
+	function onThumbPointerDown(event: PointerEvent, index: number) {
+		if (disabled) return;
+		// Grab the handle and drag it directly — the primary interaction. The thin
+		// track is a tiny pointer target, so users reach for the thumb itself; we
+		// start dragging without jumping the value.
+		event.preventDefault();
+		(event.currentTarget as HTMLElement).focus();
+		activeThumb = index;
 		window.addEventListener('pointermove', onPointerMove);
 		window.addEventListener('pointerup', onPointerUp);
 	}
@@ -160,11 +191,11 @@
 		bind:this={trackEl}
 		data-slot="slider-track"
 		onpointerdown={onTrackPointerDown}
-		class={cn('relative w-full grow rounded-full bg-muted', sliderTrackSizes[size])}
+		class={cn('relative w-full grow rounded-full bg-muted', sliderTrackSizes[size], trackClass)}
 	>
 		<div
 			data-slot="slider-range"
-			class="absolute h-full rounded-full bg-primary"
+			class={cn('absolute h-full rounded-full', rangeToneClass, rangeClass)}
 			style={`left: ${rangeStart}%; width: ${rangeEnd - rangeStart}%`}
 		></div>
 	</div>
@@ -174,6 +205,7 @@
 			type="button"
 			role="slider"
 			data-slot="slider-thumb"
+			data-dragging={activeThumb === index ? 'true' : undefined}
 			aria-label={ariaLabel}
 			aria-valuemin={min}
 			aria-valuemax={max}
@@ -181,11 +213,14 @@
 			aria-orientation="horizontal"
 			{disabled}
 			tabindex={disabled ? -1 : 0}
+			onpointerdown={(e) => onThumbPointerDown(e, index)}
 			onkeydown={(e) => onThumbKeydown(e, index)}
 			style={`left: ${percent(thumb)}%`}
 			class={cn(
-				'absolute -translate-x-1/2 rounded-full border border-primary bg-card shadow-sm transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none',
-				sliderThumbSizes[size]
+				'absolute -translate-x-1/2 cursor-grab touch-none rounded-full border bg-card shadow-sm transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 active:cursor-grabbing disabled:pointer-events-none disabled:cursor-not-allowed',
+				thumbToneClass,
+				sliderThumbSizes[size],
+				thumbClass
 			)}
 		></button>
 	{/each}
