@@ -21,6 +21,15 @@ types are committed, so `bun run check` stays hermetic and offline and
 type-checks the committed output. `openapi:types` is wired into `prepare` (like
 `paraglide:compile`) so types are present/fresh after `bun install`.
 
+Before starting a large implementation that touches API data, run
+`bun run openapi:check` to confirm the generated types
+(`src/generated/api/schema.ts`) are still in sync with the vendored contract
+(`src/generated/api/openapi.json`). If the backend contract has moved, run
+`bun run openapi:generate` first (sync + regenerate types) and reconcile any
+resulting type changes in the affected adapters/feature `types.ts`. The
+`pre-push` hook also runs `openapi:check`, but verifying up front avoids
+building on a stale contract.
+
 ## Tooling in place
 
 - **Vitest** `^4` (jsdom) — `vitest.config.ts` loads only the Svelte + icons
