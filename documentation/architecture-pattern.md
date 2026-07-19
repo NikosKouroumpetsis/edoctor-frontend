@@ -27,7 +27,16 @@ Generated code is a side input, not an ownership layer:
 ```txt
 src/generated/paraglide
   -> imported through $paraglide only
+
+src/generated/api
+  -> imported through $generated/api only inside src/shared/lib/api-client,
+     then re-exported to modules via $shared
 ```
+
+Generated API types are an allowed side-input: modules must not import
+`$generated/api` directly (their allowed-import list covers generated i18n only),
+so the generated wire types are re-exported through the shared client layer
+(`src/shared/lib/api-client`) and consumed via `$shared`.
 
 Allowed dependency rules:
 

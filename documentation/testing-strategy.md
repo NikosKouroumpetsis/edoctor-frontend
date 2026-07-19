@@ -11,6 +11,16 @@ bun run test     # Vitest run (unit + component)
 bun run build    # routing / provider / config / env / public UI changes
 ```
 
+## OpenAPI drift gate
+
+`bun run openapi:check` is a separate CI drift gate for the generated API types:
+it regenerates from the committed vendored spec and fails if
+`src/generated/api/schema.ts` is stale (mirrors the backend's `openapi:check`).
+Codegen is intentionally **not** wired into the hard `check` gate — the generated
+types are committed, so `bun run check` stays hermetic and offline and
+type-checks the committed output. `openapi:types` is wired into `prepare` (like
+`paraglide:compile`) so types are present/fresh after `bun install`.
+
 ## Tooling in place
 
 - **Vitest** `^4` (jsdom) — `vitest.config.ts` loads only the Svelte + icons

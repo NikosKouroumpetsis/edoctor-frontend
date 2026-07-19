@@ -13,8 +13,10 @@ const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),
 	// Claude Code tooling/workflow files are not part of the application source
-	// and are not held to the app's lint rules.
-	{ ignores: ['.claude/**', 'storybook-static/**'] },
+	// and are not held to the app's lint rules. Generated OpenAPI types are
+	// tracked (not gitignored) but, like the Paraglide output, are exempt from
+	// the app lint rules.
+	{ ignores: ['.claude/**', 'storybook-static/**', 'src/generated/api/**'] },
 	js.configs.recommended,
 	ts.configs.recommended,
 	svelte.configs.recommended,

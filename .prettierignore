@@ -14,6 +14,7 @@ bun.lockb
 # Generated
 src/generated/paraglide/
 src/generated/design-tokens.css
+src/generated/api/
 
 # Storybook build output
 storybook-static/

@@ -71,4 +71,32 @@ Do not persist TanStack Query caches, auth sessions, or large business payloads 
 
 Generated output lives under `src/generated`, not `src/shared`.
 
+```txt
+src/generated/
+  paraglide/   Paraglide i18n output, imported through $paraglide
+  api/         OpenAPI codegen: the vendored spec (openapi.json) and the
+               generated wire types (schema.ts), imported through $generated/api
+  design-tokens.css
+```
+
 Paraglide output is generated into `src/generated/paraglide` and imported through `$paraglide`. Do not edit generated files by hand.
+
+The backend's OpenAPI 3.1 contract is vendored and codegen'd into
+`src/generated/api` (see `documentation/framework-stack.md` for the scripts).
+The generated types are tracked, never hand-edited, and exempt from the barrel,
+Prettier, and ESLint rules (like the Paraglide output). Feature modules may not
+import `$generated/api` directly; the wire types they need are re-exported
+through the shared client layer at `src/shared/lib/api-client` and consumed via
+`$shared`, so the module allowed-import list stays intact.
+
+## Shared API Client
+
+`src/shared/lib/api-client` is the generic building block for the typed
+`openapi-fetch` client, mirroring `src/shared/lib/http`. It owns:
+
+- the client base URL (`getApiBaseUrl()` + `/doctor`) so request URLs match the
+  hand-written `http` client exactly,
+- the SSR `fetch` injection seam,
+- the response envelope/error guard (`unwrapEnvelope`, reusing `ApiError` from
+  `src/shared/lib/http`), since `openapi-fetch` does no runtime validation,
+- the `$shared` re-export of the generated wire types.

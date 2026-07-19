@@ -1,0 +1,2728 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "eDoctor Public Doctor API",
+    "version": "1.0.0",
+    "description": "Read-only OpenAPI 3.1 contract for the public doctor marketplace endpoints. Generated from the existing request validators and TypeScript response views; client repositories codegen types from this document."
+  },
+  "servers": [
+    {
+      "url": "/api/v1/doctor",
+      "description": "Public doctor marketplace API base path."
+    }
+  ],
+  "paths": {
+    "/public/doctors": {
+      "get": {
+        "operationId": "searchPublicMarketplaceDoctors",
+        "summary": "Search public marketplace doctors.",
+        "tags": [
+          "doctor-public"
+        ],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "text",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "professionalIds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "serviceSlugs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "locationSlug",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^-?(?:[0-8]?\\d(?:\\.\\d+)?|90(?:\\.0+)?)$"
+            }
+          },
+          {
+            "name": "lng",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^-?(?:(?:[0-9]?\\d|1[0-7]\\d)(?:\\.\\d+)?|180(?:\\.0+)?)$"
+            }
+          },
+          {
+            "name": "availability",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "next3Days",
+                "all"
+              ]
+            }
+          },
+          {
+            "name": "paymentOptions",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(CASH|CARD|IRIS|ONLINE_DOCTOR_PAY|ONLINE_OFFICE_PAY|STUDENT_CARD|UNEMPLOYMENT_CARD)(,(CASH|CARD|IRIS|ONLINE_DOCTOR_PAY|ONLINE_OFFICE_PAY|STUDENT_CARD|UNEMPLOYMENT_CARD))*$"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "CASH",
+                      "CARD",
+                      "IRIS",
+                      "ONLINE_DOCTOR_PAY",
+                      "ONLINE_OFFICE_PAY",
+                      "STUDENT_CARD",
+                      "UNEMPLOYMENT_CARD"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "priceMin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d{1,2})?$"
+            }
+          },
+          {
+            "name": "priceMax",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d{1,2})?$"
+            }
+          },
+          {
+            "name": "gender",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MALE",
+                "FEMALE",
+                "ANY"
+              ]
+            }
+          },
+          {
+            "name": "speakLanguageCodes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "popularity",
+                "rating",
+                "distance"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9]\\d*$"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated public marketplace doctor cards with applied filters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DoctorPublicMarketplaceSearchResponseView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/doctors/nearby": {
+      "get": {
+        "operationId": "searchNearbyPublicMarketplaceDoctors",
+        "summary": "Search public marketplace doctors ordered by proximity.",
+        "tags": [
+          "doctor-public"
+        ],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "text",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "professionalIds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "serviceSlugs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "locationSlug",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^-?(?:[0-8]?\\d(?:\\.\\d+)?|90(?:\\.0+)?)$"
+            }
+          },
+          {
+            "name": "lng",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^-?(?:(?:[0-9]?\\d|1[0-7]\\d)(?:\\.\\d+)?|180(?:\\.0+)?)$"
+            }
+          },
+          {
+            "name": "availability",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "next3Days",
+                "all"
+              ]
+            }
+          },
+          {
+            "name": "paymentOptions",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(CASH|CARD|IRIS|ONLINE_DOCTOR_PAY|ONLINE_OFFICE_PAY|STUDENT_CARD|UNEMPLOYMENT_CARD)(,(CASH|CARD|IRIS|ONLINE_DOCTOR_PAY|ONLINE_OFFICE_PAY|STUDENT_CARD|UNEMPLOYMENT_CARD))*$"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "CASH",
+                      "CARD",
+                      "IRIS",
+                      "ONLINE_DOCTOR_PAY",
+                      "ONLINE_OFFICE_PAY",
+                      "STUDENT_CARD",
+                      "UNEMPLOYMENT_CARD"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "priceMin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d{1,2})?$"
+            }
+          },
+          {
+            "name": "priceMax",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d{1,2})?$"
+            }
+          },
+          {
+            "name": "gender",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MALE",
+                "FEMALE",
+                "ANY"
+              ]
+            }
+          },
+          {
+            "name": "speakLanguageCodes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "popularity",
+                "rating",
+                "distance"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9]\\d*$"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated nearby public marketplace doctor cards with applied filters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DoctorPublicMarketplaceSearchResponseView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/doctors/facets": {
+      "get": {
+        "operationId": "getPublicMarketplaceFacets",
+        "summary": "Get public marketplace search facets.",
+        "tags": [
+          "doctor-public"
+        ],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "text",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "professionalIds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "serviceSlugs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "locationSlug",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^-?(?:[0-8]?\\d(?:\\.\\d+)?|90(?:\\.0+)?)$"
+            }
+          },
+          {
+            "name": "lng",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^-?(?:(?:[0-9]?\\d|1[0-7]\\d)(?:\\.\\d+)?|180(?:\\.0+)?)$"
+            }
+          },
+          {
+            "name": "availability",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "next3Days",
+                "all"
+              ]
+            }
+          },
+          {
+            "name": "paymentOptions",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(CASH|CARD|IRIS|ONLINE_DOCTOR_PAY|ONLINE_OFFICE_PAY|STUDENT_CARD|UNEMPLOYMENT_CARD)(,(CASH|CARD|IRIS|ONLINE_DOCTOR_PAY|ONLINE_OFFICE_PAY|STUDENT_CARD|UNEMPLOYMENT_CARD))*$"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "CASH",
+                      "CARD",
+                      "IRIS",
+                      "ONLINE_DOCTOR_PAY",
+                      "ONLINE_OFFICE_PAY",
+                      "STUDENT_CARD",
+                      "UNEMPLOYMENT_CARD"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "priceMin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d{1,2})?$"
+            }
+          },
+          {
+            "name": "priceMax",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d{1,2})?$"
+            }
+          },
+          {
+            "name": "gender",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MALE",
+                "FEMALE",
+                "ANY"
+              ]
+            }
+          },
+          {
+            "name": "speakLanguageCodes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Facet option counts for the current public marketplace filters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DoctorPublicMarketplaceFacetsResponseView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/doctors/suggestions": {
+      "get": {
+        "operationId": "listPublicMarketplaceSuggestions",
+        "summary": "List public marketplace doctor and professional suggestions.",
+        "tags": [
+          "doctor-public"
+        ],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9]\\d*$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Autocomplete suggestions for doctors and professionals.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DoctorPublicMarketplaceSuggestionsResponseView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/locations/suggestions": {
+      "get": {
+        "operationId": "listPublicMarketplaceLocationSuggestions",
+        "summary": "List public marketplace location suggestions.",
+        "tags": [
+          "doctor-public"
+        ],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^-?(?:[0-8]?\\d(?:\\.\\d+)?|90(?:\\.0+)?)$"
+            }
+          },
+          {
+            "name": "lng",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^-?(?:(?:[0-9]?\\d|1[0-7]\\d)(?:\\.\\d+)?|180(?:\\.0+)?)$"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9]\\d*$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Autocomplete location suggestions for the public marketplace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DoctorPublicMarketplaceLocationSuggestionsResponseView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/doctors/{doctorId}": {
+      "get": {
+        "operationId": "getPublicMarketplaceProfile",
+        "summary": "Get a public marketplace doctor profile.",
+        "tags": [
+          "doctor-public"
+        ],
+        "parameters": [
+          {
+            "name": "doctorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "officeId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full public marketplace doctor profile for the selected office.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DoctorPublicMarketplaceProfileResponseView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/doctors/{doctorId}/offices/{officeId}": {
+      "get": {
+        "operationId": "getPublicMarketplaceOffice",
+        "summary": "Get a single public marketplace doctor office.",
+        "tags": [
+          "doctor-public"
+        ],
+        "parameters": [
+          {
+            "name": "doctorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "officeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A single public marketplace office with its availability.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DoctorPublicMarketplaceOfficeResponseView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DoctorPublicMarketplaceSearchResponseView": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorPublicMarketplaceCardView"
+            }
+          },
+          "pageInfo": {
+            "$ref": "#/components/schemas/DoctorPublicMarketplacePageInfo"
+          },
+          "pricingVisible": {
+            "type": "boolean"
+          },
+          "appliedFilters": {
+            "$ref": "#/components/schemas/DoctorPublicMarketplaceAppliedFilters"
+          }
+        },
+        "required": [
+          "items",
+          "pageInfo",
+          "pricingVisible",
+          "appliedFilters"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceCardView": {
+        "type": "object",
+        "properties": {
+          "doctorId": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "professional": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "slug": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "slug"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "primaryOffice": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "officeId": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "state": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "latitude": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "longitude": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "distanceKm": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "officeId",
+                  "city",
+                  "state",
+                  "latitude",
+                  "longitude",
+                  "distanceKm"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "primaryImage": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "smSizeUrl": {
+                    "type": "string"
+                  },
+                  "mediumSizeUrl": {
+                    "type": "string"
+                  },
+                  "priority": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "smSizeUrl",
+                  "mediumSizeUrl",
+                  "priority"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rating": {
+            "type": "object",
+            "properties": {
+              "average": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "count": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "average",
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "availability": {
+            "type": "object",
+            "properties": {
+              "nextAvailableAt": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "hasToday": {
+                "type": "boolean"
+              },
+              "hasNext3Days": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "nextAvailableAt",
+              "hasToday",
+              "hasNext3Days"
+            ],
+            "additionalProperties": false
+          },
+          "priceRange": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DoctorPublicMarketplacePriceRangeView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "doctorId",
+          "slug",
+          "fullName",
+          "professional",
+          "primaryOffice",
+          "primaryImage",
+          "rating",
+          "availability",
+          "priceRange"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplacePriceRangeView": {
+        "type": "object",
+        "properties": {
+          "min": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "max": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "min",
+          "max"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplacePageInfo": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number"
+          },
+          "cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasNextPage": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "limit",
+          "cursor",
+          "nextCursor",
+          "hasNextPage"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceAppliedFilters": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "$ref": "#/components/schemas/ILanguage"
+          },
+          "text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "professionalIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "serviceSlugs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "locationSlug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "locationTarget": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DoctorPublicMarketplaceLocationTarget"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lat": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "lng": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "availability": {
+            "$ref": "#/components/schemas/DoctorPublicMarketplaceAvailability"
+          },
+          "sortBy": {
+            "$ref": "#/components/schemas/DoctorPublicMarketplaceSort"
+          },
+          "paymentOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorPublicMarketplacePaymentOption"
+            }
+          },
+          "priceMin": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "priceMax": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "gender": {
+            "$ref": "#/components/schemas/DoctorPublicMarketplaceGender"
+          },
+          "speakLanguageCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "limit": {
+            "type": "number"
+          },
+          "cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "language",
+          "text",
+          "professionalIds",
+          "serviceSlugs",
+          "locationSlug",
+          "lat",
+          "lng",
+          "availability",
+          "sortBy",
+          "paymentOptions",
+          "priceMin",
+          "priceMax",
+          "gender",
+          "speakLanguageCodes",
+          "limit",
+          "cursor"
+        ],
+        "additionalProperties": false
+      },
+      "ILanguage": {
+        "type": "string",
+        "enum": [
+          "el",
+          "en"
+        ]
+      },
+      "DoctorPublicMarketplaceLocationTarget": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "regionLocationId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "regionalUnitLocationId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "municipalityLocationId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "settlementLocationId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "latitude",
+          "longitude",
+          "regionLocationId",
+          "regionalUnitLocationId",
+          "municipalityLocationId",
+          "settlementLocationId"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceAvailability": {
+        "type": "string",
+        "enum": [
+          "today",
+          "next3Days",
+          "all"
+        ]
+      },
+      "DoctorPublicMarketplaceSort": {
+        "type": "string",
+        "enum": [
+          "popularity",
+          "rating",
+          "distance"
+        ]
+      },
+      "DoctorPublicMarketplacePaymentOption": {
+        "type": "string",
+        "enum": [
+          "CASH",
+          "CARD",
+          "IRIS",
+          "ONLINE_DOCTOR_PAY",
+          "ONLINE_OFFICE_PAY",
+          "STUDENT_CARD",
+          "UNEMPLOYMENT_CARD"
+        ]
+      },
+      "DoctorPublicMarketplaceGender": {
+        "type": "string",
+        "enum": [
+          "MALE",
+          "FEMALE",
+          "ANY"
+        ]
+      },
+      "DoctorPublicMarketplaceFacetsResponseView": {
+        "type": "object",
+        "properties": {
+          "pricingVisible": {
+            "type": "boolean"
+          },
+          "appliedFilters": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "$ref": "#/components/schemas/ILanguage"
+              },
+              "text": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "professionalIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "serviceSlugs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "locationSlug": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "locationTarget": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DoctorPublicMarketplaceLocationTarget"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "lat": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "lng": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "availability": {
+                "$ref": "#/components/schemas/DoctorPublicMarketplaceAvailability"
+              },
+              "paymentOptions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DoctorPublicMarketplacePaymentOption"
+                }
+              },
+              "priceMin": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "priceMax": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "gender": {
+                "$ref": "#/components/schemas/DoctorPublicMarketplaceGender"
+              },
+              "speakLanguageCodes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "language",
+              "text",
+              "professionalIds",
+              "serviceSlugs",
+              "locationSlug",
+              "lat",
+              "lng",
+              "availability",
+              "paymentOptions",
+              "priceMin",
+              "priceMax",
+              "gender",
+              "speakLanguageCodes"
+            ],
+            "additionalProperties": false
+          },
+          "facets": {
+            "type": "object",
+            "properties": {
+              "paymentOptions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DoctorPublicMarketplaceFacetOptionView"
+                }
+              },
+              "services": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DoctorPublicMarketplaceFacetOptionView"
+                }
+              },
+              "genders": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DoctorPublicMarketplaceFacetOptionView"
+                }
+              },
+              "speakLanguages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DoctorPublicMarketplaceFacetOptionView"
+                }
+              },
+              "priceRange": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DoctorPublicMarketplacePriceRangeView"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "paymentOptions",
+              "services",
+              "genders",
+              "speakLanguages",
+              "priceRange"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "pricingVisible",
+          "appliedFilters",
+          "facets"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceFacetOptionView": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "value",
+          "label",
+          "count"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceSuggestionsResponseView": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorPublicMarketplaceSuggestionView"
+            }
+          },
+          "language": {
+            "$ref": "#/components/schemas/ILanguage"
+          }
+        },
+        "required": [
+          "items",
+          "language"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceSuggestionView": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "doctor",
+              "professional"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "label",
+          "slug"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceLocationSuggestionsResponseView": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorPublicMarketplaceLocationSuggestionView"
+            }
+          },
+          "language": {
+            "$ref": "#/components/schemas/ILanguage"
+          }
+        },
+        "required": [
+          "items",
+          "language"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceLocationSuggestionView": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "context": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hierarchy": {
+            "type": "object",
+            "properties": {
+              "region": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "regionalUnit": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "municipality": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "region",
+              "regionalUnit",
+              "municipality"
+            ],
+            "additionalProperties": false
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "slug",
+          "type",
+          "label",
+          "displayName",
+          "context",
+          "hierarchy",
+          "latitude",
+          "longitude"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceProfileResponseView": {
+        "type": "object",
+        "properties": {
+          "doctor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DoctorPublicMarketplaceProfileView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pricingVisible": {
+            "type": "boolean"
+          },
+          "language": {
+            "$ref": "#/components/schemas/ILanguage"
+          }
+        },
+        "required": [
+          "doctor",
+          "pricingVisible",
+          "language"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceProfileView": {
+        "type": "object",
+        "properties": {
+          "doctorId": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "description": {},
+          "studies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "workExperience": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "conferences": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "professional": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "slug": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "slug"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "selectedOffice": {
+            "$ref": "#/components/schemas/DoctorPublicMarketplaceProfileOfficeView"
+          },
+          "otherOfficeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "socialLinks": {
+            "$ref": "#/components/schemas/DoctorPublicMarketplaceSocialLinksView"
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorPublicMarketplaceProfileServiceView"
+            }
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorImagePublicView"
+            }
+          },
+          "speakLanguages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorSpeakLanguagePublicView"
+            }
+          },
+          "rating": {
+            "$ref": "#/components/schemas/DoctorPublicMarketplaceProfileRatingView"
+          },
+          "reviewsPreview": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorPublicMarketplaceReviewPreviewView"
+            }
+          },
+          "availability": {
+            "type": "object",
+            "properties": {
+              "nextAvailableAt": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "hasToday": {
+                "type": "boolean"
+              },
+              "hasNext3Days": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "nextAvailableAt",
+              "hasToday",
+              "hasNext3Days"
+            ],
+            "additionalProperties": false
+          },
+          "articlesSummary": {
+            "$ref": "#/components/schemas/DoctorPublicMarketplaceArticlesSummaryView"
+          }
+        },
+        "required": [
+          "doctorId",
+          "slug",
+          "fullName",
+          "description",
+          "studies",
+          "workExperience",
+          "conferences",
+          "professional",
+          "selectedOffice",
+          "otherOfficeIds",
+          "socialLinks",
+          "services",
+          "images",
+          "speakLanguages",
+          "rating",
+          "reviewsPreview",
+          "availability",
+          "articlesSummary"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceProfileOfficeView": {
+        "type": "object",
+        "properties": {
+          "officeId": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "street": {
+            "type": "string"
+          },
+          "streetNumber": {
+            "type": "string"
+          },
+          "floor": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parking": {
+            "type": "boolean"
+          },
+          "disabilityAccess": {
+            "type": "boolean"
+          },
+          "paymentOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorPublicMarketplacePaymentOption"
+            }
+          },
+          "latitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "longitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "distanceKm": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "officeId",
+          "city",
+          "state",
+          "street",
+          "streetNumber",
+          "floor",
+          "postalCode",
+          "phone",
+          "parking",
+          "disabilityAccess",
+          "paymentOptions",
+          "latitude",
+          "longitude",
+          "distanceKm"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceSocialLinksView": {
+        "type": "object",
+        "properties": {
+          "website": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "facebook": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "instagram": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "linkedin": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "website",
+          "facebook",
+          "instagram",
+          "linkedin"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceProfileServiceView": {
+        "type": "object",
+        "properties": {
+          "doctorServiceId": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "sub": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {},
+          "durationInMinutes": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "price": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "isSpecialized": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "doctorServiceId",
+          "serviceId",
+          "title",
+          "sub",
+          "description",
+          "durationInMinutes",
+          "price",
+          "isSpecialized"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorImagePublicView": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "translations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorImageTranslationView"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "smSizeUrl": {
+            "type": "string"
+          },
+          "mediumSizeUrl": {
+            "type": "string"
+          },
+          "lgSizeUrl": {
+            "type": "string"
+          },
+          "priority": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "lgSizeUrl",
+          "mediumSizeUrl",
+          "priority",
+          "smSizeUrl"
+        ]
+      },
+      "DoctorImageTranslationView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/ILanguage"
+          },
+          "alt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metaDescription": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "language",
+          "alt",
+          "metaDescription"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorSpeakLanguagePublicView": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "normalized": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "id",
+          "name",
+          "normalized",
+          "slug"
+        ]
+      },
+      "DoctorPublicMarketplaceProfileRatingView": {
+        "type": "object",
+        "properties": {
+          "average": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "count": {
+            "type": "number"
+          },
+          "aspectAverages": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DoctorPublicMarketplaceProfileRatingAspectAverages"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "average",
+          "count",
+          "aspectAverages"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceProfileRatingAspectAverages": {
+        "type": "object",
+        "properties": {
+          "inDepthRating": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "trustRating": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "expertiseRating": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "punctualRating": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "friendlyRating": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "inDepthRating",
+          "trustRating",
+          "expertiseRating",
+          "punctualRating",
+          "friendlyRating"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceReviewPreviewView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "appointmentId": {
+            "type": "string"
+          },
+          "doctorId": {
+            "type": "string"
+          },
+          "patientName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "patientInitial": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "overallRating": {
+            "type": "number"
+          },
+          "comment": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "doctorReply": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "aspect": {
+            "type": "object",
+            "properties": {
+              "inDepthRating": {
+                "type": "number"
+              },
+              "trustRating": {
+                "type": "number"
+              },
+              "expertiseRating": {
+                "type": "number"
+              },
+              "punctualRating": {
+                "type": "number"
+              },
+              "friendlyRating": {
+                "type": "number"
+              },
+              "weightVersion": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "inDepthRating",
+              "trustRating",
+              "expertiseRating",
+              "punctualRating",
+              "friendlyRating",
+              "weightVersion"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "appointmentId",
+          "doctorId",
+          "patientName",
+          "patientInitial",
+          "overallRating",
+          "comment",
+          "doctorReply",
+          "createdAt",
+          "aspect"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceArticlesSummaryView": {
+        "type": "object",
+        "properties": {
+          "articlesCount": {
+            "type": "number"
+          },
+          "healthAdviceCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "articlesCount",
+          "healthAdviceCount"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceOfficeResponseView": {
+        "type": "object",
+        "properties": {
+          "office": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DoctorPublicMarketplaceProfileOfficeView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "availability": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "nextAvailableAt": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "hasToday": {
+                    "type": "boolean"
+                  },
+                  "hasNext3Days": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "nextAvailableAt",
+                  "hasToday",
+                  "hasNext3Days"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "language": {
+            "$ref": "#/components/schemas/ILanguage"
+          }
+        },
+        "required": [
+          "office",
+          "availability",
+          "language"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}

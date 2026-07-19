@@ -1,110 +1,57 @@
 /**
- * Backend view types for the public doctor marketplace
- * (`GET /api/v1/doctor/public/*`). These mirror the server contract exactly and are
- * adapted into the feature's `SearchDoctorsDoctorCard` by `card-adapter.ts`.
+ * Wire types for the public doctor marketplace (`GET /api/v1/doctor/public/*`).
+ *
+ * The response ("View") types and the availability/sort enums come from the
+ * backend's OpenAPI contract via generated types. Modules may not import
+ * `$generated/api` directly, so the wire types are re-exported through the shared
+ * client layer (`$shared/lib/api-client`) and aliased here to the names the
+ * feature already uses. `card-adapter.ts` maps `DoctorPublicMarketplaceCardView`
+ * into the feature's `DoctorCard`.
+ *
+ * The request/transport types below (`MarketplaceRequestContext`,
+ * `MarketplaceSearchParams`, `MarketplaceNearbyParams`) are app-facing input
+ * contracts, not server-response mirrors: they intentionally model `lat`/`lng`/
+ * `limit` as numbers and slug/id lists as `string[]` (the contract's query
+ * params are all strings, a serialization detail owned by `$shared/lib/http`).
+ * They stay hand-written and feature-owned.
  */
 
-export type MarketplaceAvailability = 'today' | 'next3Days' | 'all';
+import type {
+	DoctorPublicMarketplaceAvailability,
+	DoctorPublicMarketplaceCardView as WireDoctorPublicMarketplaceCardView,
+	DoctorPublicMarketplaceFacetOptionView,
+	DoctorPublicMarketplaceFacetsResponseView,
+	DoctorPublicMarketplaceLocationSuggestionsResponseView,
+	DoctorPublicMarketplaceLocationSuggestionView,
+	DoctorPublicMarketplacePageInfo,
+	DoctorPublicMarketplaceSearchResponseView,
+	DoctorPublicMarketplaceSort,
+	DoctorPublicMarketplaceSuggestionsResponseView,
+	DoctorPublicMarketplaceSuggestionView
+} from '$shared/lib/api-client';
 
-export type MarketplaceSortBy = 'popularity' | 'rating' | 'distance';
+export type MarketplaceAvailability = DoctorPublicMarketplaceAvailability;
 
-export type MarketplaceProfessionalView = {
-	id: string;
-	name: string;
-	slug: string;
-};
+export type MarketplaceSortBy = DoctorPublicMarketplaceSort;
 
-export type MarketplacePrimaryOfficeView = {
-	city: string | null;
-	state: string | null;
-	latitude: number | null;
-	longitude: number | null;
-	distanceKm: number | null;
-};
+export type DoctorPublicMarketplaceCardView = WireDoctorPublicMarketplaceCardView;
 
-export type MarketplacePrimaryImageView = {
-	smSizeUrl: string | null;
-	mediumSizeUrl: string | null;
-	priority: number;
-};
+export type MarketplacePageInfo = DoctorPublicMarketplacePageInfo;
 
-export type MarketplaceRatingView = {
-	average: number | null;
-	count: number;
-};
+export type MarketplaceSearchData = DoctorPublicMarketplaceSearchResponseView;
 
-export type MarketplaceAvailabilityView = {
-	nextAvailableAt: string | null;
-	hasToday: boolean;
-	hasNext3Days: boolean;
-};
+export type MarketplaceFacetEntry = DoctorPublicMarketplaceFacetOptionView;
 
-export type MarketplacePriceRangeView = {
-	min: number;
-	max: number;
-};
+export type MarketplaceFacetsData = DoctorPublicMarketplaceFacetsResponseView;
 
-export type DoctorPublicMarketplaceCardView = {
-	doctorId: string;
-	slug: string;
-	fullName: string;
-	professional: MarketplaceProfessionalView | null;
-	primaryOffice: MarketplacePrimaryOfficeView | null;
-	primaryImage: MarketplacePrimaryImageView | null;
-	rating: MarketplaceRatingView;
-	availability: MarketplaceAvailabilityView;
-	priceRange: MarketplacePriceRangeView | null;
-};
+export type MarketplaceSuggestionItem = DoctorPublicMarketplaceSuggestionView;
 
-export type MarketplacePageInfo = {
-	limit: number;
-	cursor: string | null;
-	nextCursor: string | null;
-	hasNextPage: boolean;
-};
+export type MarketplaceSuggestionsData = DoctorPublicMarketplaceSuggestionsResponseView;
 
-export type MarketplaceSearchData = {
-	items: DoctorPublicMarketplaceCardView[];
-	pageInfo: MarketplacePageInfo;
-	pricingVisible: boolean;
-	appliedFilters: Record<string, unknown>;
-};
+export type MarketplaceLocationSuggestion = DoctorPublicMarketplaceLocationSuggestionView;
 
-export type MarketplaceFacetEntry = {
-	value: string;
-	label: string;
-	count: number;
-};
-
-export type MarketplaceFacetsData = {
-	facets: {
-		paymentOptions: MarketplaceFacetEntry[];
-		services: MarketplaceFacetEntry[];
-		genders: MarketplaceFacetEntry[];
-		speakLanguages: MarketplaceFacetEntry[];
-		priceRange: { min: number; max: number } | null;
-	};
-};
-
-export type MarketplaceSuggestionItem = {
-	type: 'doctor' | 'professional';
-	id: string;
-	label: string;
-	slug: string;
-};
-
-export type MarketplaceSuggestionsData = {
-	items: MarketplaceSuggestionItem[];
-};
-
-export type MarketplaceLocationSuggestion = {
-	slug: string;
-	label?: string;
-};
-
-export type MarketplaceLocationSuggestionsData = {
-	items: MarketplaceLocationSuggestion[];
-};
+export type MarketplaceLocationSuggestionsData =
+	DoctorPublicMarketplaceLocationSuggestionsResponseView;
 
 /**
  * Per-request transport context threaded into every marketplace endpoint. The SSR

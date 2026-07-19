@@ -55,6 +55,12 @@ function formatFeeLabel(
 
 	const { min, max } = card.priceRange;
 
+	// The contract allows an open-ended price range (`min`/`max` nullable); treat a
+	// missing bound like no price rather than rendering a partial "EUR null" label.
+	if (min === null || max === null) {
+		return '';
+	}
+
 	if (context.formatFee) {
 		return context.formatFee(min, max);
 	}

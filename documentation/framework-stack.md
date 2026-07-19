@@ -25,6 +25,29 @@
 - Shared query defaults live under `src/shared/query`.
 - Shared preferences and persistence live under `src/shared/preferences` and `src/shared/storage`.
 
+## API contract and codegen
+
+- The backend serves an OpenAPI 3.1 contract for the public doctor marketplace.
+  Spec sharing model: **served + vendored snapshot**. This repo vendors a
+  committed copy of the spec and codegen's types from that committed copy, so
+  typecheck/CI work offline.
+- `openapi-typescript` `^7` (devDependency) generates the types.
+- `openapi-fetch` `^0` (runtime) is the typed client, wrapped by the shared
+  building block at `src/shared/lib/api-client`.
+- Generated output lives under `src/generated/api` (`openapi.json` +
+  `schema.ts`), is tracked, and is never hand-edited.
+- Scripts (Bun):
+  - `bun run openapi:sync` — vendor the spec into `src/generated/api/openapi.json`.
+    Primary source is the served URL derived from the API origin (override with
+    `OPENAPI_URL`); local-dev fallback is a build-time file read of the sibling
+    `../backend/openapi.json`.
+  - `bun run openapi:types` — run `openapi-typescript` on the committed spec into
+    `src/generated/api/schema.ts`. Also wired into `prepare` (like
+    `paraglide:compile`) so types are present after install.
+  - `bun run openapi:generate` — sync then regenerate types.
+  - `bun run openapi:check` — CI drift gate: regenerate from the committed spec
+    and fail if `schema.ts` is stale (mirrors the backend's `openapi:check`).
+
 ## Styling and UI
 
 - Tailwind CSS `^4.2.2`
