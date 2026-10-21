@@ -9,19 +9,24 @@
 		<meta name="text-scale" content="scale" />
 		<script>
 			(() => {
-				const storageKey = 'edoctor-theme';
+				const storageKey = '%edoctor.preferences.key%';
 				const systemQuery = '(prefers-color-scheme: dark)';
+				let theme = 'system';
 
 				try {
-					const theme = localStorage.getItem(storageKey) || 'system';
-					const prefersDark = matchMedia(systemQuery).matches;
-					const isDark = theme === 'dark' || (theme === 'system' && prefersDark);
+					const stored = JSON.parse(localStorage.getItem(storageKey) || '{}');
+					const preference = stored?.themePreference;
 
-					document.documentElement.classList.toggle('dark', isDark);
-					document.documentElement.dataset.theme = theme;
+					if (preference === 'light' || preference === 'dark') theme = preference;
 				} catch {
-					document.documentElement.dataset.theme = 'system';
+					theme = 'system';
 				}
+
+				const prefersDark = matchMedia(systemQuery).matches;
+				const isDark = theme === 'dark' || (theme === 'system' && prefersDark);
+
+				document.documentElement.classList.toggle('dark', isDark);
+				document.documentElement.dataset.theme = theme;
 			})();
 		</script>
 		%sveltekit.head%

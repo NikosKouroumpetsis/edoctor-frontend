@@ -1,4 +1,4 @@
-export { createDoctorApiClient, getDoctorApiBaseUrl, unwrapEnvelope } from './client';
+export { createApiClient, unwrapEnvelope } from './client';
 export type {
 	DoctorPublicMarketplaceAvailability,
 	DoctorPublicMarketplaceCardView,

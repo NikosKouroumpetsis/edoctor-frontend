@@ -1,3 +1,5 @@
+import { env } from '$env/dynamic/public';
+
 export const appEnvs = ['development', 'test', 'preview', 'production'] as const;
 export const appVariants = ['development', 'preview', 'production'] as const;
 
@@ -11,15 +13,17 @@ const isAppVariant = (value: string | undefined): value is AppVariant =>
 	value === 'development' || value === 'preview' || value === 'production';
 
 const mode = import.meta.env.MODE;
+const configuredAppEnv = env.PUBLIC_APP_ENV;
+const configuredAppVariant = env.PUBLIC_APP_VARIANT;
 
-export const appEnv: AppEnv = isAppEnv(import.meta.env.PUBLIC_APP_ENV)
-	? import.meta.env.PUBLIC_APP_ENV
+export const appEnv: AppEnv = isAppEnv(configuredAppEnv)
+	? configuredAppEnv
 	: isAppEnv(mode)
 		? mode
 		: 'development';
 
-export const appVariant: AppVariant = isAppVariant(import.meta.env.PUBLIC_APP_VARIANT)
-	? import.meta.env.PUBLIC_APP_VARIANT
+export const appVariant: AppVariant = isAppVariant(configuredAppVariant)
+	? configuredAppVariant
 	: appEnv === 'production'
 		? 'production'
 		: appEnv === 'preview'

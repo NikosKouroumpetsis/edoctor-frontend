@@ -20,6 +20,8 @@ function buildCard(
 			officeId: 'office-1',
 			city: 'Athens',
 			state: 'Attica',
+			street: null,
+			streetNumber: null,
 			latitude: 37.98,
 			longitude: 23.72,
 			distanceKm: null
@@ -30,9 +32,12 @@ function buildCard(
 			mediumSizeUrl: 'https://cdn.example.com/md.jpg',
 			priority: 1
 		},
+		images: [],
+		descriptionExcerpt: null,
 		rating: { average: 4.5, count: 12 },
-		availability: { nextAvailableAt: null, hasToday: true, hasNext3Days: true },
+		availability: { nextAvailableAt: null, hasToday: true, hasNext3Days: true, hasNext7Days: true },
 		priceRange: { min: 30, max: 50 },
+		primaryServicePrice: 30,
 		...overrides
 	};
 }
@@ -109,7 +114,7 @@ describe('mapCardToDoctor', () => {
 			{ pricingVisible: true }
 		);
 
-		expect(doctor.imageUrl).toBe('http://localhost:8081/media/md.jpg');
+		expect(doctor.imageUrl).toBe('http://localhost:8080/media/md.jpg');
 	});
 
 	it('hides the fee when pricing is not visible', () => {
@@ -168,7 +173,14 @@ describe('mapCardToDoctor', () => {
 	it('labels near-term availability from the boolean flags', () => {
 		expect(
 			mapCardToDoctor(
-				buildCard({ availability: { nextAvailableAt: null, hasToday: false, hasNext3Days: true } }),
+				buildCard({
+					availability: {
+						nextAvailableAt: null,
+						hasToday: false,
+						hasNext3Days: true,
+						hasNext7Days: true
+					}
+				}),
 				{ pricingVisible: true }
 			).availabilityLabel
 		).toBe('Next 3 days');
@@ -176,7 +188,12 @@ describe('mapCardToDoctor', () => {
 		expect(
 			mapCardToDoctor(
 				buildCard({
-					availability: { nextAvailableAt: null, hasToday: false, hasNext3Days: false }
+					availability: {
+						nextAvailableAt: null,
+						hasToday: false,
+						hasNext3Days: false,
+						hasNext7Days: false
+					}
 				}),
 				{ pricingVisible: true }
 			).availabilityLabel

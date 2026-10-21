@@ -94,8 +94,9 @@ through the shared client layer at `src/shared/lib/api-client` and consumed via
 `src/shared/lib/api-client` is the generic building block for the typed
 `openapi-fetch` client, mirroring `src/shared/lib/http`. It owns:
 
-- the client base URL (`getApiBaseUrl()` + `/doctor`) so request URLs match the
-  hand-written `http` client exactly,
+- the client base URL (`getApiBaseUrl()`; every contract path carries its module
+  segment, e.g. `/doctor/public/doctors`) so request URLs match the hand-written
+  `http` client exactly,
 - the SSR `fetch` injection seam,
 - the response envelope/error guard (`unwrapEnvelope`, reusing `ApiError` from
   `src/shared/lib/http`), since `openapi-fetch` does no runtime validation,

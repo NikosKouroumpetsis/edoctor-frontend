@@ -18,7 +18,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const DEFAULT_API_BASE_URL = 'http://localhost:8081/api/v1';
+const DEFAULT_API_BASE_URL = 'http://localhost:8080/api/v1';
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, '..');
 const vendoredSpecPath = resolve(repoRoot, 'src/generated/api/openapi.json');

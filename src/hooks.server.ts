@@ -2,6 +2,7 @@ import type { Handle } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import { getTextDirection } from '$paraglide/runtime';
 import { paraglideMiddleware } from '$paraglide/server';
+import { preferencesStorageKey } from '$shared/config/env';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {
@@ -12,6 +13,7 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 				html
 					.replace('%paraglide.lang%', locale)
 					.replace('%paraglide.dir%', getTextDirection(locale))
+					.replace('%edoctor.preferences.key%', preferencesStorageKey)
 		});
 	});
 

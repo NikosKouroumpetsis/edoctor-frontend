@@ -30,7 +30,7 @@
 				href={homeHref}
 				aria-current={isHome ? 'page' : undefined}
 				class={[
-					'flex flex-col items-center gap-1 rounded-md px-3 py-1 outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+					'flex min-w-11 flex-col items-center gap-1 rounded-md py-1 outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
 					isHome ? 'text-primary' : 'text-muted-foreground'
 				]}
 			>
@@ -41,7 +41,7 @@
 		<li>
 			<button
 				type="button"
-				class="flex flex-col items-center gap-1 px-3 py-1 text-muted-foreground outline-none"
+				class="flex min-w-11 flex-col items-center gap-1 py-1 text-muted-foreground outline-none"
 			>
 				<HeartIcon class="icon-xl" />
 				<span class="text-label-sm">{m.tab_favorites({}, messageOptions)}</span>
@@ -50,7 +50,7 @@
 		<li>
 			<button
 				type="button"
-				class="flex flex-col items-center gap-1 px-3 py-1 text-muted-foreground outline-none"
+				class="flex min-w-11 flex-col items-center gap-1 py-1 text-muted-foreground outline-none"
 			>
 				<CalendarIcon class="icon-xl" />
 				<span class="text-label-sm">{m.tab_appointments({}, messageOptions)}</span>
@@ -59,7 +59,7 @@
 		<li>
 			<button
 				type="button"
-				class="flex flex-col items-center gap-1 px-3 py-1 text-muted-foreground outline-none"
+				class="flex min-w-11 flex-col items-center gap-1 py-1 text-muted-foreground outline-none"
 			>
 				<MessageIcon class="icon-xl" />
 				<span class="text-label-sm">{m.tab_messages({}, messageOptions)}</span>
@@ -68,7 +68,7 @@
 		<li>
 			<button
 				type="button"
-				class="flex flex-col items-center gap-1 px-3 py-1 text-muted-foreground outline-none"
+				class="flex min-w-11 flex-col items-center gap-1 py-1 text-muted-foreground outline-none"
 			>
 				<UserIcon class="icon-xl" />
 				<span class="text-label-sm">{m.tab_profile({}, messageOptions)}</span>

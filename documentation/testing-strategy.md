@@ -38,8 +38,14 @@ building on a stale contract.
   `Element.animate`, pointer-capture). jest-dom matcher types are declared in
   `src/vitest.d.ts`.
 - **Svelte Testing Library** `^5` + `@testing-library/user-event`.
-- **SvelteKit virtual modules** (`$app/environment`, `$app/state`, `$app/paths`)
-  are mocked for jsdom under `vitest-mocks/` and aliased in the Vitest config.
+- **SvelteKit virtual modules** (`$app/environment`, `$app/state`, `$app/paths`,
+  `$env/dynamic/public`) are mocked for jsdom under `vitest-mocks/` and aliased in
+  the Vitest config. Tests set `page.url` to render a locale (`/en/...` for
+  English) and set/delete `PUBLIC_*` keys on the mocked `env` object, resetting
+  both in `afterEach`. Values computed once at import (`src/shared/config/env.ts`)
+  are tested by setting the keys after `vi.resetModules()` and importing the
+  module again. Storybook aliases the same `$env/dynamic/public` stand-in
+  (`.storybook/main.ts`).
 - Playwright (browser flows) is still to be added.
 - **Storybook** `^10` (`@storybook/sveltekit`) is the component workshop. Stories
   are Svelte CSF (`*.stories.svelte`) co-located next to every `src/shared/ui/**`
@@ -70,7 +76,8 @@ overlay/interactive component) to avoid duplicating them.
 - Unit/helper and component tests: colocated under `src/**` as `*.test.ts`.
 - Component tests that need children/slots or composition render a small
   colocated `*.harness.svelte` (or `*.form-harness.svelte`) component.
-- Architecture tests: `tests/architecture/**` (to be added).
+- Architecture tests: `tests/architecture/**` (Vitest `include` covers `tests/**`).
+- Tests of a root-level script: `tests/scripts/**` (`tests/scripts/check-secrets.test.ts` for `scripts/check-secrets.mjs`; the Vitest `include` does not reach `scripts/`).
 - Browser tests: `tests/browser/**` (to be added).
 
 ## Component & form testing notes
@@ -86,7 +93,15 @@ overlay/interactive component) to avoid duplicating them.
 
 ## Architecture coverage
 
-Architecture tests should enforce:
+In place:
+
+- `tests/architecture/i18n-parity.test.ts` — every locale declared in
+  `project.inlang/settings.json` has a `messages/<locale>.json` catalog (and no
+  catalog exists for an undeclared locale), with the same keys as the base locale,
+  non-empty texts, and the same `{placeholders}`. Paraglide silently falls back to
+  the base locale for a missing translation, so this test is the only guard.
+
+Architecture tests should also enforce:
 
 - every non-layout page route has a mirrored screen folder
 - screen folders contain `index.ts`, `page/index.svelte`, `hooks/index.ts`, `hooks/use-screen.svelte.ts`, and `types.ts`
@@ -94,7 +109,6 @@ Architecture tests should enforce:
 - shadcn primitives live under shared UI primitives
 - runtime code uses leaf imports instead of broad parent barrels
 - shared code does not import from feature modules
-- i18n keys have Greek and English parity
 - preferences are sanitized and stored under `edoctor.<appEnv>.preferences.v1`
 
 ## Browser coverage

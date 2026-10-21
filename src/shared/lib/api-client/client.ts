@@ -5,7 +5,7 @@ import { getApiBaseUrl } from '$shared/config';
 import { ApiError } from '$shared/lib/http';
 
 /**
- * Typed `openapi-fetch` client for the public doctor marketplace contract.
+ * Typed `openapi-fetch` client for the backend's OpenAPI contract.
  *
  * This is a generic building block that mirrors `$shared/lib/http`: it centralizes
  * the base URL, the SSR `fetch` injection seam, and the response envelope/error
@@ -14,27 +14,16 @@ import { ApiError } from '$shared/lib/http';
  */
 
 /**
- * Base URL for the openapi-fetch client.
- *
- * The generated contract declares `servers[0].url = "/api/v1/doctor"` and its
- * operation paths are relative (e.g. `/public/doctors`). The frontend's
- * `getApiBaseUrl()` already returns the `{origin}/api/v1` prefix, so appending
- * `/doctor` yields request URLs identical to the ones the hand-written
- * `$shared/lib/http` client currently produces (`{origin}/api/v1/doctor` +
- * `/public/doctors`). Keep this reconciliation exact — no endpoint may move.
+ * Creates the typed API client. The contract declares `servers[0].url = "/api/v1"`
+ * and every operation path carries its module segment (e.g. `/doctor/public/doctors`),
+ * so the base URL is exactly `getApiBaseUrl()` and request URLs stay identical to the
+ * hand-written `$shared/lib/http` client — no endpoint may move. Pass SvelteKit's
+ * `fetch` from an SSR load so the response is inlined into the streamed document;
+ * omit it in the browser to fall back to the global `fetch`.
  */
-export function getDoctorApiBaseUrl(): string {
-	return `${getApiBaseUrl()}/doctor`;
-}
-
-/**
- * Creates a typed marketplace client. Pass SvelteKit's `fetch` from an SSR load
- * so the response is inlined into the streamed document; omit it in the browser
- * to fall back to the global `fetch`.
- */
-export function createDoctorApiClient(fetchImpl?: typeof fetch) {
+export function createApiClient(fetchImpl?: typeof fetch) {
 	return createClient<paths>({
-		baseUrl: getDoctorApiBaseUrl(),
+		baseUrl: getApiBaseUrl(),
 		fetch: fetchImpl,
 		headers: { Accept: 'application/json' }
 	});

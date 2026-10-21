@@ -129,6 +129,10 @@ Do not import icons from direct component packages such as `@lucide/svelte`.
 - The resolved theme is `light | dark`.
 - Theme state lives in the shared preferences layer.
 - Persisted preference keys are env-scoped through `edoctor.<appEnv>.preferences.v1`.
+- The pre-paint script in `src/app.html` reads that same snapshot (`themePreference`)
+  before the first paint, so a saved theme never flashes the other one on load.
+  `src/hooks.server.ts` writes the key into the `%edoctor.preferences.key%`
+  placeholder, next to the Paraglide `lang`/`dir` placeholders.
 
 ## Responsive UI
 
@@ -140,6 +144,11 @@ Breakpoints (mobile-first; base styles target the 375px mobile design):
   grow beyond it.
 - The desktop top navigation shows from `lg` (1128) up; at tablet (744) and
   below the app-style bottom navigation (`lg:hidden`) is shown instead.
+- The bottom navigation items carry no horizontal padding: they are as wide as
+  their label, with a 44px minimum tap width (`min-w-11`, the `xl` control
+  height), and the row spaces them evenly. Measured in Greek and English: all five
+  labels fit without truncation from 320px up to 1.25× text size (root 16–20px);
+  at 1.5× (root 24px) they fit from 360px.
 
 - Define stable dimensions for fixed-format UI such as toolbars, controls, counters, boards, and icon buttons.
 - Do not scale font size with viewport width.

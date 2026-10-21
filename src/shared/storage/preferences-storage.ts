@@ -29,22 +29,35 @@ export function sanitizePreferencesSnapshot(value: unknown): PreferencesSnapshot
 	};
 }
 
+/**
+ * Reads the saved snapshot. A browser that blocks storage (all cookies blocked, storage
+ * disabled) or a malformed value yields the empty snapshot, i.e. the system preferences,
+ * like the pre-paint script in `src/app.html`.
+ */
 export function readPreferencesSnapshot(): PreferencesSnapshot {
 	if (!browser) return {};
 
-	const stored = window.localStorage.getItem(preferencesStorageKey);
-	if (!stored) return {};
-
 	try {
-		return sanitizePreferencesSnapshot(JSON.parse(stored));
+		const stored = window.localStorage.getItem(preferencesStorageKey);
+
+		return stored ? sanitizePreferencesSnapshot(JSON.parse(stored)) : {};
 	} catch {
 		return {};
 	}
 }
 
+/**
+ * Saves the sanitized snapshot. When the browser blocks storage the preference is kept
+ * only until the next full page load and nothing is thrown, so the theme still switches.
+ */
 export function writePreferencesSnapshot(snapshot: PreferencesSnapshot) {
 	if (!browser) return;
 
 	const sanitized = sanitizePreferencesSnapshot(snapshot);
-	window.localStorage.setItem(preferencesStorageKey, JSON.stringify(sanitized));
+
+	try {
+		window.localStorage.setItem(preferencesStorageKey, JSON.stringify(sanitized));
+	} catch {
+		return;
+	}
 }

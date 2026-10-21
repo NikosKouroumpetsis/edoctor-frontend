@@ -1,9 +1,20 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 	import MoonIcon from '~icons/lucide/moon';
 	import SunIcon from '~icons/lucide/sun';
 	import { Button } from '$shared/ui/primitives/button';
 	import { theme } from '$shared/preferences/theme';
+	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
+	import { m } from '$paraglide/messages.js';
+
+	const currentLocale = $derived(getPageLocale(page.url));
+	const messageOptions = $derived({ locale: currentLocale });
+	const label = $derived(
+		theme.resolved === 'dark'
+			? m.theme_toggle_light({}, messageOptions)
+			: m.theme_toggle_dark({}, messageOptions)
+	);
 
 	onMount(() => {
 		theme.init();
@@ -18,8 +29,8 @@
 	variant="outline"
 	size="icon"
 	class="size-9 rounded-md"
-	aria-label={theme.resolved === 'dark' ? 'Light theme' : 'Dark theme'}
-	title={theme.resolved === 'dark' ? 'Light theme' : 'Dark theme'}
+	aria-label={label}
+	title={label}
 	onclick={toggleTheme}
 >
 	{#if theme.resolved === 'dark'}

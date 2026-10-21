@@ -18,7 +18,7 @@
 		resolve(localizeHref(path, { locale: currentLocale }) as Pathname);
 
 	const linkClass =
-		'text-body-sm text-muted-foreground transition-colors hover:text-foreground hover:underline outline-none focus-visible:text-foreground';
+		'text-start text-body-sm text-muted-foreground transition-colors hover:text-foreground hover:underline outline-none focus-visible:text-foreground';
 	const socialClass =
 		'grid size-9 place-items-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:border-border hover:text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
 
@@ -59,6 +59,9 @@
 				<button type="button" class={linkClass}>{m.footer_terms({}, messageOptions)}</button>
 				<button type="button" class={linkClass}>{m.footer_privacy({}, messageOptions)}</button>
 				<button type="button" class={linkClass}>{m.footer_cookies({}, messageOptions)}</button>
+				<a href={localizedHref('/account-deletion')} class={linkClass}>
+					{m.footer_account_deletion({}, messageOptions)}
+				</a>
 			</div>
 		</div>
 	</div>

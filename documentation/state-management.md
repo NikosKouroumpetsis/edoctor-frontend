@@ -51,8 +51,9 @@ carry no category tags, and the `online` category requires a service scope only 
 server can apply.
 
 The base URL comes from `PUBLIC_API_BASE_URL` (public by design — used by both the
-SSR load and browser refetch), defaulting to `http://localhost:8081/api/v1` for the
-local seed-mock server.
+SSR load and browser refetch), read at runtime through `$env/dynamic/public` so a
+deploy changes it without a rebuild, and defaulting to `http://localhost:8080/api/v1`
+for the local seed-mock server.
 
 Two seed-data alignments live in the marketplace layer: section/category scoping maps
 each rail specialty to its professional display term (`SPECIALTY_SEARCH_TERMS`) so the
@@ -113,6 +114,7 @@ edoctor.<appEnv>.preferences.v1
 ```
 
 - Sanitize payloads during hydration.
+- When the browser blocks storage (all cookies blocked, storage disabled), reads fall back to the system preferences and writes are skipped without an error, so the theme still switches and stays until the next full page load.
 - Do not persist TanStack Query data, auth sessions, or large business payloads in preferences.
 
 ## Dependency policy

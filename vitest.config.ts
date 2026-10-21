@@ -22,6 +22,7 @@ export default defineConfig({
 			'$app/environment': r('./vitest-mocks/app-environment.ts'),
 			'$app/state': r('./vitest-mocks/app-state.ts'),
 			'$app/paths': r('./vitest-mocks/app-paths.ts'),
+			'$env/dynamic/public': r('./vitest-mocks/env-dynamic-public.ts'),
 			$generated: r('./src/generated'),
 			$modules: r('./src/modules'),
 			$paraglide: r('./src/generated/paraglide'),
@@ -33,7 +34,7 @@ export default defineConfig({
 		environment: 'jsdom',
 		globals: true,
 		setupFiles: ['./vitest-setup-client.ts'],
-		include: ['src/**/*.{test,spec}.{js,ts}'],
+		include: ['src/**/*.{test,spec}.{js,ts}', 'tests/**/*.{test,spec}.{js,ts}'],
 		// Component tests render real DOM; keep them isolated per file.
 		clearMocks: true
 	}

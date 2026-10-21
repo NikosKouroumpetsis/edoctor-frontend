@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/public/doctors": {
+    "/doctor/public/doctors": {
         parameters: {
             query?: never;
             header?: never;
@@ -21,7 +21,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/public/doctors/nearby": {
+    "/doctor/public/doctors/nearby": {
         parameters: {
             query?: never;
             header?: never;
@@ -38,7 +38,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/public/doctors/facets": {
+    "/doctor/public/doctors/facets": {
         parameters: {
             query?: never;
             header?: never;
@@ -55,7 +55,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/public/doctors/suggestions": {
+    "/doctor/public/doctors/suggestions": {
         parameters: {
             query?: never;
             header?: never;
@@ -72,7 +72,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/public/locations/suggestions": {
+    "/doctor/public/locations/suggestions": {
         parameters: {
             query?: never;
             header?: never;
@@ -89,7 +89,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/public/doctors/{doctorId}": {
+    "/doctor/public/doctors/{doctorId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -106,7 +106,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/public/doctors/{doctorId}/offices/{officeId}": {
+    "/doctor/public/doctors/{doctorId}/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List every public review for a marketplace doctor. */
+        get: operations["listPublicMarketplaceReviews"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/public/doctors/{doctorId}/offices/{officeId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -115,6 +132,2472 @@ export interface paths {
         };
         /** Get a single public marketplace doctor office. */
         get: operations["getPublicMarketplaceOffice"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/availability/public/slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List public bookable availability slots for a doctor, office and service. */
+        get: operations["listPublicAvailabilitySlots"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/consent/registry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the public cookie/tracking consent registry. */
+        get: operations["getConsentRegistry"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/consent/record": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record the signed-in user tracking-consent decision (requires session cookies). */
+        post: operations["recordTrackingConsent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/content/public/pages/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the published revision of a public content page. */
+        get: operations["getPublicContentPage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign in with email and password. */
+        post: operations["loginWithPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke the current session (requires session cookies). */
+        post: operations["logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/access/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send an access OTP to an email or mobile phone. */
+        post: operations["startAccess"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/access/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resend the access OTP, subject to the same cooldown and send cap. */
+        post: operations["resendAccessCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/access/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify the access OTP and either sign in or request registration. */
+        post: operations["verifyAccessCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/access/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify a native Google ID token and sign in, provisioning the account when needed. */
+        post: operations["verifyAccessGoogleToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/access/complete-registration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create the account behind a registration ticket and sign in. */
+        post: operations["completeAccessRegistration"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login-phone/me/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send an OTP to the mobile the signed-in caller wants as its login phone (requires session cookies). */
+        post: operations["startLoginPhoneAttach"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login-phone/me/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resend the attach OTP to the number the challenge was started for (requires session cookies). */
+        post: operations["resendLoginPhoneAttachCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login-phone/me/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify the attach OTP and promote the number to the account login phone (requires session cookies). */
+        post: operations["verifyLoginPhoneAttachCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/password-credentials/me/set-password/init": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a set-password OTP to the signed-in user own login email (requires session cookies). */
+        post: operations["initSetPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/password-credentials/me/set-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set a new password with the emailed OTP (requires session cookies). */
+        post: operations["setPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/account-deletion/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview what deleting the signed-in account would do (requires session cookies). */
+        get: operations["previewAccountDeletion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/account-deletion/me/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send the account deletion code to the signed-in user own verified channel (requires session cookies). */
+        post: operations["startAccountDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/account-deletion/me/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete the signed-in account with the code (requires session cookies). */
+        post: operations["confirmAccountDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/legal-notices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the messages of new legal versions the signed-in account still has to see (requires session cookies). */
+        get: operations["listLegalNotices"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/legal-notices/acknowledge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report that the message of a new legal version was shown or closed (requires session cookies). */
+        post: operations["acknowledgeLegalNotice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/patient/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the signed-in patient profile (requires session cookies). */
+        get: operations["getPatientMe"];
+        /** Update the signed-in patient identifiers (requires session cookies). */
+        put: operations["upsertPatientMe"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/patient/me/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Fill in the signed-in patient names and date of birth (requires session cookies). */
+        patch: operations["patchPatientMeProfile"];
+        trace?: never;
+    };
+    "/patient/onboarding/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create the signed-in patient profile (requires session cookies). */
+        post: operations["completePatientOnboarding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/patient/{patientId}/relatives": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the relatives of a patient (requires session cookies). */
+        get: operations["listPatientRelatives"];
+        put?: never;
+        /** Add a relative to a patient (requires session cookies). */
+        post: operations["addPatientRelative"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/patient/{patientId}/relatives/{relativeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete one relative of a patient (requires session cookies). */
+        delete: operations["deletePatientRelative"];
+        options?: never;
+        head?: never;
+        /** Update one relative of a patient (requires session cookies). */
+        patch: operations["updatePatientRelative"];
+        trace?: never;
+    };
+    "/appointment/booking-readiness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read what the signed-in patient still has to fill in before booking (MEMBER or DOCTOR session). */
+        get: operations["getBookingReadiness"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment/appointments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the appointments the caller may see (requires session cookies). */
+        get: operations["listAppointments"];
+        put?: never;
+        /** Book an appointment (requires session cookies). */
+        post: operations["createAppointment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment/appointments/{appointmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one appointment (requires session cookies). */
+        get: operations["getAppointment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Move or amend an appointment (requires session cookies). */
+        patch: operations["rescheduleAppointment"];
+        trace?: never;
+    };
+    "/appointment/appointments/{appointmentId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel an appointment with a reason (requires session cookies). */
+        post: operations["cancelAppointment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment/appointments/{appointmentId}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept a pending request (requires a DOCTOR or backoffice session). */
+        post: operations["confirmAppointment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment/appointments/{appointmentId}/outcome": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Declare what happened at the visit (requires a DOCTOR or backoffice session). */
+        post: operations["declareAppointmentOutcome"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment/appointments/{appointmentId}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refuse a pending request with a reason (requires a DOCTOR or backoffice session). */
+        post: operations["rejectAppointment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment-rating/rating-invitations/{invitationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one rating invitation of the signed-in patient (requires session cookies). */
+        get: operations["getRatingInvitation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment-rating/rating-invitations/{invitationId}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rate the visit of one invitation of the signed-in patient (requires session cookies). */
+        post: operations["submitRatingInvitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment-rating/ratings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the ratings the caller may read (requires session cookies). */
+        get: operations["listRatings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment-rating/ratings/{ratingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one rating (requires session cookies). */
+        get: operations["getRating"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment-rating/ratings/{ratingId}/reply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Answer one rating as its doctor (requires a DOCTOR session). */
+        post: operations["replyToRating"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notification/settings/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the signed-in doctor own notification settings (requires a DOCTOR session). */
+        get: operations["getMyNotificationSettings"];
+        /** Update the signed-in doctor own notification settings (requires a DOCTOR session). */
+        put: operations["updateMyNotificationSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notification/sms-packages/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the signed-in doctor SMS balance (requires a DOCTOR session). */
+        get: operations["getMySmsBalance"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notification/sms-packages/me/ledger": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the signed-in doctor SMS usage (requires a DOCTOR session). */
+        get: operations["listMySmsLedger"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notification/preferences/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the notification centre of the signed-in account (requires session cookies). */
+        get: operations["getMyNotificationPreferences"];
+        /** Change switches of the notification centre of the signed-in account (requires session cookies). */
+        put: operations["updateMyNotificationPreferences"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notification/push-devices/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Register or refresh the push device of this phone for the signed-in account (requires session cookies). */
+        put: operations["registerPushDevice"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notification/push-devices/me/unregister": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Forget the push device of this phone for the signed-in account (requires session cookies). */
+        post: operations["unregisterPushDevice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the profile of the signed-in account (requires session cookies). */
+        get: operations["getMyProfile"];
+        /** Update the profile of the signed-in account (requires session cookies). */
+        put: operations["updateMyProfile"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/availability/availabilities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List availabilities (requires a DOCTOR or backoffice session). */
+        get: operations["listAvailabilities"];
+        put?: never;
+        /** Create an availability for a doctor and office (requires a DOCTOR or backoffice session). */
+        post: operations["createAvailability"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/availability/availabilities/{availabilityId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one availability (requires a DOCTOR or backoffice session). */
+        get: operations["getAvailability"];
+        put?: never;
+        post?: never;
+        /** Delete one availability (requires a DOCTOR or backoffice session). */
+        delete: operations["deleteAvailability"];
+        options?: never;
+        head?: never;
+        /** Update one availability (requires a DOCTOR or backoffice session). */
+        patch: operations["updateAvailability"];
+        trace?: never;
+    };
+    "/availability/availabilities/{availabilityId}/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Replace the whole weekly schedule of an availability (requires a DOCTOR or backoffice session). */
+        put: operations["replaceAvailabilitySchedule"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/availability/availabilities/{availabilityId}/overrides": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the date overrides of an availability (requires a DOCTOR or backoffice session). */
+        get: operations["listAvailabilityOverrides"];
+        put?: never;
+        /** Add a date override to an availability (requires a DOCTOR or backoffice session). */
+        post: operations["createAvailabilityOverride"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/availability/availabilities/{availabilityId}/overrides/{overrideId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete one date override (requires a DOCTOR or backoffice session). */
+        delete: operations["deleteAvailabilityOverride"];
+        options?: never;
+        head?: never;
+        /** Update one date override (requires a DOCTOR or backoffice session). */
+        patch: operations["updateAvailabilityOverride"];
+        trace?: never;
+    };
+    "/calendar-sync/connection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the calendar connection of the signed-in doctor (requires a DOCTOR session). */
+        get: operations["getCalendarConnection"];
+        put?: never;
+        post?: never;
+        /** Disconnect the calendar of the signed-in doctor (requires a DOCTOR session). */
+        delete: operations["disconnectCalendar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendar-sync/connection/connect/google/init": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start the Google calendar OAuth flow (requires a DOCTOR session). */
+        post: operations["initGoogleCalendarConnect"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendar-sync/connection/connect/google/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Complete the Google calendar OAuth flow (anonymous: identity travels in `state`). */
+        get: operations["completeGoogleCalendarConnect"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendar-sync/connection/connect/microsoft/init": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start the Microsoft calendar OAuth flow (requires a DOCTOR session). */
+        post: operations["initMicrosoftCalendarConnect"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendar-sync/connection/connect/microsoft/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Complete the Microsoft calendar OAuth flow (anonymous: identity travels in `state`). */
+        get: operations["completeMicrosoftCalendarConnect"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendar-sync/connection/calendars": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the calendars the connected provider exposes (requires a DOCTOR session). */
+        get: operations["listCalendarProviderCalendars"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Replace the selected calendars (requires a DOCTOR session). */
+        patch: operations["updateCalendarSelection"];
+        trace?: never;
+    };
+    "/calendar-sync/connection/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enable calendar synchronisation (requires a DOCTOR session). */
+        post: operations["enableCalendarSync"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendar-sync/connection/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Disable calendar synchronisation without disconnecting (requires a DOCTOR session). */
+        post: operations["disableCalendarSync"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendar-sync/connection/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Run one synchronisation now (requires a DOCTOR session). */
+        post: operations["syncCalendarNow"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/profile/base": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the base profile of a doctor (requires a DOCTOR or backoffice session). */
+        get: operations["getDoctorProfileBase"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update the base profile of a doctor (requires a DOCTOR or backoffice session). */
+        patch: operations["updateDoctorProfileBase"];
+        trace?: never;
+    };
+    "/doctor/activation/readiness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the activation readiness of a doctor (requires a DOCTOR or backoffice session). */
+        get: operations["getDoctorActivationReadiness"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/profile/offices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the offices of a doctor (requires a DOCTOR or backoffice session). */
+        get: operations["listDoctorProfileOffices"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/onboarding/calendar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set the calendar category of a doctor (requires a session; works after onboarding too). */
+        post: operations["setDoctorOnboardingCalendar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-cart/carts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the ERP carts of one office (requires a DOCTOR session). */
+        get: operations["listErpCarts"];
+        put?: never;
+        /** Open an ERP cart for one office (requires a DOCTOR session). */
+        post: operations["createErpCart"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-cart/carts/{cartId}/lines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add one line to an ERP cart (requires a DOCTOR session). */
+        post: operations["addErpCartLine"];
+        /** Remove every line from an ERP cart (requires a DOCTOR session). */
+        delete: operations["clearErpCartLines"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-cart/carts/{cartId}/checkout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check an ERP cart out and, for a card payment, mint the device instruction (requires a DOCTOR session). */
+        post: operations["checkoutErpCart"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-settings/doctor/webecr-terminals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the WebECR terminals visible to one office or station. */
+        get: operations["listErpWebEcrTerminals"];
+        put?: never;
+        /** Register a WebECR terminal for one office (requires a DOCTOR session). */
+        post: operations["createErpWebEcrTerminal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-settings/doctor/webecr-terminals/routes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the NSP and acquirer pairs a terminal may be registered against. */
+        get: operations["listErpWebEcrTerminalRoutes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-settings/doctor/webecr-terminals/{terminalId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one WebECR terminal. */
+        get: operations["getErpWebEcrTerminalById"];
+        put?: never;
+        post?: never;
+        /** Archive one WebECR terminal. */
+        delete: operations["archiveErpWebEcrTerminal"];
+        options?: never;
+        head?: never;
+        /** Rename or enable/disable one WebECR terminal. */
+        patch: operations["updateErpWebEcrTerminal"];
+        trace?: never;
+    };
+    "/erp-financial-settings/doctor/webecr-terminals/{terminalId}/provision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Redeem the authorisation code the terminal printed (requires a DOCTOR session). */
+        post: operations["provisionErpWebEcrTerminal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-settings/doctor/webecr-terminals/{terminalId}/links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Make one WebECR terminal visible to another office or station. */
+        post: operations["linkErpWebEcrTerminal"];
+        /** Remove one visibility link of a WebECR terminal. */
+        delete: operations["unlinkErpWebEcrTerminal"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/payment-attempts/{attemptId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one payment attempt (WebECR clients poll this). */
+        get: operations["getErpPaymentAttemptById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/payment-attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List payment attempts, for the pending badge and the backoffice. */
+        get: operations["listErpPaymentAttempts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/payment-attempts/{attemptId}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the audit trail of one payment attempt. */
+        get: operations["listErpPaymentAttemptEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/payment-attempts/{attemptId}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record what the operator saw at an uncertain WebECR terminal. */
+        post: operations["decideErpPaymentAttempt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/payment-attempts/{attemptId}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Poll the SAME WebECR intent again, right now. */
+        post: operations["retryErpPaymentAttempt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/payment-attempts/{attemptId}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Run one verification cycle for a WebECR attempt now. */
+        post: operations["verifyErpPaymentAttempt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/payment-attempts/{attemptId}/manual-resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Close a WebECR manual review (ADMIN or SUPPORT only). */
+        post: operations["resolveErpPaymentAttemptManualReview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/payment-attempts/{attemptId}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Hand the raw terminal answer back for one payment attempt (requires a DOCTOR session). */
+        post: operations["applyErpPaymentAttemptResult"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-cart/carts/active": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the ACTIVE cart of one office (requires a DOCTOR session). */
+        get: operations["getActiveErpCart"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-cart/carts/{cartId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one ERP cart (requires a DOCTOR session). */
+        get: operations["getErpCart"];
+        put?: never;
+        post?: never;
+        /** Abandon an ERP cart (requires a DOCTOR session). */
+        delete: operations["abandonErpCart"];
+        options?: never;
+        head?: never;
+        /** Change the header fields of an ERP cart (requires a DOCTOR session). */
+        patch: operations["updateErpCart"];
+        trace?: never;
+    };
+    "/erp-cart/carts/{cartId}/lines/{lineNumber}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove one line from an ERP cart (requires a DOCTOR session). */
+        delete: operations["removeErpCartLine"];
+        options?: never;
+        head?: never;
+        /** Change one line of an ERP cart (requires a DOCTOR session). */
+        patch: operations["updateErpCartLine"];
+        trace?: never;
+    };
+    "/erp-cart/carts/{cartId}/series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Choose the document series an ERP cart will be issued into (requires a DOCTOR session). */
+        put: operations["setErpCartSeries"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-cart/carts/{cartId}/counterpart": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set or clear the counterpart of an ERP cart (requires a DOCTOR session). */
+        put: operations["setErpCartCounterpart"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-cart/carts/{cartId}/taxes/answers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Answer the tax questions of an ERP cart (requires a DOCTOR session). */
+        put: operations["answerErpCartTaxes"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-cart/carts/{cartId}/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check whether an ERP cart may be checked out (requires a DOCTOR session). */
+        post: operations["validateErpCart"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List issued ERP financial documents (requires a DOCTOR or backoffice session). */
+        get: operations["listErpFinancialDocuments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/documents/pending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the documents that still need a human (requires a DOCTOR or backoffice session). */
+        get: operations["listErpPendingFinancialDocuments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/documents/attention-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Count the documents needing attention, grouped by reason (requires a DOCTOR or backoffice session). */
+        get: operations["getErpFinancialDocumentAttentionSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/documents/{documentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one ERP financial document (requires a DOCTOR or backoffice session). */
+        get: operations["getErpFinancialDocument"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/documents/{documentId}/print-model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the print model of one document (requires a DOCTOR or backoffice session). */
+        get: operations["getErpFinancialDocumentPrintModel"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/documents/{documentId}/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the provider transmission attempts of one document (requires a DOCTOR or backoffice session). */
+        get: operations["listErpFinancialDocumentTransmissionAttempts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/documents/{documentId}/actions/refund": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Issue a credit note against one document (requires a DOCTOR session). */
+        post: operations["refundErpFinancialDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/documents/{documentId}/actions/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel one rejected or payment-pending ERP financial document (requires a DOCTOR or backoffice session). */
+        post: operations["cancelErpFinancialDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/documents/{documentId}/issue-date": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Correct the issue date of one rejected document (requires a DOCTOR or backoffice session). */
+        patch: operations["updateErpFinancialDocumentIssueDate"];
+        trace?: never;
+    };
+    "/erp-financial-document/documents/{documentId}/counterpart": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Correct the counterpart of one rejected document (requires a DOCTOR or backoffice session). */
+        patch: operations["updateErpFinancialDocumentCounterpart"];
+        trace?: never;
+    };
+    "/erp-financial-document/documents/{documentId}/series-number": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Renumber one rejected document inside its series (requires a DOCTOR or backoffice session). */
+        patch: operations["updateErpFinancialDocumentSeriesNumber"];
+        trace?: never;
+    };
+    "/erp-financial-document/documents/{documentId}/next-series-number": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Suggest the number a series-number correction of one document would take (requires a DOCTOR or backoffice session). */
+        get: operations["getErpFinancialDocumentNextSeriesNumber"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/documents/{documentId}/actions/restore-transmission": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send one rejected document again without changing it (requires a DOCTOR or backoffice session). */
+        post: operations["restoreErpFinancialDocumentTransmission"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/series/{seriesId}/next-number": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the next number a series would hand out (requires a DOCTOR session). */
+        get: operations["getErpSeriesNextNumber"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/reports/daily-payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Takings per day and per payment method (requires a DOCTOR or backoffice session). */
+        get: operations["getErpDailyPaymentsReport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/reports/vat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** VAT base and tax per rate (requires a DOCTOR or backoffice session). */
+        get: operations["getErpVatReport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-document/reports/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What was sold, per catalogue item (requires a DOCTOR or backoffice session). */
+        get: operations["getErpItemsReport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-print-station/office/stations/{stationId}/bootstrap": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Everything one till needs at start-up, in a single read (requires a DOCTOR session). */
+        get: operations["bootstrapErpPrintStation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-print-station/office/stations/{stationId}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Claim a till with its claim code (requires a DOCTOR session). */
+        post: operations["claimErpPrintStation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-print-station/office/stations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the tills of one office (requires a DOCTOR session). */
+        get: operations["listErpPrintStations"];
+        put?: never;
+        /** Register a till for one office (requires a DOCTOR session). */
+        post: operations["createErpPrintStation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-print-station/office/stations/{stationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one till (requires a DOCTOR session). */
+        get: operations["getErpPrintStation"];
+        put?: never;
+        post?: never;
+        /** Archive a till (requires a DOCTOR session). */
+        delete: operations["deleteErpPrintStation"];
+        options?: never;
+        head?: never;
+        /** Rename a till or change what it may deliver (requires a DOCTOR session). */
+        patch: operations["updateErpPrintStation"];
+        trace?: never;
+    };
+    "/erp-print-station/office/stations/{stationId}/rotate-claim-code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set a new claim code for a till (requires a DOCTOR session). */
+        post: operations["rotateErpPrintStationClaimCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-print-station/office/stations/{stationId}/printers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the printers of one till (requires a DOCTOR session). */
+        get: operations["listErpPrintStationPrinters"];
+        put?: never;
+        /** Attach a printer to a till (requires a DOCTOR session). */
+        post: operations["createErpPrintStationPrinter"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-print-station/office/stations/{stationId}/printers/{printerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Detach a printer from a till (requires a DOCTOR session). */
+        delete: operations["deleteErpPrintStationPrinter"];
+        options?: never;
+        head?: never;
+        /** Change a printer of one till (requires a DOCTOR session). */
+        patch: operations["updateErpPrintStationPrinter"];
+        trace?: never;
+    };
+    "/erp-print-station/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the delivery and print templates (requires a DOCTOR session). */
+        get: operations["listErpPrintTemplates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-print-station/templates/{templateId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one template (requires a DOCTOR session). */
+        get: operations["getErpPrintTemplate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-print-station/doctor/delivery-preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the delivery preferences of the doctor (requires a DOCTOR session). */
+        get: operations["getErpDoctorDeliveryPreferences"];
+        put?: never;
+        /** Create the delivery preferences of the doctor (requires a DOCTOR session). */
+        post: operations["createErpDoctorDeliveryPreferences"];
+        /** Reset the delivery preferences to their defaults (requires a DOCTOR session). */
+        delete: operations["deleteErpDoctorDeliveryPreferences"];
+        options?: never;
+        head?: never;
+        /** Change what happens to a receipt after a payment (requires a DOCTOR session). */
+        patch: operations["updateErpDoctorDeliveryPreferences"];
+        trace?: never;
+    };
+    "/erp-print-station/delivery/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List delivery jobs (requires a DOCTOR session). */
+        get: operations["listErpDeliveryJobs"];
+        put?: never;
+        /** Hand a document to a delivery channel (requires a DOCTOR session). */
+        post: operations["createErpDeliveryJob"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-print-station/delivery/jobs/{jobId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one delivery job (requires a DOCTOR session). */
+        get: operations["getErpDeliveryJob"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-print-station/delivery/jobs/{jobId}/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Retry or redirect a delivery job (requires a DOCTOR session). */
+        post: operations["actOnErpDeliveryJob"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-print-station/delivery/documents/{documentId}/follow-up": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read what may be sent again for one issued document (requires a DOCTOR or backoffice session). */
+        get: operations["getErpDeliveryDocumentFollowUp"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-print-station/delivery/jobs/{jobId}/actions/ack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Acknowledge that a till executed a delivery job (requires a DOCTOR session). */
+        post: operations["ackErpDeliveryJob"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-settings/bundle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read every ERP setting of one office in a single call (requires a DOCTOR or backoffice session). */
+        get: operations["getErpFinancialSettingsBundle"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-settings/office/payment-methods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the payment menu of one office (requires a DOCTOR or backoffice session). */
+        get: operations["listErpOfficePaymentMethods"];
+        /** Replace the whole payment menu of one office (requires a DOCTOR or backoffice session). */
+        put: operations["replaceErpOfficePaymentMethods"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-settings/office/print-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the receipt print settings of one office (requires a DOCTOR or backoffice session). */
+        get: operations["getErpPrintSettings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-settings/doctor/esp-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the provider (Πάροχος) account settings of the doctor (requires a DOCTOR or backoffice session). */
+        get: operations["getErpEspSettings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-financial-settings/doctor/esp-settings/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ask the provider to accept the stored credentials again (requires a DOCTOR or backoffice session). */
+        post: operations["verifyErpEspSettings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-item/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the catalogue items of the doctor (requires a DOCTOR or backoffice session). */
+        get: operations["listErpItems"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-item/items/{itemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one catalogue item (requires a DOCTOR or backoffice session). */
+        get: operations["getErpItem"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-item/items/defaults": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the VAT pair a new catalogue item of this doctor is born with (requires a DOCTOR or backoffice session). */
+        get: operations["getErpItemDefaults"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-item/items/reference-data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the vocabularies a catalogue item is built from (requires a DOCTOR or backoffice session). */
+        get: operations["getErpItemReferenceData"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-item/items/{itemId}/actions/line-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Preview the cart line one catalogue item would produce (requires a DOCTOR session). */
+        post: operations["previewErpItemLine"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-trader/traders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the counterparts of the doctor (requires a DOCTOR or backoffice session). */
+        get: operations["listErpTraders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-trader/traders/{traderId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one counterpart (requires a DOCTOR or backoffice session). */
+        get: operations["getErpTrader"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-trader/traders/lookup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Look a Greek counterpart up in the tax registry (requires a DOCTOR session). */
+        post: operations["lookupErpTrader"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-trader/options/countries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the country codes a counterpart may carry (requires a DOCTOR or backoffice session). */
+        get: operations["listErpTraderCountries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-document-series/document-series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the document series of one office (requires a DOCTOR or backoffice session). */
+        get: operations["listErpDocumentSeries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-document-series/document-series/{documentSeriesId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one document series (requires a DOCTOR or backoffice session). */
+        get: operations["getErpDocumentSeries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-document-series/document-series/{documentSeriesId}/taxes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the taxes attached to one series (requires a DOCTOR or backoffice session). */
+        get: operations["listErpDocumentSeriesTaxes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-document-series/document-series/refund-candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the credit series a document may be refunded into (requires a DOCTOR or backoffice session). */
+        get: operations["listErpRefundCandidateSeries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-document-series/options/my-data-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the myDATA document types a series may declare (requires a DOCTOR or backoffice session). */
+        get: operations["listErpMyDataTypes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-issuer/issuer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the tax issuer of the doctor (requires a DOCTOR or backoffice session). */
+        get: operations["getErpIssuer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-issuer/branches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the tax branches of the doctor (requires a DOCTOR or backoffice session). */
+        get: operations["listErpIssuerBranches"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-issuer/branches/{officeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the tax branch of one office (requires a DOCTOR or backoffice session). */
+        get: operations["getErpIssuerBranch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-issuer/headquarters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the head office of the doctor and the offices that can take it while it waits (requires a DOCTOR or backoffice session). */
+        get: operations["getErpIssuerHeadquarters"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-issuer/headquarters/actions/relocate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set the waiting head office on one office of the doctor (requires a DOCTOR or backoffice session). */
+        post: operations["relocateErpIssuerHeadquarters"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/erp-issuer/resolved": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the issuer identity as a document would carry it (requires a DOCTOR or backoffice session). */
+        get: operations["getErpResolvedIssuer"];
         put?: never;
         post?: never;
         delete?: never;
@@ -146,6 +2629,8 @@ export interface components {
                 officeId: string;
                 city: string | null;
                 state: string | null;
+                street: string | null;
+                streetNumber: string | null;
                 latitude: number | null;
                 longitude: number | null;
                 distanceKm: number | null;
@@ -156,6 +2641,13 @@ export interface components {
                 mediumSizeUrl: string;
                 priority: number | null;
             } | null;
+            images: {
+                id: string;
+                smSizeUrl: string;
+                mediumSizeUrl: string;
+                priority: number | null;
+            }[];
+            descriptionExcerpt: string | null;
             rating: {
                 average: number | null;
                 count: number;
@@ -164,8 +2656,10 @@ export interface components {
                 nextAvailableAt: string | null;
                 hasToday: boolean;
                 hasNext3Days: boolean;
+                hasNext7Days: boolean;
             };
             priceRange: components["schemas"]["DoctorPublicMarketplacePriceRangeView"] | null;
+            primaryServicePrice: number | null;
         };
         DoctorPublicMarketplacePriceRangeView: {
             min: number | null;
@@ -176,16 +2670,19 @@ export interface components {
             cursor: string | null;
             nextCursor: string | null;
             hasNextPage: boolean;
+            total: number;
         };
         DoctorPublicMarketplaceAppliedFilters: {
             language: components["schemas"]["ILanguage"];
             text: string | null;
             professionalIds: string[];
+            professionalSlugs: string[];
             serviceSlugs: string[];
             locationSlug: string | null;
             locationTarget?: components["schemas"]["DoctorPublicMarketplaceLocationTarget"] | null;
             lat: number | null;
             lng: number | null;
+            geoScope: components["schemas"]["DoctorPublicMarketplaceGeoScope"] | null;
             availability: components["schemas"]["DoctorPublicMarketplaceAvailability"];
             sortBy: components["schemas"]["DoctorPublicMarketplaceSort"];
             paymentOptions: components["schemas"]["DoctorPublicMarketplacePaymentOption"][];
@@ -193,6 +2690,8 @@ export interface components {
             priceMax: number | null;
             gender: components["schemas"]["DoctorPublicMarketplaceGender"];
             speakLanguageCodes: string[];
+            disabilityAccess: boolean;
+            parking: boolean;
             limit: number;
             cursor: string | null;
         };
@@ -208,8 +2707,10 @@ export interface components {
             municipalityLocationId: string | null;
             settlementLocationId: string | null;
         };
+        /** @constant */
+        DoctorPublicMarketplaceGeoScope: "locality";
         /** @enum {string} */
-        DoctorPublicMarketplaceAvailability: "today" | "next3Days" | "all";
+        DoctorPublicMarketplaceAvailability: "today" | "next3Days" | "next7Days" | "all";
         /** @enum {string} */
         DoctorPublicMarketplaceSort: "popularity" | "rating" | "distance";
         /** @enum {string} */
@@ -222,6 +2723,7 @@ export interface components {
                 language: components["schemas"]["ILanguage"];
                 text: string | null;
                 professionalIds: string[];
+                professionalSlugs: string[];
                 serviceSlugs: string[];
                 locationSlug: string | null;
                 locationTarget?: components["schemas"]["DoctorPublicMarketplaceLocationTarget"] | null;
@@ -233,12 +2735,16 @@ export interface components {
                 priceMax: number | null;
                 gender: components["schemas"]["DoctorPublicMarketplaceGender"];
                 speakLanguageCodes: string[];
+                disabilityAccess: boolean;
+                parking: boolean;
             };
             facets: {
                 paymentOptions: components["schemas"]["DoctorPublicMarketplaceFacetOptionView"][];
                 services: components["schemas"]["DoctorPublicMarketplaceFacetOptionView"][];
+                specialties: components["schemas"]["DoctorPublicMarketplaceFacetOptionView"][];
                 genders: components["schemas"]["DoctorPublicMarketplaceFacetOptionView"][];
                 speakLanguages: components["schemas"]["DoctorPublicMarketplaceFacetOptionView"][];
+                amenities: components["schemas"]["DoctorPublicMarketplaceFacetOptionView"][];
                 priceRange: components["schemas"]["DoctorPublicMarketplacePriceRangeView"] | null;
             };
         };
@@ -246,18 +2752,21 @@ export interface components {
             value: string;
             label: string;
             count: number;
+            slug?: string;
         };
         DoctorPublicMarketplaceSuggestionsResponseView: {
             items: components["schemas"]["DoctorPublicMarketplaceSuggestionView"][];
             language: components["schemas"]["ILanguage"];
         };
         DoctorPublicMarketplaceSuggestionView: {
-            /** @enum {string} */
-            type: "doctor" | "professional";
+            type: components["schemas"]["DoctorPublicMarketplaceSuggestionType"];
             id: string;
             label: string;
             slug: string;
+            supportingLabel?: string;
         };
+        /** @enum {string} */
+        DoctorPublicMarketplaceSuggestionType: "professional" | "service" | "doctor";
         DoctorPublicMarketplaceLocationSuggestionsResponseView: {
             items: components["schemas"]["DoctorPublicMarketplaceLocationSuggestionView"][];
             language: components["schemas"]["ILanguage"];
@@ -285,6 +2794,9 @@ export interface components {
             doctorId: string;
             slug: string;
             fullName: string;
+            licenseNumber: string | null;
+            licenseObtainedDate: string | null;
+            memberSince: string;
             description: unknown;
             studies: string[];
             workExperience: string[];
@@ -296,6 +2808,7 @@ export interface components {
             } | null;
             selectedOffice: components["schemas"]["DoctorPublicMarketplaceProfileOfficeView"];
             otherOfficeIds: string[];
+            offices: components["schemas"]["DoctorPublicMarketplaceProfileOfficeSummaryView"][];
             socialLinks: components["schemas"]["DoctorPublicMarketplaceSocialLinksView"];
             services: components["schemas"]["DoctorPublicMarketplaceProfileServiceView"][];
             images: components["schemas"]["DoctorImagePublicView"][];
@@ -306,6 +2819,7 @@ export interface components {
                 nextAvailableAt: string | null;
                 hasToday: boolean;
                 hasNext3Days: boolean;
+                hasNext7Days: boolean;
             };
             articlesSummary: components["schemas"]["DoctorPublicMarketplaceArticlesSummaryView"];
         };
@@ -316,6 +2830,7 @@ export interface components {
             street: string;
             streetNumber: string;
             floor: number | null;
+            description: unknown;
             postalCode: string;
             phone: string | null;
             parking: boolean;
@@ -324,6 +2839,14 @@ export interface components {
             latitude: number | null;
             longitude: number | null;
             distanceKm: number | null;
+        };
+        DoctorPublicMarketplaceProfileOfficeSummaryView: {
+            officeId: string;
+            street: string | null;
+            streetNumber: string | null;
+            city: string | null;
+            state: string | null;
+            postalCode: string | null;
         };
         DoctorPublicMarketplaceSocialLinksView: {
             website: string | null;
@@ -398,14 +2921,3052 @@ export interface components {
             articlesCount: number;
             healthAdviceCount: number;
         };
+        DoctorPublicMarketplaceReviewsResponseView: {
+            reviews: components["schemas"]["DoctorPublicMarketplaceReviewPreviewView"][] | null;
+            language: components["schemas"]["ILanguage"];
+        };
         DoctorPublicMarketplaceOfficeResponseView: {
             office: components["schemas"]["DoctorPublicMarketplaceProfileOfficeView"] | null;
             availability: {
                 nextAvailableAt: string | null;
                 hasToday: boolean;
                 hasNext3Days: boolean;
+                hasNext7Days: boolean;
             } | null;
+            bookingPolicy: components["schemas"]["BookingPolicyView"] | null;
             language: components["schemas"]["ILanguage"];
+        };
+        BookingPolicyView: {
+            confirmationMode: components["schemas"]["AppointmentConfirmationMode"];
+            cancellationCutoffHours: number;
+            minBookingNoticeHours: number;
+            maxBookingHorizonDays: number;
+        };
+        /** @enum {string} */
+        AppointmentConfirmationMode: "AUTO" | "MANUAL";
+        AvailabilityPublicSlotsView: {
+            doctorId: string;
+            officeId: string;
+            doctorServiceId: string;
+            timezone: string;
+            days: number;
+            policy: components["schemas"]["BookingPolicyView"];
+            slotsByDate: components["schemas"]["AvailabilitySlotsByDateView"][];
+        };
+        AvailabilitySlotsByDateView: {
+            date: string;
+            slots: components["schemas"]["AvailabilitySlotView"][];
+        };
+        AvailabilitySlotView: {
+            startMinute: number;
+            endMinute: number;
+            startTime: string;
+            endTime: string;
+            capacity: number | null;
+        };
+        ConsentPublicRegistryResponseView: {
+            registryVersion: string;
+            tools: components["schemas"]["ConsentToolView"][];
+        };
+        ConsentToolView: {
+            id: string;
+            category: components["schemas"]["ConsentCategory"];
+            platforms: components["schemas"]["ConsentPlatform"][];
+            policyUrl: string | null;
+            translations: {
+                el: components["schemas"]["ConsentToolTranslationView"];
+                en: components["schemas"]["ConsentToolTranslationView"];
+            };
+        };
+        /** @enum {string} */
+        ConsentCategory: "essential" | "functional" | "analytics" | "marketing";
+        /** @enum {string} */
+        ConsentPlatform: "app" | "web";
+        ConsentToolTranslationView: {
+            title: string;
+            description: string;
+        };
+        ConsentTrackingRecordResponseView: {
+            id: string;
+            registryVersion: string;
+            platform: components["schemas"]["ConsentPlatform"];
+            choices: {
+                [key: string]: boolean;
+            };
+            /** Format: date-time */
+            decidedAt: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @description `version` is the legal version of a legal page (what a registration accepts), otherwise the revision version. `effectiveAt` is when this text took or takes effect; `upcoming` names the announced text of the current edition. */
+        ContentPublicPageView: {
+            id: string;
+            key: string;
+            slug: string;
+            defaultLanguage: components["schemas"]["ILanguage"];
+            version: string;
+            language: components["schemas"]["ILanguage"];
+            availableLanguages: components["schemas"]["ILanguage"][];
+            title: string;
+            content: unknown;
+            metaTitle: string | null;
+            metaDescription: string | null;
+            metaKeywords: string[];
+            canonicalUrl: string | null;
+            publishedAt: string | null;
+            effectiveAt: string | null;
+            upcoming: components["schemas"]["ContentPublicPageUpcomingView"] | null;
+        };
+        /** @description Ε-Β19-4: the version a substantive change announced and the server instant it takes effect. */
+        ContentPublicPageUpcomingView: {
+            version: string;
+            /** Format: date-time */
+            effectiveAt: string;
+        };
+        LoginResult: {
+            tenantUser: components["schemas"]["AccessTenantUserView"];
+        };
+        /** @description D-47: the session view every client reads. The login phone is published only as `loginPhoneVerified` and `loginPhoneMasked` (`+30 69•• ••• 678`); the full number and its verification timestamp are never returned by a session endpoint. */
+        AccessTenantUserView: {
+            loginPhoneVerified: boolean;
+            loginPhoneMasked: string | null;
+            ban: components["schemas"]["BanView"] | null;
+            id: string;
+            tenantId: string;
+            role: components["schemas"]["IUserRole"];
+            secondaryRoles: components["schemas"]["IUserRole"][];
+            loginEmail: string | null;
+            loginEmailVerifiedAt: string | null;
+            loginEmailCanLogin: boolean;
+            loginPhoneCanLogin: boolean;
+            lastLoginMethod?: components["schemas"]["IProvider"] | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        BanView: {
+            id: string;
+            tenantId: string;
+            tenantUserId: string;
+            type: components["schemas"]["IBanType"];
+            reason: string | null;
+            /** Format: date-time */
+            bannedAt: string;
+        };
+        /** @enum {string} */
+        IBanType: "WARNING" | "PERMANENTLY";
+        /** @enum {string} */
+        IUserRole: "MEMBER" | "ADMIN" | "SEMI_ADMIN" | "DOCTOR" | "INSURER" | "INSURER_COMPANY_OFFICE" | "INSURER_COMPANY_ADMIN" | "INSUSER_COMPANY_SEMI_ADMIN" | "INSUSER_COMPANY_SUPPORT" | "SUPPORT" | "TENCHICAL" | "COORDINATOR_AND_SALES" | "CORDINATOR" | "SALES";
+        /** @enum {string} */
+        IProvider: "GOOGLE" | "APPLE" | "EMAIL" | "PHONE";
+        LogoutResult: {
+            revokedCount: number;
+        };
+        AccessStartResult: {
+            success: boolean;
+            channel: components["schemas"]["AuthAccessChannel"];
+        };
+        /** @enum {string} */
+        AuthAccessChannel: "email" | "phone";
+        AccessVerifyResult: {
+            outcome: components["schemas"]["AuthAccessOutcome"];
+            tenantUser: components["schemas"]["AccessTenantUserView"] | null;
+            registrationTicket: string | null;
+        };
+        /** @enum {string} */
+        AuthAccessOutcome: "signed-in" | "registration-required";
+        AccessGoogleResult: {
+            /** @constant */
+            outcome: "signed-in";
+            tenantUser: components["schemas"]["AccessTenantUserView"];
+        };
+        AccessCompleteRegistrationResult: {
+            tenantUser: components["schemas"]["AccessTenantUserView"];
+        };
+        LoginPhoneAttachStartResult: {
+            channel: components["schemas"]["AuthAccessChannel"];
+            alreadyVerified: boolean;
+        };
+        LoginPhoneAttachVerifyResult: {
+            tenantUser: components["schemas"]["AccessTenantUserView"];
+        };
+        PasswordSetInitResult: {
+            /** @constant */
+            channel: "email";
+        };
+        PasswordChangeResult: {
+            tenantUserId: string;
+            version: number;
+        };
+        /** @description What deleting the signed-in account would do, before any code is sent. `allowed` is false with a `refusal` for a backoffice account or an account without a verified sign-in channel; the code channel is published masked only. */
+        AccountDeletionPreviewView: {
+            allowed: boolean;
+            refusal: components["schemas"]["AccountDeletionRefusal"] | null;
+            codeChannel: components["schemas"]["AuthAccessChannel"] | null;
+            codeDestinationMasked: string | null;
+            removed: components["schemas"]["AccountDeletionRemovedItemView"][];
+            warnings: components["schemas"]["AccountDeletionWarning"][];
+            retained: components["schemas"]["AccountDeletionRetainedCategoryView"][];
+        };
+        /** @enum {string} */
+        AccountDeletionRefusal: "BACKOFFICE_ACCOUNT" | "NO_VERIFIED_CHANNEL";
+        /** @description One kind of data the deletion removes and how many rows of it the account has. */
+        AccountDeletionRemovedItemView: {
+            item: string;
+            count: number;
+        };
+        /** @enum {string} */
+        AccountDeletionWarning: "APPOINTMENTS_IN_PROGRESS" | "FAILED_TRANSMISSIONS" | "SMS_UNITS_LOST" | "LICENSE_LOST" | "RECORD_COPY_ON_REQUEST";
+        /** @description D-125 rule 6: what this deletion leaves behind (archive or doctor's record), why, and for how long at most. */
+        AccountDeletionRetainedCategoryView: {
+            category: components["schemas"]["AccountRetainedCategory"];
+            purpose: components["schemas"]["AccountRetainedPurpose"];
+            maxRetentionYears: number;
+        };
+        /** @enum {string} */
+        AccountRetainedCategory: "LEGAL_ACCEPTANCE" | "DELETION_TRACE" | "RATING_MODERATION" | "ABUSE_MEASURE" | "DOCTOR_PATIENT_RECORD" | "DOCTOR_APPOINTMENT_BOOK" | "DOCTOR_TAX_RECORDS" | "PLATFORM_ACCOUNTING";
+        /** @enum {string} */
+        AccountRetainedPurpose: "LEGAL_CLAIMS_EVIDENCE" | "DELETION_ACCOUNTABILITY" | "MODERATION_EVIDENCE" | "ABUSE_PREVENTION" | "DOCTOR_RECORD_KEEPING" | "TAX_LAW_RETENTION" | "ACCOUNTING_RETENTION";
+        AccountDeletionCodeSentView: {
+            channel: components["schemas"]["AuthAccessChannel"];
+        };
+        /** @description The deleted account and the server instant it was deleted at; a repeated deletion answers the same values. */
+        AccountDeletionResultView: {
+            tenantUserId: string;
+            /** Format: date-time */
+            deletedAt: string;
+        };
+        LegalNoticePendingListView: {
+            items: components["schemas"]["LegalNoticePendingView"][];
+        };
+        /** @description Π-31: one notice of a new legal version the signed-in account has not closed, read the same by the app and the web. */
+        LegalNoticePendingView: {
+            documentCode: components["schemas"]["LegalDocumentCode"];
+            title: string;
+            url: string;
+            version: string;
+            /** Format: date-time */
+            effectiveAt: string;
+            inForce: boolean;
+            seenAt: string | null;
+        };
+        /** @enum {string} */
+        LegalDocumentCode: "CORE_TERMS_OF_USE" | "CORE_PRIVACY_POLICY" | "DOCTOR_MARKETPLACE_TERMS";
+        /** @description Π-31: the state of the message of one version after a report; a closed one is never shown again on any device. */
+        LegalNoticeAcknowledgementView: {
+            documentCode: components["schemas"]["LegalDocumentCode"];
+            version: string;
+            seenAt: string | null;
+            dismissedAt: string | null;
+        };
+        PatientSelfResponseView: components["schemas"]["PatientViewExt"] | null;
+        /** @description `firstName`/`lastName` and the two login-phone facts are resolved only by `GET /patient/me`; the other reads of this view omit them. The login phone is published masked (`+30 69•• ••• 678`), never in full (D-47). */
+        PatientViewExt: {
+            relatives?: components["schemas"]["RelativeView"][];
+            firstName?: string | null;
+            lastName?: string | null;
+            loginPhoneVerified?: boolean;
+            loginPhoneMasked?: string | null;
+            id: string;
+            userId: string;
+            tenantUserId: string;
+            amka: string | null;
+            afm: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        RelativeView: {
+            id: string;
+            patientId: string;
+            firstName: string;
+            lastName: string;
+            relationship: components["schemas"]["IRelationship"];
+            phone?: string | null;
+            email?: string | null;
+            amka: string | null;
+            afm: string | null;
+            gender: components["schemas"]["IGender"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        IRelationship: "CHILD" | "PARENT" | "SIBLING" | "SPOUSE" | "OTHER_RELE";
+        /** @enum {string} */
+        IGender: "MALE" | "FEMALE" | "NON_BINARY" | "OTHER_GENE";
+        PatientSelfUpsertResponseView: components["schemas"]["PatientViewExt"];
+        PatientOnboardingResponseView: {
+            user: components["schemas"]["UserView"];
+            patient: components["schemas"]["PatientViewExt"];
+        };
+        UserView: {
+            id: string;
+            tenantUserId: string;
+            gender: components["schemas"]["IGender"] | null;
+            dateOfBirth: string | null;
+            avatarUrl: string | null;
+            headline: string | null;
+            bio: string | null;
+            locale: components["schemas"]["ILanguage"] | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        RelativeListResponseView: components["schemas"]["RelativeView"][];
+        /** @description What the app needs before the last booking step (D-05): only the missing fields are asked for. */
+        BookingReadinessView: {
+            phoneVerified: boolean;
+            nameComplete: boolean;
+            dateOfBirthPresent: boolean;
+            blockers: components["schemas"]["BookingReadinessBlocker"][];
+        };
+        /** @description Union of the two blocker vocabularies (D-47): the patient/appointment codes this module owns and the slot codes the availability module owns. */
+        BookingReadinessBlocker: components["schemas"]["AppointmentBookingBlocker"] | components["schemas"]["PublicSlotEligibilityBlockerCode"];
+        /** @enum {string} */
+        AppointmentBookingBlocker: "PATIENT_PHONE_UNVERIFIED" | "PATIENT_NAME_MISSING" | "RESCHEDULE_AFTER_CANCELLATION_CUTOFF" | "PATIENT_PENDING_LIMIT_REACHED" | "PATIENT_RESCHEDULE_LIMIT_REACHED" | "PATIENT_IS_THE_DOCTOR";
+        /** @enum {string} */
+        PublicSlotEligibilityBlockerCode: "DOCTOR_SERVICE_NOT_OWNED_BY_DOCTOR" | "AVAILABILITY_NOT_FOUND" | "AVAILABILITY_DISABLED" | "SCHEDULE_NOT_CONFIGURED" | "DOCTOR_NOT_VERIFIED" | "APPOINTMENTS_DISABLED" | "MARKETPLACE_LICENSE_INACTIVE" | "OUTSIDE_AVAILABILITY_WINDOW" | "OUTSIDE_WEEKLY_SCHEDULE" | "SLOT_STEP_MISMATCH" | "INTERVAL_DURATION_MISMATCH" | "INTERVAL_EXCEEDS_AVAILABLE_RANGE" | "SLOT_ALREADY_ELAPSED" | "BOOKING_NOTICE_TOO_SHORT" | "BOOKING_HORIZON_EXCEEDED" | "APPOINTMENT_OVERLAPS_EXISTING" | "EXTERNAL_CALENDAR_BUSY";
+        /** @description One appointment as every single-appointment response carries it: the list item plus its `actions`. */
+        AppointmentDetailResponseView: {
+            actions: components["schemas"]["AppointmentActionsView"];
+            officeTimeZone: string;
+            serviceLines?: components["schemas"]["AppointmentServiceLineView"][];
+            auditLogs?: components["schemas"]["AppointmentAuditLogResponseView"][];
+            id: string;
+            doctorId: string;
+            officeId: string;
+            patientId: string;
+            relativeId: string | null;
+            bookedForType: components["schemas"]["AppointmentBookedForType"];
+            /** Format: date-time */
+            startTime: string;
+            /** Format: date-time */
+            endTime: string;
+            effectiveDurationInMinutes: number;
+            status: components["schemas"]["AppointmentStatus"];
+            quotedNetAmount: number;
+            quotedVatAmount: number;
+            quotedTotalAmount: number;
+            finalNetAmount: number;
+            finalVatAmount: number;
+            finalTotalAmount: number;
+            patientSnapshot: components["schemas"]["AppointmentPatientSnapshotView"];
+            officeSnapshot: components["schemas"]["AppointmentOfficeSnapshotView"] | null;
+            relativeSnapshot: components["schemas"]["AppointmentRelativeSnapshotView"] | null;
+            patientNote: string | null;
+            confirmationModeSnapshot: components["schemas"]["AppointmentConfirmationMode"] | null;
+            confirmedAt: string | null;
+            confirmedBy: components["schemas"]["AppointmentActorKind"] | null;
+            rejectReasonCode: string | null;
+            rejectReasonText: string | null;
+            rejectedAt: string | null;
+            rejectedBy: components["schemas"]["AppointmentActorKind"] | null;
+            cancelReasonCode: string | null;
+            cancelReasonText: string | null;
+            canceledAt: string | null;
+            canceledBy: components["schemas"]["AppointmentActorKind"] | null;
+            canceledLate: boolean;
+            priceOverrideReason: string | null;
+            priceOverriddenAt: string | null;
+            expiresAt: string | null;
+            outcomeSource: components["schemas"]["AppointmentOutcomeSource"] | null;
+            outcomeAt: string | null;
+            outcomeCorrectableUntil: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @description D-118: what the reader may do with this appointment NOW, by the server clock and the rules the writes check. The cutoff pair is the patient's D-18/D-19 answer (`null`/`false` for the doctor side), and `outcomes`/`correction` are the doctor side's (`[]`/`null` for the patient, D-24/D-59). */
+        AppointmentActionsView: {
+            canCancel: boolean;
+            canReschedule: boolean;
+            canConfirm: boolean;
+            canReject: boolean;
+            outcomes: components["schemas"]["AppointmentOutcome"][];
+            correction: components["schemas"]["AppointmentOutcomeCorrectionView"] | null;
+            cancellationCutoffHours: number | null;
+            isPastCancellationCutoff: boolean;
+        };
+        /** @enum {string} */
+        AppointmentOutcome: "ARRIVED" | "NO_SHOW" | "COMPLETED";
+        /** @description D-24/D-85: the one verdict a SYSTEM outcome may still be corrected into, and until when. */
+        AppointmentOutcomeCorrectionView: {
+            to: components["schemas"]["AppointmentOutcome"];
+            /** Format: date-time */
+            until: string;
+        };
+        AppointmentServiceLineView: {
+            id: string;
+            appointmentId: string;
+            doctorServiceId: string;
+            serviceTitleSnapshot: string;
+            durationInMinutesSnapshot: number;
+            quantity: number;
+            unitNetAmountSnapshot: number;
+            unitVatAmountSnapshot: number;
+            unitGrossAmountSnapshot: number;
+            vatRateSnapshot: number;
+            lineNetAmount: number;
+            lineVatAmount: number;
+            lineGrossAmount: number;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @description An audit line as a response carries it. D-55: `actorUserId` is answered only to the account that acted; every other reader gets `null` and reads `actorRole` instead. Ε-Φ4-4: `actorRole` is `null` too where the reader may not learn who acted: the patient reading a line that set the outcome. */
+        AppointmentAuditLogResponseView: {
+            actorRole: string | null;
+            id: string;
+            appointmentId: string;
+            action: string;
+            actorUserId: string | null;
+            reason: string | null;
+            beforeSnapshot: unknown | null;
+            afterSnapshot: unknown | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @enum {string} */
+        AppointmentBookedForType: "SELF" | "RELATIVE";
+        /** @enum {string} */
+        AppointmentStatus: "pending" | "checked_in" | "completed" | "canceled" | "booked" | "rejected" | "unavailable" | "expired" | "no_show";
+        /** @description D-06: frozen at booking time; a later profile edit never rewrites it. D-55: a response carries `tenantUserId` only to that same account, every other reader gets `null`. */
+        AppointmentPatientSnapshotView: {
+            id: string;
+            tenantUserId: string | null;
+            firstName: string | null;
+            lastName: string | null;
+            phoneE164: string | null;
+            email?: string;
+            amka?: string;
+            afm?: string;
+        };
+        /** @description Where the appointment takes place, frozen at booking time in every language the office had. */
+        AppointmentOfficeSnapshotView: {
+            id: string;
+            postalCode: string;
+            phone: string | null;
+            city: string | null;
+            street: string | null;
+            streetNumber: string | null;
+            state: string | null;
+            floor: number | null;
+            description: unknown;
+            translations: components["schemas"]["AppointmentOfficeTranslationSnapshotView"][];
+        };
+        AppointmentOfficeTranslationSnapshotView: {
+            language: string;
+            city: string;
+            street: string;
+            streetNumber: string;
+            state: string;
+            floor: number | null;
+            description: unknown;
+        };
+        /** @description The relative the appointment was booked for, frozen the same way (D-06). */
+        AppointmentRelativeSnapshotView: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            relationship: string;
+            phone: string | null;
+            email: string | null;
+            amka?: string;
+            afm?: string;
+            gender: string;
+        };
+        /** @enum {string} */
+        AppointmentActorKind: "DOCTOR" | "BACKOFFICE" | "PATIENT" | "SYSTEM";
+        /** @enum {string} */
+        AppointmentOutcomeSource: "DOCTOR" | "SYSTEM";
+        /** @description One page of the appointment list as the response carries it; `nextCursor` and `total` unchanged. */
+        AppointmentListPageResponseView: {
+            items: components["schemas"]["AppointmentResponseView"][];
+            nextCursor: string | null;
+            total: number;
+        };
+        /** @description The appointment as every response carries it, built only by the actor-scoped mapper. `officeTimeZone` is the IANA zone the office keeps its hours in, so a client prints every hour on the office clock. */
+        AppointmentResponseView: {
+            officeTimeZone: string;
+            serviceLines?: components["schemas"]["AppointmentServiceLineView"][];
+            auditLogs?: components["schemas"]["AppointmentAuditLogResponseView"][];
+            id: string;
+            doctorId: string;
+            officeId: string;
+            patientId: string;
+            relativeId: string | null;
+            bookedForType: components["schemas"]["AppointmentBookedForType"];
+            /** Format: date-time */
+            startTime: string;
+            /** Format: date-time */
+            endTime: string;
+            effectiveDurationInMinutes: number;
+            status: components["schemas"]["AppointmentStatus"];
+            quotedNetAmount: number;
+            quotedVatAmount: number;
+            quotedTotalAmount: number;
+            finalNetAmount: number;
+            finalVatAmount: number;
+            finalTotalAmount: number;
+            patientSnapshot: components["schemas"]["AppointmentPatientSnapshotView"];
+            officeSnapshot: components["schemas"]["AppointmentOfficeSnapshotView"] | null;
+            relativeSnapshot: components["schemas"]["AppointmentRelativeSnapshotView"] | null;
+            patientNote: string | null;
+            confirmationModeSnapshot: components["schemas"]["AppointmentConfirmationMode"] | null;
+            confirmedAt: string | null;
+            confirmedBy: components["schemas"]["AppointmentActorKind"] | null;
+            rejectReasonCode: string | null;
+            rejectReasonText: string | null;
+            rejectedAt: string | null;
+            rejectedBy: components["schemas"]["AppointmentActorKind"] | null;
+            cancelReasonCode: string | null;
+            cancelReasonText: string | null;
+            canceledAt: string | null;
+            canceledBy: components["schemas"]["AppointmentActorKind"] | null;
+            canceledLate: boolean;
+            priceOverrideReason: string | null;
+            priceOverriddenAt: string | null;
+            expiresAt: string | null;
+            outcomeSource: components["schemas"]["AppointmentOutcomeSource"] | null;
+            outcomeAt: string | null;
+            outcomeCorrectableUntil: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @description Ε-Φ7-1 (D-55): an invitation as its patient reads it — its state on the SERVER clock (an OPEN one past `expiresAt` reads `EXPIRED`, D-118), whether a rating is accepted now and the code that refuses it, and the rating it produced; never the tenant, the patient account, the mailbox or a counter. */
+        AppointmentRatingInvitationActorView: {
+            invitationId: string;
+            appointmentId: string;
+            status: components["schemas"]["AppointmentRatingInvitationStatus"];
+            /** Format: date-time */
+            expiresAt: string;
+            canSubmit: boolean;
+            submitBlocker: components["schemas"]["RatingInvitationSubmitBlocker"] | null;
+            ratingId: string | null;
+        };
+        /** @enum {string} */
+        AppointmentRatingInvitationStatus: "OPEN" | "SUBMITTED" | "EXPIRED" | "REVOKED";
+        /** @enum {string} */
+        RatingInvitationSubmitBlocker: "RATING_INVITATION_NOT_OPEN" | "RATING_INVITATION_EXPIRED" | "RATING_PATIENT_IS_THE_DOCTOR" | "RATING_DOCTOR_LICENSE_INACTIVE";
+        /** @description Ε-Φ7-1 (D-55): a rating as every response carries it, built only by the actor-scoped mapper — every field of the rating but the tenant, which is always the reader's own and never part of the published contract. */
+        AppointmentRatingResponseView: {
+            id: string;
+            appointmentId: string;
+            doctorId: string;
+            patientId: string;
+            patientName: string | null;
+            patientInitial: string | null;
+            overallRating: number;
+            comment: string | null;
+            ratingModerationStatus: components["schemas"]["RatingModerationStatus"];
+            ratingModerationNote: string | null;
+            ratingModeratedAt: string | null;
+            ratingModeratedByUserId: string | null;
+            doctorReply: string | null;
+            doctorReplyAt: string | null;
+            replyModerationStatus: components["schemas"]["ReplyModerationStatus"];
+            replyModerationNote: string | null;
+            replyModeratedAt: string | null;
+            replyModeratedByUserId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            aspect?: components["schemas"]["RatingAspectView"] | null;
+        };
+        /** @enum {string} */
+        RatingModerationStatus: "PENDING" | "APPROVED" | "REJECTED";
+        /** @enum {string} */
+        ReplyModerationStatus: "NONE" | "PENDING" | "APPROVED" | "REJECTED";
+        RatingAspectView: {
+            id: string;
+            ratingId: string;
+            inDepthRating: number;
+            trustRating: number;
+            expertiseRating: number;
+            punctualRating: number;
+            friendlyRating: number;
+            weightVersion: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @description One page of the rating list (D-47/D-58): newest first, `nextCursor` opens the next page, `total` is the whole set. */
+        AppointmentRatingListPageView: {
+            items: components["schemas"]["AppointmentRatingResponseView"][];
+            nextCursor: string | null;
+            total: number;
+        };
+        DoctorNotificationSettingsView: {
+            doctorId: string;
+            smsPatientConfirmed: boolean;
+            smsPatientRescheduled: boolean;
+            smsPatientRejectedOrExpired: boolean;
+            smsPatientCanceledByDoctor: boolean;
+            smsPatientReminderOffsetsHours: number[];
+            smsDoctorNewRequest: boolean;
+            smsDoctorLateCancel: boolean;
+            reminderOffsetOptionsHours: number[];
+            updatedAt: string | null;
+        };
+        SmsBalanceView: {
+            doctorId: string;
+            remainingUnits: number;
+            activePackages: components["schemas"]["SmsPackageView"][];
+            sentThisMonth: number;
+            unitsChargedThisMonth: number;
+        };
+        /** @description The doctor's own view of a package (D-55): who granted it, who revoked it and the backoffice `note` are deliberately absent — the note is an internal remark, not a message to the doctor. */
+        SmsPackageView: {
+            id: string;
+            units: number;
+            remainingUnits: number;
+            /** Format: date-time */
+            grantedAt: string;
+            expiresAt: string | null;
+            revokedAt: string | null;
+        };
+        SmsLedgerPageView: {
+            items: components["schemas"]["SmsLedgerEntryView"][];
+            nextCursor: string | null;
+            total: number;
+        };
+        SmsLedgerEntryView: {
+            id: string;
+            packageId: string | null;
+            subjectType: string;
+            subjectId: string;
+            templateKey: string;
+            recipientMasked: string;
+            segments: number;
+            unitsCharged: number;
+            status: components["schemas"]["SmsLedgerStatus"];
+            error: string | null;
+            /** Format: date-time */
+            sentAt: string;
+        };
+        /** @enum {string} */
+        SmsLedgerStatus: "SENT" | "FAILED" | "SKIPPED";
+        /** @description D-132: the centre of one account — its patient side, and its doctor side when the account is a doctor. */
+        NotificationPreferencesView: {
+            sections: components["schemas"]["NotificationPreferenceSectionView"][];
+            updatedAt: string | null;
+        };
+        NotificationPreferenceSectionView: {
+            side: components["schemas"]["NotificationRecipientKind"];
+            categories: components["schemas"]["NotificationPreferenceCategoryView"][];
+        };
+        /** @enum {string} */
+        NotificationRecipientKind: "PATIENT" | "DOCTOR";
+        NotificationPreferenceCategoryView: {
+            category: components["schemas"]["NotificationPreferenceCategory"];
+            cells: components["schemas"]["NotificationPreferenceCellView"][];
+        };
+        /** @enum {string} */
+        NotificationPreferenceCategory: "APPOINTMENT_UPDATES" | "REMINDERS" | "RATINGS" | "QUESTIONS" | "ACCOUNT" | "DOCTOR_NEW_APPOINTMENTS" | "DOCTOR_PATIENT_CHANGES" | "DOCTOR_RATINGS" | "DOCTOR_ACCOUNT" | "DOCTOR_OPERATIONS";
+        /** @description `enabled` is `null` where the account decides nothing: the doctor of the visit sets it (D-132). */
+        NotificationPreferenceCellView: {
+            channel: components["schemas"]["NotificationChannel"];
+            mode: components["schemas"]["NotificationPreferenceCellMode"];
+            enabled: boolean | null;
+            scope: components["schemas"]["NotificationPreferenceCellScope"] | null;
+        };
+        /** @enum {string} */
+        NotificationChannel: "EMAIL" | "SMS" | "PUSH";
+        /** @enum {string} */
+        NotificationPreferenceCellMode: "ALWAYS" | "TOGGLE" | "SET_BY_DOCTOR";
+        /** @enum {string} */
+        NotificationPreferenceCellScope: "NEW_REQUESTS_ONLY" | "LATE_CANCELLATIONS_ONLY" | "WHEN_DOCTOR_OFFERS";
+        /** @description The device the app registered, without its token: a token never leaves the server in a body (P54). */
+        PushDeviceView: {
+            id: string;
+            platform: components["schemas"]["PushPlatform"];
+            appId: string;
+            apnsEnvironment: components["schemas"]["PushApnsEnvironment"] | null;
+            /** Format: date-time */
+            lastSeenAt: string;
+        };
+        /** @enum {string} */
+        PushPlatform: "IOS" | "ANDROID";
+        /** @enum {string} */
+        PushApnsEnvironment: "SANDBOX" | "PRODUCTION";
+        PushDeviceUnregisterView: {
+            removed: boolean;
+        };
+        /** @description `GET /user/me` (Β20α delta 1): an account with no profile row yet reads `null`; its first `PUT /user/me` creates it. */
+        UserGetResponseView: components["schemas"]["UserViewExt"] | null;
+        UserViewExt: {
+            translations?: components["schemas"]["UserTranslationView"][];
+            id: string;
+            tenantUserId: string;
+            gender: components["schemas"]["IGender"] | null;
+            dateOfBirth: string | null;
+            avatarUrl: string | null;
+            headline: string | null;
+            bio: string | null;
+            locale: components["schemas"]["ILanguage"] | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        UserTranslationView: {
+            id: string;
+            language: components["schemas"]["ILanguage"];
+            firstName: string;
+            lastName: string;
+            fullName: string | null;
+            title: string | null;
+            normalizedFirstName: string | null;
+            normalizedLastName: string | null;
+            normalizedFullName: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AvailabilityViewExt: {
+            scheduleAvailability?: components["schemas"]["AvailabilityScheduleView"];
+            overrides?: components["schemas"]["AvailabilityOverrideView"][];
+            id: string;
+            doctorId: string;
+            officeId: string;
+            timezone: string;
+            /** Format: date-time */
+            availabilityFrom: string;
+            /** Format: date-time */
+            availabilityUntil: string;
+            isEnabled: boolean;
+            slotStepMinutes: number;
+            confirmationMode: components["schemas"]["AppointmentConfirmationMode"] | null;
+            cancellationCutoffHours: number | null;
+            minBookingNoticeHours: number | null;
+            scheduleAvailabilityId: string;
+        };
+        AvailabilityScheduleView: {
+            monday: components["schemas"]["AvailabilityRangeView"][];
+            tuesday: components["schemas"]["AvailabilityRangeView"][];
+            wednesday: components["schemas"]["AvailabilityRangeView"][];
+            thursday: components["schemas"]["AvailabilityRangeView"][];
+            friday: components["schemas"]["AvailabilityRangeView"][];
+            saturday: components["schemas"]["AvailabilityRangeView"][];
+            sunday: components["schemas"]["AvailabilityRangeView"][];
+        };
+        AvailabilityRangeView: {
+            startMinute: number;
+            endMinute: number;
+            capacity: number | null;
+        };
+        AvailabilityOverrideView: {
+            id: string;
+            availabilityId: string;
+            date: string;
+            startMinute: number;
+            endMinute: number;
+            type: components["schemas"]["AvailabilityOverrideType"];
+            capacity: number | null;
+        };
+        /** @enum {string} */
+        AvailabilityOverrideType: "OPEN" | "CLOSED";
+        AvailabilityListResponseView: components["schemas"]["AvailabilityViewExt"][];
+        AvailabilityGetResponseView: components["schemas"]["AvailabilityViewExt"] | null;
+        AvailabilityOverrideListResponseView: components["schemas"]["AvailabilityOverrideView"][];
+        CalendarConnectionStateView: {
+            calendarCategory: components["schemas"]["ICalendar"];
+            activeProvider: components["schemas"]["CalendarSyncProvider"] | null;
+            activeMode: components["schemas"]["CalendarActiveMode"];
+            connections: components["schemas"]["CalendarConnectionView"][];
+        };
+        /** @enum {string} */
+        ICalendar: "NONE" | "GOOGLE" | "DIRECT" | "MICROSOFT";
+        /** @enum {string} */
+        CalendarSyncProvider: "GOOGLE" | "MICROSOFT";
+        /** @enum {string} */
+        CalendarActiveMode: "NONE" | "DIRECT" | "EXTERNAL";
+        CalendarConnectionView: {
+            id: string;
+            doctorId: string;
+            tenantId: string;
+            provider: components["schemas"]["CalendarSyncProvider"];
+            connectionStatus: components["schemas"]["CalendarConnectionStatus"];
+            syncStatus: components["schemas"]["CalendarSyncStatus"];
+            providerAccountId: string | null;
+            providerAccountEmail: string | null;
+            providerAccountLabel: string | null;
+            selectedReadCalendarIds: string[];
+            selectedWriteCalendarId: string | null;
+            accessTokenExpiresAt: string | null;
+            hasPushSubscription: boolean;
+            subscriptionExpiresAt: string | null;
+            lastSuccessfulSyncAt: string | null;
+            lastErrorCode: string | null;
+            lastErrorMessage: string | null;
+            lastWarningCode: string | null;
+            lastWarningMessage: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        CalendarConnectionStatus: "CONNECTED" | "REAUTH_REQUIRED" | "ERROR" | "DISCONNECTED";
+        /** @enum {string} */
+        CalendarSyncStatus: "ACTIVE" | "INACTIVE" | "DISABLED";
+        CalendarActionResult: {
+            code: string;
+            connection: components["schemas"]["CalendarConnectionView"] | null;
+        };
+        CalendarConnectInitResult: {
+            provider: components["schemas"]["CalendarSyncProvider"];
+            authorizationUrl: string;
+            state: string;
+        };
+        CalendarProviderCalendarListResponseView: components["schemas"]["CalendarProviderCalendarView"][];
+        CalendarProviderCalendarView: {
+            id: string;
+            name: string;
+            isPrimary: boolean;
+            canWrite: boolean;
+            isReadSelected: boolean;
+            isWriteSelected: boolean;
+        };
+        DoctorProfileBaseView: {
+            doctorId: string;
+            notificationEmail: string | null;
+            notificationEmailVerifiedAt: string | null;
+            facebook: string | null;
+            website: string | null;
+            instagram: string | null;
+            linkedin: string | null;
+            licenseNumber: string | null;
+            licenseObtainedDate: string | null;
+            appointmentsEnabled: boolean;
+            appointmentConfirmationMode: components["schemas"]["AppointmentConfirmationMode"];
+            cancellationCutoffHours: number;
+            minBookingNoticeHours: number;
+            maxBookingHorizonDays: number;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        DoctorActivationReadinessResponse: {
+            facts: components["schemas"]["DoctorActivationFacts"];
+            capabilities: {
+                onboardingComplete: boolean;
+                adminVerified: boolean;
+                marketplaceLicensed: boolean;
+                publicVisible: boolean;
+                schedulingReady: boolean;
+                paymentsLicensed: boolean;
+                paymentsReady: boolean;
+            };
+            blockers: components["schemas"]["DoctorActivationBlocker"][];
+            suggestions: components["schemas"]["DoctorActivationSuggestion"][];
+        };
+        DoctorActivationFacts: {
+            identity: {
+                doctorId: string;
+                tenantUserId: string;
+            };
+            onboarding: {
+                signupProfileCompletedAt: string | null;
+                stage: components["schemas"]["DoctorOnboardingStage"] | null;
+                onboardingComplete: boolean;
+            };
+            verification: {
+                isVerified: boolean;
+                verifiedAt: string | null;
+                verifiedByTenantUserId?: string | null;
+                verificationNote?: string | null;
+            };
+            intent: {
+                wantsMarketplace: boolean | null;
+                wantsPayments: boolean | null;
+                wantsAppointments: boolean | null;
+                marketplacePaymentsInterest: boolean | null;
+                paymentParochosInterest: boolean | null;
+            };
+            notificationEmail: {
+                exists: boolean;
+                verified: boolean;
+            };
+            loginPhone: {
+                verified: boolean;
+            };
+            office: {
+                usableOfficeExists: boolean;
+                publicPhoneExists: boolean;
+                addressExists: boolean;
+                locationResolved: boolean;
+                officeCount?: number;
+                usableOfficeIds?: string[];
+            };
+            defaultService: {
+                defaultBaseServiceConfigured: boolean;
+                defaultBaseServiceAmbiguous: boolean;
+                defaultBaseServiceId: string | null;
+                defaultDoctorServiceExists: boolean;
+                defaultDoctorServiceDuplicate: boolean;
+                priceValid: boolean;
+                durationValid: boolean;
+                defaultDoctorServiceId?: string | null;
+            };
+            calendar: {
+                calendarCategory: components["schemas"]["ICalendar"];
+                activeProvider: string | null;
+                activeMode: string;
+                externalConnectionExists: boolean;
+                selectedReadCalendars: boolean;
+                selectedWriteCalendar: boolean;
+                syncActive: boolean;
+            };
+            appointments: {
+                wantsAppointments: boolean | null;
+                appointmentsEnabled: boolean;
+                enabledAvailabilityExists: boolean;
+            };
+            licenses: {
+                marketplace: {
+                    active: boolean;
+                    endDate: string | null;
+                };
+                payments: {
+                    active: boolean;
+                    endDate: string | null;
+                };
+            };
+            payments: {
+                setupExists: boolean;
+                hasDoctorSettings?: boolean;
+                hasOfficeSettings?: boolean;
+            };
+        };
+        /** @enum {string} */
+        DoctorOnboardingStage: "START" | "BASIC_INFO" | "PROFESSIONAL" | "SERVICE_PRICING" | "LICENSE" | "CALENDAR" | "OFFICE" | "LIABILITY" | "PAYMENTS_INTEREST" | "COMPLETE";
+        DoctorActivationBlocker: {
+            code: components["schemas"]["DoctorActivationBlockerCode"];
+            capability: components["schemas"]["DoctorActivationCapabilityCode"];
+            /** @constant */
+            severity: "BLOCKING";
+            message?: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+        };
+        /** @enum {string} */
+        DoctorActivationBlockerCode: "ONBOARDING_INCOMPLETE" | "DOCTOR_NOTIFICATION_EMAIL_MISSING" | "DOCTOR_NOTIFICATION_EMAIL_UNVERIFIED" | "DOCTOR_PHONE_UNVERIFIED" | "DOCTOR_NOT_ADMIN_VERIFIED" | "MARKETPLACE_LICENSE_INACTIVE" | "PAYMENTS_LICENSE_INACTIVE" | "PAYMENTS_SETUP_MISSING" | "ESP_MISSING" | "ESP_UNVERIFIED" | "ERP_ISSUER_MISSING" | "ERP_ISSUER_HQ_MISSING" | "ERP_SERIES_MISSING" | "ERP_PAYMENT_METHOD_MISSING" | "DEFAULT_ONBOARDING_SERVICE_NOT_CONFIGURED" | "DEFAULT_ONBOARDING_SERVICE_AMBIGUOUS" | "DEFAULT_DOCTOR_SERVICE_MISSING" | "DEFAULT_DOCTOR_SERVICE_DUPLICATE" | "DEFAULT_DOCTOR_SERVICE_PRICE_INVALID" | "DEFAULT_DOCTOR_SERVICE_DURATION_INVALID" | "OFFICE_MISSING" | "OFFICE_PHONE_MISSING" | "OFFICE_ADDRESS_MISSING" | "OFFICE_LOCATION_NOT_RESOLVED" | "APPOINTMENT_INTENT_MISSING" | "APPOINTMENTS_DISABLED" | "NO_ENABLED_AVAILABILITY" | "CALENDAR_MODE_REQUIRED" | "EXTERNAL_CALENDAR_CONNECTION_REQUIRED" | "EXTERNAL_CALENDAR_SELECTION_REQUIRED" | "EXTERNAL_CALENDAR_SYNC_INACTIVE";
+        /** @enum {string} */
+        DoctorActivationCapabilityCode: "onboardingComplete" | "adminVerified" | "marketplaceLicensed" | "publicVisible" | "schedulingReady" | "paymentsLicensed" | "paymentsReady";
+        DoctorActivationSuggestion: {
+            code: components["schemas"]["DoctorActivationSuggestionCode"];
+            /** @constant */
+            severity: "SUGGESTION";
+            message?: string;
+        };
+        /** @enum {string} */
+        DoctorActivationSuggestionCode: "ADD_PROFILE_IMAGE" | "ADD_BIO" | "ADD_STUDIES" | "ADD_WORK_EXPERIENCE" | "ADD_QUALIFICATIONS" | "ADD_SPEAK_LANGUAGES" | "ADD_SERVICE_DESCRIPTIONS" | "VERIFY_LOGIN_PHONE";
+        DoctorProfileOfficeListResponseView: components["schemas"]["DoctorProfileOfficeView"][];
+        DoctorProfileOfficeView: {
+            doctorOffice: components["schemas"]["DoctorOfficeView"];
+            office: components["schemas"]["OfficeViewExt"];
+        };
+        DoctorOfficeView: {
+            id: string;
+            doctorId: string;
+            officeId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        OfficeViewExt: {
+            translations?: components["schemas"]["OfficeTranslationView"][];
+            images?: components["schemas"]["OfficeImageView"][];
+            id: string;
+            postalCode: string;
+            longitude: number;
+            latitude: number;
+            regionLocationId: string | null;
+            regionalUnitLocationId: string | null;
+            municipalityLocationId: string | null;
+            settlementLocationId: string | null;
+            phone: string | null;
+            parking: boolean;
+            disabilityAccess: boolean;
+            paymentOptions: components["schemas"]["IPaymentOptions"][];
+        };
+        OfficeTranslationView: {
+            id: string;
+            language: components["schemas"]["ILanguage"];
+            city: string;
+            street: string;
+            streetNumber: string;
+            state: string;
+            floor: number | null;
+            description: unknown;
+        };
+        OfficeImageView: {
+            id: string;
+            officeId: string;
+            smSizeUrl: string;
+            mediumSizeUrl: string;
+            lgSizeUrl: string;
+            priority: number | null;
+            translations?: components["schemas"]["OfficeImageTranslationView"][];
+        };
+        OfficeImageTranslationView: {
+            id: string;
+            language: components["schemas"]["ILanguage"];
+            alt: string | null;
+            metaDescription: string | null;
+        };
+        /** @enum {string} */
+        IPaymentOptions: "CASH" | "CARD" | "ONLINE_DOCTOR_PAY" | "ONLINE_OFFICE_PAY" | "IRIS" | "STUDENT_CARD" | "UNEMPLOYMENT_CARD";
+        DoctorView: {
+            id: string;
+            userId: string;
+            tenantUserId: string;
+            mobileNumber: string | null;
+            notificationEmail: string | null;
+            notificationEmailVerifiedAt: string | null;
+            facebook: string | null;
+            website: string | null;
+            instagram: string | null;
+            linkedin: string | null;
+            isVerified: boolean;
+            signupProfileCompletedAt: string | null;
+            licenseNumber: string | null;
+            licenseObtainedDate: string | null;
+            calendarCategory: components["schemas"]["ICalendar"];
+            appointmentsEnabled: boolean;
+            appointmentConfirmationMode: components["schemas"]["AppointmentConfirmationMode"];
+            cancellationCutoffHours: number;
+            minBookingNoticeHours: number;
+            maxBookingHorizonDays: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ErpCartView: {
+            id: string;
+            doctorId: string;
+            officeId: string;
+            status: components["schemas"]["ErpCartStatus"];
+            version: number;
+            series: components["schemas"]["ErpCartSeriesView"] | null;
+            issuer: components["schemas"]["ErpCartIssuerSnapshot"];
+            counterpart: {
+                source: components["schemas"]["ErpCartCounterpartSource"];
+                snapshot: components["schemas"]["ErpCartCounterpartSnapshot"];
+            } | null;
+            patientId: string | null;
+            appointmentId: string | null;
+            smsRecipient: string | null;
+            smsRecipientSource: components["schemas"]["ErpCartSmsRecipientSource"] | null;
+            notes: string | null;
+            email: string | null;
+            lines: components["schemas"]["ErpCartLineView"][];
+            vatTable: components["schemas"]["ErpCartVatTableRowView"][];
+            taxes: components["schemas"]["ErpCartTaxView"][];
+            totals: components["schemas"]["ErpCartTotalsView"];
+            allowedPaymentMethods: components["schemas"]["ErpCartAllowedPaymentMethodView"][];
+            readiness: components["schemas"]["ErpCartReadinessView"];
+            checkedOutDocumentId: string | null;
+            /** Format: date-time */
+            lastActivityAt: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        ErpCartStatus: "ACTIVE" | "CHECKING_OUT" | "CHECKED_OUT" | "ABANDONED";
+        ErpCartSeriesView: {
+            nextNumberPeek: number | null;
+            busy: components["schemas"]["ErpCartSeriesBusyView"] | null;
+            id: string;
+            series: string;
+            abbreviation: string;
+            description: string | null;
+            myDataType: string;
+            startNumber: number;
+            characteristics: components["schemas"]["ErpCartSeriesCharacteristics"];
+        };
+        ErpCartSeriesBusyView: {
+            pendingDocumentId: string;
+            abbreviation: string;
+            number: number;
+            stationId: string | null;
+            /** Format: date-time */
+            since: string;
+        };
+        ErpCartSeriesCharacteristics: {
+            type: string;
+            isCredit: boolean;
+            isSale: boolean;
+            isRetail: boolean;
+            isInvoice: boolean;
+            isCorrelated: boolean;
+            isTaxFee: boolean;
+        };
+        ErpCartIssuerSnapshot: {
+            id: string | null;
+            taxNumber: string;
+            businessName: string;
+            vatCategory: components["schemas"]["ErpCartVatCategory"];
+            branch: components["schemas"]["ErpCartIssuerBranchSnapshot"];
+        };
+        /** @enum {string} */
+        ErpCartVatCategory: "standard" | "reduced" | "zero";
+        ErpCartIssuerBranchSnapshot: {
+            id: string | null;
+            branchCode: number;
+            isHq: boolean;
+            address: string | null;
+            jobTitle: string | null;
+            postalCode: string | null;
+            city: string | null;
+            taxOffice: string | null;
+        };
+        /** @enum {string} */
+        ErpCartCounterpartSource: "TRADER" | "PATIENT" | "MANUAL";
+        ErpCartCounterpartSnapshot: {
+            sourceErpTraderId: string | null;
+            sourcePatientId: string | null;
+            taxNumber: string;
+            name: string;
+            type: string;
+            country: string;
+            vatCategory: components["schemas"]["ErpCartVatCategory"];
+            address: string | null;
+            jobTitle: string | null;
+            postalCode: string | null;
+            city: string | null;
+            taxOffice: string | null;
+            phoneNumber: string | null;
+            isValidated: boolean;
+            validationSource: string | null;
+        };
+        /** @enum {string} */
+        ErpCartSmsRecipientSource: "PATIENT" | "TRADER" | "MANUAL";
+        ErpCartLineView: {
+            id: string;
+            lineNumber: number;
+            sourceErpItemId: string | null;
+            sourceDoctorServiceId: string | null;
+            description: string;
+            measurementUnit: components["schemas"]["ErpCartItemMeasurementUnit"];
+            type: components["schemas"]["ErpCartItemType"];
+            productType: number;
+            quantity: number;
+            grossUnitAmountInCents: number;
+            lineTotalInputInCents: number | null;
+            nominalVatRate: number;
+            vatCategory: components["schemas"]["ErpCartVatCategory"];
+            vatReduction: number;
+            vatRate: number;
+            vatExemption: number | null;
+            selectedPriceInCents: number;
+            netAmountInCents: number;
+            vatAmountInCents: number;
+            totalAmountInCents: number;
+            roundingDifference: number;
+            maxSellingPriceInCents: number | null;
+            maxSellingQuantity: number | null;
+            warnings: string[];
+        };
+        /** @enum {string} */
+        ErpCartItemMeasurementUnit: "piece" | "litre" | "kilogram" | "cubicMetre";
+        /** @enum {string} */
+        ErpCartItemType: "service" | "good" | "product";
+        ErpCartVatTableRowView: {
+            vatRate: number;
+            netAmountInCents: number;
+            vatAmountInCents: number;
+            totalAmountInCents: number;
+        };
+        ErpCartTaxView: {
+            id: string;
+            sourceDocumentSeriesTaxId: string;
+            category: components["schemas"]["ErpCartTaxCategory"];
+            categoryCode: number;
+            taxCategory: number;
+            taxPercent: number;
+            proceed: components["schemas"]["ErpCartTaxProceed"];
+            needsAnswer: boolean;
+            thresholdGrossAmountInCents: number;
+            taxAmountInCents: number;
+            feeAmountInCents: number;
+            underlyingAmountInCents: number;
+            willBePaid: boolean;
+            isWithholding: boolean;
+            isFee: boolean;
+        };
+        /** @enum {string} */
+        ErpCartTaxCategory: "WITHHOLDING_TAX" | "DIGITAL_TRANSACTION_FEE";
+        /** @enum {string} */
+        ErpCartTaxProceed: "DISABLED" | "NOT_ASKED_YET" | "NOT_GRANTED_AT_ASKED" | "GRANTED_AT_ASKED" | "AUTO_GRANTED" | "AUTO_GRANTED_OVER";
+        ErpCartTotalsView: {
+            netAmountInCents: number;
+            vatAmountInCents: number;
+            feeAmountInCents: number;
+            taxAmountInCents: number;
+            totalAmountInCents: number;
+        };
+        ErpCartAllowedPaymentMethodView: {
+            method: components["schemas"]["ErpCartPaymentMethod"];
+            provider: string | null;
+            priority: number;
+            enabled: boolean;
+            configured: boolean;
+            available: boolean;
+            unavailableReason: components["schemas"]["ErpCartPaymentMethodUnavailableReason"] | null;
+        };
+        /** @enum {string} */
+        ErpCartPaymentMethod: "cash" | "credit" | "deposit" | "web-banking" | "check" | "free" | "pos" | "iris";
+        /**
+         * @description DoD #7: why a listed method cannot be used right now. `PROVIDER_DOWN` is the transmission light, the other two are the office menu itself, so the till can tell "come back later" from "set it up".
+         * @enum {string}
+         */
+        ErpCartPaymentMethodUnavailableReason: "PROVIDER_DOWN" | "METHOD_DISABLED" | "PROVIDER_NOT_CONFIGURED";
+        /** @description Q2: `canCheckout` is exactly "no `checkoutBlockers`" — the gate stays the server's, the till only shows it. */
+        ErpCartReadinessView: {
+            /** @enum {string} */
+            aade: "GREEN" | "RED";
+            /** @enum {string} */
+            provider: "GREEN" | "RED";
+            account: {
+                blocked: boolean;
+            };
+            cardPaymentsAvailable: boolean;
+            canCheckout: boolean;
+            checkoutBlockers: components["schemas"]["ErpCartCheckoutBlocker"][];
+            receiptSms: components["schemas"]["ErpCartReceiptSmsView"];
+            notices: components["schemas"]["ErpCartReadinessNotice"][];
+        };
+        /**
+         * @description Q2 (D-120): ONE code per reason the checkout of this cart is closed right now — the account, the series lock, and what the checkout already refuses from the cart alone (not active, no series, empty, an invoice without its counterpart, an unanswered tax, any other blocking rule: `CART_RULES`, detailed by `validate`).
+         * @enum {string}
+         */
+        ErpCartCheckoutBlocker: "ACCOUNT_BLOCKED" | "SERIES_BUSY" | "CART_NOT_ACTIVE" | "SERIES_MISSING" | "CART_EMPTY" | "COUNTERPART_REQUIRED" | "TAX_ANSWER_MISSING" | "CART_RULES";
+        /** @description Q3 rule 2: whether a receipt SMS can be sent at this checkout, and why not (`NO_SMS_UNITS`). */
+        ErpCartReceiptSmsView: {
+            available: boolean;
+            reason: components["schemas"]["ErpReceiptDeliveryRefusal"] | null;
+        };
+        /**
+         * @description Why a receipt delivery is refused; each one is the error message of its answer (409 only for `NO_SMS_UNITS`).
+         * @enum {string}
+         */
+        ErpReceiptDeliveryRefusal: "DELIVERY_METHOD_NOT_ENABLED" | "DELIVERY_METHOD_UNAVAILABLE" | "DELIVERY_RECIPIENT_MISSING" | "NO_SMS_UNITS" | "RECEIPT_NOT_TRANSMITTED" | "RECEIPT_NOT_DELIVERABLE";
+        /** @enum {string} */
+        ErpCartReadinessNotice: "AADE_DELAYED_TRANSMISSION" | "PROVIDER_DOWN" | "ACCOUNT_BLOCKED" | "SERIES_BUSY";
+        ErpCartCheckoutView: {
+            cartId: string;
+            status: components["schemas"]["ErpCartStatus"];
+            document: {
+                id: string;
+                status: string;
+                series: {
+                    abbreviation: string;
+                    number: number;
+                };
+                totals: components["schemas"]["ErpCartTotalsView"];
+            };
+            transmission: components["schemas"]["ErpCartCheckoutTransmissionView"] | null;
+            print: components["schemas"]["ErpCartCheckoutPrintView"] | null;
+            paymentAttempt: {
+                id: string;
+                status: string;
+                kind: string | null;
+                expiresAt: string | null;
+            } | null;
+            instruction: components["schemas"]["PaymentInstruction"] | null;
+        };
+        ErpCartCheckoutTransmissionView: components["schemas"]["ErpFinancialDocumentTransmissionOutcomeView"];
+        /** @description What the synchronous send of an issuance answered, as the till renders it. One shape for every issuance — a sale checkout and a credit note alike; `null` in a response means the send never ran. */
+        ErpFinancialDocumentTransmissionOutcomeView: {
+            status: string;
+            bucket: string | null;
+            mark: string | null;
+            qrUrlAADE: string | null;
+            qrCode: string | null;
+            transmissionNotice: string | null;
+        };
+        ErpCartCheckoutPrintView: components["schemas"]["ErpFinancialDocumentPrintJobView"];
+        /** @description D-104: the delivery job an issuance handed to the station. One shape for every issuance — a sale checkout and a credit note alike; `null` in a response means no station was named or nothing was printed. */
+        ErpFinancialDocumentPrintJobView: {
+            jobId: string;
+        };
+        PaymentInstruction: {
+            contractVersion: string;
+            attemptId: string;
+            documentId: string;
+            sequenceNo: number;
+            kind: components["schemas"]["PaymentInstructionKind"];
+            provider: components["schemas"]["PaymentProviderCode"];
+            operation: components["schemas"]["PaymentOperation"];
+            method: components["schemas"]["PaymentMethodKind"];
+            amounts: components["schemas"]["PaymentAmounts"];
+            target: components["schemas"]["PaymentInstructionTarget"];
+            payload: string | {
+                [key: string]: unknown;
+            } | null;
+            parochosToken: components["schemas"]["PaymentInstructionTokenRef"] | null;
+            timeoutSec: number;
+            expiresAt: string;
+            idempotencyKey: string;
+            display: components["schemas"]["PaymentInstructionDisplay"];
+            resultSchemaHint: components["schemas"]["PaymentResultSchemaHint"];
+        };
+        /** @enum {string} */
+        PaymentInstructionKind: "deeplink-callback" | "intent-extra-json" | "intent-action-json" | "nexi-deeplink" | "tapxphone" | "server" | "mock";
+        /** @enum {string} */
+        PaymentProviderCode: "worldline" | "viva" | "nbg" | "epay" | "iris" | "nexi" | "webecr";
+        /** @enum {string} */
+        PaymentOperation: "sale" | "refund";
+        /** @enum {string} */
+        PaymentMethodKind: "pos" | "iris";
+        PaymentAmounts: {
+            amountInCents: number;
+            tipAmountInCents: number;
+            netInCents: number;
+            vatInCents: number;
+            totalInCents: number;
+            /** @constant */
+            currency: "EUR";
+        };
+        /** @description One member per `kind`, so the compiler — not a code review — refuses an executor target that does not carry what the Android side needs to launch that particular SoftPOS. */
+        PaymentInstructionTarget: {
+            /** @constant */
+            kind: "deeplink-callback";
+            uri: string;
+            packages: string[];
+        } | {
+            /** @constant */
+            kind: "intent-extra-json";
+            package: string;
+            extraKey: string;
+            resultExtraKey: string;
+            legacyResultKeys: string[];
+            requestCode: number;
+        } | {
+            /** @constant */
+            kind: "intent-action-json";
+            actionCandidates: string[];
+            requestExtraKey: string;
+            resultExtraKey: string;
+            requestCode: number;
+        } | {
+            /** @constant */
+            kind: "nexi-deeplink";
+            scheme: string;
+            host: string;
+            package: string;
+            contentProviderAuthority: string;
+            requestCode: number;
+            verifyTerminalId: boolean;
+        } | {
+            /** @constant */
+            kind: "tapxphone";
+            package: string;
+            requestCode: number;
+        } | {
+            /** @constant */
+            kind: "server";
+            /** @constant */
+            provider: "webecr";
+            pollIntervalMs: number;
+            terminalLabel: string;
+        } | {
+            /** @constant */
+            kind: "mock";
+            scenario: string;
+            mockAs: components["schemas"]["PaymentProviderCode"];
+            delayMs: number;
+            nativeStatus: string;
+            rawResult: string;
+        };
+        /** @description Θ-05: the envelope carries only the token identifiers. The provider signature already travels inside `target.uri`; a second copy would widen the exposure surface without a reader. */
+        PaymentInstructionTokenRef: {
+            uid: string;
+            date: string;
+            terminalId: string;
+        };
+        PaymentInstructionDisplay: {
+            providerLabel: string;
+            methodLabel: string;
+            amountLabel: string;
+            terminalLabel: string;
+        };
+        /** @enum {string} */
+        PaymentResultSchemaHint: "viva-callback-uri" | "epay-result-json" | "edps-result-json" | "nexi-result-extras" | "tapxphone-result-extras" | "webecr-server-poll" | "mock";
+        /** @description 🔴 D-01/D-03/R-12: the terminal as anyone outside the payment path may see it. There is no field for the API key — only its mask — and the type is what the bundle and the list both answer. */
+        ErpWebEcrTerminalView: {
+            id: string;
+            doctorId: string;
+            nspType: components["schemas"]["WebEcrNspType"];
+            acquirerType: components["schemas"]["WebEcrAcquirerType"];
+            bankTerminalId: string;
+            internalTerminalId: string | null;
+            apiKeyMasked: string | null;
+            label: string | null;
+            friendlyName: string | null;
+            merchant: string | null;
+            terminalType: number | null;
+            isEnabled: boolean;
+            locked: boolean;
+            currentBatchNumber: number | null;
+            isTaCAccepted: boolean;
+            taCAcceptanceDatetime: string | null;
+            provisioned: boolean;
+            provisionedAt: string | null;
+            lastProvisionErrorCode: string | null;
+            links: components["schemas"]["ErpWebEcrTerminalLinkView"][];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /**
+         * @description WebECR routing registry: which NSP serves which acquirer, and at which URLs. Values mirror the production `webEcrConfig` of ics-vcr. Credentials are NEVER here: they are environment-driven and owned by `RuntimeConfig.erpPayments.webecr` (D-59).
+         * @enum {string}
+         */
+        WebEcrNspType: "mellon" | "euronet";
+        /**
+         * @description 🔴 B-13: an open string in the source became an env-dependent database ENUM. Here the value list is a compile-time union and the database column stays a plain `String`.
+         * @enum {string}
+         */
+        WebEcrAcquirerType: "mellon" | "euronet" | "nexi" | "worldline" | "nbg" | "cosmote" | "jcc" | "attica" | "pancreta" | "tora" | "pbt" | "mypos" | "procredit";
+        ErpWebEcrTerminalLinkView: {
+            officeId: string;
+            stationId: string | null;
+        };
+        /** @description The published shapes of the two list endpoints; the OpenAPI artifact names them. */
+        ErpWebEcrTerminalListView: components["schemas"]["ErpWebEcrTerminalView"][];
+        ErpWebEcrTerminalRouteOptionListView: components["schemas"]["ErpWebEcrTerminalRouteOptionView"][];
+        /** @description One registrable NSP/acquirer pair. The acquirers without an Appendix 5 code are not listed. */
+        ErpWebEcrTerminalRouteOptionView: {
+            nspType: components["schemas"]["WebEcrNspType"];
+            acquirerType: components["schemas"]["WebEcrAcquirerType"];
+        };
+        ErpFinancialDocumentPaymentAttemptView: {
+            id: string;
+            erpFinancialDocumentId: string;
+            erpFinancialDocumentPaymentId: string | null;
+            sequenceNo: number;
+            kind: components["schemas"]["ErpFinancialDocumentPaymentAttemptKind"];
+            method: components["schemas"]["ErpFinancialDocumentPaymentMethod"];
+            provider: components["schemas"]["ErpFinancialDocumentPaymentProvider"];
+            amountInCents: number;
+            terminalRef: {
+                [key: string]: unknown;
+            } | null;
+            parochosTokenId: string | null;
+            status: components["schemas"]["ErpFinancialDocumentPaymentAttemptStatus"];
+            instruction: {
+                [key: string]: unknown;
+            } | null;
+            instructionIssuedAt: string | null;
+            instructionExpiresAt: string | null;
+            deviceContext: {
+                [key: string]: unknown;
+            } | null;
+            rawResult: {
+                [key: string]: unknown;
+            } | null;
+            nativeStatus: string | null;
+            nativeErrorCode: string | null;
+            normalizedResult: {
+                [key: string]: unknown;
+            } | null;
+            errorCode: string | null;
+            errorMessage: string | null;
+            resultReceivedAt: string | null;
+            resolvedAt: string | null;
+            uncertainSince: string | null;
+            decision: {
+                [key: string]: unknown;
+            } | null;
+            verification: {
+                [key: string]: unknown;
+            } | null;
+            webhookRefs: {
+                [key: string]: unknown;
+            } | null;
+            instructionKind: components["schemas"]["ErpFinancialDocumentPaymentInstructionKind"] | null;
+            contractVersion: string;
+            timeoutSec: number | null;
+            clientResultId: string | null;
+            lateResults: {
+                [key: string]: unknown;
+            }[] | null;
+            initiatedByTenantUserId: string | null;
+            initiatedFrom: components["schemas"]["ErpFinancialDocumentPaymentAttemptOrigin"];
+            nextVerificationAt: string | null;
+            verificationBackoffStep: number;
+            verificationExpiresAt: string | null;
+            verificationAttempts: number;
+            manualReviewReason: components["schemas"]["ErpFinancialDocumentManualReviewReason"] | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        ErpFinancialDocumentPaymentAttemptKind: "SALE" | "REFUND" | "VOID";
+        /** @enum {string} */
+        ErpFinancialDocumentPaymentMethod: "deposit" | "cash" | "credit" | "pos" | "web-banking" | "check" | "free" | "iris";
+        /** @enum {string} */
+        ErpFinancialDocumentPaymentProvider: "worldline" | "viva" | "nbg" | "epay" | "iris" | "nexi" | "webecr";
+        /** @enum {string} */
+        ErpFinancialDocumentPaymentAttemptStatus: "CREATED" | "AWAITING_DEVICE_RESULT" | "SENT_TO_NSP" | "APPROVED" | "DECLINED" | "CANCELLED" | "FAILED" | "UNCERTAIN" | "MANUAL_REVIEW" | "EXPIRED";
+        /** @enum {string} */
+        ErpFinancialDocumentPaymentInstructionKind: "DEEPLINK_CALLBACK" | "INTENT_EXTRA_JSON" | "INTENT_ACTION_JSON" | "NEXI_DEEPLINK" | "TAPXPHONE" | "SERVER" | "MOCK";
+        /** @enum {string} */
+        ErpFinancialDocumentPaymentAttemptOrigin: "APP" | "WEB" | "BACKOFFICE" | "WORKER" | "SYSTEM";
+        /** @enum {string} */
+        ErpFinancialDocumentManualReviewReason: "PAYMENT_RESULT_INCOMPLETE" | "UNCERTAIN_TTL" | "GHOST_CHARGE" | "CRITICAL_MISMATCH" | "DUPLICATE_CUSTOMER_REFERENCE";
+        ErpFinancialDocumentPaymentAttemptListView: {
+            items: components["schemas"]["ErpFinancialDocumentPaymentAttemptView"][];
+            total: number;
+        };
+        /** @description The published shape of `GET /payment-attempts/{attemptId}/events`. */
+        ErpFinancialDocumentPaymentAttemptEventListView: components["schemas"]["ErpFinancialDocumentPaymentAttemptEventView"][];
+        ErpFinancialDocumentPaymentAttemptEventView: {
+            id: string;
+            eventType: string;
+            previousStatus: components["schemas"]["ErpFinancialDocumentPaymentAttemptStatus"] | null;
+            newStatus: components["schemas"]["ErpFinancialDocumentPaymentAttemptStatus"] | null;
+            actorTenantUserId: string | null;
+            source: components["schemas"]["ErpFinancialDocumentPaymentAttemptOrigin"];
+            metadata: {
+                [key: string]: unknown;
+            } | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @description The answer of a quick retry or a manual verify: what the NSP showed and where it left things. */
+        ErpFinancialDocumentWebEcrVerificationView: {
+            attempt: components["schemas"]["ErpFinancialDocumentPaymentAttemptView"];
+            document: components["schemas"]["ErpFinancialDocumentView"];
+            observation: string;
+            action: string;
+        };
+        ErpFinancialDocumentView: {
+            id: string;
+            officeId: string;
+            createdByTenantUserId: string;
+            issueDate: string | null;
+            submissionDate: string | null;
+            transmissionDate: string | null;
+            printDate: string | null;
+            delayedProcessCode: string | null;
+            netAmountInCents: number;
+            vatAmountInCents: number;
+            taxAmountInCents: number;
+            feeAmountInCents: number;
+            totalAmountInCents: number;
+            notes: string | null;
+            email: string | null;
+            status: components["schemas"]["ErpFinancialDocumentStatus"];
+            transmissionStatus: components["schemas"]["ErpFinancialDocumentTransmissionStatus"];
+            transmissionStep: components["schemas"]["ErpFinancialDocumentTransmissionStep"];
+            transmissionFailureType: components["schemas"]["ErpFinancialDocumentTransmissionFailureType"];
+            lastTransmissionAttemptAt: string | null;
+            nextTransmissionAttemptAt: string | null;
+            transmissionAttemptsCount: number;
+            statusCheckAttemptsCount: number;
+            lastTransmissionErrorCode: string | null;
+            lastTransmissionErrorMessage: string | null;
+            lastTransmissionErrorAt: string | null;
+            completedAt: string | null;
+            canceledAt: string | null;
+            stationId: string | null;
+            sourceCartId: string | null;
+            patientId: string | null;
+            appointmentId: string | null;
+            smsRecipient: string | null;
+            deliveryMethod: components["schemas"]["ErpReceiptDeliveryMethod"] | null;
+            cancelReason: components["schemas"]["ErpFinancialDocumentCancelReason"] | null;
+            manualReviewReason: components["schemas"]["ErpFinancialDocumentManualReviewReason"] | null;
+            needsAttention: boolean;
+            needsAttentionReason: string | null;
+            reconcileCount: number;
+            transmissionBucket: components["schemas"]["ErpTransmissionBucket"] | null;
+            unknownAttemptsCount: number;
+            lastPaymentErrorCode: string | null;
+            lastPaymentErrorMessage: string | null;
+            lastPaymentErrorAt: string | null;
+            lastPrintJobId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            documentSeries: components["schemas"]["ErpFinancialDocumentSeriesView"];
+            issuer: components["schemas"]["ErpFinancialDocumentIssuerView"];
+            trader: components["schemas"]["ErpFinancialDocumentTraderView"] | null;
+            traderBranch: components["schemas"]["ErpFinancialDocumentTraderBranchView"] | null;
+            items: components["schemas"]["ErpFinancialDocumentItemView"][];
+            payments: components["schemas"]["ErpFinancialDocumentPaymentView"][];
+            signing: components["schemas"]["ErpFinancialDocumentSigningView"] | null;
+            print: components["schemas"]["ErpFinancialDocumentPrintView"] | null;
+            errors: components["schemas"]["ErpFinancialDocumentErrorView"][];
+            correlations: components["schemas"]["ErpFinancialDocumentCorrelationView"][];
+            refundedByDocumentIds: string[];
+            correctionActions: components["schemas"]["ErpFinancialDocumentCorrectionAction"][];
+            documentTaxes: components["schemas"]["ErpFinancialDocumentTaxView"][];
+        };
+        /** @enum {string} */
+        ErpFinancialDocumentStatus: "PAYMENT_PENDING" | "PAYMENT_UNCERTAIN" | "PAYMENT_MANUAL_REVIEW" | "ISSUED" | "TRANSMITTING" | "WAITING_STATUS_CHECK" | "PRINTING" | "COMPLETED" | "FAILED_TERMINAL" | "CANCELED";
+        /** @enum {string} */
+        ErpFinancialDocumentTransmissionStatus: "NONE" | "PENDING_TRANSMIT" | "RETRY_SCHEDULED" | "PENDING_STATUS_CHECK" | "CONFIRMED" | "FAILED_TERMINAL";
+        /** @enum {string} */
+        ErpFinancialDocumentTransmissionStep: "NONE" | "TRANSMIT" | "CHECK_STATUS";
+        /** @enum {string} */
+        ErpFinancialDocumentTransmissionFailureType: "NONE" | "FAILURE_1" | "FAILURE_2";
+        /**
+         * @description Q3 (D-120): the ONE way a receipt reaches the customer, picked per issuance among the doctor's enabled methods.
+         * @enum {string}
+         */
+        ErpReceiptDeliveryMethod: "PRINT" | "SMS" | "EMAIL";
+        /** @enum {string} */
+        ErpFinancialDocumentCancelReason: "TOKEN_FAILED" | "PAYMENT_DECLINED" | "PAYMENT_CANCELLED" | "PAYMENT_FAILED" | "PAYMENT_TIMEOUT" | "PAYMENT_APP_NOT_INSTALLED" | "DECISION_DECLINE" | "UNCERTAIN_TTL" | "REFUND_FAILED" | "MANUAL";
+        /** @enum {string} */
+        ErpTransmissionBucket: "SUCCESS" | "AADE_PENDING" | "PROVIDER_DOWN" | "CONTENT_REJECTED" | "ACCOUNT" | "IDEMPOTENT" | "UNKNOWN";
+        ErpFinancialDocumentSeriesView: {
+            sourceErpDocumentSeriesId: string;
+            abbreviation: string;
+            description: string | null;
+            series: string;
+            number: number;
+            holdsNumber: boolean;
+            type: string | null;
+            myDataType: string | null;
+        };
+        ErpFinancialDocumentIssuerView: {
+            sourceErpIssuerId: string | null;
+            sourceErpIssuerBranchId: string | null;
+            taxNumber: string;
+            businessName: string;
+            vatCategory: components["schemas"]["ErpFinancialDocumentVatCategory"];
+            branch: components["schemas"]["ErpFinancialDocumentIssuerBranchView"];
+        };
+        /** @enum {string} */
+        ErpFinancialDocumentVatCategory: "standard" | "reduced" | "zero";
+        ErpFinancialDocumentIssuerBranchView: {
+            id: string;
+            branchCode: number;
+            isHq: boolean;
+            address: string | null;
+            jobTitle: string | null;
+            postalCode: string | null;
+            city: string | null;
+            taxOffice: string | null;
+        };
+        ErpFinancialDocumentTraderView: {
+            sourceErpTraderId: string | null;
+            taxNumber: string;
+            name: string;
+            type: components["schemas"]["ErpFinancialDocumentTraderType"];
+            branch: string | null;
+            vatCategory: components["schemas"]["ErpFinancialDocumentVatCategory"];
+            address: string | null;
+            jobTitle: string | null;
+            postalCode: string | null;
+            city: string | null;
+            taxOffice: string | null;
+            phoneNumber: string | null;
+            country: string;
+            isValidated: boolean;
+            sourcePatientId: string | null;
+            validationSource: components["schemas"]["ErpFinancialDocumentTraderValidationSource"] | null;
+        };
+        /** @enum {string} */
+        ErpFinancialDocumentTraderType: "customer" | "citizen" | "supplier";
+        /** @enum {string} */
+        ErpFinancialDocumentTraderValidationSource: "GSIS" | "VIES";
+        ErpFinancialDocumentTraderBranchView: {
+            sourceTraderBranchId: string | null;
+            sourceErpTraderId: string | null;
+            code: number;
+            city: string;
+            street: string;
+            streetNumber: number;
+            postalCode: string;
+            country: string;
+            jobTitle: string | null;
+            vatCategory: components["schemas"]["ErpFinancialDocumentVatCategory"] | null;
+            phoneNumber: string | null;
+            taxOffice: string | null;
+        };
+        ErpFinancialDocumentItemView: {
+            lineNumber: number;
+            sourceErpItemId: string | null;
+            sourceDoctorServiceId: string | null;
+            description: string;
+            measurementUnit: components["schemas"]["ErpFinancialDocumentItemMeasurementUnit"];
+            type: components["schemas"]["ErpFinancialDocumentItemType"];
+            productType: number;
+            quantity: number;
+            selectedPriceInCents: number;
+            netAmountInCents: number;
+            vatAmountInCents: number;
+            totalAmountInCents: number;
+            vatRate: number;
+            vatCategory: components["schemas"]["ErpFinancialDocumentVatCategory"] | null;
+            vatExemption: number | null;
+            vatReduction: number | null;
+            taxType: string | null;
+            taxCategory: number | null;
+            taxUnderlyingAmount: number | null;
+            recType: number | null;
+            roundingDifference: number;
+        };
+        /** @enum {string} */
+        ErpFinancialDocumentItemMeasurementUnit: "piece" | "litre" | "kilogram" | "cubicMetre";
+        /** @enum {string} */
+        ErpFinancialDocumentItemType: "service" | "good" | "product";
+        ErpFinancialDocumentPaymentView: {
+            id: string;
+            sequenceNo: number;
+            paymentMethod: components["schemas"]["ErpFinancialDocumentPaymentMethod"];
+            amountInCents: number;
+            provider: components["schemas"]["ErpFinancialDocumentPaymentProvider"] | null;
+            paymentStatus: components["schemas"]["ErpFinancialDocumentPaymentStatus"];
+            transactionId: string | null;
+            aadeTransactionId: string | null;
+            token: components["schemas"]["ErpFinancialDocumentPaymentTokenView"] | null;
+            details: {
+                [key: string]: unknown;
+            } | null;
+        };
+        /** @enum {string} */
+        ErpFinancialDocumentPaymentStatus: "NONE" | "PENDING" | "PAID" | "PENDING_VERIFICATION" | "FAILED";
+        ErpFinancialDocumentPaymentTokenView: {
+            uid: string;
+            /** Format: date-time */
+            date: string;
+            providersSignature: string;
+            terminalId: string;
+            status: components["schemas"]["ErpFinancialDocumentPaymentTokenStatus"];
+            mark: string | null;
+            amountInCents: number;
+            externalSystemId: string | null;
+            attemptId: string | null;
+            /** Format: date-time */
+            requestedAt: string;
+            completedAt: string | null;
+            cancelledAt: string | null;
+            cancelAttempts: number;
+            lastCancelError: string | null;
+        };
+        /** @enum {string} */
+        ErpFinancialDocumentPaymentTokenStatus: "PENDING" | "COMPLETED" | "CANCELLED" | "EXPIRED";
+        ErpFinancialDocumentSigningView: {
+            uid: string;
+            mark: string | null;
+            qrCode: string | null;
+            qrUrlAADE: string | null;
+            authenticationCode: string | null;
+            pdfFileUrl: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ErpFinancialDocumentPrintView: {
+            renderVersion: string;
+            renderChannel: components["schemas"]["ErpFinancialDocumentRenderChannel"];
+            data: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        ErpFinancialDocumentRenderChannel: "NONE" | "THERMAL_PRINT" | "COLOR_BROWSER_PRINT" | "EMAIL" | "SMS";
+        ErpFinancialDocumentErrorView: {
+            id: string;
+            attemptId: string | null;
+            paymentAttemptId: string | null;
+            editedByTenantUserId: string | null;
+            stationId: string | null;
+            stage: components["schemas"]["ErpFinancialDocumentErrorStage"];
+            errorKind: components["schemas"]["ErpFinancialDocumentErrorKind"];
+            errorCode: string | null;
+            errorMessage: string;
+            isRetryable: boolean;
+            providerRequestJson: {
+                [key: string]: unknown;
+            } | null;
+            providerResponseJson: {
+                [key: string]: unknown;
+            } | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @enum {string} */
+        ErpFinancialDocumentErrorStage: "ISSUE" | "TRANSMIT" | "CHECK_STATUS" | "SUBMIT" | "REFUND" | "PAYMENT" | "PRINT" | "CANCEL";
+        /** @enum {string} */
+        ErpFinancialDocumentErrorKind: "BUSINESS" | "TECHNICAL" | "VALIDATION" | "UNKNOWN";
+        ErpFinancialDocumentCorrelationView: {
+            id: string;
+            sourceErpFinancialDocumentId: string;
+            targetErpFinancialDocumentId: string;
+            relationType: components["schemas"]["ErpFinancialDocumentRelationType"];
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @enum {string} */
+        ErpFinancialDocumentRelationType: "REFUND_OF" | "REPLACES" | "CANCELS" | "RELATED_TO";
+        /**
+         * @description D-123 (D-118 rule 1): the manual actions the server accepts on a document NOW, in the order the till offers them. The view lists them (`correctionActions`), so a client never infers a permission from a status or an error text.
+         * @enum {string}
+         */
+        ErpFinancialDocumentCorrectionAction: "ISSUE_DATE" | "COUNTERPART" | "SERIES_NUMBER" | "RESTORE_TRANSMISSION" | "CANCEL";
+        ErpFinancialDocumentTaxView: {
+            id: string;
+            sourceDocumentSeriesTaxId: string | null;
+            taxType: string | null;
+            taxCategory: number | null;
+            taxPercent: number | null;
+            taxAmountInCents: number;
+            underlyingAmountInCents: number;
+            feeAmountInCents: number;
+            willBePaid: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ErpFinancialDocumentPaymentResultView: {
+            attempt: components["schemas"]["ErpFinancialDocumentPaymentAttemptView"];
+            document: components["schemas"]["ErpFinancialDocumentView"];
+            next: components["schemas"]["ErpFinancialDocumentPaymentNextStep"];
+            cart: {
+                cartId: string;
+                status: string;
+            } | null;
+        };
+        /** @enum {string} */
+        ErpFinancialDocumentPaymentNextStep: "issued_and_transmitting" | "issued_deferred" | "canceled" | "manual_review";
+        ErpCartListView: {
+            items: components["schemas"]["ErpCartView"][];
+            total: number;
+        };
+        /** @description Named response aliases for the OpenAPI registry: `data` is always ONE `$ref` (`buildOpenApiDocument`), so a list or a nullable read needs a name of its own. Same technique as `ErpWebEcrTerminalListView`. */
+        ErpCartActiveView: components["schemas"]["ErpCartView"] | null;
+        ErpCartValidationView: {
+            valid: boolean;
+            violations: components["schemas"]["ErpRuleViolation"][];
+            allowedPaymentMethods: components["schemas"]["ErpCartAllowedPaymentMethodView"][];
+            readiness: components["schemas"]["ErpCartReadinessView"];
+        };
+        ErpRuleViolation: {
+            code: string;
+            severity: components["schemas"]["ErpRuleSeverity"];
+            path: string;
+        };
+        /** @enum {number} */
+        ErpRuleSeverity: 1 | 2;
+        ErpFinancialDocumentListView: {
+            items: components["schemas"]["ErpFinancialDocumentListItemView"][];
+            total: number;
+        };
+        /** @description D-16: the light row a paginated list answers with. It is deliberately not the aggregate view: a list page must not hydrate lines, payments and error trails it never shows. */
+        ErpFinancialDocumentListItemView: {
+            id: string;
+            officeId: string;
+            issueDate: string | null;
+            status: components["schemas"]["ErpFinancialDocumentStatus"];
+            transmissionStatus: components["schemas"]["ErpFinancialDocumentTransmissionStatus"];
+            transmissionStep: components["schemas"]["ErpFinancialDocumentTransmissionStep"];
+            needsAttention: boolean;
+            needsAttentionReason: string | null;
+            netAmountInCents: number;
+            vatAmountInCents: number;
+            totalAmountInCents: number;
+            delayedProcessCode: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            documentSeries: {
+                sourceErpDocumentSeriesId: string;
+                abbreviation: string;
+                series: string;
+                number: number;
+                myDataType: string | null;
+            };
+            counterpart: {
+                name: string;
+                taxNumber: string;
+            } | null;
+            mark: string | null;
+            paymentMethod: components["schemas"]["ErpFinancialDocumentPaymentMethod"] | null;
+        };
+        ErpFinancialDocumentPendingView: {
+            counters: components["schemas"]["ErpFinancialDocumentPendingCounters"];
+            items: components["schemas"]["ErpFinancialDocumentPendingItemView"][];
+        };
+        ErpFinancialDocumentPendingCounters: {
+            rejected: number;
+            deferred: number;
+            needsAttention: number;
+            canceledWithNumber: number;
+            uncertain: number;
+            manualReview: number;
+            awaitingDevice: number;
+        };
+        ErpFinancialDocumentPendingItemView: {
+            category: components["schemas"]["ErpFinancialDocumentPendingCategory"];
+            lastError: {
+                code: string | null;
+                message: string | null;
+                at: string | null;
+            } | null;
+            /** @enum {string} */
+            nextAction: "RETRY" | "CORRECT" | "WAIT" | "REVIEW";
+            id: string;
+            officeId: string;
+            issueDate: string | null;
+            status: components["schemas"]["ErpFinancialDocumentStatus"];
+            transmissionStatus: components["schemas"]["ErpFinancialDocumentTransmissionStatus"];
+            transmissionStep: components["schemas"]["ErpFinancialDocumentTransmissionStep"];
+            needsAttention: boolean;
+            needsAttentionReason: string | null;
+            netAmountInCents: number;
+            vatAmountInCents: number;
+            totalAmountInCents: number;
+            delayedProcessCode: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            documentSeries: {
+                sourceErpDocumentSeriesId: string;
+                abbreviation: string;
+                series: string;
+                number: number;
+                myDataType: string | null;
+            };
+            counterpart: {
+                name: string;
+                taxNumber: string;
+            } | null;
+            mark: string | null;
+            paymentMethod: components["schemas"]["ErpFinancialDocumentPaymentMethod"] | null;
+        };
+        /**
+         * @description D-09 / L-16: the categories of "documents in the air". `uncertain`, `manualReview` and `awaitingDevice` are the states only the card flow writes.
+         * @enum {string}
+         */
+        ErpFinancialDocumentPendingCategory: "rejected" | "deferred" | "needsAttention" | "canceledWithNumber" | "uncertain" | "manualReview" | "awaitingDevice";
+        /** @description Named response aliases for the OpenAPI registry: `data` is always ONE `$ref` (`buildOpenApiDocument`), so a list read needs a name of its own. Same technique as `ErpFinancialDocumentPaymentAttemptEventListView`. */
+        ErpFinancialDocumentAttentionSummaryListView: components["schemas"]["ErpFinancialDocumentAttentionSummaryView"][];
+        ErpFinancialDocumentAttentionSummaryView: {
+            reason: components["schemas"]["ErpFinancialDocumentNeedsAttentionReason"];
+            count: number;
+        };
+        /** @enum {string} */
+        ErpFinancialDocumentNeedsAttentionReason: "UNKNOWN_PROVIDER_RESPONSE" | "REPEATED_QUEUE_LOSS" | "TRANSMISSION_OVERDUE" | "SYSTEMIC_TRANSMISSION_STOP" | "PAYMENT_AMOUNT_MISMATCH" | "PAYMENT_TOKEN_REJECTED" | "PAYMENT_TERMINAL_MISMATCH" | "PAYMENT_PROVIDER_RECONCILIATION" | "UNBOUND_CARD_SEND_FAILED" | "TRANSMISSION_REJECTED";
+        ErpFinancialDocumentPrintModelView: {
+            documentId: string;
+            version: number;
+            kind: string | null;
+            series: {
+                abbreviation: string;
+                series: string;
+                number: number;
+            };
+            issueDate: string | null;
+            issuer: components["schemas"]["ErpFinancialDocumentIssuerView"];
+            counterpart: components["schemas"]["ErpFinancialDocumentTraderView"] | null;
+            lines: components["schemas"]["ErpFinancialDocumentItemView"][];
+            vatTable: components["schemas"]["ErpFinancialDocumentPrintModelVatTableRow"][];
+            taxes: components["schemas"]["ErpFinancialDocumentTaxView"][];
+            totals: components["schemas"]["ErpFinancialDocumentCartTotalsInput"];
+            payment: {
+                method: components["schemas"]["ErpFinancialDocumentPaymentMethod"] | null;
+                amountInCents: number;
+            };
+            signing: components["schemas"]["ErpFinancialDocumentSigningView"] | null;
+            qr: {
+                value: string;
+            } | null;
+            delayedProcessCode: string | null;
+            transmissionState: components["schemas"]["ErpFinancialDocumentTransmissionState"];
+            transmissionNotice: string | null;
+            smsRecipient: string | null;
+            notes: string | null;
+            printedAt: string | null;
+        };
+        ErpFinancialDocumentPrintModelVatTableRow: {
+            vatRate: number;
+            netAmountInCents: number;
+            vatAmountInCents: number;
+            totalAmountInCents: number;
+        };
+        ErpFinancialDocumentCartTotalsInput: {
+            netAmountInCents: number;
+            vatAmountInCents: number;
+            taxAmountInCents: number;
+            feeAmountInCents: number;
+            totalAmountInCents: number;
+        };
+        /**
+         * @description A document without a print model has no transmission state to print, so `failed` is not one.
+         * @enum {string}
+         */
+        ErpFinancialDocumentTransmissionState: "confirmed" | "deferred";
+        ErpFinancialDocumentTransmissionAttemptListView: components["schemas"]["ErpFinancialDocumentTransmissionAttemptView"][];
+        ErpFinancialDocumentTransmissionAttemptView: {
+            id: string;
+            erpFinancialDocumentId: string;
+            attemptType: components["schemas"]["ErpFinancialDocumentTransmissionAttemptType"];
+            attemptStatus: components["schemas"]["ErpFinancialDocumentTransmissionAttemptStatus"];
+            attemptNo: number;
+            scheduledAt: string | null;
+            /** Format: date-time */
+            startedAt: string;
+            finishedAt: string | null;
+            providerErrorCode: string | null;
+            providerErrorMessage: string | null;
+            providerRequestJson: {
+                [key: string]: unknown;
+            } | null;
+            providerResponseJson: {
+                [key: string]: unknown;
+            } | null;
+            resolvedTransmissionFailureType: components["schemas"]["ErpFinancialDocumentTransmissionFailureType"];
+            nextRetryAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @enum {string} */
+        ErpFinancialDocumentTransmissionAttemptType: "TRANSMIT" | "CHECK_STATUS";
+        /** @enum {string} */
+        ErpFinancialDocumentTransmissionAttemptStatus: "SUCCEEDED" | "FAILED_RETRYABLE" | "FAILED_TERMINAL";
+        /** @description E11 / F9 / D-104: the credit note answer. The document keeps the exact shape it always had; a card refund adds the attempt and the instruction the terminal runs, `transmission` carries what the synchronous send answered. `printJob` is the delivery job that was handed over — it is NOT the document's own `print` render payload, which this view already carries; both are `null` when they never ran, exactly as on a checkout. */
+        ErpFinancialDocumentRefundView: {
+            paymentAttempt: {
+                id: string;
+                status: components["schemas"]["ErpFinancialDocumentPaymentAttemptStatus"];
+                kind: string | null;
+                expiresAt: string | null;
+            } | null;
+            instruction: components["schemas"]["PaymentInstruction"] | null;
+            transmission: components["schemas"]["ErpFinancialDocumentTransmissionOutcomeView"] | null;
+            printJob: components["schemas"]["ErpFinancialDocumentPrintJobView"] | null;
+            id: string;
+            officeId: string;
+            createdByTenantUserId: string;
+            issueDate: string | null;
+            submissionDate: string | null;
+            transmissionDate: string | null;
+            printDate: string | null;
+            delayedProcessCode: string | null;
+            netAmountInCents: number;
+            vatAmountInCents: number;
+            taxAmountInCents: number;
+            feeAmountInCents: number;
+            totalAmountInCents: number;
+            notes: string | null;
+            email: string | null;
+            status: components["schemas"]["ErpFinancialDocumentStatus"];
+            transmissionStatus: components["schemas"]["ErpFinancialDocumentTransmissionStatus"];
+            transmissionStep: components["schemas"]["ErpFinancialDocumentTransmissionStep"];
+            transmissionFailureType: components["schemas"]["ErpFinancialDocumentTransmissionFailureType"];
+            lastTransmissionAttemptAt: string | null;
+            nextTransmissionAttemptAt: string | null;
+            transmissionAttemptsCount: number;
+            statusCheckAttemptsCount: number;
+            lastTransmissionErrorCode: string | null;
+            lastTransmissionErrorMessage: string | null;
+            lastTransmissionErrorAt: string | null;
+            completedAt: string | null;
+            canceledAt: string | null;
+            stationId: string | null;
+            sourceCartId: string | null;
+            patientId: string | null;
+            appointmentId: string | null;
+            smsRecipient: string | null;
+            deliveryMethod: components["schemas"]["ErpReceiptDeliveryMethod"] | null;
+            cancelReason: components["schemas"]["ErpFinancialDocumentCancelReason"] | null;
+            manualReviewReason: components["schemas"]["ErpFinancialDocumentManualReviewReason"] | null;
+            needsAttention: boolean;
+            needsAttentionReason: string | null;
+            reconcileCount: number;
+            transmissionBucket: components["schemas"]["ErpTransmissionBucket"] | null;
+            unknownAttemptsCount: number;
+            lastPaymentErrorCode: string | null;
+            lastPaymentErrorMessage: string | null;
+            lastPaymentErrorAt: string | null;
+            lastPrintJobId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            documentSeries: components["schemas"]["ErpFinancialDocumentSeriesView"];
+            issuer: components["schemas"]["ErpFinancialDocumentIssuerView"];
+            trader: components["schemas"]["ErpFinancialDocumentTraderView"] | null;
+            traderBranch: components["schemas"]["ErpFinancialDocumentTraderBranchView"] | null;
+            items: components["schemas"]["ErpFinancialDocumentItemView"][];
+            payments: components["schemas"]["ErpFinancialDocumentPaymentView"][];
+            signing: components["schemas"]["ErpFinancialDocumentSigningView"] | null;
+            print: components["schemas"]["ErpFinancialDocumentPrintView"] | null;
+            errors: components["schemas"]["ErpFinancialDocumentErrorView"][];
+            correlations: components["schemas"]["ErpFinancialDocumentCorrelationView"][];
+            refundedByDocumentIds: string[];
+            correctionActions: components["schemas"]["ErpFinancialDocumentCorrectionAction"][];
+            documentTaxes: components["schemas"]["ErpFinancialDocumentTaxView"][];
+        };
+        ErpFinancialDocumentSeriesNextNumberView: {
+            nextNumber: number;
+            busy: components["schemas"]["ErpFinancialDocumentSeriesBusyView"] | null;
+        };
+        ErpFinancialDocumentSeriesBusyView: {
+            pendingDocumentId: string;
+            abbreviation: string;
+            number: number;
+            stationId: string | null;
+            /** Format: date-time */
+            since: string;
+        };
+        ErpFinancialDocumentDailyPaymentsView: components["schemas"]["ErpFinancialDocumentReportView<ErpFinancialDocumentDailyPaymentsRow,ErpFinancialDocumentAmountTotals>"];
+        "ErpFinancialDocumentReportView<ErpFinancialDocumentDailyPaymentsRow,ErpFinancialDocumentAmountTotals>": {
+            /** Format: date-time */
+            from: string;
+            /** Format: date-time */
+            to: string;
+            sales: components["schemas"]["ErpFinancialDocumentReportBlock<ErpFinancialDocumentDailyPaymentsRow,ErpFinancialDocumentAmountTotals>"];
+            credits: components["schemas"]["ErpFinancialDocumentReportBlock<ErpFinancialDocumentDailyPaymentsRow,ErpFinancialDocumentAmountTotals>"];
+        };
+        /** @description D-62#8: every report answers in two blocks. Credit notes are reported on their own, with their own counter and their own POSITIVE total; nothing is ever subtracted and no net is published. `documents` counts DISTINCT documents of the block, so it is not the sum of the row counters — one document with two payment methods appears in two rows but is one document. */
+        "ErpFinancialDocumentReportBlock<ErpFinancialDocumentDailyPaymentsRow,ErpFinancialDocumentAmountTotals>": {
+            rows: components["schemas"]["ErpFinancialDocumentDailyPaymentsRow"][];
+            documents: number;
+            totals: components["schemas"]["ErpFinancialDocumentAmountTotals"];
+        };
+        ErpFinancialDocumentDailyPaymentsRow: {
+            day: string;
+            paymentMethod: components["schemas"]["ErpFinancialDocumentPaymentMethod"];
+            documents: number;
+            totalAmountInCents: number;
+        };
+        ErpFinancialDocumentAmountTotals: {
+            totalAmountInCents: number;
+        };
+        ErpFinancialDocumentVatReportView: components["schemas"]["ErpFinancialDocumentReportView<ErpFinancialDocumentVatReportRow,ErpFinancialDocumentTaxTotals>"];
+        "ErpFinancialDocumentReportView<ErpFinancialDocumentVatReportRow,ErpFinancialDocumentTaxTotals>": {
+            /** Format: date-time */
+            from: string;
+            /** Format: date-time */
+            to: string;
+            sales: components["schemas"]["ErpFinancialDocumentReportBlock<ErpFinancialDocumentVatReportRow,ErpFinancialDocumentTaxTotals>"];
+            credits: components["schemas"]["ErpFinancialDocumentReportBlock<ErpFinancialDocumentVatReportRow,ErpFinancialDocumentTaxTotals>"];
+        };
+        /** @description D-62#8: every report answers in two blocks. Credit notes are reported on their own, with their own counter and their own POSITIVE total; nothing is ever subtracted and no net is published. `documents` counts DISTINCT documents of the block, so it is not the sum of the row counters — one document with two payment methods appears in two rows but is one document. */
+        "ErpFinancialDocumentReportBlock<ErpFinancialDocumentVatReportRow,ErpFinancialDocumentTaxTotals>": {
+            rows: components["schemas"]["ErpFinancialDocumentVatReportRow"][];
+            documents: number;
+            totals: components["schemas"]["ErpFinancialDocumentTaxTotals"];
+        };
+        ErpFinancialDocumentVatReportRow: {
+            vatRate: number;
+            documents: number;
+            netAmountInCents: number;
+            vatAmountInCents: number;
+            totalAmountInCents: number;
+        };
+        ErpFinancialDocumentTaxTotals: {
+            netAmountInCents: number;
+            vatAmountInCents: number;
+            totalAmountInCents: number;
+        };
+        ErpFinancialDocumentItemsReportView: components["schemas"]["ErpFinancialDocumentReportView<ErpFinancialDocumentItemsReportRow,ErpFinancialDocumentTaxTotals>"];
+        "ErpFinancialDocumentReportView<ErpFinancialDocumentItemsReportRow,ErpFinancialDocumentTaxTotals>": {
+            /** Format: date-time */
+            from: string;
+            /** Format: date-time */
+            to: string;
+            sales: components["schemas"]["ErpFinancialDocumentReportBlock<ErpFinancialDocumentItemsReportRow,ErpFinancialDocumentTaxTotals>"];
+            credits: components["schemas"]["ErpFinancialDocumentReportBlock<ErpFinancialDocumentItemsReportRow,ErpFinancialDocumentTaxTotals>"];
+        };
+        /** @description D-62#8: every report answers in two blocks. Credit notes are reported on their own, with their own counter and their own POSITIVE total; nothing is ever subtracted and no net is published. `documents` counts DISTINCT documents of the block, so it is not the sum of the row counters — one document with two payment methods appears in two rows but is one document. */
+        "ErpFinancialDocumentReportBlock<ErpFinancialDocumentItemsReportRow,ErpFinancialDocumentTaxTotals>": {
+            rows: components["schemas"]["ErpFinancialDocumentItemsReportRow"][];
+            documents: number;
+            totals: components["schemas"]["ErpFinancialDocumentTaxTotals"];
+        };
+        ErpFinancialDocumentItemsReportRow: {
+            sourceErpItemId: string | null;
+            description: string;
+            documents: number;
+            quantity: number;
+            netAmountInCents: number;
+            vatAmountInCents: number;
+            totalAmountInCents: number;
+        };
+        PrintStationBootstrapView: {
+            station: components["schemas"]["PrintStationView"];
+            printers: components["schemas"]["PrintStationPrinterView"][];
+            doctorDeliveryPreferences: components["schemas"]["DoctorDeliveryPreferencesView"];
+            selectedTemplates: {
+                email: components["schemas"]["PrintStationTemplateSummary"] | null;
+                colorPrint: components["schemas"]["PrintStationTemplateSummary"] | null;
+            };
+            officeBranding: components["schemas"]["PrintStationOfficeBrandingSummary"] | null;
+            doctor: components["schemas"]["PrintStationBootstrapDoctorView"];
+            office: components["schemas"]["PrintStationBootstrapOfficeView"];
+            series: components["schemas"]["PrintStationBootstrapSeriesView"][];
+            paymentMethods: components["schemas"]["PrintStationBootstrapPaymentMethodView"][];
+            print: components["schemas"]["PrintStationBootstrapPrintView"];
+            features: components["schemas"]["PrintStationBootstrapFeaturesView"];
+            health: components["schemas"]["PrintStationBootstrapHealthView"];
+            account: components["schemas"]["PrintStationBootstrapAccountView"];
+            readiness: components["schemas"]["PrintStationBootstrapReadinessView"];
+            etag: string;
+            /** Format: date-time */
+            generatedAt: string;
+        };
+        PrintStationView: {
+            id: string;
+            doctorId: string;
+            officeId: string;
+            stationName: string;
+            stationType: components["schemas"]["PrintStationType"];
+            platform: components["schemas"]["PrintStationPlatform"];
+            thermalPrintEnabled: boolean;
+            browserColorPrintEnabled: boolean;
+            hasActiveDefaultThermalPrinter: boolean;
+            printCapable: boolean;
+            lastSeenAt: string | null;
+            archivedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        PrintStationType: "DEVICE_APP" | "BROWSER_CLIENT";
+        /** @enum {string} */
+        PrintStationPlatform: "android" | "ios" | "macos" | "windows" | "linux" | "web";
+        PrintStationPrinterView: {
+            id: string;
+            stationId: string;
+            label: string;
+            connectionType: components["schemas"]["PrintStationPrinterConnectionType"];
+            macAddress: string | null;
+            ipAddress: string | null;
+            paperWidth: components["schemas"]["PrintStationPaperWidth"];
+            enabled: boolean;
+            isDefault: boolean;
+            archivedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        PrintStationPrinterConnectionType: "BLUETOOTH" | "NETWORK";
+        /** @enum {string} */
+        PrintStationPaperWidth: "58" | "80";
+        /** @description Q3: the receipt methods the doctor offers at the till (at least one) and the colour print style. */
+        DoctorDeliveryPreferencesView: {
+            id: string | null;
+            enabledDeliveryMethods: components["schemas"]["ErpReceiptDeliveryMethod"][];
+            defaultColorPrintTemplateId: string;
+            createdAt: string | null;
+            updatedAt: string | null;
+        };
+        PrintStationTemplateSummary: {
+            id: string;
+            channel: components["schemas"]["PrintTemplateChannel"];
+            templateKey: string;
+            version: number;
+            label: string;
+            contentType: components["schemas"]["PrintTemplateContentType"];
+        };
+        /** @enum {string} */
+        PrintTemplateChannel: "SMS" | "EMAIL" | "COLOR_BROWSER_PRINT";
+        /** @enum {string} */
+        PrintTemplateContentType: "TEXT" | "HTML" | "LAYOUT_JSON";
+        PrintStationOfficeBrandingSummary: {
+            officeId: string;
+            width: components["schemas"]["ErpPrintSettingsWidth"];
+            receiptFooter: string | null;
+            receiptLogo: components["schemas"]["StoredFileView"] | null;
+            hasReceiptLogo: boolean;
+            receiptLogoThermal: components["schemas"]["StoredFileView"] | null;
+            hasReceiptLogoThermal: boolean;
+        };
+        /** @enum {string} */
+        ErpPrintSettingsWidth: "58" | "80";
+        StoredFileView: {
+            storageKey: string;
+            url: string;
+            mimeType: components["schemas"]["SecureFileMimeType"];
+            extension: components["schemas"]["SecureFileExtension"];
+            sizeInBytes: number;
+            sha256: string;
+            originalFileName: string | null;
+            uploadedAt: string;
+            kind: components["schemas"]["SecureFileKind"];
+        };
+        /** @enum {string} */
+        SecureFileMimeType: "application/pdf" | "image/png" | "image/jpeg" | "image/webp";
+        /** @enum {string} */
+        SecureFileExtension: "pdf" | "png" | "jpg" | "webp";
+        /** @enum {string} */
+        SecureFileKind: "pdf" | "image";
+        PrintStationBootstrapDoctorView: {
+            id: string;
+            taxNumber: string | null;
+            businessName: string | null;
+            espConfigured: boolean;
+            espVerified: boolean;
+            gsisConfigured: boolean;
+        };
+        PrintStationBootstrapOfficeView: {
+            id: string;
+            branchCode: number | null;
+            isMainBranch: boolean;
+            hq: components["schemas"]["PrintStationBootstrapHqView"] | null;
+        };
+        PrintStationBootstrapHqView: {
+            branchCode: number;
+            address: string;
+            city: string;
+            postalCode: string;
+            taxOffice: string;
+        };
+        PrintStationBootstrapSeriesView: {
+            id: string;
+            series: string;
+            abbreviation: string;
+            description: string | null;
+            myDataType: string;
+            isCredit: boolean;
+            isRetail: boolean;
+            isInvoice: boolean;
+        };
+        PrintStationBootstrapPaymentMethodView: {
+            method: string;
+            provider: string | null;
+            priority: number;
+            enabled: boolean;
+            configured: boolean;
+        };
+        PrintStationBootstrapPrintView: {
+            width: components["schemas"]["ErpPrintSettingsWidth"];
+            receiptFooter: string | null;
+            receiptLogoUrl: string | null;
+            receiptLogoThermalUrl: string | null;
+        };
+        PrintStationBootstrapFeaturesView: {
+            tips: boolean;
+            installments: boolean;
+            webEcr: boolean;
+            sms: boolean;
+            digitalClient: boolean;
+            thirdCountryInvoicing: boolean;
+        };
+        PrintStationBootstrapHealthView: {
+            aade: components["schemas"]["PrintStationHealthState"];
+            provider: components["schemas"]["PrintStationHealthState"];
+        };
+        /**
+         * @description The two states the till acts on. Same vocabulary the cart projects (`ErpCartReadinessService`).
+         * @enum {string}
+         */
+        PrintStationHealthState: "GREEN" | "RED";
+        PrintStationBootstrapAccountView: {
+            blocked: boolean;
+        };
+        PrintStationBootstrapReadinessView: {
+            paymentsReady: boolean;
+            blockers: string[];
+            cardPaymentsAvailable: boolean;
+            canCheckout: boolean;
+        };
+        /** @description Named response aliases for the OpenAPI registry: `data` is always ONE `$ref` (`buildOpenApiDocument`), so a list or a nullable read needs a name of its own. Same technique as `ErpWebEcrTerminalListView`. */
+        PrintStationListView: components["schemas"]["PrintStationView"][];
+        PrintStationPrinterListView: components["schemas"]["PrintStationPrinterView"][];
+        PrintTemplateListView: components["schemas"]["PrintTemplateView"][];
+        PrintTemplateView: {
+            id: string;
+            channel: components["schemas"]["PrintTemplateChannel"];
+            templateKey: string;
+            version: number;
+            label: string;
+            isSystem: boolean;
+            isLocked: boolean;
+            contentType: components["schemas"]["PrintTemplateContentType"];
+            subjectTemplate: string | null;
+            textTemplate: string | null;
+            htmlTemplate: string | null;
+            layoutSchemaJson: {
+                [key: string]: unknown;
+            } | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        DeliveryJobRunResponse: {
+            job: components["schemas"]["DeliveryJobView"];
+            primaryInstruction: components["schemas"]["PrintInstruction"] | null;
+            primaryExecutionResult: components["schemas"]["DeliveryExecutionResultView"] | null;
+            followUpActions: components["schemas"]["DeliveryFollowUpActionView"][];
+        };
+        DeliveryJobView: {
+            id: string;
+            doctorId: string;
+            officeId: string;
+            stationId: string;
+            documentId: string;
+            documentSnapshot: components["schemas"]["PrintStationDocumentSnapshot"];
+            recipientSnapshot: components["schemas"]["PrintStationRecipientSnapshot"];
+            requestedPrimaryAction: components["schemas"]["PrintPrimaryAction"] | null;
+            resolvedPrimaryAction: components["schemas"]["PrintPrimaryAction"];
+            primaryExecutionSide: components["schemas"]["PrintExecutionSide"];
+            primaryTemplateId: string | null;
+            status: components["schemas"]["DeliveryJobStatus"];
+            createdByTenantUserId: string;
+            /** Format: date-time */
+            createdAt: string;
+            completedAt: string | null;
+            attempts: components["schemas"]["DeliveryAttemptView"][];
+        };
+        /** @description The snapshot a job prints from. Its schema accepts additional properties on purpose: the issuing side sends everything a receipt shows (signing block, QR, delayed-transmission notice) without the print station having to know each field. */
+        PrintStationDocumentSnapshot: {
+            documentId: string;
+            documentNumber: string;
+            documentType: string;
+            issuedAt: string;
+            issuer: components["schemas"]["PrintStationIssuerSnapshot"];
+            patient: components["schemas"]["PrintStationPatientSnapshot"];
+            items: components["schemas"]["PrintStationDocumentItemSnapshot"][];
+            totals: components["schemas"]["PrintStationDocumentTotalsSnapshot"];
+            payment: components["schemas"]["PrintStationPaymentSnapshot"];
+            receiptLink?: string | null;
+        } & {
+            [key: string]: unknown;
+        };
+        PrintStationIssuerSnapshot: {
+            name: string;
+        } & {
+            [key: string]: unknown;
+        };
+        PrintStationPatientSnapshot: {
+            name?: string | null;
+        } & {
+            [key: string]: unknown;
+        };
+        PrintStationDocumentItemSnapshot: {
+            [key: string]: unknown;
+        };
+        PrintStationDocumentTotalsSnapshot: {
+            grandTotal?: number | null;
+        } & {
+            [key: string]: unknown;
+        };
+        PrintStationPaymentSnapshot: {
+            [key: string]: unknown;
+        };
+        PrintStationRecipientSnapshot: {
+            patientName?: string | null;
+            phone?: string | null;
+            email?: string | null;
+        };
+        /** @enum {string} */
+        PrintPrimaryAction: "THERMAL_PRINT" | "COLOR_BROWSER_PRINT" | "SMS" | "EMAIL" | "ASK_DIGITAL" | "NO_AUTO_ACTION";
+        /** @enum {string} */
+        PrintExecutionSide: "BACKEND" | "STATION";
+        /**
+         * @description `FAILED` is retryable and carries a `nextAttemptAt`; `FAILED_FINAL` is the job the retry loop gave up on, and the only one that opens a `DELIVERY_FAILED` operations alert.
+         * @enum {string}
+         */
+        DeliveryJobStatus: "PENDING" | "ACTION_REQUIRED" | "COMPLETED" | "FAILED" | "FAILED_FINAL";
+        DeliveryAttemptView: {
+            id: string;
+            deliveryJobId: string;
+            channel: components["schemas"]["PrintTemplateChannel"];
+            executionSide: components["schemas"]["PrintExecutionSide"];
+            templateId: string | null;
+            provider: string | null;
+            targetSnapshot: {
+                [key: string]: unknown;
+            };
+            status: components["schemas"]["DeliveryAttemptStatus"];
+            providerMessageId: string | null;
+            errorMessage: string | null;
+            /** Format: date-time */
+            startedAt: string;
+            completedAt: string | null;
+        };
+        /**
+         * @description `SENDING` is written immediately BEFORE the gateway call, so it also means "outcome unknown".
+         * @enum {string}
+         */
+        DeliveryAttemptStatus: "SENDING" | "SENT" | "FAILED";
+        PrintInstruction: components["schemas"]["ThermalPrintInstruction"] | components["schemas"]["ColorBrowserPrintInstruction"];
+        ThermalPrintInstruction: {
+            /** @constant */
+            type: "THERMAL_PRINT";
+            /** @constant */
+            executionSide: "STATION";
+            /** @constant */
+            templateKey: "thermal-receipt-v1";
+            printer: components["schemas"]["PrintStationPrinterView"];
+            officeBranding: components["schemas"]["PrintStationOfficeBrandingSummary"] | null;
+            documentSnapshot: components["schemas"]["PrintStationDocumentSnapshot"];
+        };
+        ColorBrowserPrintInstruction: {
+            /** @constant */
+            type: "COLOR_BROWSER_PRINT";
+            /** @constant */
+            executionSide: "STATION";
+            template: components["schemas"]["PrintTemplateView"];
+            officeBranding: components["schemas"]["PrintStationOfficeBrandingSummary"] | null;
+            documentSnapshot: components["schemas"]["PrintStationDocumentSnapshot"];
+        };
+        DeliveryExecutionResultView: {
+            action: components["schemas"]["PrintPrimaryAction"];
+            executionSide: components["schemas"]["PrintExecutionSide"];
+            status: components["schemas"]["DeliveryJobStatus"] | components["schemas"]["DeliveryAttemptStatus"];
+            templateId: string | null;
+            provider: string | null;
+            message: string;
+        };
+        /** @description Q3γ/δ: whether a receipt may be sent again by this method NOW, and why not (the server decides). */
+        DeliveryFollowUpActionView: {
+            method: components["schemas"]["ErpReceiptFollowUpMethod"];
+            allowed: boolean;
+            reason: components["schemas"]["ErpReceiptDeliveryRefusal"] | null;
+        };
+        /**
+         * @description Q3γ: the methods a receipt may be sent again by after the patient left; a print never is one.
+         * @enum {string}
+         */
+        ErpReceiptFollowUpMethod: "SMS" | "EMAIL";
+        DeliveryJobListView: components["schemas"]["DeliveryJobView"][];
+        /** @description What the till may do for one issued document after the patient left, and to whom it last went. */
+        DeliveryDocumentFollowUpView: {
+            documentId: string;
+            actions: components["schemas"]["DeliveryFollowUpActionView"][];
+            recipient: {
+                phone: string | null;
+                email: string | null;
+            };
+        };
+        DeliveryJobAckView: {
+            job: components["schemas"]["DeliveryJobView"];
+            documentId: string;
+            documentStatus: string;
+            printedAt: string | null;
+        };
+        ErpFinancialSettingsBundleView: {
+            doctor: {
+                esp: components["schemas"]["ErpEspSettingsView"] | null;
+                gsis: components["schemas"]["ErpGsisSettingsView"] | null;
+                worldlineDoctor: components["schemas"]["ErpWorldlineDoctorSettingsView"] | null;
+            };
+            office: null | {
+                worldline: components["schemas"]["ErpWorldlineSettingsView"] | null;
+                viva: components["schemas"]["ErpVivaSettingsView"] | null;
+                print: components["schemas"]["ErpPrintSettingsView"] | null;
+                nbgPay: components["schemas"]["ErpNbgPaySettingsView"] | null;
+                iris: components["schemas"]["ErpIrisSettingsView"] | null;
+                epay: components["schemas"]["ErpEpaySettingsView"] | null;
+                nexi: components["schemas"]["ErpNexiSettingsView"] | null;
+                webEcrTerminals: components["schemas"]["ErpWebEcrTerminalView"][];
+                paymentMethods: components["schemas"]["ErpPaymentMethodSettingsEffectiveView"][];
+            };
+            health: components["schemas"]["ErpFinancialSettingsHealthView"] | null;
+            account: components["schemas"]["ErpFinancialSettingsAccountView"] | null;
+        };
+        ErpEspSettingsView: {
+            id: string;
+            username: string;
+            apiUserName: string | null;
+            hasPassword: boolean;
+            hasSubscriptionKey: boolean;
+            hasApiLoginCode: boolean;
+            espVerified: boolean;
+            lastVerifiedAt: string | null;
+            lastVerificationError: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ErpGsisSettingsView: {
+            id: string;
+            username: string;
+            hasPassword: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ErpWorldlineDoctorSettingsView: {
+            id: string;
+            login: string;
+            dccSupport: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ErpWorldlineSettingsView: {
+            id: string;
+            officeId: string;
+            tid: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ErpVivaSettingsView: {
+            id: string;
+            officeId: string;
+            tid: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ErpPrintSettingsView: {
+            id: string;
+            officeId: string;
+            receiptFooter: string | null;
+            width: components["schemas"]["ErpPrintSettingsWidth"];
+            hasReceiptLogo: boolean;
+            receiptLogo: components["schemas"]["StoredFileView"] | null;
+            hasReceiptLogoThermal: boolean;
+            receiptLogoThermal: components["schemas"]["StoredFileView"] | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ErpNbgPaySettingsView: {
+            id: string;
+            officeId: string;
+            tid: string | null;
+            appVersion: components["schemas"]["ErpNbgPaySettingsAppVersion"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @constant */
+        ErpNbgPaySettingsAppVersion: "1.0";
+        ErpIrisSettingsView: {
+            id: string;
+            officeId: string;
+            paymentServiceProvider: components["schemas"]["ErpIrisPaymentServiceProvider"] | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        ErpIrisPaymentServiceProvider: "worldline" | "viva" | "nbg" | "epay" | "nexi" | "webecr";
+        ErpEpaySettingsView: {
+            id: string;
+            officeId: string;
+            tid: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ErpNexiSettingsView: {
+            id: string;
+            officeId: string;
+            tid: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @description The office menu as the checkout computes it: what the doctor allowed AND what is set up. */
+        ErpPaymentMethodSettingsEffectiveView: {
+            method: components["schemas"]["ErpPaymentMethodKind"];
+            provider: components["schemas"]["ErpPaymentMethodProvider"] | null;
+            priority: number;
+            enabled: boolean;
+            configured: boolean;
+        };
+        /** @enum {string} */
+        ErpPaymentMethodKind: "cash" | "credit" | "deposit" | "web-banking" | "check" | "free" | "pos" | "iris";
+        /** @enum {string} */
+        ErpPaymentMethodProvider: "none" | "viva" | "epay" | "nbg" | "nexi" | "worldline" | "webecr";
+        ErpFinancialSettingsHealthView: {
+            aade: components["schemas"]["ErpFinancialSettingsHealthState"];
+            provider: components["schemas"]["ErpFinancialSettingsHealthState"];
+        };
+        /**
+         * @description The two states the transmission module reports. Same vocabulary the cart and the till project.
+         * @enum {string}
+         */
+        ErpFinancialSettingsHealthState: "GREEN" | "RED";
+        ErpFinancialSettingsAccountView: {
+            blocked: boolean;
+        };
+        ErpPaymentMethodSettingsListView: {
+            items: components["schemas"]["ErpPaymentMethodSettingsView"][];
+        };
+        ErpPaymentMethodSettingsView: {
+            id: string;
+            officeId: string;
+            method: components["schemas"]["ErpPaymentMethodKind"];
+            provider: components["schemas"]["ErpPaymentMethodProvider"] | null;
+            priority: number;
+            enabled: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ErpPrintSettingsReadView: components["schemas"]["ErpPrintSettingsView"] | null;
+        /** @description Named response aliases for the OpenAPI registry: `data` is always ONE `$ref` (`buildOpenApiDocument`), so a list or a nullable read needs a name of its own. Same technique as `ErpWebEcrTerminalListView`. */
+        ErpEspSettingsReadView: components["schemas"]["ErpEspSettingsView"] | null;
+        ErpItemListView: {
+            rows: components["schemas"]["ErpItemView"][];
+            total: number;
+            limit: number;
+            offset: number;
+        };
+        ErpItemView: {
+            id: string;
+            description: string;
+            measurementUnit: components["schemas"]["ErpItemMeasurementUnit"];
+            type: components["schemas"]["ErpItemType"];
+            vatRate: number;
+            vatExemption: number | null;
+            netAmountInCents: number;
+            roundingDifference: number;
+            productType: number;
+            maxSellingPriceInCents: number | null;
+            maxSellingQuantity: number | null;
+            netAmount: number;
+            vatAmountInCents: number;
+            vatAmount: number;
+            totalAmountInCents: number;
+            totalAmount: number;
+            archivedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        ErpItemMeasurementUnit: "piece" | "litre" | "kilogram" | "cubicMetre";
+        /** @enum {string} */
+        ErpItemType: "service" | "good" | "product";
+        /** @description The VAT pair a new item of this doctor is born with; the app pre-fills it. */
+        ErpItemDefaultsView: {
+            vatExemption: number | null;
+            vatRate: number;
+        };
+        ErpItemReferenceDataView: {
+            itemTypes: components["schemas"]["ErpItemLabelledOption"][];
+            measurementUnits: components["schemas"]["ErpItemLabelledOption"][];
+            vatRates: {
+                standard: number[];
+                reducedMap: {
+                    [key: string]: number;
+                };
+                myDataCategoryMap: {
+                    [key: string]: number;
+                };
+            };
+            vatExemptions: components["schemas"]["ErpItemVatExemptionOption"][];
+        };
+        ErpItemLabelledOption: {
+            code: string;
+            label: string;
+        };
+        ErpItemVatExemptionOption: {
+            code: number;
+            label: string;
+        };
+        ErpItemLineDraftView: {
+            sourceErpItemId: string | null;
+            description: string;
+            measurementUnit: components["schemas"]["ErpItemMeasurementUnit"];
+            type: components["schemas"]["ErpItemType"];
+            productType: number;
+            quantity: number;
+            vatRateNominal: number;
+            vatCategory: components["schemas"]["ErpItemVatCategory"];
+            vatReduction: number;
+            vatRate: number;
+            vatExemption: number | null;
+            selectedPriceInCents: number;
+            netAmountInCents: number;
+            vatAmountInCents: number;
+            totalAmountInCents: number;
+            roundingDifference: number;
+            warnings: components["schemas"]["ErpItemLineDraftWarning"][];
+        };
+        /** @enum {string} */
+        ErpItemVatCategory: "standard" | "reduced" | "zero";
+        /** @enum {string} */
+        ErpItemLineDraftWarning: "exceedsMaxSellingQuantity" | "exceedsMaxSellingPrice" | "zeroTotal";
+        ErpTraderListView: {
+            items: components["schemas"]["ErpTraderView"][];
+            total: number;
+            limit: number;
+            offset: number;
+        };
+        ErpTraderView: {
+            id: string;
+            patientId: string | null;
+            name: string;
+            taxNumber: string;
+            country: string;
+            type: components["schemas"]["ErpTraderType"];
+            vatCategory: components["schemas"]["ErpTraderVatCategory"];
+            address: string;
+            jobTitle: string;
+            postalCode: string;
+            city: string;
+            taxOffice: string;
+            phoneNumber: string;
+            isValidated: boolean;
+            validationSource: components["schemas"]["ErpTraderValidationSource"] | null;
+            validatedAt: string | null;
+            archivedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        ErpTraderType: "customer" | "supplier" | "citizen";
+        /** @enum {string} */
+        ErpTraderVatCategory: "standard" | "reduced" | "zero";
+        /** @enum {string} */
+        ErpTraderValidationSource: "GSIS" | "VIES";
+        ErpTraderLookupView: components["schemas"]["TraderLookupResult"];
+        TraderLookupResult: {
+            /** @constant */
+            success: true;
+            /** @enum {string} */
+            provider: "GSIS" | "VIES";
+            /** Format: date-time */
+            checkedAt: string;
+            trader: {
+                /** @constant */
+                isValidated: true;
+                country: string;
+                taxNumber: string;
+                name?: string;
+                address?: string;
+                jobTitle?: string;
+                postalCode?: string;
+                city?: string;
+                taxOffice?: string;
+            };
+        } | {
+            /** @constant */
+            success: false;
+            provider: components["schemas"]["TraderLookupProvider"];
+            errorCode: components["schemas"]["TraderLookupErrorCode"];
+            errorMessage?: string;
+            trader: {
+                /** @constant */
+                isValidated: false;
+                country?: string;
+                taxNumber?: string;
+                name?: string;
+                address?: string;
+                jobTitle?: string;
+                postalCode?: string;
+                city?: string;
+                taxOffice?: string;
+            };
+        };
+        /** @enum {string} */
+        TraderLookupProvider: "GSIS" | "VIES" | "NONE";
+        TraderLookupErrorCode: components["schemas"]["GsisLookupErrorCode"] | components["schemas"]["ViesLookupErrorCode"] | components["schemas"]["TraderLookupCountryErrorCode"];
+        /** @enum {string} */
+        GsisLookupErrorCode: "SERVER_CONNECTION_ERROR" | "SERVER_THROWN_ERROR" | "INACTIVE_TAX_NUMBER" | "TAX_NUMBER_NOT_FOUND" | "CREDENTIALS_MISSING" | "UNKNOWN_ERROR";
+        /** @enum {string} */
+        ViesLookupErrorCode: "SERVER_CONNECTION_ERROR" | "SERVICE_UNAVAILABLE" | "INVALID_VAT_NUMBER" | "INVALID_INPUT" | "UNKNOWN_ERROR";
+        /** @enum {string} */
+        TraderLookupCountryErrorCode: "THIRD_COUNTRY_NO_REGISTRY" | "UNSUPPORTED_COUNTRY";
+        /** @description Named response aliases for the OpenAPI registry: `data` is always ONE `$ref` (`buildOpenApiDocument`), so a list or a nullable read needs a name of its own. Same technique as `ErpWebEcrTerminalListView`. */
+        ErpTraderCountryListView: string[];
+        /** @description Named response aliases for the OpenAPI registry: `data` is always ONE `$ref` (`buildOpenApiDocument`), so a list or a nullable read needs a name of its own. Same technique as `ErpWebEcrTerminalListView`. */
+        ErpDocumentSeriesListView: components["schemas"]["ErpDocumentSeriesView"][];
+        ErpDocumentSeriesView: {
+            id: string;
+            financialBranchId: string;
+            series: string;
+            abbreviation: string;
+            description: string | null;
+            startNumber: number;
+            myDataType: components["schemas"]["ErpDocumentSeriesMyDataType"];
+            type: components["schemas"]["ErpDocumentSeriesType"];
+            isCredit: boolean;
+            isSale: boolean;
+            isRetail: boolean;
+            isInvoice: boolean;
+            isCorrelated: boolean;
+            isTaxFee: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @description Points at the shared TYPE rather than at the re-exported value. Identical union, but the OpenAPI schema generator can follow a type reference across files and cannot follow an imported value. */
+        ErpDocumentSeriesMyDataType: components["schemas"]["MyDataDocSeriesCode"];
+        /** @enum {string} */
+        MyDataDocSeriesCode: "1.1" | "2.1" | "5.2" | "11.1" | "11.2" | "1.2" | "2.2" | "11.4" | "1.3" | "2.3";
+        /** @enum {string} */
+        ErpDocumentSeriesType: "indifferent" | "invoice-sale" | "invoice-sale-credit" | "retail-sale" | "retail-sale-credit";
+        ErpDocumentSeriesTaxListView: components["schemas"]["ErpDocumentSeriesTaxView"][];
+        ErpDocumentSeriesTaxView: {
+            id: string;
+            documentSeriesId: string;
+            category: components["schemas"]["ErpDocumentSeriesTaxCategory"];
+            categoryCode: number;
+            taxCategory: number;
+            taxPercent: number;
+            policy: components["schemas"]["ErpDocumentSeriesTaxPolicy"];
+            policyCode: number;
+            thresholdGrossAmountInCents: number;
+            defaultAmountInCents: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        ErpDocumentSeriesTaxCategory: "WITHHOLDING_TAX" | "DIGITAL_TRANSACTION_FEE";
+        /** @enum {string} */
+        ErpDocumentSeriesTaxPolicy: "DISABLED" | "ASK_AT_PAYMENT" | "AUTO" | "AUTO_OVER_THRESHOLD";
+        ErpDocumentSeriesMyDataTypeOptionListView: components["schemas"]["ErpDocumentSeriesMyDataTypeOptionView"][];
+        ErpDocumentSeriesMyDataTypeOptionView: {
+            visible: boolean;
+            characteristics: components["schemas"]["ErpDocumentSeriesCharacteristics"];
+            acceptsSeriesTaxes: boolean;
+            /** @enum {string} */
+            traderRule: "required" | "forbidden";
+            /** @enum {string} */
+            traderCountryRule: "GR" | "EU_FOREIGN" | "ANY";
+            code: components["schemas"]["MyDataDocSeriesCode"];
+            name: string;
+            normalized: string;
+            slug: string;
+        };
+        ErpDocumentSeriesCharacteristics: {
+            type: components["schemas"]["ErpDocumentSeriesType"];
+            isCredit: boolean;
+            isSale: boolean;
+            isRetail: boolean;
+            isInvoice: boolean;
+            isCorrelated: boolean;
+            isTaxFee: boolean;
+        };
+        /** @description Named response aliases for the OpenAPI registry: `data` is always ONE `$ref` (`buildOpenApiDocument`), so a list or a nullable read needs a name of its own. Same technique as `ErpWebEcrTerminalListView`. */
+        ErpIssuerRootReadView: components["schemas"]["ErpIssuerRootView"] | null;
+        ErpIssuerRootView: {
+            id: string;
+            businessName: string;
+            taxNumber: string;
+            jobTitle: string;
+            vatCategory: components["schemas"]["ErpIssuerVatCategory"];
+            telephoneNumber: string | null;
+            others: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        ErpIssuerVatCategory: "standard" | "reduced" | "zero";
+        ErpIssuerBranchListView: components["schemas"]["ErpIssuerBranchListItemView"][];
+        /** @description A row of the branch list, which is also where the till looks for the offices it sells from: `officeOpen` is false once the doctor no longer works at the office (a deleted office keeps only its waiting headquarters row, D-117). */
+        ErpIssuerBranchListItemView: {
+            officeOpen: boolean;
+            id: string;
+            officeId: string;
+            branch: number;
+            taxOffice: string;
+            isHq: boolean;
+            telephoneNumber: string | null;
+            others: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ErpIssuerBranchReadView: components["schemas"]["ErpIssuerBranchView"] | null;
+        ErpIssuerBranchView: {
+            id: string;
+            officeId: string;
+            branch: number;
+            taxOffice: string;
+            isHq: boolean;
+            telephoneNumber: string | null;
+            others: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @description D-123: the headquarters of the doctor and, while it waits for an office (its own was deleted, D-117), the offices that can take it. The `branch` of a candidate is its own code, which it gives up when it becomes the headquarters. */
+        ErpIssuerHeadquartersView: {
+            headquarters: components["schemas"]["ErpIssuerBranchView"] | null;
+            waiting: boolean;
+            candidates: components["schemas"]["ErpIssuerHeadquartersCandidateView"][];
+        };
+        /** @description One office of the doctor that can take a waiting headquarters, named by the Greek address its receipts print. */
+        ErpIssuerHeadquartersCandidateView: {
+            officeId: string;
+            address: string;
+            city: string;
+            postalCode: string;
+            branch: number | null;
+        };
+        ErpIssuerResolvedView: {
+            id: string;
+            officeId: string;
+            businessName: string;
+            taxNumber: string;
+            branch: number;
+            isHq: boolean;
+            address?: string;
+            jobTitle?: string;
+            postalCode?: string;
+            city?: string;
+            taxOffice?: string;
+            telephoneNumber: string | null;
+            others: string | null;
+            vatCategory: components["schemas"]["ErpIssuerVatCategory"];
+            hq: components["schemas"]["ErpIssuerHqView"] | null;
+        };
+        ErpIssuerHqView: {
+            branch: number;
+            address: string;
+            city: string;
+            postalCode: string;
+            taxOffice: string;
         };
     };
     responses: never;
@@ -425,17 +5986,21 @@ export interface operations {
                 query?: string;
                 text?: string;
                 professionalIds?: string | string[];
+                professionalSlugs?: string | string[];
                 serviceSlugs?: string | string[];
                 locationSlug?: string;
                 lat?: string;
                 lng?: string;
-                availability?: "today" | "next3Days" | "all";
+                availability?: "today" | "next3Days" | "next7Days" | "all";
                 paymentOptions?: string | ("CASH" | "CARD" | "IRIS" | "ONLINE_DOCTOR_PAY" | "ONLINE_OFFICE_PAY" | "STUDENT_CARD" | "UNEMPLOYMENT_CARD")[];
                 priceMin?: string;
                 priceMax?: string;
                 gender?: "MALE" | "FEMALE" | "ANY";
                 speakLanguageCodes?: string | string[];
+                disabilityAccess?: "true" | "false";
+                parking?: "true" | "false";
                 sortBy?: "popularity" | "rating" | "distance";
+                geoScope?: "locality";
                 limit?: string;
                 cursor?: string;
             };
@@ -470,17 +6035,21 @@ export interface operations {
                 query?: string;
                 text?: string;
                 professionalIds?: string | string[];
+                professionalSlugs?: string | string[];
                 serviceSlugs?: string | string[];
                 locationSlug?: string;
                 lat?: string;
                 lng?: string;
-                availability?: "today" | "next3Days" | "all";
+                availability?: "today" | "next3Days" | "next7Days" | "all";
                 paymentOptions?: string | ("CASH" | "CARD" | "IRIS" | "ONLINE_DOCTOR_PAY" | "ONLINE_OFFICE_PAY" | "STUDENT_CARD" | "UNEMPLOYMENT_CARD")[];
                 priceMin?: string;
                 priceMax?: string;
                 gender?: "MALE" | "FEMALE" | "ANY";
                 speakLanguageCodes?: string | string[];
+                disabilityAccess?: "true" | "false";
+                parking?: "true" | "false";
                 sortBy?: "popularity" | "rating" | "distance";
+                geoScope?: "locality";
                 limit?: string;
                 cursor?: string;
             };
@@ -515,16 +6084,19 @@ export interface operations {
                 query?: string;
                 text?: string;
                 professionalIds?: string | string[];
+                professionalSlugs?: string | string[];
                 serviceSlugs?: string | string[];
                 locationSlug?: string;
                 lat?: string;
                 lng?: string;
-                availability?: "today" | "next3Days" | "all";
+                availability?: "today" | "next3Days" | "next7Days" | "all";
                 paymentOptions?: string | ("CASH" | "CARD" | "IRIS" | "ONLINE_DOCTOR_PAY" | "ONLINE_OFFICE_PAY" | "STUDENT_CARD" | "UNEMPLOYMENT_CARD")[];
                 priceMin?: string;
                 priceMax?: string;
                 gender?: "MALE" | "FEMALE" | "ANY";
                 speakLanguageCodes?: string | string[];
+                disabilityAccess?: "true" | "false";
+                parking?: "true" | "false";
             };
             header?: never;
             path?: never;
@@ -555,7 +6127,9 @@ export interface operations {
                 language?: "el" | "en";
                 q?: string;
                 query?: string;
+                types?: ("professional" | "service" | "doctor") | ("professional" | "service" | "doctor")[];
                 limit?: string;
+                limitPerType?: string;
             };
             header?: never;
             path?: never;
@@ -643,6 +6217,36 @@ export interface operations {
             };
         };
     };
+    listPublicMarketplaceReviews: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path: {
+                doctorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Approved public reviews for the doctor, newest first, capped at the 500 most recent. `reviews` is null for an unknown or non-visible doctor and [] when the doctor has no approved reviews. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorPublicMarketplaceReviewsResponseView"];
+                    };
+                };
+            };
+        };
+    };
     getPublicMarketplaceOffice: {
         parameters: {
             query?: {
@@ -669,6 +6273,6065 @@ export interface operations {
                         status: "success" | "error";
                         message: string;
                         data: components["schemas"]["DoctorPublicMarketplaceOfficeResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    listPublicAvailabilitySlots: {
+        parameters: {
+            query: {
+                doctorId: string;
+                officeId: string;
+                doctorServiceId: string;
+                date?: string;
+                days?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bookable slots grouped by date, in the office timezone, for `days` days starting at `date` (default 1, max 61). A date with no bookable slot is returned with an empty `slots` array. `date` is optional: without it the window opens on today of the platform calendar (Europe/Athens, by the server clock), and a `date` before that today is moved up to it — past days are never offered. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AvailabilityPublicSlotsView"];
+                    };
+                };
+            };
+        };
+    };
+    getConsentRegistry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every catalogued tool with its category, the platforms it applies to, and both el/en translations, plus the registry version the client stores with the decision. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ConsentPublicRegistryResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    recordTrackingConsent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    registryVersion: string;
+                    /** @enum {string} */
+                    platform: "app" | "web";
+                    choices: {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description The stored decision. Append-only: every call inserts a new audit row, so repeated calls never overwrite history. The decision is dated by the server clock at the moment it is stored (D-118): `decidedAt` in the answer is that instant. The body carries no `decidedAt`; one sent anyway is refused (422) like every unknown field. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ConsentTrackingRecordResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    getPublicContentPage: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                edition?: "current" | "upcoming";
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The text of a non-archived page in force now (server clock), or with `edition=upcoming` the text a substantive change announced (404 when none). A legal page reports its legal version in `version` — the one a registration accepts — which a wording correction keeps; `effectiveAt` is when the text took or takes effect, and `upcoming` names the announced version and its date. When the requested language is missing the response falls back to Greek and reports the actual `language` plus `availableLanguages`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ContentPublicPageView"];
+                    };
+                };
+            };
+        };
+    };
+    loginWithPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantId?: string;
+                    tenantSlug?: string;
+                    /** Format: email */
+                    email: string;
+                    password: string;
+                } | unknown | unknown;
+            };
+        };
+        responses: {
+            /** @description The signed-in tenant user. The active-token and refresh-token cookies are set on the response; no token is ever returned in the body. Until the password is proven, every credential refusal is the same 401 EC412: an unknown email, an account without a password credential, an email that may not sign in, a disabled credential and a wrong password cannot be told apart, so this endpoint never answers SIGN_IN_NOT_AVAILABLE. Repeated failures for one email from one IP lock that pair with 403 USER_LOCKED; a banned account is told so (403 USER_LOCKED) only after the right password; the per-IP `login` class answers 429. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["LoginResult"];
+                    };
+                };
+            };
+        };
+    };
+    logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    allDevices?: boolean;
+                    pushToken?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Number of refresh tokens revoked. Without `allDevices`, the session of this device ends — the refresh token of its cookie and the one that replaced it moments ago (a parallel request that rotated it, or the rotation of this very request when the access token had lapsed) — and no other device is signed out; the response clears the session cookies and never sets new ones. Send `allDevices: true` to revoke every session of the user: every other device is signed out at once, its access token included. Send `pushToken` (the native push token of this phone, as given to `registerPushDevice`) to forget this phone's push device with the session; a token of another account is ignored. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["LogoutResult"];
+                    };
+                };
+            };
+        };
+    };
+    startAccess: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": ({
+                    /** Format: uuid */
+                    tenantId?: string;
+                    tenantSlug?: string;
+                    /** Format: email */
+                    email?: string;
+                    mobilePhone?: string;
+                } | unknown | unknown) & (unknown | unknown);
+            };
+        };
+        responses: {
+            /** @description Acknowledgement only. The response is identical whether or not an account exists for the identifier, so it cannot be used to probe for accounts. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AccessStartResult"];
+                    };
+                };
+            };
+        };
+    };
+    resendAccessCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": ({
+                    /** Format: uuid */
+                    tenantId?: string;
+                    tenantSlug?: string;
+                    /** Format: email */
+                    email?: string;
+                    mobilePhone?: string;
+                } | unknown | unknown) & (unknown | unknown);
+            };
+        };
+        responses: {
+            /** @description Acknowledgement only, identical in shape to the start response. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AccessStartResult"];
+                    };
+                };
+            };
+        };
+    };
+    verifyAccessCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": ({
+                    /** Format: uuid */
+                    tenantId?: string;
+                    tenantSlug?: string;
+                    /** Format: email */
+                    email?: string;
+                    mobilePhone?: string;
+                    code: string;
+                } | unknown | unknown) & (unknown | unknown);
+            };
+        };
+        responses: {
+            /** @description `signed-in` carries `tenantUser` and sets the session cookies; `registration-required` carries a single-use `registrationTicket` and creates nothing. A right code is spent even when the account may not sign in here, and three such accounts are refused with 401 SIGN_IN_NOT_AVAILABLE, with no cookie set and the account left unchanged: an account holding any role besides MEMBER and DOCTOR (it signs in with a password through `POST /auth/login`), an identifier the backoffice disabled (verified but no longer allowed to sign in), and a never-verified identifier of an account that may not activate itself (a doctor is activated by an admin). The role refusal comes before the ban check, so it is the same whether or not the account is banned; a banned MEMBER or DOCTOR account is 403 USER_LOCKED before its identifier is looked at. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AccessVerifyResult"];
+                    };
+                };
+            };
+        };
+    };
+    verifyAccessGoogleToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantId?: string;
+                    tenantSlug?: string;
+                    idToken: string;
+                    /** @enum {string} */
+                    target?: "patient";
+                    legalAcceptance: {
+                        /** @enum {string} */
+                        context: "PATIENT";
+                        acceptances: {
+                            documentCode: string;
+                            version: string;
+                            /** @constant */
+                            accepted: true;
+                        }[];
+                    };
+                } | unknown | unknown;
+            };
+        };
+        responses: {
+            /** @description Always `signed-in`, with the session cookies set and full access granted; there is no follow-up step. A known email signs in and links the Google identity on first use; an unknown email is provisioned immediately from the token profile, so `legalAcceptance` must carry the CURRENT published versions and is validated and recorded only on that branch. Gender and date of birth stay empty because Google does not supply them. `target` selects the profile created for a new account and defaults to `patient`. Failure semantics match the OTP verify: banned is 403 USER_LOCKED, a disabled identifier or a Google subject already bound elsewhere is 401 SIGN_IN_NOT_AVAILABLE. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AccessGoogleResult"];
+                    };
+                };
+            };
+        };
+    };
+    completeAccessRegistration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantId?: string;
+                    tenantSlug?: string;
+                    registrationTicket: string;
+                    firstName: string;
+                    lastName: string;
+                    /** @enum {string} */
+                    gender?: "MALE" | "FEMALE" | "NON_BINARY" | "OTHER_GENE";
+                    /** Format: date-time */
+                    dateOfBirth: string;
+                    password?: string;
+                    /** @enum {string} */
+                    language?: "el" | "en";
+                    /** @enum {string} */
+                    target?: "patient";
+                    legalAcceptance: {
+                        /** @enum {string} */
+                        context: "PATIENT";
+                        acceptances: {
+                            documentCode: string;
+                            version: string;
+                            /** @constant */
+                            accepted: true;
+                        }[];
+                    };
+                } | unknown | unknown;
+            };
+        };
+        responses: {
+            /** @description The created tenant user, with the session cookies set. `password` is required for an email ticket and rejected for a phone ticket; `legalAcceptance` must carry the CURRENT published document versions; `target` selects the created profile and defaults to `patient`. A `dateOfBirth` after today, or further back than 120 years, is refused with 422 before the ticket is spent (a baby born today passes). */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AccessCompleteRegistrationResult"];
+                    };
+                };
+            };
+        };
+    };
+    startLoginPhoneAttach: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    mobilePhone: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Acknowledgement of the delivery channel only; the number is never echoed back. The target account is always the session actor, so the body carries no identifier. Sending the caller own ALREADY verified number answers `alreadyVerified: true` without an SMS. An account whose phone channel the backoffice disabled (verified but no longer allowed to sign in) is refused with 401 SIGN_IN_NOT_AVAILABLE before any SMS is sent or any budget is charged, and attaching another number never re-enables that channel. A number that belongs to another account of the tenant is refused with 409 ALREADY_EXIST and the message of the register identity conflict ("Phone already exists for this tenant."), so the two flows cannot be told apart. A malformed number or an extra body property is 422; the per-IP `otp-send` class, the per-account send cap and the per-number cap shared with phone-register/phone-login answer 429. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["LoginPhoneAttachStartResult"];
+                    };
+                };
+            };
+        };
+    };
+    resendLoginPhoneAttachCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Acknowledgement only, identical in shape to the start response. The body is empty by contract: the number is read from the live challenge, so a resend can neither retarget it nor skip the uniqueness gate. Without a live challenge the answer is 401 TOKEN_NOT_FOUND; a phone channel the backoffice disabled answers 401 SIGN_IN_NOT_AVAILABLE before the cooldown, the send budgets and the SMS; inside the resend cooldown, over a send cap or over the per-IP `otp-send` class it is 429; the uniqueness refusal of start applies here too as 409 ALREADY_EXIST with the same message ("Phone already exists for this tenant."). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["LoginPhoneAttachStartResult"];
+                    };
+                };
+            };
+        };
+    };
+    verifyLoginPhoneAttachCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    code: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated session view of the caller, with `loginPhoneVerified` true and `loginPhoneMasked` filled; the full number never leaves auth. The code is single use and the number becomes usable for phone sign-in (D-04). A verify that REPLACES an already verified number signs every OTHER session of the account out at once, access tokens included, in the same transaction as the write; only the calling session, the one the request's refresh-token cookie names, goes on, and the response sets its fresh active-token and refresh-token cookies (never a token in the body). Without a live refresh-token cookie no session is kept and no cookie is set; a FIRST attach revokes nothing and sets no cookie. A phone channel the backoffice disabled answers 401 SIGN_IN_NOT_AVAILABLE and writes nothing. A wrong, expired or already consumed code is 401; too many wrong codes for the account or for the number is 429, as is the per-IP `otp-verify` class; a number taken by another account between start and verify is 409 ALREADY_EXIST with the same message as the register identity conflict ("Phone already exists for this tenant."); a malformed or extra body property is 422. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["LoginPhoneAttachVerifyResult"];
+                    };
+                };
+            };
+        };
+    };
+    initSetPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Acknowledgement of the delivery channel only. The target is always the caller own login email, taken from the session, so the request carries no identifier and the address is never echoed back. Refused with 401 SIGN_IN_NOT_AVAILABLE when that email is not both verified and loginable. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PasswordSetInitResult"];
+                    };
+                };
+            };
+        };
+    };
+    setPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    code: string;
+                    newPassword: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The credential owner and its new version. A caller without a credential gets version 1, an existing one is bumped and re-enabled. The OTP is single use. Every OTHER session is signed out at once, its access token included. The calling session, the one the request's refresh-token cookie names, goes on: the response sets its fresh active-token and refresh-token cookies, and no token is ever returned in the body. Without a live refresh-token cookie no session is kept and no cookie is set, so the caller signs in again. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PasswordChangeResult"];
+                    };
+                };
+            };
+        };
+    };
+    previewAccountDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Nothing is changed or sent. `allowed` is false with `refusal` BACKOFFICE_ACCOUNT for an account that holds a backoffice role (another administrator deletes it) or NO_VERIFIED_CHANNEL when neither the email nor the phone is verified and allowed to sign in. `codeChannel` is where the code will go (the verified email first, otherwise the verified phone) and `codeDestinationMasked` shows it masked only. `removed` counts what the deletion removes, by item: legalAcceptances, legalNotices (who was told of a new terms version), trackingConsents, appointmentsCanceled (the appointments, relatives included, that have not started), ratings (deleted whole), ratingInvitationsRevoked, questions, notificationsCanceled, notificationPreferences (the switches of the notification centre), pushDevices (the phones registered for push notifications), patientProfiles (anonymized), relatives, profiles; a doctor account adds doctorAppointmentsCanceled (in every office, the patients are told), receivedRatings, doctorRatingInvitationsRevoked, doctorAnswers, articleAuthorships (an article left with no author is unpublished), calendarConnections, offices, doctorProfiles (the public profile goes at once), pendingTransmissions (still sent to the tax authority for at most one month), erpTraders, erpItems, providerMessageTemplates and operationsAlerts. `warnings` holds codes: APPOINTMENTS_IN_PROGRESS when a started or checked-in visit stays with its doctor; for a doctor also FAILED_TRANSMISSIONS (documents the tax authority never accepted), SMS_UNITS_LOST, LICENSE_LOST (a running licence ends with the account) and RECORD_COPY_ON_REQUEST (a copy of the appointment book is given on request, before or after the deletion). `retained` lists what stays, why, and for at most how many years: in the locked archive the accepted terms versions, an abuse measure when the account is banned, rating moderation decisions without text, and the deletion trace (no name, email, phone or health data); DOCTOR_PATIENT_RECORD when past appointments stay in the doctors' records, never shown to the deleted account or publicly; for a doctor DOCTOR_APPOINTMENT_BOOK, DOCTOR_TAX_RECORDS (the issued documents) and PLATFORM_ACCOUNTING (licences and SMS packages). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AccountDeletionPreviewView"];
+                    };
+                };
+            };
+        };
+    };
+    startAccountDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Acknowledgement of the delivery channel only; the address is never echoed back. The body is empty by contract: the account is the session actor. A backoffice account is refused with 403 and its reason; an account without a verified sign-in channel is 401 SIGN_IN_NOT_AVAILABLE. Inside the resend cooldown, over the per-account send cap, over the per-number cap shared with the other phone flows, or over the per-IP `otp-send` class the answer is 429. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AccountDeletionCodeSentView"];
+                    };
+                };
+            };
+        };
+    };
+    confirmAccountDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    code: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The deleted account id and the server instant of the deletion. The session cookies are cleared, and every other session of the account is refused with 401 from its next request on. Appointments that have not started are canceled (their doctors are told as for any cancellation), reviews and questions are deleted, and one notice that the account was deleted goes to the verified email (else phone). The account keeps no email, phone, password, Google link or terms acceptance; the same email or phone can register again as a new, empty account, unless the deleted account was banned, in which case registration (and attaching that phone to another account) answers 403 USER_LOCKED until the abuse measure expires. A confirm that runs at the same time as the first one answers the same values; every later request of the deleted account, a repeated confirm included, is 401 and clears the cookies. A wrong, expired or consumed code is 401; too many wrong codes for the account or for the number, or over the per-IP `otp-verify` class, is 429. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AccountDeletionResultView"];
+                    };
+                };
+            };
+        };
+    };
+    listLegalNotices: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description D-132: one item per announced version of a legal document addressed to the account (the core documents to every patient and doctor, the doctor terms to doctors only) that it neither accepted nor closed. `inForce` is false while the version is upcoming, before `effectiveAt` (server clock); `seenAt` is when a device first showed it. Nothing locks the account: the message is information, and the same answer serves the app and the web. A closed message never comes back on any device; a newer version is a new item. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["LegalNoticePendingListView"];
+                    };
+                };
+            };
+        };
+    };
+    acknowledgeLegalNotice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    documentCode: string;
+                    version: string;
+                    /** @enum {string} */
+                    action: "SEEN" | "DISMISSED";
+                };
+            };
+        };
+        responses: {
+            /** @description D-132: `SEEN` stamps the first time the message was shown, `DISMISSED` closes it on every device (and stamps `seenAt` too when it was never reported). A repeated report keeps the first instants. A version that is not the announced one of a document addressed to the account is 404; the acceptance of the terms is not affected. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["LegalNoticeAcknowledgementView"];
+                    };
+                };
+            };
+        };
+    };
+    getPatientMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The patient profile of the signed-in tenant user, or null when registration completed but the patient profile does not exist yet. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PatientSelfResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    upsertPatientMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    amka?: string | null;
+                    afm?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Patient-owned identifiers only: at least one of `amka`/`afm`, an omitted one left untouched. D-132: the legacy `consents` array is no part of the contract and is refused like every unknown field; the terms a person accepted live in the acceptances (`legalAcceptance` of the registration). Gender, date of birth and names live on the user profile and are not writable here. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PatientSelfUpsertResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    patchPatientMeProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    firstName?: string;
+                    lastName?: string;
+                    /** Format: date-time */
+                    dateOfBirth?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description D-74: the booking prerequisites of D-05 that live on the user profile. Every field is optional and at least one must be sent; an omitted one is left untouched, and a name is merged with the stored one, so `firstName` alone is refused with 422 when no surname is on file. The body is the patient row, unchanged: read the effect back from GET /appointment/booking-readiness or GET /patient/me. A `dateOfBirth` after today, or further back than 120 years, is refused with 422 (a baby born today passes). A caller without a patient profile is refused with 403 EC017. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PatientSelfUpsertResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    completePatientOnboarding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    firstName: string;
+                    lastName: string;
+                    fullName?: string;
+                    title?: string;
+                    /** @enum {string} */
+                    gender?: "MALE" | "FEMALE" | "NON_BINARY" | "OTHER_GENE";
+                    /** Format: date-time */
+                    dateOfBirth: string;
+                    /** @enum {string} */
+                    language?: "el" | "en";
+                    amka?: string | null;
+                    afm?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Creation-only: sets the user profile (names, gender, date of birth, language) and creates the patient row, independently of how the session was obtained. A `dateOfBirth` after today, or further back than 120 years, is refused with 422 (a baby born today passes). A caller that already has a patient profile is rejected with 409 EC415; use GET /patient/me to detect that state. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PatientOnboardingResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    listPatientRelatives: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every relative of the patient, or [] when there is none. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["RelativeListResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    addPatientRelative: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    firstName: string;
+                    lastName: string;
+                    /** @enum {string} */
+                    relationship: "CHILD" | "PARENT" | "SIBLING" | "SPOUSE" | "OTHER_RELE";
+                    /** @enum {string} */
+                    gender: "MALE" | "FEMALE" | "NON_BINARY" | "OTHER_GENE";
+                    phone?: string | null;
+                    email?: string | null;
+                    amka?: string | null;
+                    afm?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The created relative. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["RelativeView"];
+                    };
+                };
+            };
+        };
+    };
+    deletePatientRelative: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+                relativeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The deleted relative, as it was before deletion. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["RelativeView"];
+                    };
+                };
+            };
+        };
+    };
+    updatePatientRelative: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+                relativeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    firstName?: string;
+                    lastName?: string;
+                    /** @enum {string} */
+                    relationship?: "CHILD" | "PARENT" | "SIBLING" | "SPOUSE" | "OTHER_RELE";
+                    /** @enum {string} */
+                    gender?: "MALE" | "FEMALE" | "NON_BINARY" | "OTHER_GENE";
+                    phone?: string | null;
+                    email?: string | null;
+                    amka?: string | null;
+                    afm?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated relative. The relative must belong to the patient in the path. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["RelativeView"];
+                    };
+                };
+            };
+        };
+    };
+    getBookingReadiness: {
+        parameters: {
+            query?: {
+                doctorId?: string;
+                relativeId?: string;
+                officeId?: string;
+                startTime?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The blockers standing between the signed-in patient and a booking (verified mobile, full name), plus whether booking is possible at all. It belongs to the patient side: a member account, and an account that is also a doctor only when it holds a patient profile (a doctor books another doctor as a patient); otherwise 403. With `doctorId` it also reports `PATIENT_PENDING_LIMIT_REACHED` when that doctor already holds an open request of the PERSON being booked (D-70, counted per person): the account itself, or the relative named by `relativeId` — each relative has a place of its own. A `relativeId` that is not a relative of this account answers like a person with no open request. With `doctorId` naming the doctor profile of this very account it also reports `PATIENT_IS_THE_DOCTOR`, with or without `relativeId`: one account is never both sides of an appointment, and the booking would be refused with 403. With the chosen slot (`officeId` and `startTime`, both together with `doctorId`) it also reports `BOOKING_NOTICE_TOO_SHORT` and `BOOKING_HORIZON_EXCEEDED` under the effective policy of that doctor and office, decided on the SERVER clock — exactly what the booking would be refused with. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["BookingReadinessView"];
+                    };
+                };
+            };
+        };
+    };
+    listAppointments: {
+        parameters: {
+            query?: {
+                doctorId?: string;
+                officeId?: string;
+                patientId?: string;
+                doctorServiceId?: string;
+                status?: "pending" | "checked_in" | "completed" | "canceled" | "booked" | "rejected" | "unavailable" | "expired" | "no_show";
+                from?: string;
+                to?: string;
+                historyBefore?: string;
+                scope?: "today" | "upcoming" | "history";
+                as?: "patient" | "doctor";
+                limit?: string;
+                cursor?: string;
+                sortDir?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page ordered by `startTime, id` in the direction of `sortDir`: `asc` (the default, oldest first) or `desc` (newest first). `limit` defaults to the configured page size and is refused past the configured maximum; `cursor` is the opaque `nextCursor` of the previous page and belongs to the `sortDir` it was issued for — a cursor of the other direction is refused (422); `total` is the whole matched set and does not change between pages. `historyBefore` (optional, an ISO date-time; a client reads its tabs with `scope` instead, whose bounds the server sets) keeps ONLY the history: every appointment in a final status (`completed`, `canceled`, `rejected`, `expired`, `no_show`, `unavailable`) whatever its time, and every open one (`pending`, `booked`, `checked_in`) whose `startTime` is before `historyBefore`; an open appointment at or after it is never returned. It combines with every other filter and the role scope, and with `sortDir` and `cursor` in both directions; without it the list is unchanged. `scope` (optional) reads the tab the server bounds by its OWN clock (D-118): for the doctor side (DOCTOR and backoffice) the day is the platform calendar day (Europe/Athens, daylight saving included) — `today` is every open appointment starting today, `upcoming` every open one after today, `history` every final one and every open one before today; for a member `upcoming` is every open appointment from now on and `history` every final one and every open one that started before now, and `today` answers 422. The scopes of one reader are disjoint and together hold every appointment. `scope` sets the time bounds itself, so it is refused (422) beside `from`, `to` or `historyBefore`; it combines with `status`, `sortDir` and `cursor`. `as` (optional, `patient` or `doctor`) names the side an account that is both a doctor and a patient reads: without it a doctor account reads the doctor side, every other app account the patient side and the backoffice its tenant; `as=patient` lists the appointments its own patient profile booked, with the member scopes; `as=doctor` from an account that is no doctor answers 403 and `as` from the backoffice 422. Every item carries `officeTimeZone`, the IANA zone of its office. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentListPageResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    createAppointment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    doctorId: string;
+                    officeId: string;
+                    patientId: string;
+                    /** @enum {string} */
+                    bookedForType: "SELF" | "RELATIVE";
+                    relativeId?: string | null;
+                    /** Format: date-time */
+                    startTime: string;
+                    /** @enum {string} */
+                    status?: "pending" | "checked_in" | "completed" | "canceled" | "booked" | "rejected" | "unavailable" | "expired" | "no_show";
+                    patientNote?: string | null;
+                    services: {
+                        doctorServiceId: string;
+                        quantity?: number;
+                        vatRate?: number;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description The created appointment. The booking is decided by the side the account takes in it: naming its own doctor profile as `doctorId` makes it a doctor booking, naming its own patient profile as `patientId` (another doctor) a patient booking, and a booking of a doctor for the patient profile of its own account — by that doctor or by the backoffice, for itself or for a relative of its own (`RELATIVE`) — is refused with 403 `PATIENT_IS_THE_DOCTOR`, the blocker code `getBookingReadiness` reports it with beforehand (one account is never both sides of an appointment; another doctor books the same person by the patient rules; judged on the accounts behind the two profiles). Every id is read in its canonical lower-case text before the side is chosen, so the letter case of an id changes nothing. A patient booking never sends `status`: the doctor confirmation mode decides it (AUTO ⇒ `booked`, MANUAL ⇒ `pending`) and the mode is snapshotted on the row. A MEMBER keeps one `pending` request per PERSON with one doctor (D-70): the account itself and each of its relatives count separately, and a second one for the same person answers 422 `PATIENT_PENDING_LIMIT_REACHED`. Rate limited per IP under the `booking` class. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentDetailResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    getAppointment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The appointment with its service lines and audit log, `officeTimeZone`: the IANA zone its office keeps its hours in, so every hour is shown on the office clock, and `actions`: what the reader may do with it NOW, decided on the server clock by the very rules the writes check (D-118) — a member cancels until the hour (`isPastCancellationCutoff` flags a late cancel) and moves strictly before the cutoff and within the move limit, the doctor side answers a pending request, moves a pending or booked one, cancels anything not over, declares the `outcomes` due after the hour and makes the open `correction`. Booking readiness and an already rated visit are asked by the write itself. The side comes from the appointment itself: its doctor reads it as the doctor side, the holder of its patient profile as a member (a doctor who booked another doctor reads that visit as a patient), the backoffice every appointment of its tenant; everyone else gets the one 403. A member reads every audit line without the explanation of an automatic change, and every line that set the outcome of the visit (a declared outcome, or a status move to `completed`/`no_show` by anyone) without who set it, its reason or its snapshots (`actorRole` null). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentDetailResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    rescheduleAppointment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    bookedForType?: "SELF" | "RELATIVE";
+                    relativeId?: string | null;
+                    /** Format: date-time */
+                    startTime?: string;
+                    patientNote?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated appointment, with its `actions`. A member may move it only before the effective cancellation cutoff and only into a slot that still passes notice, horizon and availability; a doctor moves only a pending or booked appointment (403 otherwise), without the patient accepting, and the status does not change. A member who hands a `pending` request to another person (`relativeId`) takes that person's own D-70 place (422 `PATIENT_PENDING_LIMIT_REACHED` when it is taken). Who the visit is for (`bookedForType`, `relativeId`) and the `patientNote` change only while it is pending or booked, for every role (403 otherwise), and a new person carries its own frozen `relativeSnapshot` (null for the account holder). Only the patient of the appointment writes `patientNote` (D-39): a body from the doctor side that carries it is refused with 403. A write that finds the appointment closed in the meantime answers that same 403; one that finds it changed but still open answers 409. Rate limited per IP under the `booking` class. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentDetailResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    cancelAppointment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    reasonCode: "SCHEDULE_CONFLICT" | "FEELING_BETTER" | "FOUND_ANOTHER_DOCTOR" | "PERSONAL" | "OTHER" | "DOCTOR_UNAVAILABLE" | "EMERGENCY";
+                    reasonText?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The canceled appointment, with its `actions`. `reasonCode` is mandatory and must belong to the list of the caller own role. A member cancels until the appointment starts (403 from then on); cancelling past the cutoff is not refused: the row is flagged `canceledLate`. Repeating the call is idempotent. Rate limited per IP under the `booking` class. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentDetailResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    confirmAppointment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    reason?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The appointment moved from `pending` to `booked`. Idempotent when it is already booked; a terminal appointment answers 409. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentDetailResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    declareAppointmentOutcome: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    outcome: "ARRIVED" | "NO_SHOW" | "COMPLETED";
+                };
+            };
+        };
+        responses: {
+            /** @description The appointment after the one-tap answer of the doctor: `ARRIVED` checks it in, `COMPLETED` and `NO_SHOW` settle it from either `booked` or `checked_in`. Answered only once the appointment has started, and only once: an already settled appointment answers 409. Repeating `ARRIVED` on a checked-in appointment is idempotent. An outcome the SYSTEM recorded (`outcomeSource = SYSTEM`) may be corrected into its opposite until `endTime` plus the configured correction window; correcting a completion into a no-show revokes the rating invitation and answers 409 when the patient already rated the visit. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentDetailResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    rejectAppointment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    reasonCode: "DOCTOR_UNAVAILABLE" | "SLOT_TAKEN" | "NEEDS_DIFFERENT_SERVICE" | "OTHER";
+                    message?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The appointment moved from `pending` to `rejected`. `reasonCode` is mandatory and comes from the reject list; an already booked appointment answers 409. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentDetailResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    getRatingInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The invitation the rating email links to (the app link `ratings/{invitationId}`), as its patient reads it: `status` on the SERVER clock — an `OPEN` invitation whose `expiresAt` has passed reads `EXPIRED` before any worker closes it — `canSubmit`, whether a rating would be accepted now by the very rules the submit checks (open, inside its window, the doctor holding an active marketplace licence, the doctor not being this very account), with `submitBlocker` — the `RatingInvitationSubmitBlocker` code the submit would refuse with, `null` when `canSubmit` — and `ratingId` once rated. The doctor and the date of the visit are read from `getAppointment` with `appointmentId`. It belongs to the patient side: a member, and a doctor account that was the patient of another doctor; an invitation of another account, of another tenant or one that does not exist answers the one 403 `rating invitation is not accessible to this account.` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentRatingInvitationActorView"];
+                    };
+                };
+            };
+        };
+    };
+    submitRatingInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    comment?: string;
+                    aspect: {
+                        inDepthRating: number;
+                        trustRating: number;
+                        expertiseRating: number;
+                        punctualRating: number;
+                        friendlyRating: number;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description The created rating as its patient reads it; `overallRating` is computed by the server from the five aspects and the rating waits for moderation before the public reads it. One rating per invitation, on the SERVER clock. A refusal names its `RatingInvitationSubmitBlocker` code in the message: 403 `RATING_INVITATION_NOT_OPEN` (already rated, revoked or closed), 403 `RATING_INVITATION_EXPIRED` (past `expiresAt`; the invitation is closed unless something else closed it first), 403 `RATING_PATIENT_IS_THE_DOCTOR` (the doctor of the visit is this very account: one account is never both sides of a visit), 403 `RATING_DOCTOR_LICENSE_INACTIVE` (the doctor holds no active marketplace licence now; the invitation stays open). An invitation of another account or one that does not exist answers the one 403 `rating invitation is not accessible to this account.`; a second rating of one visit answers 409. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentRatingResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    listRatings: {
+        parameters: {
+            query?: {
+                doctorId?: string;
+                patientId?: string;
+                appointmentId?: string;
+                ratingModerationStatus?: "PENDING" | "APPROVED" | "REJECTED";
+                replyModerationStatus?: "NONE" | "PENDING" | "APPROVED" | "REJECTED";
+                as?: "patient" | "doctor";
+                limit?: string;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page ordered newest first (`createdAt desc, id desc`). `limit` defaults to the page size and is refused (422) past the maximum; `cursor` is the opaque `nextCursor` of the previous page, refused (422) when it is not one; `total` is the whole matched set and does not change between pages. `as` (optional, `patient` or `doctor`) names the side an account that is both a doctor and a patient reads: without it a doctor account reads the ratings it received, every other app account the ratings it wrote and the backoffice every rating of its tenant; `as=patient` lists the ratings its own patient profile wrote; `as=doctor` from an account that is no doctor answers 403 and `as` from the backoffice 422. The patient side reads a doctor reply only once it is approved — a pending or rejected reply reads as `NONE`, with no trace in `updatedAt` — and `replyModerationStatus` filters on that visible status. Moderation notes reach the backoffice only, and a moderator id only the moderator. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentRatingListPageView"];
+                    };
+                };
+            };
+        };
+    };
+    getRating: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ratingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One rating, read on the side the rating gives the account: its doctor reads it as the doctor (its reply with the moderation status), the holder of its patient profile as the patient (a reply only once approved — until then `updatedAt` is the last change of the rating or its moderation, never of the reply), the backoffice every rating of its tenant. No rating response names the tenant. A rating that does not exist, one of another tenant and an account on neither side answer the one 403 `rating is not accessible to this account.` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentRatingResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    replyToRating: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ratingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    reply: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The rating with the one reply of its doctor, waiting for moderation (`replyModerationStatus` `PENDING`); the patient and the public read it only once approved. An account acting as a doctor — `DOCTOR` as its primary or a secondary role — answers its own ratings only: a rating that does not exist, one of another doctor and one of another tenant answer the one 403 `rating is not accessible to this account.`; a second reply answers 409, also when two replies race. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentRatingResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    getMyNotificationSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Which appointment events the doctor pays an SMS for (D-09), the reminder offsets currently enabled, and `reminderOffsetOptionsHours`: the only offsets an update may contain. A doctor who never saved them reads the defaults with every SMS off. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorNotificationSettingsView"];
+                    };
+                };
+            };
+        };
+    };
+    updateMyNotificationSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    smsPatientConfirmed?: boolean;
+                    smsPatientRescheduled?: boolean;
+                    smsPatientRejectedOrExpired?: boolean;
+                    smsPatientCanceledByDoctor?: boolean;
+                    smsPatientReminderOffsetsHours?: number[];
+                    smsDoctorNewRequest?: boolean;
+                    smsDoctorLateCancel?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description The stored settings. The body is a patch: an absent field keeps its current value. A reminder offset outside `reminderOffsetOptionsHours` is refused with 422 (D-15); the target is always the doctor of the session. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorNotificationSettingsView"];
+                    };
+                };
+            };
+        };
+    };
+    getMySmsBalance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The remaining SMS units across the active packages, the packages themselves, and how many messages were charged this calendar month. Who granted a package is server-side only. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["SmsBalanceView"];
+                    };
+                };
+            };
+        };
+    };
+    listMySmsLedger: {
+        parameters: {
+            query?: {
+                limit?: string;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page ordered by `sentAt desc, id desc`, with the recipient masked. `limit` defaults to the configured page size and is refused past the configured maximum; `cursor` is the opaque `nextCursor` of the previous page; `total` is the whole matched set. `error` names why a line was not sent: besides the delivery reasons, `RECIPIENT_OPTED_OUT` (the patient turned SMS reminders off) and `REMINDER_EXPIRED` (the reminder would have left once the visit began), both with no unit charged. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["SmsLedgerPageView"];
+                    };
+                };
+            };
+        };
+    };
+    getMyNotificationPreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The centre of the signed-in app account, a doctor included: one `PATIENT` section, and a `DOCTOR` section only for an account that acts as a doctor and holds a doctor profile (a doctor reads its patient side here too). Each category lists its channels: `mode` `ALWAYS` (always sent, `enabled` true), `TOGGLE` (a switch, `enabled` its value) or `SET_BY_DOCTOR` (the SMS a doctor offers for its own appointments, `enabled` null); a channel a category does not list does not exist for it. `scope` names a switch that covers part of its category: `NEW_REQUESTS_ONLY`, `LATE_CANCELLATIONS_ONLY` (the doctor SMS, the same values as `getMyNotificationSettings`) and `WHEN_DOCTOR_OFFERS` (SMS reminders, sent only where the doctor offers them). An account that never saved anything reads the defaults (every switch on, the doctor SMS off) with `updatedAt` null. A switch turned off stops also what is already waiting to leave. Push switches are stored and read; push messages start in a later release. A backoffice account answers 403. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["NotificationPreferencesView"];
+                    };
+                };
+            };
+        };
+    };
+    updateMyNotificationPreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    cells: {
+                        /** @enum {string} */
+                        category: "APPOINTMENT_UPDATES" | "REMINDERS" | "RATINGS" | "QUESTIONS" | "ACCOUNT" | "DOCTOR_NEW_APPOINTMENTS" | "DOCTOR_PATIENT_CHANGES" | "DOCTOR_RATINGS" | "DOCTOR_ACCOUNT" | "DOCTOR_OPERATIONS";
+                        /** @enum {string} */
+                        channel: "EMAIL" | "SMS" | "PUSH";
+                        enabled: boolean;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description The centre after the change. `cells` is a patch: each entry names a `TOGGLE` cell by `category` and `channel` once, and the cells it does not name keep their value. An `ALWAYS` or `SET_BY_DOCTOR` cell, a channel the category lacks and a cell named twice answer 422; a cell of the `DOCTOR` side from an account with no doctor profile answers 403 `doctor profile not found for current user.`. The two doctor SMS cells are the same switches as `smsDoctorNewRequest` and `smsDoctorLateCancel` of `getMyNotificationSettings`: one source, written in the same transaction. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["NotificationPreferencesView"];
+                    };
+                };
+            };
+        };
+    };
+    registerPushDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    pushToken: string;
+                    /** @enum {string} */
+                    platform: "IOS" | "ANDROID";
+                    /** @enum {string} */
+                    appId: "com.edoctor.app" | "com.edoctor.app.development" | "com.edoctor.app.preview";
+                    /** @enum {string} */
+                    apnsEnvironment?: "SANDBOX" | "PRODUCTION";
+                };
+            };
+        };
+        responses: {
+            /** @description The device, without its token. `pushToken` is the native APNs (iOS) or FCM (Android) token of `getDevicePushTokenAsync`; `appId` the bundle / application id of the build; `apnsEnvironment` is required for `IOS` (`SANDBOX` for a development build, `PRODUCTION` otherwise) and refused for `ANDROID`. Production accepts only `com.edoctor.app` with `PRODUCTION`. Call it after every sign-in, on every return to the foreground and when the token changes: a device not seen for as long as a session lives stops receiving and is forgotten. It needs a live session (the refresh cookie of a session that was not revoked), else 401. A token registered by another account moves to this one; an account keeps its 10 most recently seen devices. A device of a session revoked from elsewhere (sign-out of every device, password change, ban) stops receiving and must be registered again after the next sign-in. Push messages start in a later release. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PushDeviceView"];
+                    };
+                };
+            };
+        };
+    };
+    unregisterPushDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    pushToken: string;
+                };
+            };
+        };
+        responses: {
+            /** @description `removed` is true when the token was a device of this account; a token of another account, or one never registered, is left alone with `removed` false. Call it when the notification permission is withdrawn; a sign-out forgets the device through `logout` (`pushToken`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PushDeviceUnregisterView"];
+                    };
+                };
+            };
+        };
+    };
+    getMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The profile of the signed-in account with its name translations: `locale` (`el` or `en`; without one the messages use the platform default language), `gender`, `dateOfBirth`, `avatarUrl`, `headline` and `bio`. It names no id but the account's own. `data` is `null` for an account that has no profile yet (a sign-up without names, for one): its first `updateMyProfile` creates the profile, with `locale` `en` unless that body names one. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["UserGetResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    updateMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    gender?: "MALE" | "FEMALE" | "NON_BINARY" | "OTHER_GENE";
+                    /** Format: date-time */
+                    dateOfBirth?: string;
+                    avatarUrl?: string;
+                    headline?: string;
+                    bio?: string;
+                    /** @enum {string} */
+                    locale?: "el" | "en";
+                };
+            };
+        };
+        responses: {
+            /** @description The stored profile. For an account with no profile yet the call creates it, with every field the body names and `locale` `en` unless it names one — an empty body included. Once the profile exists the body is a patch: an absent field keeps its value, and a body that changes nothing answers 422. `locale` sets the language of every message the account receives from then on. `avatarUrl` must be an absolute `https` URL (anything else answers 422). The target is always the account of the session. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["UserViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    listAvailabilities: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every availability the caller may see, with its weekly schedule. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AvailabilityListResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    createAvailability: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    doctorId: string;
+                    officeId: string;
+                    /** @enum {string} */
+                    timezone: "Europe/Athens" | "Europe/Nicosia";
+                    /** Format: date-time */
+                    availabilityFrom: string;
+                    /** Format: date-time */
+                    availabilityUntil: string;
+                    isEnabled?: boolean;
+                    slotStepMinutes?: number;
+                    confirmationMode?: ("AUTO" | "MANUAL") | null;
+                    cancellationCutoffHours?: number | null;
+                    minBookingNoticeHours?: number | null;
+                    scheduleAvailability: {
+                        monday: {
+                            startMinute: number;
+                            endMinute: number;
+                            /** @enum {integer} */
+                            slot?: 1;
+                            /** @enum {integer} */
+                            capacity?: 1;
+                        }[];
+                        tuesday: {
+                            startMinute: number;
+                            endMinute: number;
+                            /** @enum {integer} */
+                            slot?: 1;
+                            /** @enum {integer} */
+                            capacity?: 1;
+                        }[];
+                        wednesday: {
+                            startMinute: number;
+                            endMinute: number;
+                            /** @enum {integer} */
+                            slot?: 1;
+                            /** @enum {integer} */
+                            capacity?: 1;
+                        }[];
+                        thursday: {
+                            startMinute: number;
+                            endMinute: number;
+                            /** @enum {integer} */
+                            slot?: 1;
+                            /** @enum {integer} */
+                            capacity?: 1;
+                        }[];
+                        friday: {
+                            startMinute: number;
+                            endMinute: number;
+                            /** @enum {integer} */
+                            slot?: 1;
+                            /** @enum {integer} */
+                            capacity?: 1;
+                        }[];
+                        saturday: {
+                            startMinute: number;
+                            endMinute: number;
+                            /** @enum {integer} */
+                            slot?: 1;
+                            /** @enum {integer} */
+                            capacity?: 1;
+                        }[];
+                        sunday: {
+                            startMinute: number;
+                            endMinute: number;
+                            /** @enum {integer} */
+                            slot?: 1;
+                            /** @enum {integer} */
+                            capacity?: 1;
+                        }[];
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description The created availability with its weekly schedule. The three booking policy fields are per-office overrides: `null` inherits the doctor value. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AvailabilityViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    getAvailability: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                availabilityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The availability, or `null` when no availability carries that id. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AvailabilityGetResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    deleteAvailability: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                availabilityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The deleted availability, as it was before deletion. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AvailabilityViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    updateAvailability: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                availabilityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    doctorId?: string;
+                    officeId?: string;
+                    /** @enum {string} */
+                    timezone?: "Europe/Athens" | "Europe/Nicosia";
+                    /** Format: date-time */
+                    availabilityFrom?: string;
+                    /** Format: date-time */
+                    availabilityUntil?: string;
+                    isEnabled?: boolean;
+                    slotStepMinutes?: number;
+                    confirmationMode?: ("AUTO" | "MANUAL") | null;
+                    cancellationCutoffHours?: number | null;
+                    minBookingNoticeHours?: number | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated availability. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AvailabilityViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    replaceAvailabilitySchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                availabilityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    monday: {
+                        startMinute: number;
+                        endMinute: number;
+                        /** @enum {integer} */
+                        slot?: 1;
+                        /** @enum {integer} */
+                        capacity?: 1;
+                    }[];
+                    tuesday: {
+                        startMinute: number;
+                        endMinute: number;
+                        /** @enum {integer} */
+                        slot?: 1;
+                        /** @enum {integer} */
+                        capacity?: 1;
+                    }[];
+                    wednesday: {
+                        startMinute: number;
+                        endMinute: number;
+                        /** @enum {integer} */
+                        slot?: 1;
+                        /** @enum {integer} */
+                        capacity?: 1;
+                    }[];
+                    thursday: {
+                        startMinute: number;
+                        endMinute: number;
+                        /** @enum {integer} */
+                        slot?: 1;
+                        /** @enum {integer} */
+                        capacity?: 1;
+                    }[];
+                    friday: {
+                        startMinute: number;
+                        endMinute: number;
+                        /** @enum {integer} */
+                        slot?: 1;
+                        /** @enum {integer} */
+                        capacity?: 1;
+                    }[];
+                    saturday: {
+                        startMinute: number;
+                        endMinute: number;
+                        /** @enum {integer} */
+                        slot?: 1;
+                        /** @enum {integer} */
+                        capacity?: 1;
+                    }[];
+                    sunday: {
+                        startMinute: number;
+                        endMinute: number;
+                        /** @enum {integer} */
+                        slot?: 1;
+                        /** @enum {integer} */
+                        capacity?: 1;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description The availability with the new schedule. The call replaces every day, it does not merge. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AvailabilityViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    listAvailabilityOverrides: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                availabilityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every date override of the availability, or [] when there is none. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AvailabilityOverrideListResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    createAvailabilityOverride: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                availabilityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    date: string;
+                    startMinute: number;
+                    endMinute: number;
+                    /** @enum {string} */
+                    type: "OPEN" | "CLOSED";
+                    /** @enum {integer} */
+                    capacity?: 1;
+                };
+            };
+        };
+        responses: {
+            /** @description The availability with the new override applied. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AvailabilityViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    deleteAvailabilityOverride: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                availabilityId: string;
+                overrideId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The availability with the override removed. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AvailabilityViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    updateAvailabilityOverride: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                availabilityId: string;
+                overrideId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    date?: string;
+                    startMinute?: number;
+                    endMinute?: number;
+                    /** @enum {string} */
+                    type?: "OPEN" | "CLOSED";
+                    /** @enum {integer} */
+                    capacity?: 1;
+                };
+            };
+        };
+        responses: {
+            /** @description The availability with the override updated. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AvailabilityViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    getCalendarConnection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The connection with its provider, status and selected calendars, or the disconnected state. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["CalendarConnectionStateView"];
+                    };
+                };
+            };
+        };
+    };
+    disconnectCalendar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The outcome code and the resulting connection state. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["CalendarActionResult"];
+                    };
+                };
+            };
+        };
+    };
+    initGoogleCalendarConnect: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    redirectUrl?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The provider authorization URL to open, and the `state` the callback must carry back. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["CalendarConnectInitResult"];
+                    };
+                };
+            };
+        };
+    };
+    completeGoogleCalendarConnect: {
+        parameters: {
+            query: {
+                code?: string;
+                state: string;
+                scope?: string;
+                authuser?: string;
+                prompt?: string;
+                hd?: string;
+                session_state?: string;
+                client_info?: string;
+                error?: string;
+                error_description?: string;
+                error_uri?: string;
+                error_subcode?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The outcome code and the resulting connection state. The caller is the browser the doctor was sent to, so no session cookie is required. When the connect was started with a `redirectUrl`, the answer is a 302 to it with `?code=<outcome>&provider=<provider>` instead of this body. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["CalendarActionResult"];
+                    };
+                };
+            };
+        };
+    };
+    initMicrosoftCalendarConnect: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    redirectUrl?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The provider authorization URL to open, and the `state` the callback must carry back. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["CalendarConnectInitResult"];
+                    };
+                };
+            };
+        };
+    };
+    completeMicrosoftCalendarConnect: {
+        parameters: {
+            query: {
+                code?: string;
+                state: string;
+                scope?: string;
+                authuser?: string;
+                prompt?: string;
+                hd?: string;
+                session_state?: string;
+                client_info?: string;
+                error?: string;
+                error_description?: string;
+                error_uri?: string;
+                error_subcode?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The outcome code and the resulting connection state. The caller is the browser the doctor was sent to, so no session cookie is required. When the connect was started with a `redirectUrl`, the answer is a 302 to it with `?code=<outcome>&provider=<provider>` instead of this body. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["CalendarActionResult"];
+                    };
+                };
+            };
+        };
+    };
+    listCalendarProviderCalendars: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every calendar of the connected account, flagged with the ones currently selected. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["CalendarProviderCalendarListResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    updateCalendarSelection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    readCalendarIds: string[];
+                    writeCalendarId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The outcome code and the resulting connection state. The call replaces the selection, it does not merge. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["CalendarActionResult"];
+                    };
+                };
+            };
+        };
+    };
+    enableCalendarSync: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The outcome code and the resulting connection state. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["CalendarActionResult"];
+                    };
+                };
+            };
+        };
+    };
+    disableCalendarSync: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The outcome code and the resulting connection state. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["CalendarActionResult"];
+                    };
+                };
+            };
+        };
+    };
+    syncCalendarNow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The outcome code and the resulting connection state after the manual cycle. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["CalendarActionResult"];
+                    };
+                };
+            };
+        };
+    };
+    getDoctorProfileBase: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The base profile with the four booking policy fields: confirmation mode, cancellation cutoff, minimum booking notice and maximum booking horizon. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorProfileBaseView"];
+                    };
+                };
+            };
+        };
+    };
+    updateDoctorProfileBase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    tenantUserId?: string;
+                    facebook?: string | null;
+                    website?: string | null;
+                    instagram?: string | null;
+                    linkedin?: string | null;
+                    licenseNumber?: string | null;
+                    licenseObtainedDate?: string | null;
+                    appointmentsEnabled?: boolean;
+                    /** @enum {string} */
+                    appointmentConfirmationMode?: "AUTO" | "MANUAL";
+                    cancellationCutoffHours?: number;
+                    minBookingNoticeHours?: number;
+                    maxBookingHorizonDays?: number;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated base profile. Each booking policy field is validated against the configured range and refused with 422 outside it. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorProfileBaseView"];
+                    };
+                };
+            };
+        };
+    };
+    getDoctorActivationReadiness: {
+        parameters: {
+            query?: {
+                doctorId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The collected activation facts, the capability flags derived from them, the blocking reasons per capability and the non-blocking suggestions. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorActivationReadinessResponse"];
+                    };
+                };
+            };
+        };
+    };
+    listDoctorProfileOffices: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every office linked to the doctor, each as the doctor-office link plus the office aggregate with its translations. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorProfileOfficeListResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    setDoctorOnboardingCalendar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    tenantUserId?: string;
+                    /** @enum {string} */
+                    calendarCategory: "NONE" | "GOOGLE" | "DIRECT" | "MICROSOFT";
+                };
+            };
+        };
+        responses: {
+            /** @description The updated doctor. `DIRECT` keeps appointments inside eDoctor; `GOOGLE` or `MICROSOFT` is the category the calendar-sync connect flow then requires. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpCarts: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId: string;
+                status?: "ACTIVE" | "CHECKING_OUT" | "CHECKED_OUT" | "ABANDONED";
+                limit?: number | string;
+                offset?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The page of carts plus the total of the whole filter. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartListView"];
+                    };
+                };
+            };
+        };
+    };
+    createErpCart: {
+        parameters: {
+            query?: {
+                replace?: boolean | ("true" | "false");
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    officeId: string;
+                    /** Format: uuid */
+                    documentSeriesId?: string;
+                    /** Format: uuid */
+                    appointmentId?: string;
+                    /** Format: uuid */
+                    patientId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The created cart. A doctor holds one ACTIVE cart per office; send `replace=true` to abandon the existing one instead of being refused. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartView"];
+                    };
+                };
+            };
+        };
+    };
+    addErpCartLine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    expectedVersion?: number;
+                    /** Format: uuid */
+                    sourceErpItemId?: string;
+                    /** Format: uuid */
+                    sourceDoctorServiceId?: string;
+                    quantity: number;
+                    grossUnitPriceInCents?: number;
+                    /** @enum {string} */
+                    vatCategory?: "standard" | "reduced";
+                } & (unknown | unknown);
+            };
+        };
+        responses: {
+            /** @description The cart with the new line and recomputed totals. A line names exactly one catalogue source, `sourceErpItemId` or `sourceDoctorServiceId`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartView"];
+                    };
+                };
+            };
+        };
+    };
+    clearErpCartLines: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    expectedVersion?: number;
+                };
+            };
+        };
+        responses: {
+            /** @description The emptied cart. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartView"];
+                    };
+                };
+            };
+        };
+    };
+    checkoutErpCart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    expectedVersion?: number;
+                    payment: {
+                        /** @enum {string} */
+                        method: "cash" | "credit" | "deposit" | "web-banking" | "check" | "free" | "pos" | "iris";
+                        /** @enum {string} */
+                        provider?: "worldline" | "viva" | "nbg" | "epay" | "iris" | "nexi" | "webecr";
+                        terminalId?: string;
+                        tipAmountInCents?: number;
+                    } & (unknown & unknown);
+                    delivery: {
+                        /** @enum {string} */
+                        method: "PRINT" | "SMS" | "EMAIL";
+                    };
+                    print?: {
+                        /** Format: uuid */
+                        stationId: string;
+                    };
+                    device?: {
+                        appId?: string;
+                        flavor?: string;
+                        platform?: string;
+                        callbackSchemes?: {
+                            [key: string]: string;
+                        };
+                        installedApps?: string[];
+                    };
+                    mockScenario?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The issued document plus, for a card payment, the payment attempt and the `PaymentInstruction` the device executes. `instruction` is null for cash. `target` is a discriminated union keyed on `kind`; the device selects its executor from it and never interprets the terminal answer. Send the `Idempotency-Key` header so a replayed checkout returns the first answer instead of minting a second attempt. The body names the ONE way the receipt reaches the patient (`delivery.method`: PRINT, SMS or EMAIL, among the methods the doctor enabled); it is checked before anything is issued: a method the doctor did not enable answers 422 `DELIVERY_METHOD_NOT_ENABLED`, one this till cannot run (PRINT or EMAIL without a named station with a printer) 422 `DELIVERY_METHOD_UNAVAILABLE`, an SMS without the cart mobile or an EMAIL without the cart email 422 `DELIVERY_RECIPIENT_MISSING`, and an SMS without an SMS unit 409 `NO_SMS_UNITS`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartCheckoutView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpWebEcrTerminals: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+                officeId?: string;
+                stationId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The terminals whose links match the office and station of the query. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpWebEcrTerminalListView"];
+                    };
+                };
+            };
+        };
+    };
+    createErpWebEcrTerminal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                    nspType: string;
+                    acquirerType: string;
+                    bankTerminalId: string;
+                    label?: string | null;
+                    /** Format: uuid */
+                    stationId?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The registered terminal. It is not usable until it is provisioned; `apiKeyMasked` is null until then and the key itself is never returned. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpWebEcrTerminalView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpWebEcrTerminalRoutes: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The NSP and acquirer pairs the active environment routes; a pair outside this list is refused at registration. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpWebEcrTerminalRouteOptionListView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpWebEcrTerminalById: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                terminalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The terminal, with its links and its provisioning state. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpWebEcrTerminalView"];
+                    };
+                };
+            };
+        };
+    };
+    archiveErpWebEcrTerminal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                terminalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Archiving is a soft state: the terminal keeps its history and stops being selectable. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpWebEcrTerminalView"];
+                    };
+                };
+            };
+        };
+    };
+    updateErpWebEcrTerminal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                terminalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    label?: string | null;
+                    isEnabled?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description The identity of a terminal (NSP, acquirer, bank terminal id) is immutable: sending one is refused rather than silently dropped. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpWebEcrTerminalView"];
+                    };
+                };
+            };
+        };
+    };
+    provisionErpWebEcrTerminal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                terminalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    authCode: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The provisioned terminal. The API key the NSP returns is stored encrypted and never leaves the server; only its mask is published. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpWebEcrTerminalView"];
+                    };
+                };
+            };
+        };
+    };
+    linkErpWebEcrTerminal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                terminalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                    /** Format: uuid */
+                    stationId?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description A null `stationId` means every station of that office. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpWebEcrTerminalView"];
+                    };
+                };
+            };
+        };
+    };
+    unlinkErpWebEcrTerminal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                terminalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                    /** Format: uuid */
+                    stationId?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Removing the last link archives the terminal, so no orphan can stay behind. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpWebEcrTerminalView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpPaymentAttemptById: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                attemptId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A WebECR attempt is driven server-side: the client polls this endpoint at `instruction.target.pollIntervalMs` until the status leaves `SENT_TO_NSP`. A DOCTOR never receives the raw provider evidence of an attempt waiting for a human. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentPaymentAttemptView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpPaymentAttempts: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+                status?: "CREATED" | "AWAITING_DEVICE_RESULT" | "SENT_TO_NSP" | "APPROVED" | "DECLINED" | "CANCELLED" | "FAILED" | "UNCERTAIN" | "MANUAL_REVIEW" | "EXPIRED";
+                officeId?: string;
+                documentId?: string;
+                limit?: number | string;
+                offset?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Filter on `status=UNCERTAIN` or `status=MANUAL_REVIEW` to read the payments that still owe a decision. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentPaymentAttemptListView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpPaymentAttemptEvents: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                attemptId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every WebECR transition writes one row, oldest first. Credential-looking metadata keys are dropped before the row is stored, so this trail can never leak an API key. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentPaymentAttemptEventListView"];
+                    };
+                };
+            };
+        };
+    };
+    decideErpPaymentAttempt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attemptId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** @enum {string} */
+                    decision: "approve" | "decline";
+                    note?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The decision is a CLAIM, never a verdict. `approve` issues the receipt with a placeholder transaction id and holds its transmission until the NSP confirms; `decline` cancels the document and reopens the cart. A native attempt is refused by name. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentWebEcrVerificationView"];
+                    };
+                };
+            };
+        };
+    };
+    retryErpPaymentAttempt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attemptId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description A quick retry NEVER starts a second transaction: it polls the intent that already exists, recovering its id by customer reference when it was lost. A new payment is a new checkout. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentWebEcrVerificationView"];
+                    };
+                };
+            };
+        };
+    };
+    verifyErpPaymentAttempt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attemptId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The same cycle the worker runs, on demand. `observation` is what the NSP shows and `action` is what the decision matrix answered for it. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentWebEcrVerificationView"];
+                    };
+                };
+            };
+        };
+    };
+    resolveErpPaymentAttemptManualReview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attemptId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** @enum {string} */
+                    resolution: "approve" | "decline" | "acknowledge";
+                    note: string;
+                };
+            };
+        };
+        responses: {
+            /** @description `acknowledge` closes the case without moving the document, which is how a ghost charge settled with the bank is filed. The note is mandatory. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentWebEcrVerificationView"];
+                    };
+                };
+            };
+        };
+    };
+    applyErpPaymentAttemptResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attemptId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    contractVersion?: string;
+                    /** @enum {string} */
+                    nativeStatus: "resolved" | "rejected" | "timeout" | "cancelled_by_user" | "not_started";
+                    nativeErrorCode?: string | null;
+                    nativeErrorMessage?: string | null;
+                    resultSchemaHint?: string;
+                    rawResult?: string | {
+                        [key: string]: unknown;
+                    } | null;
+                    startedAt?: string | null;
+                    finishedAt?: string | null;
+                    elapsedMs?: number | null;
+                    clientResultId: string;
+                    device?: {
+                        appId?: string;
+                        flavor?: string;
+                        platform?: string;
+                        callbackSchemes?: {
+                            [key: string]: string;
+                        };
+                        installedApps?: string[];
+                    } | null;
+                };
+            };
+        };
+        responses: {
+            /** @description `rawResult` is forwarded verbatim: the device performs no normalization, and the provider adapter on this side is the only interpreter. `nativeStatus` carries the four answers that never reach a provider payload (`timeout`, `cancelled_by_user`, `not_started`, and `rejected`, the last of which means "app not installed" when `nativeErrorCode` says so). `clientResultId` is half of the idempotency key, so a replayed answer returns the first outcome. `startedAt`, `finishedAt` and `elapsedMs` are device telemetry: they are kept verbatim with the raw answer as evidence and never decide or date anything; the times that count, when the answer was received and when the attempt was resolved, are set by the server clock (D-118). `next` reports what the document did. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentPaymentResultView"];
+                    };
+                };
+            };
+        };
+    };
+    getActiveErpCart: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The open cart, or `null` when the office has none. A doctor holds at most one ACTIVE cart per office. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartActiveView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpCart: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                cartId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The cart with its lines, totals and tax answers. `readiness.checkoutBlockers` names, one code per reason, what stops a checkout right now (blocked account, busy or missing series, empty cart, missing counterpart, unanswered tax, other cart rules) and `canCheckout` is exactly their absence; `readiness.receiptSms` tells whether a receipt SMS can be sent (`NO_SMS_UNITS` when not). The till shows them; the gate stays the server's. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartView"];
+                    };
+                };
+            };
+        };
+    };
+    abandonErpCart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    expectedVersion?: number;
+                };
+            };
+        };
+        responses: {
+            /** @description The abandoned cart. Abandoning frees the office to open a new one. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartView"];
+                    };
+                };
+            };
+        };
+    };
+    updateErpCart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    expectedVersion?: number;
+                    notes?: string | null;
+                    email?: string | null;
+                    smsRecipient?: string | null;
+                    appointmentId?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The cart with the changed header. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartView"];
+                    };
+                };
+            };
+        };
+    };
+    removeErpCartLine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartId: string;
+                lineNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    expectedVersion?: number;
+                };
+            };
+        };
+        responses: {
+            /** @description The cart without the line and with totals recomputed. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartView"];
+                    };
+                };
+            };
+        };
+    };
+    updateErpCartLine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartId: string;
+                lineNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    expectedVersion?: number;
+                    quantity?: number;
+                    grossUnitPriceInCents?: number;
+                    lineTotalAmountInCents?: number;
+                    /** @enum {string} */
+                    vatCategory?: "standard" | "reduced";
+                };
+            };
+        };
+        responses: {
+            /** @description The cart with the line changed and totals recomputed. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartView"];
+                    };
+                };
+            };
+        };
+    };
+    setErpCartSeries: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    expectedVersion?: number;
+                    /** Format: uuid */
+                    documentSeriesId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The cart with the chosen series and any tax questions that series raises. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartView"];
+                    };
+                };
+            };
+        };
+    };
+    setErpCartCounterpart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    expectedVersion?: number;
+                    source: ("TRADER" | "PATIENT" | "MANUAL") | null;
+                    /** Format: uuid */
+                    traderId?: string;
+                    /** Format: uuid */
+                    patientId?: string;
+                    details?: {
+                        taxNumber: string;
+                        name: string;
+                        country?: string;
+                        type: string;
+                        /** @enum {string} */
+                        vatCategory: "standard" | "reduced" | "zero";
+                        address?: string;
+                        jobTitle?: string;
+                        postalCode?: string;
+                        city?: string;
+                        taxOffice?: string;
+                        phoneNumber?: string;
+                        email?: string;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description The cart with the counterpart the chosen series requires. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartView"];
+                    };
+                };
+            };
+        };
+    };
+    answerErpCartTaxes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    expectedVersion?: number;
+                    answers: {
+                        /** Format: uuid */
+                        taxId: string;
+                        /** @enum {string} */
+                        proceed: "GRANTED_AT_ASKED" | "NOT_GRANTED_AT_ASKED";
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description The cart with the answers applied to its totals. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartView"];
+                    };
+                };
+            };
+        };
+    };
+    validateErpCart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    payment?: {
+                        /** @enum {string} */
+                        method: "cash" | "credit" | "deposit" | "web-banking" | "check" | "free" | "pos" | "iris";
+                        /** @enum {string} */
+                        provider?: "worldline" | "viva" | "nbg" | "epay" | "iris" | "nexi" | "webecr";
+                        terminalId?: string;
+                        tipAmountInCents?: number;
+                    } & (unknown & unknown);
+                };
+            };
+        };
+        responses: {
+            /** @description What still blocks the checkout. An empty list of problems means the cart is issuable. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpCartValidationView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpFinancialDocuments: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+                officeId?: string;
+                status?: "PAYMENT_PENDING" | "PAYMENT_UNCERTAIN" | "PAYMENT_MANUAL_REVIEW" | "ISSUED" | "TRANSMITTING" | "WAITING_STATUS_CHECK" | "PRINTING" | "COMPLETED" | "FAILED_TERMINAL" | "CANCELED";
+                transmissionStatus?: "NONE" | "PENDING_TRANSMIT" | "RETRY_SCHEDULED" | "PENDING_STATUS_CHECK" | "CONFIRMED" | "FAILED_TERMINAL";
+                transmissionStep?: "NONE" | "TRANSMIT" | "CHECK_STATUS";
+                needsAttention?: boolean | ("true" | "false");
+                needsAttentionReason?: "UNKNOWN_PROVIDER_RESPONSE" | "REPEATED_QUEUE_LOSS" | "TRANSMISSION_OVERDUE" | "SYSTEMIC_TRANSMISSION_STOP" | "PAYMENT_AMOUNT_MISMATCH" | "PAYMENT_TOKEN_REJECTED" | "PAYMENT_TERMINAL_MISMATCH" | "PAYMENT_PROVIDER_RECONCILIATION" | "UNBOUND_CARD_SEND_FAILED" | "TRANSMISSION_REJECTED";
+                search?: string;
+                issueDateFrom?: string;
+                issueDateTo?: string;
+                totalAmountInCentsFrom?: number | string;
+                totalAmountInCentsTo?: number | string;
+                documentSeriesId?: string;
+                number?: number | string;
+                series?: string;
+                abbreviation?: string;
+                mark?: string;
+                counterpartTaxNumber?: string;
+                includeCanceled?: boolean | ("true" | "false");
+                limit?: number | string;
+                offset?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The page of documents plus the total of the whole filter. Canceled documents are hidden unless asked for by name. `totalAmountInCentsFrom`/`totalAmountInCentsTo` keep the documents whose total, in cents, lies within both bounds; a lower bound above the upper one is refused with 422. `abbreviation` is the series abbreviation printed on the receipt and shown beside its number (e.g. `ΤΠΩΛ-Α 15`), matched exactly; `series` is the code of the series, which may differ from it. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentListView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpPendingFinancialDocuments: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+                officeId?: string;
+                limit?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The rejected, deferred and canceled-but-numbered documents, with a counter per category. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentPendingView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpFinancialDocumentAttentionSummary: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One row per attention reason with its count. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentAttentionSummaryListView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpFinancialDocument: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The document with its series, issuer, counterpart, lines, taxes and payments. A document the provider rejected for good is `FAILED_TERMINAL`, carries `needsAttention` with `TRANSMISSION_REJECTED` and the reason in `lastTransmissionErrorCode`/`lastTransmissionErrorMessage` (the provider's own text, or `SERIES_NUMBER_TAKEN` when its number is held by another document). `correctionActions` lists the manual actions the server accepts on the document NOW (D-118 rule 1), in the order to offer them: all five on a rejected document; only `RESTORE_TRANSMISSION` and `CANCEL` while the provider may still hold a submission of it (the status check that follows the restore settles that first); only `CANCEL` on a rejected document with a MARK and on a payment still pending or uncertain; none otherwise. A client offers exactly these and never infers them from `status` or from an error text; a listed action refused with 409/422 means the document moved meanwhile, so it is read again. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpFinancialDocumentPrintModel: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Everything a receipt needs, already resolved: the till renders it without a second read. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentPrintModelView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpFinancialDocumentTransmissionAttempts: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The attempt history, newest first. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentTransmissionAttemptListView"];
+                    };
+                };
+            };
+        };
+    };
+    refundErpFinancialDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    delayedProcessCode?: string | null;
+                    documentSeries: {
+                        /** Format: uuid */
+                        id: string;
+                    };
+                    payment?: {
+                        /** @enum {string} */
+                        method: "deposit" | "cash" | "credit" | "pos" | "web-banking" | "check" | "free" | "iris";
+                        /** @enum {string} */
+                        provider?: "worldline" | "viva" | "nbg" | "epay" | "iris" | "nexi" | "webecr";
+                        terminalId?: string;
+                        tipAmountInCents?: number;
+                    };
+                    device?: {
+                        appId?: string;
+                        flavor?: string;
+                        platform?: string;
+                        callbackSchemes?: {
+                            [key: string]: string;
+                        };
+                        installedApps?: string[];
+                    };
+                    delivery: {
+                        /** @enum {string} */
+                        method: "PRINT" | "SMS" | "EMAIL";
+                        phone?: string;
+                        email?: string;
+                    };
+                    print?: {
+                        /** Format: uuid */
+                        stationId: string;
+                    };
+                    mockScenario?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The credit note and, for a card refund, the device instruction. Send the `Idempotency-Key` header: a refund can move money, so the key is REQUIRED and a replay returns the first answer. The issue date of the credit note is set by the server at the moment of issuance; a client never sends one (D-118). The body names how the credit note reaches the patient (`delivery.method` with its `phone` or `email` when the original receipt kept none), under the same checks as a checkout. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentRefundView"];
+                    };
+                };
+            };
+        };
+    };
+    cancelErpFinancialDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    reason: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The canceled document. Canceling a rejected SALE gives NO money back: the payment it recorded stays taken (the cash in the till, the card charge on the card) and a rejected or canceled document can never be credited, so a refund to the patient happens outside this system. Canceling a rejected CREDIT NOTE (its `correlations` carry `REFUND_OF`) does NOT undo the refund it already made: the cash paid out of the till or the reversal on the card stays given back, and its original becomes creditable again (`refundedByDocumentIds` no longer names it), so a new credit note for the same original must not give the money back a second time; a rejected credit note is better corrected or sent again. Its number goes back to the series only when it was the highest one held. A second change of the same rejected document that lost the race is refused with 409. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentView"];
+                    };
+                };
+            };
+        };
+    };
+    updateErpFinancialDocumentIssueDate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    issueDate: string;
+                    reason: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The document with the corrected issue date, back in the transmission queue and `COMPLETED` (a receipt the patient paid for, owed to the provider). A date in the future is refused with 422; a document another change got to first, with 409. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentView"];
+                    };
+                };
+            };
+        };
+    };
+    updateErpFinancialDocumentCounterpart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    counterpart: {
+                        /** Format: uuid */
+                        id?: string;
+                        taxNumber: string;
+                        name: string;
+                        /** @enum {string} */
+                        type: "customer" | "citizen" | "supplier";
+                        branch?: string;
+                        /** @enum {string} */
+                        vatCategory: "standard" | "reduced" | "zero";
+                        address?: string;
+                        jobTitle?: string;
+                        postalCode?: string;
+                        city?: string;
+                        taxOffice?: string;
+                        phoneNumber?: string;
+                        country: string;
+                    };
+                    reason: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The document with the corrected counterpart snapshot, back in the transmission queue and `COMPLETED`; no amount moves. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentView"];
+                    };
+                };
+            };
+        };
+    };
+    updateErpFinancialDocumentSeriesNumber: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    documentSeriesId?: string;
+                    number?: number;
+                    reason: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The document with its new number, back in the transmission queue and `COMPLETED`. Send the `number` the doctor confirmed (the suggestion of `next-series-number`): a number another document holds is refused with 409 and nothing changes. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpFinancialDocumentNextSeriesNumber: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The next free number of the document's own series, in its own office (also one that closed). A preview for the doctor to confirm or replace, never a reservation. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentSeriesNextNumberView"];
+                    };
+                };
+            };
+        };
+    };
+    restoreErpFinancialDocumentTransmission: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    reason: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The document back in the transmission queue and `COMPLETED`. The worker sends it within a minute; a new rejection makes it `FAILED_TERMINAL` again. Once its MARK arrives the patient is sent the receipt again by its delivery method (SMS, email); a printed one is printed again by the till. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpSeriesNextNumber: {
+        parameters: {
+            query: {
+                officeId: string;
+            };
+            header?: never;
+            path: {
+                seriesId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The next number. It is a preview, not a reservation. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentSeriesNextNumberView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpDailyPaymentsReport: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId?: string;
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Two separate blocks: `sales` and `credits`. Both carry POSITIVE amounts and their own document counter; credit notes are never subtracted from sales and no net is published. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentDailyPaymentsView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpVatReport: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId?: string;
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The same two blocks, grouped by the VAT rate the lines actually carry, so a regional rate needs no list entry to appear. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentVatReportView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpItemsReport: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId?: string;
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The same two blocks, grouped by catalogue item and, for a line whose item was deleted, by its description. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialDocumentItemsReportView"];
+                    };
+                };
+            };
+        };
+    };
+    bootstrapErpPrintStation: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId: string;
+            };
+            header?: never;
+            path: {
+                stationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Station, printers, templates, office branding, payment methods, series, health, account and payments readiness, and the receipt delivery methods the doctor enabled. Carries an `ETag`; send it back as `If-None-Match` to get a 304. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PrintStationBootstrapView"];
+                    };
+                };
+            };
+        };
+    };
+    claimErpPrintStation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                    claimCode: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The claimed station. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PrintStationView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpPrintStations: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The active stations of the office. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PrintStationListView"];
+                    };
+                };
+            };
+        };
+    };
+    createErpPrintStation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                    stationName: string;
+                    /** @enum {string} */
+                    stationType: "DEVICE_APP" | "BROWSER_CLIENT";
+                    /** @enum {string} */
+                    platform: "android" | "ios" | "macos" | "windows" | "linux" | "web";
+                    thermalPrintEnabled?: boolean;
+                    browserColorPrintEnabled?: boolean;
+                    claimCode: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The created station. `stationName` is unique per office, so a repeated name is refused rather than silently attached to the existing till. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PrintStationView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpPrintStation: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId: string;
+            };
+            header?: never;
+            path: {
+                stationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The station, or 404 when it belongs to another office. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PrintStationView"];
+                    };
+                };
+            };
+        };
+    };
+    deleteErpPrintStation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The archived station. Archiving is how a device that was replaced stops competing for its old name. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PrintStationView"];
+                    };
+                };
+            };
+        };
+    };
+    updateErpPrintStation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                    stationName?: string;
+                    /** @enum {string} */
+                    stationType?: "DEVICE_APP" | "BROWSER_CLIENT";
+                    /** @enum {string} */
+                    platform?: "android" | "ios" | "macos" | "windows" | "linux" | "web";
+                    thermalPrintEnabled?: boolean;
+                    browserColorPrintEnabled?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated station. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PrintStationView"];
+                    };
+                };
+            };
+        };
+    };
+    rotateErpPrintStationClaimCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                    claimCode: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The station. The code is stored hashed and never returned, so rotating is the only way to obtain a usable one. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PrintStationView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpPrintStationPrinters: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId: string;
+            };
+            header?: never;
+            path: {
+                stationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The active printers of the station. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PrintStationPrinterListView"];
+                    };
+                };
+            };
+        };
+    };
+    createErpPrintStationPrinter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                    label: string;
+                    /** @enum {string} */
+                    connectionType: "BLUETOOTH" | "NETWORK";
+                    macAddress?: string | null;
+                    ipAddress?: string | null;
+                    /** @enum {string} */
+                    paperWidth?: "58" | "80";
+                    enabled?: boolean;
+                    isDefault?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description The created printer. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PrintStationPrinterView"];
+                    };
+                };
+            };
+        };
+    };
+    deleteErpPrintStationPrinter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stationId: string;
+                printerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The detached printer. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PrintStationPrinterView"];
+                    };
+                };
+            };
+        };
+    };
+    updateErpPrintStationPrinter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stationId: string;
+                printerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                    label?: string;
+                    /** @enum {string} */
+                    connectionType?: "BLUETOOTH" | "NETWORK";
+                    macAddress?: string | null;
+                    ipAddress?: string | null;
+                    /** @enum {string} */
+                    paperWidth?: "58" | "80";
+                    enabled?: boolean;
+                    isDefault?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated printer. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PrintStationPrinterView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpPrintTemplates: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+                channel?: "SMS" | "EMAIL" | "COLOR_BROWSER_PRINT";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The templates the doctor may select. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PrintTemplateListView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpPrintTemplate: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The template with its body. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PrintTemplateView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpDoctorDeliveryPreferences: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The enabled receipt delivery methods and the default colour-print template; the receipt email has one template. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorDeliveryPreferencesView"];
+                    };
+                };
+            };
+        };
+    };
+    createErpDoctorDeliveryPreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    enabledDeliveryMethods?: ("PRINT" | "SMS" | "EMAIL")[];
+                    /** Format: uuid */
+                    defaultColorPrintTemplateId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The stored preferences. They are per DOCTOR, not per station, so every device of the doctor reads the same answer. `enabledDeliveryMethods` lists the ways a receipt may reach a patient (PRINT, SMS, EMAIL; at least one, all three by default); the checkout offers only those. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorDeliveryPreferencesView"];
+                    };
+                };
+            };
+        };
+    };
+    deleteErpDoctorDeliveryPreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The preferences as they stand after the reset. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorDeliveryPreferencesView"];
+                    };
+                };
+            };
+        };
+    };
+    updateErpDoctorDeliveryPreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    enabledDeliveryMethods?: ("PRINT" | "SMS" | "EMAIL")[];
+                    /** Format: uuid */
+                    defaultColorPrintTemplateId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated preferences. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorDeliveryPreferencesView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpDeliveryJobs: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId: string;
+                stationId?: string;
+                status?: "PENDING" | "ACTION_REQUIRED" | "COMPLETED" | "FAILED" | "FAILED_FINAL";
+                documentId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The jobs of the filter, with their attempts. A print waiting for the station (a STATION job in PENDING) carries the document as it stands now — the MARK, QR and link the provider returned after the job was written — while its stored snapshot is never rewritten; one whose document no longer gets a receipt (rejected, cancelled), or cannot be read, is not listed. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DeliveryJobListView"];
+                    };
+                };
+            };
+        };
+    };
+    createErpDeliveryJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                    /** Format: uuid */
+                    stationId: string;
+                    /** Format: uuid */
+                    documentId: string;
+                    /** @enum {string} */
+                    method: "PRINT" | "SMS" | "EMAIL";
+                    phone?: string;
+                    email?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The job and the result of its first run (201). A refused channel is reported on the job, not as an HTTP error. The body names the document (`documentId`, one of this doctor in this office), the station, the `method` (PRINT reprints on this station; SMS and EMAIL send the receipt again, optionally to a new `phone`/`email`) and nothing else (D-118). An SMS sent again is charged, so it must carry the `Idempotency-Key` header (422 `IDEMPOTENCY_KEY_REQUIRED` without one); an email may carry one. Either is answered only when the server allows it now (`GET …/delivery/documents/{documentId}/follow-up`): not before the provider accepted the document (422 `RECEIPT_NOT_TRANSMITTED`), never for a cancelled or rejected one (422 `RECEIPT_NOT_DELIVERABLE`), an SMS only while the doctor has SMS units (409 `NO_SMS_UNITS`), and only to a recipient named now or kept from the issuance (422 `DELIVERY_RECIPIENT_MISSING`); a replay with the same key returns the first answer and sends nothing, except after a 409 `NO_SMS_UNITS`, which keeps no key: once the doctor has units the same key sends. A phone is one mobile, `69XXXXXXXX` or E.164 (422 `doc0037` otherwise). The rest of the receipt: the issue time, number, totals, link and recipient are built by the server from the document itself, the same way an issuance hands its receipt over, and a body carrying a snapshot, an issue time, a text or a link is refused (422). `documentSnapshot.receiptLink` is the provider link of the document (`signing.qrCode`, the URL its QR prints) or null while there is none; an SMS or email sent now or later carries the link the document has at that moment (worded as in the source system: issuer, series-number and «Περισσότερα:» in the SMS; its whole email — issuer, branch, counterparty, document, totals, payment, notes, transmission details and «Δείτε το παραστατικό εδώ:» — in the email), and without one it carries no link part at all. An unknown document or one of another doctor or office answers 404; a document that is not issued (cancelled, card payment still open, rejected by the provider) answers 422, exactly as the issuance hands it no receipt. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DeliveryJobRunResponse"];
+                    };
+                };
+            };
+        };
+    };
+    getErpDeliveryJob: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId: string;
+            };
+            header?: never;
+            path: {
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The job with its attempt history. A print waiting for the station carries the document as it stands now; one whose document no longer gets a receipt (rejected, cancelled) answers 422. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DeliveryJobView"];
+                    };
+                };
+            };
+        };
+    };
+    actOnErpDeliveryJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                    /** @enum {string} */
+                    action: "SMS" | "EMAIL";
+                    phone?: string;
+                    email?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The job and the result of the run the action triggered. `action` is SMS or EMAIL: the receipt of the job's document sent again, optionally to a new `phone`/`email`, under the same rules and the same `Idempotency-Key` handling as a new SMS or EMAIL job (SMS needs the key and an SMS unit). The SMS or email is built from the document as it stands now, with the provider link it has now. A document that no longer gets a receipt (rejected by the provider, cancelled) answers 422 before anything is written or sent. `followUpActions` tells what the till may offer next. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DeliveryJobRunResponse"];
+                    };
+                };
+            };
+        };
+    };
+    getErpDeliveryDocumentFollowUp: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId: string;
+            };
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description For SMS and EMAIL, whether the receipt may be sent again now and, when not, the reason (`RECEIPT_NOT_TRANSMITTED` before the provider accepted it, `RECEIPT_NOT_DELIVERABLE` for a cancelled or rejected one, `NO_SMS_UNITS` for an SMS without a unit). The server decides; the till only shows it. `recipient` is the phone and email the receipt last went to, for prefilling. An unknown document or one of another doctor or office answers 404. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DeliveryDocumentFollowUpView"];
+                    };
+                };
+            };
+        };
+    };
+    ackErpDeliveryJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                    /** @enum {string} */
+                    outcome: "PRINTED" | "FAILED";
+                    /** Format: uuid */
+                    printerId?: string;
+                    error?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The acknowledged job state. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DeliveryJobAckView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpFinancialSettingsBundle: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+                officeId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The whole settings bundle. No credential of any kind is present: secrets are reported as configured flags only. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpFinancialSettingsBundleView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpOfficePaymentMethods: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every supported method with its saved position and switch. With no saved row a method is offered exactly when its provider is configured. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpPaymentMethodSettingsListView"];
+                    };
+                };
+            };
+        };
+    };
+    replaceErpOfficePaymentMethods: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                    methods: {
+                        /** @enum {string} */
+                        method: "cash" | "credit" | "deposit" | "web-banking" | "check" | "free" | "pos" | "iris";
+                        /** @enum {string|null} */
+                        provider?: "none" | "viva" | "epay" | "nbg" | "nexi" | "worldline" | "webecr" | null;
+                        priority: number;
+                        enabled?: boolean;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description The stored menu. The body is the COMPLETE list: a method left out is removed. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpPaymentMethodSettingsListView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpPrintSettings: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The paper size, footer and logos, or `null` when the office has not configured printing yet. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpPrintSettingsReadView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpEspSettings: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The username plus whether the credentials are configured and whether the provider has accepted them, or `null` when none are stored. No secret is returned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpEspSettingsReadView"];
+                    };
+                };
+            };
+        };
+    };
+    verifyErpEspSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The settings with the fresh verification outcome. A refusal is recorded on the row and answered as 422 (credentials) or 502 (provider unavailable). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpEspSettingsView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpItems: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+                search?: string;
+                type?: "service" | "good" | "product";
+                limit?: number | string;
+                offset?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The page of items plus the total of the whole filter. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpItemListView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpItem: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The item with its price and tax configuration. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpItemView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpItemDefaults: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Exemption 7 with 0% for a profession article 22 exempts, otherwise no exemption at the standard rate. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpItemDefaultsView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpItemReferenceData: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Measurement units, item types and VAT categories, so the till never hard-codes them. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpItemReferenceDataView"];
+                    };
+                };
+            };
+        };
+    };
+    previewErpItemLine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    quantity: number;
+                    grossUnitPriceInCents?: number;
+                    /** @enum {string} */
+                    vatCategory?: "standard" | "reduced" | "zero";
+                };
+            };
+        };
+        responses: {
+            /** @description The line draft with its computed net, VAT and total. Nothing is stored. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpItemLineDraftView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpTraders: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+                search?: string;
+                type?: "customer" | "supplier" | "citizen";
+                vatCategory?: "standard" | "reduced" | "zero";
+                country?: string;
+                patientId?: string;
+                limit?: number | string;
+                offset?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The page of counterparts plus the total of the whole filter. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpTraderListView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpTrader: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                traderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The counterpart with its tax identity and branches. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpTraderView"];
+                    };
+                };
+            };
+        };
+    };
+    lookupErpTrader: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    country: string;
+                    taxNumber: string;
+                };
+            };
+        };
+        responses: {
+            /** @description What the registry returned. The call spends the issuer own registry credentials, so it carries its own per-IP budget. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpTraderLookupView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpTraderCountries: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The accepted ISO country codes. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpTraderCountryListView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpDocumentSeries: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                financialBranchId: string;
+                search?: string;
+                myDataType?: "1.1" | "2.1" | "5.2" | "11.1" | "11.2" | "1.2" | "2.2" | "11.4" | "1.3" | "2.3";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The active series of the office. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpDocumentSeriesListView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpDocumentSeries: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                documentSeriesId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The series with its myDATA type and numbering. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpDocumentSeriesView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpDocumentSeriesTaxes: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                documentSeriesId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The withholding, fee and stamp rules the series applies. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpDocumentSeriesTaxListView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpRefundCandidateSeries: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                financialBranchId: string;
+                sourceMyDataType: "1.1" | "2.1" | "5.2" | "11.1" | "11.2" | "1.2" | "2.2" | "11.4" | "1.3" | "2.3";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The compatible credit series. A source type that cannot be refunded returns an empty list rather than an error. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpDocumentSeriesListView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpMyDataTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The allowed Greek myDATA types with their names. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpDocumentSeriesMyDataTypeOptionListView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpIssuer: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The issuer identity, or `null` when the doctor has not created one yet. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpIssuerRootReadView"];
+                    };
+                };
+            };
+        };
+    };
+    listErpIssuerBranches: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One branch per office, with the head office flagged. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpIssuerBranchListView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpIssuerBranch: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                officeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The branch, or `null` when the office has none. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpIssuerBranchReadView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpIssuerHeadquarters: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The head office branch (`null` when none), whether it waits for an office because its own was deleted, and while it waits the offices of the doctor that can take it, named by their Greek address with the code of their own branch (`null` when they have none). An open head office offers no candidates. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpIssuerHeadquartersView"];
+                    };
+                };
+            };
+        };
+    };
+    relocateErpIssuerHeadquarters: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** Format: uuid */
+                    officeId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The head office branch, now on the named office with its code, tax office and contact fields; the office's own branch is removed and its code freed. Allowed only while the head office waits (409 when its office is open, 404 when there is none); an office of another doctor is 403, one without a Greek address 422. A backoffice account names the doctor with `tenantUserId`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpIssuerBranchView"];
+                    };
+                };
+            };
+        };
+    };
+    getErpResolvedIssuer: {
+        parameters: {
+            query: {
+                tenantUserId?: string;
+                officeId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The issuer merged with the branch of the office and with the head office it reports under. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ErpIssuerResolvedView"];
                     };
                 };
             };

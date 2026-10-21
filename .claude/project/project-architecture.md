@@ -243,9 +243,10 @@ Current state and targets:
   unit under test. Every shared headless utility and UI primitive ships with
   tests, plus integration tests for realistic component+primitive and form
   compositions.
-- Remaining test targets (as tooling is added): architecture contract tests for
-  route mirrors, module slices, shared imports, and i18n parity, and Playwright
-  for browser flows.
+- Architecture contract tests live under `tests/architecture/**` (Vitest); i18n
+  parity is enforced by `tests/architecture/i18n-parity.test.ts`. Remaining
+  targets (as tooling is added): route mirrors, module slices, shared imports,
+  and Playwright for browser flows.
 
 Use only scripts defined in `package.json`. Never claim that an unrun check
 passed. Distinguish implementation defects, test defects, flaky behavior, and

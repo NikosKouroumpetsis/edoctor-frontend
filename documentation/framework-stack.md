@@ -27,10 +27,11 @@
 
 ## API contract and codegen
 
-- The backend serves an OpenAPI 3.1 contract for the public doctor marketplace.
-  Spec sharing model: **served + vendored snapshot**. This repo vendors a
-  committed copy of the spec and codegen's types from that committed copy, so
-  typecheck/CI work offline.
+- The backend serves one OpenAPI 3.1 contract for all its modules
+  (`servers[0].url = /api/v1`; every path carries its module segment, e.g.
+  `/doctor/public/doctors`). Spec sharing model: **served + vendored
+  snapshot**. This repo vendors a committed copy of the spec and codegen's
+  types from that committed copy, so typecheck/CI work offline.
 - `openapi-typescript` `^7` (devDependency) generates the types.
 - `openapi-fetch` `^0` (runtime) is the typed client, wrapped by the shared
   building block at `src/shared/lib/api-client`.
@@ -65,7 +66,10 @@
 
 - Storybook `^10.4.6` with the `@storybook/sveltekit` framework, which reuses the
   project `vite.config.ts` (design tokens, Tailwind v4, `unplugin-icons`,
-  Paraglide) so stories render exactly like the app.
+  Paraglide) so stories render exactly like the app. Storybook has no SvelteKit
+  server to inject runtime env, so `.storybook/main.ts` aliases
+  `$env/dynamic/public` to the shared stand-in `vitest-mocks/env-dynamic-public.ts`
+  (every `PUBLIC_*` setting keeps its default in stories).
 - Stories are **Svelte CSF** (`@storybook/addon-svelte-csf`): `*.stories.svelte`
   files co-located next to each component, using `defineMeta` + `<Story>`.
 - Addons: `@storybook/addon-a11y` (axe) and `@storybook/addon-docs` (autodocs via
@@ -95,9 +99,10 @@
   - Vitest `^4` (`vitest.config.ts`, jsdom)
   - Svelte Testing Library `^5` + `@testing-library/user-event`
   - `@testing-library/jest-dom` matchers (types in `src/vitest.d.ts`)
+  - architecture contract tests under `tests/architecture` (i18n parity in place)
 - Target test stack (not yet added):
   - Playwright for browser flows
-  - architecture contract tests under `tests/architecture`
+  - the remaining architecture contract tests (route mirrors, slices, imports)
 
 ## Notes
 
