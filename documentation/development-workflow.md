@@ -83,6 +83,15 @@ The current package has the core scripts. When env-specific scripts are added, u
 }
 ```
 
+## Git hooks
+
+Same shape as the eDoctor application's hooks:
+
+- `.husky/pre-commit`: `bun scripts/check-secrets.mjs` (staged files, below), then `bun run verify:commit`
+  (`bun run lint` + `bun run check`: Prettier, ESLint, svelte-check).
+- `.husky/pre-push`: `bun run verify:push` (`bun run test` + `bun run openapi:check`).
+- A red hook is fixed, never skipped: no `--no-verify`, no `HUSKY=0`.
+
 ## Secret check on every commit
 
 - `.husky/pre-commit` runs `bun scripts/check-secrets.mjs` (backend D-132). It reads ONLY the staged files
@@ -97,8 +106,8 @@ The current package has the core scripts. When env-specific scripts are added, u
 - A false alarm is fixed in ONE place, `ALLOWED_FINDINGS` of `scripts/check-secrets.mjs`, with its reason. Never
   `git commit --no-verify`. Tests: `tests/scripts/check-secrets.test.ts`.
 - **The hooks of this repository are installed by `prepare` (`… && husky`), which runs on `bun install`.** A clone
-  where `git config core.hooksPath` is empty and `.husky/_/` is missing runs NO hook — neither this check nor the
-  `pre-push` `openapi:check` — until `bun install` (or `bun run prepare`) runs once.
+  where `git config core.hooksPath` is empty and `.husky/_/` is missing runs NO hook — neither `pre-commit` nor
+  `pre-push` — until `bun install` (or `bun run prepare`) runs once.
 
 ## Final verification loop
 

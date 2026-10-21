@@ -27,8 +27,8 @@ Before starting a large implementation that touches API data, run
 (`src/generated/api/openapi.json`). If the backend contract has moved, run
 `bun run openapi:generate` first (sync + regenerate types) and reconcile any
 resulting type changes in the affected adapters/feature `types.ts`. The
-`pre-push` hook also runs `openapi:check`, but verifying up front avoids
-building on a stale contract.
+`pre-push` hook (`verify:push`) also runs `bun run test` and `openapi:check`,
+but verifying up front avoids building on a stale contract.
 
 ## Tooling in place
 

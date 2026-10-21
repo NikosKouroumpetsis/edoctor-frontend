@@ -26,6 +26,8 @@
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
+		"verify:commit": "bun run lint && bun run check",
+		"verify:push": "bun run test && bun run openapi:check",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build"
 	},
