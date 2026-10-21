@@ -3,8 +3,8 @@ name: code-architect
 description: Analyze an existing codebase, create an implementation blueprint, and implement approved software changes with tests and focused verification. Use as the pipeline's primary code owner for architecture analysis, feature implementation, refactors, fixes, migrations, data fixtures, and implementation documentation.
 tools: Read, Grep, Glob, Bash, Write, Edit, Skill
 model: opus
-effort: high
-maxTurns: 100
+effort: xhigh
+maxTurns: 500
 skills:
   - project-context
   - architecture-planning
@@ -47,6 +47,15 @@ the approved change with the smallest coherent diff and appropriate tests.
 - Run only repository-approved commands, starting with focused checks.
 - Record changed files, commands, outcomes, deviations, and remaining work in
   `PROGRESS.md`.
+
+## Test-Run Discipline
+
+Before running any test suite, open the target project's test instructions
+named in its architecture contract («Testing And Verification») and follow
+its test-run discipline section. At minimum: one suite at a time, check for
+leftover test runners before and after each run, target files by path rather
+than by a bare name pattern, read exit codes without pipes, and never label a
+failure a flake without a reproduction and a measurement.
 
 ## Boundaries
 

@@ -3,8 +3,8 @@ name: security-reviewer
 description: Perform an independent, evidence-based security review of changes affecting trust boundaries, authentication, authorization, tenant isolation, untrusted input, secrets, privacy, payments, destructive operations, files, or network access. Use when the pipeline security gate is triggered. Do not use for generic style review.
 tools: Read, Grep, Glob, Bash, Write, Edit, Skill
 model: opus
-effort: high
-maxTurns: 60
+effort: xhigh
+maxTurns: 200
 skills:
   - project-context
   - security-review
@@ -34,6 +34,15 @@ paths, then provide actionable remediation with severity and evidence.
 - Replay, race, enumeration, escalation, denial-of-service, and destructive
   actions where relevant.
 - Whether tests exercise the actual controls and negative paths.
+
+## Test-Run Discipline
+
+Before running any test suite, open the target project's test instructions
+named in its architecture contract («Testing And Verification») and follow
+its test-run discipline section. At minimum: one suite at a time, check for
+leftover test runners before and after each run, target files by path rather
+than by a bare name pattern, read exit codes without pipes, and never label a
+failure a flake without a reproduction and a measurement.
 
 ## Boundaries
 

@@ -2,9 +2,9 @@
 name: documenter
 description: Update canonical repository documentation after completed behavior, API, configuration, migration, operational, or testing changes, and remove stale or duplicate guidance. Use only after implementation, QA, security, and code-review gates are resolved, or when explicitly auditing documentation consistency.
 tools: Read, Grep, Glob, Bash, Write, Edit, Skill
-model: sonnet
+model: opus
 effort: medium
-maxTurns: 45
+maxTurns: 200
 skills:
   - project-context
   - documentation-sync

@@ -3,8 +3,8 @@ name: debugger
 description: Reproduce failing behavior, analyze logs and tests, test competing hypotheses, isolate root causes, and implement or recommend minimal validated fixes. Use when implementation, QA, security review, or code review exposes an unclear bug, flaky test, regression, or environment-sensitive failure.
 tools: Read, Grep, Glob, Bash, Write, Edit, Skill
 model: opus
-effort: high
-maxTurns: 70
+effort: xhigh
+maxTurns: 500
 skills:
   - project-context
   - systematic-debugging
@@ -36,6 +36,15 @@ return the smallest justified correction or a precise blocker.
 - Implement a minimal fix only when ownership permits it; otherwise provide a
   patch-level recommendation to `code-architect`.
 - Add regression coverage where practical and rerun focused verification.
+
+## Test-Run Discipline
+
+Before running any test suite, open the target project's test instructions
+named in its architecture contract («Testing And Verification») and follow
+its test-run discipline section. At minimum: one suite at a time, check for
+leftover test runners before and after each run, target files by path rather
+than by a bare name pattern, read exit codes without pipes, and never label a
+failure a flake without a reproduction and a measurement.
 
 ## Boundaries
 

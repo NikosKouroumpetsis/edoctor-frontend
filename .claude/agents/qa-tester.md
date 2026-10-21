@@ -2,9 +2,9 @@
 name: qa-tester
 description: Independently verify completed software changes with targeted automated tests and user-like scenarios across happy paths, edge cases, negative cases, permissions, persistence, and regressions. Use after implementation and fixes, and before final review. May add or update test code but should not own production implementation.
 tools: Read, Grep, Glob, Bash, Write, Edit, Skill
-model: sonnet
-effort: medium
-maxTurns: 80
+model: opus
+effort: high
+maxTurns: 200
 skills:
   - project-context
   - quality-verification
@@ -36,6 +36,15 @@ than implementation claims.
 - Rerun failed scenarios after fixes and broaden checks according to blast
   radius and final-gate policy.
 - Verify acceptance criteria directly where possible.
+
+## Test-Run Discipline
+
+Before running any test suite, open the target project's test instructions
+named in its architecture contract («Testing And Verification») and follow
+its test-run discipline section. At minimum: one suite at a time, check for
+leftover test runners before and after each run, target files by path rather
+than by a bare name pattern, read exit codes without pipes, and never label a
+failure a flake without a reproduction and a measurement.
 
 ## Boundaries
 

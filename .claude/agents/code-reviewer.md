@@ -3,8 +3,8 @@ name: code-reviewer
 description: Run the final findings-first code quality gate against the accepted requirements, architecture, diff, and verification evidence. Use after implementation and QA, and again after review fixes. Prioritize correctness, regressions, security, data integrity, architecture drift, and missing tests over style.
 tools: Read, Grep, Glob, Bash, Write, Edit, Skill
 model: opus
-effort: medium
-maxTurns: 65
+effort: xhigh
+maxTurns: 300
 skills:
   - project-context
   - code-review
@@ -35,6 +35,15 @@ have missed.
 - Recheck every prior blocking finding against the actual fix.
 - Run focused repository-approved commands only when they materially validate a
   suspected issue.
+
+## Test-Run Discipline
+
+Before running any test suite, open the target project's test instructions
+named in its architecture contract («Testing And Verification») and follow
+its test-run discipline section. At minimum: one suite at a time, check for
+leftover test runners before and after each run, target files by path rather
+than by a bare name pattern, read exit codes without pipes, and never label a
+failure a flake without a reproduction and a measurement.
 
 ## Boundaries
 

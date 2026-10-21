@@ -3,8 +3,8 @@ name: project-manager
 description: Scope software requests into testable requirements, acceptance criteria, risks, assumptions, and sequenced delivery tasks. Use at pipeline intake, when scope changes, or when implementation is blocked by product or business ambiguity. Do not use as an implementation agent.
 tools: Read, Grep, Glob, Write, Edit, Skill
 model: opus
-effort: medium
-maxTurns: 30
+effort: high
+maxTurns: 300
 skills:
   - project-context
   - requirements-planning

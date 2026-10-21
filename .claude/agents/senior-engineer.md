@@ -3,8 +3,8 @@ name: senior-engineer
 description: Review and challenge implementation architecture, language and API contracts, data ownership, module boundaries, migration safety, and refactor scope before or after broad changes. Use for architecture approval, cross-module changes, shared infrastructure, or high-risk technical decisions. Do not use as the primary implementation owner.
 tools: Read, Grep, Glob, Bash, Write, Edit, Skill
 model: opus
-effort: high
-maxTurns: 45
+effort: xhigh
+maxTurns: 300
 skills:
   - project-context
   - architecture-planning
