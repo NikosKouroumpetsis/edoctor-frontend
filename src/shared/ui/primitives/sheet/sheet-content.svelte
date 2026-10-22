@@ -2,12 +2,11 @@
 	export type SheetSide = 'top' | 'bottom' | 'left' | 'right';
 	export type SheetSize = 'sm' | 'default' | 'lg';
 
-	// Cross-axis extent depends on the side: max-width for left/right, height for
-	// top/bottom. `default` reproduces the previous fixed extent (`max-w-sm` /
-	// `h-auto`); sm/lg pin a smaller/larger panel.
+	// Cross-axis extent depends on the side: a named max-width for left/right, a
+	// height for top/bottom; sm/lg pin a smaller/larger panel than `default`.
 	const sheetSizeBySide: Record<SheetSide, Record<SheetSize, string>> = {
-		right: { sm: 'max-w-xs', default: 'max-w-sm', lg: 'max-w-md' },
-		left: { sm: 'max-w-xs', default: 'max-w-sm', lg: 'max-w-md' },
+		right: { sm: 'max-w-narrow', default: 'max-w-text', lg: 'max-w-form' },
+		left: { sm: 'max-w-narrow', default: 'max-w-text', lg: 'max-w-form' },
 		top: { sm: 'h-1/4', default: 'h-auto', lg: 'h-1/2' },
 		bottom: { sm: 'h-1/4', default: 'h-auto', lg: 'h-1/2' }
 	};
@@ -18,6 +17,7 @@
 	import type { Snippet } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import XIcon from '~icons/lucide/x';
+	import { platform } from '$shared/design/tokens';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
 	import { portal, focusTrap, dismissable, scrollLock } from '$shared/lib/headless';
 	import { getDialogContext } from '$shared/ui/primitives/dialog/dialog.svelte';
@@ -48,10 +48,10 @@
 
 	const flyParams = $derived(
 		{
-			right: { x: 320, duration: 200 },
-			left: { x: -320, duration: 200 },
-			top: { y: -320, duration: 200 },
-			bottom: { y: 320, duration: 200 }
+			right: { x: platform.motion.sheet, duration: 200 },
+			left: { x: -platform.motion.sheet, duration: 200 },
+			top: { y: -platform.motion.sheet, duration: 200 },
+			bottom: { y: platform.motion.sheet, duration: 200 }
 		}[side]
 	);
 </script>
@@ -61,7 +61,7 @@
 		use:portal
 		data-slot="sheet-overlay"
 		transition:fade={{ duration: 150 }}
-		class="fixed inset-0 z-50 bg-black/50"
+		class="fixed inset-0 z-50 bg-overlay"
 	></div>
 	<!-- `use:portal` before `use:focusTrap`: relocate to <body> before focusing in. -->
 	<div
@@ -94,7 +94,7 @@
 				aria-label="Close"
 				data-slot="sheet-close"
 				onclick={() => ctx.setOpen(false)}
-				class="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+				class="absolute top-2 right-2 grid size-touch place-items-center rounded-full opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50"
 			>
 				<XIcon class="size-4" />
 			</button>

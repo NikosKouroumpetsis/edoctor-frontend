@@ -111,7 +111,7 @@
 <div
 	bind:this={ref}
 	data-slot="calendar"
-	class={cn('w-fit rounded-control border border-border bg-card p-3', className)}
+	class={cn('w-narrow max-w-full rounded-md border border-border bg-card p-2', className)}
 	{...restProps}
 >
 	<div class="mb-2 flex items-center justify-between">
@@ -119,7 +119,7 @@
 			type="button"
 			aria-label="Previous month"
 			onclick={() => shiftMonth(-1)}
-			class="inline-flex size-8 items-center justify-center rounded-md hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50"
+			class="inline-flex size-touch items-center justify-center rounded-md hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
 		>
 			<ChevronLeftIcon class="size-4" />
 		</button>
@@ -130,18 +130,17 @@
 			type="button"
 			aria-label="Next month"
 			onclick={() => shiftMonth(1)}
-			class="inline-flex size-8 items-center justify-center rounded-md hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50"
+			class="inline-flex size-touch items-center justify-center rounded-md hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
 		>
 			<ChevronRightIcon class="size-4" />
 		</button>
 	</div>
 
-	<table role="grid" class="border-collapse" onkeydown={onGridKeydown}>
+	<table role="grid" class="w-full table-fixed border-collapse" onkeydown={onGridKeydown}>
 		<thead>
 			<tr>
 				{#each weekdayLabels as label (label)}
-					<th class="size-9 text-label-md font-normal text-muted-foreground" scope="col">{label}</th
-					>
+					<th class="py-2 text-label-md font-normal text-muted-foreground" scope="col">{label}</th>
 				{/each}
 			</tr>
 		</thead>
@@ -164,7 +163,7 @@
 								tabindex={isSameDay(day, focusedDate) ? 0 : -1}
 								onclick={() => select(day)}
 								class={cn(
-									'inline-flex size-9 items-center justify-center rounded-md text-body-sm outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50',
+									'inline-flex h-touch w-full items-center justify-center rounded-md text-body-sm outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50',
 									'data-[today]:font-semibold data-[today]:text-primary',
 									'data-[outside]:text-muted-foreground/50',
 									'data-[selected]:bg-primary data-[selected]:text-primary-foreground data-[selected]:hover:bg-primary',

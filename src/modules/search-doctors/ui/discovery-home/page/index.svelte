@@ -67,11 +67,11 @@
 </svelte:head>
 
 <main class="container-page">
-	<div class="sticky top-16 z-30 bg-background pt-6 pb-4">
+	<div class="sticky top-bar-top z-30 bg-background pt-6 pb-4">
 		<SearchHeader placeholder={m.search_discovery_placeholder({}, messageOptions)} />
 	</div>
 
-	<div class="flex flex-col gap-section pb-12">
+	<div class="flex flex-col gap-section pb-section-lg">
 		<CategoryRail
 			{categories}
 			activeCategory={discovery.activeCategory}
@@ -96,7 +96,7 @@
 							onToggleFavorite={discovery.toggleFavorite}
 						/>
 					{:else if result.status === 'error'}
-						<div class="rounded-panel border border-border/70 bg-card p-card shadow-soft">
+						<div class="rounded-xl border border-border/70 bg-card p-card shadow-soft">
 							<h2 class="text-heading-sm text-foreground">
 								{m.section_error_title({}, messageOptions)}
 							</h2>
@@ -112,7 +112,7 @@
 				<SectionSkeleton />
 			{/each}
 		{:else if home.isError}
-			<div class="rounded-panel border border-border/70 bg-card p-card shadow-soft">
+			<div class="rounded-xl border border-border/70 bg-card p-card shadow-soft">
 				<h2 class="text-heading-sm text-foreground">
 					{m.section_error_title({}, messageOptions)}
 				</h2>
@@ -134,7 +134,7 @@
 				/>
 			{/each}
 		{:else}
-			<div class="rounded-panel border border-border/70 bg-card p-card shadow-soft">
+			<div class="rounded-xl border border-border/70 bg-card p-card shadow-soft">
 				<h2 class="text-heading-sm text-foreground">
 					{m.no_results_title({}, messageOptions)}
 				</h2>

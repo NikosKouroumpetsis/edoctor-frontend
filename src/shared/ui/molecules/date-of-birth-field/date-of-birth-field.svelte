@@ -138,7 +138,7 @@
 
 <fieldset class="w-full" data-slot="date-of-birth-field" {disabled}>
 	<legend class="mb-1.5 text-label-lg text-muted-foreground">{label ?? m.dob_label()}</legend>
-	<div class="flex items-start gap-2">
+	<div class="grid max-w-narrow grid-cols-4 items-start gap-touch-gap">
 		<Input
 			bind:ref={dayEl}
 			{size}
@@ -151,7 +151,7 @@
 			placeholder={m.dob_day_placeholder()}
 			aria-label={m.dob_day()}
 			aria-invalid={currentError ? 'true' : undefined}
-			class="w-16 text-center"
+			class="text-center"
 		/>
 		<Input
 			bind:ref={monthEl}
@@ -166,7 +166,7 @@
 			placeholder={m.dob_month_placeholder()}
 			aria-label={m.dob_month()}
 			aria-invalid={currentError ? 'true' : undefined}
-			class="w-16 text-center"
+			class="text-center"
 		/>
 		<Input
 			bind:ref={yearEl}
@@ -181,7 +181,7 @@
 			placeholder={m.dob_year_placeholder()}
 			aria-label={m.dob_year()}
 			aria-invalid={currentError ? 'true' : undefined}
-			class="w-20 text-center"
+			class="col-span-2 text-center"
 		/>
 	</div>
 

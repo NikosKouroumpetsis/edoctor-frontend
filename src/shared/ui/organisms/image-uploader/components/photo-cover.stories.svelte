@@ -23,7 +23,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="mx-auto max-w-md">
+		<div class="mx-auto max-w-text">
 			<StoryHarness items={[cover]}>
 				<PhotoCover item={cover} />
 			</StoryHarness>

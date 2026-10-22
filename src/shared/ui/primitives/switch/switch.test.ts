@@ -50,18 +50,20 @@ describe('Switch', () => {
 	});
 
 	it('defaults the track/thumb to the default scale and applies sm/lg', () => {
+		const track = (container: HTMLElement) => container.querySelector('[data-slot="switch-track"]');
 		const def = render(Switch, { props: { 'aria-label': 'd' } });
-		expect(screen.getByRole('switch', { name: 'd' })).toHaveClass('w-8');
+		expect(screen.getByRole('switch', { name: 'd' })).toHaveClass('min-h-touch', 'min-w-touch');
+		expect(track(def.container)).toHaveClass('w-control-xs');
 		expect(def.container.querySelector('[data-slot="switch-thumb"]')).toHaveClass('size-4');
 		def.unmount();
 
 		const sm = render(Switch, { props: { 'aria-label': 's', size: 'sm' } });
-		expect(screen.getByRole('switch', { name: 's' })).toHaveClass('w-6');
+		expect(track(sm.container)).toHaveClass('w-6');
 		expect(sm.container.querySelector('[data-slot="switch-thumb"]')).toHaveClass('size-3');
 		sm.unmount();
 
 		const lg = render(Switch, { props: { 'aria-label': 'l', size: 'lg' } });
-		expect(screen.getByRole('switch', { name: 'l' })).toHaveClass('w-10');
+		expect(track(lg.container)).toHaveClass('w-control-sm');
 		expect(lg.container.querySelector('[data-slot="switch-thumb"]')).toHaveClass('size-5');
 	});
 

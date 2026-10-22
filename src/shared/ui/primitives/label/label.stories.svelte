@@ -18,7 +18,7 @@
 
 <Story name="With input association">
 	{#snippet template()}
-		<div class="flex w-72 flex-col gap-2">
+		<div class="flex w-narrow flex-col gap-2">
 			<Label for="email">Email address</Label>
 			<Input id="email" type="email" placeholder="you@example.com" />
 		</div>

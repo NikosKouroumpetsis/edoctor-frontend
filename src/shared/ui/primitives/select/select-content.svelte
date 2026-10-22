@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { scale } from 'svelte/transition';
+	import { step } from '$shared/design/tokens';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
 	import {
 		portal,
@@ -61,7 +62,7 @@
 		use:floating={{
 			reference: ctx.triggerEl,
 			placement: 'bottom-start',
-			sideOffset: 4,
+			sideOffset: step(1),
 			onPlaced: setMinWidth
 		}}
 		use:dismissable={{ onDismiss: () => ctx.setOpen(false), ignore: [ctx.triggerEl] }}
@@ -69,7 +70,7 @@
 		{onkeydown}
 		transition:scale={{ start: 0.95, duration: 120 }}
 		class={cn(
-			'z-50 max-h-72 overflow-y-auto rounded-control border border-border bg-popover p-1 text-popover-foreground shadow-overlay outline-none',
+			'z-50 max-h-menu-max-h overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-overlay outline-none',
 			className
 		)}
 		{...restProps}

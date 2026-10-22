@@ -41,7 +41,7 @@
 		oninput={(e) => ctx.setSearch(e.currentTarget.value)}
 		{onkeydown}
 		class={cn(
-			'flex h-11 w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+			'flex min-h-control-md w-full bg-transparent py-3 text-body-lg outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
 			className
 		)}
 		{...restProps}

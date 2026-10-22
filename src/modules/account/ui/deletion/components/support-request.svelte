@@ -19,11 +19,11 @@
 
 <section
 	aria-labelledby="account-deletion-support-title"
-	class="rounded-panel border border-border/70 bg-card p-card"
+	class="rounded-xl border border-border/70 bg-card p-card"
 >
 	<h2
 		id="account-deletion-support-title"
-		class="text-heading-md text-foreground md:text-heading-lg"
+		class="text-heading-md text-foreground tablet:text-heading-lg"
 	>
 		{m.account_deletion_support_title({}, messageOptions)}
 	</h2>
@@ -39,7 +39,7 @@
 	<Button
 		href={`mailto:${supportEmail}?subject=${subject}`}
 		size="lg"
-		class="mt-6 w-full sm:w-auto"
+		class="mt-6 w-full tablet:w-auto"
 	>
 		<MailIcon class="icon-sm" />
 		{m.account_deletion_support_action({}, messageOptions)}

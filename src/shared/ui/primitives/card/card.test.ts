@@ -18,6 +18,9 @@ describe('Card', () => {
 		sm.unmount();
 
 		const lg = render(Card, { props: { size: 'lg' } });
-		expect(lg.container.querySelector('[data-slot="card"]')).toHaveClass('py-8', 'gap-8');
+		expect(lg.container.querySelector('[data-slot="card"]')).toHaveClass(
+			'py-section',
+			'gap-section'
+		);
 	});
 });

@@ -28,7 +28,7 @@
 <Button
 	variant="outline"
 	size="icon"
-	class="size-9 rounded-md"
+	class="rounded-md"
 	aria-label={label}
 	title={label}
 	onclick={toggleTheme}

@@ -20,7 +20,7 @@
 
 <Story name="Default">
 	{#snippet template()}
-		<Card class="w-80">
+		<Card class="w-narrow">
 			<CardHeader>
 				<CardTitle>Appointment</CardTitle>
 				<CardDescription>Cardiology — Dr. Maria Alexiou</CardDescription>
@@ -36,12 +36,12 @@
 
 <Story name="With action">
 	{#snippet template()}
-		<Card class="w-80">
+		<Card class="w-narrow">
 			<CardHeader>
 				<CardTitle>Notifications</CardTitle>
 				<CardDescription>Manage your reminders</CardDescription>
 				<CardAction>
-					<Button variant="ghost" size="sm">Edit</Button>
+					<Button variant="ghost">Edit</Button>
 				</CardAction>
 			</CardHeader>
 			<CardContent>
@@ -55,7 +55,7 @@
 	{#snippet template()}
 		<div class="flex flex-col gap-4">
 			{#each ['sm', 'default', 'lg'] as const as size (size)}
-				<Card {size} class="w-80">
+				<Card {size} class="w-narrow">
 					<CardHeader>
 						<CardTitle>Size {size}</CardTitle>
 						<CardDescription>Vertical padding and section gap scale with size.</CardDescription>
@@ -71,7 +71,7 @@
 
 <Story name="With footer">
 	{#snippet template()}
-		<Card class="w-80">
+		<Card class="w-narrow">
 			<CardHeader>
 				<CardTitle>Cancel appointment</CardTitle>
 				<CardDescription>This action cannot be undone.</CardDescription>

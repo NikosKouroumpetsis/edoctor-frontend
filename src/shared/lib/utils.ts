@@ -1,5 +1,16 @@
 import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { extendTailwindMerge } from 'tailwind-merge';
+import { createTV } from 'tailwind-variants';
+import { mergeTheme } from '$shared/design/tokens';
+
+export type { VariantProps } from 'tailwind-variants';
+
+// One merge config for `cn` and `tv`: tailwind-variants keeps a single merger cache for the whole app.
+const twMergeConfig = { extend: { theme: mergeTheme } };
+
+const twMerge = extendTailwindMerge(twMergeConfig);
+
+export const tv = createTV({ twMergeConfig });
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));

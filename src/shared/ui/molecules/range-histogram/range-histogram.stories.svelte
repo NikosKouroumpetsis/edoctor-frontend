@@ -44,7 +44,7 @@
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class="w-[28rem] max-w-full">
+		<div class="w-text max-w-full">
 			<RangeHistogram {...args} bind:value={playground} />
 			<p class="mt-4 text-body-sm text-muted-foreground">
 				Range: {playground[0]} – {playground[1]}
@@ -55,7 +55,7 @@
 
 <Story name="Default">
 	{#snippet template()}
-		<div class="w-[28rem] max-w-full">
+		<div class="w-text max-w-full">
 			<RangeHistogram
 				title="Τιμή ανά επισκέπτη"
 				subtitle="Τιμές χωρίς προμήθειες και φόρους"
@@ -73,7 +73,7 @@
 
 <Story name="Sizes">
 	{#snippet template()}
-		<div class="flex w-[28rem] max-w-full flex-col gap-10">
+		<div class="flex w-text max-w-full flex-col gap-section">
 			<RangeHistogram
 				size="sm"
 				title="Small"
@@ -110,7 +110,7 @@
 
 <Story name="Disabled">
 	{#snippet template()}
-		<div class="w-[28rem] max-w-full">
+		<div class="w-text max-w-full">
 			<RangeHistogram
 				disabled
 				title="Τιμή ανά επισκέπτη"
@@ -128,7 +128,7 @@
 
 <Story name="Ceiling">
 	{#snippet template()}
-		<div class="w-[28rem] max-w-full">
+		<div class="w-text max-w-full">
 			<RangeHistogram
 				title="Τιμή ανά επισκέπτη"
 				subtitle="Τιμές χωρίς προμήθειες και φόρους"

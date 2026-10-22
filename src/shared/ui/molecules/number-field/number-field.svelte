@@ -2,6 +2,7 @@
 	import ChevronUpIcon from '~icons/lucide/chevron-up';
 	import ChevronDownIcon from '~icons/lucide/chevron-down';
 	import { TextField, type TextFieldSize } from '$shared/ui/molecules/text-field';
+	import { Button } from '$shared/ui/primitives/button';
 	import type { FieldApi } from '$shared/lib/form';
 
 	let {
@@ -47,40 +48,39 @@
 	}
 </script>
 
-<TextField
-	{label}
-	{field}
-	bind:value
-	{error}
-	{name}
-	{size}
-	{placeholder}
-	{disabled}
-	type="text"
-	inputmode="numeric"
->
-	{#snippet trailing()}
-		<div class="flex flex-col">
-			<button
-				type="button"
-				aria-label="Increase"
-				tabindex={-1}
-				{disabled}
-				onclick={() => nudge(1)}
-				class="flex h-4 w-6 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
-			>
-				<ChevronUpIcon class="size-3.5" />
-			</button>
-			<button
-				type="button"
-				aria-label="Decrease"
-				tabindex={-1}
-				{disabled}
-				onclick={() => nudge(-1)}
-				class="flex h-4 w-6 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
-			>
-				<ChevronDownIcon class="size-3.5" />
-			</button>
-		</div>
-	{/snippet}
-</TextField>
+<!-- The steppers sit beside the field as full touch targets (they no longer fit inside its box). -->
+<div class="flex w-full items-start gap-touch-gap" data-slot="number-field">
+	<TextField
+		{label}
+		{field}
+		bind:value
+		{error}
+		{name}
+		{size}
+		{placeholder}
+		{disabled}
+		class="flex-1"
+		type="text"
+		inputmode="numeric"
+	/>
+	<Button
+		variant="outline"
+		size="icon"
+		aria-label="Decrease"
+		tabindex={-1}
+		{disabled}
+		onclick={() => nudge(-1)}
+	>
+		<ChevronDownIcon />
+	</Button>
+	<Button
+		variant="outline"
+		size="icon"
+		aria-label="Increase"
+		tabindex={-1}
+		{disabled}
+		onclick={() => nudge(1)}
+	>
+		<ChevronUpIcon />
+	</Button>
+</div>

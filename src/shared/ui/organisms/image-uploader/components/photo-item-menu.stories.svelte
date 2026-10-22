@@ -29,7 +29,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="relative grid h-40 w-40 place-items-center">
+		<div class="relative grid aspect-square w-narrow place-items-center">
 			<StoryHarness items={[item]} setup={openMenu}>
 				<PhotoItemMenu id="a" />
 			</StoryHarness>
@@ -46,7 +46,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="relative grid h-40 w-40 place-items-center">
+		<div class="relative grid aspect-square w-narrow place-items-center">
 			<StoryHarness items={[item]}>
 				<PhotoItemMenu id="a" />
 			</StoryHarness>

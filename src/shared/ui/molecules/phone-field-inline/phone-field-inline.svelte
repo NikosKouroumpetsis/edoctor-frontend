@@ -1,32 +1,12 @@
 <script lang="ts" module>
 	import type { TextFieldSize } from '$shared/ui/molecules/text-field';
 
-	// Floating-label geometry per size — kept 1:1 with the text-field family so the
-	// inline number input reads identically to the rest of the field molecules. The
-	// inline variant owns the border itself (see below), so the input here is
-	// intentionally border/background-less; only the padding + label transforms are
-	// shared. The select column stretches to this height and centers its content.
-	const SIZES: Record<TextFieldSize, { input: string; label: string; code: string }> = {
-		sm: {
-			input: 'pl-2 pt-3 pb-1 text-xs',
-			label: 'left-2 top-2.5 text-xs -translate-y-2.5 peer-focus:-translate-y-2.5',
-			code: 'px-2 text-xs'
-		},
-		default: {
-			input: 'pl-2.5 pt-4 pb-1.5 text-sm',
-			label: 'left-2.5 top-3 text-sm -translate-y-3 peer-focus:-translate-y-3',
-			code: 'px-2.5 text-sm'
-		},
-		lg: {
-			input: 'pl-2.5 pt-5 pb-2.5 text-base',
-			label: 'left-2.5 top-4 text-base -translate-y-4 peer-focus:-translate-y-4',
-			code: 'px-3.5 text-base'
-		},
-		xl: {
-			input: 'pl-3 pt-6 pb-3 text-lg',
-			label: 'left-3 top-5 text-lg -translate-y-5 peer-focus:-translate-y-5',
-			code: 'px-4 text-lg'
-		}
+	// The inline variant owns the border itself (see below), so its input is border/background-less and
+	// takes only the shared field geometry; `CODE_PAD` is the side padding of the dial-code column.
+	const CODE_PAD: Record<TextFieldSize, string> = {
+		default: 'px-2.5',
+		lg: 'px-3.5',
+		xl: 'px-4'
 	};
 </script>
 
@@ -35,6 +15,7 @@
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$shared/ui/primitives/select';
 	import { cn } from '$shared/lib/utils';
 	import { useId } from '$shared/lib/headless';
+	import { fieldSizes } from '$shared/ui/primitives/input';
 	import type { FieldApi } from '$shared/lib/form';
 
 	// Structured so the trigger can show only the dial code (e.g. "+30") while the
@@ -97,30 +78,28 @@
 </script>
 
 <!--
-	Inline / serial layout: a single bordered control owns the border and the
-	focus-within / invalid states, so the whole control highlights as one unit
-	(matching the other field molecules). Inside it: a muted country select on the
-	LEFT showing only the dial code (vertically centered via `items-stretch`), a
-	1.5px divider, and the floating-label phone input on the RIGHT. The error sits
-	OUTSIDE the bordered box so it never stretches the select.
+	Inline / serial layout: one control owns the focus-within / invalid states, so
+	the whole control highlights as one unit. Its border is an overlay drawn on top,
+	so it adds no height: the field stays 48 / 56 / 64 like the other field
+	molecules. Inside: a muted country select on the LEFT (dial code only), a 1px
+	divider, and the floating-label phone input on the RIGHT. The error sits
+	OUTSIDE the box so it never stretches the select.
 -->
 <div class="w-full pb-1" data-slot="phone-field-inline">
 	<div
+		data-slot="phone-field-inline-control"
 		class={cn(
-			'flex w-full items-stretch overflow-hidden rounded-md border-[1.5px] bg-card transition-[color,box-shadow]',
-			currentError
-				? 'border-destructive bg-destructive/10'
-				: 'border-input focus-within:border-ring focus-within:ring-[0.5px] focus-within:ring-ring',
+			'group relative flex w-full items-stretch overflow-hidden rounded-md bg-card',
+			currentError && 'bg-destructive/10',
 			disabled && 'pointer-events-none opacity-50'
 		)}
 	>
 		<!-- Country select: borderless except a right divider, muted, dial code only. -->
 		<Select bind:value={dialCode} {disabled}>
 			<SelectTrigger
-				size={size === 'sm' ? 'sm' : 'default'}
 				class={cn(
 					'h-auto shrink-0 items-center justify-center gap-1 rounded-none border-transparent border-r-input bg-muted font-medium focus-visible:border-transparent focus-visible:border-r-input focus-visible:ring-0',
-					SIZES[size].code
+					CODE_PAD[size]
 				)}
 				aria-label={countryLabel}
 			>
@@ -129,7 +108,7 @@
 			<SelectContent>
 				{#each DIAL_CODES as code (code.value)}
 					<SelectItem value={code.value} label={code.value}>
-						<span class="w-14 shrink-0 font-medium text-foreground">{code.value}</span>
+						<span class="w-dial-code-w shrink-0 font-medium text-foreground">{code.value}</span>
 						<span class="text-muted-foreground">{code.name}</span>
 					</SelectItem>
 				{/each}
@@ -156,7 +135,8 @@
 					'peer block w-full appearance-none bg-transparent pr-3 text-foreground outline-none',
 					'placeholder:text-muted-foreground',
 					'disabled:cursor-not-allowed disabled:opacity-50',
-					SIZES[size].input
+					fieldSizes[size].input,
+					fieldSizes[size].start
 				)}
 			/>
 
@@ -164,17 +144,27 @@
 				for={inputId}
 				data-slot="phone-field-inline-label"
 				class={cn(
-					'pointer-events-none absolute z-10 origin-[0] transform truncate pr-3 text-muted-foreground duration-200',
+					'pointer-events-none absolute z-10 origin-left transform truncate pr-3 text-muted-foreground duration-200',
 					'scale-75',
 					'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
 					'peer-focus:scale-75 peer-focus:text-foreground',
 					'peer-aria-[invalid=true]:text-destructive',
-					SIZES[size].label
+					fieldSizes[size].label,
+					fieldSizes[size].left
 				)}
 			>
 				{label}
 			</label>
 		</div>
+
+		<span
+			aria-hidden="true"
+			data-slot="phone-field-inline-border"
+			class={cn(
+				'pointer-events-none absolute inset-0 rounded-md border transition-colors',
+				currentError ? 'border-destructive' : 'border-input group-focus-within:border-ring'
+			)}
+		></span>
 	</div>
 
 	{#if currentError}

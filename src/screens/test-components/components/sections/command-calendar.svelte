@@ -37,7 +37,7 @@
 			<PopoverTrigger class={buttonVariants({ variant: 'outline' })}>
 				{city ?? 'Select city…'}
 			</PopoverTrigger>
-			<PopoverContent class="w-64 p-0">
+			<PopoverContent class="w-popover-md p-0">
 				<Command>
 					<CommandInput placeholder="Search city…" aria-label="Search city" />
 					<CommandList>

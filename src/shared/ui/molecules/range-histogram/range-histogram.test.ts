@@ -129,4 +129,23 @@ describe('RangeHistogram', () => {
 		expect(Number(thumbs[0].getAttribute('aria-valuenow'))).toBeLessThanOrEqual(80);
 		expect(thumbs[0]).toHaveAttribute('aria-valuenow', '80');
 	});
+
+	// 🔴 S-26.9: the thumbs say the same text as the pills: `€80`, and `€420+` for the max thumb at the ceiling.
+	it('S-26.9: slider announces its shown value, never a percentage', () => {
+		render(RangeHistogram, {
+			props: {
+				minLabel: 'Min',
+				maxLabel: 'Max',
+				data: distribution,
+				min: 8,
+				max: 420,
+				value: [80, 420] as [number, number]
+			}
+		});
+
+		expect(
+			screen.getAllByRole('slider').map((thumb) => thumb.getAttribute('aria-valuetext'))
+		).toEqual(['€80', '€420+']);
+		expect(screen.getByLabelText('Max')).toHaveValue('€420+');
+	});
 });

@@ -53,14 +53,17 @@
 	<header class="mb-section">
 		<p class="text-label-md tracking-wide text-muted-foreground uppercase">eDoctor</p>
 		<h1 class="text-display-sm">Component gallery</h1>
-		<p class="mt-2 max-w-2xl text-body-md text-muted-foreground">
+		<p class="mt-2 max-w-content text-body-md text-muted-foreground">
 			Live showcase of the in-house, shadcn-styled component system. Every primitive here is built
 			on our own headless layer — no external UI libraries.
 		</p>
 	</header>
 
-	<div class="gap-section lg:grid lg:grid-cols-[210px_1fr]">
-		<nav class="mb-8 lg:sticky lg:top-24 lg:mb-0 lg:self-start" aria-label="Component sections">
+	<div class="gap-section laptop:flex">
+		<nav
+			class="mb-section laptop:sticky laptop:top-bar-top laptop:mb-0 laptop:w-1/5 laptop:shrink-0 laptop:self-start"
+			aria-label="Component sections"
+		>
 			{#each groups as group (group.label)}
 				<p class="mb-2 text-label-md tracking-wide text-muted-foreground uppercase">
 					{group.label}
@@ -70,7 +73,7 @@
 						<li>
 							<a
 								href={`#${item.id}`}
-								class="block rounded-md px-2 py-1 text-body-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+								class="flex min-h-touch w-full items-center rounded-md px-2 text-body-sm text-muted-foreground hover:bg-muted hover:text-foreground"
 							>
 								{item.label}
 							</a>
@@ -80,7 +83,7 @@
 			{/each}
 		</nav>
 
-		<main class="min-w-0 space-y-section">
+		<main class="min-w-0 flex-1 space-y-section">
 			<Buttons />
 			<TextInputs />
 			<SelectionControls />

@@ -25,7 +25,7 @@
 <section class="flex flex-col gap-3.5">
 	<div class="flex items-start justify-between gap-4">
 		<div class="flex flex-1 flex-col gap-1">
-			<h2 class="text-heading-md text-foreground md:text-heading-lg">
+			<h2 class="text-heading-md text-foreground tablet:text-heading-lg">
 				{title}
 			</h2>
 			{#if subtitle}
@@ -35,14 +35,18 @@
 		<button
 			type="button"
 			aria-label={viewAllLabel}
-			class="mt-0.5 grid size-10 shrink-0 place-items-center rounded-full bg-card text-foreground shadow-soft outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+			class="group grid size-touch shrink-0 place-items-center rounded-full outline-none"
 		>
-			<ArrowRightIcon class="icon-md" />
+			<span
+				class="grid size-control-sm place-items-center rounded-full bg-card text-foreground shadow-soft group-focus-visible:ring-3 group-focus-visible:ring-ring/50"
+			>
+				<ArrowRightIcon class="icon-md" />
+			</span>
 		</button>
 	</div>
 
 	<div
-		class="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:-mx-6 sm:px-6 md:-mx-8 md:px-8 lg:-mx-12 lg:px-12 [&::-webkit-scrollbar]:hidden"
+		class="container-bleed flex gap-rail overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
 	>
 		{#each doctors as doctor (doctor.id)}
 			<DoctorCard

@@ -20,7 +20,6 @@
 	</DemoRow>
 
 	<DemoRow label="Sizes">
-		<Button size="sm">Small</Button>
 		<Button size="default">Default</Button>
 		<Button size="lg">Large</Button>
 		<Button size="icon" aria-label="Search"><SearchIcon /></Button>

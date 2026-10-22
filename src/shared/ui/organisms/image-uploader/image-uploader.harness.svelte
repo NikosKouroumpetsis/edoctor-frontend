@@ -53,7 +53,7 @@
 	onDestroy(() => controller.destroy());
 </script>
 
-<div class="mx-auto max-w-xl p-6">
+<div class="mx-auto max-w-form p-6">
 	{#if controller.count === 0}
 		<UploaderEmpty />
 	{:else}

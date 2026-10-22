@@ -12,7 +12,7 @@
 
 <Story name="Default">
 	{#snippet template()}
-		<div class="max-w-2xl"><CookieConsent /></div>
+		<div class="max-w-content"><CookieConsent /></div>
 	{/snippet}
 </Story>
 
@@ -24,6 +24,6 @@
 	}}
 >
 	{#snippet template()}
-		<div class="max-w-2xl"><CookieConsent /></div>
+		<div class="max-w-content"><CookieConsent /></div>
 	{/snippet}
 </Story>

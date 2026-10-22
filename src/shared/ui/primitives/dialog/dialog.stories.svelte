@@ -24,7 +24,7 @@
 	{#snippet template()}
 		<Dialog>
 			<DialogTrigger class={buttonVariants()}>Open dialog</DialogTrigger>
-			<DialogContent class="max-w-md">
+			<DialogContent class="max-w-text">
 				<DialogHeader>
 					<DialogTitle>Confirm booking</DialogTitle>
 					<DialogDescription>Confirm your appointment with the doctor.</DialogDescription>
@@ -38,7 +38,7 @@
 	{#snippet template()}
 		<Dialog>
 			<DialogTrigger class={buttonVariants()}>Open dialog</DialogTrigger>
-			<DialogContent class="max-w-md">
+			<DialogContent class="max-w-text">
 				<DialogHeader>
 					<DialogTitle>Cancel appointment</DialogTitle>
 					<DialogDescription>This action cannot be undone.</DialogDescription>
@@ -80,7 +80,7 @@
 	{#snippet template()}
 		<Dialog>
 			<DialogTrigger class={buttonVariants()}>Open dialog</DialogTrigger>
-			<DialogContent class="max-w-md">
+			<DialogContent class="max-w-text">
 				<DialogHeader>
 					<DialogTitle>Confirm</DialogTitle>
 					<DialogDescription>The dialog is opened by the play function.</DialogDescription>

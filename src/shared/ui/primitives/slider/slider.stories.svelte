@@ -21,7 +21,7 @@
 
 <Story name="Single">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<Slider bind:value={single} aria-label="Volume" />
 			<p class="mt-2 text-body-sm text-muted-foreground">Value: {single}</p>
 		</div>
@@ -30,7 +30,7 @@
 
 <Story name="Range">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<Slider bind:value={range} aria-label="Price range" />
 			<p class="mt-2 text-body-sm text-muted-foreground">Range: {range.join(' – ')}</p>
 		</div>
@@ -39,7 +39,7 @@
 
 <Story name="Stepped">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<Slider bind:value={stepped} min={0} max={100} step={10} aria-label="Stepped" />
 			<p class="mt-2 text-body-sm text-muted-foreground">Value: {stepped} (step 10)</p>
 		</div>
@@ -48,7 +48,7 @@
 
 <Story name="Accent tone">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<Slider bind:value={accent} tone="accent" aria-label="Accent range" />
 			<p class="mt-2 text-body-sm text-muted-foreground">Range: {accent.join(' – ')}</p>
 		</div>
@@ -57,13 +57,13 @@
 
 <Story name="Disabled">
 	{#snippet template()}
-		<div class="w-80"><Slider value={30} disabled aria-label="Disabled" /></div>
+		<div class="w-narrow"><Slider value={30} disabled aria-label="Disabled" /></div>
 	{/snippet}
 </Story>
 
 <Story name="Sizes">
 	{#snippet template()}
-		<div class="flex w-80 flex-col gap-6">
+		<div class="flex w-narrow flex-col gap-6">
 			<Slider bind:value={small} size="sm" aria-label="Small" />
 			<Slider bind:value={medium} size="default" aria-label="Default" />
 			<Slider bind:value={large} size="lg" aria-label="Large" />

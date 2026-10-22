@@ -25,7 +25,7 @@
 
 {#snippet slide(label: string)}
 	<div
-		class="flex h-40 items-center justify-center rounded-md bg-muted text-title-md font-semibold"
+		class="flex aspect-video items-center justify-center rounded-md bg-muted text-title-md font-semibold"
 	>
 		{label}
 	</div>
@@ -33,7 +33,7 @@
 
 <Story name="Default">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<Carousel bind:index>
 				<CarouselContent>
 					{#each slides as label (label)}
@@ -49,7 +49,7 @@
 
 <Story name="With dots">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<Carousel bind:index>
 				<CarouselContent>
 					{#each slides as label (label)}
@@ -66,7 +66,7 @@
 
 <Story name="Loop">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<Carousel bind:index={loopIndex} loop>
 				<CarouselContent>
 					{#each slides as label (label)}

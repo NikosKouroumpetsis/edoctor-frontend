@@ -98,7 +98,7 @@
 	bind:this={ref}
 	data-slot="command"
 	class={cn(
-		'flex w-full flex-col overflow-hidden rounded-control bg-popover text-popover-foreground',
+		'flex w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground',
 		className
 	)}
 	{...restProps}

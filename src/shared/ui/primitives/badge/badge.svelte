@@ -1,8 +1,8 @@
 <script lang="ts" module>
-	import { type VariantProps, tv } from 'tailwind-variants';
+	import { tv, type VariantProps } from '$shared/lib/utils';
 
 	export const badgeVariants = tv({
-		base: 'inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [&>svg]:pointer-events-none',
+		base: 'inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&>svg]:pointer-events-none',
 		variants: {
 			variant: {
 				default: 'border-transparent bg-primary text-primary-foreground',
@@ -13,7 +13,7 @@
 				outline: 'border-border text-foreground'
 			},
 			size: {
-				sm: "px-1.5 py-0 text-label-sm [&>svg:not([class*='size-'])]:size-2.5",
+				sm: "px-1.5 py-0 text-label-md [&>svg:not([class*='size-'])]:size-2.5",
 				default: "px-2 py-0.5 text-label-md [&>svg:not([class*='size-'])]:size-3",
 				lg: "px-2.5 py-1 text-label-lg [&>svg:not([class*='size-'])]:size-3.5"
 			}

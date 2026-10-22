@@ -24,13 +24,13 @@
 
 <Story name="Default">
 	{#snippet template()}
-		<div class="w-96"><SingleSelection label="Preferred time" {options} bind:value /></div>
+		<div class="w-narrow"><SingleSelection label="Preferred time" {options} bind:value /></div>
 	{/snippet}
 </Story>
 
 <Story name="Pre-selected">
 	{#snippet template()}
-		<div class="w-96">
+		<div class="w-narrow">
 			<SingleSelection label="Preferred time" {options} bind:value={preselected} />
 		</div>
 	{/snippet}
@@ -46,7 +46,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="w-96">
+		<div class="w-narrow">
 			<SingleSelection label="Preferred time" {options} bind:value={navValue} />
 		</div>
 	{/snippet}

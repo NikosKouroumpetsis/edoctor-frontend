@@ -3,15 +3,16 @@
 
 	/** Panel width. */
 	const hoverCardSizes: Record<HoverCardSize, string> = {
-		sm: 'w-48',
-		default: 'w-64',
-		lg: 'w-72'
+		sm: 'w-popover-sm',
+		default: 'w-popover-md',
+		lg: 'w-popover-lg'
 	};
 </script>
 
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { scale } from 'svelte/transition';
+	import { step } from '$shared/design/tokens';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
 	import { portal, dismissable, floating, type Placement } from '$shared/lib/headless';
 	import { getHoverCardContext } from './hover-card.svelte';
@@ -21,7 +22,7 @@
 		class: className,
 		placement = 'bottom',
 		align = 'center',
-		sideOffset = 8,
+		sideOffset = step(2),
 		size = 'default',
 		children,
 		...restProps
@@ -50,7 +51,7 @@
 		onpointerleave={() => ctx.close()}
 		transition:scale={{ start: 0.95, duration: 120 }}
 		class={cn(
-			'z-50 rounded-control border border-border bg-popover p-4 text-popover-foreground shadow-overlay outline-none',
+			'z-50 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-overlay outline-none',
 			hoverCardSizes[size],
 			className
 		)}

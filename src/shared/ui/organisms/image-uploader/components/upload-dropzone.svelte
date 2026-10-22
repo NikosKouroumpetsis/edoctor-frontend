@@ -42,14 +42,14 @@
 	data-slot="upload-dropzone"
 	data-drag-over={dragOver ? '' : undefined}
 	class={cn(
-		'flex flex-col items-center gap-gutter rounded-media border border-dashed p-section text-center transition-colors',
+		'flex flex-col items-center gap-list rounded-xl border border-dashed p-section text-center transition-colors',
 		dragOver ? 'border-ring bg-muted/40' : 'border-border bg-muted/20'
 	)}
 	ondragover={handleDragOver}
 	ondragleave={handleDragLeave}
 	ondrop={handleDrop}
 >
-	<ImagesIcon class="icon-xl text-foreground" />
+	<ImagesIcon class="icon-lg text-foreground" />
 	<div class="space-y-1">
 		<p class="text-title-sm font-semibold">{m.image_uploader_dropzone_title()}</p>
 		<p class="text-body-sm text-muted-foreground">{m.image_uploader_dropzone_hint()}</p>

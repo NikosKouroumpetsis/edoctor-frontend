@@ -13,11 +13,14 @@
 
 <Story name="Vertical">
 	{#snippet template()}
-		<ScrollArea orientation="vertical" class="h-60 w-56 rounded-md border border-border">
+		<ScrollArea
+			orientation="vertical"
+			class="h-scroll-max w-narrow rounded-md border border-border"
+		>
 			<div class="p-4">
-				<h4 class="mb-3 text-sm font-medium">Tags</h4>
+				<h4 class="mb-3 text-body-sm font-medium">Tags</h4>
 				{#each tags as tag (tag)}
-					<div class="border-b border-border py-2 text-sm">{tag}</div>
+					<div class="border-b border-border py-2 text-body-sm">{tag}</div>
 				{/each}
 			</div>
 		</ScrollArea>
@@ -26,11 +29,11 @@
 
 <Story name="Horizontal">
 	{#snippet template()}
-		<ScrollArea orientation="horizontal" class="w-80 rounded-md border border-border">
+		<ScrollArea orientation="horizontal" class="w-narrow rounded-md border border-border">
 			<div class="flex gap-3 p-4">
 				{#each Array.from({ length: 15 }, (_, i) => i + 1) as n (n)}
 					<div
-						class="flex h-28 w-28 shrink-0 items-center justify-center rounded-md bg-muted text-sm"
+						class="flex size-tile shrink-0 items-center justify-center rounded-md bg-muted text-body-sm"
 					>
 						Card {n}
 					</div>
@@ -42,10 +45,10 @@
 
 <Story name="Both axes">
 	{#snippet template()}
-		<ScrollArea orientation="both" class="h-60 w-80 rounded-md border border-border">
-			<div class="w-[640px] p-4">
+		<ScrollArea orientation="both" class="h-scroll-max w-narrow rounded-md border border-border">
+			<div class="w-content p-4">
 				{#each Array.from({ length: 30 }, (_, i) => i + 1) as n (n)}
-					<p class="py-1 text-sm whitespace-nowrap">
+					<p class="py-1 text-body-sm whitespace-nowrap">
 						Row {n} — a deliberately wide line of content that overflows horizontally as well.
 					</p>
 				{/each}

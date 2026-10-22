@@ -25,43 +25,43 @@
 
 	const sizeConfig: Record<RangeHistogramSize, SizeSpec> = {
 		sm: {
-			histogram: 'h-20',
-			barGap: 'gap-[3px]',
+			histogram: 'h-histogram-sm',
+			barGap: 'gap-0.5',
 			track: 'h-0.5',
 			thumb: 'size-6',
-			pill: 'h-9 px-4 text-sm',
-			field: 'w-28',
-			title: 'text-base',
-			subtitle: 'text-xs',
-			label: 'text-xs',
+			pill: 'min-h-control-md px-4 text-body-lg',
+			field: 'w-2/5',
+			title: 'text-body-lg',
+			subtitle: 'text-label-md font-normal',
+			label: 'text-label-md font-normal',
 			titleMb: 'mb-4',
 			inputsMt: 'mt-6'
 		},
 		default: {
-			histogram: 'h-28',
+			histogram: 'h-histogram-md',
 			barGap: 'gap-1',
 			track: 'h-0.5',
-			thumb: 'size-7',
-			pill: 'h-11 px-5 text-base',
-			field: 'w-36',
-			title: 'text-lg',
-			subtitle: 'text-sm',
-			label: 'text-sm',
+			thumb: 'size-control-xs',
+			pill: 'min-h-control-lg px-5 text-body-lg',
+			field: 'w-2/5',
+			title: 'text-title-sm',
+			subtitle: 'text-body-sm',
+			label: 'text-body-sm',
 			titleMb: 'mb-6',
-			inputsMt: 'mt-8'
+			inputsMt: 'mt-section'
 		},
 		lg: {
-			histogram: 'h-32',
+			histogram: 'h-histogram-lg',
 			barGap: 'gap-1.5',
 			track: 'h-1',
-			thumb: 'size-8',
-			pill: 'h-12 px-6 text-lg',
-			field: 'w-40',
-			title: 'text-xl',
-			subtitle: 'text-base',
-			label: 'text-base',
-			titleMb: 'mb-7',
-			inputsMt: 'mt-10'
+			thumb: 'size-control-sm',
+			pill: 'min-h-control-xl px-6 text-title-sm font-normal',
+			field: 'w-2/5',
+			title: 'text-title-lg',
+			subtitle: 'text-body-lg',
+			label: 'text-body-lg',
+			titleMb: 'mb-6',
+			inputsMt: 'mt-section'
 		}
 	};
 
@@ -171,7 +171,7 @@
 	// the reference mockup; on-pattern focus indicator via `focus-visible:border-ring`.
 	const pillClass = $derived(
 		cn(
-			'w-full rounded-full border border-input bg-card text-center font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50',
+			'min-h-touch w-full rounded-full border border-input bg-card text-center font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50',
 			spec.pill
 		)
 	);
@@ -268,7 +268,7 @@
 					data-slot="range-histogram-bar"
 					data-active={isActive(i) ? '' : undefined}
 					class={cn(
-						'min-h-[3px] flex-1 rounded-t-sm',
+						'min-h-0.5 flex-1 rounded-t-sm',
 						isActive(i) ? ACTIVE_FILL : 'bg-muted-foreground/25'
 					)}
 					style={`height: ${barHeight(magnitude)}%`}
@@ -289,6 +289,8 @@
 					'border-neutral-300 bg-white shadow-md transition-[border-color,box-shadow] data-[dragging=true]:border-2 data-[dragging=true]:border-[#e31c5f] data-[dragging=true]:shadow-lg',
 					spec.thumb
 				)}
+				formatValue={(thumbValue, thumbIndex) =>
+					format(thumbValue, thumbIndex === 1 && thumbValue >= max)}
 				onValueChange={onSliderChange}
 				aria-label={ariaLabel ?? title ?? `${minLabel} / ${maxLabel}`}
 			/>

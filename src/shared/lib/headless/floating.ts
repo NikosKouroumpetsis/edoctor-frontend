@@ -8,6 +8,7 @@
  * resize. Coordinates are viewport-relative, intended for `position: fixed`.
  */
 import type { Action } from 'svelte/action';
+import { step } from '$shared/design/tokens';
 
 export type Side = 'top' | 'bottom' | 'left' | 'right';
 export type Align = 'start' | 'center' | 'end';
@@ -92,11 +93,11 @@ export function computePosition(
 ): PositionResult {
 	const {
 		placement = 'bottom',
-		sideOffset = 8,
+		sideOffset = step(2),
 		alignOffset = 0,
 		flip = true,
 		shift = true,
-		padding = 8
+		padding = step(2)
 	} = options;
 
 	const parsed = parsePlacement(placement);

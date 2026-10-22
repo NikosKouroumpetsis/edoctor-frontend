@@ -1,21 +1,10 @@
-<script lang="ts" module>
-	import type { TextFieldSize } from '$shared/ui/molecules/text-field';
-
-	// Padding-based geometry that matches the text-field family per size, so the
-	// stacked country select and the number input share the exact same height.
-	const TRIGGER_PAD: Record<TextFieldSize, string> = {
-		sm: 'h-auto px-2 pt-3 pb-1 text-xs',
-		default: 'h-auto px-2.5 pt-4 pb-1.5 text-sm',
-		lg: 'h-auto px-2.5 pt-5 pb-2.5 text-base',
-		xl: 'h-auto px-3.5 pt-6 pb-3 text-lg'
-	};
-</script>
-
 <script lang="ts">
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$shared/ui/primitives/select';
 	import { TextField } from '$shared/ui/molecules/text-field';
 	import { cn } from '$shared/lib/utils';
 	import type { FieldApi } from '$shared/lib/form';
+	import { fieldSizes } from '$shared/ui/primitives/input';
+	import type { TextFieldSize } from '$shared/ui/molecules/text-field';
 
 	const DIAL_CODES = [
 		{ value: '+30', label: '🇬🇷 Ελλάδα +30' },
@@ -61,11 +50,16 @@
 <div class="w-full" data-slot="phone-field">
 	<Select bind:value={dialCode} {disabled}>
 		<SelectTrigger
-			class={cn('relative w-full items-center justify-between rounded-b-none', TRIGGER_PAD[size])}
+			class={cn(
+				'relative h-auto w-full items-center justify-between rounded-b-none',
+				fieldSizes[size].input,
+				fieldSizes[size].start,
+				fieldSizes[size].end
+			)}
 			aria-label={countryLabel}
 		>
 			<span
-				class="pointer-events-none absolute top-1.5 left-2.5 origin-[0] scale-90 text-xs text-muted-foreground"
+				class="pointer-events-none absolute top-1.5 left-2.5 text-label-md font-normal text-muted-foreground"
 			>
 				{countryLabel}
 			</span>

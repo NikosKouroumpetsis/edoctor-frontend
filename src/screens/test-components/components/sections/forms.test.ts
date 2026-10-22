@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import { m } from '$paraglide/messages.js';
 import Forms from './forms.svelte';
 
 describe('Forms section (integration)', () => {
@@ -24,6 +25,7 @@ describe('Forms section (integration)', () => {
 		await user.type(screen.getByLabelText('Password'), 'Abcd1234');
 		await user.click(screen.getByRole('radio', { name: 'Morning' }));
 		await user.click(screen.getByRole('checkbox', { name: 'Greek' }));
+		await user.click(screen.getByRole('button', { name: m.stepper_increase() }));
 
 		await user.click(screen.getByRole('button', { name: 'Create account' }));
 
@@ -31,6 +33,7 @@ describe('Forms section (integration)', () => {
 		expect(result).toHaveTextContent('"fullName": "Maria Alexiou"');
 		expect(result).toHaveTextContent('"email": "maria@edoctor.gr"');
 		expect(result).toHaveTextContent('"slot": "morning"');
+		expect(result).toHaveTextContent('"minNotice": "3"');
 		expect(result.textContent).toContain('"gr"');
 
 		expect(infoSpy).toHaveBeenCalledWith(

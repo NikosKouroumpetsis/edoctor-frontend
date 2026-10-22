@@ -31,12 +31,13 @@
 >
 	<DropdownMenuTrigger
 		aria-label={m.image_uploader_options()}
-		class={cn(
-			'grid size-8 place-items-center rounded-full bg-card text-foreground shadow-raised transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring',
-			className
-		)}
+		class={cn('group grid size-touch place-items-center rounded-full outline-none', className)}
 	>
-		<EllipsisIcon class="icon-sm" />
+		<span
+			class="grid size-control-xs place-items-center rounded-full bg-card text-foreground shadow-raised transition-colors group-hover:bg-muted group-focus-visible:ring-2 group-focus-visible:ring-ring"
+		>
+			<EllipsisIcon class="icon-sm" />
+		</span>
 	</DropdownMenuTrigger>
 	<DropdownMenuContent align="end">
 		<DropdownMenuItem onclick={() => ctx.edit(id)}>

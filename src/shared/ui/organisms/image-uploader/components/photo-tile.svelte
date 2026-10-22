@@ -14,10 +14,10 @@
 </script>
 
 <div data-slot="photo-tile" class="relative">
-	<AspectRatio ratio={1} class="overflow-hidden rounded-media bg-muted">
+	<AspectRatio ratio={1} class="overflow-hidden rounded-xl bg-muted">
 		{#if src}
 			<img {src} {alt} class="absolute inset-0 h-full w-full object-cover" />
 		{/if}
 	</AspectRatio>
-	<PhotoItemMenu id={item.id} class="absolute top-2 right-2" />
+	<PhotoItemMenu id={item.id} class="absolute top-0 right-0" />
 </div>

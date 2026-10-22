@@ -45,7 +45,7 @@
 	tabindex={-1}
 	onclick={() => !disabled && ctx.select(value)}
 	class={cn(
-		'relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-base outline-none select-none hover:bg-accent/10 focus:bg-accent/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+		'relative flex min-h-touch w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-indent pl-2 text-body-lg outline-none select-none hover:bg-accent/10 focus:bg-accent/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
 		className
 	)}
 	{...restProps}

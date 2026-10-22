@@ -8,7 +8,7 @@
 		tags: ['autodocs'],
 		args: { label: 'Quantity', placeholder: 'e.g. 3', size: 'default', disabled: false },
 		argTypes: {
-			size: { control: 'select', options: ['sm', 'default', 'lg', 'xl'] },
+			size: { control: 'select', options: ['default', 'lg', 'xl'] },
 			disabled: { control: 'boolean' }
 		}
 	});
@@ -21,19 +21,19 @@
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class="w-80"><NumberField {...args} /></div>
+		<div class="w-narrow"><NumberField {...args} /></div>
 	{/snippet}
 </Story>
 
 <Story name="Default">
 	{#snippet template()}
-		<div class="w-80"><NumberField label="Quantity" bind:value /></div>
+		<div class="w-narrow"><NumberField label="Quantity" bind:value /></div>
 	{/snippet}
 </Story>
 
 <Story name="Min/max + step">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<NumberField label="Guests" bind:value={bounded} min={1} max={10} step={1} />
 			<p class="mt-2 text-body-sm text-muted-foreground">Allowed: 1–10, step 1.</p>
 		</div>

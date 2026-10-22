@@ -25,7 +25,7 @@
 		aria-labelledby={`${tabs.baseId}-trigger-${value}`}
 		data-slot="tabs-content"
 		tabindex={0}
-		class={cn('flex-1 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50', className)}
+		class={cn('flex-1 outline-none focus-visible:ring-3 focus-visible:ring-ring/50', className)}
 		{...restProps}
 	>
 		{@render children?.()}

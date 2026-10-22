@@ -36,7 +36,7 @@
 
 <div
 	data-slot="availability-table"
-	class={cn('w-full rounded-panel border border-border bg-card p-card shadow-raised', className)}
+	class={cn('w-full rounded-xl border border-border bg-card p-card shadow-raised', className)}
 >
 	<div class="mb-4 flex items-center justify-between gap-2">
 		<button
@@ -44,7 +44,7 @@
 			aria-label="Previous week"
 			disabled={!canPrev}
 			onclick={() => onPrev?.()}
-			class="inline-flex size-9 items-center justify-center rounded-md hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-40"
+			class="inline-flex size-touch items-center justify-center rounded-md hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-40"
 		>
 			<ChevronLeftIcon class="size-4" />
 		</button>
@@ -54,20 +54,20 @@
 			aria-label="Next week"
 			disabled={!canNext}
 			onclick={() => onNext?.()}
-			class="inline-flex size-9 items-center justify-center rounded-md hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-40"
+			class="inline-flex size-touch items-center justify-center rounded-md hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-40"
 		>
 			<ChevronRightIcon class="size-4" />
 		</button>
 	</div>
 
-	<div class="grid grid-cols-3 gap-3 md:grid-cols-5">
+	<div class="grid grid-cols-3 gap-3 tablet:grid-cols-5">
 		{#each days as day (day.date)}
 			<div class="flex flex-col">
 				<div class="mb-2 text-center">
 					<p class="text-label-md text-muted-foreground uppercase">{day.weekday}</p>
 					<p class="text-body-sm font-semibold">{day.label}</p>
 				</div>
-				<div class="flex flex-col gap-2">
+				<div class="flex flex-col gap-touch-gap">
 					{#each day.slots as slot (slot.time)}
 						{@const isSelected = selected === `${day.date} ${slot.time}`}
 						<button
@@ -76,7 +76,7 @@
 							aria-pressed={isSelected}
 							onclick={() => select(day.date, slot.time, slot.available)}
 							class={cn(
-								'rounded-md border px-2 py-1.5 text-body-sm transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+								'min-h-touch w-full rounded-md border px-2 py-1.5 text-body-sm transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
 								slot.available
 									? 'border-input hover:border-primary hover:bg-primary/5'
 									: 'cursor-not-allowed border-transparent bg-muted text-muted-foreground/50 line-through',

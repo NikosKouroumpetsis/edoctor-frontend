@@ -16,7 +16,7 @@
 			disabled: false
 		},
 		argTypes: {
-			size: { control: 'select', options: ['sm', 'default', 'lg', 'xl'] },
+			size: { control: 'select', options: ['default', 'lg', 'xl'] },
 			allowFreeText: { control: 'boolean' },
 			searchIcon: { control: 'boolean' },
 			chevron: { control: 'boolean' },
@@ -41,13 +41,13 @@
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class="w-80"><Combobox {...args} options={specialties} bind:value /></div>
+		<div class="w-narrow"><Combobox {...args} options={specialties} bind:value /></div>
 	{/snippet}
 </Story>
 
 <Story name="Pre-selected">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<Combobox label="Specialty" options={specialties} bind:value={preselected} />
 			<p class="mt-2 text-body-sm text-muted-foreground">value: {preselected || '(empty)'}</p>
 		</div>
@@ -56,7 +56,7 @@
 
 <Story name="Strict (no free text)">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<Combobox label="Specialty" options={specialties} allowFreeText={false} />
 		</div>
 	{/snippet}
@@ -64,7 +64,7 @@
 
 <Story name="No search icon">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<Combobox label="Specialty" options={specialties} searchIcon={false} />
 		</div>
 	{/snippet}
@@ -72,7 +72,7 @@
 
 <Story name="No chevron">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<Combobox label="Specialty" options={specialties} chevron={false} />
 		</div>
 	{/snippet}
@@ -80,7 +80,7 @@
 
 <Story name="Bare (no icons)">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<Combobox label="Specialty" options={specialties} searchIcon={false} chevron={false} />
 		</div>
 	{/snippet}

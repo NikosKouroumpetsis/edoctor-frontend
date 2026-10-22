@@ -49,7 +49,7 @@
 	onclick={() => ctx.setOpen(!ctx.open)}
 	{onkeydown}
 	class={cn(
-		"flex w-fit items-center justify-between gap-2 rounded-md border-[1.5px] border-input bg-card whitespace-nowrap transition-[color,box-shadow] outline-none select-none focus-visible:border-ring focus-visible:ring-[0.5px] focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		"flex w-fit min-w-touch items-center justify-between gap-2 rounded-md border border-input bg-card whitespace-nowrap transition-[color,box-shadow] outline-none select-none focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 		inputSizes[size],
 		className
 	)}

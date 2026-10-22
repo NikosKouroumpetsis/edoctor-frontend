@@ -18,7 +18,7 @@
 	role="listbox"
 	id={ctx.listId}
 	data-slot="command-list"
-	class={cn('max-h-72 overflow-x-hidden overflow-y-auto p-1', className)}
+	class={cn('max-h-menu-max-h overflow-x-hidden overflow-y-auto p-1', className)}
 	{...restProps}
 >
 	{@render children?.()}

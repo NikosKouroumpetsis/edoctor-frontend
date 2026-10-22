@@ -10,7 +10,7 @@
 		args: { variant: 'default', size: 'default', disabled: false },
 		argTypes: {
 			variant: { control: 'select', options: ['default', 'outline'] },
-			size: { control: 'select', options: ['default', 'sm', 'lg'] },
+			size: { control: 'select', options: ['default', 'lg'] },
 			disabled: { control: 'boolean' }
 		}
 	});
@@ -38,7 +38,6 @@
 <Story name="Sizes">
 	{#snippet template()}
 		<div class="flex items-center gap-3">
-			<Toggle size="sm" aria-label="Small bold"><BoldIcon /></Toggle>
 			<Toggle size="default" aria-label="Default bold"><BoldIcon /></Toggle>
 			<Toggle size="lg" aria-label="Large bold"><BoldIcon /></Toggle>
 		</div>

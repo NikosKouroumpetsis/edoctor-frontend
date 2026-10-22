@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import Slider from './slider.svelte';
 
@@ -36,30 +36,32 @@ describe('Slider', () => {
 	it('defaults the track/thumb to the default scale and applies sm/lg', () => {
 		const def = render(Slider, { props: { value: 50, 'aria-label': 'd' } });
 		expect(def.container.querySelector('[data-slot="slider-track"]')).toHaveClass('h-1.5');
-		expect(def.container.querySelector('[data-slot="slider-thumb"]')).toHaveClass('size-4');
+		expect(def.container.querySelector('[data-slot="slider-thumb-dot"]')).toHaveClass('size-4');
 		def.unmount();
 
 		const sm = render(Slider, { props: { value: 50, 'aria-label': 's', size: 'sm' } });
 		expect(sm.container.querySelector('[data-slot="slider-track"]')).toHaveClass('h-1');
-		expect(sm.container.querySelector('[data-slot="slider-thumb"]')).toHaveClass('size-3');
+		expect(sm.container.querySelector('[data-slot="slider-thumb-dot"]')).toHaveClass('size-3');
 		sm.unmount();
 
 		const lg = render(Slider, { props: { value: 50, 'aria-label': 'l', size: 'lg' } });
 		expect(lg.container.querySelector('[data-slot="slider-track"]')).toHaveClass('h-2');
-		expect(lg.container.querySelector('[data-slot="slider-thumb"]')).toHaveClass('size-5');
+		expect(lg.container.querySelector('[data-slot="slider-thumb-dot"]')).toHaveClass('size-5');
 	});
 
 	it('defaults to the primary tone and repaints range/thumb for tone="accent"', () => {
 		const def = render(Slider, { props: { value: [20, 80], 'aria-label': 'p' } });
 		expect(def.container.querySelector('[data-slot="slider-range"]')).toHaveClass('bg-primary');
-		expect(def.container.querySelector('[data-slot="slider-thumb"]')).toHaveClass('border-primary');
+		expect(def.container.querySelector('[data-slot="slider-thumb-dot"]')).toHaveClass(
+			'border-primary'
+		);
 		def.unmount();
 
 		const accent = render(Slider, {
 			props: { value: [20, 80], tone: 'accent', 'aria-label': 'a' }
 		});
 		expect(accent.container.querySelector('[data-slot="slider-range"]')).toHaveClass('bg-accent');
-		expect(accent.container.querySelector('[data-slot="slider-thumb"]')).toHaveClass(
+		expect(accent.container.querySelector('[data-slot="slider-thumb-dot"]')).toHaveClass(
 			'border-accent'
 		);
 	});
@@ -74,5 +76,47 @@ describe('Slider', () => {
 		thumbs[0].focus();
 		for (let i = 0; i < 20; i++) await user.keyboard('{ArrowRight}');
 		expect(Number(thumbs[0].getAttribute('aria-valuenow'))).toBeLessThanOrEqual(30);
+	});
+
+	it('moves the value to the pressed point from the touch box, as the track does, and grabs only from the dot', async () => {
+		const { container } = render(Slider, { props: { value: 50, 'aria-label': 'Volume' } });
+		const thumb = screen.getByRole('slider', { name: 'Volume' });
+		const track = container.querySelector('[data-slot="slider-track"]') as HTMLElement;
+		const dot = container.querySelector('[data-slot="slider-thumb-dot"]') as HTMLElement;
+		const rect = { left: 0, width: 200, top: 0, height: 6, right: 200, bottom: 6, x: 0, y: 0 };
+		track.getBoundingClientRect = () => ({ ...rect, toJSON: () => rect });
+
+		await fireEvent.pointerDown(dot, { clientX: 150 });
+		await fireEvent.pointerUp(window);
+		expect(thumb).toHaveAttribute('aria-valuenow', '50');
+
+		await fireEvent.pointerDown(thumb, { clientX: 120 });
+		await fireEvent.pointerUp(window);
+		expect(thumb).toHaveAttribute('aria-valuenow', '60');
+
+		await fireEvent.pointerDown(track, { clientX: 40 });
+		await fireEvent.pointerUp(window);
+		expect(thumb).toHaveAttribute('aria-valuenow', '20');
+	});
+
+	// 🔴 S-26.9: each thumb says its value as the screen shows it (`formatValue`), the plain number by default.
+	it('S-26.9: slider announces its shown value, never a percentage', () => {
+		const formatted = render(Slider, {
+			props: {
+				value: [80, 420],
+				min: 8,
+				max: 420,
+				'aria-label': 'Τιμή',
+				formatValue: (value: number, thumbIndex: number) =>
+					`€${value}${thumbIndex === 1 ? '+' : ''}`
+			}
+		});
+		expect(
+			screen.getAllByRole('slider').map((thumb) => thumb.getAttribute('aria-valuetext'))
+		).toEqual(['€80', '€420+']);
+		formatted.unmount();
+
+		render(Slider, { props: { value: 50, 'aria-label': 'Volume' } });
+		expect(screen.getByRole('slider', { name: 'Volume' })).toHaveAttribute('aria-valuetext', '50');
 	});
 });

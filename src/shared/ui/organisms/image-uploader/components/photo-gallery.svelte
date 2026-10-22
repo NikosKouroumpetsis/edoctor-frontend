@@ -79,7 +79,7 @@
 	}
 </script>
 
-<section data-slot="photo-gallery" class="space-y-gutter">
+<section data-slot="photo-gallery" class="space-y-list">
 	<div class="flex items-start justify-between gap-inline">
 		<div class="space-y-1">
 			<h2 class="text-heading-lg font-bold text-foreground">
@@ -104,7 +104,7 @@
 			data-dragging={dragFrom === 0 ? '' : undefined}
 			ondragover={handleDragOver}
 			ondrop={(event) => handleDrop(0, event)}
-			class="relative rounded-media data-[dragging]:opacity-60"
+			class="relative rounded-xl data-[dragging]:opacity-60"
 		>
 			<PhotoCover item={cover} />
 			<button
@@ -114,14 +114,18 @@
 				ondragstart={(event) => handleDragStart(0, event)}
 				ondragend={handleDragEnd}
 				onkeydown={(event) => handleKeydown(0, event)}
-				class="absolute bottom-3 left-3 grid size-8 cursor-grab place-items-center rounded-full bg-card/90 text-foreground shadow-raised transition-colors outline-none hover:bg-card focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
+				class="group absolute bottom-1 left-1 grid size-touch cursor-grab place-items-center rounded-full outline-none active:cursor-grabbing"
 			>
-				<GripVerticalIcon class="icon-sm" />
+				<span
+					class="grid size-control-xs place-items-center rounded-full bg-card/90 text-foreground shadow-raised transition-colors group-hover:bg-card group-focus-visible:ring-2 group-focus-visible:ring-ring"
+				>
+					<GripVerticalIcon class="icon-sm" />
+				</span>
 			</button>
 		</div>
 	{/if}
 
-	<div class="grid grid-cols-2 gap-gutter">
+	<div class="grid grid-cols-2 gap-list">
 		{#each rest as item, i (item.id)}
 			{@const index = i + 1}
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -129,7 +133,7 @@
 				data-dragging={dragFrom === index ? '' : undefined}
 				ondragover={handleDragOver}
 				ondrop={(event) => handleDrop(index, event)}
-				class="relative rounded-media data-[dragging]:opacity-60"
+				class="relative rounded-xl data-[dragging]:opacity-60"
 			>
 				<PhotoTile {item} />
 				<button
@@ -139,9 +143,13 @@
 					ondragstart={(event) => handleDragStart(index, event)}
 					ondragend={handleDragEnd}
 					onkeydown={(event) => handleKeydown(index, event)}
-					class="absolute bottom-2 left-2 grid size-7 cursor-grab place-items-center rounded-full bg-card/90 text-foreground shadow-raised transition-colors outline-none hover:bg-card focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
+					class="group absolute bottom-0 left-0 grid size-touch cursor-grab place-items-center rounded-full outline-none active:cursor-grabbing"
 				>
-					<GripVerticalIcon class="icon-sm" />
+					<span
+						class="grid size-control-xs place-items-center rounded-full bg-card/90 text-foreground shadow-raised transition-colors group-hover:bg-card group-focus-visible:ring-2 group-focus-visible:ring-ring"
+					>
+						<GripVerticalIcon class="icon-sm" />
+					</span>
 				</button>
 			</div>
 		{/each}

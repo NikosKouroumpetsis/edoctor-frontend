@@ -32,7 +32,7 @@
 	class="relative"
 	title={reason || undefined}
 >
-	<AspectRatio ratio={1} class="overflow-hidden rounded-media bg-muted">
+	<AspectRatio ratio={1} class="overflow-hidden rounded-xl bg-muted">
 		{#if staged.previewUrl}
 			<img src={staged.previewUrl} alt="" class="absolute inset-0 h-full w-full object-cover" />
 		{/if}
@@ -47,18 +47,18 @@
 			>
 				{#if staged.status === 'done'}
 					<span
-						class="grid size-8 place-items-center rounded-full bg-secondary text-secondary-foreground"
+						class="grid size-control-xs place-items-center rounded-full bg-secondary text-secondary-foreground"
 					>
 						<CheckIcon class="icon-sm" />
 					</span>
 				{:else}
-					<LoaderCircleIcon class="icon-xl animate-spin text-white" />
+					<LoaderCircleIcon class="icon-lg animate-spin text-white" />
 				{/if}
 			</div>
 		{/if}
 
 		{#if failed}
-			<div class="pointer-events-none absolute inset-0 rounded-media ring-2 ring-destructive"></div>
+			<div class="pointer-events-none absolute inset-0 rounded-xl ring-2 ring-destructive"></div>
 		{/if}
 	</AspectRatio>
 
@@ -67,18 +67,26 @@
 			type="button"
 			aria-label={m.image_uploader_cancel()}
 			onclick={() => ctx.cancelStaged(staged.id)}
-			class="absolute top-2 right-2 grid size-7 place-items-center rounded-full bg-black/50 text-white transition-colors outline-none hover:bg-black/70 focus-visible:ring-2 focus-visible:ring-ring"
+			class="group absolute top-0 right-0 grid size-touch place-items-center rounded-full outline-none"
 		>
-			<XIcon class="icon-sm" />
+			<span
+				class="grid size-control-xs place-items-center rounded-full bg-black/50 text-white transition-colors group-hover:bg-black/70 group-focus-visible:ring-2 group-focus-visible:ring-ring"
+			>
+				<XIcon class="icon-sm" />
+			</span>
 		</button>
 	{:else}
 		<button
 			type="button"
 			aria-label={m.image_uploader_remove()}
 			onclick={() => ctx.removeStaged(staged.id)}
-			class="absolute top-2 right-2 grid size-7 place-items-center rounded-full bg-secondary text-secondary-foreground transition-colors outline-none hover:bg-secondary/80 focus-visible:ring-2 focus-visible:ring-ring"
+			class="group absolute top-0 right-0 grid size-touch place-items-center rounded-full outline-none"
 		>
-			<TrashIcon class="icon-sm" />
+			<span
+				class="grid size-control-xs place-items-center rounded-full bg-secondary text-secondary-foreground transition-colors group-hover:bg-secondary/80 group-focus-visible:ring-2 group-focus-visible:ring-ring"
+			>
+				<TrashIcon class="icon-sm" />
+			</span>
 		</button>
 	{/if}
 

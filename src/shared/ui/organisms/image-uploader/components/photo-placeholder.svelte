@@ -9,8 +9,8 @@
 
 <AspectRatio
 	ratio={1}
-	class="grid place-items-center rounded-media bg-muted"
+	class="grid place-items-center rounded-xl bg-muted"
 	data-slot="photo-placeholder"
 >
-	<ImageIcon class="icon-xl text-muted-foreground" />
+	<ImageIcon class="icon-lg text-muted-foreground" />
 </AspectRatio>

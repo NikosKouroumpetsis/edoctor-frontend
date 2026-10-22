@@ -27,35 +27,35 @@
 			track: 'h-0.5',
 			thumb: 'size-6',
 			tick: 'h-1.5',
-			sliderArea: 'h-6',
-			title: 'text-base',
-			subtitle: 'text-xs',
-			label: 'text-xs',
+			sliderArea: 'min-h-touch',
+			title: 'text-body-lg',
+			subtitle: 'text-label-md font-normal',
+			label: 'text-label-md font-normal',
 			titleMb: 'mb-4',
 			labelsMt: 'mt-3',
 			labelsH: 'h-4'
 		},
 		default: {
 			track: 'h-0.5',
-			thumb: 'size-7',
+			thumb: 'size-control-xs',
 			tick: 'h-2',
-			sliderArea: 'h-7',
-			title: 'text-lg',
-			subtitle: 'text-sm',
-			label: 'text-sm',
+			sliderArea: 'min-h-touch',
+			title: 'text-title-sm',
+			subtitle: 'text-body-sm',
+			label: 'text-body-sm',
 			titleMb: 'mb-6',
 			labelsMt: 'mt-4',
 			labelsH: 'h-5'
 		},
 		lg: {
 			track: 'h-1',
-			thumb: 'size-8',
+			thumb: 'size-control-sm',
 			tick: 'h-2.5',
-			sliderArea: 'h-8',
-			title: 'text-xl',
-			subtitle: 'text-base',
-			label: 'text-base',
-			titleMb: 'mb-7',
+			sliderArea: 'min-h-touch',
+			title: 'text-title-lg',
+			subtitle: 'text-body-lg',
+			label: 'text-body-lg',
+			titleMb: 'mb-6',
 			labelsMt: 'mt-5',
 			labelsH: 'h-6'
 		}
@@ -163,6 +163,7 @@
 				'border-input bg-card shadow-sm transition-[border-color,box-shadow] focus-visible:border-2 focus-visible:border-foreground focus-visible:ring-0 data-[dragging=true]:border-2 data-[dragging=true]:border-foreground data-[dragging=true]:shadow-md',
 				spec.thumb
 			)}
+			formatValue={(stop) => steps[stop] ?? String(stop)}
 			onValueChange={onSliderChange}
 			aria-label={ariaLabel ?? title ?? 'Range'}
 		/>

@@ -3,9 +3,9 @@
 
 	/** Panel max-width. */
 	const dialogSizes: Record<DialogSize, string> = {
-		sm: 'max-w-md',
-		default: 'max-w-lg',
-		lg: 'max-w-2xl'
+		sm: 'max-w-text',
+		default: 'max-w-form',
+		lg: 'max-w-content'
 	};
 </script>
 
@@ -39,7 +39,7 @@
 		use:portal
 		data-slot="dialog-overlay"
 		transition:fade={{ duration: 150 }}
-		class="fixed inset-0 z-50 bg-black/50"
+		class="fixed inset-0 z-50 bg-overlay"
 	></div>
 	<!-- `use:portal` is declared before `use:focusTrap` so the node is relocated to
 	     <body> before focus moves in (relocating a focused node would blur it). -->
@@ -58,7 +58,7 @@
 		use:scrollLock={ctx.modal}
 		transition:scale={{ start: 0.95, duration: 150 }}
 		class={cn(
-			'fixed top-1/2 left-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 gap-4 rounded-panel border border-border bg-card p-card shadow-soft',
+			'fixed top-1/2 left-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border border-border bg-card p-card shadow-soft',
 			dialogSizes[size],
 			className
 		)}
@@ -71,7 +71,7 @@
 				aria-label="Close"
 				data-slot="dialog-close"
 				onclick={() => ctx.setOpen(false)}
-				class="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+				class="absolute top-2 right-2 grid size-touch place-items-center rounded-full opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50"
 			>
 				<XIcon class="size-4" />
 			</button>

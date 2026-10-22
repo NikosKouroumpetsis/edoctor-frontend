@@ -25,7 +25,10 @@ describe('Badge', () => {
 		def.unmount();
 
 		const sm = render(Badge, { props: { size: 'sm', children: label('B') } });
-		expect(sm.container.querySelector('[data-slot="badge"]')).toHaveClass('text-label-sm');
+		expect(sm.container.querySelector('[data-slot="badge"]')).toHaveClass(
+			'text-label-md',
+			'px-1.5'
+		);
 		sm.unmount();
 
 		const lg = render(Badge, { props: { size: 'lg', children: label('C') } });

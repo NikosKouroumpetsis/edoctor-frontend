@@ -17,7 +17,7 @@
 
 <Story name="Default">
 	{#snippet template()}
-		<Tabs bind:value class="w-80">
+		<Tabs bind:value class="w-narrow">
 			<TabsList>
 				<TabsTrigger value="account">Account</TabsTrigger>
 				<TabsTrigger value="password">Password</TabsTrigger>
@@ -30,7 +30,7 @@
 
 <Story name="Vertical">
 	{#snippet template()}
-		<Tabs bind:value={vertical} orientation="vertical" class="w-96">
+		<Tabs bind:value={vertical} orientation="vertical" class="w-narrow">
 			<TabsList>
 				<TabsTrigger value="general">General</TabsTrigger>
 				<TabsTrigger value="security">Security</TabsTrigger>
@@ -56,7 +56,7 @@
 	}}
 >
 	{#snippet template()}
-		<Tabs value="account" class="w-80">
+		<Tabs value="account" class="w-narrow">
 			<TabsList>
 				<TabsTrigger value="account">Account</TabsTrigger>
 				<TabsTrigger value="password">Password</TabsTrigger>

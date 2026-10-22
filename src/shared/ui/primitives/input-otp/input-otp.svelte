@@ -112,7 +112,7 @@
 	data-slot="input-otp"
 	data-disabled={disabled ? '' : undefined}
 	class={cn(
-		'relative flex h-12 w-full items-center rounded-2xl border border-input bg-card px-3 transition-[color,box-shadow]',
+		'relative flex h-control-md w-full items-center rounded-lg border border-input bg-card px-3 transition-[color,box-shadow]',
 		isFocused && 'border-ring',
 		disabled && 'opacity-50',
 		containerClass
@@ -137,7 +137,7 @@
 		aria-label="One-time passcode"
 		data-slot="input-otp-input"
 		class={cn(
-			'absolute inset-0 size-full cursor-text bg-transparent text-transparent caret-transparent opacity-0 outline-none disabled:cursor-not-allowed',
+			'absolute inset-0 size-full min-h-touch cursor-text bg-transparent text-transparent caret-transparent opacity-0 outline-none disabled:cursor-not-allowed',
 			className
 		)}
 		{...restProps}

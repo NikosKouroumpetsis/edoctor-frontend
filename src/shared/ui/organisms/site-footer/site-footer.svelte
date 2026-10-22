@@ -18,9 +18,9 @@
 		resolve(localizeHref(path, { locale: currentLocale }) as Pathname);
 
 	const linkClass =
-		'text-start text-body-sm text-muted-foreground transition-colors hover:text-foreground hover:underline outline-none focus-visible:text-foreground';
+		'inline-flex min-h-touch min-w-touch items-center text-start text-body-sm text-muted-foreground transition-colors hover:text-foreground hover:underline outline-none focus-visible:text-foreground';
 	const socialClass =
-		'grid size-9 place-items-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:border-border hover:text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
+		'grid size-touch place-items-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:border-border hover:text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
 
 	const socialLinks = [
 		{ label: 'Facebook', icon: FacebookIcon },
@@ -29,10 +29,10 @@
 	];
 </script>
 
-<footer class="mt-12 border-t border-border bg-card pb-[88px] lg:pb-0">
-	<div class="container-page py-12">
-		<div class="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3">
-			<div class="flex flex-col gap-3">
+<footer class="mt-section-lg border-t border-border bg-card pb-bar-bottom laptop:pb-0">
+	<div class="container-page py-section-lg">
+		<div class="grid grid-cols-2 gap-x-section gap-y-section tablet:grid-cols-3">
+			<div class="flex flex-col gap-touch-gap">
 				<h2 class="text-label-lg font-semibold text-foreground">
 					{m.footer_support_title({}, messageOptions)}
 				</h2>
@@ -41,7 +41,7 @@
 				<button type="button" class={linkClass}>{m.footer_safety({}, messageOptions)}</button>
 			</div>
 
-			<div class="flex flex-col gap-3">
+			<div class="flex flex-col gap-touch-gap">
 				<h2 class="text-label-lg font-semibold text-foreground">
 					{m.footer_company_title({}, messageOptions)}
 				</h2>
@@ -52,7 +52,7 @@
 				<a href={localizedHref('/plans')} class={linkClass}>{m.nav_plans({}, messageOptions)}</a>
 			</div>
 
-			<div class="flex flex-col gap-3">
+			<div class="flex flex-col gap-touch-gap">
 				<h2 class="text-label-lg font-semibold text-foreground">
 					{m.footer_legal_title({}, messageOptions)}
 				</h2>
@@ -68,11 +68,11 @@
 
 	<div class="border-t border-border/70">
 		<div
-			class="container-page flex flex-col gap-4 py-6 md:flex-row md:items-center md:justify-between"
+			class="container-page flex flex-col gap-4 py-6 tablet:flex-row tablet:items-center tablet:justify-between"
 		>
-			<div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-body-sm text-muted-foreground">
+			<div class="flex flex-wrap items-center gap-touch-gap text-body-sm text-muted-foreground">
 				<span>{m.footer_rights({}, messageOptions)}</span>
-				<span aria-hidden="true" class="hidden sm:inline">·</span>
+				<span aria-hidden="true" class="hidden tablet:inline">·</span>
 				<button type="button" class={linkClass}>{m.footer_terms({}, messageOptions)}</button>
 				<span aria-hidden="true">·</span>
 				<button type="button" class={linkClass}>{m.footer_privacy({}, messageOptions)}</button>
@@ -83,7 +83,7 @@
 			<div class="flex items-center gap-2">
 				<LanguageSwitcher />
 				<ThemeToggle />
-				<ul class="ml-1 flex items-center gap-2">
+				<ul class="ml-1 flex items-center gap-touch-gap">
 					{#each socialLinks as social (social.label)}
 						{@const Icon = social.icon}
 						<li>

@@ -39,7 +39,7 @@
 		}
 	}}
 	class={cn(
-		"relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-body-sm outline-none select-none hover:bg-accent/10 focus:bg-accent/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 data-[variant=destructive]:focus:bg-destructive/10 [&_svg:not([class*='size-'])]:size-4",
+		"relative flex min-h-touch w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-body-sm outline-none select-none hover:bg-accent/10 focus:bg-accent/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[variant=destructive]:text-destructive data-[variant=destructive]:hover:bg-destructive/10 data-[variant=destructive]:focus:bg-destructive/10 [&_svg:not([class*='size-'])]:size-4",
 		className
 	)}
 	{...restProps}

@@ -39,7 +39,7 @@
 		onclick={() => onSelect?.(value)}
 		onpointermove={() => ctx.setActiveId(id)}
 		class={cn(
-			'relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-body-sm outline-none select-none data-[active]:bg-accent/10',
+			'relative flex min-h-touch w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-body-sm outline-none select-none data-[active]:bg-accent/10',
 			className
 		)}
 		{...restProps}

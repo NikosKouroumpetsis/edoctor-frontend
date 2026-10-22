@@ -2,13 +2,13 @@
 	export type DrawerDirection = 'top' | 'bottom' | 'left' | 'right';
 	export type DrawerSize = 'sm' | 'default' | 'lg';
 
-	// Panel extent along the open axis: max-height for top/bottom, max-width for
-	// left/right. `default` reproduces the previous fixed extent.
+	// Panel extent along the open axis: a sheet height for top/bottom, a named
+	// max-width for left/right.
 	const drawerExtent: Record<DrawerDirection, Record<DrawerSize, string>> = {
-		bottom: { sm: 'max-h-[70vh]', default: 'max-h-[85vh]', lg: 'max-h-[95vh]' },
-		top: { sm: 'max-h-[70vh]', default: 'max-h-[85vh]', lg: 'max-h-[95vh]' },
-		left: { sm: 'max-w-xs', default: 'max-w-sm', lg: 'max-w-md' },
-		right: { sm: 'max-w-xs', default: 'max-w-sm', lg: 'max-w-md' }
+		bottom: { sm: 'max-h-sheet-md', default: 'max-h-sheet-lg', lg: 'max-h-sheet-xl' },
+		top: { sm: 'max-h-sheet-md', default: 'max-h-sheet-lg', lg: 'max-h-sheet-xl' },
+		left: { sm: 'max-w-narrow', default: 'max-w-text', lg: 'max-w-form' },
+		right: { sm: 'max-w-narrow', default: 'max-w-text', lg: 'max-w-form' }
 	};
 </script>
 
@@ -17,6 +17,7 @@
 	import type { Snippet } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import XIcon from '~icons/lucide/x';
+	import { platform, step } from '$shared/design/tokens';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
 	import { portal, focusTrap, dismissable, scrollLock } from '$shared/lib/headless';
 	import { getDialogContext } from '$shared/ui/primitives/dialog/dialog.svelte';
@@ -44,10 +45,10 @@
 	// is rounded. Mirrors `sheet` but with a grabbable rounded edge. The open-axis
 	// extent is applied separately from `drawerExtent[direction][panelSize]`.
 	const directionClasses: Record<DrawerDirection, string> = {
-		bottom: 'inset-x-0 bottom-0 mt-24 flex-col rounded-t-panel border-t',
-		top: 'inset-x-0 top-0 mb-24 flex-col-reverse rounded-b-panel border-b',
-		left: 'inset-y-0 left-0 w-3/4 flex-row rounded-r-panel border-r',
-		right: 'inset-y-0 right-0 w-3/4 flex-row-reverse rounded-l-panel border-l'
+		bottom: 'inset-x-0 bottom-0 mt-drawer-inset flex-col rounded-t-xl border-t',
+		top: 'inset-x-0 top-0 mb-drawer-inset flex-col-reverse rounded-b-xl border-b',
+		left: 'inset-y-0 left-0 w-3/4 flex-row rounded-r-xl border-r',
+		right: 'inset-y-0 right-0 w-3/4 flex-row-reverse rounded-l-xl border-l'
 	};
 
 	// Drag axis + the sign of the dismiss direction along that axis.
@@ -56,10 +57,10 @@
 
 	const flyParams = $derived(
 		{
-			bottom: { y: 360, duration: 320 },
-			top: { y: -360, duration: 320 },
-			left: { x: -360, duration: 320 },
-			right: { x: 360, duration: 320 }
+			bottom: { y: platform.motion.drawer, duration: 320 },
+			top: { y: -platform.motion.drawer, duration: 320 },
+			left: { x: -platform.motion.drawer, duration: 320 },
+			right: { x: platform.motion.drawer, duration: 320 }
 		}[direction]
 	);
 
@@ -76,9 +77,9 @@
 	let decided = false; // whether this gesture has been claimed as a drag
 
 	const DISTANCE_RATIO = 0.25; // fraction of size that dismisses on release
-	const FALLBACK_DISTANCE = 80; // px, used when size can't be measured (e.g. jsdom)
+	const FALLBACK_DISTANCE = platform.motion.dismiss; // used when size can't be measured (e.g. jsdom)
 	const VELOCITY_DISMISS = 0.4; // px/ms toward the dismiss edge
-	const START_THRESHOLD = 4; // px before a gesture is claimed
+	const START_THRESHOLD = step(1); // travel before a gesture is claimed
 
 	function coordOf(e: PointerEvent) {
 		return axis === 'y' ? e.clientY : e.clientX;
@@ -206,10 +207,10 @@
 	});
 
 	const handleClasses: Record<DrawerDirection, string> = {
-		bottom: 'mx-auto mt-3 h-1.5 w-12 rounded-full bg-muted-foreground/40',
-		top: 'mx-auto mb-3 h-1.5 w-12 rounded-full bg-muted-foreground/40',
-		left: 'my-auto ml-3 h-12 w-1.5 rounded-full bg-muted-foreground/40',
-		right: 'my-auto mr-3 h-12 w-1.5 rounded-full bg-muted-foreground/40'
+		bottom: 'mx-auto mt-3 h-1.5 w-drawer-handle rounded-full bg-muted-foreground/40',
+		top: 'mx-auto mb-3 h-1.5 w-drawer-handle rounded-full bg-muted-foreground/40',
+		left: 'my-auto ml-3 h-drawer-handle w-1.5 rounded-full bg-muted-foreground/40',
+		right: 'my-auto mr-3 h-drawer-handle w-1.5 rounded-full bg-muted-foreground/40'
 	};
 </script>
 
@@ -273,7 +274,7 @@
 				aria-label="Close"
 				data-slot="drawer-close"
 				onclick={() => ctx.setOpen(false)}
-				class="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+				class="absolute top-2 right-2 grid size-touch place-items-center rounded-full opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50"
 			>
 				<XIcon class="size-4" />
 			</button>

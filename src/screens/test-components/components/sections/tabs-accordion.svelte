@@ -21,7 +21,7 @@
 	description="Disclosure and range primitives."
 >
 	<DemoRow label="Tabs (active: {tab})">
-		<Tabs bind:value={tab} class="w-full max-w-md">
+		<Tabs bind:value={tab} class="w-full max-w-text">
 			<TabsList>
 				<TabsTrigger value="overview">Overview</TabsTrigger>
 				<TabsTrigger value="reviews">Reviews</TabsTrigger>
@@ -40,7 +40,7 @@
 	</DemoRow>
 
 	<DemoRow label="Accordion (single)">
-		<Accordion type="single" value="q1" class="w-full max-w-md">
+		<Accordion type="single" value="q1" class="w-full max-w-text">
 			<AccordionItem value="q1">
 				<AccordionTrigger>How do I book an appointment?</AccordionTrigger>
 				<AccordionContent>Search for a doctor, pick a slot, and confirm.</AccordionContent>
@@ -53,10 +53,12 @@
 	</DemoRow>
 
 	<DemoRow label="Slider — single ({volume})">
-		<div class="w-64"><Slider bind:value={volume} aria-label="Volume" /></div>
+		<div class="w-full max-w-narrow"><Slider bind:value={volume} aria-label="Volume" /></div>
 	</DemoRow>
 
 	<DemoRow label="Slider — range ({priceRange[0]}–{priceRange[1]})">
-		<div class="w-64"><Slider bind:value={priceRange} aria-label="Price range" /></div>
+		<div class="w-full max-w-narrow">
+			<Slider bind:value={priceRange} aria-label="Price range" />
+		</div>
 	</DemoRow>
 </DemoSection>

@@ -19,7 +19,7 @@
 	data-slot="input-otp-slot"
 	data-active={slot.isActive ? '' : undefined}
 	class={cn(
-		'relative flex h-full flex-1 items-center justify-center text-lg font-medium transition-colors',
+		'relative flex h-full flex-1 items-center justify-center text-title-sm font-medium transition-colors',
 		slot.char === undefined ? 'text-muted-foreground' : 'text-foreground',
 		className
 	)}

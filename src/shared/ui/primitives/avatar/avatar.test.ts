@@ -4,17 +4,17 @@ import Harness from './avatar.harness.svelte';
 import Avatar from './avatar.svelte';
 
 describe('Avatar', () => {
-	it('defaults the root box to size-10 and scales with the size prop', () => {
+	it('defaults the root box to size-avatar-md and scales with the size prop', () => {
 		const { container, unmount } = render(Avatar);
-		expect(container.querySelector('[data-slot="avatar"]')).toHaveClass('size-10');
+		expect(container.querySelector('[data-slot="avatar"]')).toHaveClass('size-avatar-md');
 		unmount();
 
 		const sm = render(Avatar, { props: { size: 'sm' } });
-		expect(sm.container.querySelector('[data-slot="avatar"]')).toHaveClass('size-8');
+		expect(sm.container.querySelector('[data-slot="avatar"]')).toHaveClass('size-avatar-sm');
 		sm.unmount();
 
 		const lg = render(Avatar, { props: { size: 'lg' } });
-		expect(lg.container.querySelector('[data-slot="avatar"]')).toHaveClass('size-12');
+		expect(lg.container.querySelector('[data-slot="avatar"]')).toHaveClass('size-avatar-lg');
 	});
 
 	it('shows the fallback while the image has not loaded', () => {

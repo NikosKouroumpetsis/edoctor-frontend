@@ -19,59 +19,57 @@
 </script>
 
 <nav
-	class="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card lg:hidden"
+	class="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card laptop:hidden"
 	aria-label={m.bottom_navigation({}, messageOptions)}
 >
-	<ul
-		class="mx-auto flex max-w-tablet items-stretch justify-around px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]"
-	>
+	<ul class="mx-auto flex max-w-content items-stretch justify-around px-2 pt-2 pb-safe-area">
 		<li>
 			<a
 				href={homeHref}
 				aria-current={isHome ? 'page' : undefined}
 				class={[
-					'flex min-w-11 flex-col items-center gap-1 rounded-md py-1 outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+					'flex min-h-touch min-w-touch flex-col items-center justify-center gap-1 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
 					isHome ? 'text-primary' : 'text-muted-foreground'
 				]}
 			>
-				<SearchIcon class="icon-xl" />
-				<span class="text-label-sm">{m.tab_search({}, messageOptions)}</span>
+				<SearchIcon class="icon-lg" />
+				<span class="text-label-md">{m.tab_search({}, messageOptions)}</span>
 			</a>
 		</li>
 		<li>
 			<button
 				type="button"
-				class="flex min-w-11 flex-col items-center gap-1 py-1 text-muted-foreground outline-none"
+				class="flex min-h-touch min-w-touch flex-col items-center justify-center gap-1 text-muted-foreground outline-none"
 			>
-				<HeartIcon class="icon-xl" />
-				<span class="text-label-sm">{m.tab_favorites({}, messageOptions)}</span>
+				<HeartIcon class="icon-lg" />
+				<span class="text-label-md">{m.tab_favorites({}, messageOptions)}</span>
 			</button>
 		</li>
 		<li>
 			<button
 				type="button"
-				class="flex min-w-11 flex-col items-center gap-1 py-1 text-muted-foreground outline-none"
+				class="flex min-h-touch min-w-touch flex-col items-center justify-center gap-1 text-muted-foreground outline-none"
 			>
-				<CalendarIcon class="icon-xl" />
-				<span class="text-label-sm">{m.tab_appointments({}, messageOptions)}</span>
+				<CalendarIcon class="icon-lg" />
+				<span class="text-label-md">{m.tab_appointments({}, messageOptions)}</span>
 			</button>
 		</li>
 		<li>
 			<button
 				type="button"
-				class="flex min-w-11 flex-col items-center gap-1 py-1 text-muted-foreground outline-none"
+				class="flex min-h-touch min-w-touch flex-col items-center justify-center gap-1 text-muted-foreground outline-none"
 			>
-				<MessageIcon class="icon-xl" />
-				<span class="text-label-sm">{m.tab_messages({}, messageOptions)}</span>
+				<MessageIcon class="icon-lg" />
+				<span class="text-label-md">{m.tab_messages({}, messageOptions)}</span>
 			</button>
 		</li>
 		<li>
 			<button
 				type="button"
-				class="flex min-w-11 flex-col items-center gap-1 py-1 text-muted-foreground outline-none"
+				class="flex min-h-touch min-w-touch flex-col items-center justify-center gap-1 text-muted-foreground outline-none"
 			>
-				<UserIcon class="icon-xl" />
-				<span class="text-label-sm">{m.tab_profile({}, messageOptions)}</span>
+				<UserIcon class="icon-lg" />
+				<span class="text-label-md">{m.tab_profile({}, messageOptions)}</span>
 			</button>
 		</li>
 	</ul>

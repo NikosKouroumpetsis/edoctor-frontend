@@ -21,7 +21,7 @@
 
 <Story name="Single">
 	{#snippet template()}
-		<Accordion type="single" bind:value={single} class="w-96">
+		<Accordion type="single" bind:value={single} class="w-narrow">
 			<AccordionItem value="one">
 				<AccordionTrigger>How do I book an appointment?</AccordionTrigger>
 				<AccordionContent>Search for a doctor and pick an available slot.</AccordionContent>
@@ -36,7 +36,7 @@
 
 <Story name="Multiple">
 	{#snippet template()}
-		<Accordion type="multiple" bind:value={multiple} class="w-96">
+		<Accordion type="multiple" bind:value={multiple} class="w-narrow">
 			<AccordionItem value="one">
 				<AccordionTrigger>First section</AccordionTrigger>
 				<AccordionContent>Several sections can be open at once.</AccordionContent>

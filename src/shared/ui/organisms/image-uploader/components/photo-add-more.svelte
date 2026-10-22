@@ -15,14 +15,14 @@
 	type="button"
 	data-slot="photo-add-more"
 	onclick={() => ctx.openDialog()}
-	class="w-full outline-none"
+	class="min-h-touch w-full outline-none"
 	aria-label={m.image_uploader_add_more()}
 >
 	<AspectRatio
 		ratio={1}
-		class="flex flex-col items-center justify-center gap-inline rounded-media border border-dashed border-border bg-muted/20 text-muted-foreground transition-colors hover:bg-muted/40"
+		class="flex flex-col items-center justify-center gap-inline rounded-xl border border-dashed border-border bg-muted/20 text-muted-foreground transition-colors hover:bg-muted/40"
 	>
-		<PlusIcon class="icon-xl" />
+		<PlusIcon class="icon-lg" />
 		<span class="text-body-sm">{m.image_uploader_add_more()}</span>
 	</AspectRatio>
 </button>

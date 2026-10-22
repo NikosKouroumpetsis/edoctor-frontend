@@ -12,7 +12,9 @@
 <!-- Mobile bottom navigation. Reads $app/state (page.url) for the active item. -->
 <Story name="Default">
 	{#snippet template()}
-		<div class="relative mx-auto h-40 w-[390px] overflow-hidden rounded-lg border bg-background">
+		<div
+			class="relative mx-auto h-bar-bottom w-narrow overflow-hidden rounded-lg border bg-background"
+		>
 			<BottomNav />
 		</div>
 	{/snippet}

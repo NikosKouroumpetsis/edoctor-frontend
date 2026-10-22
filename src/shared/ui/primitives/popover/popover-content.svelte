@@ -3,15 +3,16 @@
 
 	/** Panel width. */
 	const popoverSizes: Record<PopoverSize, string> = {
-		sm: 'w-56',
-		default: 'w-72',
-		lg: 'w-80'
+		sm: 'w-popover-sm',
+		default: 'w-popover-md',
+		lg: 'w-popover-lg'
 	};
 </script>
 
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { scale } from 'svelte/transition';
+	import { step } from '$shared/design/tokens';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
 	import { portal, dismissable, floating, type Placement } from '$shared/lib/headless';
 	import { getPopoverContext } from './popover.svelte';
@@ -20,7 +21,7 @@
 		ref = $bindable(null),
 		class: className,
 		placement = 'bottom',
-		sideOffset = 8,
+		sideOffset = step(2),
 		align = 'center',
 		size = 'default',
 		children,
@@ -62,7 +63,7 @@
 		use:autofocus
 		transition:scale={{ start: 0.95, duration: 120 }}
 		class={cn(
-			'z-50 rounded-control border border-border bg-popover p-4 text-popover-foreground shadow-overlay outline-none',
+			'z-50 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-overlay outline-none',
 			popoverSizes[size],
 			className
 		)}

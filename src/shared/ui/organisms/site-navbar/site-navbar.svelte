@@ -57,22 +57,22 @@
 </script>
 
 <header data-slot="site-navbar" class={cn('w-full border-b border-border bg-card', className)}>
-	<div class="container-page flex h-16 items-center justify-between gap-4">
-		<a href={href('/')} class="flex items-center gap-2 font-semibold">
+	<div class="container-page flex h-bar-top items-center justify-between gap-4">
+		<a href={href('/')} class="flex min-h-touch min-w-touch items-center gap-2 font-semibold">
 			<StethoscopeIcon class="size-5 text-primary" />
 			{brand}
 		</a>
 
-		<nav class="hidden items-center gap-1 lg:flex" aria-label="Primary">
+		<nav class="hidden items-center gap-touch-gap laptop:flex" aria-label="Primary">
 			{#each links as link (link.label)}
-				<a href={href(link.href)} class={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}>
+				<a href={href(link.href)} class={cn(buttonVariants({ variant: 'ghost' }))}>
 					{link.label}
 				</a>
 			{/each}
 		</nav>
 
 		<div class="flex items-center gap-2">
-			<div class="hidden items-center gap-2 sm:flex">
+			<div class="hidden items-center gap-2 tablet:flex">
 				<LanguageSwitcher />
 				<ThemeToggle />
 			</div>
@@ -80,14 +80,14 @@
 			<DropdownMenu>
 				<DropdownMenuTrigger
 					aria-label="Account menu"
-					class="rounded-full focus-visible:ring-[3px] focus-visible:ring-ring/50"
+					class="rounded-full focus-visible:ring-3 focus-visible:ring-ring/50"
 				>
-					<Avatar class="size-9">
+					<Avatar>
 						<AvatarImage src="" alt={userName} />
 						<AvatarFallback>{initials}</AvatarFallback>
 					</Avatar>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent class="w-48" align="end">
+				<DropdownMenuContent class="w-popover-sm" align="end">
 					<DropdownMenuLabel>{userName}</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem>Profile</DropdownMenuItem>
@@ -99,7 +99,7 @@
 
 			<Sheet>
 				<SheetTrigger
-					class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'lg:hidden')}
+					class={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'laptop:hidden')}
 					aria-label="Open menu"
 				>
 					<MenuIcon />
@@ -108,7 +108,7 @@
 					<SheetHeader>
 						<SheetTitle>{brand}</SheetTitle>
 					</SheetHeader>
-					<nav class="flex flex-col gap-1" aria-label="Mobile">
+					<nav class="flex flex-col gap-touch-gap" aria-label="Mobile">
 						{#each links as link (link.label)}
 							<a
 								href={href(link.href)}

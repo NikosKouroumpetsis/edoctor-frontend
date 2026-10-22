@@ -35,7 +35,7 @@
 		aria-label="Cookie consent"
 		data-slot="cookie-consent"
 		class={cn(
-			'flex flex-col gap-4 rounded-panel border border-border bg-card p-card shadow-overlay md:flex-row md:items-center',
+			'flex flex-col gap-4 rounded-xl border border-border bg-card p-card shadow-overlay tablet:flex-row tablet:items-center',
 			className
 		)}
 	>
@@ -46,7 +46,7 @@
 				<p class="mt-1 text-body-sm text-muted-foreground">{description}</p>
 			</div>
 		</div>
-		<div class="flex shrink-0 gap-2">
+		<div class="flex shrink-0 gap-touch-gap">
 			<Button variant="outline" onclick={reject}>Essentials only</Button>
 			<Button onclick={accept}>Accept all</Button>
 		</div>

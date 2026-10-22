@@ -70,4 +70,13 @@ describe('SteppedRange', () => {
 		await user.keyboard('{ArrowLeft}');
 		expect(thumbs[1]).toHaveAttribute('aria-valuenow', '3');
 	});
+
+	// 🔴 S-26.9: each thumb says the label of its stop, not the stop's index.
+	it('S-26.9: slider announces its shown value, never a percentage', () => {
+		render(SteppedRange, { props: { steps, value: [0, 6] as [number, number] } });
+
+		expect(
+			screen.getAllByRole('slider').map((thumb) => thumb.getAttribute('aria-valuetext'))
+		).toEqual(['30 min', '5+ h']);
+	});
 });

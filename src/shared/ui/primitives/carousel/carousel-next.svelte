@@ -21,10 +21,14 @@
 	disabled={!ctx.canNext}
 	onclick={() => ctx.scrollNext()}
 	class={cn(
-		'inline-flex size-9 items-center justify-center rounded-full border border-border bg-card shadow-xs hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-40',
+		'group inline-flex size-touch items-center justify-center rounded-full outline-none disabled:pointer-events-none disabled:opacity-40',
 		className
 	)}
 	{...restProps}
 >
-	<ChevronRightIcon class="size-4" />
+	<span
+		class="inline-flex size-control-sm items-center justify-center rounded-full border border-border bg-card shadow-xs group-hover:bg-muted group-focus-visible:ring-3 group-focus-visible:ring-ring/50"
+	>
+		<ChevronRightIcon class="size-4" />
+	</span>
 </button>

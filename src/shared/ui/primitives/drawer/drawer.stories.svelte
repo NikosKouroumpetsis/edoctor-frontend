@@ -93,7 +93,7 @@
 				</DrawerHeader>
 				<div class="min-h-0 flex-1 overflow-y-auto pr-2">
 					{#each Array.from({ length: 30 }, (_, i) => i + 1) as n (n)}
-						<p class="border-b border-border py-2 text-sm">List item {n}</p>
+						<p class="border-b border-border py-2 text-body-sm">List item {n}</p>
 					{/each}
 				</div>
 			</DrawerContent>

@@ -39,9 +39,13 @@ Rule: **when a color changes in one project, change it in the other.** Token
 names are shared: `background`, `foreground`, `card`, `card-foreground`,
 `primary`, `primary-foreground`, `secondary`, `secondary-foreground`, `accent`,
 `accent-foreground`, `muted`, `muted-foreground`, `border`, `input`, `ring`,
-`success`, `warning`, `danger`. The frontend stores them as hex (matching the
-application) so the two files can be compared directly. `destructive` is a
-shadcn alias of `danger`.
+`success`, `warning`, `danger`, `overlay`. The frontend stores them as hex
+(matching the application) so the two files can be compared directly.
+`destructive` is a shadcn alias of `danger`.
+
+`overlay` (`#00000080`, the same in light and dark) is the dimmed backdrop of the
+dialog and the sheet: `bg-overlay`, the application's name (search-ux S-26.6),
+never a static colour with an opacity such as `bg-black/50`.
 
 Note: `accent` is the brand pink (`#BE185D`). It is reserved for intentional
 brand elements (ratings, favorites, accent CTAs). shadcn primitives that use
@@ -51,58 +55,85 @@ as a low-contrast background.
 
 ## Named tokens over raw values
 
-Do not scatter raw/arbitrary utilities (`max-w-360`, `size-5.5`, `size-[18px]`,
-`text-[18px]`, repeated `font-semibold`, ad-hoc shadows). Use the named non-color
-tokens — typography, spacing, radius, elevation, breakpoints, containers, icons.
+No rem and no per-component sizes: every size is a named class from the central
+scale (owner decision, search-ux S-05 … S-08). Arbitrary values (`text-[18px]`,
+`h-[calc(…)]`, `ring-[3px]`), steps above 24px (`h-12`, `w-42`) and hidden
+steps (`p-3.75`) are rejected by `tests/architecture/scale-vocabulary.test.ts`.
 
-These sizing tokens are **not** hand-written in CSS anymore: they are defined
-once in `src/shared/design/tokens/tokens.ts` and generated into
-`src/routes/layout.css` (via `src/generated/design-tokens.css`). Edit the `.ts`
-source and the change propagates globally.
+The scale is defined once, in `src/shared/design/tokens/tokens.ts` — a copy of
+the application's canonical `values/index.ts`, kept identical by
+`tests/architecture/scale-parity.test.ts` — and generated into the theme. Full
+tables and rules in [`design-tokens.md`](./design-tokens.md):
 
-Quick reference (full tables and rules in
-[`design-tokens.md`](./design-tokens.md)):
+- Step: `--spacing` 4px; numeric steps only 0–6 (≤ 24px) in halves.
+- Typography: `text-display-* | heading-* | title-* | body-* | label-*`, never
+  under 12px, running text `body-lg` (16). Each role bakes size + weight + line
+  height; add `font-*` only for an intentional override.
+- Line height: `leading-flat | tight | normal | relaxed | loose`, written after
+  the role.
+- Touch and controls: `touch` 48 (every target), `touch-gap` 8, visible shapes
+  `control-xs/sm` 32/40, controls `control-md/lg/xl` 48/56/64, rows 56/72.
+- Spacing roles: `inline` 8 · `rail` 12 · `list` 16 · `grid`/`card` 24 ·
+  `section` 32 · `section-lg` 48; page gutters `gutter-sm/md/lg` 24/32/48.
+- Containers: `narrow` 360 · `text` 480 · `form` 560 · `content` 760 ·
+  `listing` 1120 · `page` 1440.
+- Radii: `xs` 4 · `sm` 8 · `md` 12 · `lg` 16 · `xl` 24 (+ `full`/`none`).
+- Elevation: `shadow-raised | overlay | floating | soft | bar`.
+- Icons: `icon-xs` 12 · `icon-sm` 16 · `icon-md` 20 · `icon-lg` 24 · `icon-xl` 32.
+- Container: `container-page` (centered, `max-w-page`, gutters per breakpoint);
+  `container-bleed` for rails that run into the gutters.
 
-- Typography: `text-display-* | heading-* | title-* | body-* | label-*`. Each
-  bakes size + weight + line-height — add `font-*` only for an intentional
-  override (e.g. `text-body-sm font-medium` nav links).
-- Spacing: semantic `gap-section` (32), `p-card` (24), `gap-gutter` (16),
-  `gap-inline` (8) on top of the numeric scale.
-- Radii: `rounded-panel` (28, cards), `rounded-control` (13, inputs/selects),
-  `rounded-media` (24, images), plus the base `rounded-sm…4xl` scale.
-- Elevation: `shadow-raised` (resting), `shadow-overlay` (menus), `shadow-soft`
-  (large float).
-- Icons: `icon-xs` 14 · `icon-sm` 16 · `icon-md` 18 · `icon-lg` 20 · `icon-xl` 22.
-- Container: `container-page` utility (centered, `max-w-page` = 1440, shared
-  responsive gutters). Named widths `max-w-page` (1440) and `max-w-tablet` (744).
-
-When a dimension repeats or encodes a design decision, add a named token in
-`tokens.ts` rather than inlining a raw value.
+When a dimension repeats or encodes a design decision, add a name to the
+canonical file (shared) or to `platform` in `tokens/index.ts` (web-only) rather
+than inlining a value.
 
 ## Shared control spec
 
-Text inputs, selects, and search controls share one look with the application:
-`rounded-control`, `border-input`, `bg-card`, and one compact height scale
-`sm | default | lg | xl` (`h-7` / `h-8` / `h-9` / `h-11`, i.e. 28 / 32 / 36 /
-44px) where `default` is denser than shadcn-normal and `lg` equals the
-shadcn-normal `h-9`/36px. The scale is owned by `inputSizes` in `input.svelte`
-and reused by the textarea, select trigger, combobox, and field molecules; the
-`input` and `select` primitives already encode this, so reuse them rather than
-restyling per feature.
+Every interactive element is at least **48 × 48** (`touch`), with 8px
+(`touch-gap`) between neighbouring targets; the visible shape may be smaller and
+sits centered in the box (`size-touch` button around a `size-control-sm` circle,
+a checkbox box, a switch track or a slider dot). This replaces the former
+"compact" 28 / 32 / 36 control scale. The few exceptions (segments of one
+control, calendar cells, the web switch track) are listed in
+[`design-tokens.md`](./design-tokens.md) (touch targets).
+
+Text inputs, selects, comboboxes and search controls share one look with the
+application: `rounded-md`, a 1px `border-input`, `bg-card`, a border-color focus
+(`focus-visible:border-ring`) and one height scale `default | lg | xl` =
+`min-h-control-md | -lg | -xl` (48 / 56 / 64) with 16px text. The scale is
+owned by `inputSizes` in `input.svelte` and reused by the textarea, select
+trigger and combobox; the floating-label geometry of the field molecules
+(text, password, number, phone fields and the combobox) is `fieldSizes` in the
+same file. Buttons use the same heights (`default` 48, `lg` 56, `icon` 48 × 48)
+and keep the shadcn focus ring (`ring-3`).
+
+The `stepper` molecule is the number control for forms, identical to the
+application's `app-stepper` (search-ux S-26.4): its whole title above a 56 box
+(`min-h-control-lg`), «−» left, the number centred (typed, `inputmode="numeric"`),
+«+» right, both 48 × 48 (`Button size="icon"`) and disabled at their bound, the
+helper/error line below. The input is the one `spinbutton` (ArrowUp/ArrowDown
+step it; `aria-valuetext` is the number as shown and a blank box is «Κενό» /
+«Empty», never «0»); the buttons stay out of the Tab order. Their names and the
+blank value come from Paraglide (`stepper_decrease` / `stepper_increase` /
+`stepper_empty`, in the page locale) unless the caller passes `decreaseLabel` /
+`increaseLabel` / `emptyValueLabel`. `number-field` stays, without a product
+consumer.
+
+Each `slider` thumb says its value as the screen shows it: `aria-valuetext`
+from `formatValue(value, thumbIndex)`, the plain number by default (search-ux
+S-26.9, the application's name). The range-histogram passes its pill text
+(`€80`, `€420+` at the ceiling) and the stepped-range the stop's label.
 
 Separately, several visual primitives and overlays expose an **opt-in**,
 generic `size` prop with a `sm | default | lg` scale (a distinct concept from the
-`InputSize` control scale above, and from the button scale). It is additive and
-`default` reproduces each component's prior fixed rendering exactly, so existing
-usages are unchanged. Each component owns its own per-component type
-(`AvatarSize`, `BadgeSize`, `CheckboxSize`, `RadioGroupItemSize`, `SwitchSize`,
-`ProgressSize`, `SliderSize`, `DialogSize`, `SheetSize`, `DrawerSize`,
-`PopoverSize`, `HoverCardSize`, `CardSize`) and applies it through a local size
-map (mirroring `inputSizes`). `size` scales the coupled dimensions together: the
-box and its glyph for checkbox/radio, the track + thumb + travel for switch and
-slider, the panel max-width/height for dialog/sheet/drawer/popover/hover-card
-(sheet/drawer combine `size` with their `side`/`direction`), and the vertical
-padding/gap for card.
+`InputSize` control scale above, and from the button scale). Each component owns
+its own per-component type (`AvatarSize`, `BadgeSize`, `CheckboxSize`,
+`RadioGroupItemSize`, `SwitchSize`, `ProgressSize`, `SliderSize`, `DialogSize`,
+`SheetSize`, `DrawerSize`, `PopoverSize`, `HoverCardSize`, `CardSize`) and
+applies it through a local size map whose values are named tokens. `size` scales
+the visible parts together (box and glyph for checkbox/radio, track + thumb +
+travel for switch and slider, panel width/height for dialog/sheet/drawer/popover/
+hover-card, padding/gap for card); the touch box stays 48 at every size.
 
 ## Components
 
@@ -136,21 +167,21 @@ Do not import icons from direct component packages such as `@lucide/svelte`.
 
 ## Responsive UI
 
-Breakpoints (mobile-first; base styles target the 375px mobile design):
+Breakpoints (mobile-first; base styles target the 375px phone design):
 
-- `sm` 600 (small phone) · `md` 744 (tablet) · `lg` 1128 (laptop) ·
-  `xl` 1280 (desktop) · `2xl` 1440 (wide).
-- Content is centered with a max width of 1440 (`max-w-360`); the side margins
-  grow beyond it.
-- The desktop top navigation shows from `lg` (1128) up; at tablet (744) and
-  below the app-style bottom navigation (`lg:hidden`) is shown instead.
-- The bottom navigation items carry no horizontal padding: they are as wide as
-  their label, with a 44px minimum tap width (`min-w-11`, the `xl` control
-  height), and the row spaces them evenly. Measured in Greek and English: all five
-  labels fit without truncation from 320px up to 1.25× text size (root 16–20px);
-  at 1.5× (root 24px) they fit from 360px.
+- `tablet:` 744 · `split:` 950 · `laptop:` 1128 · `desktop:` 1440. The old
+  `sm: md: lg: xl: 2xl:` prefixes no longer compile.
+- Content is centered with a max width of 1440 (`max-w-page` via
+  `container-page`); the side margins grow beyond it. Gutters: 24 below 950, 32
+  from 950, 48 from 1440.
+- The desktop top navigation shows from `laptop:` (1128) up; below it the
+  app-style bottom navigation (`laptop:hidden`) is shown instead.
+- Bottom navigation items are 48 × 48 targets (`min-h-touch min-w-touch`) with
+  12px labels; the row spaces them evenly and reserves the device safe area
+  (`pb-safe-area`). The footer reserves the bar's space with `pb-bar-bottom`.
 
-- Define stable dimensions for fixed-format UI such as toolbars, controls, counters, boards, and icon buttons.
+- Define stable dimensions for fixed-format UI such as toolbars, controls, counters, boards, and icon buttons — always with named tokens.
+- Elements that hold text use `min-h-*`, not `h-*`, so they grow at 200% zoom and with text-spacing overrides (WCAG 1.4.4 / 1.4.12).
 - Do not scale font size with viewport width.
 - Keep letter spacing at `0` unless a specific brand treatment requires otherwise.
 - Text must fit its container on mobile and desktop.

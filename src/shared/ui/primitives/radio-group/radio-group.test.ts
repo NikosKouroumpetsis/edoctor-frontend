@@ -17,17 +17,22 @@ describe('RadioGroup', () => {
 		expect(free).toHaveAttribute('aria-checked', 'false');
 	});
 
-	it('defaults item boxes to size-5 and scales with the size prop', () => {
+	it('defaults item boxes to size-5, scales with the size prop and keeps touch-sized targets', () => {
+		const box = (container: HTMLElement) =>
+			container.querySelector('[data-slot="radio-group-item-box"]');
 		const def = render(Harness);
-		expect(def.getAllByRole('radio')[0]).toHaveClass('size-5');
+		expect(def.getAllByRole('radio')[0]).toHaveClass('size-touch');
+		expect(box(def.container)).toHaveClass('size-5');
 		def.unmount();
 
 		const sm = render(Harness, { props: { size: 'sm' } });
-		expect(sm.getAllByRole('radio')[0]).toHaveClass('size-4');
+		expect(sm.getAllByRole('radio')[0]).toHaveClass('size-touch');
+		expect(box(sm.container)).toHaveClass('size-4');
 		sm.unmount();
 
 		const lg = render(Harness, { props: { size: 'lg' } });
-		expect(lg.getAllByRole('radio')[0]).toHaveClass('size-6');
+		expect(lg.getAllByRole('radio')[0]).toHaveClass('size-touch');
+		expect(box(lg.container)).toHaveClass('size-6');
 	});
 
 	it('keeps a single tab stop and moves selection with arrow keys', async () => {

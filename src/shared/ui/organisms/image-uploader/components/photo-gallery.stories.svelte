@@ -21,7 +21,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="mx-auto max-w-xl">
+		<div class="mx-auto max-w-form">
 			<StoryHarness items={seededItems} minCount={5}>
 				<PhotoGallery />
 			</StoryHarness>

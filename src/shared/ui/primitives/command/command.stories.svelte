@@ -26,7 +26,7 @@
 
 <Story name="Default (filter)">
 	{#snippet template()}
-		<Command class="w-72 rounded-lg border">
+		<Command class="w-narrow rounded-lg border">
 			<CommandInput placeholder="Search specialty…" aria-label="Search specialty" />
 			<CommandList>
 				<CommandEmpty>No results.</CommandEmpty>
@@ -42,7 +42,7 @@
 
 <Story name="Empty state">
 	{#snippet template()}
-		<Command class="w-72 rounded-lg border">
+		<Command class="w-narrow rounded-lg border">
 			<CommandInput placeholder="Search…" aria-label="Search" value="zzz" />
 			<CommandList>
 				<CommandEmpty>No results found.</CommandEmpty>
@@ -62,7 +62,7 @@
 			<PopoverTrigger class={buttonVariants({ variant: 'outline' })}>
 				{selected || 'Select specialty…'}
 			</PopoverTrigger>
-			<PopoverContent class="w-72 p-0">
+			<PopoverContent class="w-popover-md p-0">
 				<Command>
 					<CommandInput placeholder="Search specialty…" aria-label="Search specialty" />
 					<CommandList>

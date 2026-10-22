@@ -8,7 +8,7 @@
 		tags: ['autodocs'],
 		args: { label: 'Phone number', placeholder: '69xxxxxxxx', size: 'default', disabled: false },
 		argTypes: {
-			size: { control: 'select', options: ['sm', 'default', 'lg', 'xl'] },
+			size: { control: 'select', options: ['default', 'lg', 'xl'] },
 			disabled: { control: 'boolean' }
 		}
 	});
@@ -21,13 +21,13 @@
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class="w-80"><PhoneField {...args} /></div>
+		<div class="w-narrow"><PhoneField {...args} /></div>
 	{/snippet}
 </Story>
 
 <Story name="Default (dial code + number)">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<PhoneField label="Phone number" bind:value bind:dialCode />
 			<p class="mt-2 text-body-sm text-muted-foreground">{dialCode} {value || '…'}</p>
 		</div>

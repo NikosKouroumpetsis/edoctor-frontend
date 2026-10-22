@@ -18,7 +18,7 @@
 			>
 				@maria
 			</HoverCardTrigger>
-			<HoverCardContent class="w-64">
+			<HoverCardContent class="w-narrow">
 				<p class="text-body-sm font-medium">Dr. Maria Alexiou</p>
 				<p class="text-body-sm text-muted-foreground">Cardiologist — Athens</p>
 			</HoverCardContent>

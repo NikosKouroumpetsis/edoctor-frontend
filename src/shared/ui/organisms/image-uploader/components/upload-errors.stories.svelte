@@ -32,7 +32,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="mx-auto max-w-lg">
+		<div class="mx-auto max-w-text">
 			<StoryHarness
 				items={[remoteItem('x', '#2563eb')]}
 				maxCount={1}

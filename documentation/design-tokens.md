@@ -1,177 +1,210 @@
 # Design Tokens (sizing & non-color)
 
-Canonical reference for every **non-color** size in the web app: typography,
-spacing, border radius, elevation (shadow), breakpoints, container widths and
-icon sizes. Colors are documented separately in
+Canonical reference for every **non-color** size in the web app: the step scale,
+typography, line height, touch targets and control heights, spacing roles,
+gutters, media and card sizes, container widths, breakpoints, icons, radii,
+elevation and sheet heights. Colors are documented separately in
 [`styling-guidelines.md`](./styling-guidelines.md) and live in
 `src/routes/layout.css`.
 
-The goal is **stable, named patterns** instead of scattered raw values
-(`text-[18px]`, `font-semibold` everywhere, `p-6` vs `p-[24px]`, ad-hoc
-shadows). Pick a token by role; the value is decided once, centrally.
+The rule (owner decision, search-ux S-05 … S-08): **no rem, no per-component
+sizes.** Every size is a named Tailwind class from one central scale, so changing
+a value in the centre changes it everywhere. A component never writes its own
+`[15px]`.
 
-## Source of truth
-
-All non-color values are defined once, in TypeScript:
+## Source of truth: one scale, shared with the application
 
 ```
-src/shared/design/tokens/
-  tokens.ts        ← THE file you edit (plain numbers in px + CSS strings)
-  to-css.ts        ← pure tokens → Tailwind @theme CSS
+application/src/shared/design/tokens/values/index.ts   ← CANONICAL (edit here first)
+frontend/src/shared/design/tokens/
+  tokens.ts        ← copy of the canonical file (same exports, same order, web Prettier)
+  index.ts         ← registry: re-exports + web-only names (`platform`) + `step()` + theme lists
+  to-css.ts        ← tokens → Tailwind `@theme` CSS (pure)
   vite-plugin.ts   ← writes src/generated/design-tokens.css (dev + build + HMR)
-  build.ts         ← `bun run tokens:build` (CI / manual)
-  index.ts         ← typed registry for runtime/tooling consumers
+  build.ts         ← `bun run tokens:build`
 ```
 
-`tokens.ts` is compiled into `src/generated/design-tokens.css` (a Tailwind v4
-`@theme` block), which `src/routes/layout.css` imports. Tailwind then generates
-the `text-*`, `rounded-*`, `shadow-*`, `p-*`, `gap-*`, `icon-*` utilities from
-it.
+- `tokens.ts` holds **only** the shared values (no imports, no functions). The
+  test `tests/architecture/scale-parity.test.ts` transpiles both files and fails
+  on the first difference, naming its path (`radius.md: 12 ≠ 8`). To change a
+  value: edit the application file, copy it here, run `bun run tokens:build`.
+- `index.ts` adds what only the web has (`platform.spacing`, `platform.motion`)
+  and the derived lists both the theme and the class merger read
+  (`spacingScale`, `mergeTheme`).
+- `src/generated/design-tokens.css` is generated and committed; never edit it.
+  The Vite plugin regenerates it on dev start, on every build, and when a token
+  source changes.
 
-**Edit `tokens.ts`, save, and the change propagates globally** — the Vite plugin
-regenerates the CSS on dev start, on every build, and on hot-update of the token
-source. Never edit `src/generated/design-tokens.css` by hand (it is generated
-and git-ignored).
+## Step scale
 
-> Two separate sources of truth, on purpose:
->
-> - **Colors** → `src/routes/layout.css` (`:root` / `.dark`), kept in sync with
->   the eDoctor application theme.
-> - **Sizes (this doc)** → `src/shared/design/tokens/tokens.ts`.
+`--spacing` is **4px** (not rem), so `p-4` is 16px whatever the browser's root
+font size. Small internal gaps and small geometry use the numeric steps **0–6
+(≤ 24px), in halves** (`p-3`, `gap-1.5`, `size-6`). Anything above 24px, and
+every text, control height, width, icon and radius, is **only** a name. `p-3.75`
+(a hidden `[15px]`) and `h-14` are rejected by the architecture test.
 
-## Typography
+Runtime code reads small lengths through `step(n)` (`sideOffset = step(2)`), never
+as a raw number.
 
-Each role is a complete bundle: **font-size + default weight + line-height**.
-Using `text-<role>` alone renders correctly — no companion `font-*` / `leading-*`
-needed. Letter-spacing stays at the project default (`0`).
+## Typography (`text-<role>`)
 
-| Token (`text-…`) | Size | Weight | Line-height | Use                        |
-| ---------------- | ---- | ------ | ----------- | -------------------------- |
-| `display-xl`     | 44   | 700    | 1.08        | Hero / marketing headline  |
-| `display-lg`     | 40   | 700    | 1.10        | Hero                       |
-| `display-md`     | 36   | 700    | 1.12        | Hero                       |
-| `display-sm`     | 32   | 700    | 1.15        | Large display              |
-| `display-xs`     | 30   | 700    | 1.18        | Display                    |
-| `heading-xl`     | 28   | 600    | 1.20        | Page title (h1)            |
-| `heading-lg`     | 24   | 600    | 1.25        | Section head (desktop)     |
-| `heading-md`     | 21   | 600    | 1.30        | Section head (mobile)      |
-| `heading-sm`     | 19   | 600    | 1.32        | Sub-section                |
-| `title-lg`       | 18   | 600    | 1.40        | Card / block title         |
-| `title-md`       | 17   | 600    | 1.40        | Card title                 |
-| `title-sm`       | 16   | 600    | 1.45        | Card title                 |
-| `title-xs`       | 15   | 600    | 1.45        | Small title                |
-| `body-lg`        | 16   | 400    | 1.50        | Running text, primary body |
-| `body-md`        | 15   | 400    | 1.50        | Body, subtitles            |
-| `body-sm`        | 14   | 400    | 1.45        | Card meta, secondary text  |
-| `label-lg`       | 13   | 500    | 1.40        | UI labels                  |
-| `label-md`       | 12   | 500    | 1.40        | Labels, badges             |
-| `label-sm`       | 11   | 500    | 1.35        | Tab labels, micro-labels   |
+Each role bakes size + weight + line height; add `font-*` only for an
+intentional override. Never under 12px; running text is `body-lg` (16).
 
-**Weight override rule:** apply `font-medium` / `font-semibold` only when the
-element genuinely differs from its role's default (e.g. a footer column heading
-at `text-label-lg font-semibold`, nav links at `text-body-sm font-medium`). Do
-**not** repeat the weight a token already bakes in.
+| Role         | Size / line / weight | Role       | Size / line / weight |
+| ------------ | -------------------- | ---------- | -------------------- |
+| `display-xl` | 48 / 1.08 / 700      | `title-lg` | 20 / 1.40 / 600      |
+| `display-lg` | 44 / 1.10 / 700      | `title-md` | 19 / 1.40 / 600      |
+| `display-md` | 40 / 1.12 / 700      | `title-sm` | 18 / 1.45 / 600      |
+| `display-sm` | 36 / 1.15 / 700      | `title-xs` | 17 / 1.45 / 600      |
+| `display-xs` | 34 / 1.18 / 700      | `body-lg`  | **16** / 1.50 / 400  |
+| `heading-xl` | 30 / 1.20 / 600      | `body-md`  | 15 / 1.50 / 400      |
+| `heading-lg` | 28 / 1.25 / 600      | `body-sm`  | 14 / 1.45 / 400      |
+| `heading-md` | 24 / 1.30 / 600      | `label-lg` | 13 / 1.40 / 500      |
+| `heading-sm` | 22 / 1.32 / 600      | `label-md` | **12** / 1.40 / 500  |
 
-## Spacing
+Tailwind's `text-xs … text-9xl` do not compile (`--text-*: initial`).
 
-Semantic spacing names a recurring layout decision so the same rhythm is reused.
-They sit on top of Tailwind's numeric scale (which stays available for genuine
-one-offs).
+## Line height (`leading-<name>`)
 
-| Token     | Value | Utilities                                      | Use                                      |
-| --------- | ----- | ---------------------------------------------- | ---------------------------------------- |
-| `section` | 32    | `gap-section`, `space-y-section`, `py-section` | Vertical rhythm between major page bands |
-| `card`    | 24    | `p-card`, `px-card`                            | Internal padding of a card / panel       |
-| `gutter`  | 16    | `gap-gutter`                                   | Gap between cards / grid items           |
-| `inline`  | 8     | `gap-inline`                                   | Tight inline gap (icon + label)          |
+`flat` 1 · `tight` 1.25 · `normal` 1.5 · `relaxed` 1.75 · `loose` 2. Write a
+leading **after** the role in the same class string (`text-body-sm
+leading-tight`): `cn` drops a leading that precedes a role. Numeric `leading-N`
+and `leading-none` are rejected.
 
-Use a semantic token when the value encodes one of these decisions; use the raw
-numeric scale (`p-4`, `gap-3`) for incidental, component-local spacing.
+## Touch targets and control heights (`--spacing-*`)
 
-## Border radius
+| Name                 | px       | Use                                                           |
+| -------------------- | -------- | ------------------------------------------------------------- |
+| `touch`              | 48       | minimum box of **every** target (`min-h-touch`, `size-touch`) |
+| `touch-gap`          | 8        | gap between neighbouring targets (`gap-touch-gap`)            |
+| `control-xs` / `-sm` | 32/40    | a **visible** shape inside a 48 box (circle buttons, tracks)  |
+| `control-md/-lg/-xl` | 48/56/64 | control heights: inputs, selects, buttons, fields             |
+| `row` / `row-lg`     | 56/72    | list and suggestion rows                                      |
+| `bar-bottom`         | 88       | space the mobile bottom bar takes                             |
+| `bar-booking`        | 112      | space a booking bar takes                                     |
+| `field-inset`        | 36       | field padding next to a leading icon                          |
 
-| Token (`rounded-…`) | Value | Use                                          |
-| ------------------- | ----- | -------------------------------------------- |
-| `sm`                | 6     | Small controls                               |
-| `md`                | 8     | Buttons, inputs (shadcn default)             |
-| `lg`                | 10    | Default surfaces                             |
-| `xl`                | 14    | Larger surfaces                              |
-| `2xl`               | 18    | Large surfaces                               |
-| `3xl`               | 22    | —                                            |
-| `4xl`               | 26    | —                                            |
-| `panel`             | 28    | Cards / large panels (application parity)    |
-| `control`           | 13    | Inputs, selects, search controls             |
-| `media`             | 24    | Images / media                               |
-| `full`              | 9999  | Pills, circular elements (Tailwind built-in) |
+Every `<button>`, `<a>`, `<input>`, `<select>`, `<textarea>` and ARIA widget is at
+least 48×48. The visible shape may be smaller (`size-control-sm` inside
+`size-touch`); `hitSlop`-style tricks do not count.
+`tests/architecture/touch-targets.test.ts` checks the height and the width of
+each target and of each recipe `base`, and fails on a class that shrinks the box
+again (`min-w-0`, `h-8`) or on a size passed to a target component
+(`<Button class="size-6">`).
 
-## Elevation (shadow)
+Known exceptions (written down here, not checked by a test):
 
-Three purposeful levels sharing one slate base. Tuned for light surfaces; they
-read faintly in dark mode by design. Depth otherwise comes from surface
-separation and rounded corners, not heavy shadows.
+- **No 8 gap** between the adjacent segments of one control (language switcher,
+  tabs list, toggle group), between menu rows and between calendar cells. Between
+  separate targets `gap-touch-gap` is a review rule, not a test.
+- **Calendar cells** are fluid (`h-touch w-full` in a `w-narrow max-w-full`
+  grid): 48 wide only in a container of at least 354; about 41 in a popover and
+  about 36 inline on a 320 screen.
+- **Switch:** the web keeps its own track (24/32/40 × 16/18/24, thumb 12/16/20,
+  from steps and `control-xs/-sm`) inside the 48 box and does not read
+  `switchGeometry` (the application's 38/48/56 × 22/28/32 track). The values are
+  shared, the use differs per platform (SCALE-1 §1.11).
 
-| Token (`shadow-…`) | Level | Use                                               |
-| ------------------ | ----- | ------------------------------------------------- |
-| `raised`           | 1     | Resting cards / controls                          |
-| `overlay`          | 2     | Menus, popovers, dropdowns                        |
-| `soft`             | 3     | Large floating panel / modal (application parity) |
+Fields (floating label) share one geometry, the class form of the `field`
+tokens: `fieldSizes` in `src/shared/ui/primitives/input` (`default` 48, `lg` 56,
+`xl` 64; text 16 so iOS Safari never zooms). The inline phone field draws its
+border as an overlay, so it has the same 48/56/64.
 
-## Icons
+## Spacing roles and gutters
 
-Keep icons on the named sizes (these generate `icon-xs … icon-xl`, each setting
-`width`/`height`):
+| Name                                    | px           | Use                                         |
+| --------------------------------------- | ------------ | ------------------------------------------- |
+| `inline`                                | 8            | icon + label                                |
+| `rail`                                  | 12           | cards in a horizontal rail                  |
+| `list`                                  | 16           | list items (the former `gutter`)            |
+| `grid` / `card`                         | 24 / 24      | cards in a grid / card and panel padding    |
+| `section` / `section-lg`                | 32 / 48      | between page bands / end of a page          |
+| `gutter-sm` / `gutter-md` / `gutter-lg` | 24 / 32 / 48 | page side gutter < 950 / 950–1439 / ≥ 1440  |
+| `indent`                                | 36           | room for a leading/trailing check indicator |
 
-| Token     | Size |
-| --------- | ---- |
-| `icon-xs` | 14   |
-| `icon-sm` | 16   |
-| `icon-md` | 18   |
-| `icon-lg` | 20   |
-| `icon-xl` | 22   |
+`container-page` (centered, `max-w-page`, `px-gutter-sm split:px-gutter-md
+desktop:px-gutter-lg`) frames the header, `<main>` and footer;
+`container-bleed` lets a rail run into those gutters.
 
-## Breakpoints & containers
+## Media and cards
 
-Mobile-first; base styles target the 375px mobile design. The desktop top
-navigation appears from `lg` (1128) up; below that the app-style bottom nav
-shows.
+Named in the shared `media` family (values unchanged from the screens that
+introduced them): `avatar-sm/md/lg/xl/2xl` 32/40/48/64/96 · `tile` 56 ·
+`card-rail-w` 168 / `-lg` 216 · `card-rail-media` 152 / `-lg` 188 ·
+`card-list-media` 188 / `-lg` 224 · `placeholder-sm/md/lg/xl` 64/80/96/160 ·
+`search-pill` 64 · `scroll-max` 256 … (full list in the canonical file).
 
-| Breakpoint | Width |     | Container      | Width |
-| ---------- | ----- | --- | -------------- | ----- |
-| `sm`       | 600   |     | `max-w-page`   | 1440  |
-| `md`       | 744   |     | `max-w-tablet` | 744   |
-| `lg`       | 1128  |     |                |       |
-| `xl`       | 1280  |     |                |       |
-| `2xl`      | 1440  |     |                |       |
+## Web-only names (`platform` in `index.ts`)
 
-Use the `container-page` utility (centered, `max-w-page`, shared responsive
-gutters) for the header bar, page `<main>`, and footer.
+`bar-top` 64 (header) · `menu-max-h` 288 · `menu-min-w` 160 · `popover-sm/md/lg`
+224/288/320 · `textarea-md/lg/xl` 64/80/96 · `histogram-sm/md/lg` 80/112/128 ·
+`dropzone-min-h` 288 · `drawer-handle` 48 · `drawer-inset` 96 · `brand-mark` 40
+(header logo) · `icon-tile` 48 (icon tile of a placeholder page) · `dial-code-w`
+56 (dial-code column of the inline phone field), and `platform.motion`: overlay
+travel (drawer 360, sheet 320) and `dismiss` 80 (drag distance that closes a
+drawer whose size cannot be measured). They reach the theme next to the shared
+names; promote one to the shared file when the application needs it.
 
-## Rules
+## Containers (`max-w-*`, also `w-*`)
 
-- Prefer a token over a raw value. Reach for `text-[..]`, `p-[..]`, arbitrary
-  shadows or radii only for a deliberate, documented one-off.
-- Do not scale font size with the viewport. Keep letter-spacing at `0` unless a
-  specific brand treatment requires otherwise.
-- Changing a value is a one-line edit in `tokens.ts`; it applies everywhere.
-  Don't fork values per feature.
+`narrow` 360 · `text` 480 · `form` 560 · `content` 760 · `listing` 1120 ·
+`page` 1440. Tailwind's `max-w-sm … max-w-7xl` do not compile.
 
-## Portability (other front / app)
+Container queries use the same names: `@container` on the parent, `@<name>:` on
+the child (`@form:inline-flex` = parent at least 560 wide). The header uses them:
+the brand word shows from a 360 header, «Σύνδεση» from 560.
 
-The token system is self-contained and framework-light. To adopt it in another
-SvelteKit front or app:
+## Breakpoints (mobile-first)
 
-1. Copy `src/shared/design/tokens/` (5 files; `tokens.ts` has zero imports).
-2. Register the plugin in `vite.config.ts`:
-   `import { designTokensPlugin } from './src/shared/design/tokens/vite-plugin';`
-   then add `designTokensPlugin()` **before** `tailwindcss()`.
-3. Add `@import '../generated/design-tokens.css';` to the app's Tailwind entry
-   CSS, and git-ignore `src/generated/design-tokens.css`.
-4. Optionally add the `tokens:build` script and prepend it to `prepare`.
+| Variant    | From | Meaning                               |
+| ---------- | ---- | ------------------------------------- |
+| (none)     | 0    | phone                                 |
+| `tablet:`  | 744  | tablet                                |
+| `split:`   | 950  | two columns, gutter 32                |
+| `laptop:`  | 1128 | desktop header (the bottom nav hides) |
+| `desktop:` | 1440 | gutter 48, page centered              |
 
-Then edit `tokens.ts` to that product's scale; everything else follows.
+`sm: md: lg: xl: 2xl:` do not exist (`--breakpoint-*: initial`). In hand-written
+CSS use `>=` / `<` media conditions, never a one-line range.
 
-## Related
+## Icons, radii, elevation, sheets
 
-- [`styling-guidelines.md`](./styling-guidelines.md) — colors, components, i18n,
-  responsive rules.
-- `src/routes/layout.css` — color tokens and the generated-tokens import.
+- Icons (`icon-*`, width + height): `xs` 12 · `sm` 16 · `md` 20 · `lg` 24 · `xl` 32.
+- Radii (`rounded-*`, closed scale): `xs` 4 · `sm` 8 · `md` 12 · `lg` 16 · `xl` 24,
+  plus `full`/`none`. Bare `rounded` and `rounded-2xl … 4xl` do not compile.
+- Elevation (`shadow-*`): `raised` · `overlay` · `floating` · `soft` · `bar`.
+- Sheet heights (`max-h-sheet-*`, viewport %): `sm` 60 · `md` 70 · `lg` 85 · `xl` 90.
+- Focus rings are `ring-3`; field focus is a border-color change (`border` +
+  `focus-visible:border-ring`).
+
+## Class merging
+
+`cn` and `tv` come from `src/shared/lib/utils.ts` (one `tailwind-merge` config
+built from `mergeTheme`: roles, spacing names, radii, containers, leadings,
+elevations). Components never import `tailwind-merge` / `tailwind-variants`
+directly (`tests/architecture/class-merge-imports.test.ts`).
+
+A role passed in the `class` of a primitive whose own classes carry a `leading-*`
+drops that leading (font size and line height conflict). Pass only what changes
+(`<DialogTitle>` without `text-title-md`), or repeat the leading after the role.
+
+## Rules (enforced by `tests/architecture/scale-vocabulary.test.ts`)
+
+- No arbitrary size (`[15px]`, `(--x)`, `[width:…]`) in any size family, and no
+  length in any other arbitrary value (`underline-offset-[3px]`,
+  `drop-shadow-[0_2px_4px_#000]`, `[mask-size:15px]`); colors and length-free
+  grid templates stay allowed.
+- No line height written on a text size (`text-body-sm/7`, `text-body-sm/[20px]`).
+- Numeric steps only 0–6 in halves; above that, a name. The same for `step(n)`.
+- Every name exists in its family (a missing name renders nothing, silently).
+- No old breakpoint prefix, no container query outside the container names, no
+  Tailwind text size, no numeric leading.
+- No size as a number in code or CSS: props (`sideOffset={8}`, `width={160}`),
+  object keys (`{ margin: 8 }`), size or gesture constants (`MIN_THUMB = 20`,
+  `FALLBACK_DISTANCE = 80`) and lengths in `<style>`, `style=`, `style:width` or
+  `el.style.width`. Use `step(n)` or a token.
+- Comments are ignored, strings are not: a `/*` inside `'image/*'` opens no
+  comment.
+- Do not scale font size with the viewport; letter spacing stays 0 unless a
+  role says otherwise.

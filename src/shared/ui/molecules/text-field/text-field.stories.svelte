@@ -15,7 +15,7 @@
 			disabled: false
 		},
 		argTypes: {
-			size: { control: 'select', options: ['sm', 'default', 'lg', 'xl'] },
+			size: { control: 'select', options: ['default', 'lg', 'xl'] },
 			type: { control: 'select', options: ['text', 'email', 'password', 'tel'] },
 			disabled: { control: 'boolean' }
 		}
@@ -35,13 +35,13 @@
 <!-- Controls-driven: change `size` in the Controls panel to see it apply live. -->
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class="w-80"><TextField {...args} /></div>
+		<div class="w-narrow"><TextField {...args} /></div>
 	{/snippet}
 </Story>
 
 <Story name="Standalone">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<TextField label="Email" bind:value type="email" />
 			<p class="mt-2 text-body-sm text-muted-foreground">Value: {value || '(empty)'}</p>
 		</div>
@@ -50,8 +50,7 @@
 
 <Story name="Sizes">
 	{#snippet template()}
-		<div class="flex w-80 flex-col gap-4">
-			<TextField label="Small" size="sm" />
+		<div class="flex w-narrow flex-col gap-4">
 			<TextField label="Default" size="default" />
 			<TextField label="Large" size="lg" />
 			<TextField label="Extra large" size="xl" />
@@ -61,7 +60,7 @@
 
 <Story name="With error">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<TextField label="Email" value="bad" error="Enter a valid email address" />
 		</div>
 	{/snippet}
@@ -69,7 +68,7 @@
 
 <Story name="Leading/trailing">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<TextField label="Email">
 				{#snippet leading()}
 					<MailIcon class="size-4" />
@@ -81,7 +80,7 @@
 
 <Story name="Form-connected (blur to validate)">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<TextField label="Email" field={form.field('email')} type="email" />
 		</div>
 	{/snippet}

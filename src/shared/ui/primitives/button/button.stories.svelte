@@ -16,7 +16,7 @@
 			},
 			size: {
 				control: 'select',
-				options: ['default', 'sm', 'lg', 'icon', 'icon-sm', 'icon-lg']
+				options: ['default', 'lg', 'icon']
 			},
 			disabled: { control: 'boolean' }
 		}
@@ -45,7 +45,6 @@
 <Story name="Sizes">
 	{#snippet template()}
 		<div class="flex flex-wrap items-center gap-3">
-			<Button size="sm">Small</Button>
 			<Button size="default">Default</Button>
 			<Button size="lg">Large</Button>
 			<Button size="icon" aria-label="Add"><PlusIcon /></Button>

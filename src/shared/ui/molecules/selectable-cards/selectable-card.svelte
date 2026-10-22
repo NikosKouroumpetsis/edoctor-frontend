@@ -49,7 +49,7 @@
 	tabindex={tabbable ? 0 : -1}
 	onclick={() => group.toggle(value)}
 	class={cn(
-		'flex w-full cursor-pointer items-center justify-between gap-4 rounded-control border-2 bg-card p-card text-left transition-[color,background-color,border-color,box-shadow,transform] duration-150 ease-out outline-none select-none',
+		'flex min-h-touch w-full cursor-pointer items-center justify-between gap-4 rounded-md border-2 bg-card p-card text-left transition-[color,background-color,border-color,box-shadow,transform] duration-150 ease-out outline-none select-none',
 		'active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100',
 		'disabled:cursor-not-allowed disabled:opacity-50',
 		'data-[state=selected]:border-foreground data-[state=selected]:bg-foreground/5 data-[state=selected]:shadow-raised data-[state=unselected]:border-input',

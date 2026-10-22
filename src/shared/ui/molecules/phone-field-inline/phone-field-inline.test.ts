@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import { fieldSizes } from '$shared/ui/primitives/input';
 import PhoneFieldInline from './phone-field-inline.svelte';
 
 describe('PhoneFieldInline', () => {
@@ -33,5 +34,18 @@ describe('PhoneFieldInline', () => {
 		const option = screen.getByRole('option', { name: /Ελλάδα/ });
 		expect(option).toHaveTextContent('+30');
 		expect(option).toHaveTextContent('Ελλάδα');
+	});
+
+	it('keeps the field height of the family: the border is an overlay, not part of the box', () => {
+		for (const size of ['default', 'lg', 'xl'] as const) {
+			const { container, unmount } = render(PhoneFieldInline, { props: { label: 'Phone', size } });
+			const control = container.querySelector('[data-slot="phone-field-inline-control"]');
+			const border = container.querySelector('[data-slot="phone-field-inline-border"]');
+			const input = container.querySelector('[data-slot="phone-field-inline-input"]');
+			expect(control?.className.split(' '), size).not.toContain('border');
+			expect(border, size).toHaveClass('absolute', 'inset-0', 'border');
+			for (const name of fieldSizes[size].input.split(' ')) expect(input, size).toHaveClass(name);
+			unmount();
+		}
 	});
 });

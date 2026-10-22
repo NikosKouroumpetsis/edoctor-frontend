@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	export type CheckboxSize = 'sm' | 'default' | 'lg';
 
-	/** Box and check/indeterminate icon scale together. */
+	/** Box and check/indeterminate icon scale together, inside a touch-sized button. */
 	const checkboxBoxSizes: Record<CheckboxSize, string> = {
 		sm: 'size-4',
 		default: 'size-5',
@@ -63,21 +63,30 @@
 	{disabled}
 	onclick={toggle}
 	class={cn(
-		'peer flex shrink-0 items-center justify-center rounded-[5px] border border-input bg-card shadow-xs transition-shadow outline-none',
-		checkboxBoxSizes[size],
-		'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
-		'data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground',
-		'data-[state=indeterminate]:border-primary data-[state=indeterminate]:bg-primary data-[state=indeterminate]:text-primary-foreground',
-		'disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20',
+		'group peer inline-flex size-touch shrink-0 items-center justify-center rounded-md outline-none',
+		'disabled:cursor-not-allowed disabled:opacity-50',
 		className
 	)}
 	{...restProps}
 >
-	{#if indeterminate}
-		<MinusIcon class={checkboxIconSizes[size]} />
-	{:else if checked}
-		<CheckIcon class={checkboxIconSizes[size]} />
-	{/if}
+	<span
+		data-slot="checkbox-box"
+		data-state={state}
+		class={cn(
+			'flex items-center justify-center rounded-xs border border-input bg-card shadow-xs transition-shadow',
+			checkboxBoxSizes[size],
+			'group-focus-visible:border-ring group-focus-visible:ring-3 group-focus-visible:ring-ring/50',
+			'data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground',
+			'data-[state=indeterminate]:border-primary data-[state=indeterminate]:bg-primary data-[state=indeterminate]:text-primary-foreground',
+			'group-aria-invalid:border-destructive group-aria-invalid:ring-destructive/20'
+		)}
+	>
+		{#if indeterminate}
+			<MinusIcon class={checkboxIconSizes[size]} />
+		{:else if checked}
+			<CheckIcon class={checkboxIconSizes[size]} />
+		{/if}
+	</span>
 </button>
 
 <!-- Mirror into a hidden control so the checkbox participates in native forms. -->

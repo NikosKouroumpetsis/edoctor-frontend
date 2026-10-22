@@ -26,7 +26,7 @@
 		onclick?.(e);
 		ctx.setOpen(true);
 	}}
-	class={cn(className)}
+	class={cn('inline-flex min-h-touch min-w-touch items-center justify-center', className)}
 	{...restProps}
 >
 	{@render children?.()}

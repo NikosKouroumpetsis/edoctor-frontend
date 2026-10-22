@@ -30,7 +30,7 @@
 	tabindex={-1}
 	onclick={() => !disabled && group.select(value)}
 	class={cn(
-		'relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-body-sm outline-none select-none hover:bg-accent/10 focus:bg-accent/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+		'relative flex min-h-touch w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-indent text-body-sm outline-none select-none hover:bg-accent/10 focus:bg-accent/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
 		className
 	)}
 	{...restProps}

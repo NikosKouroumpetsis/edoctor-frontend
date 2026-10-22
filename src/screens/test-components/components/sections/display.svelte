@@ -49,10 +49,8 @@
 	</DemoRow>
 
 	<DemoRow label="Progress ({progress}%)">
-		<div class="w-64"><Progress value={progress} /></div>
-		<Button size="sm" variant="outline" onclick={() => (progress = (progress + 10) % 110)}
-			>+10</Button
-		>
+		<div class="w-full max-w-narrow"><Progress value={progress} /></div>
+		<Button variant="outline" onclick={() => (progress = (progress + 10) % 110)}>+10</Button>
 	</DemoRow>
 
 	<DemoRow label="Separator">
@@ -67,29 +65,29 @@
 
 	<DemoRow label="Skeleton">
 		<div class="flex items-center gap-3">
-			<Skeleton class="size-10 rounded-full" />
-			<div class="space-y-2">
-				<Skeleton class="h-3 w-32" />
-				<Skeleton class="h-3 w-24" />
+			<Skeleton class="size-avatar-md rounded-full" />
+			<div class="w-narrow max-w-full space-y-2">
+				<Skeleton class="h-3 w-full" />
+				<Skeleton class="h-3 w-3/4" />
 			</div>
 		</div>
 	</DemoRow>
 
 	<DemoRow label="Textarea">
-		<div class="grid w-full max-w-sm gap-2">
+		<div class="grid w-full max-w-narrow gap-2">
 			<Label for="bio">Bio</Label>
 			<Textarea id="bio" bind:value={bio} placeholder="Tell us about yourself" />
 		</div>
 	</DemoRow>
 
 	<DemoRow label="Card + AspectRatio">
-		<Card class="w-72">
+		<Card class="w-narrow">
 			<CardHeader>
 				<CardTitle>Dr. Maria Alexiou</CardTitle>
 				<CardDescription>Cardiologist · Athens</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<AspectRatio ratio={16 / 9} class="overflow-hidden rounded-media bg-muted">
+				<AspectRatio ratio={16 / 9} class="overflow-hidden rounded-xl bg-muted">
 					<img
 						src="https://picsum.photos/seed/edoctor/320/180"
 						alt="Office"

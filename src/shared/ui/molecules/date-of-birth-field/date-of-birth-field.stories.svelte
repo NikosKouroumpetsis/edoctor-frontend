@@ -8,7 +8,7 @@
 		tags: ['autodocs'],
 		args: { label: 'Date of birth', size: 'default', disabled: false },
 		argTypes: {
-			size: { control: 'select', options: ['sm', 'default', 'lg', 'xl'] },
+			size: { control: 'select', options: ['default', 'lg', 'xl'] },
 			disabled: { control: 'boolean' }
 		}
 	});
@@ -21,19 +21,19 @@
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class="w-96"><DateOfBirthField {...args} /></div>
+		<div class="w-narrow"><DateOfBirthField {...args} /></div>
 	{/snippet}
 </Story>
 
 <Story name="Default">
 	{#snippet template()}
-		<div class="w-96"><DateOfBirthField label="Date of birth" bind:value /></div>
+		<div class="w-narrow"><DateOfBirthField label="Date of birth" bind:value /></div>
 	{/snippet}
 </Story>
 
 <Story name="Pre-filled">
 	{#snippet template()}
-		<div class="w-96">
+		<div class="w-narrow">
 			<DateOfBirthField label="Date of birth" bind:value={prefilled} />
 			<p class="mt-2 text-body-sm text-muted-foreground">ISO value: {prefilled}</p>
 		</div>

@@ -29,7 +29,7 @@
 	const photosNeeded = $derived(ctx.minCount ?? ctx.maxCount ?? 1);
 </script>
 
-<section data-slot="uploader-empty" class="space-y-gutter">
+<section data-slot="uploader-empty" class="space-y-list">
 	<div class="space-y-2">
 		<h2 class="text-heading-lg font-bold text-foreground">
 			{title ?? m.image_uploader_empty_title()}
@@ -40,20 +40,22 @@
 	</div>
 
 	<div
-		class="flex min-h-72 flex-col items-center justify-center gap-section rounded-panel border border-dashed border-border bg-muted/30 p-section text-center"
+		class="flex min-h-dropzone-min-h flex-col items-center justify-center gap-section rounded-xl border border-dashed border-border bg-muted/30 p-section text-center"
 	>
 		{#if illustration}
 			{@render illustration()}
 		{:else}
-			<span class="grid size-24 place-items-center rounded-full bg-muted text-muted-foreground">
-				<CameraIcon class="size-10" />
+			<span
+				class="grid size-avatar-2xl place-items-center rounded-full bg-muted text-muted-foreground"
+			>
+				<CameraIcon class="icon-xl" />
 			</span>
 		{/if}
 
 		<button
 			type="button"
 			onclick={() => ctx.openDialog()}
-			class="rounded-full bg-muted px-6 py-3 text-label-lg font-medium text-foreground transition-colors outline-none hover:bg-muted/80 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+			class="inline-flex min-h-touch min-w-touch items-center justify-center rounded-full bg-muted px-6 py-3 text-label-lg font-medium text-foreground transition-colors outline-none hover:bg-muted/80 focus-visible:ring-3 focus-visible:ring-ring/50"
 		>
 			{cta ?? m.image_uploader_empty_cta()}
 		</button>

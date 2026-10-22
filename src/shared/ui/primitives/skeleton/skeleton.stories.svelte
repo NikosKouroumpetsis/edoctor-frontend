@@ -11,7 +11,7 @@
 
 <Story name="Line">
 	{#snippet template()}
-		<div class="flex w-72 flex-col gap-2">
+		<div class="flex w-narrow flex-col gap-2">
 			<Skeleton class="h-4 w-full" />
 			<Skeleton class="h-4 w-4/5" />
 			<Skeleton class="h-4 w-2/3" />
@@ -21,8 +21,8 @@
 
 <Story name="Card placeholder">
 	{#snippet template()}
-		<div class="flex w-72 items-center gap-3">
-			<Skeleton class="size-12 rounded-full" />
+		<div class="flex w-narrow items-center gap-3">
+			<Skeleton class="size-avatar-lg rounded-full" />
 			<div class="flex flex-1 flex-col gap-2">
 				<Skeleton class="h-4 w-3/4" />
 				<Skeleton class="h-3 w-1/2" />

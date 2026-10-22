@@ -37,7 +37,7 @@
 >
 	<DemoRow label="Select (value: {specialty ?? 'none'})">
 		<Select bind:value={specialty}>
-			<SelectTrigger class="w-56" aria-label="Specialty">
+			<SelectTrigger class="w-full max-w-narrow" aria-label="Specialty">
 				<SelectValue placeholder="Choose a specialty" />
 			</SelectTrigger>
 			<SelectContent>
@@ -62,7 +62,7 @@
 			<DropdownMenuTrigger class={buttonVariants({ variant: 'outline' })}
 				>Options</DropdownMenuTrigger
 			>
-			<DropdownMenuContent class="w-56">
+			<DropdownMenuContent class="w-popover-sm">
 				<DropdownMenuLabel>Filters</DropdownMenuLabel>
 				<DropdownMenuCheckboxItem bind:checked={showAvailability}>
 					Available today

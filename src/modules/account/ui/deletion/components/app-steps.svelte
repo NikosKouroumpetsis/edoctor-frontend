@@ -14,9 +14,12 @@
 
 <section
 	aria-labelledby="account-deletion-app-title"
-	class="rounded-panel border border-border/70 bg-card p-card"
+	class="rounded-xl border border-border/70 bg-card p-card"
 >
-	<h2 id="account-deletion-app-title" class="text-heading-md text-foreground md:text-heading-lg">
+	<h2
+		id="account-deletion-app-title"
+		class="text-heading-md text-foreground tablet:text-heading-lg"
+	>
 		{m.account_deletion_app_title({}, messageOptions)}
 	</h2>
 	<ol class="mt-4 flex list-decimal flex-col gap-3 pl-5 text-body-lg text-foreground">

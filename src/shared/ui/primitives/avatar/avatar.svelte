@@ -11,9 +11,9 @@
 
 	/** Root box size; <Avatar.Fallback> scales its initials to match. */
 	export const avatarSizes: Record<AvatarSize, string> = {
-		sm: 'size-8',
-		default: 'size-10',
-		lg: 'size-12'
+		sm: 'size-avatar-sm',
+		default: 'size-avatar-md',
+		lg: 'size-avatar-lg'
 	};
 </script>
 

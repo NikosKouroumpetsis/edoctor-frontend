@@ -11,7 +11,7 @@
 
 <Story name="Horizontal">
 	{#snippet template()}
-		<div class="w-72">
+		<div class="w-narrow">
 			<p class="text-body-sm">Section one</p>
 			<Separator class="my-3" />
 			<p class="text-body-sm">Section two</p>
@@ -21,7 +21,7 @@
 
 <Story name="Vertical">
 	{#snippet template()}
-		<div class="flex h-8 items-center gap-3 text-body-sm">
+		<div class="flex h-6 items-center gap-3 text-body-sm">
 			<span>Profile</span>
 			<Separator orientation="vertical" />
 			<span>Settings</span>

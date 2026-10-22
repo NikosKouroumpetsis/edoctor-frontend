@@ -37,7 +37,7 @@
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class="w-[32rem] max-w-full">
+		<div class="w-text max-w-full">
 			<SteppedRange {...args} bind:value={playground} />
 			<p class="mt-6 text-body-sm text-muted-foreground">
 				Range: {args.steps[playground[0]]} – {args.steps[playground[1]]}
@@ -49,7 +49,7 @@
 <!-- Reproduces bar_02_all.png: full range [0, 6]. -->
 <Story name="Default">
 	{#snippet template()}
-		<div class="w-[32rem] max-w-full">
+		<div class="w-text max-w-full">
 			<SteppedRange title="Διάρκεια" steps={durationSteps} bind:value={full} />
 		</div>
 	{/snippet}
@@ -58,7 +58,7 @@
 <!-- Reproduces bar_02_half.png: short range [0, 1]. -->
 <Story name="Half">
 	{#snippet template()}
-		<div class="w-[32rem] max-w-full">
+		<div class="w-text max-w-full">
 			<SteppedRange title="Διάρκεια" steps={durationSteps} bind:value={half} />
 		</div>
 	{/snippet}
@@ -66,7 +66,7 @@
 
 <Story name="Sizes">
 	{#snippet template()}
-		<div class="flex w-[32rem] max-w-full flex-col gap-12">
+		<div class="flex w-text max-w-full flex-col gap-section-lg">
 			<SteppedRange size="sm" title="Small" steps={durationSteps} bind:value={small} />
 			<SteppedRange size="default" title="Default" steps={durationSteps} bind:value={medium} />
 			<SteppedRange size="lg" title="Large" steps={durationSteps} bind:value={large} />
@@ -76,7 +76,7 @@
 
 <Story name="Disabled">
 	{#snippet template()}
-		<div class="w-[32rem] max-w-full">
+		<div class="w-text max-w-full">
 			<SteppedRange disabled title="Διάρκεια" steps={durationSteps} bind:value={disabledRange} />
 		</div>
 	{/snippet}

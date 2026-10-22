@@ -15,9 +15,9 @@
 -->
 <Story name="Default">
 	{#snippet template()}
-		<div class="h-[600px] overflow-auto rounded-lg border">
+		<div class="h-dvh overflow-auto rounded-lg border">
 			<AppShell>
-				<div class="mx-auto max-w-3xl p-6">
+				<div class="mx-auto max-w-content p-6">
 					<h1 class="text-title-lg font-semibold">Dashboard</h1>
 					<p class="mt-2 text-body-md text-muted-foreground">
 						The app shell composes the navbar, this content area, and the footer / bottom navigation

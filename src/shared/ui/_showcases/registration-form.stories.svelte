@@ -69,7 +69,7 @@
 -->
 <Story name="Registration form">
 	{#snippet template()}
-		<form class="grid max-w-xl gap-5" onsubmit={(e) => form.handleSubmit(e)} novalidate>
+		<form class="grid max-w-form gap-5" onsubmit={(e) => form.handleSubmit(e)} novalidate>
 			<TextField label="Full name" field={form.field('fullName')} autocomplete="name" />
 			<TextField label="Email" field={form.field('email')} type="email" autocomplete="email" />
 			<PasswordField field={form.field('password')} autocomplete="new-password" />
@@ -112,7 +112,7 @@
 
 		{#if submitted}
 			<pre
-				class="mt-4 overflow-x-auto rounded-control border border-border bg-muted p-4 text-body-sm">{JSON.stringify(
+				class="mt-4 overflow-x-auto rounded-md border border-border bg-muted p-4 text-body-sm">{JSON.stringify(
 					submitted,
 					null,
 					2

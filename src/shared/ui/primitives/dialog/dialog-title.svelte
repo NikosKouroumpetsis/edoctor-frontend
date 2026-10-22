@@ -17,7 +17,7 @@
 	bind:this={ref}
 	id={ctx.titleId}
 	data-slot="dialog-title"
-	class={cn('text-title-md leading-none font-semibold', className)}
+	class={cn('text-title-md leading-flat font-semibold', className)}
 	{...restProps}
 >
 	{@render children?.()}

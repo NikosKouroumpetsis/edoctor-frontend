@@ -100,6 +100,38 @@ In place:
   catalog exists for an undeclared locale), with the same keys as the base locale,
   non-empty texts, and the same `{placeholders}`. Paraglide silently falls back to
   the base locale for a missing translation, so this test is the only guard.
+- `tests/architecture/scale-vocabulary.test.ts` — every class in `src/**`
+  (components, stories, harnesses, demos, CSS) stays on the central size scale:
+  no arbitrary size values, numeric steps only 0–6 in halves, every name known
+  to its family (spacing/controls/media/web-only names, containers, roles,
+  leadings, radii, icons), no `sm: md: lg: xl: 2xl:` prefix and no container
+  query outside the container names, no length in any arbitrary value, no line
+  height on a text size (`text-body-sm/7`), a leading only after a role, and no
+  size written as a number in code or CSS (props, object keys, size and gesture
+  constants, `step(n)` above the scale, `style=`/`style:`/`el.style`). Comments
+  are blanked by a string-aware pass (`source-scan.ts`).
+- `tests/architecture/touch-targets.test.ts` — every `<button>`, `<a>`,
+  `<input>`, `<select>`, `<textarea>` and ARIA widget has a box of at least the
+  48px touch target on both axes (from its classes, same-file definitions or the
+  shared recipes `buttonVariants`/`toggleVariants`/`inputSizes`/`fieldSizes`:
+  the height of each size and the width of each recipe `base`). It fails on a
+  class that shrinks the box again (`min-w-0` after `min-w-touch`) and on a size
+  passed to a target component (`<Button class="size-6">`); hidden form mirrors
+  are skipped. The 8 gap between targets is not tested (see `design-tokens.md`).
+- `tests/architecture/scale-parity.test.ts` (node environment) — transpiles the
+  application's canonical `values/index.ts` (read only, from the sibling
+  `../application` repo) and `src/shared/design/tokens/tokens.ts`, and fails on
+  the first differing export path. It fails, with the path, when the sibling
+  repo is missing.
+- `tests/architecture/class-merge-imports.test.ts` — `tailwind-merge` and
+  `tailwind-variants` are imported only by `src/shared/lib/utils.ts`.
+- Each checker ships with negative fixtures next to the project scan, plus a
+  proof that the scan read the code (file, token and tag counts).
+
+The token registry and the class merger have unit specs next to them:
+`src/shared/design/tokens/tokens.test.ts` (value rules, unique names, generated
+theme) and `src/shared/lib/utils.test.ts` (`cn`/`tv` keep a role beside a color,
+merge named sizes, drop a leading written before its role).
 
 Architecture tests should also enforce:
 

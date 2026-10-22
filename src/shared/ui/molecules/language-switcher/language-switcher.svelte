@@ -14,13 +14,12 @@
 		resolve(localizeHref(basePath, { locale }) as Pathname);
 </script>
 
-<div class="flex items-center rounded-md border border-border bg-background p-0.5 shadow-xs">
+<div class="flex items-center rounded-md border border-border bg-background shadow-xs">
 	{#each languages as language (language.locale)}
 		<Button
 			href={localizedHref(language.locale)}
 			variant={currentLocale === language.locale ? 'secondary' : 'ghost'}
-			size="sm"
-			class="h-7 min-w-8 rounded-[calc(var(--radius)-2px)] px-2 text-label-md"
+			class="rounded-sm px-2 text-label-md"
 			aria-label={language.label}
 		>
 			{language.shortLabel}

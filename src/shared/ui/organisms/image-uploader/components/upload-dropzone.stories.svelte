@@ -22,7 +22,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="mx-auto max-w-lg">
+		<div class="mx-auto max-w-text">
 			<UploadDropzone onbrowse={noop} ondropfiles={noop} />
 		</div>
 	{/snippet}
@@ -37,7 +37,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="mx-auto max-w-lg">
+		<div class="mx-auto max-w-text">
 			<UploadDropzone onbrowse={noop} ondropfiles={noop} />
 		</div>
 	{/snippet}

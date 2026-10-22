@@ -21,7 +21,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="mx-auto max-w-xl">
+		<div class="mx-auto max-w-form">
 			<StoryHarness minCount={5}>
 				<UploaderEmpty />
 			</StoryHarness>
@@ -32,7 +32,7 @@
 <!-- Overridable copy + illustration (decision D-3 / A6) -->
 <Story name="Custom copy">
 	{#snippet template()}
-		<div class="mx-auto max-w-xl">
+		<div class="mx-auto max-w-form">
 			<StoryHarness minCount={3}>
 				<UploaderEmpty
 					title="Ανεβάστε τις φωτογραφίες σας"

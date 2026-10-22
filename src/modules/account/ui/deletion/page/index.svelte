@@ -18,7 +18,7 @@
 </svelte:head>
 
 <main class="container-page py-section">
-	<div class="mx-auto flex max-w-tablet flex-col gap-section">
+	<div class="mx-auto flex max-w-content flex-col gap-section">
 		<header class="flex flex-col gap-3">
 			<h1 class="text-heading-xl text-balance text-foreground">
 				{m.account_deletion_title({}, messageOptions)}

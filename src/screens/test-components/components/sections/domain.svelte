@@ -81,7 +81,7 @@
 	description="Real eDoctor compositions built entirely from the in-house kit (mock data)."
 >
 	<DemoRow label="Site navbar (resize / open the avatar menu / mobile menu)">
-		<div class="w-full overflow-hidden rounded-control border border-border">
+		<div class="w-full overflow-hidden rounded-md border border-border">
 			<SiteNavbar />
 		</div>
 	</DemoRow>
@@ -95,7 +95,7 @@
 	</DemoRow>
 
 	<DemoRow label="Doctor cards">
-		<div class="grid w-full gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		<div class="grid w-full gap-4 tablet:grid-cols-2 laptop:grid-cols-3">
 			{#each doctors as doctor (doctor.id)}
 				<DoctorCard {doctor} />
 			{/each}
@@ -112,12 +112,12 @@
 	</DemoRow>
 
 	<DemoRow label="Image carousel">
-		<div class="w-full max-w-md">
-			<Carousel class="px-12">
+		<div class="w-full max-w-text">
+			<Carousel class="px-section-lg">
 				<CarouselContent>
 					{#each ['clinic1', 'clinic2', 'clinic3'] as seed (seed)}
 						<CarouselItem>
-							<AspectRatio ratio={16 / 9} class="overflow-hidden rounded-media bg-muted">
+							<AspectRatio ratio={16 / 9} class="overflow-hidden rounded-xl bg-muted">
 								<img
 									src={`https://picsum.photos/seed/${seed}/480/270`}
 									alt={seed}

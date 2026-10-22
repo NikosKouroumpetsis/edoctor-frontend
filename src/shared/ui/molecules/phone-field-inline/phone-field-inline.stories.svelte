@@ -13,7 +13,7 @@
 			disabled: false
 		},
 		argTypes: {
-			size: { control: 'select', options: ['sm', 'default', 'lg', 'xl'] },
+			size: { control: 'select', options: ['default', 'lg', 'xl'] },
 			disabled: { control: 'boolean' }
 		}
 	});
@@ -26,13 +26,13 @@
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class="w-96"><PhoneFieldInline {...args} /></div>
+		<div class="w-narrow"><PhoneFieldInline {...args} /></div>
 	{/snippet}
 </Story>
 
 <Story name="Default (dial code + number)">
 	{#snippet template()}
-		<div class="w-96">
+		<div class="w-narrow">
 			<PhoneFieldInline label="Αριθμός τηλεφώνου ή email" bind:value bind:dialCode />
 			<p class="mt-2 text-body-sm text-muted-foreground">{dialCode} {value || '…'}</p>
 		</div>

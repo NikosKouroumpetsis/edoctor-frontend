@@ -23,13 +23,13 @@
 
 <Story name="Default">
 	{#snippet template()}
-		<div class="w-96"><MultiSelection label="Specialties" {options} bind:value /></div>
+		<div class="w-narrow"><MultiSelection label="Specialties" {options} bind:value /></div>
 	{/snippet}
 </Story>
 
 <Story name="Pre-selected">
 	{#snippet template()}
-		<div class="w-96">
+		<div class="w-narrow">
 			<MultiSelection label="Specialties" {options} bind:value={preselected} />
 			<p class="mt-2 text-body-sm text-muted-foreground">Selected: {preselected.join(', ')}</p>
 		</div>

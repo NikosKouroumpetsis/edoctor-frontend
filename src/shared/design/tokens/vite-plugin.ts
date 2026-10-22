@@ -1,9 +1,9 @@
 /**
- * Vite plugin that compiles the canonical token source (`./tokens.ts`) into the
- * generated Tailwind theme CSS. Mirrors how Paraglide generates into
- * `src/generated`: the output is git-ignored and rebuilt on dev start, on every
- * production build, and whenever the token source changes in dev (triggering a
- * full reload so Tailwind re-reads the theme).
+ * Vite plugin that compiles the token source (`./tokens.ts` + `./index.ts`) into the
+ * generated Tailwind theme CSS in `src/generated` (committed, never edited by
+ * hand). It is rebuilt on dev start, on every production build, and whenever
+ * the token source changes in dev (triggering a full reload so Tailwind re-reads
+ * the theme).
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -14,7 +14,11 @@ import { tokensToCss } from './to-css';
 const DEFAULT_OUTPUT = 'src/generated/design-tokens.css';
 
 /** Token source files that should trigger a regenerate in dev. */
-const SOURCE_FILES = ['design/tokens/tokens.ts', 'design/tokens/to-css.ts'];
+const SOURCE_FILES = [
+	'design/tokens/tokens.ts',
+	'design/tokens/index.ts',
+	'design/tokens/to-css.ts'
+];
 
 function write(outputPath: string): void {
 	mkdirSync(dirname(outputPath), { recursive: true });

@@ -24,7 +24,7 @@
 
 <Story name="Booking space (image)">
 	{#snippet template()}
-		<div class="max-w-xl">
+		<div class="max-w-form">
 			<SelectableCards
 				type="single"
 				bind:value={space}
@@ -35,21 +35,21 @@
 					title="Ολόκληρο κατάλυμα"
 					description="Οι επισκέπτες έχουν ολόκληρο τον χώρο στη διάθεσή τους."
 				>
-					{#snippet icon()}<HouseIcon class="icon-xl" />{/snippet}
+					{#snippet icon()}<HouseIcon class="icon-lg" />{/snippet}
 				</SelectableCard>
 				<SelectableCard
 					value="room"
 					title="Ένα δωμάτιο"
 					description="Οι επισκέπτες έχουν το δικό τους δωμάτιο σε ένα κατάλυμα, καθώς και πρόσβαση σε κοινόχρηστους χώρους."
 				>
-					{#snippet icon()}<DoorOpenIcon class="icon-xl" />{/snippet}
+					{#snippet icon()}<DoorOpenIcon class="icon-lg" />{/snippet}
 				</SelectableCard>
 				<SelectableCard
 					value="shared"
 					title="Κοινόχρηστο δωμάτιο σε χόστελ"
 					description="Οι επισκέπτες κοιμούνται σε ένα κοινόχρηστο δωμάτιο, σε ένα χόστελ από εταιρεία διαχείρισης και με προσωπικό 24 ώρες το 24-ωρο."
 				>
-					{#snippet icon()}<BedDoubleIcon class="icon-xl" />{/snippet}
+					{#snippet icon()}<BedDoubleIcon class="icon-lg" />{/snippet}
 				</SelectableCard>
 			</SelectableCards>
 		</div>
@@ -58,28 +58,28 @@
 
 <Story name="Single">
 	{#snippet template()}
-		<div class="max-w-xl">
+		<div class="max-w-form">
 			<SelectableCards type="single" bind:value={single} label="Διάλεξε έναν χώρο">
 				<SelectableCard
 					value="entire"
 					title="Ολόκληρο κατάλυμα"
 					description="Όλος ο χώρος δικός σου."
 				>
-					{#snippet icon()}<HouseIcon class="icon-xl" />{/snippet}
+					{#snippet icon()}<HouseIcon class="icon-lg" />{/snippet}
 				</SelectableCard>
 				<SelectableCard
 					value="room"
 					title="Ένα δωμάτιο"
 					description="Ιδιωτικό δωμάτιο με κοινόχρηστους χώρους."
 				>
-					{#snippet icon()}<DoorOpenIcon class="icon-xl" />{/snippet}
+					{#snippet icon()}<DoorOpenIcon class="icon-lg" />{/snippet}
 				</SelectableCard>
 				<SelectableCard
 					value="shared"
 					title="Κοινόχρηστο δωμάτιο"
 					description="Κοινόχρηστος χώρος ύπνου."
 				>
-					{#snippet icon()}<BedDoubleIcon class="icon-xl" />{/snippet}
+					{#snippet icon()}<BedDoubleIcon class="icon-lg" />{/snippet}
 				</SelectableCard>
 			</SelectableCards>
 		</div>
@@ -88,28 +88,28 @@
 
 <Story name="Multiple">
 	{#snippet template()}
-		<div class="max-w-xl">
+		<div class="max-w-form">
 			<SelectableCards type="multiple" bind:value={multiple} label="Διάλεξε όσους χώρους θέλεις">
 				<SelectableCard
 					value="entire"
 					title="Ολόκληρο κατάλυμα"
 					description="Όλος ο χώρος δικός σου."
 				>
-					{#snippet icon()}<HouseIcon class="icon-xl" />{/snippet}
+					{#snippet icon()}<HouseIcon class="icon-lg" />{/snippet}
 				</SelectableCard>
 				<SelectableCard
 					value="room"
 					title="Ένα δωμάτιο"
 					description="Ιδιωτικό δωμάτιο με κοινόχρηστους χώρους."
 				>
-					{#snippet icon()}<DoorOpenIcon class="icon-xl" />{/snippet}
+					{#snippet icon()}<DoorOpenIcon class="icon-lg" />{/snippet}
 				</SelectableCard>
 				<SelectableCard
 					value="shared"
 					title="Κοινόχρηστο δωμάτιο"
 					description="Κοινόχρηστος χώρος ύπνου."
 				>
-					{#snippet icon()}<BedDoubleIcon class="icon-xl" />{/snippet}
+					{#snippet icon()}<BedDoubleIcon class="icon-lg" />{/snippet}
 				</SelectableCard>
 			</SelectableCards>
 		</div>
@@ -118,7 +118,7 @@
 
 <Story name="Disabled">
 	{#snippet template()}
-		<div class="max-w-xl">
+		<div class="max-w-form">
 			<SelectableCards
 				type="single"
 				bind:value={disabledValue}
@@ -130,14 +130,14 @@
 					title="Ολόκληρο κατάλυμα"
 					description="Όλος ο χώρος δικός σου."
 				>
-					{#snippet icon()}<HouseIcon class="icon-xl" />{/snippet}
+					{#snippet icon()}<HouseIcon class="icon-lg" />{/snippet}
 				</SelectableCard>
 				<SelectableCard
 					value="room"
 					title="Ένα δωμάτιο"
 					description="Ιδιωτικό δωμάτιο με κοινόχρηστους χώρους."
 				>
-					{#snippet icon()}<DoorOpenIcon class="icon-xl" />{/snippet}
+					{#snippet icon()}<DoorOpenIcon class="icon-lg" />{/snippet}
 				</SelectableCard>
 			</SelectableCards>
 		</div>
@@ -155,7 +155,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="max-w-xl">
+		<div class="max-w-form">
 			<SelectableCards type="single" label="Διάλεξε έναν χώρο">
 				<SelectableCard
 					value="entire"

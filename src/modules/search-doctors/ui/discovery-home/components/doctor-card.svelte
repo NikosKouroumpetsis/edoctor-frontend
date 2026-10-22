@@ -22,7 +22,12 @@
 	const isCarousel = $derived(variant === 'carousel');
 </script>
 
-<article class={['flex flex-col gap-2.5', isCarousel ? 'w-42 shrink-0 md:w-54' : 'w-full']}>
+<article
+	class={[
+		'flex flex-col gap-2.5',
+		isCarousel ? 'w-card-rail-w shrink-0 tablet:w-card-rail-w-lg' : 'w-full'
+	]}
+>
 	<div class="relative">
 		<img
 			src={doctor.imageUrl}
@@ -31,8 +36,10 @@
 			decoding="async"
 			referrerpolicy="no-referrer"
 			class={[
-				'w-full rounded-media bg-muted object-cover',
-				isCarousel ? 'h-38 md:h-47' : 'h-47 md:h-56'
+				'w-full rounded-xl bg-muted object-cover',
+				isCarousel
+					? 'h-card-rail-media tablet:h-card-rail-media-lg'
+					: 'h-card-list-media tablet:h-card-list-media-lg'
 			]}
 		/>
 
@@ -49,7 +56,7 @@
 			aria-label={favoriteLabel}
 			aria-pressed={isFavorite}
 			onclick={() => onToggleFavorite(doctor.doctorSlug)}
-			class="absolute top-3 right-3 grid size-9 place-items-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+			class="absolute top-1.5 right-1.5 grid size-touch place-items-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
 		>
 			<HeartIcon
 				class={['icon-md', isFavorite ? 'fill-current text-accent' : 'text-foreground/75']}
@@ -65,15 +72,15 @@
 
 		<div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 pt-1">
 			<span class="flex items-center gap-1.5 text-body-sm text-muted-foreground">
-				<TagIcon class="icon-xs" />
+				<TagIcon class="icon-sm" />
 				{doctor.visitFeeLabel}
 			</span>
 			<span class="flex items-center gap-1.5 text-body-sm font-semibold text-primary">
-				<StarIcon class="icon-xs fill-current text-accent" />
+				<StarIcon class="icon-sm fill-current text-accent" />
 				{doctor.rating.toFixed(1)}
 			</span>
 			<span class="flex items-center gap-1.5 text-body-sm text-muted-foreground">
-				<MessageIcon class="icon-xs" />
+				<MessageIcon class="icon-sm" />
 				{doctor.reviewCount}
 			</span>
 		</div>

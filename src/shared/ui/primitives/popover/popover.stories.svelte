@@ -15,7 +15,7 @@
 	{#snippet template()}
 		<Popover>
 			<PopoverTrigger class={buttonVariants({ variant: 'outline' })}>Open popover</PopoverTrigger>
-			<PopoverContent class="w-64">
+			<PopoverContent class="w-popover-md">
 				<p class="text-body-sm">Set your notification preferences here.</p>
 			</PopoverContent>
 		</Popover>
@@ -29,7 +29,7 @@
 				<Popover>
 					<PopoverTrigger class={buttonVariants({ variant: 'outline' })}>{placement}</PopoverTrigger
 					>
-					<PopoverContent {placement} class="w-40">
+					<PopoverContent {placement} class="w-popover-sm">
 						<p class="text-body-sm">Placed {placement}.</p>
 					</PopoverContent>
 				</Popover>
@@ -63,7 +63,7 @@
 	{#snippet template()}
 		<Popover>
 			<PopoverTrigger class={buttonVariants({ variant: 'outline' })}>Open popover</PopoverTrigger>
-			<PopoverContent class="w-64">
+			<PopoverContent class="w-popover-md">
 				<p class="text-body-sm">Set your notification preferences here.</p>
 			</PopoverContent>
 		</Popover>

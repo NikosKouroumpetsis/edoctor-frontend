@@ -28,7 +28,7 @@
 <Story name="Default">
 	{#snippet template()}
 		<Select bind:value name="specialty">
-			<SelectTrigger class="w-64" aria-label="Specialty">
+			<SelectTrigger class="w-narrow" aria-label="Specialty">
 				<SelectValue placeholder="Pick a specialty" />
 			</SelectTrigger>
 			<SelectContent>
@@ -43,7 +43,7 @@
 <Story name="Pre-selected">
 	{#snippet template()}
 		<Select bind:value={preselected} name="specialty-pre">
-			<SelectTrigger class="w-64" aria-label="Specialty">
+			<SelectTrigger class="w-narrow" aria-label="Specialty">
 				<SelectValue placeholder="Pick a specialty" />
 			</SelectTrigger>
 			<SelectContent>
@@ -58,7 +58,7 @@
 <Story name="Grouped + separator">
 	{#snippet template()}
 		<Select bind:value={grouped} name="city">
-			<SelectTrigger class="w-64" aria-label="City">
+			<SelectTrigger class="w-narrow" aria-label="City">
 				<SelectValue placeholder="Pick a city" />
 			</SelectTrigger>
 			<SelectContent>
@@ -80,9 +80,9 @@
 <Story name="Sizes">
 	{#snippet template()}
 		<div class="flex flex-col gap-3">
-			{#each ['sm', 'default', 'lg', 'xl'] as const as s (s)}
+			{#each ['default', 'lg', 'xl'] as const as s (s)}
 				<Select bind:value={sizes} name={`size-${s}`}>
-					<SelectTrigger size={s} class="w-64" aria-label={s}>
+					<SelectTrigger size={s} class="w-narrow" aria-label={s}>
 						<SelectValue placeholder={s} />
 					</SelectTrigger>
 					<SelectContent>
@@ -98,7 +98,7 @@
 <Story name="Disabled">
 	{#snippet template()}
 		<Select value="" name="specialty-disabled" disabled>
-			<SelectTrigger class="w-64" aria-label="Specialty">
+			<SelectTrigger class="w-narrow" aria-label="Specialty">
 				<SelectValue placeholder="Disabled" />
 			</SelectTrigger>
 			<SelectContent>

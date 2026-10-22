@@ -41,7 +41,7 @@
 	onclick={() => group.toggle(value)}
 	class={cn(
 		toggleVariants({ variant: group.variant, size: group.size }),
-		'min-w-0 flex-1 shrink-0 rounded-none shadow-none first:rounded-l-md last:rounded-r-md focus:z-10 focus-visible:z-10',
+		'flex-1 shrink-0 rounded-none shadow-none first:rounded-l-md last:rounded-r-md focus:z-10 focus-visible:z-10',
 		group.variant === 'outline' && '-ml-px first:ml-0',
 		className
 	)}

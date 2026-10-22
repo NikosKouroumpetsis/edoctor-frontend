@@ -40,11 +40,11 @@
 
 <section
 	aria-labelledby="account-deletion-removed-title"
-	class="rounded-panel border border-border/70 bg-card p-card"
+	class="rounded-xl border border-border/70 bg-card p-card"
 >
 	<h2
 		id="account-deletion-removed-title"
-		class="text-heading-md text-foreground md:text-heading-lg"
+		class="text-heading-md text-foreground tablet:text-heading-lg"
 	>
 		{m.account_deletion_removed_title({}, messageOptions)}
 	</h2>
@@ -58,20 +58,20 @@
 
 <section
 	aria-labelledby="account-deletion-retained-title"
-	class="rounded-panel border border-border/70 bg-card p-card"
+	class="rounded-xl border border-border/70 bg-card p-card"
 >
 	<h2
 		id="account-deletion-retained-title"
-		class="text-heading-md text-foreground md:text-heading-lg"
+		class="text-heading-md text-foreground tablet:text-heading-lg"
 	>
 		{m.account_deletion_retained_title({}, messageOptions)}
 	</h2>
 	<p class="mt-4 text-body-lg text-foreground">
 		{m.account_deletion_retained_intro({}, messageOptions)}
 	</p>
-	<ul class="mt-6 flex flex-col gap-gutter">
+	<ul class="mt-6 flex flex-col gap-list">
 		{#each retained as record (record.id)}
-			<li class="flex flex-col gap-2 border-t border-border/70 pt-gutter">
+			<li class="flex flex-col gap-2 border-t border-border/70 pt-list">
 				<h3 class="text-title-md text-foreground">{record.title}</h3>
 				<p class="text-body-md text-muted-foreground">{record.body}</p>
 				<p class="text-body-md font-medium text-foreground">{record.duration}</p>

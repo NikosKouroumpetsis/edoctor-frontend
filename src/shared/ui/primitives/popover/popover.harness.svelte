@@ -10,8 +10,8 @@
 		<PopoverTrigger>Open popover</PopoverTrigger>
 		<PopoverContent {size}>
 			<p>Popover body</p>
-			<button type="button">Inner action</button>
+			<button type="button" class="min-h-touch min-w-touch">Inner action</button>
 		</PopoverContent>
 	</Popover>
-	<button type="button" data-testid="outside">Outside</button>
+	<button type="button" class="min-h-touch min-w-touch" data-testid="outside">Outside</button>
 </div>

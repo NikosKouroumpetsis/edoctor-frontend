@@ -8,10 +8,10 @@
 	}: { orientation?: ScrollAreaOrientation; count?: number } = $props();
 </script>
 
-<ScrollArea {orientation} class="h-40 w-60 rounded-md border border-border">
+<ScrollArea {orientation} class="h-scroll-max w-narrow rounded-md border border-border">
 	<div data-testid="scroll-content" class="p-3">
 		{#each Array.from({ length: count }, (_, i) => i + 1) as n (n)}
-			<p class="py-1 text-sm">Row {n}</p>
+			<p class="py-1 text-body-sm">Row {n}</p>
 		{/each}
 	</div>
 </ScrollArea>

@@ -11,8 +11,8 @@
 	<div class="-mx-1 flex gap-5 px-1 py-2">
 		{#each categoryPlaceholders as index (index)}
 			<div class="flex flex-col items-center gap-2">
-				<Skeleton class="size-14 rounded-full" />
-				<Skeleton class="h-4 w-16 rounded-full" />
+				<Skeleton class="size-tile rounded-full" />
+				<Skeleton class="h-4 w-full rounded-full" />
 			</div>
 		{/each}
 	</div>

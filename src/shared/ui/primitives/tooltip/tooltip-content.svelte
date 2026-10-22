@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { scale } from 'svelte/transition';
+	import { step } from '$shared/design/tokens';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
 	import { portal, floating, type Placement } from '$shared/lib/headless';
 	import { getTooltipContext } from './tooltip.svelte';
@@ -9,7 +10,7 @@
 		ref = $bindable(null),
 		class: className,
 		placement = 'top',
-		sideOffset = 6,
+		sideOffset = step(1.5),
 		children,
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {

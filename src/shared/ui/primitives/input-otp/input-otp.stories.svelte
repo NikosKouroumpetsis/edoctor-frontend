@@ -16,7 +16,7 @@
 
 <Story name="Six digits">
 	{#snippet template()}
-		<div class="flex w-72 flex-col gap-3">
+		<div class="flex w-narrow flex-col gap-3">
 			<InputOTP bind:value maxlength={6} onComplete={(v) => (completed = v)}>
 				<InputOTPGroup>
 					<InputOTPSlot index={0} />
@@ -27,7 +27,7 @@
 					<InputOTPSlot index={5} />
 				</InputOTPGroup>
 			</InputOTP>
-			<p class="text-sm text-muted-foreground">
+			<p class="text-body-sm text-muted-foreground">
 				Value: {value || '—'} · Completed: {completed || '—'}
 			</p>
 		</div>
@@ -36,7 +36,7 @@
 
 <Story name="Four digits">
 	{#snippet template()}
-		<div class="w-48">
+		<div class="w-popover-sm">
 			<InputOTP maxlength={4}>
 				<InputOTPGroup>
 					<InputOTPSlot index={0} />
@@ -51,7 +51,7 @@
 
 <Story name="Disabled">
 	{#snippet template()}
-		<div class="w-72">
+		<div class="w-narrow">
 			<InputOTP maxlength={6} disabled>
 				<InputOTPGroup>
 					<InputOTPSlot index={0} />

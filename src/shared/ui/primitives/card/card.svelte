@@ -5,7 +5,7 @@
 	const cardSizes: Record<CardSize, string> = {
 		sm: 'gap-4 py-4',
 		default: 'gap-6 py-6',
-		lg: 'gap-8 py-8'
+		lg: 'gap-section py-section'
 	};
 </script>
 
@@ -26,7 +26,7 @@
 	bind:this={ref}
 	data-slot="card"
 	class={cn(
-		'flex flex-col rounded-panel border border-border bg-card text-card-foreground shadow-raised',
+		'flex flex-col rounded-xl border border-border bg-card text-card-foreground shadow-raised',
 		cardSizes[size],
 		className
 	)}

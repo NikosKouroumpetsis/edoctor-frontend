@@ -48,7 +48,7 @@
 <div
 	data-slot="doctor-search-bar"
 	class={cn(
-		'flex w-full flex-col gap-2 rounded-panel border border-border bg-card p-2 shadow-raised md:flex-row md:items-center',
+		'flex w-full flex-col gap-2 rounded-xl border border-border bg-card p-2 shadow-raised tablet:flex-row tablet:items-center',
 		className
 	)}
 >
@@ -56,13 +56,13 @@
 		<PopoverTrigger
 			class={cn(
 				buttonVariants({ variant: 'ghost' }),
-				'h-12 flex-1 justify-start gap-2 font-normal'
+				'h-control-md flex-1 justify-start gap-2 font-normal'
 			)}
 		>
 			<StethoscopeIcon class="size-4 text-muted-foreground" />
 			<span class={cn(!specialty && 'text-muted-foreground')}>{specialty || 'Specialty'}</span>
 		</PopoverTrigger>
-		<PopoverContent class="w-64 p-0">
+		<PopoverContent class="w-popover-md p-0">
 			<Command>
 				<CommandInput placeholder="Search specialty…" aria-label="Search specialty" />
 				<CommandList>
@@ -83,9 +83,9 @@
 		</PopoverContent>
 	</Popover>
 
-	<div class="hidden h-8 w-px bg-border md:block"></div>
+	<div class="hidden h-6 w-px bg-border tablet:block"></div>
 
-	<div class="flex h-12 flex-1 items-center gap-2 px-3">
+	<div class="flex h-control-md flex-1 items-center gap-2 px-3">
 		<MapPinIcon class="size-4 shrink-0 text-muted-foreground" />
 		<Input
 			bind:value={location}
@@ -95,13 +95,13 @@
 		/>
 	</div>
 
-	<div class="hidden h-8 w-px bg-border md:block"></div>
+	<div class="hidden h-6 w-px bg-border tablet:block"></div>
 
 	<Popover bind:open={dateOpen}>
 		<PopoverTrigger
 			class={cn(
 				buttonVariants({ variant: 'ghost' }),
-				'h-12 flex-1 justify-start gap-2 font-normal'
+				'h-control-md flex-1 justify-start gap-2 font-normal'
 			)}
 		>
 			<CalendarIcon class="size-4 text-muted-foreground" />
@@ -112,7 +112,7 @@
 		</PopoverContent>
 	</Popover>
 
-	<Button class="h-12 gap-2 md:w-auto" onclick={() => onSearch?.({ specialty, location, date })}>
+	<Button class="gap-2 tablet:w-auto" onclick={() => onSearch?.({ specialty, location, date })}>
 		<SearchIcon class="size-4" />
 		Search
 	</Button>

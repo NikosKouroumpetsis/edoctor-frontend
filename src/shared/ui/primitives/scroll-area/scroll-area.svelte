@@ -5,6 +5,7 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
+	import { step } from '$shared/design/tokens';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
 
 	let {
@@ -25,7 +26,7 @@
 	const showVertical = $derived(orientation === 'vertical' || orientation === 'both');
 	const showHorizontal = $derived(orientation === 'horizontal' || orientation === 'both');
 
-	const MIN_THUMB = 20; // px
+	const MIN_THUMB = step(5);
 
 	type Thumb = { visible: boolean; size: number; pos: number };
 	let vThumb = $state<Thumb>({ visible: false, size: 0, pos: 0 });
@@ -131,7 +132,7 @@
 		data-slot="scroll-area-viewport"
 		{onscroll}
 		class={cn(
-			'scroll-area-viewport size-full rounded-[inherit]',
+			'scroll-area-viewport size-full',
 			showVertical && (showHorizontal ? 'overflow-auto' : 'overflow-x-hidden overflow-y-auto'),
 			!showVertical && showHorizontal && 'overflow-x-auto overflow-y-hidden',
 			viewportClass
@@ -184,6 +185,7 @@
 <style>
 	/* Hide the native scrollbar; the custom thumb above renders the affordance. */
 	.scroll-area-viewport {
+		border-radius: inherit;
 		scrollbar-width: none;
 		-ms-overflow-style: none;
 	}

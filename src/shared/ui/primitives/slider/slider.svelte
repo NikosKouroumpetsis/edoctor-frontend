@@ -6,7 +6,7 @@
 	 * by the range-histogram molecule). Additive and backward-compatible. */
 	export type SliderTone = 'primary' | 'accent';
 
-	/** Track thickness and thumb diameter scale together. */
+	/** Track thickness and thumb diameter scale together; each thumb sits in a touch-sized button. */
 	const sliderTrackSizes: Record<SliderSize, string> = {
 		sm: 'h-1',
 		default: 'h-1.5',
@@ -35,6 +35,7 @@
 		trackClass,
 		rangeClass,
 		thumbClass,
+		formatValue = String,
 		class: className,
 		onValueChange,
 		'aria-label': ariaLabel,
@@ -53,6 +54,9 @@
 		trackClass?: string;
 		rangeClass?: string;
 		thumbClass?: string;
+		/** 🔴 S-26.9: each thumb's `aria-valuetext`, the value as the screen shows it (`€420+`, a stop's
+		 * label); the plain number by default, never left to a percentage reading. */
+		formatValue?: (value: number, thumbIndex: number) => string;
 		onValueChange?: (value: number | number[]) => void;
 	} = $props();
 
@@ -115,11 +119,14 @@
 		window.addEventListener('pointerup', onPointerUp);
 	}
 
+	// Only the visible dot grabs the handle and drags it without jumping the value; the rest
+	// of its touch-sized box behaves exactly like the track beneath it.
 	function onThumbPointerDown(event: PointerEvent, index: number) {
 		if (disabled) return;
-		// Grab the handle and drag it directly — the primary interaction. The thin
-		// track is a tiny pointer target, so users reach for the thumb itself; we
-		// start dragging without jumping the value.
+		if (!(event.target as HTMLElement).closest('[data-slot="slider-thumb-dot"]')) {
+			onTrackPointerDown(event);
+			return;
+		}
 		event.preventDefault();
 		(event.currentTarget as HTMLElement).focus();
 		activeThumb = index;
@@ -179,7 +186,7 @@
 	data-slot="slider"
 	data-disabled={disabled ? '' : undefined}
 	class={cn(
-		'relative flex w-full touch-none items-center select-none',
+		'relative flex min-h-touch w-full touch-none items-center select-none',
 		disabled && 'opacity-50',
 		className
 	)}
@@ -210,18 +217,25 @@
 			aria-valuemin={min}
 			aria-valuemax={max}
 			aria-valuenow={thumb}
+			aria-valuetext={formatValue(thumb, index)}
 			aria-orientation="horizontal"
 			{disabled}
 			tabindex={disabled ? -1 : 0}
 			onpointerdown={(e) => onThumbPointerDown(e, index)}
 			onkeydown={(e) => onThumbKeydown(e, index)}
 			style={`left: ${percent(thumb)}%`}
-			class={cn(
-				'absolute -translate-x-1/2 cursor-grab touch-none rounded-full border bg-card shadow-sm transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 active:cursor-grabbing disabled:pointer-events-none disabled:cursor-not-allowed',
-				thumbToneClass,
-				sliderThumbSizes[size],
-				thumbClass
-			)}
-		></button>
+			class="group absolute grid size-touch -translate-x-1/2 cursor-grab touch-none place-items-center rounded-full outline-none active:cursor-grabbing disabled:pointer-events-none disabled:cursor-not-allowed"
+		>
+			<span
+				data-slot="slider-thumb-dot"
+				data-dragging={activeThumb === index ? 'true' : undefined}
+				class={cn(
+					'rounded-full border bg-card shadow-sm transition-[color,box-shadow] group-focus-visible:ring-3 group-focus-visible:ring-ring/50',
+					thumbToneClass,
+					sliderThumbSizes[size],
+					thumbClass
+				)}
+			></span>
+		</button>
 	{/each}
 </div>

@@ -18,7 +18,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="w-40">
+		<div class="w-narrow">
 			<PhotoPlaceholder />
 		</div>
 	{/snippet}

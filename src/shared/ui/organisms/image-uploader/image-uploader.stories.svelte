@@ -132,7 +132,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="mx-auto max-w-xl">
+		<div class="mx-auto max-w-form">
 			<ImageUploader items={seededItems} minCount={5} upload={mockUpload} />
 		</div>
 	{/snippet}

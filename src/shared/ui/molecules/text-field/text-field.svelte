@@ -2,31 +2,6 @@
 	import type { InputSize } from '$shared/ui/primitives/input';
 
 	export type TextFieldSize = InputSize;
-
-	/**
-	 * 1:1 port of the old Vue floating-label input (components/Input/Text.vue):
-	 * the label rests inside the field and rises *inside* the top padding when the
-	 * field is focused or filled (it is NOT a notch on the border). `default`
-	 * reproduces the Vue geometry exactly; the other sizes scale around it.
-	 */
-	const SIZES: Record<TextFieldSize, { input: string; label: string }> = {
-		sm: {
-			input: 'pl-2 pt-3 pb-1 text-xs',
-			label: 'left-2 top-2.5 text-xs -translate-y-2.5 peer-focus:-translate-y-2.5'
-		},
-		default: {
-			input: 'pl-2.5 pt-4 pb-1.5 text-sm',
-			label: 'left-2.5 top-3 text-sm -translate-y-3 peer-focus:-translate-y-3'
-		},
-		lg: {
-			input: 'pl-2.5 pt-5 pb-2.5 text-base',
-			label: 'left-2.5 top-4 text-base -translate-y-4 peer-focus:-translate-y-4'
-		},
-		xl: {
-			input: 'pl-3 pt-6 pb-3 text-lg',
-			label: 'left-3 top-5 text-lg -translate-y-5 peer-focus:-translate-y-5'
-		}
-	};
 </script>
 
 <script lang="ts">
@@ -35,6 +10,7 @@
 	import AlertIcon from '~icons/lucide/circle-alert';
 	import { cn } from '$shared/lib/utils';
 	import { useId } from '$shared/lib/headless';
+	import { fieldSizes } from '$shared/ui/primitives/input';
 	import type { FieldApi } from '$shared/lib/form';
 
 	let {
@@ -124,14 +100,14 @@
 			onblur={handleBlur}
 			data-slot="text-field-input"
 			class={cn(
-				'peer block w-full appearance-none rounded-md border-[1.5px] border-input bg-card pr-3 text-foreground transition-[color,box-shadow] outline-none',
+				'peer block w-full appearance-none rounded-md border border-input bg-card pr-3 text-foreground transition-[color,box-shadow] outline-none',
 				'placeholder:text-muted-foreground',
-				'focus:border-ring focus:ring-[0.5px] focus:ring-ring',
+				'focus:border-ring',
 				'disabled:cursor-not-allowed disabled:opacity-50',
 				'aria-[invalid=true]:border-destructive aria-[invalid=true]:bg-destructive/10',
-				SIZES[size].input,
-				leading && 'pl-9',
-				trailing && 'pr-10',
+				fieldSizes[size].input,
+				leading ? 'pl-field-inset' : fieldSizes[size].start,
+				trailing && 'pr-touch',
 				inputClass
 			)}
 			{...restProps}
@@ -143,20 +119,21 @@
 			for={inputId}
 			data-slot="text-field-label"
 			class={cn(
-				'pointer-events-none absolute z-10 origin-[0] transform truncate pr-3 text-muted-foreground duration-200',
+				'pointer-events-none absolute z-10 origin-left transform truncate pr-3 text-muted-foreground duration-200',
 				'scale-75',
 				'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
 				'peer-focus:scale-75 peer-focus:text-foreground',
 				'peer-aria-[invalid=true]:text-destructive',
-				SIZES[size].label,
-				leading && 'peer-placeholder-shown:left-9 peer-focus:left-2.5'
+				fieldSizes[size].label,
+				fieldSizes[size].left,
+				leading && 'peer-placeholder-shown:left-field-inset peer-focus:left-2.5'
 			)}
 		>
 			{label}
 		</label>
 
 		{#if trailing}
-			<div class="absolute inset-y-0 right-2 flex items-center">
+			<div class="absolute inset-y-0 right-0 flex items-center">
 				{@render trailing()}
 			</div>
 		{/if}

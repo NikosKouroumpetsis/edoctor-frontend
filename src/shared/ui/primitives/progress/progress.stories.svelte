@@ -13,25 +13,25 @@
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class="w-80"><Progress {...args} /></div>
+		<div class="w-narrow"><Progress {...args} /></div>
 	{/snippet}
 </Story>
 
 <Story name="Indeterminate">
 	{#snippet template()}
-		<div class="w-80"><Progress value={null} /></div>
+		<div class="w-narrow"><Progress value={null} /></div>
 	{/snippet}
 </Story>
 
 <Story name="Complete">
 	{#snippet template()}
-		<div class="w-80"><Progress value={100} /></div>
+		<div class="w-narrow"><Progress value={100} /></div>
 	{/snippet}
 </Story>
 
 <Story name="Sizes">
 	{#snippet template()}
-		<div class="flex w-80 flex-col gap-3">
+		<div class="flex w-narrow flex-col gap-3">
 			<Progress size="sm" value={40} />
 			<Progress size="default" value={40} />
 			<Progress size="lg" value={40} />

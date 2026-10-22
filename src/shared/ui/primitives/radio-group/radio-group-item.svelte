@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	export type RadioGroupItemSize = 'sm' | 'default' | 'lg';
 
-	/** Box and the selected dot scale together. */
+	/** Box and the selected dot scale together, inside a touch-sized button. */
 	const radioBoxSizes: Record<RadioGroupItemSize, string> = {
 		sm: 'size-4',
 		default: 'size-5',
@@ -65,16 +65,25 @@
 	tabindex={tabbable ? 0 : -1}
 	onclick={select}
 	class={cn(
-		'relative flex aspect-square items-center justify-center rounded-full border border-input bg-card text-primary shadow-xs transition-shadow outline-none',
-		radioBoxSizes[size],
-		'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
-		'disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:border-primary',
+		'group relative inline-flex size-touch shrink-0 items-center justify-center rounded-full outline-none',
+		'disabled:cursor-not-allowed disabled:opacity-50',
 		className
 	)}
 	{...restProps}
 >
-	{#if checked}
-		<CircleIcon class={cn(radioDotSizes[size], 'fill-primary text-primary')} />
-	{/if}
+	<span
+		data-slot="radio-group-item-box"
+		data-state={checked ? 'checked' : 'unchecked'}
+		class={cn(
+			'flex aspect-square items-center justify-center rounded-full border border-input bg-card text-primary shadow-xs transition-shadow',
+			radioBoxSizes[size],
+			'group-focus-visible:border-ring group-focus-visible:ring-3 group-focus-visible:ring-ring/50',
+			'data-[state=checked]:border-primary'
+		)}
+	>
+		{#if checked}
+			<CircleIcon class={cn(radioDotSizes[size], 'fill-primary text-primary')} />
+		{/if}
+	</span>
 	{@render children?.()}
 </button>

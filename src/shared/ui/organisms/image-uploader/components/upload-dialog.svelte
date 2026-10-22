@@ -52,19 +52,19 @@
 </script>
 
 <Dialog open={ctx.dialogOpen} onOpenChange={(open) => !open && ctx.closeDialog()}>
-	<DialogContent showClose={false} size="lg" class="max-w-xl gap-0 p-0">
+	<DialogContent showClose={false} size="lg" class="max-w-form gap-0 p-0">
 		<!-- Header: X · (title + counter) · + -->
 		<div class="flex items-center justify-between gap-inline p-card pb-inline">
 			<Button
 				variant="ghost"
-				size="icon-sm"
+				size="icon"
 				aria-label={m.image_uploader_cancel()}
 				onclick={() => ctx.closeDialog()}
 			>
 				<XIcon class="icon-sm" />
 			</Button>
 			<div class="min-w-0 flex-1 text-center">
-				<DialogTitle class="text-title-md font-semibold">
+				<DialogTitle>
 					{m.image_uploader_dialog_title()}
 				</DialogTitle>
 				<DialogDescription class="text-body-sm text-muted-foreground">
@@ -73,7 +73,7 @@
 			</div>
 			<Button
 				variant="ghost"
-				size="icon-sm"
+				size="icon"
 				aria-label={m.image_uploader_add_more()}
 				onclick={openPicker}
 			>
@@ -86,7 +86,7 @@
 			{#if ctx.staged.length === 0}
 				<UploadDropzone onbrowse={openPicker} ondropfiles={(files) => ctx.pickFiles(files)} />
 			{:else}
-				<div class="grid grid-cols-2 gap-gutter">
+				<div class="grid grid-cols-2 gap-list">
 					{#each ctx.staged as staged (staged.id)}
 						<UploadTile {staged} />
 					{/each}

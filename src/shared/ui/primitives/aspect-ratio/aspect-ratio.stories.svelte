@@ -11,7 +11,7 @@
 
 <Story name="Ratio 16:9">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<AspectRatio ratio={16 / 9} class="overflow-hidden rounded-md bg-muted">
 				<div class="flex size-full items-center justify-center text-body-sm text-muted-foreground">
 					16 : 9
@@ -23,7 +23,7 @@
 
 <Story name="Square 1:1">
 	{#snippet template()}
-		<div class="w-60">
+		<div class="w-narrow">
 			<AspectRatio ratio={1} class="overflow-hidden rounded-md bg-muted">
 				<div class="flex size-full items-center justify-center text-body-sm text-muted-foreground">
 					1 : 1
@@ -35,7 +35,7 @@
 
 <Story name="Ratio 4:3 (with image)">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<AspectRatio ratio={4 / 3} class="overflow-hidden rounded-md bg-muted">
 				<img
 					src="https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=640&q=80"

@@ -39,7 +39,10 @@
 	}
 </script>
 
-<Card class={cn('w-full max-w-sm gap-3 overflow-hidden pt-0', className)} data-slot="doctor-card">
+<Card
+	class={cn('w-full max-w-narrow gap-3 overflow-hidden pt-0', className)}
+	data-slot="doctor-card"
+>
 	<div class="relative">
 		<AspectRatio ratio={16 / 9} class="bg-muted">
 			{#if doctor.imageUrl}
@@ -51,9 +54,13 @@
 			aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
 			aria-pressed={wishlisted}
 			onclick={toggleWishlist}
-			class="absolute top-2 right-2 inline-flex size-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur transition-colors hover:bg-black/55 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+			class="group absolute top-0.5 right-0.5 inline-flex size-touch items-center justify-center rounded-full outline-none"
 		>
-			<HeartIcon class={cn('size-5', wishlisted && 'fill-rose-500 text-rose-500')} />
+			<span
+				class="inline-flex size-control-sm items-center justify-center rounded-full bg-black/40 text-white backdrop-blur transition-colors group-hover:bg-black/55 group-focus-visible:ring-3 group-focus-visible:ring-ring/50"
+			>
+				<HeartIcon class={cn('size-5', wishlisted && 'fill-rose-500 text-rose-500')} />
+			</span>
 		</button>
 		{#if doctor.available}
 			<Badge variant="success" class="absolute bottom-2 left-2">Available today</Badge>

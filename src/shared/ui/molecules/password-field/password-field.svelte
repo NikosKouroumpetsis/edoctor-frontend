@@ -51,7 +51,7 @@
 			aria-pressed={revealed}
 			tabindex={-1}
 			onclick={() => (revealed = !revealed)}
-			class="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
+			class="flex size-touch items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
 		>
 			{#if revealed}<EyeOffIcon class="size-4" />{:else}<EyeIcon class="size-4" />{/if}
 		</button>

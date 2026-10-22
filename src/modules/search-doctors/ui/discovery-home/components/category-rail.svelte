@@ -38,17 +38,17 @@
 			type="button"
 			aria-pressed={isSelected}
 			onclick={() => onSelect(category.id)}
-			class="flex shrink-0 flex-col items-center gap-2 outline-none"
+			class="flex min-h-touch min-w-touch shrink-0 flex-col items-center gap-2 outline-none"
 		>
 			<span
 				class={[
-					'grid size-14 place-items-center rounded-full border transition-colors',
+					'grid size-tile place-items-center rounded-full border transition-colors',
 					isSelected
 						? 'border-primary/20 bg-primary/10 text-primary'
 						: 'border-border/70 bg-card text-muted-foreground'
 				]}
 			>
-				<Icon class="icon-xl" />
+				<Icon class="icon-lg" />
 			</span>
 			<span class="flex flex-col items-center gap-1">
 				<span class={['text-body-sm', isSelected ? 'text-foreground' : 'text-muted-foreground']}>
@@ -57,7 +57,7 @@
 				<span
 					class={[
 						'h-1 rounded-full transition-all',
-						isSelected ? 'w-8 bg-foreground' : 'w-0 bg-transparent'
+						isSelected ? 'w-full bg-foreground' : 'w-0 bg-transparent'
 					]}
 				></span>
 			</span>

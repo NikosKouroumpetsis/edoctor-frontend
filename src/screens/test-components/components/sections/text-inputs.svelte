@@ -13,7 +13,7 @@
 	description="In-house text input and label primitives bound to local state."
 >
 	<DemoRow label="Default">
-		<div class="grid w-full max-w-sm gap-2">
+		<div class="grid w-full max-w-narrow gap-2">
 			<Label for="demo-email">Email</Label>
 			<Input id="demo-email" type="email" placeholder="name@edoctor.gr" bind:value />
 			<p class="text-body-sm text-muted-foreground">Value: {value || '—'}</p>
@@ -21,7 +21,7 @@
 	</DemoRow>
 
 	<DemoRow label="States">
-		<Input class="max-w-3xs" placeholder="Disabled" disabled />
-		<Input class="max-w-3xs" placeholder="Invalid" aria-invalid="true" />
+		<Input class="max-w-narrow" placeholder="Disabled" disabled />
+		<Input class="max-w-narrow" placeholder="Invalid" aria-invalid="true" />
 	</DemoRow>
 </DemoSection>

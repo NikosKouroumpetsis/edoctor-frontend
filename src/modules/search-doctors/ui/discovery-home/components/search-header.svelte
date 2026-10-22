@@ -7,12 +7,12 @@
 
 <button
 	type="button"
-	class="flex w-full items-center gap-3 rounded-full border border-border/70 bg-card px-5 py-4 text-left shadow-soft transition-colors outline-none hover:border-border focus-visible:ring-3 focus-visible:ring-ring/50"
+	class="flex min-h-search-pill w-full items-center gap-3 rounded-full border border-border/70 bg-card px-5 py-4 text-left shadow-soft transition-colors outline-none hover:border-border focus-visible:ring-3 focus-visible:ring-ring/50"
 >
-	<SearchIcon class="icon-lg text-foreground" />
+	<SearchIcon class="icon-md text-foreground" />
 	<span class="flex-1 truncate text-body-md text-foreground/75">{placeholder}</span>
 	<span
-		class="grid size-8 place-items-center rounded-full border border-border/70 text-muted-foreground"
+		class="grid size-control-xs place-items-center rounded-full border border-border/70 text-muted-foreground"
 	>
 		<SlidersIcon class="icon-sm" />
 	</span>

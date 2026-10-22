@@ -15,7 +15,7 @@
 </script>
 
 <div data-slot="photo-cover" class="relative">
-	<AspectRatio ratio={16 / 10} class="overflow-hidden rounded-media bg-muted">
+	<AspectRatio ratio={16 / 10} class="overflow-hidden rounded-xl bg-muted">
 		{#if src}
 			<img {src} {alt} class="absolute inset-0 h-full w-full object-cover" />
 		{/if}
@@ -25,5 +25,5 @@
 	>
 		{m.image_uploader_cover_badge()}
 	</span>
-	<PhotoItemMenu id={item.id} class="absolute top-3 right-3" />
+	<PhotoItemMenu id={item.id} class="absolute top-1 right-1" />
 </div>

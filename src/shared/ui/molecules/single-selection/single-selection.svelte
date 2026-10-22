@@ -45,7 +45,7 @@
 		aria-label={label}
 		tabindex={-1}
 		{onkeydown}
-		class="flex flex-wrap gap-2"
+		class="flex flex-wrap gap-touch-gap"
 	>
 		{#each options as option, i (option.value)}
 			{@const checked = current === option.value}
@@ -59,7 +59,7 @@
 				tabindex={checked || (!current && i === 0) ? 0 : -1}
 				onclick={() => select(option.value)}
 				class={cn(
-					'rounded-md border-2 bg-card px-4 py-2 text-body-sm whitespace-nowrap transition-[color,border-color,box-shadow] outline-none select-none focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50',
+					'inline-flex min-h-touch min-w-touch items-center justify-center rounded-md border-2 bg-card px-4 py-2 text-body-sm whitespace-nowrap transition-[color,border-color,box-shadow] outline-none select-none focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50',
 					checked
 						? 'border-foreground text-foreground shadow-md'
 						: 'border-input text-muted-foreground hover:text-foreground'

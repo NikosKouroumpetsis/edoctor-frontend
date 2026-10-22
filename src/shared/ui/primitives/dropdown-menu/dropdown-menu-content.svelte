@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { scale } from 'svelte/transition';
+	import { step } from '$shared/design/tokens';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
 	import {
 		portal,
@@ -18,7 +19,7 @@
 		class: className,
 		placement = 'bottom',
 		align = 'start',
-		sideOffset = 6,
+		sideOffset = step(1.5),
 		children,
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
@@ -63,7 +64,7 @@
 		{onkeydown}
 		transition:scale={{ start: 0.95, duration: 120 }}
 		class={cn(
-			'z-50 min-w-40 overflow-y-auto rounded-control border border-border bg-popover p-1 text-popover-foreground shadow-overlay outline-none',
+			'z-50 min-w-menu-min-w overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-overlay outline-none',
 			className
 		)}
 		{...restProps}

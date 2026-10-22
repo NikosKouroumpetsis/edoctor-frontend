@@ -28,7 +28,7 @@
 	data-slot="tabs-list"
 	{onkeydown}
 	class={cn(
-		'inline-flex h-9 w-fit items-center justify-center rounded-lg bg-muted p-[3px] text-muted-foreground data-[orientation=vertical]:h-auto data-[orientation=vertical]:flex-col',
+		'inline-flex w-fit items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground data-[orientation=vertical]:flex-col',
 		className
 	)}
 	{...restProps}

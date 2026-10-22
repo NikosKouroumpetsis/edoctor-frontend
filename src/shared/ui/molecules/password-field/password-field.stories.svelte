@@ -13,7 +13,7 @@
 			disabled: false
 		},
 		argTypes: {
-			size: { control: 'select', options: ['sm', 'default', 'lg', 'xl'] },
+			size: { control: 'select', options: ['default', 'lg', 'xl'] },
 			disabled: { control: 'boolean' }
 		}
 	});
@@ -26,19 +26,19 @@
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class="w-80"><PasswordField {...args} /></div>
+		<div class="w-narrow"><PasswordField {...args} /></div>
 	{/snippet}
 </Story>
 
 <Story name="Default">
 	{#snippet template()}
-		<div class="w-80"><PasswordField label="Password" bind:value /></div>
+		<div class="w-narrow"><PasswordField label="Password" bind:value /></div>
 	{/snippet}
 </Story>
 
 <Story name="Reveal toggle">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<PasswordField label="Password" bind:value={revealValue} autocomplete="new-password" />
 			<p class="mt-2 text-body-sm text-muted-foreground">Use the eye button to reveal the value.</p>
 		</div>
@@ -47,7 +47,7 @@
 
 <Story name="With error">
 	{#snippet template()}
-		<div class="w-80">
+		<div class="w-narrow">
 			<PasswordField label="Password" value="123" error="Use at least 8 characters" />
 		</div>
 	{/snippet}
