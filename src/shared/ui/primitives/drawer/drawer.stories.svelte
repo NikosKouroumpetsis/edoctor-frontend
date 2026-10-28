@@ -8,10 +8,16 @@
 		DrawerFooter,
 		DrawerTitle,
 		DrawerDescription,
-		DrawerClose
+		DrawerClose,
+		type DrawerDirection,
+		type DrawerSize
 	} from '$shared/ui/primitives/drawer';
-	import { buttonVariants } from '$shared/ui/primitives/button';
+	import { buttonClasses } from '$shared/ui/primitives/button';
 
+	const sizes: DrawerSize[] = ['sm', 'md', 'lg'];
+
+	// Web only (the application has no drawer): it rises from its edge and goes back to it on the bottom sheet's motion
+	// (gorhom's 250 ms `out(exp)`, U-09.8), the backdrop fades (CSS, whatever the motion setting, U-12.1).
 	const { Story } = defineMeta({
 		title: 'Primitives/Drawer',
 		component: Drawer,
@@ -19,61 +25,50 @@
 	});
 </script>
 
-{#snippet example(direction: 'top' | 'bottom' | 'left' | 'right', label: string)}
+{#snippet example(direction: DrawerDirection, label: string)}
 	<Drawer>
-		<DrawerTrigger class={buttonVariants({ variant: 'outline' })}>{label}</DrawerTrigger>
+		<DrawerTrigger class={buttonClasses({ tone: 'outline' })}>{label}</DrawerTrigger>
 		<DrawerContent {direction}>
 			<DrawerHeader>
-				<DrawerTitle>Book an appointment</DrawerTitle>
-				<DrawerDescription>
-					Drag the handle (or this panel) toward the edge to dismiss.
-				</DrawerDescription>
+				<DrawerTitle>Κλείστε ραντεβού</DrawerTitle>
+				<DrawerDescription
+					>Σύρετε τη λαβή (ή το πάνελ) προς την άκρη για να κλείσει.</DrawerDescription
+				>
 			</DrawerHeader>
 			<DrawerFooter>
-				<DrawerClose class={buttonVariants({ variant: 'default' })}>Confirm</DrawerClose>
-				<DrawerClose class={buttonVariants({ variant: 'ghost' })}>Cancel</DrawerClose>
+				<DrawerClose class={buttonClasses()}>Επιβεβαίωση</DrawerClose>
+				<DrawerClose class={buttonClasses({ tone: 'ghost' })}>Άκυρο</DrawerClose>
 			</DrawerFooter>
 		</DrawerContent>
 	</Drawer>
 {/snippet}
 
 <Story name="Bottom">
-	{#snippet template()}
-		{@render example('bottom', 'Open bottom')}
-	{/snippet}
+	{#snippet template()}{@render example('bottom', 'Άνοιγμα κάτω')}{/snippet}
 </Story>
 
 <Story name="Top">
-	{#snippet template()}
-		{@render example('top', 'Open top')}
-	{/snippet}
+	{#snippet template()}{@render example('top', 'Άνοιγμα πάνω')}{/snippet}
 </Story>
 
 <Story name="Left">
-	{#snippet template()}
-		{@render example('left', 'Open left')}
-	{/snippet}
+	{#snippet template()}{@render example('left', 'Άνοιγμα αριστερά')}{/snippet}
 </Story>
 
 <Story name="Right">
-	{#snippet template()}
-		{@render example('right', 'Open right')}
-	{/snippet}
+	{#snippet template()}{@render example('right', 'Άνοιγμα δεξιά')}{/snippet}
 </Story>
 
 <Story name="Sizes">
 	{#snippet template()}
 		<div class="flex flex-wrap gap-3">
-			{#each ['sm', 'default', 'lg'] as const as size (size)}
+			{#each sizes as size (size)}
 				<Drawer>
-					<DrawerTrigger class={buttonVariants({ variant: 'outline' })}>Bottom {size}</DrawerTrigger
-					>
+					<DrawerTrigger class={buttonClasses({ tone: 'outline' })}>Κάτω {size}</DrawerTrigger>
 					<DrawerContent direction="bottom" {size}>
 						<DrawerHeader>
-							<DrawerTitle>Size {size}</DrawerTitle>
-							<DrawerDescription
-								>The {size} panel sets the bottom drawer height cap.</DrawerDescription
-							>
+							<DrawerTitle>Μέγεθος {size}</DrawerTitle>
+							<DrawerDescription>Το {size} ορίζει το μέγιστο ύψος.</DrawerDescription>
 						</DrawerHeader>
 					</DrawerContent>
 				</Drawer>
@@ -82,18 +77,20 @@
 	{/snippet}
 </Story>
 
-<Story name="Scrollable content">
+<Story name="Scrollable Content">
 	{#snippet template()}
 		<Drawer>
-			<DrawerTrigger class={buttonVariants({ variant: 'outline' })}>Open long drawer</DrawerTrigger>
+			<DrawerTrigger class={buttonClasses({ tone: 'outline' })}
+				>Άνοιγμα μεγάλης λίστας</DrawerTrigger
+			>
 			<DrawerContent direction="bottom">
 				<DrawerHeader>
-					<DrawerTitle>Terms</DrawerTitle>
-					<DrawerDescription>Scroll the list; drag from the top to dismiss.</DrawerDescription>
+					<DrawerTitle>Όροι</DrawerTitle>
+					<DrawerDescription>Κυλήστε τη λίστα· σύρετε από πάνω για να κλείσει.</DrawerDescription>
 				</DrawerHeader>
 				<div class="min-h-0 flex-1 overflow-y-auto pr-2">
 					{#each Array.from({ length: 30 }, (_, i) => i + 1) as n (n)}
-						<p class="border-b border-border py-2 text-body-sm">List item {n}</p>
+						<p class="border-b border-border py-2 text-body-sm">Στοιχείο {n}</p>
 					{/each}
 				</div>
 			</DrawerContent>

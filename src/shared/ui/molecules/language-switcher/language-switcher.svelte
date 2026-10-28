@@ -1,28 +1,52 @@
-<script lang="ts">
-	import type { Pathname } from '$app/types';
-	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
-	import { Button } from '$shared/ui/primitives/button';
-	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
-	import { languages, type SupportedLocale } from '$shared/preferences/i18n/locales';
-	import { deLocalizeHref, localizeHref } from '$paraglide/runtime';
+<script lang="ts" module>
+	export type LanguageOption = {
+		locale: string;
+		/** The same page in that language, already localized and resolved by the caller. */
+		href: string;
+		/** The language's name in itself («Ελληνικά», «English»): the link's accessible name. */
+		label: string;
+		/** The two letters on the button («EL», «EN»). */
+		shortLabel: string;
+		current: boolean;
+	};
 
-	const currentLocale = $derived(getPageLocale(page.url));
-	const basePath = $derived(deLocalizeHref(page.url.pathname));
-
-	const localizedHref = (locale: SupportedLocale) =>
-		resolve(localizeHref(basePath, { locale }) as Pathname);
+	// One segment per language: 48 targets side by side, the current one filled (no gap: one control).
+	const segmentClass =
+		'inline-flex min-h-touch min-w-touch items-center justify-center rounded-sm px-2 text-label-md font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
 </script>
 
-<div class="flex items-center rounded-md border border-border bg-background shadow-xs">
-	{#each languages as language (language.locale)}
-		<Button
-			href={localizedHref(language.locale)}
-			variant={currentLocale === language.locale ? 'secondary' : 'ghost'}
-			class="rounded-sm px-2 text-label-md"
-			aria-label={language.label}
+<script lang="ts">
+	import { cn } from '$shared/lib/utils';
+
+	let {
+		options,
+		'aria-label': ariaLabel
+	}: {
+		options: LanguageOption[];
+		/** The group's name, already localized. */
+		'aria-label'?: string;
+	} = $props();
+</script>
+
+<div
+	role="group"
+	aria-label={ariaLabel}
+	data-slot="language-switcher"
+	class="flex items-center rounded-md border border-border bg-background"
+>
+	{#each options as option (option.locale)}
+		<a
+			href={option.href}
+			hreflang={option.locale}
+			lang={option.locale}
+			aria-label={option.label}
+			aria-current={option.current ? 'true' : undefined}
+			class={cn(
+				segmentClass,
+				option.current ? 'bg-secondary text-secondary-foreground' : 'text-foreground hover:bg-muted'
+			)}
 		>
-			{language.shortLabel}
-		</Button>
+			{option.shortLabel}
+		</a>
 	{/each}
 </div>

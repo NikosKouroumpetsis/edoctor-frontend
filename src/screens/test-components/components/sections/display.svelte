@@ -29,28 +29,29 @@
 	description="Badges, avatars, progress, card, textarea, separators."
 >
 	<DemoRow label="Badge">
-		<Badge>Default</Badge>
-		<Badge variant="secondary">Secondary</Badge>
-		<Badge variant="success">Verified</Badge>
-		<Badge variant="warning">Pending</Badge>
-		<Badge variant="destructive">Error</Badge>
-		<Badge variant="outline">Outline</Badge>
+		<Badge label="Primary" />
+		<Badge tone="secondary" label="Secondary" />
+		<Badge tone="success" label="Verified" />
+		<Badge tone="warning" label="Pending" />
+		<Badge tone="danger" label="Error" />
+		<Badge tone="danger" solid label="Cancelled" />
+		<Badge tone="outline" label="Outline" />
 	</DemoRow>
 
 	<DemoRow label="Avatar">
-		<Avatar>
+		<Avatar size="md">
 			<AvatarImage src="https://i.pravatar.cc/80?img=5" alt="Maria" />
-			<AvatarFallback>MA</AvatarFallback>
+			<AvatarFallback class="text-body-sm font-normal">MA</AvatarFallback>
 		</Avatar>
-		<Avatar>
+		<Avatar size="md">
 			<AvatarImage src="" alt="broken" />
-			<AvatarFallback>JD</AvatarFallback>
+			<AvatarFallback class="text-body-sm font-normal">JD</AvatarFallback>
 		</Avatar>
 	</DemoRow>
 
 	<DemoRow label="Progress ({progress}%)">
-		<div class="w-full max-w-narrow"><Progress value={progress} /></div>
-		<Button variant="outline" onclick={() => (progress = (progress + 10) % 110)}>+10</Button>
+		<div class="w-full max-w-narrow"><Progress value={progress} class="h-2" /></div>
+		<Button tone="outline" label="+10" onclick={() => (progress = (progress + 10) % 110)} />
 	</DemoRow>
 
 	<DemoRow label="Separator">
@@ -76,7 +77,7 @@
 	<DemoRow label="Textarea">
 		<div class="grid w-full max-w-narrow gap-2">
 			<Label for="bio">Bio</Label>
-			<Textarea id="bio" bind:value={bio} placeholder="Tell us about yourself" />
+			<Textarea id="bio" size="sm" bind:value={bio} placeholder="Tell us about yourself" />
 		</div>
 	</DemoRow>
 
@@ -96,7 +97,7 @@
 				</AspectRatio>
 			</CardContent>
 			<CardFooter>
-				<Button class="w-full">Book appointment</Button>
+				<Button class="w-full" label="Book appointment" />
 			</CardFooter>
 		</Card>
 	</DemoRow>

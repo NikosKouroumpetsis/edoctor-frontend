@@ -41,8 +41,14 @@
 	onclick={() => group.toggle(value)}
 	class={cn(
 		toggleVariants({ variant: group.variant, size: group.size }),
-		'flex-1 shrink-0 rounded-none shadow-none first:rounded-l-md last:rounded-r-md focus:z-10 focus-visible:z-10',
-		group.variant === 'outline' && '-ml-px first:ml-0',
+		'flex-1 shrink-0 rounded-none shadow-none focus:z-10 focus-visible:z-10',
+		// The application's corners (`sm`) on the group's two ends, and the shared 1px edge, per orientation.
+		group.orientation === 'vertical'
+			? ['first:rounded-t-sm last:rounded-b-sm', group.variant === 'outline' && '-mt-px first:mt-0']
+			: [
+					'first:rounded-l-sm last:rounded-r-sm',
+					group.variant === 'outline' && '-ml-px first:ml-0'
+				],
 		className
 	)}
 	{...restProps}

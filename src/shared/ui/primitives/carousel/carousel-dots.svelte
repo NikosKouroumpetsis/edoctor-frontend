@@ -2,16 +2,26 @@
 	import { cn } from '$shared/lib/utils';
 	import { getCarouselContext } from './carousel.svelte';
 
-	let { class: className }: { class?: string } = $props();
+	let {
+		dotLabel,
+		class: className
+	}: {
+		/** The accessible name of the dot of slide `index` (0-based), already localized by the caller. */
+		dotLabel: (index: number) => string;
+		class?: string;
+	} = $props();
 
 	const ctx = getCarouselContext();
 </script>
 
-<div data-slot="carousel-dots" class={cn('flex flex-wrap justify-center gap-touch-gap', className)}>
+<div
+	data-slot="carousel-dots"
+	class={cn('mt-1 flex flex-wrap justify-center gap-touch-gap', className)}
+>
 	{#each Array.from({ length: ctx.count }, (_, i) => i) as i (i)}
 		<button
 			type="button"
-			aria-label={`Go to slide ${i + 1}`}
+			aria-label={dotLabel(i)}
 			aria-current={ctx.index === i}
 			onclick={() => ctx.scrollTo(i)}
 			class="group grid size-touch place-items-center rounded-full outline-none"

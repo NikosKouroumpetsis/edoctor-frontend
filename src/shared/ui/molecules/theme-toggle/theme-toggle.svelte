@@ -1,20 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { page } from '$app/state';
-	import MoonIcon from '~icons/lucide/moon';
-	import SunIcon from '~icons/lucide/sun';
-	import { Button } from '$shared/ui/primitives/button';
 	import { theme } from '$shared/preferences/theme';
-	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
-	import { m } from '$paraglide/messages.js';
+	import { IconButton } from '$shared/ui/primitives/icon-button';
 
-	const currentLocale = $derived(getPageLocale(page.url));
-	const messageOptions = $derived({ locale: currentLocale });
-	const label = $derived(
-		theme.resolved === 'dark'
-			? m.theme_toggle_light({}, messageOptions)
-			: m.theme_toggle_dark({}, messageOptions)
-	);
+	let {
+		lightLabel,
+		darkLabel
+	}: {
+		/** The name of the action that turns the light theme on, already localized. */
+		lightLabel: string;
+		/** The name of the action that turns the dark theme on. */
+		darkLabel: string;
+	} = $props();
+
+	const label = $derived(theme.resolved === 'dark' ? lightLabel : darkLabel);
 
 	onMount(() => {
 		theme.init();
@@ -25,17 +24,11 @@
 	};
 </script>
 
-<Button
-	variant="outline"
-	size="icon"
-	class="rounded-md"
+<IconButton
+	appearance="outline"
+	icon={theme.resolved === 'dark' ? 'sunny-outline' : 'moon-outline'}
+	iconSize="md"
 	aria-label={label}
 	title={label}
 	onclick={toggleTheme}
->
-	{#if theme.resolved === 'dark'}
-		<SunIcon class="size-4" />
-	{:else}
-		<MoonIcon class="size-4" />
-	{/if}
-</Button>
+/>

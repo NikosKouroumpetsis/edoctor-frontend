@@ -1,28 +1,36 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
-import SiteNavbar from './site-navbar.svelte';
+import Harness from './site-navbar.harness.svelte';
 
 describe('SiteNavbar', () => {
-	it('renders the brand and primary links', () => {
-		render(SiteNavbar, { props: { brand: 'eDoctor' } });
-		expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument();
-		expect(screen.getAllByRole('link', { name: 'Doctors' }).length).toBeGreaterThan(0);
+	it('U-03.8: renders the caller’s brand and links, named by the caller', () => {
+		render(Harness);
+		expect(screen.getByRole('link', { name: 'Δείγμα' })).toHaveAttribute('href', '/');
+		const primary = screen.getByRole('navigation', { name: 'Κύρια' });
+		expect(within(primary).getByRole('link', { name: 'Ενότητα Α' })).toHaveAttribute('href', '/a');
 	});
 
-	it('opens the account dropdown menu', async () => {
+	it('U-03.8: has no account menu without a person, and opens it with one', async () => {
+		const guest = render(Harness);
+		expect(screen.queryByRole('button', { name: 'Λογαριασμός' })).toBeNull();
+		guest.unmount();
 		const user = userEvent.setup();
-		render(SiteNavbar, { props: { userName: 'Maria Alexiou' } });
-		await user.click(screen.getByRole('button', { name: 'Account menu' }));
+		render(Harness, { props: { userName: 'Δείγμα Χρήστη' } });
+		await user.click(screen.getByRole('button', { name: 'Λογαριασμός' }));
 		expect(await screen.findByRole('menu')).toBeInTheDocument();
-		expect(screen.getByRole('menuitem', { name: 'Sign out' })).toBeInTheDocument();
+		expect(screen.getByRole('menuitem', { name: 'Αποσύνδεση' })).toHaveAttribute(
+			'data-variant',
+			'destructive'
+		);
 	});
 
-	it('opens the mobile navigation sheet', async () => {
+	it('U-03.8: opens the mobile sheet with its own close name', async () => {
 		const user = userEvent.setup();
-		render(SiteNavbar, { props: { brand: 'eDoctor' } });
-		await user.click(screen.getByRole('button', { name: 'Open menu' }));
+		render(Harness);
+		await user.click(screen.getByRole('button', { name: 'Άνοιγμα μενού' }));
 		const dialog = await screen.findByRole('dialog');
-		expect(within(dialog).getByRole('navigation', { name: 'Mobile' })).toBeInTheDocument();
+		expect(within(dialog).getByRole('navigation', { name: 'Κινητό' })).toBeInTheDocument();
+		expect(within(dialog).getByRole('button', { name: 'Κλείσιμο' })).toBeInTheDocument();
 	});
 });

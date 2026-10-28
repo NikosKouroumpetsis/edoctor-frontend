@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { Tabs, TabsList, TabsTrigger, TabsContent } from './index';
 
-	let { value = $bindable('account') }: { value?: string } = $props();
+	let {
+		value = $bindable('account'),
+		orientation = 'horizontal'
+	}: { value?: string; orientation?: 'horizontal' | 'vertical' } = $props();
 </script>
 
-<Tabs bind:value>
+<Tabs bind:value {orientation}>
 	<TabsList>
 		<TabsTrigger value="account">Account</TabsTrigger>
 		<TabsTrigger value="password">Password</TabsTrigger>

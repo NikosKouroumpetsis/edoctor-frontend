@@ -28,7 +28,7 @@ frontend/src/shared/design/tokens/
   test `tests/architecture/scale-parity.test.ts` transpiles both files and fails
   on the first difference, naming its path (`radius.md: 12 ≠ 8`). To change a
   value: edit the application file, copy it here, run `bun run tokens:build`.
-- `index.ts` adds what only the web has (`platform.spacing`, `platform.motion`)
+- `index.ts` adds what only the web has (`platform.spacing`, `platform.motion`, the `motion` durations and curves)
   and the derived lists both the theme and the class merger read
   (`spacingScale`, `mergeTheme`).
 - `src/generated/design-tokens.css` is generated and committed; never edit it.
@@ -93,6 +93,12 @@ each target and of each recipe `base`, and fails on a class that shrinks the box
 again (`min-w-0`, `h-8`) or on a size passed to a target component
 (`<Button class="size-6">`).
 
+**Inline links** are the one exception the test lists (`EXCEPTIONS` in
+`touch-targets.test.ts`, file + marker + reason; an entry without a match fails):
+the link of `InlineLinkText` (`data-slot="inline-link-text-link"`) is a word of
+a running sentence and takes the sentence's line height — the WCAG 2.5.8
+«inline» exception, as in the application.
+
 Known exceptions (written down here, not checked by a test):
 
 - **No 8 gap** between the adjacent segments of one control (language switcher,
@@ -101,14 +107,14 @@ Known exceptions (written down here, not checked by a test):
 - **Calendar cells** are fluid (`h-touch w-full` in a `w-narrow max-w-full`
   grid): 48 wide only in a container of at least 354; about 41 in a popover and
   about 36 inline on a 320 screen.
-- **Switch:** the web keeps its own track (24/32/40 × 16/18/24, thumb 12/16/20,
-  from steps and `control-xs/-sm`) inside the 48 box and does not read
-  `switchGeometry` (the application's 38/48/56 × 22/28/32 track). The values are
-  shared, the use differs per platform (SCALE-1 §1.11).
+- **Switch:** the web draws the application's track from the shared `switchGeometry` (38 / 48 / 56 × 22 / 28 /
+  32, a 2 inset, the thumb 18 / 24 / 28) inside the 48 box, as inline sizes read from the token (U-07.1).
 
 Fields (floating label) share one geometry, the class form of the `field`
-tokens: `fieldSizes` in `src/shared/ui/primitives/input` (`default` 48, `lg` 56,
-`xl` 64; text 16 so iOS Safari never zooms). The inline phone field draws its
+tokens: the box is `fieldSizes` in `src/shared/ui/primitives/input` (`default` 48,
+`lg` 56, `xl` 64; text 16 so iOS Safari never zooms) and the label's places are
+`FloatingLabel`'s (`src/shared/ui/primitives/floating-label`), keyed by the same
+`FieldSize`. The inline phone field draws its
 border as an overlay, so it has the same 48/56/64.
 
 ## Spacing roles and gutters
@@ -125,7 +131,19 @@ border as an overlay, so it has the same 48/56/64.
 
 `container-page` (centered, `max-w-page`, `px-gutter-sm split:px-gutter-md
 desktop:px-gutter-lg`) frames the header, `<main>` and footer;
-`container-bleed` lets a rail run into those gutters.
+`container-bleed` lets a rail run into those gutters. The same column as a
+component is `Container` (`src/shared/ui/molecules/container`, the application's
+K2.1): `width` (a container name, default `page`), `widthByZone` (another cap from
+a zone up, `{ split: 'listing' }`), `gutter` (`zone` | `none`) and `as`; its class
+maps (`containerWidthClasses`, `containerGutterClasses`) are the one source the
+layout units reuse.
+
+Bars pinned to the bottom edge pad themselves with utilities of
+`src/routes/layout.css` (not tokens): `pb-safe-area` (8 + the device safe area,
+the bottom navigation), `pb-safe-area-action` (16 + the safe area, `ActionBar`)
+and `pb-safe-area-sticky` (16, or the safe area + 6 where that is more, the phone
+`StickyActionBar`) — the application's formulas. The web sets no
+`viewport-fit=cover`, so the safe area is 0 in the browser today.
 
 ## Media and cards
 
@@ -133,27 +151,64 @@ Named in the shared `media` family (values unchanged from the screens that
 introduced them): `avatar-sm/md/lg/xl/2xl` 32/40/48/64/96 · `tile` 56 ·
 `card-rail-w` 168 / `-lg` 216 · `card-rail-media` 152 / `-lg` 188 ·
 `card-list-media` 188 / `-lg` 224 · `placeholder-sm/md/lg/xl` 64/80/96/160 ·
-`search-pill` 64 · `scroll-max` 256 … (full list in the canonical file).
+`search-pill` 64 · `search-bar-w` 850 / `search-bar-h` 66 (the web's `SearchBar` from 950, Airbnb's
+850 × 66, U-05.5; the application holds the same two names unused) · `scroll-max` 256 … (full list in the
+canonical file).
 
 ## Web-only names (`platform` in `index.ts`)
 
-`bar-top` 64 (header) · `menu-max-h` 288 · `menu-min-w` 160 · `popover-sm/md/lg`
+`bar-top` 64 (header) · `cta-inline` 32 (the pill call to action's inline padding,
+`StickyActionBar`; the application's own platform name and value) · `menu-max-h` 288 · `menu-min-w` 160 · `popover-sm/md/lg`
 224/288/320 · `textarea-md/lg/xl` 64/80/96 · `histogram-sm/md/lg` 80/112/128 ·
+`range-field-sm/md/lg` 112/144/160 (the price filter's min / max columns, the application's platform names) ·
 `dropzone-min-h` 288 · `drawer-handle` 48 · `drawer-inset` 96 · `brand-mark` 40
 (header logo) · `icon-tile` 48 (icon tile of a placeholder page) · `dial-code-w`
-56 (dial-code column of the inline phone field), and `platform.motion`: overlay
-travel (drawer 360, sheet 320) and `dismiss` 80 (drag distance that closes a
-drawer whose size cannot be measured). They reach the theme next to the shared
-names; promote one to the shared file when the application needs it.
+56 (dial-code column of the inline phone field), `hover-card-w` 256 (the application's hover card width, `HoverCard`
+`md`), and `platform.motion.dismiss` 80 (drag distance that closes a drawer whose size cannot be measured; the
+panels travel their own size, U-09.8). They reach the theme next to the shared names; promote one to the shared
+file when the application needs it.
+
+## Motion (`motion` in `index.ts`, U-09.8)
+
+ONE place for every duration and curve of the kit; the theme makes them `duration-<name>` and `ease-<name>`
+(`--transition-duration-*`, `--ease-*`), and every motion of the web is CSS on those classes (U-12.2; the way in
+`starting:`, the way out `data-[state=closed]:`, `Presence` of `$shared/lib/headless` keeping a leaving layer;
+see «Motion» in `styling-guidelines.md`). `motion.ts` keeps only the leave's clocks (`leaveTimeout`: the token
+and a 50 ms grace, `isMoving`).
+
+| Name        | ms  | Curve                                                            | Source                                                                                                                                                                                      |
+| ----------- | --- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `standard`  | 250 | `cubic-bezier(0.2, 0, 0, 1)`                                     | Airbnb (every layer the application does not animate)                                                                                                                                       |
+| `sheet`     | 250 | `cubic-bezier(0.16, 1, 0.3, 1)` (`expoOut`)                      | gorhom 5.2.14: Android 250 ms `Easing.out(Easing.exp)`; iOS a spring (damping 500, stiffness 1000, mass 3, `overshootClamping`, ~95 % at 0.26 s); the web keeps 250 ms `expoOut`, near both |
+| `accordion` | 220 | `cubic-bezier(0.45, 0, 0.55, 1)` (`quadInOut`)                   | `accordionAnimationDuration` + `withTiming`'s default                                                                                                                                       |
+| `zoom`      | 220 | `zoom-in` `(0.33, 1, 0.68, 1)` · `zoom-out` `(0.32, 0, 0.67, 0)` | `MODAL_ANIMATION_DURATION`, open `out(cubic)`, close `in(cubic)`                                                                                                                            |
+| `label`     | 200 | `cubic-bezier(0.45, 0, 0.55, 1)`                                 | `FloatingLabel`'s `labelAnimationDuration` + `withTiming`'s default                                                                                                                         |
+| `segment`   | 180 | `cubic-bezier(0.33, 1, 0.68, 1)` (`cubicOut`)                    | `THUMB_SLIDE_DURATION_MS` + `Easing.out(Easing.cubic)`                                                                                                                                      |
+| `reveal`    | 800 | the `standard` curve (`ease-standard`), no curve of its own      | Airbnb's fade of what arrives (measured, U-14.1): the `CollapsingHero` photo and its pill once it loads (U-14.5)                                                                            |
+
+The modal panel's pair (`panelFade` in `index.ts`, the application's `panelStyle`): `ease-modal-panel-in` and
+`ease-modal-panel-out` are two curves each, for `transition-[translate,opacity]` — the rise on `zoom-in` /
+`zoom-out` and the fade on `linear()` points of the same curve (none until it reaches 35 %, then linear in it),
+generated by `to-css.ts` (`panelFadeCurve`).
+
+Nothing reads the device's motion setting (U-12.1, which cancels U-09.13): no `motion-reduce:` / `motion-safe:`,
+no `prefers-reduced-motion`. The owner's Mac has macOS «Reduce motion» on (System Settings → Accessibility →
+Display) and the kit moves there as everywhere (`tests/architecture/motion.test.ts`).
 
 ## Containers (`max-w-*`, also `w-*`)
 
-`narrow` 360 · `text` 480 · `form` 560 · `content` 760 · `listing` 1120 ·
-`page` 1440. Tailwind's `max-w-sm … max-w-7xl` do not compile.
+`narrow` 360 · `text` 480 · `form` 560 · `dialog` 568 · `content` 760 · `listing`
+1120 · `page` 1440 · `wide` 1920. Tailwind's `max-w-sm … max-w-7xl` do not
+compile. `dialog` is the Airbnb filter dialog the modal templates become from 744;
+`wide` is the page column from 1920 (U-04, both started in the application).
 
 Container queries use the same names: `@container` on the parent, `@<name>:` on
 the child (`@form:inline-flex` = parent at least 560 wide). The header uses them:
 the brand word shows from a 360 header, «Σύνδεση» from 560.
+
+The page column is 1440 and, from 1920, Airbnb's 1920 in the centre (its 4K zone,
+U-04.1): `container-page` and `Container width="page"` add `wide:max-w-wide`; the
+gutter stays the desktop's 48.
 
 ## Breakpoints (mobile-first)
 
@@ -164,6 +219,7 @@ the brand word shows from a 360 header, «Σύνδεση» from 560.
 | `split:`   | 950  | two columns, gutter 32                |
 | `laptop:`  | 1128 | desktop header (the bottom nav hides) |
 | `desktop:` | 1440 | gutter 48, page centered              |
+| `wide:`    | 1920 | 4K: the page column becomes 1920      |
 
 `sm: md: lg: xl: 2xl:` do not exist (`--breakpoint-*: initial`). In hand-written
 CSS use `>=` / `<` media conditions, never a one-line range.
@@ -172,8 +228,18 @@ CSS use `>=` / `<` media conditions, never a one-line range.
 
 - Icons (`icon-*`, width + height): `xs` 12 · `sm` 16 · `md` 20 · `lg` 24 · `xl` 32.
 - Radii (`rounded-*`, closed scale): `xs` 4 · `sm` 8 · `md` 12 · `lg` 16 · `xl` 24,
-  plus `full`/`none`. Bare `rounded` and `rounded-2xl … 4xl` do not compile.
-- Elevation (`shadow-*`): `raised` · `overlay` · `floating` · `soft` · `bar`.
+  plus `full`/`none` — five steps, as the application's (the Airbnb dialog's 32 stays
+  an open question, the dialog keeps `xl`). Bare `rounded` and
+  `rounded-2xl … 4xl` do not compile.
+- Elevation (`shadow-*`): `raised` · `overlay` · `floating` · `soft` · `bar`. The
+  generated theme resets `--shadow-*` (`RESET_NAMESPACES` in `to-css.ts`), so these
+  are the only shadows; Tailwind's `shadow-xs | sm | md …` do not compile (U-03.4).
+- Motion: `animate-spinner` (8 spokes, one turn a second in 8 steps, the
+  application's `ActivityIndicator`), `animate-skeleton` (the application's
+  0.9 ⇄ 0.4 breathing, 850 ms each way), `animate-upload-ring` and the code field's
+  `animate-caret-blink` (shadcn's, the kit's own since U-12.2), whatever the motion
+  setting (U-12.1). They live in the `@theme` block of `src/routes/layout.css`; the transitions' durations and curves are the `motion`
+  tokens (above). `can-hover:` (`@media (hover: hover)`, `layout.css`) is the variant for what a pointer reveals.
 - Sheet heights (`max-h-sheet-*`, viewport %): `sm` 60 · `md` 70 · `lg` 85 · `xl` 90.
 - Focus rings are `ring-3`; field focus is a border-color change (`border` +
   `focus-visible:border-ring`).

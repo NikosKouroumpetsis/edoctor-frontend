@@ -2,71 +2,85 @@
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { Slider } from '$shared/ui/primitives/slider';
 
+	// The application's meta (`atoms/slider`); its `accessibilityLabel` is the web's `aria-label`.
 	const { Story } = defineMeta({
 		title: 'Primitives/Slider',
 		component: Slider,
-		tags: ['autodocs']
+		tags: ['autodocs'],
+		args: { 'aria-label': 'Ένταση', min: 0, max: 100, step: 1, disabled: false, value: 40 },
+		argTypes: {
+			min: { control: 'number' },
+			max: { control: 'number' },
+			step: { control: 'number' },
+			disabled: { control: 'boolean' },
+			size: { control: 'select', options: ['sm', 'default', 'lg'] },
+			tone: { control: 'select', options: ['primary', 'accent'] }
+		}
 	});
 </script>
 
 <script lang="ts">
-	let single = $state(50);
-	let range = $state([20, 80]);
-	let accent = $state([20, 80]);
-	let stepped = $state(40);
-	let small = $state(50);
-	let medium = $state(50);
-	let large = $state(50);
+	type SliderValue = number | number[];
+	let single = $state<SliderValue>(40);
+	let range = $state<SliderValue>([25, 75]);
+	const toned = $state<Record<string, SliderValue>>({ primary: [25, 75], accent: [25, 75] });
+	const sized = $state<Record<string, SliderValue>>({
+		sm: [25, 75],
+		default: [25, 75],
+		lg: [25, 75]
+	});
+	let stepped = $state<SliderValue>(40);
 </script>
 
 <Story name="Single">
 	{#snippet template()}
-		<div class="w-narrow">
-			<Slider bind:value={single} aria-label="Volume" />
-			<p class="mt-2 text-body-sm text-muted-foreground">Value: {single}</p>
+		<div class="flex w-full max-w-narrow flex-col gap-4">
+			<Slider aria-label="Ένταση" bind:value={single} />
 		</div>
 	{/snippet}
 </Story>
 
 <Story name="Range">
 	{#snippet template()}
-		<div class="w-narrow">
-			<Slider bind:value={range} aria-label="Price range" />
-			<p class="mt-2 text-body-sm text-muted-foreground">Range: {range.join(' – ')}</p>
+		<div class="flex w-full max-w-narrow flex-col gap-4">
+			<Slider aria-label="Εύρος" bind:value={range} />
 		</div>
 	{/snippet}
 </Story>
 
-<Story name="Stepped">
+<Story name="Tones">
 	{#snippet template()}
-		<div class="w-narrow">
-			<Slider bind:value={stepped} min={0} max={100} step={10} aria-label="Stepped" />
-			<p class="mt-2 text-body-sm text-muted-foreground">Value: {stepped} (step 10)</p>
+		<div class="flex w-full max-w-narrow flex-col gap-6">
+			{#each ['primary', 'accent'] as const as tone (tone)}
+				<p class="text-label-lg text-muted-foreground">{tone}</p>
+				<Slider aria-label="Εύρος" {tone} bind:value={toned[tone]} />
+			{/each}
 		</div>
-	{/snippet}
-</Story>
-
-<Story name="Accent tone">
-	{#snippet template()}
-		<div class="w-narrow">
-			<Slider bind:value={accent} tone="accent" aria-label="Accent range" />
-			<p class="mt-2 text-body-sm text-muted-foreground">Range: {accent.join(' – ')}</p>
-		</div>
-	{/snippet}
-</Story>
-
-<Story name="Disabled">
-	{#snippet template()}
-		<div class="w-narrow"><Slider value={30} disabled aria-label="Disabled" /></div>
 	{/snippet}
 </Story>
 
 <Story name="Sizes">
 	{#snippet template()}
-		<div class="flex w-narrow flex-col gap-6">
-			<Slider bind:value={small} size="sm" aria-label="Small" />
-			<Slider bind:value={medium} size="default" aria-label="Default" />
-			<Slider bind:value={large} size="lg" aria-label="Large" />
+		<div class="flex w-full max-w-narrow flex-col gap-6">
+			{#each ['sm', 'default', 'lg'] as const as size (size)}
+				<p class="text-label-lg text-muted-foreground">{size}</p>
+				<Slider aria-label="Εύρος" {size} bind:value={sized[size]} />
+			{/each}
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Disabled" args={{ disabled: true }}>
+	{#snippet template(args)}
+		<div class="flex w-full max-w-narrow flex-col gap-4"><Slider {...args} value={40} /></div>
+	{/snippet}
+</Story>
+
+<!-- Stops every 10. -->
+<Story name="Stepped" args={{ max: 100, min: 0, step: 10 }}>
+	{#snippet template(args)}
+		<div class="flex w-full max-w-narrow flex-col gap-4">
+			<Slider {...args} aria-label="Ένταση" bind:value={stepped} />
 		</div>
 	{/snippet}
 </Story>

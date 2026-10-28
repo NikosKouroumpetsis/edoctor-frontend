@@ -76,4 +76,28 @@ describe('InputOTP', () => {
 			expect((slot as HTMLElement).className).not.toMatch(/border/);
 		});
 	});
+
+	// U-07.1: the application's sizes (the row's resting height, inset and digits; the web had one fixed row) and its
+	// `invalid` (the danger border and aria-invalid).
+	it('U-07.1: md by default, sm / lg as the application’s, the corner md', () => {
+		const md = render(Harness);
+		const row = () => document.querySelector('[data-slot="input-otp"]') as HTMLElement;
+		const slot = () => document.querySelector('[data-slot="input-otp-slot"]') as HTMLElement;
+		expect(row()).toHaveClass('min-h-control-lg', 'px-4', 'rounded-md', 'border-input');
+		expect(row()).not.toHaveClass('h-control-md', 'rounded-lg');
+		expect(slot()).toHaveClass('text-title-sm');
+		md.unmount();
+		const sm = render(Harness, { props: { size: 'sm' } });
+		expect(row()).toHaveClass('min-h-control-md', 'px-3');
+		sm.unmount();
+		render(Harness, { props: { size: 'lg' } });
+		expect(row()).toHaveClass('min-h-control-xl', 'px-5');
+		expect(slot()).toHaveClass('text-title-md');
+	});
+
+	it('U-07.1: invalid draws the danger border and says aria-invalid', () => {
+		render(Harness, { props: { invalid: true } });
+		expect(document.querySelector('[data-slot="input-otp"]')).toHaveClass('border-danger');
+		expect(screen.getByLabelText('One-time passcode')).toHaveAttribute('aria-invalid', 'true');
+	});
 });

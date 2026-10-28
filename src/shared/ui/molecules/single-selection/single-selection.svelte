@@ -61,7 +61,7 @@
 				class={cn(
 					'inline-flex min-h-touch min-w-touch items-center justify-center rounded-md border-2 bg-card px-4 py-2 text-body-sm whitespace-nowrap transition-[color,border-color,box-shadow] outline-none select-none focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50',
 					checked
-						? 'border-foreground text-foreground shadow-md'
+						? 'border-foreground text-foreground shadow-raised'
 						: 'border-input text-muted-foreground hover:text-foreground'
 				)}
 			>
@@ -69,5 +69,5 @@
 			</button>
 		{/each}
 	</div>
-	{#if currentError}<p class="mt-1 text-body-sm text-destructive">{currentError}</p>{/if}
+	{#if currentError}<p class="mt-1 text-body-sm text-danger-text">{currentError}</p>{/if}
 </div>

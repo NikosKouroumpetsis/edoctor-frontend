@@ -1,26 +1,32 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { Label } from '$shared/ui/primitives/label';
-	import { Input } from '$shared/ui/primitives/input';
 
 	const { Story } = defineMeta({
 		title: 'Primitives/Label',
 		component: Label,
-		tags: ['autodocs']
+		tags: ['autodocs'],
+		args: { label: 'Διεύθυνση email', required: false, disabled: false },
+		argTypes: {
+			label: { control: 'text' },
+			required: { control: 'boolean' },
+			disabled: { control: 'boolean' }
+		}
 	});
 </script>
 
-<Story name="Default">
-	{#snippet template()}
-		<Label>Email address</Label>
+<Story name="Playground">
+	{#snippet template(args)}
+		<Label {...args} />
 	{/snippet}
 </Story>
 
-<Story name="With input association">
+<Story name="States">
 	{#snippet template()}
-		<div class="flex w-narrow flex-col gap-2">
-			<Label for="email">Email address</Label>
-			<Input id="email" type="email" placeholder="you@example.com" />
+		<div class="flex flex-col gap-3">
+			<Label label="Κανονική ετικέτα" />
+			<Label label="Υποχρεωτικό πεδίο" required />
+			<Label label="Ανενεργό πεδίο" disabled />
 		</div>
 	{/snippet}
 </Story>

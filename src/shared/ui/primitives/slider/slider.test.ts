@@ -119,4 +119,53 @@ describe('Slider', () => {
 		render(Slider, { props: { value: 50, 'aria-label': 'Volume' } });
 		expect(screen.getByRole('slider', { name: 'Volume' })).toHaveAttribute('aria-valuetext', '50');
 	});
+
+	// U-06.2: a thumb's 48 box at either end ran 24 past the slider (the owner saw it at 4θ); the rail the thumbs sit
+	// on is inset by half that box, the track spans the rail.
+	it('U-06.2: the thumbs sit on a rail inset by half the touch box, so both ends stay inside', () => {
+		const { container } = render(Slider, { props: { value: [0, 100], 'aria-label': 'Εύρος' } });
+		const rail = container.querySelector('[data-slot="slider-rail"]') as HTMLElement;
+		expect(rail).toHaveClass('relative', 'mx-6');
+		expect(rail.parentElement).toHaveAttribute('data-slot', 'slider');
+		for (const thumb of screen.getAllByRole('slider')) {
+			expect(thumb.parentElement).toBe(rail);
+			expect(thumb).toHaveClass('size-touch', '-translate-x-1/2');
+		}
+		expect(container.querySelector('[data-slot="slider-track"]')?.parentElement).toBe(rail);
+	});
+
+	// U-06.10 + NIT-1 (R1 review): a press on the dot is not cancelled and focuses the thumb without a scroll (Safari
+	// and Firefox on macOS focus no pressed button, and the arrows must move it after a drag). Chrome's scripted focus
+	// matches `:focus-visible` (the orchestrator's measurement), so `focusVisible: false`: the press shows no ring.
+	it('U-06.10: pressing the dot focuses the thumb, not visibly, without cancelling the press or scrolling', async () => {
+		const { container } = render(Slider, { props: { value: 50, 'aria-label': 'Ένταση' } });
+		const thumb = screen.getByRole('slider', { name: 'Ένταση' });
+		const dot = container.querySelector('[data-slot="slider-thumb-dot"]') as HTMLElement;
+		const focus = vi.spyOn(thumb, 'focus');
+		const press = new MouseEvent('pointerdown', { bubbles: true, cancelable: true, clientX: 0 });
+		dot.dispatchEvent(press);
+		await fireEvent.pointerUp(window);
+		expect(press.defaultPrevented).toBe(false);
+		expect(focus).toHaveBeenCalledWith({ preventScroll: true, focusVisible: false });
+		expect(thumb).toHaveFocus();
+		const pressed = [...thumb.classList, ...dot.classList];
+		expect(
+			pressed.filter((name) => /^(focus|active|focus-within):(ring|outline|border)/.test(name))
+		).toEqual([]);
+	});
+
+	it('U-06.10: the thumb draws no outline; its ring is only the keyboard’s (`focus-visible`)', () => {
+		const { container } = render(Slider, { props: { value: 50, 'aria-label': 'Ένταση' } });
+		const thumb = screen.getByRole('slider', { name: 'Ένταση' });
+		expect(thumb).toHaveClass('outline-none', '[-webkit-tap-highlight-color:transparent]');
+		const dot = container.querySelector('[data-slot="slider-thumb-dot"]') as HTMLElement;
+		const rings = [...thumb.classList, ...dot.classList].filter((name) =>
+			/(^|:)(ring|outline)-/.test(name)
+		);
+		expect(rings.length).toBeGreaterThan(0);
+		for (const ring of rings) {
+			if (ring === 'outline-none') continue;
+			expect(ring).toMatch(/^group-focus-visible:/);
+		}
+	});
 });

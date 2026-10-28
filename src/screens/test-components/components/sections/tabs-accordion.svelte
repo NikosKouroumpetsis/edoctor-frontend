@@ -40,14 +40,23 @@
 	</DemoRow>
 
 	<DemoRow label="Accordion (single)">
-		<Accordion type="single" value="q1" class="w-full max-w-text">
+		<!-- The application's API (K4.5): the chevron and the second press that closes are the caller's choice. -->
+		<Accordion type="single" value="q1" collapsible class="w-full max-w-text">
 			<AccordionItem value="q1">
-				<AccordionTrigger>How do I book an appointment?</AccordionTrigger>
-				<AccordionContent>Search for a doctor, pick a slot, and confirm.</AccordionContent>
+				<AccordionTrigger showChevron>
+					<span class="text-body-md font-medium">How do I book an appointment?</span>
+				</AccordionTrigger>
+				<AccordionContent contentClass="pb-4 text-body-sm"
+					>Search for a doctor, pick a slot, and confirm.</AccordionContent
+				>
 			</AccordionItem>
 			<AccordionItem value="q2">
-				<AccordionTrigger>Can I cancel for free?</AccordionTrigger>
-				<AccordionContent>Yes, up to 24 hours before the appointment.</AccordionContent>
+				<AccordionTrigger showChevron>
+					<span class="text-body-md font-medium">Can I cancel for free?</span>
+				</AccordionTrigger>
+				<AccordionContent contentClass="pb-4 text-body-sm"
+					>Yes, up to 24 hours before the appointment.</AccordionContent
+				>
 			</AccordionItem>
 		</Accordion>
 	</DemoRow>

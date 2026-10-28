@@ -1,14 +1,19 @@
 import {
 	breakpoints,
 	containers,
+	cubicBezier,
+	cubicBezierCss,
 	elevation,
 	icon,
 	leading,
+	motion,
+	panelFade,
 	radius,
 	spacingScale,
 	steps,
 	tracking,
-	typography
+	typography,
+	type MotionEasing
 } from './index';
 
 const HEADER = `/*
@@ -19,16 +24,48 @@ const HEADER = `/*
  * Edit the .ts source, not this file.
  */`;
 
-const RESET_NAMESPACES = ['text', 'leading', 'radius', 'container', 'breakpoint'];
+const RESET_NAMESPACES = ['text', 'leading', 'radius', 'shadow', 'container', 'breakpoint'];
 
 function px(value: number): string {
 	return `${value}px`;
 }
 
+const round = (value: number, digits: number) => Number(value.toFixed(digits));
+
 /**
- * Turns the token registry into the Tailwind v4 theme: the 4px step, a reset of every size namespace the
- * scale owns (so a Tailwind default such as `text-sm`, `max-w-md` or `sm:` stops compiling) followed by
- * our names, and the `icon-*` utilities. Pure: no side effects, no Node imports.
+ * The modal panel's fade as `linear()` points of a zoom curve (the application's `panelStyle`, U-12.2): opening
+ * (`zoom-in`, 0 ⇒ 1) the fade is none until the curve reaches `hiddenUntil`, then linear in it; closing (`zoom-out`,
+ * 1 ⇒ 0, Svelte's former `t = 1 - curve`) the panel is gone once the curve passes `1 - hiddenUntil`. The point where
+ * the fade starts (or ends) is solved exactly, the rest sampled at `panelFade.points`.
+ */
+export function panelFadeCurve(name: 'zoom-in' | 'zoom-out'): string {
+	const [x1, y1, x2, y2] = motion.easing[name];
+	const curve = cubicBezier(x1, y1, x2, y2);
+	const { hiddenUntil, points } = panelFade;
+	const opening = name === 'zoom-in';
+	const share = (y: number) =>
+		opening
+			? Math.max(0, (y - hiddenUntil) / (1 - hiddenUntil))
+			: Math.min(1, y / (1 - hiddenUntil));
+	const target = opening ? hiddenUntil : 1 - hiddenUntil;
+	let low = 0;
+	let high = 1;
+	while (high - low > 1e-9) {
+		const middle = (low + high) / 2;
+		if (curve(middle) < target) low = middle;
+		else high = middle;
+	}
+	const times = [...Array.from({ length: points + 1 }, (_, index) => index / points), high].sort(
+		(a, b) => a - b
+	);
+	const stops = times.map((time) => `${round(share(curve(time)), 4)} ${round(time * 100, 2)}%`);
+	return `linear(${stops.join(', ')})`;
+}
+
+/**
+ * Turns the token registry into the Tailwind v4 theme: the 4px step, a reset of every namespace the
+ * scale owns (so a Tailwind default such as `text-sm`, `max-w-md`, `shadow-md` or `sm:` stops compiling)
+ * followed by our names, and the `icon-*` utilities. Pure: no side effects, no Node imports.
  */
 export function tokensToCss(): string {
 	const lines: string[] = ['@theme {', `\t--spacing: ${px(steps.base)};`];
@@ -55,6 +92,20 @@ export function tokensToCss(): string {
 	for (const [name, value] of Object.entries(breakpoints)) {
 		lines.push(`\t--breakpoint-${name}: ${px(value)};`);
 	}
+	// Motion (U-09.8): `duration-<name>` and `ease-<name>` next to Tailwind's own `ease-in | out | in-out`.
+	for (const [name, value] of Object.entries(motion.duration)) {
+		lines.push(`\t--transition-duration-${name}: ${value}ms;`);
+	}
+	for (const name of Object.keys(motion.easing) as MotionEasing[]) {
+		lines.push(`\t--ease-${name}: ${cubicBezierCss(name)};`);
+	}
+	// The modal panel (U-12.2): `transition-[translate,opacity]` rises on the zoom's curve and fades on `linear()`.
+	lines.push(
+		`\t--ease-modal-panel-in: ${cubicBezierCss('zoom-in')}, ${panelFadeCurve('zoom-in')};`
+	);
+	lines.push(
+		`\t--ease-modal-panel-out: ${cubicBezierCss('zoom-out')}, ${panelFadeCurve('zoom-out')};`
+	);
 	lines.push('}', '');
 
 	for (const [name, value] of Object.entries(icon)) {

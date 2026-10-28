@@ -3,6 +3,7 @@ import {
 	breakpoints,
 	containers,
 	controls,
+	elevation,
 	icon,
 	leading,
 	media,
@@ -70,7 +71,7 @@ describe('tokensToCss', () => {
 
 	it('sets the 4px step and resets each owned namespace before defining it', () => {
 		expect(css).toContain(`--spacing: ${steps.base}px;`);
-		for (const namespace of ['text', 'leading', 'radius', 'container', 'breakpoint']) {
+		for (const namespace of ['text', 'leading', 'radius', 'shadow', 'container', 'breakpoint']) {
 			const reset = css.indexOf(`--${namespace}-*: initial;`);
 			expect(reset, namespace).toBeGreaterThan(-1);
 			expect(reset, namespace).toBeLessThan(css.indexOf(`--${namespace}-`, reset + 1));
@@ -88,6 +89,7 @@ describe('tokensToCss', () => {
 		expect(css).toContain('--container-form: 560px;');
 		expect(css).toContain('--breakpoint-split: 950px;');
 		expect(css).toContain('--radius-md: 12px;');
+		for (const name of Object.keys(elevation)) expect(css).toContain(`--shadow-${name}:`);
 		for (const name of Object.keys(spacingScale)) expect(css).toContain(`--spacing-${name}:`);
 		for (const name of Object.keys(icon)) expect(css).toContain(`@utility icon-${name} {`);
 	});

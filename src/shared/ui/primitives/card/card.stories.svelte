@@ -1,90 +1,36 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import {
-		Card,
-		CardHeader,
-		CardTitle,
-		CardDescription,
-		CardAction,
-		CardContent,
-		CardFooter
-	} from '$shared/ui/primitives/card';
+	import { Card } from '$shared/ui/primitives/card';
 	import { Button } from '$shared/ui/primitives/button';
+	import { Text } from '$shared/ui/primitives/text';
 
+	// The application's meta (`molecules/card`): its one shell with a 12 column gap.
 	const { Story } = defineMeta({
 		title: 'Primitives/Card',
 		component: Card,
-		tags: ['autodocs']
+		tags: ['autodocs'],
+		args: { class: 'gap-3' },
+		argTypes: { class: { control: 'text' } }
 	});
 </script>
 
-<Story name="Default">
-	{#snippet template()}
-		<Card class="w-narrow">
-			<CardHeader>
-				<CardTitle>Appointment</CardTitle>
-				<CardDescription>Cardiology — Dr. Maria Alexiou</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<p class="text-body-sm text-muted-foreground">
-					Tuesday, 24 June 2026 at 10:30. Please arrive 10 minutes early.
-				</p>
-			</CardContent>
+<Story name="Playground">
+	{#snippet template(args)}
+		<Card {...args}>
+			<Text variant="heading">Κάρτα γιατρού</Text>
+			<Text class="text-body-md text-muted-foreground">
+				Η κοινή επιφάνεια κάρτας με ακτίνα `xl`, απαλή σκίαση και χρώμα card.
+			</Text>
 		</Card>
 	{/snippet}
 </Story>
 
-<Story name="With action">
-	{#snippet template()}
-		<Card class="w-narrow">
-			<CardHeader>
-				<CardTitle>Notifications</CardTitle>
-				<CardDescription>Manage your reminders</CardDescription>
-				<CardAction>
-					<Button variant="ghost">Edit</Button>
-				</CardAction>
-			</CardHeader>
-			<CardContent>
-				<p class="text-body-sm text-muted-foreground">Email and SMS reminders are enabled.</p>
-			</CardContent>
-		</Card>
-	{/snippet}
-</Story>
-
-<Story name="Sizes">
-	{#snippet template()}
-		<div class="flex flex-col gap-4">
-			{#each ['sm', 'default', 'lg'] as const as size (size)}
-				<Card {size} class="w-narrow">
-					<CardHeader>
-						<CardTitle>Size {size}</CardTitle>
-						<CardDescription>Vertical padding and section gap scale with size.</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<p class="text-body-sm text-muted-foreground">Card body content.</p>
-					</CardContent>
-				</Card>
-			{/each}
-		</div>
-	{/snippet}
-</Story>
-
-<Story name="With footer">
-	{#snippet template()}
-		<Card class="w-narrow">
-			<CardHeader>
-				<CardTitle>Cancel appointment</CardTitle>
-				<CardDescription>This action cannot be undone.</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<p class="text-body-sm text-muted-foreground">
-					Cancelling frees the slot for other patients.
-				</p>
-			</CardContent>
-			<CardFooter class="justify-end gap-2">
-				<Button variant="outline">Keep</Button>
-				<Button variant="destructive">Cancel it</Button>
-			</CardFooter>
+<Story name="With Action">
+	{#snippet template(args)}
+		<Card {...args} class="gap-4">
+			<Text variant="heading">Επόμενο ραντεβού</Text>
+			<Text class="text-body-md text-muted-foreground">Δρ. Παπαδοπούλου · Τρίτη 10:00</Text>
+			<Button label="Προβολή" radius="md" tone="primary" />
 		</Card>
 	{/snippet}
 </Story>

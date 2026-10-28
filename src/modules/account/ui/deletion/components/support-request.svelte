@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MailIcon from '~icons/lucide/mail';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { Button } from '$shared/ui/primitives/button';
 	import { m } from '$paraglide/messages.js';
 	import type { DeletionSupportProps } from '../types';
@@ -39,9 +39,11 @@
 	<Button
 		href={`mailto:${supportEmail}?subject=${subject}`}
 		size="lg"
+		label={m.account_deletion_support_action({}, messageOptions)}
 		class="mt-6 w-full tablet:w-auto"
 	>
-		<MailIcon class="icon-sm" />
-		{m.account_deletion_support_action({}, messageOptions)}
+		{#snippet leading()}
+			<Ionicon name="mail-outline" class="icon-sm text-primary-foreground" />
+		{/snippet}
 	</Button>
 </section>

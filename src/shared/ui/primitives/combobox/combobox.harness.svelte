@@ -12,5 +12,13 @@
 	let value = $state('');
 </script>
 
-<Combobox label="Specialty" {options} {allowFreeText} bind:value />
+<Combobox
+	label="Specialty"
+	emptyText="Δεν βρέθηκαν αποτελέσματα"
+	clearLabel="Clear"
+	toggleLabel="Toggle options"
+	{options}
+	{allowFreeText}
+	bind:value
+/>
 <p data-testid="cb-value">{value || 'empty'}</p>

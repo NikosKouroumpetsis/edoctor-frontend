@@ -17,7 +17,7 @@
 	<div
 		data-slot="upload-errors"
 		role="alert"
-		class="mt-list space-y-1 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-body-sm text-destructive"
+		class="mt-list space-y-1 rounded-md border border-danger/40 bg-danger/10 p-3 text-body-sm text-danger-text"
 	>
 		{#if ctx.countIssue}
 			<p>{issueMessage(ctx.countIssue)}</p>

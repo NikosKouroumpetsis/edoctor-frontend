@@ -1,30 +1,50 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import AppShell from '$shared/ui/organisms/app-shell';
+	import { AppHeader } from '$shared/ui/organisms/app-header';
+	import BottomNav from '$shared/ui/organisms/bottom-nav';
+	import { sampleBottomNavItems } from '$shared/ui/organisms/bottom-nav/bottom-nav.sample';
+	import SiteFooter from '$shared/ui/organisms/site-footer';
+	import { Button } from '$shared/ui/primitives/button';
 
 	const { Story } = defineMeta({
-		title: 'Organisms/App shell',
+		title: 'Organisms/AppShell',
 		component: AppShell,
-		tags: ['autodocs']
+		tags: ['autodocs'],
+		parameters: { layout: 'fullscreen' }
 	});
 </script>
 
-<!--
-	Full page layout (navbar + content slot + footer/bottom-nav). Rendered inside a
-	fixed-height, clipped container so the full-page chrome fits the canvas.
--->
+<!-- Layout only: every part is the caller's (the product's frame lives in `modules/shell`). -->
 <Story name="Default">
 	{#snippet template()}
-		<div class="h-dvh overflow-auto rounded-lg border">
-			<AppShell>
-				<div class="mx-auto max-w-content p-6">
-					<h1 class="text-title-lg font-semibold">Dashboard</h1>
-					<p class="mt-2 text-body-md text-muted-foreground">
-						The app shell composes the navbar, this content area, and the footer / bottom navigation
-						around any page.
-					</p>
-				</div>
-			</AppShell>
-		</div>
+		<AppShell skipLinkLabel="Μετάβαση στο περιεχόμενο">
+			{#snippet header()}
+				<AppHeader>
+					{#snippet brand()}
+						<a href="#home" class="inline-flex min-h-touch min-w-touch items-center font-semibold"
+							>Δείγμα</a
+						>
+					{/snippet}
+					{#snippet actions()}
+						<Button tone="outline" label="Σύνδεση" />
+					{/snippet}
+				</AppHeader>
+			{/snippet}
+			<div class="container-page py-section">
+				<h1 class="text-title-lg font-semibold">Σελίδα</h1>
+				<p class="mt-2 text-body-md text-muted-foreground">Το περιεχόμενο της σελίδας.</p>
+			</div>
+			{#snippet footer()}
+				<SiteFooter
+					columns={[
+						{ title: 'Υποστήριξη', links: [{ label: 'Βοήθεια' }, { label: 'Επικοινωνία' }] }
+					]}
+				/>
+			{/snippet}
+			{#snippet bottomNav()}
+				<BottomNav items={sampleBottomNavItems} aria-label="Πλοήγηση" />
+			{/snippet}
+		</AppShell>
 	{/snippet}
 </Story>

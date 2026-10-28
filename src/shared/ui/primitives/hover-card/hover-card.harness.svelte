@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { HoverCard, HoverCardTrigger, HoverCardContent, type HoverCardSize } from './index';
 
-	let { size = 'default' }: { size?: HoverCardSize } = $props();
+	let { size = 'md' }: { size?: HoverCardSize } = $props();
 </script>
 
 <HoverCard openDelay={0} closeDelay={0}>

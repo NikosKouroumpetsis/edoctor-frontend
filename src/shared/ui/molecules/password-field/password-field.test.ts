@@ -6,7 +6,9 @@ import PasswordField from './password-field.svelte';
 describe('PasswordField', () => {
 	it('masks input by default and reveals on toggle', async () => {
 		const user = userEvent.setup({ delay: null });
-		render(PasswordField, { props: { label: 'Password' } });
+		render(PasswordField, {
+			props: { hideLabel: 'Hide password', showLabel: 'Show password', label: 'Password' }
+		});
 		const input = screen.getByLabelText('Password');
 		expect(input).toHaveAttribute('type', 'password');
 
@@ -17,9 +19,36 @@ describe('PasswordField', () => {
 		expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'password');
 	});
 
+	it('U-03.1: the text reveal variant writes the names as words; helper text sits below', async () => {
+		const user = userEvent.setup({ delay: null });
+		render(PasswordField, {
+			props: {
+				label: 'Κωδικός',
+				hideLabel: 'Απόκρυψη',
+				showLabel: 'Εμφάνιση',
+				revealVariant: 'text',
+				helperText: 'Τουλάχιστον 8 χαρακτήρες.'
+			}
+		});
+		await user.click(screen.getByRole('button', { name: 'Εμφάνιση' }));
+		expect(screen.getByLabelText('Κωδικός')).toHaveAttribute('type', 'text');
+		expect(screen.getByRole('button', { name: 'Απόκρυψη' })).toHaveAttribute(
+			'aria-pressed',
+			'true'
+		);
+		expect(screen.getByText('Τουλάχιστον 8 χαρακτήρες.')).toHaveClass('text-muted-foreground');
+	});
+
 	it('forwards the placeholder and reveals it only while focused', async () => {
 		const user = userEvent.setup({ delay: null });
-		render(PasswordField, { props: { label: 'Password', placeholder: 'Enter your password' } });
+		render(PasswordField, {
+			props: {
+				hideLabel: 'Hide password',
+				showLabel: 'Show password',
+				label: 'Password',
+				placeholder: 'Enter your password'
+			}
+		});
 		const input = screen.getByLabelText('Password');
 
 		expect(input).toHaveAttribute('placeholder', ' ');

@@ -54,5 +54,5 @@
 		<p class="text-title-sm font-semibold">{m.image_uploader_dropzone_title()}</p>
 		<p class="text-body-sm text-muted-foreground">{m.image_uploader_dropzone_hint()}</p>
 	</div>
-	<Button variant="secondary" onclick={onbrowse}>{m.image_uploader_browse()}</Button>
+	<Button tone="contrast" label={m.image_uploader_browse()} onclick={onbrowse} />
 </div>

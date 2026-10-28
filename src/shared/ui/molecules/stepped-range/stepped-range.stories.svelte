@@ -6,6 +6,7 @@
 	// demo content supplied by the story; the molecule itself is i18n-agnostic.
 	const durationSteps = ['30 λεπτά', '1 ώρα', '1,5 ώρα', '2 ώρες', '3 ώρες', '4 ώρες', '5+ ώρες'];
 
+	// The application's meta (`molecules/stepped-range`); each story shows the chosen range under the control.
 	const { Story } = defineMeta({
 		title: 'Molecules/Stepped range',
 		component: SteppedRange,
@@ -24,9 +25,9 @@
 </script>
 
 <script lang="ts">
-	const durationSteps = ['30 λεπτά', '1 ώρα', '1,5 ώρα', '2 ώρες', '3 ώρες', '4 ώρες', '5+ ώρες'];
+	const steps = ['30 λεπτά', '1 ώρα', '1,5 ώρα', '2 ώρες', '3 ώρες', '4 ώρες', '5+ ώρες'];
+	const range = (value: [number, number]) => `Εύρος: ${steps[value[0]]} – ${steps[value[1]]}`;
 
-	let playground = $state<[number, number]>([0, 6]);
 	let full = $state<[number, number]>([0, 6]);
 	let half = $state<[number, number]>([0, 1]);
 	let small = $state<[number, number]>([1, 4]);
@@ -35,49 +36,50 @@
 	let disabledRange = $state<[number, number]>([0, 3]);
 </script>
 
-<Story name="Playground">
-	{#snippet template(args)}
-		<div class="w-text max-w-full">
-			<SteppedRange {...args} bind:value={playground} />
-			<p class="mt-6 text-body-sm text-muted-foreground">
-				Range: {args.steps[playground[0]]} – {args.steps[playground[1]]}
-			</p>
-		</div>
-	{/snippet}
-</Story>
-
-<!-- Reproduces bar_02_all.png: full range [0, 6]. -->
+<!-- Reproduces the full-range mockup [0, 6]. -->
 <Story name="Default">
-	{#snippet template()}
-		<div class="w-text max-w-full">
-			<SteppedRange title="Διάρκεια" steps={durationSteps} bind:value={full} />
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow">
+			<SteppedRange {...args} bind:value={full} />
+			<p class="mt-6 text-body-sm text-muted-foreground">{range(full)}</p>
 		</div>
 	{/snippet}
 </Story>
 
-<!-- Reproduces bar_02_half.png: short range [0, 1]. -->
+<!-- Reproduces the short-range mockup [0, 1]. -->
 <Story name="Half">
-	{#snippet template()}
-		<div class="w-text max-w-full">
-			<SteppedRange title="Διάρκεια" steps={durationSteps} bind:value={half} />
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow">
+			<SteppedRange {...args} bind:value={half} />
+			<p class="mt-6 text-body-sm text-muted-foreground">{range(half)}</p>
 		</div>
 	{/snippet}
 </Story>
 
 <Story name="Sizes">
-	{#snippet template()}
-		<div class="flex w-text max-w-full flex-col gap-section-lg">
-			<SteppedRange size="sm" title="Small" steps={durationSteps} bind:value={small} />
-			<SteppedRange size="default" title="Default" steps={durationSteps} bind:value={medium} />
-			<SteppedRange size="lg" title="Large" steps={durationSteps} bind:value={large} />
+	{#snippet template(args)}
+		<div class="flex w-full max-w-narrow flex-col gap-section-lg">
+			<div class="w-full max-w-narrow">
+				<SteppedRange {...args} size="sm" title="Μικρό" bind:value={small} />
+				<p class="mt-6 text-body-sm text-muted-foreground">{range(small)}</p>
+			</div>
+			<div class="w-full max-w-narrow">
+				<SteppedRange {...args} size="default" title="Κανονικό" bind:value={medium} />
+				<p class="mt-6 text-body-sm text-muted-foreground">{range(medium)}</p>
+			</div>
+			<div class="w-full max-w-narrow">
+				<SteppedRange {...args} size="lg" title="Μεγάλο" bind:value={large} />
+				<p class="mt-6 text-body-sm text-muted-foreground">{range(large)}</p>
+			</div>
 		</div>
 	{/snippet}
 </Story>
 
 <Story name="Disabled">
-	{#snippet template()}
-		<div class="w-text max-w-full">
-			<SteppedRange disabled title="Διάρκεια" steps={durationSteps} bind:value={disabledRange} />
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow">
+			<SteppedRange {...args} disabled title="Διάρκεια" bind:value={disabledRange} />
+			<p class="mt-6 text-body-sm text-muted-foreground">{range(disabledRange)}</p>
 		</div>
 	{/snippet}
 </Story>

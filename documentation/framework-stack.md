@@ -56,11 +56,16 @@
 - shadcn-svelte style: `new-york`
 - UI components are in-house, built on the headless layer in
   `src/shared/lib/headless`. No external UI component library is allowed for new
-  code. Bits UI `^2.18.1` is being phased out — only `select` and
-  `dropdown-menu` still import it, pending their rewrite.
-- Tailwind helpers: `clsx`, `tailwind-merge`, `tailwind-variants`, `tw-animate-css`
+  code. Bits UI is no longer a dependency (no `bits-ui` import remains in `src/`).
+- Tailwind helpers: `clsx`, `tailwind-merge`, `tailwind-variants`, `tw-animate-css` (still imported by
+  `src/routes/layout.css`, but no class of it is used: the kit's motion is its own CSS, U-12.2)
 - Font: `@fontsource-variable/inter`
-- Icons: Icones through `unplugin-icons` and Iconify icon JSON packages.
+- Icons: the kit draws the application's Ionicons from local SVG paths in
+  `src/shared/ui/icons/ionicon` (no package, U-03.3); older screens still use
+  Icones through `unplugin-icons` and Iconify icon JSON packages.
+- Storybook viewports (`.storybook/preview.ts`): `z375`, `z744`, `z950`, `z1128`,
+  `z1440`, `z1920`, chosen per story with `globals: { viewport: { value: 'z744' } }`
+  or in the URL (`globals=viewport:z744;theme:dark`).
 
 ## Component workshop (Storybook)
 

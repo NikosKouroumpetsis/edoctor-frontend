@@ -5,6 +5,39 @@ import TextField from './text-field.svelte';
 import FormHarness from './text-field.form-harness.svelte';
 
 describe('TextField (standalone)', () => {
+	// U-06.8 (3β) + R3-3: the label is the shared `FloatingLabel`, floated by focus OR a value (the application's
+	// `floated = focused || hasValue`), with the same classes the field drew by CSS before.
+	it('U-06.8: the label rests while empty and blurred, floats on focus and stays floated with a value', async () => {
+		const user = userEvent.setup({ delay: null });
+		const { container } = render(TextField, { props: { label: 'Email' } });
+		const label = () => container.querySelector('[data-slot="text-field-label"]') as HTMLElement;
+		expect(label()).toHaveClass(
+			'translate-y-0',
+			'scale-100',
+			'top-3',
+			'left-2.5',
+			'text-muted-foreground'
+		);
+		expect(label()).not.toHaveAttribute('data-floated');
+		expect(label().className).not.toMatch(/peer-placeholder-shown/);
+
+		await user.click(screen.getByLabelText('Email'));
+		expect(label()).toHaveClass('scale-75', '-translate-y-3', 'text-foreground');
+		await user.type(screen.getByLabelText('Email'), 'a');
+		await user.tab();
+		expect(label()).toHaveAttribute('data-floated');
+		expect(label()).toHaveClass('text-muted-foreground');
+	});
+
+	it('U-06.8: a value from the caller floats it before any focus; an error colours it', () => {
+		const { container } = render(TextField, {
+			props: { label: 'Email', value: 'name@example.com', error: 'Δώσε ένα έγκυρο email.' }
+		});
+		const label = container.querySelector('[data-slot="text-field-label"]') as HTMLElement;
+		expect(label).toHaveAttribute('data-floated');
+		expect(label).toHaveClass('text-danger-text');
+	});
+
 	it('associates the floating label with the input', () => {
 		render(TextField, { props: { label: 'Email' } });
 		expect(screen.getByLabelText('Email')).toBeInTheDocument();
@@ -23,7 +56,37 @@ describe('TextField (standalone)', () => {
 		const input = screen.getByLabelText('Email');
 		expect(input).toHaveAttribute('aria-invalid', 'true');
 		expect(screen.getByText('Required')).toBeInTheDocument();
-		expect(input).toHaveAttribute('aria-describedby', screen.getByText('Required').id);
+		expect(input).toHaveAttribute(
+			'aria-describedby',
+			screen.getByText('Required').closest('p')?.id
+		);
+		expect(screen.getByText('Required')).toHaveClass('text-danger-text');
+		expect(input).toHaveClass(
+			'aria-[invalid=true]:border-danger',
+			'aria-[invalid=true]:bg-danger/10'
+		);
+	});
+
+	it('U-03.1: shows the helper line, marks required and invalid, and reports each text (onChangeText)', async () => {
+		const user = userEvent.setup({ delay: null });
+		const onChangeText = vi.fn();
+		render(TextField, {
+			props: {
+				label: 'Κινητό',
+				helperText: 'Θα σας στείλουμε κωδικό.',
+				required: true,
+				invalid: true,
+				onChangeText
+			}
+		});
+		const input = screen.getByLabelText('Κινητό');
+		expect(input).toHaveAttribute('aria-required', 'true');
+		expect(input).toHaveAttribute('aria-invalid', 'true');
+		const helper = screen.getByText('Θα σας στείλουμε κωδικό.');
+		expect(helper).toHaveClass('text-muted-foreground');
+		expect(input).toHaveAttribute('aria-describedby', helper.id);
+		await user.type(input, '69');
+		expect(onChangeText).toHaveBeenLastCalledWith('69');
 	});
 
 	it('reveals the placeholder only while focused', async () => {

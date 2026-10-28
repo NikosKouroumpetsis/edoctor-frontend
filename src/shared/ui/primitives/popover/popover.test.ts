@@ -50,4 +50,16 @@ describe('Popover', () => {
 		await user.keyboard('{Escape}');
 		await waitFor(() => expect(screen.queryByText('Popover body')).not.toBeInTheDocument());
 	});
+
+	it('U-03.1 (NIT-R2-1): Escape gives the focus back to the trigger (as the menu and the select), never to the page', async () => {
+		const user = userEvent.setup();
+		render(Harness);
+		const trigger = screen.getByRole('button', { name: 'Open popover' });
+		await user.click(trigger);
+		expect(screen.getByText('Popover body').closest('[data-slot="popover-content"]')).toHaveFocus();
+		await user.keyboard('{Escape}');
+		await waitFor(() => expect(screen.queryByText('Popover body')).not.toBeInTheDocument());
+		expect(trigger).toHaveFocus();
+		expect(document.activeElement).not.toBe(document.body);
+	});
 });

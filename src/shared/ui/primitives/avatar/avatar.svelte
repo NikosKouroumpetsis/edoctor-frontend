@@ -2,7 +2,8 @@
 	import { createContext } from '$shared/lib/headless';
 
 	export type AvatarStatus = 'loading' | 'loaded' | 'error';
-	export type AvatarSize = 'sm' | 'default' | 'lg';
+	/** The application's avatar sizes (U-07.1): 32 / 40 / 48 / 64, `md` by default. */
+	export type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
 	export type AvatarContext = {
 		status: AvatarStatus;
 		size: AvatarSize;
@@ -12,8 +13,9 @@
 	/** Root box size; <Avatar.Fallback> scales its initials to match. */
 	export const avatarSizes: Record<AvatarSize, string> = {
 		sm: 'size-avatar-sm',
-		default: 'size-avatar-md',
-		lg: 'size-avatar-lg'
+		md: 'size-avatar-md',
+		lg: 'size-avatar-lg',
+		xl: 'size-avatar-xl'
 	};
 </script>
 
@@ -23,7 +25,7 @@
 
 	let {
 		ref = $bindable(null),
-		size = 'default',
+		size = 'md',
 		class: className,
 		children,
 		...restProps

@@ -22,7 +22,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="w-narrow">
+		<div class="w-full max-w-narrow">
 			<StoryHarness items={seededItems} minCount={5}>
 				<PhotoAddMore />
 			</StoryHarness>

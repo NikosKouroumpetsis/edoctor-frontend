@@ -1,30 +1,30 @@
 <script lang="ts" module>
-	export type RadioGroupItemSize = 'sm' | 'default' | 'lg';
+	/** The application's radio sizes (U-07.1, R4-5): `md` (24) by default. */
+	export type RadioGroupItemSize = 'sm' | 'md' | 'lg';
 
-	/** Box and the selected dot scale together, inside a touch-sized button. */
+	/** Ring 20 / 24 / 32 and the selected dot 10 / 12 / 16 scale together, inside the 48 touch box. */
 	const radioBoxSizes: Record<RadioGroupItemSize, string> = {
-		sm: 'size-4',
-		default: 'size-5',
-		lg: 'size-6'
+		sm: 'size-5',
+		md: 'size-6',
+		lg: 'size-control-xs'
 	};
 	const radioDotSizes: Record<RadioGroupItemSize, string> = {
-		sm: 'size-2',
-		default: 'size-2.5',
-		lg: 'size-3'
+		sm: 'size-2.5',
+		md: 'size-3',
+		lg: 'size-4'
 	};
 </script>
 
 <script lang="ts">
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { onMount } from 'svelte';
-	import CircleIcon from '~icons/lucide/circle';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
 	import { getRadioGroupContext } from './radio-group.svelte';
 
 	let {
 		ref = $bindable(null),
 		value,
-		size = 'default',
+		size = 'md',
 		class: className,
 		disabled,
 		children,
@@ -75,14 +75,17 @@
 		data-slot="radio-group-item-box"
 		data-state={checked ? 'checked' : 'unchecked'}
 		class={cn(
-			'flex aspect-square items-center justify-center rounded-full border border-input bg-card text-primary shadow-xs transition-shadow',
+			'flex aspect-square items-center justify-center rounded-full border border-input bg-card text-primary transition-shadow',
 			radioBoxSizes[size],
 			'group-focus-visible:border-ring group-focus-visible:ring-3 group-focus-visible:ring-ring/50',
 			'data-[state=checked]:border-primary'
 		)}
 	>
 		{#if checked}
-			<CircleIcon class={cn(radioDotSizes[size], 'fill-primary text-primary')} />
+			<span
+				data-slot="radio-group-item-dot"
+				class={cn('rounded-full bg-primary', radioDotSizes[size])}
+			></span>
 		{/if}
 	</span>
 	{@render children?.()}

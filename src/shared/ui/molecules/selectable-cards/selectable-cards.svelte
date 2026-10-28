@@ -1,101 +1,111 @@
 <script lang="ts" module>
-	import { createContext } from '$shared/lib/headless';
+	import type { Snippet } from 'svelte';
+	import type { SelectableCardIconPlacement } from './selectable-card.svelte';
 
-	export type SelectableCardsContext = {
-		readonly type: 'single' | 'multiple';
-		readonly disabled: boolean;
-		readonly items: string[];
-		isSelected: (value: string) => boolean;
-		toggle: (value: string) => void;
-		register: (value: string) => void;
-		unregister: (value: string) => void;
+	/** One card: the caller's words, its value and an optional glyph. */
+	export type SelectableCardsOption = {
+		value: string;
+		title: string;
+		description?: string;
+		icon?: Snippet;
 	};
 
-	export const [getSelectableCardsContext, setSelectableCardsContext] =
-		createContext<SelectableCardsContext>('SelectableCards');
+	/** A single choice is one value (or none), a multiple one a list (the application's two `onChange`). */
+	export type SelectableCardsValue = string | string[] | undefined;
+
+	export type SelectableCardsProps = {
+		options: SelectableCardsOption[];
+		/** `single` (radio group, the default) or `multiple` (checkboxes). */
+		type?: 'single' | 'multiple';
+		value?: SelectableCardsValue;
+		/** The new choice: the value (single) or the list (multiple), the application's `onChange`. */
+		onChange?: (value: SelectableCardsValue) => void;
+		disabled?: boolean;
+		iconPlacement?: SelectableCardIconPlacement;
+		/** The question over the cards, also the group's name. */
+		label?: string;
+		/** `<id>` on the group, `<id>-<value>` on each card. */
+		testId?: string;
+		class?: string;
+	};
 </script>
 
 <script lang="ts">
-	import type { HTMLAttributes } from 'svelte/elements';
-	import { cn, type WithElementRef } from '$shared/lib/utils';
 	import { handleRovingKeydown, useId } from '$shared/lib/headless';
+	import { cn } from '$shared/lib/utils';
+	import SelectableCard from './selectable-card.svelte';
 
 	let {
-		ref = $bindable(null),
-		value = $bindable(),
+		options,
 		type = 'single',
+		value = $bindable(),
+		onChange,
 		disabled = false,
-		orientation = 'vertical',
+		iconPlacement = 'trailing',
 		label,
-		class: className,
-		onValueChange,
-		children,
-		...restProps
-	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
-		value?: string | string[];
-		type?: 'single' | 'multiple';
-		disabled?: boolean;
-		orientation?: 'vertical' | 'horizontal';
-		label?: string;
-		onValueChange?: (value: string | string[] | undefined) => void;
-	} = $props();
+		testId,
+		class: className
+	}: SelectableCardsProps = $props();
 
-	const labelId = useId();
-	let items = $state<string[]>([]);
+	const labelId = useId(undefined, 'selectable-cards');
+	let group = $state<HTMLElement | null>(null);
+	const isMultiple = $derived(type === 'multiple');
+	const chosen = $derived(
+		isMultiple ? (Array.isArray(value) ? value : []) : typeof value === 'string' ? [value] : []
+	);
+	// One Tab stop: the first chosen card, else the first card.
+	const tabStop = $derived(options.find((option) => chosen.includes(option.value))?.value);
 
-	const context = setSelectableCardsContext({
-		get type() {
-			return type;
-		},
-		get disabled() {
-			return disabled;
-		},
-		get items() {
-			return items;
-		},
-		register(v) {
-			if (!items.includes(v)) items.push(v);
-		},
-		unregister(v) {
-			items = items.filter((i) => i !== v);
-		},
-		isSelected(v) {
-			if (type === 'multiple') return Array.isArray(value) && value.includes(v);
-			return value === v;
-		},
-		toggle(v) {
-			if (disabled) return;
-			if (type === 'multiple') {
-				const current = Array.isArray(value) ? value : [];
-				value = current.includes(v) ? current.filter((i) => i !== v) : [...current, v];
-			} else {
-				// Radiogroup semantics: selecting sets the value; re-selecting keeps it.
-				value = v;
-			}
-			onValueChange?.(value);
+	function toggle(next: string) {
+		if (disabled) return;
+		if (isMultiple) {
+			const updated = chosen.includes(next)
+				? chosen.filter((item) => item !== next)
+				: [...chosen, next];
+			value = updated;
+			onChange?.(updated);
+			return;
 		}
-	});
+		// Radio-group semantics: choosing sets the value; choosing it again keeps it.
+		value = next;
+		onChange?.(next);
+	}
 
+	// Single: the arrows move the focus AND choose; multiple: they only move (Space toggles).
 	function onkeydown(event: KeyboardEvent) {
-		const moved = handleRovingKeydown(event, ref!, { orientation });
-		// Single (radiogroup): arrow keys move focus AND select the focused card.
-		if (type === 'single' && moved?.dataset.value) context.toggle(moved.dataset.value);
+		if (!group) return;
+		const moved = handleRovingKeydown(event, group, { orientation: 'vertical' });
+		if (!isMultiple && moved?.dataset.value) toggle(moved.dataset.value);
 	}
 </script>
 
-<div class={cn('w-full', className)} data-slot="selectable-cards">
+<!-- The application's `SelectableCards`: the optional question (heading 24), then the cards 12 apart. -->
+<div data-slot="selectable-cards" data-testid={testId} class={cn('w-full', className)}>
 	{#if label}
-		<p id={labelId} class="mb-4 text-heading-md text-foreground">{label}</p>
+		<p id={labelId} class="mb-4 text-heading-md font-semibold text-foreground">{label}</p>
 	{/if}
 	<div
-		bind:this={ref}
-		role={type === 'single' ? 'radiogroup' : 'group'}
-		data-orientation={orientation}
+		bind:this={group}
+		role={isMultiple ? 'group' : 'radiogroup'}
 		aria-labelledby={label ? labelId : undefined}
+		class="flex w-full flex-col gap-3"
 		{onkeydown}
-		class="flex gap-3 data-[orientation=vertical]:flex-col"
-		{...restProps}
 	>
-		{@render children?.()}
+		{#each options as option (option.value)}
+			<SelectableCard
+				role={isMultiple ? 'checkbox' : 'radio'}
+				title={option.title}
+				description={option.description}
+				icon={option.icon}
+				{iconPlacement}
+				selected={chosen.includes(option.value)}
+				{disabled}
+				data-roving-item
+				data-value={option.value}
+				tabindex={(tabStop ?? options[0]?.value) === option.value ? 0 : -1}
+				testId={testId ? `${testId}-${option.value}` : undefined}
+				onclick={() => toggle(option.value)}
+			/>
+		{/each}
 	</div>
 </div>

@@ -11,78 +11,52 @@
 		DropdownMenuLabel,
 		DropdownMenuSeparator
 	} from '$shared/ui/primitives/dropdown-menu';
-	import { buttonVariants } from '$shared/ui/primitives/button';
+	import { buttonClasses } from '$shared/ui/primitives/button';
 
+	// The application's menu (`molecules/dropdown-menu`): «Ενέργειες» with its glyphs (`icon`, R7-4), a checkbox row
+	// and the destructive «Διαγραφή». It fades in and grows from 95 % (U-09.8), whatever the motion setting (U-12.1).
 	const { Story } = defineMeta({
-		title: 'Primitives/Dropdown menu',
+		title: 'Primitives/DropdownMenu',
 		component: DropdownMenu,
 		tags: ['autodocs']
 	});
 </script>
 
 <script lang="ts">
-	let showGrid = $state(true);
-	let showRuler = $state(false);
+	let showArchived = $state(false);
 	let density = $state('comfortable');
 </script>
 
-<Story name="Default">
+<Story name="Playground">
 	{#snippet template()}
 		<DropdownMenu>
-			<DropdownMenuTrigger class={buttonVariants({ variant: 'outline' })}>
-				Open menu
-			</DropdownMenuTrigger>
+			<DropdownMenuTrigger class={buttonClasses()}>Ενέργειες</DropdownMenuTrigger>
 			<DropdownMenuContent>
-				<DropdownMenuLabel>Account</DropdownMenuLabel>
-				<DropdownMenuItem>Profile</DropdownMenuItem>
-				<DropdownMenuItem>Settings</DropdownMenuItem>
+				<DropdownMenuLabel>Λογαριασμός</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem>Log out</DropdownMenuItem>
+				<DropdownMenuItem icon="create-outline">Επεξεργασία</DropdownMenuItem>
+				<DropdownMenuItem icon="share-outline">Κοινοποίηση</DropdownMenuItem>
+				<DropdownMenuCheckboxItem bind:checked={showArchived}>
+					Εμφάνιση αρχειοθετημένων
+				</DropdownMenuCheckboxItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem icon="trash-outline" variant="destructive">Διαγραφή</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	{/snippet}
 </Story>
 
-<Story name="With checkbox items">
+<!-- A menu with one choice of two: the chosen one carries the dot, and the menu stays open on a press. -->
+<Story name="With Radio Group">
 	{#snippet template()}
 		<DropdownMenu>
-			<DropdownMenuTrigger class={buttonVariants({ variant: 'outline' })}>View</DropdownMenuTrigger>
+			<DropdownMenuTrigger class={buttonClasses()}>Πυκνότητα</DropdownMenuTrigger>
 			<DropdownMenuContent>
-				<DropdownMenuLabel>Appearance</DropdownMenuLabel>
-				<DropdownMenuCheckboxItem bind:checked={showGrid}>Show grid</DropdownMenuCheckboxItem>
-				<DropdownMenuCheckboxItem bind:checked={showRuler}>Show ruler</DropdownMenuCheckboxItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
-	{/snippet}
-</Story>
-
-<Story name="With radio group">
-	{#snippet template()}
-		<DropdownMenu>
-			<DropdownMenuTrigger class={buttonVariants({ variant: 'outline' })}>
-				Density
-			</DropdownMenuTrigger>
-			<DropdownMenuContent>
-				<DropdownMenuLabel>Density</DropdownMenuLabel>
+				<DropdownMenuLabel>Πυκνότητα</DropdownMenuLabel>
 				<DropdownMenuRadioGroup bind:value={density}>
-					<DropdownMenuRadioItem value="comfortable">Comfortable</DropdownMenuRadioItem>
-					<DropdownMenuRadioItem value="compact">Compact</DropdownMenuRadioItem>
+					<DropdownMenuRadioItem value="comfortable">Άνετη</DropdownMenuRadioItem>
+					<DropdownMenuRadioItem value="compact">Συμπαγής</DropdownMenuRadioItem>
 				</DropdownMenuRadioGroup>
-			</DropdownMenuContent>
-		</DropdownMenu>
-	{/snippet}
-</Story>
-
-<Story name="Destructive item">
-	{#snippet template()}
-		<DropdownMenu>
-			<DropdownMenuTrigger class={buttonVariants({ variant: 'outline' })}>
-				Manage
-			</DropdownMenuTrigger>
-			<DropdownMenuContent>
-				<DropdownMenuItem>Rename</DropdownMenuItem>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem variant="destructive">Delete account</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	{/snippet}

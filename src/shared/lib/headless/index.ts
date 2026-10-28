@@ -10,6 +10,9 @@ export { createContext } from './context';
 export { useId, __resetIdCounter } from './id';
 export { focusTrap, getFocusableElements, type FocusTrapOptions } from './focus';
 export { dismissable, type DismissableOptions } from './dismissable';
+export { escapeKeydown, type EscapeKeydownOptions } from './escape';
+export { LEAVE_GRACE_MS, leaveTimeout, isMoving } from './motion';
+export { Presence, type PresenceState } from './presence.svelte';
 export { scrollLock, lockBodyScroll, __getLockCount } from './scroll-lock';
 export {
 	handleRovingKeydown,
@@ -19,6 +22,7 @@ export {
 	type RovingDirection
 } from './roving-focus';
 export { createTypeahead, getNextMatch, wrapArray, type Typeahead } from './typeahead';
+export { handleListboxKeydown, nextActiveId } from './active-descendant';
 export {
 	floating,
 	computePosition,
@@ -31,3 +35,4 @@ export {
 	type FloatingOptions
 } from './floating';
 export { portal } from './portal';
+export { keepArrowFocus, type ScrollArrows, type ScrollArrowsEnabled } from './arrow-focus';

@@ -1,22 +1,27 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { TextField } from '$shared/ui/molecules/text-field';
-	import MailIcon from '~icons/lucide/mail';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
 
+	const sizes = ['default', 'lg', 'xl'] as const;
+
+	// The application's meta (`molecules/text-field`).
 	const { Story } = defineMeta({
-		title: 'Molecules/Text field',
+		title: 'Molecules/TextField',
 		component: TextField,
 		tags: ['autodocs'],
 		args: {
 			label: 'Email',
-			placeholder: 'you@example.com',
+			placeholder: 'name@example.com',
 			size: 'default',
-			type: 'text',
 			disabled: false
 		},
 		argTypes: {
-			size: { control: 'select', options: ['default', 'lg', 'xl'] },
-			type: { control: 'select', options: ['text', 'email', 'password', 'tel'] },
+			label: { control: 'text' },
+			placeholder: { control: 'text' },
+			helperText: { control: 'text' },
+			error: { control: 'text' },
+			size: { control: 'radio', options: sizes },
 			disabled: { control: 'boolean' }
 		}
 	});
@@ -25,63 +30,78 @@
 <script lang="ts">
 	import { createForm, Validators } from '$shared/lib/form';
 
-	let value = $state('');
+	// Each story is controlled with its own value, as the application's `Controlled`.
+	let playground = $state('');
+	let filled = $state('name@example.com');
+	let helper = $state('');
+	let invalid = $state('not-an-email');
+	let search = $state('');
+	let disabled = $state('name@example.com');
+	const sized = $state<Record<string, string>>({ default: '', lg: '', xl: '' });
+
+	// Validated through the shared form: the error shows once the field has been left.
 	const form = createForm({
 		initialValues: { email: '' },
-		validators: { email: [Validators.required, Validators.email] }
+		validators: { email: [Validators.required, Validators.email] },
+		messages: { email: { required: 'Υποχρεωτικό πεδίο', email: 'Δώσε ένα έγκυρο email.' } }
 	});
 </script>
 
-<!-- Controls-driven: change `size` in the Controls panel to see it apply live. -->
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class="w-narrow"><TextField {...args} /></div>
+		<div class="w-full max-w-narrow"><TextField {...args} bind:value={playground} /></div>
 	{/snippet}
 </Story>
 
-<Story name="Standalone">
-	{#snippet template()}
-		<div class="w-narrow">
-			<TextField label="Email" bind:value type="email" />
-			<p class="mt-2 text-body-sm text-muted-foreground">Value: {value || '(empty)'}</p>
-		</div>
+<Story name="Filled">
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><TextField {...args} bind:value={filled} /></div>
 	{/snippet}
 </Story>
 
-<Story name="Sizes">
-	{#snippet template()}
-		<div class="flex w-narrow flex-col gap-4">
-			<TextField label="Default" size="default" />
-			<TextField label="Large" size="lg" />
-			<TextField label="Extra large" size="xl" />
-		</div>
+<Story name="With Helper Text" args={{ helperText: 'Δεν θα κοινοποιηθεί ποτέ.' }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><TextField {...args} bind:value={helper} /></div>
 	{/snippet}
 </Story>
 
-<Story name="With error">
-	{#snippet template()}
-		<div class="w-narrow">
-			<TextField label="Email" value="bad" error="Enter a valid email address" />
-		</div>
+<Story name="With Error" args={{ error: 'Δώσε ένα έγκυρο email.' }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><TextField {...args} bind:value={invalid} /></div>
 	{/snippet}
 </Story>
 
-<Story name="Leading/trailing">
-	{#snippet template()}
-		<div class="w-narrow">
-			<TextField label="Email">
-				{#snippet leading()}
-					<MailIcon class="size-4" />
-				{/snippet}
+<Story name="With Leading Icon">
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow">
+			<TextField {...args} label="Αναζήτηση" bind:value={search}>
+				{#snippet leading()}<Ionicon
+						name="search"
+						class="icon-md text-muted-foreground"
+					/>{/snippet}
 			</TextField>
 		</div>
 	{/snippet}
 </Story>
 
-<Story name="Form-connected (blur to validate)">
-	{#snippet template()}
-		<div class="w-narrow">
-			<TextField label="Email" field={form.field('email')} type="email" />
+<Story name="Disabled" args={{ disabled: true }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><TextField {...args} bind:value={disabled} /></div>
+	{/snippet}
+</Story>
+
+<Story name="Sizes">
+	{#snippet template(args)}
+		<div class="flex w-full max-w-narrow flex-col gap-4">
+			{#each sizes as size (size)}
+				<TextField {...args} {size} label={`Size ${size}`} bind:value={sized[size]} />
+			{/each}
 		</div>
+	{/snippet}
+</Story>
+
+<Story name="Form Connected">
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><TextField {...args} field={form.field('email')} /></div>
 	{/snippet}
 </Story>

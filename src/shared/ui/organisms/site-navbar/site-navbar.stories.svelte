@@ -3,38 +3,58 @@
 	import { expect, userEvent, screen } from 'storybook/test';
 	import { SiteNavbar } from '$shared/ui/organisms/site-navbar';
 
+	const props = {
+		brand: 'Δείγμα',
+		brandHref: '#home',
+		brandIcon: 'medical-outline' as const,
+		links: [
+			{ label: 'Ενότητα Α', href: '#a' },
+			{ label: 'Ενότητα Β', href: '#b' },
+			{ label: 'Ενότητα Γ', href: '#c' }
+		],
+		primaryNavLabel: 'Κύρια πλοήγηση',
+		mobileNavLabel: 'Πλοήγηση κινητού',
+		openMenuLabel: 'Άνοιγμα μενού',
+		closeMenuLabel: 'Κλείσιμο',
+		userName: 'Δείγμα Χρήστη',
+		accountMenuLabel: 'Λογαριασμός',
+		menuItems: [
+			{ label: 'Προφίλ' },
+			{ label: 'Ρυθμίσεις' },
+			{ label: 'Αποσύνδεση', destructive: true }
+		]
+	};
+
 	const { Story } = defineMeta({
-		title: 'Organisms/Site navbar',
+		title: 'Organisms/SiteNavbar',
 		component: SiteNavbar,
-		tags: ['autodocs']
+		tags: ['autodocs'],
+		parameters: { layout: 'fullscreen' }
 	});
 </script>
 
 <Story name="Default">
 	{#snippet template()}
-		<SiteNavbar />
+		<SiteNavbar {...props} />
 	{/snippet}
 </Story>
 
 <Story
-	name="Account menu"
+	name="Account Menu"
 	play={async ({ canvas }) => {
-		await userEvent.click(canvas.getByRole('button', { name: 'Account menu' }));
-		await expect(await screen.findByText('Appointments')).toBeVisible();
+		await userEvent.click(canvas.getByRole('button', { name: 'Λογαριασμός' }));
+		await expect(await screen.findByText('Ρυθμίσεις')).toBeVisible();
 	}}
 >
 	{#snippet template()}
-		<SiteNavbar />
+		<SiteNavbar {...props} />
 	{/snippet}
 </Story>
 
-<!--
-	The hamburger ("Open menu") + mobile sheet are shown below the `lg` breakpoint.
-	Switch the canvas to a small viewport to exercise it (no play here — it is
-	viewport-dependent rather than interaction-dependent).
--->
-<Story name="Mobile sheet">
+<!-- The menu button and the mobile sheet show below `laptop:` (1128): the z375 viewport. The menu slides in from the
+     right and the backdrop fades (U-09.8, whatever the motion setting, U-12.1). -->
+<Story name="Mobile Sheet" globals={{ viewport: { value: 'z375', isRotated: false } }}>
 	{#snippet template()}
-		<SiteNavbar />
+		<SiteNavbar {...props} />
 	{/snippet}
 </Story>

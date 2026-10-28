@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { QueryProvider } from '$shared/providers';
-	import AppShell from '$shared/ui/organisms/app-shell';
+	import SiteFrame from '$modules/shell/ui/site-frame';
 	import './layout.css';
 	import favicon from '$shared/design/assets/favicon.svg';
 
@@ -12,7 +12,7 @@
 </svelte:head>
 
 <QueryProvider>
-	<AppShell>
+	<SiteFrame>
 		{@render children()}
-	</AppShell>
+	</SiteFrame>
 </QueryProvider>

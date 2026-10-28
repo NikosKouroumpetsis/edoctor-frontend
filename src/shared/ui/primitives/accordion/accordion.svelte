@@ -1,8 +1,10 @@
 <script lang="ts" module>
 	import { createContext } from '$shared/lib/headless';
 
+	export type AccordionType = 'single' | 'multiple';
+
 	export type AccordionContext = {
-		readonly type: 'single' | 'multiple';
+		readonly type: AccordionType;
 		readonly disabled: boolean;
 		isOpen: (value: string) => boolean;
 		toggle: (value: string) => void;
@@ -19,6 +21,7 @@
 		ref = $bindable(null),
 		value = $bindable(),
 		type = 'single',
+		collapsible = false,
 		disabled = false,
 		class: className,
 		onValueChange,
@@ -26,7 +29,9 @@
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
 		value?: string | string[];
-		type?: 'single' | 'multiple';
+		type?: AccordionType;
+		/** Single: a press on the open item closes it (the application's `collapsible`, off by default). */
+		collapsible?: boolean;
 		disabled?: boolean;
 		onValueChange?: (value: string | string[] | undefined) => void;
 	} = $props();
@@ -48,13 +53,13 @@
 				const current = Array.isArray(value) ? value : [];
 				value = current.includes(v) ? current.filter((i) => i !== v) : [...current, v];
 			} else {
-				value = value === v ? undefined : v;
+				value = value === v ? (collapsible ? undefined : v) : v;
 			}
 			onValueChange?.(value);
 		}
 	});
 </script>
 
-<div bind:this={ref} data-slot="accordion" class={cn(className)} {...restProps}>
+<div bind:this={ref} data-slot="accordion" class={cn('w-full', className)} {...restProps}>
 	{@render children?.()}
 </div>

@@ -1,174 +1,139 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { expect, userEvent } from 'storybook/test';
-	import { SelectableCards, SelectableCard } from '$shared/ui/molecules/selectable-cards';
 	import HouseIcon from '~icons/lucide/house';
 	import DoorOpenIcon from '~icons/lucide/door-open';
 	import BedDoubleIcon from '~icons/lucide/bed-double';
+	import {
+		SelectableCards,
+		type SelectableCardsValue
+	} from '$shared/ui/molecules/selectable-cards';
 
+	// The application's stories (`molecules/selectable-cards`), with its Lucide glyphs at `icon-lg`.
 	const { Story } = defineMeta({
-		title: 'Molecules/Selectable cards',
+		title: 'Molecules/SelectableCards',
 		component: SelectableCards,
 		tags: ['autodocs']
 	});
 </script>
 
 <script lang="ts">
-	// Reproduces images/selections/selection_A.png (single mode, top card preselected).
-	let space = $state<string | string[]>('entire');
-	// Generic demos.
-	let single = $state<string | string[]>('room');
-	let multiple = $state<string | string[]>(['entire']);
-	let disabledValue = $state<string | string[]>('entire');
+	let space = $state<SelectableCardsValue>('entire');
+	let sort = $state<SelectableCardsValue>('popularity');
+	let many = $state<SelectableCardsValue>(['entire']);
 </script>
 
-<Story name="Booking space (image)">
+{#snippet house()}<HouseIcon class="icon-lg text-foreground" />{/snippet}
+{#snippet door()}<DoorOpenIcon class="icon-lg text-foreground" />{/snippet}
+{#snippet bed()}<BedDoubleIcon class="icon-lg text-foreground" />{/snippet}
+
+<Story name="Booking Space Image">
 	{#snippet template()}
-		<div class="max-w-form">
+		<div class="w-full max-w-form p-4">
 			<SelectableCards
 				type="single"
 				bind:value={space}
 				label="Τι είδους χώρο θα έχουν στη διάθεσή τους οι επισκέπτες;"
-			>
-				<SelectableCard
-					value="entire"
-					title="Ολόκληρο κατάλυμα"
-					description="Οι επισκέπτες έχουν ολόκληρο τον χώρο στη διάθεσή τους."
-				>
-					{#snippet icon()}<HouseIcon class="icon-lg" />{/snippet}
-				</SelectableCard>
-				<SelectableCard
-					value="room"
-					title="Ένα δωμάτιο"
-					description="Οι επισκέπτες έχουν το δικό τους δωμάτιο σε ένα κατάλυμα, καθώς και πρόσβαση σε κοινόχρηστους χώρους."
-				>
-					{#snippet icon()}<DoorOpenIcon class="icon-lg" />{/snippet}
-				</SelectableCard>
-				<SelectableCard
-					value="shared"
-					title="Κοινόχρηστο δωμάτιο σε χόστελ"
-					description="Οι επισκέπτες κοιμούνται σε ένα κοινόχρηστο δωμάτιο, σε ένα χόστελ από εταιρεία διαχείρισης και με προσωπικό 24 ώρες το 24-ωρο."
-				>
-					{#snippet icon()}<BedDoubleIcon class="icon-lg" />{/snippet}
-				</SelectableCard>
-			</SelectableCards>
+				options={[
+					{
+						value: 'entire',
+						title: 'Ολόκληρο κατάλυμα',
+						description: 'Οι επισκέπτες έχουν ολόκληρο τον χώρο στη διάθεσή τους.',
+						icon: house
+					},
+					{
+						value: 'room',
+						title: 'Ένα δωμάτιο',
+						description:
+							'Οι επισκέπτες έχουν το δικό τους δωμάτιο σε ένα κατάλυμα, καθώς και πρόσβαση σε κοινόχρηστους χώρους.',
+						icon: door
+					},
+					{
+						value: 'shared',
+						title: 'Κοινόχρηστο δωμάτιο σε χόστελ',
+						description:
+							'Οι επισκέπτες κοιμούνται σε ένα κοινόχρηστο δωμάτιο, σε ένα χόστελ από εταιρεία διαχείρισης και με προσωπικό 24 ώρες το 24-ωρο.',
+						icon: bed
+					}
+				]}
+			/>
 		</div>
 	{/snippet}
 </Story>
 
-<Story name="Single">
+<!-- The leading-glyph layout: the filters' «Ταξινόμηση» cards. -->
+<Story name="Leading Icons">
 	{#snippet template()}
-		<div class="max-w-form">
-			<SelectableCards type="single" bind:value={single} label="Διάλεξε έναν χώρο">
-				<SelectableCard
-					value="entire"
-					title="Ολόκληρο κατάλυμα"
-					description="Όλος ο χώρος δικός σου."
-				>
-					{#snippet icon()}<HouseIcon class="icon-lg" />{/snippet}
-				</SelectableCard>
-				<SelectableCard
-					value="room"
-					title="Ένα δωμάτιο"
-					description="Ιδιωτικό δωμάτιο με κοινόχρηστους χώρους."
-				>
-					{#snippet icon()}<DoorOpenIcon class="icon-lg" />{/snippet}
-				</SelectableCard>
-				<SelectableCard
-					value="shared"
-					title="Κοινόχρηστο δωμάτιο"
-					description="Κοινόχρηστος χώρος ύπνου."
-				>
-					{#snippet icon()}<BedDoubleIcon class="icon-lg" />{/snippet}
-				</SelectableCard>
-			</SelectableCards>
+		<div class="w-full max-w-form p-4">
+			<SelectableCards
+				type="single"
+				iconPlacement="leading"
+				bind:value={sort}
+				label="Ταξινόμηση"
+				options={[
+					{
+						value: 'popularity',
+						title: 'Προτεινόμενα',
+						description: 'Οι πιο προτεινόμενοι πρώτα',
+						icon: house
+					},
+					{
+						value: 'rating',
+						title: 'Αξιολόγηση',
+						description: 'Καλύτερη αξιολόγηση πρώτα',
+						icon: door
+					},
+					{ value: 'distance', title: 'Απόσταση', description: 'Κοντινότεροι πρώτα', icon: bed }
+				]}
+			/>
 		</div>
 	{/snippet}
 </Story>
 
 <Story name="Multiple">
 	{#snippet template()}
-		<div class="max-w-form">
-			<SelectableCards type="multiple" bind:value={multiple} label="Διάλεξε όσους χώρους θέλεις">
-				<SelectableCard
-					value="entire"
-					title="Ολόκληρο κατάλυμα"
-					description="Όλος ο χώρος δικός σου."
-				>
-					{#snippet icon()}<HouseIcon class="icon-lg" />{/snippet}
-				</SelectableCard>
-				<SelectableCard
-					value="room"
-					title="Ένα δωμάτιο"
-					description="Ιδιωτικό δωμάτιο με κοινόχρηστους χώρους."
-				>
-					{#snippet icon()}<DoorOpenIcon class="icon-lg" />{/snippet}
-				</SelectableCard>
-				<SelectableCard
-					value="shared"
-					title="Κοινόχρηστο δωμάτιο"
-					description="Κοινόχρηστος χώρος ύπνου."
-				>
-					{#snippet icon()}<BedDoubleIcon class="icon-lg" />{/snippet}
-				</SelectableCard>
-			</SelectableCards>
+		<div class="w-full max-w-form p-4">
+			<SelectableCards
+				type="multiple"
+				bind:value={many}
+				label="Διάλεξε όσους χώρους θέλεις"
+				options={[
+					{
+						value: 'entire',
+						title: 'Ολόκληρο κατάλυμα',
+						description: 'Όλος ο χώρος δικός σου.',
+						icon: house
+					},
+					{
+						value: 'room',
+						title: 'Ένα δωμάτιο',
+						description: 'Ιδιωτικό δωμάτιο με κοινόχρηστους χώρους.',
+						icon: door
+					},
+					{
+						value: 'shared',
+						title: 'Κοινόχρηστο δωμάτιο',
+						description: 'Κοινόχρηστος χώρος ύπνου.',
+						icon: bed
+					}
+				]}
+			/>
 		</div>
 	{/snippet}
 </Story>
 
 <Story name="Disabled">
 	{#snippet template()}
-		<div class="max-w-form">
+		<div class="w-full max-w-form p-4">
 			<SelectableCards
 				type="single"
-				bind:value={disabledValue}
+				value="entire"
 				disabled
 				label="Μη διαθέσιμη επιλογή"
-			>
-				<SelectableCard
-					value="entire"
-					title="Ολόκληρο κατάλυμα"
-					description="Όλος ο χώρος δικός σου."
-				>
-					{#snippet icon()}<HouseIcon class="icon-lg" />{/snippet}
-				</SelectableCard>
-				<SelectableCard
-					value="room"
-					title="Ένα δωμάτιο"
-					description="Ιδιωτικό δωμάτιο με κοινόχρηστους χώρους."
-				>
-					{#snippet icon()}<DoorOpenIcon class="icon-lg" />{/snippet}
-				</SelectableCard>
-			</SelectableCards>
-		</div>
-	{/snippet}
-</Story>
-
-<Story
-	name="Arrow selects (single)"
-	play={async ({ canvas }) => {
-		const radios = canvas.getAllByRole('radio');
-		radios[0].focus();
-		await userEvent.keyboard('{ArrowDown}');
-		await expect(radios[1]).toHaveFocus();
-		await expect(radios[1]).toHaveAttribute('aria-checked', 'true');
-	}}
->
-	{#snippet template()}
-		<div class="max-w-form">
-			<SelectableCards type="single" label="Διάλεξε έναν χώρο">
-				<SelectableCard
-					value="entire"
-					title="Ολόκληρο κατάλυμα"
-					description="Όλος ο χώρος δικός σου."
-				/>
-				<SelectableCard value="room" title="Ένα δωμάτιο" description="Ιδιωτικό δωμάτιο." />
-				<SelectableCard
-					value="shared"
-					title="Κοινόχρηστο δωμάτιο"
-					description="Κοινόχρηστος χώρος."
-				/>
-			</SelectableCards>
+				options={[
+					{ value: 'entire', title: 'Ολόκληρο κατάλυμα', description: 'Όλος ο χώρος δικός σου.' },
+					{ value: 'room', title: 'Ένα δωμάτιο', description: 'Ιδιωτικό δωμάτιο.' }
+				]}
+			/>
 		</div>
 	{/snippet}
 </Story>

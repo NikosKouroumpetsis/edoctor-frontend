@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
-	import { getInputOtpContext } from './input-otp.svelte';
+	import { getInputOtpContext, inputOtpSizes } from './input-otp.svelte';
 
 	let {
 		ref = $bindable(null),
@@ -19,7 +19,8 @@
 	data-slot="input-otp-slot"
 	data-active={slot.isActive ? '' : undefined}
 	class={cn(
-		'relative flex h-full flex-1 items-center justify-center text-title-sm font-medium transition-colors',
+		'relative flex flex-1 items-center justify-center font-medium transition-colors',
+		inputOtpSizes[ctx.size].digit,
 		slot.char === undefined ? 'text-muted-foreground' : 'text-foreground',
 		className
 	)}

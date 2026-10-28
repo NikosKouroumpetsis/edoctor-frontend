@@ -1,15 +1,51 @@
 <script lang="ts">
-	import { SelectableCards, SelectableCard } from './index';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
+	import { SelectableCards } from './index';
 
 	let {
 		type = 'single',
 		value = $bindable(),
-		disabled = false
-	}: { type?: 'single' | 'multiple'; value?: string | string[]; disabled?: boolean } = $props();
+		disabled = false,
+		iconPlacement = 'trailing',
+		onChange = () => {}
+	}: {
+		type?: 'single' | 'multiple';
+		value?: string | string[];
+		disabled?: boolean;
+		iconPlacement?: 'leading' | 'trailing';
+		onChange?: (value: string | string[] | undefined) => void;
+	} = $props();
 </script>
 
-<SelectableCards {type} bind:value {disabled} label="Choose a space">
-	<SelectableCard value="alpha" title="Alpha" description="First option" />
-	<SelectableCard value="beta" title="Beta" description="Second option" />
-	<SelectableCard value="gamma" title="Gamma" description="Third option" />
-</SelectableCards>
+{#snippet star()}<Ionicon name="star-outline" class="icon-lg text-foreground" />{/snippet}
+
+{#if type === 'multiple'}
+	<SelectableCards
+		type="multiple"
+		bind:value
+		{disabled}
+		{iconPlacement}
+		{onChange}
+		label="Choose spaces"
+		testId="spaces"
+		options={[
+			{ value: 'alpha', title: 'Alpha', description: 'First option', icon: star },
+			{ value: 'beta', title: 'Beta', description: 'Second option' },
+			{ value: 'gamma', title: 'Gamma' }
+		]}
+	/>
+{:else}
+	<SelectableCards
+		bind:value
+		{disabled}
+		{iconPlacement}
+		{onChange}
+		label="Choose a space"
+		testId="space"
+		options={[
+			{ value: 'alpha', title: 'Alpha', description: 'First option', icon: star },
+			{ value: 'beta', title: 'Beta', description: 'Second option' },
+			{ value: 'gamma', title: 'Gamma' }
+		]}
+	/>
+{/if}

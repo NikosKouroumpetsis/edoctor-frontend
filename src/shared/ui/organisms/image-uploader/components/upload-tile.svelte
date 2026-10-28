@@ -39,7 +39,7 @@
 
 		{#if busy}
 			<div
-				class="absolute inset-0 grid place-items-center bg-black/40"
+				class="absolute inset-0 grid place-items-center bg-overlay"
 				role="progressbar"
 				aria-valuemin={0}
 				aria-valuemax={100}
@@ -52,7 +52,7 @@
 						<CheckIcon class="icon-sm" />
 					</span>
 				{:else}
-					<LoaderCircleIcon class="icon-lg animate-spin text-white" />
+					<LoaderCircleIcon class="icon-lg animate-spin text-secondary-foreground" />
 				{/if}
 			</div>
 		{/if}
@@ -70,7 +70,7 @@
 			class="group absolute top-0 right-0 grid size-touch place-items-center rounded-full outline-none"
 		>
 			<span
-				class="grid size-control-xs place-items-center rounded-full bg-black/50 text-white transition-colors group-hover:bg-black/70 group-focus-visible:ring-2 group-focus-visible:ring-ring"
+				class="grid size-control-xs place-items-center rounded-full bg-overlay text-secondary-foreground transition-colors group-hover:bg-secondary group-focus-visible:ring-2 group-focus-visible:ring-ring"
 			>
 				<XIcon class="icon-sm" />
 			</span>

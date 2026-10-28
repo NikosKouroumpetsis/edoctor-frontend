@@ -1,7 +1,7 @@
 <script lang="ts" module>
-	import type { InputSize } from '$shared/ui/primitives/input';
+	import type { FieldSize } from '$shared/ui/primitives/floating-label';
 
-	export type ComboboxSize = InputSize;
+	export type ComboboxSize = FieldSize;
 	export type ComboboxOption = { label: string; value: string; icon?: string };
 
 	// Greek-accent folding so search is diacritics-insensitive (1:1 with the Vue
@@ -36,14 +36,12 @@
 
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import SearchIcon from '~icons/lucide/search';
-	import ChevronDownIcon from '~icons/lucide/chevron-down';
-	import XIcon from '~icons/lucide/x';
 	import { cn } from '$shared/lib/utils';
-	import { useId, dismissable } from '$shared/lib/headless';
+	import { useId, dismissable, Presence } from '$shared/lib/headless';
+	import { FloatingLabel } from '$shared/ui/primitives/floating-label';
 	import { fieldSizes } from '$shared/ui/primitives/input';
-	import { m } from '$paraglide/messages.js';
 	import type { FieldApi } from '$shared/lib/form';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
 
 	let {
 		label,
@@ -56,8 +54,11 @@
 		disabled = false,
 		placeholder = '',
 		allowFreeText = true,
-		searchIcon = true,
+		searchIcon = false,
 		chevron = true,
+		emptyText,
+		clearLabel,
+		toggleLabel,
 		name,
 		class: className
 	}: {
@@ -73,10 +74,15 @@
 		placeholder?: string;
 		/** Allow committing typed text that matches no option (default true, 1:1 Vue). */
 		allowFreeText?: boolean;
-		/** Show the leading search icon; when false the input/label start at the edge. */
+		/** Show the leading search icon (off by default, the application's look, U-07.3); off, the input and the label start at the edge. */
 		searchIcon?: boolean;
 		/** Show the trailing toggle/clear button (chevron when empty, clear when filled). */
 		chevron?: boolean;
+		/** What the list says when nothing matches, already localized (the application's `emptyText`). */
+		emptyText: string;
+		/** Names of the trailing button: clearing the text, or opening the options. */
+		clearLabel: string;
+		toggleLabel: string;
 		name?: string;
 		class?: string;
 	} = $props();
@@ -85,7 +91,6 @@
 	// otherwise fall back to the size's natural horizontal padding.
 	const leadPad = $derived(searchIcon ? 'pl-field-inset' : fieldSizes[size].start);
 	const trailPad = $derived(chevron ? 'pr-touch' : fieldSizes[size].end);
-	const labelLeft = $derived(searchIcon ? 'left-field-inset' : fieldSizes[size].left);
 
 	const inputId = useId(untrack(() => id) ?? undefined, 'combobox');
 	const listId = `${inputId}-list`;
@@ -98,9 +103,13 @@
 	let highlighted = $state(-1);
 	let inputEl = $state<HTMLInputElement | null>(null);
 	let listEl = $state<HTMLUListElement | null>(null);
-	// Placeholder only while focused (1:1 with the Vue combobox); a space otherwise
-	// so the floating label's `:placeholder-shown` mechanism keeps working.
+	// The list stays until its CSS leave ends (U-12.2): it grows from 95 % as it fades in, and back out.
+	const presence = new Presence(() => open, { duration: 'standard' });
+	// Placeholder only while focused (1:1 with the Vue combobox).
 	let placeholderText = $state(' ');
+	let focused = $state(false);
+	// The application's `floated = focused || hasValue` (R3-3) over the typed text; autofill floats it by CSS.
+	const floated = $derived(focused || search !== '');
 
 	// Keep the visible text in sync with EXTERNAL value changes only (untrack so
 	// typing — which writes `value` — never fights the input).
@@ -186,11 +195,13 @@
 	}
 
 	function onFocus() {
+		focused = true;
 		open = true;
 		placeholderText = placeholder || ' ';
 	}
 
 	function onBlur() {
+		focused = false;
 		placeholderText = ' ';
 		field?.handleBlur();
 	}
@@ -231,8 +242,9 @@
 >
 	<div class="relative">
 		{#if searchIcon}
-			<SearchIcon
-				class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+			<Ionicon
+				name="search"
+				class="pointer-events-none absolute top-1/2 left-3 icon-sm -translate-y-1/2 text-muted-foreground"
 			/>
 		{/if}
 
@@ -265,20 +277,17 @@
 			)}
 		/>
 
-		<label
+		<!-- With the search icon the label stays clear of it floated too (the web's look, kept by `class`). -->
+		<FloatingLabel
 			for={inputId}
 			data-slot="combobox-label"
-			class={cn(
-				'pointer-events-none absolute z-10 origin-left scale-75 transform truncate pr-3 text-muted-foreground duration-200',
-				'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
-				'peer-focus:scale-75 peer-focus:text-foreground',
-				'peer-aria-[invalid=true]:text-destructive',
-				fieldSizes[size].label,
-				labelLeft
-			)}
-		>
 			{label}
-		</label>
+			{floated}
+			{focused}
+			error={Boolean(currentError)}
+			{size}
+			class={searchIcon ? 'left-field-inset' : undefined}
+		/>
 
 		{#if chevron}
 			<button
@@ -286,20 +295,27 @@
 				tabindex={-1}
 				{disabled}
 				onclick={onButton}
-				aria-label={search ? 'Clear' : 'Toggle options'}
+				aria-label={search ? clearLabel : toggleLabel}
 				class="absolute top-1/2 right-0 grid size-touch -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground disabled:opacity-50"
 			>
-				{#if search}<XIcon class="size-4" />{:else}<ChevronDownIcon class="size-4" />{/if}
+				<!-- The application's trailing glyph is `icon.md` (20). -->
+				{#if search}<Ionicon name="close" class="icon-md" />{:else}<Ionicon
+						name="chevron-down"
+						class="icon-md"
+					/>{/if}
 			</button>
 		{/if}
 	</div>
 
-	{#if open}
+	{#if presence.present}
 		<ul
 			bind:this={listEl}
+			use:presence.track
 			id={listId}
 			role="listbox"
-			class="absolute z-50 mt-1 max-h-menu-max-h w-full overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-overlay"
+			data-state={presence.state}
+			inert={presence.closing}
+			class="absolute z-50 mt-1 max-h-menu-max-h w-full overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-overlay transition-[opacity,scale] duration-standard ease-standard data-[state=closed]:pointer-events-none data-[state=closed]:scale-95 data-[state=closed]:opacity-0 starting:scale-95 starting:opacity-0"
 		>
 			{#each filtered as option, i (option.value)}
 				<li
@@ -326,13 +342,13 @@
 				</li>
 			{:else}
 				<li class="px-3 py-4 text-body-sm text-muted-foreground select-none">
-					{m.combobox_no_results()}
+					{emptyText}
 				</li>
 			{/each}
 		</ul>
 	{/if}
 
 	{#if currentError}
-		<p data-slot="combobox-error" class="mt-1 text-body-sm text-destructive">{currentError}</p>
+		<p data-slot="combobox-error" class="mt-1 text-body-sm text-danger-text">{currentError}</p>
 	{/if}
 </div>

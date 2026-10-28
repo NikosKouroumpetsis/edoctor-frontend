@@ -11,13 +11,14 @@
 
 	let {
 		direction = 'bottom',
-		size = 'default'
-	}: { direction?: DrawerDirection; size?: DrawerSize } = $props();
+		size = 'md',
+		dismissible = true
+	}: { direction?: DrawerDirection; size?: DrawerSize; dismissible?: boolean } = $props();
 </script>
 
 <Drawer>
 	<DrawerTrigger>Open drawer</DrawerTrigger>
-	<DrawerContent {direction} {size}>
+	<DrawerContent {direction} {size} {dismissible}>
 		<DrawerHeader>
 			<DrawerTitle>Filters</DrawerTitle>
 			<DrawerDescription>Narrow down the doctor search.</DrawerDescription>

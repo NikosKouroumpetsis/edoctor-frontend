@@ -120,15 +120,17 @@
 	}
 
 	// Only the visible dot grabs the handle and drags it without jumping the value; the rest
-	// of its touch-sized box behaves exactly like the track beneath it.
+	// of its touch-sized box behaves exactly like the track beneath it. The dot takes the focus (Safari and
+	// Firefox on macOS give none to a pressed button), so the arrows move it after a drag; the press is not
+	// cancelled (U-06.10). A scripted focus matches `:focus-visible` in Chrome even after a pointer, so
+	// `focusVisible: false` keeps the ring, drawn only there, for the keyboard: a click or a drag draws none.
 	function onThumbPointerDown(event: PointerEvent, index: number) {
 		if (disabled) return;
 		if (!(event.target as HTMLElement).closest('[data-slot="slider-thumb-dot"]')) {
 			onTrackPointerDown(event);
 			return;
 		}
-		event.preventDefault();
-		(event.currentTarget as HTMLElement).focus();
+		(event.currentTarget as HTMLElement).focus({ preventScroll: true, focusVisible: false });
 		activeThumb = index;
 		window.addEventListener('pointermove', onPointerMove);
 		window.addEventListener('pointerup', onPointerUp);
@@ -192,50 +194,58 @@
 	)}
 	{...restProps}
 >
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<!-- Track is a pointer convenience; keyboard access is on the slider thumbs below. -->
-	<div
-		bind:this={trackEl}
-		data-slot="slider-track"
-		onpointerdown={onTrackPointerDown}
-		class={cn('relative w-full grow rounded-full bg-muted', sliderTrackSizes[size], trackClass)}
-	>
+	<!-- The rail is inset by half the 48 touch box (`mx-6`), so a thumb at either end stays inside the slider's
+	     box (U-06.2): its dot and its touch box. The thumbs are placed on the rail, the track spans it. -->
+	<div data-slot="slider-rail" class="relative mx-6 flex min-w-0 flex-1 items-center self-stretch">
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<!-- Track is a pointer convenience; keyboard access is on the slider thumbs below. -->
 		<div
-			data-slot="slider-range"
-			class={cn('absolute h-full rounded-full', rangeToneClass, rangeClass)}
-			style={`left: ${rangeStart}%; width: ${rangeEnd - rangeStart}%`}
-		></div>
-	</div>
-
-	{#each thumbs as thumb, index (index)}
-		<button
-			type="button"
-			role="slider"
-			data-slot="slider-thumb"
-			data-dragging={activeThumb === index ? 'true' : undefined}
-			aria-label={ariaLabel}
-			aria-valuemin={min}
-			aria-valuemax={max}
-			aria-valuenow={thumb}
-			aria-valuetext={formatValue(thumb, index)}
-			aria-orientation="horizontal"
-			{disabled}
-			tabindex={disabled ? -1 : 0}
-			onpointerdown={(e) => onThumbPointerDown(e, index)}
-			onkeydown={(e) => onThumbKeydown(e, index)}
-			style={`left: ${percent(thumb)}%`}
-			class="group absolute grid size-touch -translate-x-1/2 cursor-grab touch-none place-items-center rounded-full outline-none active:cursor-grabbing disabled:pointer-events-none disabled:cursor-not-allowed"
+			bind:this={trackEl}
+			data-slot="slider-track"
+			onpointerdown={onTrackPointerDown}
+			class={cn(
+				'relative w-full grow rounded-full bg-muted [-webkit-tap-highlight-color:transparent]',
+				sliderTrackSizes[size],
+				trackClass
+			)}
 		>
-			<span
-				data-slot="slider-thumb-dot"
+			<div
+				data-slot="slider-range"
+				class={cn('absolute h-full rounded-full', rangeToneClass, rangeClass)}
+				style={`left: ${rangeStart}%; width: ${rangeEnd - rangeStart}%`}
+			></div>
+		</div>
+
+		{#each thumbs as thumb, index (index)}
+			<button
+				type="button"
+				role="slider"
+				data-slot="slider-thumb"
 				data-dragging={activeThumb === index ? 'true' : undefined}
-				class={cn(
-					'rounded-full border bg-card shadow-sm transition-[color,box-shadow] group-focus-visible:ring-3 group-focus-visible:ring-ring/50',
-					thumbToneClass,
-					sliderThumbSizes[size],
-					thumbClass
-				)}
-			></span>
-		</button>
-	{/each}
+				aria-label={ariaLabel}
+				aria-valuemin={min}
+				aria-valuemax={max}
+				aria-valuenow={thumb}
+				aria-valuetext={formatValue(thumb, index)}
+				aria-orientation="horizontal"
+				{disabled}
+				tabindex={disabled ? -1 : 0}
+				onpointerdown={(e) => onThumbPointerDown(e, index)}
+				onkeydown={(e) => onThumbKeydown(e, index)}
+				style={`left: ${percent(thumb)}%`}
+				class="group absolute grid size-touch -translate-x-1/2 cursor-grab touch-none place-items-center rounded-full outline-none [-webkit-tap-highlight-color:transparent] active:cursor-grabbing disabled:pointer-events-none disabled:cursor-not-allowed"
+			>
+				<span
+					data-slot="slider-thumb-dot"
+					data-dragging={activeThumb === index ? 'true' : undefined}
+					class={cn(
+						'rounded-full border bg-card shadow-raised transition-[color,box-shadow] group-focus-visible:ring-3 group-focus-visible:ring-ring/50',
+						thumbToneClass,
+						sliderThumbSizes[size],
+						thumbClass
+					)}
+				></span>
+			</button>
+		{/each}
+	</div>
 </div>

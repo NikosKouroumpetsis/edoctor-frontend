@@ -6,10 +6,14 @@
 
 	let {
 		ref = $bindable(null),
+		roleDescription,
 		class: className,
 		children,
 		...restProps
-	}: WithElementRef<HTMLAttributes<HTMLDivElement>> = $props();
+	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
+		/** What a slide is called aloud («διαφάνεια»), already localized; omitted when absent. */
+		roleDescription?: string;
+	} = $props();
 
 	const ctx = getCarouselContext();
 	onMount(() => ctx.register());
@@ -18,7 +22,7 @@
 <div
 	bind:this={ref}
 	role="group"
-	aria-roledescription="slide"
+	aria-roledescription={roleDescription}
 	data-slot="carousel-item"
 	class={cn('min-w-0 shrink-0 grow-0 basis-full', className)}
 	{...restProps}

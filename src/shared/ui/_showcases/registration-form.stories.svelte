@@ -13,7 +13,7 @@
 	import { createForm, Validators } from '$shared/lib/form';
 	import { TextField } from '$shared/ui/molecules/text-field';
 	import { PasswordField } from '$shared/ui/molecules/password-field';
-	import { NumberField } from '$shared/ui/molecules/number-field';
+	import { Stepper } from '$shared/ui/molecules/stepper';
 	import { PhoneField } from '$shared/ui/molecules/phone-field';
 	import { PhoneFieldInline } from '$shared/ui/molecules/phone-field-inline';
 	import { DateOfBirthField } from '$shared/ui/molecules/date-of-birth-field';
@@ -24,7 +24,7 @@
 		fullName: string;
 		email: string;
 		password: string;
-		age: string;
+		minNotice: string;
 		phone: string;
 		mobile: string;
 		dob: string;
@@ -39,7 +39,7 @@
 			fullName: '',
 			email: '',
 			password: '',
-			age: '',
+			minNotice: '2',
 			phone: '',
 			mobile: '',
 			dob: '',
@@ -50,11 +50,16 @@
 			fullName: [Validators.required, Validators.minLength(2)],
 			email: [Validators.required, Validators.email],
 			password: [Validators.required, Validators.minLength(8), Validators.passwordStrength],
+			minNotice: [Validators.required, Validators.min(0), Validators.max(72)],
 			slot: [Validators.required],
 			languages: [Validators.required]
 		},
 		messages: {
-			password: { minLength: 'At least 8 characters' }
+			fullName: { required: 'Υποχρεωτικό πεδίο', minLength: 'Τουλάχιστον 2 χαρακτήρες.' },
+			email: { required: 'Υποχρεωτικό πεδίο', email: 'Δώσε ένα έγκυρο email.' },
+			password: { required: 'Υποχρεωτικό πεδίο', minLength: 'Τουλάχιστον 8 χαρακτήρες.' },
+			slot: { required: 'Επιλέξτε μία ώρα' },
+			languages: { required: 'Επιλέξτε τουλάχιστον μία γλώσσα' }
 		},
 		onSubmit: (values) => {
 			submitted = { ...values };
@@ -67,52 +72,78 @@
 	registration form built from createForm + every field molecule. Submit to
 	validate; collected values render below.
 -->
-<Story name="Registration form">
+<Story name="Registration Form">
 	{#snippet template()}
 		<form class="grid max-w-form gap-5" onsubmit={(e) => form.handleSubmit(e)} novalidate>
-			<TextField label="Full name" field={form.field('fullName')} autocomplete="name" />
+			<TextField label="Ονοματεπώνυμο" field={form.field('fullName')} autocomplete="name" />
 			<TextField label="Email" field={form.field('email')} type="email" autocomplete="email" />
-			<PasswordField field={form.field('password')} autocomplete="new-password" />
-			<NumberField label="Age" field={form.field('age')} min={0} max={120} />
-			<PhoneField field={form.field('phone')} />
-			<PhoneFieldInline label="Mobile (inline)" field={form.field('mobile')} />
+			<PasswordField
+				label="Κωδικός πρόσβασης"
+				hideLabel="Απόκρυψη κωδικού"
+				showLabel="Εμφάνιση κωδικού"
+				field={form.field('password')}
+				autocomplete="new-password"
+			/>
+			<Stepper
+				label="Ελάχιστος χρόνος πριν την κράτηση (ώρες)"
+				helperText="Πόσες ώρες πριν σταματά η κράτηση για μια ώρα (0-72)."
+				decreaseLabel="Μείωση"
+				increaseLabel="Αύξηση"
+				emptyValueLabel="Κενό"
+				field={form.field('minNotice')}
+				min={0}
+				max={72}
+			/>
+			<PhoneField
+				label="Κινητό τηλέφωνο"
+				countryLabel="Χώρα"
+				countryAccessibilityLabel="Κωδικός χώρας"
+				searchPlaceholder="Αναζήτηση χώρας"
+				field={form.field('phone')}
+			/>
+			<PhoneFieldInline
+				label="Αριθμός τηλεφώνου"
+				countryAccessibilityLabel="Κωδικός χώρας"
+				searchPlaceholder="Αναζήτηση χώρας"
+				field={form.field('mobile')}
+			/>
 			<DateOfBirthField field={form.field('dob')} />
 
 			<SingleSelection
-				label="Preferred slot"
+				label="Προτιμώμενη ώρα"
 				field={form.field('slot')}
 				options={[
-					{ value: 'morning', label: 'Morning' },
-					{ value: 'afternoon', label: 'Afternoon' },
-					{ value: 'evening', label: 'Evening' }
+					{ value: 'morning', label: 'Πρωί' },
+					{ value: 'noon', label: 'Μεσημέρι' },
+					{ value: 'afternoon', label: 'Απόγευμα' }
 				]}
 			/>
 
 			<MultiSelection
-				label="Spoken languages"
+				label="Γλώσσες"
 				field={form.field('languages')}
 				options={[
-					{ value: 'gr', label: 'Greek' },
-					{ value: 'en', label: 'English' },
-					{ value: 'de', label: 'German' },
-					{ value: 'fr', label: 'French' }
+					{ value: 'gr', label: 'Ελληνικά' },
+					{ value: 'en', label: 'Αγγλικά' },
+					{ value: 'de', label: 'Γερμανικά' },
+					{ value: 'fr', label: 'Γαλλικά' }
 				]}
 			/>
 
 			<p class="text-body-sm text-muted-foreground">
-				dirty: {form.isDirty} · submitted: {form.submitCount} ·
-				{form.isSubmitting ? 'submitting…' : 'idle'}
+				Αλλαγές: {form.isDirty ? 'ναι' : 'όχι'} · Υποβολές: {form.submitCount} ·
+				{form.isSubmitting ? 'Υποβολή…' : 'Σε αναμονή'}
 			</p>
 
-			<div class="flex gap-3">
-				<Button type="submit">Create account</Button>
-				<Button type="button" variant="outline" onclick={() => form.reset()}>Reset</Button>
+			<div class="flex flex-wrap gap-3">
+				<Button type="submit" label="Δημιουργία λογαριασμού" />
+				<Button tone="outline" label="Επαναφορά" onclick={() => form.reset()} />
 			</div>
 		</form>
 
 		{#if submitted}
 			<pre
-				class="mt-4 overflow-x-auto rounded-md border border-border bg-muted p-4 text-body-sm">{JSON.stringify(
+				class="mt-4 scrollbar-none overflow-x-auto rounded-md border border-border bg-muted p-4 text-body-sm">{JSON.stringify(
 					submitted,
 					null,
 					2

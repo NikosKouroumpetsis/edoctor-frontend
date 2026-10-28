@@ -8,7 +8,14 @@ describe('Combobox', () => {
 	it('reveals the placeholder only while focused', async () => {
 		const user = userEvent.setup();
 		render(Combobox, {
-			props: { label: 'Specialty', options: [{ label: 'A', value: 'a' }], placeholder: 'Search…' }
+			props: {
+				label: 'Specialty',
+				emptyText: 'No results',
+				clearLabel: 'Clear',
+				toggleLabel: 'Toggle options',
+				options: [{ label: 'A', value: 'a' }],
+				placeholder: 'Search…'
+			}
 		});
 		const input = screen.getByRole('combobox');
 

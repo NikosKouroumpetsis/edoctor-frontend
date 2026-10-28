@@ -25,4 +25,23 @@ describe('MultiSelection', () => {
 		expect(greek).toHaveAttribute('aria-checked', 'false');
 		expect(german).toHaveAttribute('aria-checked', 'true');
 	});
+
+	// 4ν: the application's `max` — at the limit the unchosen chips are disabled, a chosen one still clears.
+	it('4ν: at `max` chosen, the rest are disabled; clearing one frees them', async () => {
+		const user = userEvent.setup({ delay: null });
+		render(MultiSelection, { props: { label: 'Languages', options, max: 2, value: ['gr'] } });
+		const greek = screen.getByRole('checkbox', { name: 'Greek' });
+		const english = screen.getByRole('checkbox', { name: 'English' });
+		const german = screen.getByRole('checkbox', { name: 'German' });
+		expect(german).toBeEnabled();
+
+		await user.click(english);
+		expect(english).toHaveAttribute('aria-checked', 'true');
+		expect(german).toBeDisabled();
+		expect(greek).toBeEnabled();
+
+		await user.click(greek);
+		expect(greek).toHaveAttribute('aria-checked', 'false');
+		expect(german).toBeEnabled();
+	});
 });

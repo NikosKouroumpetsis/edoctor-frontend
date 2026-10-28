@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import Harness from './date-of-birth-field.harness.svelte';
+import DateOfBirthField from './date-of-birth-field.svelte';
 
 // Labels/placeholders are i18n (Paraglide) so they vary by locale; query the
 // day/month/year inputs by position and assert behaviour via the emitted ISO
@@ -66,5 +67,38 @@ describe('DateOfBirthField', () => {
 		await user.type(year, '2001');
 
 		expect(screen.getByTestId('dob-value')).toHaveTextContent('empty');
+	});
+
+	// R3-11: the field family's size (`default | lg | xl`) draws each segment's box, the look the Input sizes drew
+	// before they became the application's `sm | md | lg`.
+	it('R3-11: each field size keeps its segment box (48 / 56 / 64 with its side padding)', () => {
+		for (const [size, box] of [
+			['default', ['min-h-control-md', 'px-2.5']],
+			['lg', ['min-h-control-lg', 'px-3']],
+			['xl', ['min-h-control-xl', 'px-3.5']]
+		] as const) {
+			const view = render(DateOfBirthField, { props: { size } });
+			for (const input of screen.getAllByRole('textbox')) {
+				expect(input).toHaveClass(...box, 'text-center', 'text-body-lg');
+				expect([...input.classList].filter((name) => /^px-/.test(name))).toEqual([box[1]]);
+			}
+			view.unmount();
+		}
+	});
+
+	it('the muted helper shows while there is no error (the application’s port)', () => {
+		const helped = render(DateOfBirthField, {
+			props: { helperText: 'Πρέπει να είναι στο παρελθόν.' }
+		});
+		expect(screen.getByText('Πρέπει να είναι στο παρελθόν.')).toHaveClass('text-muted-foreground');
+		helped.unmount();
+		render(DateOfBirthField, {
+			props: {
+				helperText: 'Πρέπει να είναι στο παρελθόν.',
+				error: 'Απαιτείται ημερομηνία γέννησης.'
+			}
+		});
+		expect(screen.queryByText('Πρέπει να είναι στο παρελθόν.')).toBeNull();
+		expect(screen.getByText('Απαιτείται ημερομηνία γέννησης.')).toBeInTheDocument();
 	});
 });

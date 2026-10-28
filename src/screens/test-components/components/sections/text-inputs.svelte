@@ -15,13 +15,13 @@
 	<DemoRow label="Default">
 		<div class="grid w-full max-w-narrow gap-2">
 			<Label for="demo-email">Email</Label>
-			<Input id="demo-email" type="email" placeholder="name@edoctor.gr" bind:value />
+			<Input id="demo-email" class="px-2.5" type="email" placeholder="name@edoctor.gr" bind:value />
 			<p class="text-body-sm text-muted-foreground">Value: {value || '—'}</p>
 		</div>
 	</DemoRow>
 
 	<DemoRow label="States">
-		<Input class="max-w-narrow" placeholder="Disabled" disabled />
-		<Input class="max-w-narrow" placeholder="Invalid" aria-invalid="true" />
+		<Input class="max-w-narrow px-2.5" placeholder="Disabled" disabled />
+		<Input class="max-w-narrow px-2.5" placeholder="Invalid" aria-invalid="true" />
 	</DemoRow>
 </DemoSection>

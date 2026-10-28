@@ -2,18 +2,21 @@
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { Stepper } from '$shared/ui/molecules/stepper';
 
-	// Only JSON-serializable args: the value lives in each story's `bind:value`.
+	// The application's meta (`molecules/stepper`): only JSON-serializable args; each story holds its own value.
 	const { Story } = defineMeta({
 		title: 'Molecules/Stepper',
 		component: Stepper,
 		tags: ['autodocs'],
 		args: {
-			label: 'Ελάχιστος χρόνος πριν την κράτηση (ώρες)',
+			decreaseLabel: 'Μείωση',
+			disabled: false,
+			emptyValueLabel: 'Κενό',
 			helperText: 'Πόσες ώρες πριν σταματά η κράτηση για μια ώρα (0-72).',
-			min: 0,
+			increaseLabel: 'Αύξηση',
+			label: 'Ελάχιστος χρόνος πριν την κράτηση (ώρες)',
 			max: 72,
-			step: 1,
-			disabled: false
+			min: 0,
+			step: 1
 		},
 		argTypes: {
 			disabled: { control: 'boolean' },
@@ -28,29 +31,32 @@
 </script>
 
 <script lang="ts">
-	let value = $state('2');
+	let playground = $state('2');
+	let invalid = $state('2');
+	let minimum = $state('2');
+	let disabled = $state('2');
 </script>
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class="w-narrow"><Stepper {...args} bind:value /></div>
+		<div class="w-full max-w-narrow"><Stepper {...args} bind:value={playground} /></div>
 	{/snippet}
 </Story>
 
-<Story name="With error" args={{ error: 'Δώστε έναν αριθμό από 0 έως 72.' }}>
+<Story name="With Error" args={{ error: 'Δώστε έναν αριθμό από 0 έως 72.' }}>
 	{#snippet template(args)}
-		<div class="w-narrow"><Stepper {...args} bind:value /></div>
+		<div class="w-full max-w-narrow"><Stepper {...args} bind:value={invalid} /></div>
 	{/snippet}
 </Story>
 
-<Story name="At minimum" args={{ min: 2 }}>
+<Story name="At Minimum" args={{ min: 2 }}>
 	{#snippet template(args)}
-		<div class="w-narrow"><Stepper {...args} bind:value /></div>
+		<div class="w-full max-w-narrow"><Stepper {...args} bind:value={minimum} /></div>
 	{/snippet}
 </Story>
 
 <Story name="Disabled" args={{ disabled: true }}>
 	{#snippet template(args)}
-		<div class="w-narrow"><Stepper {...args} bind:value /></div>
+		<div class="w-full max-w-narrow"><Stepper {...args} bind:value={disabled} /></div>
 	{/snippet}
 </Story>

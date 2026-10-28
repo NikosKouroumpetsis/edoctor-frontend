@@ -18,7 +18,8 @@
 	<DropdownMenuContent>
 		<DropdownMenuLabel>Account</DropdownMenuLabel>
 		<DropdownMenuItem onclick={() => onProfile?.()}>Profile</DropdownMenuItem>
-		<DropdownMenuItem>Settings</DropdownMenuItem>
+		<DropdownMenuItem icon="settings-outline">Settings</DropdownMenuItem>
+		<DropdownMenuItem icon="trash-outline" variant="destructive">Delete</DropdownMenuItem>
 		<DropdownMenuSeparator />
 		<DropdownMenuCheckboxItem bind:checked={showGrid}>Show grid</DropdownMenuCheckboxItem>
 	</DropdownMenuContent>

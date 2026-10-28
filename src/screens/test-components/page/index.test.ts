@@ -12,13 +12,13 @@ describe('Component gallery page', () => {
 		expect(screen.getByRole('navigation', { name: /component sections/i })).toBeInTheDocument();
 	});
 
-	it('renders button primitive variants', () => {
+	it('renders the button tones of the application and their states', () => {
 		render(Page);
-		expect(screen.getByRole('button', { name: 'Secondary' })).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: 'Destructive' })).toBeInTheDocument();
-		// "Default" appears twice (a variant and a size demo).
-		expect(screen.getAllByRole('button', { name: 'Default' })).toHaveLength(2);
+		for (const tone of ['Primary', 'Secondary', 'Accent', 'Contrast', 'Ghost', 'Muted', 'Outline'])
+			expect(screen.getByRole('button', { name: tone })).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: 'Disabled' })).toBeDisabled();
+		expect(screen.getByRole('button', { name: 'Loading' })).toHaveAttribute('aria-busy', 'true');
+		expect(screen.getByRole('button', { name: 'Filters' })).toBeInTheDocument();
 	});
 
 	it('associates the label with the email input and reflects typed value', async () => {

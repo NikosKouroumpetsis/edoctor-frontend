@@ -1,77 +1,122 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { BrandGoogle } from '$shared/ui/icons/brand-google';
 	import { Button } from '$shared/ui/primitives/button';
-	import PlusIcon from '~icons/lucide/plus';
-	import ArrowRightIcon from '~icons/lucide/arrow-right';
 
+	const tones = [
+		'primary',
+		'secondary',
+		'accent',
+		'contrast',
+		'ghost',
+		'muted',
+		'outline'
+	] as const;
+	const radii = ['sm', 'md', 'lg', 'full'] as const;
+	const sizes = ['default', 'lg'] as const;
+
+	// The application's meta (`atoms/button`); each story stacks its buttons in a column 12 apart, as its decorator.
 	const { Story } = defineMeta({
 		title: 'Primitives/Button',
 		component: Button,
 		tags: ['autodocs'],
-		args: { variant: 'default', size: 'default', disabled: false },
+		args: {
+			label: 'Συνέχεια',
+			tone: 'primary',
+			radius: 'md',
+			labelCase: 'normal',
+			bordered: true,
+			loading: false
+		},
 		argTypes: {
-			variant: {
-				control: 'select',
-				options: ['default', 'secondary', 'destructive', 'outline', 'ghost', 'link']
-			},
-			size: {
-				control: 'select',
-				options: ['default', 'lg', 'icon']
-			},
-			disabled: { control: 'boolean' }
+			tone: { control: 'select', options: tones },
+			radius: { control: 'select', options: radii },
+			size: { control: 'radio', options: sizes },
+			labelCase: { control: 'radio', options: ['uppercase', 'normal'] },
+			bordered: { control: 'boolean' },
+			disabled: { control: 'boolean' },
+			loading: { control: 'boolean' },
+			label: { control: 'text' }
 		}
 	});
 </script>
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<Button {...args}>Button</Button>
+		<div class="flex flex-col gap-3"><Button {...args} /></div>
 	{/snippet}
 </Story>
 
-<Story name="Variants">
-	{#snippet template()}
-		<div class="flex flex-wrap gap-3">
-			<Button>Default</Button>
-			<Button variant="secondary">Secondary</Button>
-			<Button variant="destructive">Destructive</Button>
-			<Button variant="outline">Outline</Button>
-			<Button variant="ghost">Ghost</Button>
-			<Button variant="link">Link</Button>
+<Story name="Tones">
+	{#snippet template(args)}
+		<div class="flex flex-col gap-3">
+			{#each tones as tone (tone)}
+				<Button {...args} {tone} label={tone} />
+			{/each}
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Radii">
+	{#snippet template(args)}
+		<div class="flex flex-col gap-3">
+			{#each radii as radius (radius)}
+				<Button {...args} {radius} label={radius} />
+			{/each}
 		</div>
 	{/snippet}
 </Story>
 
 <Story name="Sizes">
-	{#snippet template()}
-		<div class="flex flex-wrap items-center gap-3">
-			<Button size="default">Default</Button>
-			<Button size="lg">Large</Button>
-			<Button size="icon" aria-label="Add"><PlusIcon /></Button>
+	{#snippet template(args)}
+		<div class="flex flex-col gap-3">
+			{#each sizes as size (size)}
+				<Button {...args} {size} label={size} />
+			{/each}
 		</div>
 	{/snippet}
 </Story>
 
-<Story name="With icon">
-	{#snippet template()}
-		<div class="flex flex-wrap gap-3">
-			<Button><PlusIcon />Add item</Button>
-			<Button variant="outline">Continue<ArrowRightIcon /></Button>
+<Story name="Loading">
+	{#snippet template(args)}
+		<div class="flex flex-col gap-3">
+			{#each tones as tone (tone)}
+				<Button {...args} {tone} label={tone} loading size="lg" />
+			{/each}
 		</div>
 	{/snippet}
 </Story>
 
-<Story name="As link">
-	{#snippet template()}
-		<Button href="https://example.com" variant="link">Visit example.com</Button>
+<Story name="Disabled" args={{ disabled: true, label: 'Μη διαθέσιμο' }}>
+	{#snippet template(args)}
+		<div class="flex flex-col gap-3"><Button {...args} /></div>
 	{/snippet}
 </Story>
 
-<Story name="Disabled">
-	{#snippet template()}
-		<div class="flex flex-wrap gap-3">
-			<Button disabled>Default</Button>
-			<Button variant="outline" disabled>Outline</Button>
+<Story name="Borderless" args={{ bordered: false, tone: 'ghost' }}>
+	{#snippet template(args)}
+		<div class="flex flex-col gap-3"><Button {...args} /></div>
+	{/snippet}
+</Story>
+
+<Story name="Uppercase Pill" args={{ labelCase: 'uppercase', label: 'Πληρωμή', radius: 'full' }}>
+	{#snippet template(args)}
+		<div class="flex flex-col gap-3"><Button {...args} /></div>
+	{/snippet}
+</Story>
+
+<Story name="Uppercase Md" args={{ labelCase: 'uppercase', label: 'Αποθήκευση', radius: 'md' }}>
+	{#snippet template(args)}
+		<div class="flex flex-col gap-3"><Button {...args} /></div>
+	{/snippet}
+</Story>
+
+<Story name="With Leading Mark">
+	{#snippet template(args)}
+		<div class="flex flex-col gap-3">
+			<Button {...args} label="Συνέχεια με Google" labelCase="normal" radius="md" size="lg">
+				{#snippet leading()}<BrandGoogle class="icon-md" />{/snippet}
+			</Button>
 		</div>
 	{/snippet}
 </Story>

@@ -1,55 +1,100 @@
 <script lang="ts" module>
-	import { tv, type VariantProps } from '$shared/lib/utils';
+	import type { HTMLAttributes } from 'svelte/elements';
 
-	export const badgeVariants = tv({
-		base: 'inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&>svg]:pointer-events-none',
-		variants: {
-			variant: {
-				default: 'border-transparent bg-primary text-primary-foreground',
-				secondary: 'border-transparent bg-secondary text-secondary-foreground',
-				destructive: 'border-transparent bg-destructive text-white',
-				success: 'border-transparent bg-success text-white',
-				warning: 'border-transparent bg-warning text-white',
-				outline: 'border-border text-foreground'
-			},
-			size: {
-				sm: "px-1.5 py-0 text-label-md [&>svg:not([class*='size-'])]:size-2.5",
-				default: "px-2 py-0.5 text-label-md [&>svg:not([class*='size-'])]:size-3",
-				lg: "px-2.5 py-1 text-label-lg [&>svg:not([class*='size-'])]:size-3.5"
-			}
-		},
-		defaultVariants: {
-			variant: 'default',
-			size: 'default'
-		}
-	});
+	export type BadgeTone =
+		| 'primary'
+		| 'secondary'
+		| 'accent'
+		| 'muted'
+		| 'success'
+		| 'warning'
+		| 'danger'
+		| 'outline';
+	export type BadgeSize = 'sm' | 'md';
 
-	export type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
-	export type BadgeSize = VariantProps<typeof badgeVariants>['size'];
+	type SolidTone = Extract<BadgeTone, 'success' | 'warning' | 'danger'>;
+
+	// The application's `Badge` (`atoms/badge`): status tones are a soft tint with their `*-text` colour.
+	const toneClasses: Record<BadgeTone, string> = {
+		primary: 'border-primary bg-primary',
+		secondary: 'border-secondary bg-secondary',
+		accent: 'border-accent bg-accent',
+		muted: 'border-muted bg-muted',
+		success: 'border-success/20 bg-success/15',
+		warning: 'border-warning/20 bg-warning/15',
+		danger: 'border-danger/20 bg-danger/15',
+		outline: 'border-border bg-transparent'
+	};
+	const toneTextClasses: Record<BadgeTone, string> = {
+		primary: 'text-primary-foreground',
+		secondary: 'text-secondary-foreground',
+		accent: 'text-secondary-foreground',
+		muted: 'text-muted-foreground',
+		success: 'text-success-text',
+		warning: 'text-foreground',
+		danger: 'text-danger-text',
+		outline: 'text-foreground'
+	};
+	// Opt-in solid status tones: danger/success fill in their text colour, the label ≥ 4.5:1 (S-34.1).
+	const solidClasses: Record<SolidTone, string> = {
+		success: 'border-success-text bg-success-text',
+		warning: 'border-warning bg-warning',
+		danger: 'border-danger-text bg-danger-text'
+	};
+	const solidTextClasses: Record<SolidTone, string> = {
+		success: 'text-success-foreground',
+		warning: 'text-warning-foreground',
+		danger: 'text-danger-foreground'
+	};
+	const sizeClasses: Record<BadgeSize, string> = {
+		sm: 'px-2 py-0.5',
+		md: 'px-2.5 py-1'
+	};
+
+	const isSolidTone = (tone: BadgeTone): tone is SolidTone =>
+		tone === 'success' || tone === 'warning' || tone === 'danger';
+
+	export type BadgeProps = Omit<HTMLAttributes<HTMLSpanElement>, 'children'> & {
+		label: string;
+		tone?: BadgeTone;
+		size?: BadgeSize;
+		/** A solid fill for the status tones (`success` / `warning` / `danger`); a no-op for the others. */
+		solid?: boolean;
+		/** Classes of the label: a text role only, never a colour. */
+		textClass?: string;
+	};
 </script>
 
 <script lang="ts">
-	import type { HTMLAnchorAttributes } from 'svelte/elements';
-	import { cn, type WithElementRef } from '$shared/lib/utils';
+	import { cn } from '$shared/lib/utils';
 
 	let {
-		ref = $bindable(null),
-		href,
+		label,
+		tone = 'primary',
+		size = 'md',
+		solid = false,
+		textClass,
 		class: className,
-		variant = 'default',
-		size = 'default',
-		children,
 		...restProps
-	}: WithElementRef<HTMLAnchorAttributes> & { variant?: BadgeVariant; size?: BadgeSize } = $props();
+	}: BadgeProps = $props();
+
+	const useSolid = $derived(solid && isSolidTone(tone));
+	const box = $derived(useSolid && isSolidTone(tone) ? solidClasses[tone] : toneClasses[tone]);
+	const words = $derived(
+		useSolid && isSolidTone(tone) ? solidTextClasses[tone] : toneTextClasses[tone]
+	);
 </script>
 
-<svelte:element
-	this={href ? 'a' : 'span'}
-	bind:this={ref}
+<span
 	data-slot="badge"
-	{href}
-	class={cn(badgeVariants({ variant, size }), className)}
+	data-tone={tone}
+	class={cn(
+		'inline-flex flex-row items-center justify-center self-start rounded-full border',
+		box,
+		sizeClasses[size],
+		className
+	)}
 	{...restProps}
 >
-	{@render children?.()}
-</svelte:element>
+	<span class={cn('text-label-md font-semibold', words, textClass)}>{label}</span>
+</span>

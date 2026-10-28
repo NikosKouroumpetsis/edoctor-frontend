@@ -39,8 +39,13 @@
 	}
 </script>
 
+<!-- The card's own look, kept after the shared `Card` took the application's shell (U-09.2): the plain border and
+     surface, the raised shadow, no top inset (the photo meets the edge), 24 at the sides of its parts. -->
 <Card
-	class={cn('w-full max-w-narrow gap-3 overflow-hidden pt-0', className)}
+	class={cn(
+		'w-full max-w-narrow gap-3 overflow-hidden border-border bg-card p-0 pb-6 shadow-raised',
+		className
+	)}
 	data-slot="doctor-card"
 >
 	<div class="relative">
@@ -63,15 +68,15 @@
 			</span>
 		</button>
 		{#if doctor.available}
-			<Badge variant="success" class="absolute bottom-2 left-2">Available today</Badge>
+			<Badge tone="success" solid label="Available today" class="absolute bottom-2 left-2" />
 		{/if}
 	</div>
 
-	<CardContent class="flex flex-col gap-2">
+	<CardContent class="flex flex-col gap-2 px-6">
 		<div class="flex items-center gap-3">
-			<Avatar>
+			<Avatar size="md">
 				<AvatarImage src={doctor.avatarUrl} alt={doctor.name} />
-				<AvatarFallback>{initials}</AvatarFallback>
+				<AvatarFallback class="text-body-sm font-normal">{initials}</AvatarFallback>
 			</Avatar>
 			<div class="min-w-0">
 				<h3 class="truncate text-title-sm font-semibold">{doctor.name}</h3>
@@ -93,13 +98,13 @@
 		{#if doctor.tags.length}
 			<div class="flex flex-wrap gap-1.5">
 				{#each doctor.tags as tag (tag)}
-					<Badge variant="secondary">{tag}</Badge>
+					<Badge tone="secondary" label={tag} />
 				{/each}
 			</div>
 		{/if}
 	</CardContent>
 
-	<CardFooter>
-		<Button class="w-full" onclick={() => onBook?.(doctor)}>Book appointment</Button>
+	<CardFooter class="px-6">
+		<Button class="w-full" label="Book appointment" onclick={() => onBook?.(doctor)} />
 	</CardFooter>
 </Card>

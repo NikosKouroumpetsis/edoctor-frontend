@@ -45,9 +45,7 @@
 		</button>
 	</div>
 
-	<div
-		class="container-bleed flex gap-rail overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-	>
+	<div class="container-bleed scrollbar-none flex gap-rail overflow-x-auto pb-1">
 		{#each doctors as doctor (doctor.id)}
 			<DoctorCard
 				{doctor}

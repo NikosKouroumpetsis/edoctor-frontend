@@ -46,6 +46,21 @@ const RECIPES: Record<string, { path: string; definition: string; sizes: string 
 
 const touch = controls.touch;
 
+/**
+ * Targets WCAG 2.5.8 exempts as «inline»: a link that is a word of a running sentence takes the sentence's line
+ * height, not the 48 box (the application's `InlineLinkText`). Each entry names its file and the marker its tag
+ * carries; an entry that no longer matches a tag fails the project test, so the list cannot go stale.
+ */
+type TouchException = { path: string; marker: string; reason: string };
+
+const EXCEPTIONS: TouchException[] = [
+	{
+		path: 'src/shared/ui/primitives/inline-link-text/inline-link-text.svelte',
+		marker: 'data-slot="inline-link-text-link"',
+		reason: 'WCAG 2.5.8 inline: the link is part of the sentence'
+	}
+];
+
 /** The px a named or stepped length resolves to, or `null` when it is relative or unknown. */
 function lengthOf(value: string): number | null {
 	const named = spacingScale[value];
@@ -196,12 +211,23 @@ function findRecipeIssues(
  * `path:line <tag>`. The box comes from the tag's classes, same-file definitions and the shared recipes; a
  * shrinking class cancels any of them. Hidden mirrors (`type="hidden"`, `aria-hidden` + `tabindex -1`) are skipped.
  */
-function findTouchIssues(files: SourceFile[]): string[] {
+function findTouchIssues(
+	files: SourceFile[],
+	exceptions: TouchException[] = EXCEPTIONS,
+	used: Set<TouchException> = new Set()
+): string[] {
 	const issues: string[] = [];
 	for (const { path, text } of files) {
 		if (!path.endsWith('.svelte')) continue;
 		for (const match of text.matchAll(TARGET_TAG)) {
 			const tag = tagAt(text, match.index ?? 0);
+			const exception = exceptions.find(
+				(entry) => entry.path === path && tag.includes(entry.marker)
+			);
+			if (exception) {
+				used.add(exception);
+				continue;
+			}
 			if (/\stype="hidden"/.test(tag)) continue;
 			if (/\saria-hidden="true"/.test(tag) && /\stabindex=(\{-1\}|"-1")/.test(tag)) continue;
 			const classAttribute = classAttributeOf(tag);
@@ -227,6 +253,33 @@ function findTouchIssues(files: SourceFile[]): string[] {
 			if (!shrinks(utilitiesOf(`${classAttribute} ${definitions}`))) continue;
 			const line = text.slice(0, match.index ?? 0).split('\n').length;
 			issues.push(`${path}:${line} ${tag.split(/\s/)[0]}>`);
+		}
+	}
+	return issues;
+}
+
+const ICON_BUTTON_TAG = /<IconButton(?=[\s/>])/g;
+const SIZING_UTILITY = /^-?(size|w|h|min-w|min-h|max-w|max-h)-/;
+
+/**
+ * Every `<IconButton>` whose `class` sizes it (`size-*`, `w-*`, `h-*`, `min-*`, `max-*`, at any breakpoint): the
+ * caller places an icon button, its size is the `size` prop (the application's rule after its delta R1). Classes
+ * of names the attribute uses (`class={iconClass}`) count too.
+ */
+function findIconButtonSizing(files: SourceFile[]): string[] {
+	const issues: string[] = [];
+	for (const { path, text } of files) {
+		if (!path.endsWith('.svelte')) continue;
+		for (const match of text.matchAll(ICON_BUTTON_TAG)) {
+			const classAttribute = classAttributeOf(tagAt(text, match.index ?? 0));
+			const definitions = codeNamesOf(classAttribute)
+				.map((name) => definitionOf(text, name))
+				.join(' ');
+			const line = text.slice(0, match.index ?? 0).split('\n').length;
+			for (const token of `${classAttribute} ${definitions}`.split(/[\s'"`{}(),]+/)) {
+				if (SIZING_UTILITY.test(splitVariants(token).utility))
+					issues.push(`${path}:${line} <IconButton> ${token}`);
+			}
 		}
 	}
 	return issues;
@@ -280,6 +333,38 @@ describe('touch target checker', () => {
 		]);
 	});
 
+	it('U-03.1: skips only the listed inline targets of the listed file and records which entries matched', () => {
+		const text = `<p>Read the <a href="/terms" data-slot="inline-link" class="underline">terms</a></p>
+<a href="/x" class="underline">x</a>`;
+		const entry = { path: 'fixture.svelte', marker: 'data-slot="inline-link"', reason: 'inline' };
+		const other = { path: 'other.svelte', marker: 'data-slot="inline-link"', reason: 'inline' };
+		const used = new Set<TouchException>();
+		expect(findTouchIssues(fixture(text), [entry, other], used)).toEqual(['fixture.svelte:2 <a>']);
+		expect([...used]).toEqual([entry]);
+		expect(findTouchIssues(fixture(text), [])).toEqual([
+			'fixture.svelte:1 <a>',
+			'fixture.svelte:2 <a>'
+		]);
+	});
+
+	it('U-03.1: lets a caller place an IconButton and reports a class that sizes it (delta R1)', () => {
+		const text = `<script>
+	const iconClass = 'h-8';
+</script>
+<IconButton icon="close" aria-label="x" class="mt-0.5" />
+<IconButton icon="close" aria-label="x" class="absolute top-5 right-5" />
+<IconButton icon="close" aria-label="x" class="size-6" />
+<IconButton icon="close" aria-label="x" class={cn('tablet:w-full', extra)} />
+<IconButton icon="close" aria-label="x" class="min-h-0" />
+<IconButton icon="close" aria-label="x" class={iconClass} />`;
+		expect(findIconButtonSizing(fixture(text))).toEqual([
+			'fixture.svelte:6 <IconButton> size-6',
+			'fixture.svelte:7 <IconButton> tablet:w-full',
+			'fixture.svelte:8 <IconButton> min-h-0',
+			'fixture.svelte:9 <IconButton> h-8'
+		]);
+	});
+
 	it('reports a recipe size without the touch height and a recipe base without the touch width', () => {
 		const files: Record<string, string> = {
 			'button.svelte': `export const buttonVariants = tv({
@@ -318,5 +403,19 @@ describe('touch targets of the project', () => {
 
 	it('gives every interactive element a box of at least the touch target', () => {
 		expect(findTouchIssues(files)).toEqual([]);
+	});
+
+	it('U-03.1: no IconButton is sized by its class, only by its `size` (delta R1)', () => {
+		const uses = files
+			.filter((file) => file.path.endsWith('.svelte'))
+			.flatMap((file) => [...file.text.matchAll(ICON_BUTTON_TAG)]);
+		expect(uses.length).toBeGreaterThan(20);
+		expect(findIconButtonSizing(files)).toEqual([]);
+	});
+
+	it('U-03.1: every inline exception still matches a tag (a stale entry is removed, not kept)', () => {
+		const used = new Set<TouchException>();
+		findTouchIssues(files, EXCEPTIONS, used);
+		expect(EXCEPTIONS.filter((entry) => !used.has(entry)).map((entry) => entry.path)).toEqual([]);
 	});
 });

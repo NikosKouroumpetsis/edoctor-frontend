@@ -1,74 +1,72 @@
-<script lang="ts">
+<script lang="ts" module>
 	import type { Snippet } from 'svelte';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
-	import { onMount } from 'svelte';
-	import { cn, type WithElementRef } from '$shared/lib/utils';
-	import { getSelectableCardsContext } from './selectable-cards.svelte';
 
-	let {
-		ref = $bindable(null),
-		value,
-		title,
-		description,
-		icon,
-		disabled,
-		class: className,
-		children,
-		...restProps
-	}: WithElementRef<HTMLButtonAttributes, HTMLButtonElement> & {
-		value: string;
+	/** Where the glyph sits beside the words: `trailing` (default) or `leading` (the filters' sort cards). */
+	export type SelectableCardIconPlacement = 'leading' | 'trailing';
+
+	export type SelectableCardProps = Omit<HTMLButtonAttributes, 'children' | 'title'> & {
 		title: string;
 		description?: string;
 		icon?: Snippet;
-	} = $props();
-
-	const group = getSelectableCardsContext();
-	const selected = $derived(group.isSelected(value));
-	const isDisabled = $derived(disabled || group.disabled);
-	// Single roving tab stop: the first selected item, else the first registered item.
-	const firstSelected = $derived(group.items.find((i) => group.isSelected(i)));
-	const tabbable = $derived(firstSelected ? firstSelected === value : group.items[0] === value);
-
-	onMount(() => {
-		group.register(value);
-		return () => group.unregister(value);
-	});
+		iconPlacement?: SelectableCardIconPlacement;
+		selected: boolean;
+		/** `radio` in a single choice, `checkbox` in a multiple one; `aria-checked` follows `selected`. */
+		role?: 'radio' | 'checkbox';
+		testId?: string;
+		ref?: HTMLButtonElement | null;
+	};
 </script>
 
+<script lang="ts">
+	import { cn } from '$shared/lib/utils';
+
+	let {
+		title,
+		description,
+		icon,
+		iconPlacement = 'trailing',
+		selected,
+		role = 'radio',
+		testId,
+		disabled = false,
+		ref = $bindable(null),
+		class: className,
+		...restProps
+	}: SelectableCardProps = $props();
+</script>
+
+<!-- The application's `SelectableCard`: the 1px border (constant, so a choice never reflows the row), the selected
+     card dark-bordered on muted with the raised shadow, the others transparent on a light border. -->
 <button
 	bind:this={ref}
 	type="button"
-	role={group.type === 'single' ? 'radio' : 'checkbox'}
+	{role}
 	aria-checked={selected}
 	data-slot="selectable-card"
 	data-state={selected ? 'selected' : 'unselected'}
-	data-roving-item
-	data-value={value}
-	data-disabled={isDisabled ? '' : undefined}
-	disabled={isDisabled}
-	tabindex={tabbable ? 0 : -1}
-	onclick={() => group.toggle(value)}
+	data-testid={testId}
+	{disabled}
 	class={cn(
-		'flex min-h-touch w-full cursor-pointer items-center justify-between gap-4 rounded-md border-2 bg-card p-card text-left transition-[color,background-color,border-color,box-shadow,transform] duration-150 ease-out outline-none select-none',
-		'active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100',
-		'disabled:cursor-not-allowed disabled:opacity-50',
-		'data-[state=selected]:border-foreground data-[state=selected]:bg-foreground/5 data-[state=selected]:shadow-raised data-[state=unselected]:border-input',
-		'data-[state=unselected]:hover:border-muted-foreground data-[state=unselected]:focus-visible:border-muted-foreground',
+		'flex min-h-touch w-full flex-row items-center justify-between gap-4 rounded-md border p-6 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed',
+		selected
+			? 'border-foreground bg-muted shadow-raised'
+			: 'border-border bg-transparent shadow-none',
+		disabled && 'opacity-50',
 		className
 	)}
 	{...restProps}
 >
-	{#if children}
-		{@render children()}
-	{:else}
-		<span class="flex min-w-0 flex-col gap-1">
-			<span class="text-title-md text-foreground">{title}</span>
-			{#if description}
-				<span class="text-body-sm text-muted-foreground">{description}</span>
-			{/if}
-		</span>
-		{#if icon}
-			<span class="shrink-0 text-foreground">{@render icon()}</span>
+	{#if icon && iconPlacement === 'leading'}
+		<span class="shrink-0">{@render icon()}</span>
+	{/if}
+	<span class="flex min-w-0 flex-1 flex-col gap-1">
+		<span class="text-title-md font-semibold text-foreground">{title}</span>
+		{#if description}
+			<span class="text-body-sm text-muted-foreground">{description}</span>
 		{/if}
+	</span>
+	{#if icon && iconPlacement === 'trailing'}
+		<span class="shrink-0">{@render icon()}</span>
 	{/if}
 </button>

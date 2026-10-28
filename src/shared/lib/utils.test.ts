@@ -25,6 +25,13 @@ describe('cn', () => {
 		expect(cn('text-body-sm leading-tight')).toBe('text-body-sm leading-tight');
 	});
 
+	it('lets the later icon size win, and a size utility override an icon size', () => {
+		expect(cn('icon-md shrink-0', 'icon-sm')).toBe('shrink-0 icon-sm');
+		expect(cn('icon-md', 'size-5')).toBe('size-5');
+		expect(cn('size-5', 'icon-lg')).toBe('icon-lg');
+		expect(cn('icon-md text-foreground')).toBe('icon-md text-foreground');
+	});
+
 	it('keeps an elevation next to a shadow colour', () => {
 		expect(cn('shadow-raised shadow-primary/20')).toBe('shadow-raised shadow-primary/20');
 	});

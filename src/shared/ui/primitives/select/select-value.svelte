@@ -12,7 +12,7 @@
 	data-slot="select-value"
 	data-placeholder={label == null ? '' : undefined}
 	class={cn(
-		'line-clamp-1 flex items-center gap-2',
+		'line-clamp-1 flex min-w-0 items-center gap-2',
 		label == null && 'text-muted-foreground',
 		className
 	)}

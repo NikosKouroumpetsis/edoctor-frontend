@@ -12,10 +12,9 @@
 		endOfWeek,
 		today
 	} from '@internationalized/date';
-	import ChevronLeftIcon from '~icons/lucide/chevron-left';
-	import ChevronRightIcon from '~icons/lucide/chevron-right';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
 
 	let {
 		ref = $bindable(null),
@@ -23,12 +22,17 @@
 		locale = 'en-US',
 		minValue,
 		maxValue,
+		previousMonthLabel,
+		nextMonthLabel,
 		class: className,
 		onValueChange,
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
 		value?: CalendarDate;
 		locale?: string;
+		/** Names of the month arrows, already localized (the application requires them too). */
+		previousMonthLabel: string;
+		nextMonthLabel: string;
 		minValue?: CalendarDate;
 		maxValue?: CalendarDate;
 		onValueChange?: (value: CalendarDate) => void;
@@ -117,22 +121,22 @@
 	<div class="mb-2 flex items-center justify-between">
 		<button
 			type="button"
-			aria-label="Previous month"
+			aria-label={previousMonthLabel}
 			onclick={() => shiftMonth(-1)}
 			class="inline-flex size-touch items-center justify-center rounded-md hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
 		>
-			<ChevronLeftIcon class="size-4" />
+			<Ionicon name="chevron-back" class="icon-md" />
 		</button>
 		<div data-slot="calendar-heading" class="text-body-sm font-medium" aria-live="polite">
 			{monthLabelFmt.format(displayMonth.toDate(tz))}
 		</div>
 		<button
 			type="button"
-			aria-label="Next month"
+			aria-label={nextMonthLabel}
 			onclick={() => shiftMonth(1)}
 			class="inline-flex size-touch items-center justify-center rounded-md hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
 		>
-			<ChevronRightIcon class="size-4" />
+			<Ionicon name="chevron-forward" class="icon-md" />
 		</button>
 	</div>
 

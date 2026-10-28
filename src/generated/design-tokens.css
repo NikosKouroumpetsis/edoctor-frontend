@@ -11,6 +11,7 @@
 	--text-*: initial;
 	--leading-*: initial;
 	--radius-*: initial;
+	--shadow-*: initial;
 	--container-*: initial;
 	--breakpoint-*: initial;
 	--text-display-xl: 48px;
@@ -135,6 +136,8 @@
 	--spacing-choice-max-w: 128px;
 	--spacing-preference-min-w: 138px;
 	--spacing-search-pill: 64px;
+	--spacing-search-bar-w: 850px;
+	--spacing-search-bar-h: 66px;
 	--spacing-qr: 160px;
 	--spacing-placeholder-sm: 64px;
 	--spacing-placeholder-md: 80px;
@@ -151,15 +154,20 @@
 	--spacing-popover-sm: 224px;
 	--spacing-popover-md: 288px;
 	--spacing-popover-lg: 320px;
+	--spacing-hover-card-w: 256px;
 	--spacing-textarea-md: 64px;
 	--spacing-textarea-lg: 80px;
 	--spacing-textarea-xl: 96px;
 	--spacing-histogram-sm: 80px;
 	--spacing-histogram-md: 112px;
 	--spacing-histogram-lg: 128px;
+	--spacing-range-field-sm: 112px;
+	--spacing-range-field-md: 144px;
+	--spacing-range-field-lg: 160px;
 	--spacing-dropzone-min-h: 288px;
 	--spacing-drawer-handle: 48px;
 	--spacing-drawer-inset: 96px;
+	--spacing-cta-inline: 32px;
 	--spacing-sheet-sm: 60dvh;
 	--spacing-sheet-md: 70dvh;
 	--spacing-sheet-lg: 85dvh;
@@ -177,13 +185,32 @@
 	--container-narrow: 360px;
 	--container-text: 480px;
 	--container-form: 560px;
+	--container-dialog: 568px;
 	--container-content: 760px;
 	--container-listing: 1120px;
 	--container-page: 1440px;
+	--container-wide: 1920px;
 	--breakpoint-tablet: 744px;
 	--breakpoint-split: 950px;
 	--breakpoint-laptop: 1128px;
 	--breakpoint-desktop: 1440px;
+	--breakpoint-wide: 1920px;
+	--transition-duration-standard: 250ms;
+	--transition-duration-sheet: 250ms;
+	--transition-duration-accordion: 220ms;
+	--transition-duration-zoom: 220ms;
+	--transition-duration-label: 200ms;
+	--transition-duration-segment: 180ms;
+	--transition-duration-reveal: 800ms;
+	--ease-standard: cubic-bezier(0.2, 0, 0, 1);
+	--ease-sheet: cubic-bezier(0.16, 1, 0.3, 1);
+	--ease-accordion: cubic-bezier(0.45, 0, 0.55, 1);
+	--ease-zoom-in: cubic-bezier(0.33, 1, 0.68, 1);
+	--ease-zoom-out: cubic-bezier(0.32, 0, 0.67, 0);
+	--ease-label: cubic-bezier(0.45, 0, 0.55, 1);
+	--ease-segment: cubic-bezier(0.33, 1, 0.68, 1);
+	--ease-modal-panel-in: cubic-bezier(0.33, 1, 0.68, 1), linear(0 0%, 0 4.17%, 0 8.33%, 0 12.5%, 0 13.34%, 0.1104 16.67%, 0.2365 20.83%, 0.3498 25%, 0.4511 29.17%, 0.5412 33.33%, 0.6207 37.5%, 0.6905 41.67%, 0.7512 45.83%, 0.8034 50%, 0.8478 54.17%, 0.885 58.33%, 0.9156 62.5%, 0.9403 66.67%, 0.9597 70.83%, 0.9744 75%, 0.9851 79.17%, 0.9923 83.33%, 0.9967 87.5%, 0.999 91.67%, 0.9999 95.83%, 1 100%);
+	--ease-modal-panel-out: cubic-bezier(0.32, 0, 0.67, 0), linear(0 0%, 0.0001 4.17%, 0.001 8.33%, 0.0033 12.5%, 0.0077 16.67%, 0.0149 20.83%, 0.0256 25%, 0.0403 29.17%, 0.0597 33.33%, 0.0844 37.5%, 0.115 41.67%, 0.1522 45.83%, 0.1966 50%, 0.2488 54.17%, 0.3095 58.33%, 0.3793 62.5%, 0.4588 66.67%, 0.5489 70.83%, 0.6502 75%, 0.7635 79.17%, 0.8896 83.33%, 1 86.66%, 1 87.5%, 1 91.67%, 1 95.83%, 1 100%);
 }
 
 @utility icon-xs {

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { today, getLocalTimeZone, DateFormatter } from '@internationalized/date';
+	import { m } from '$paraglide/messages.js';
 	import { SiteNavbar } from '$shared/ui/organisms/site-navbar';
 	import { CookieConsent } from '$shared/ui/organisms/cookie-consent';
 	import { DoctorCard } from '$modules/doctors/ui/doctor-card';
@@ -82,7 +83,27 @@
 >
 	<DemoRow label="Site navbar (resize / open the avatar menu / mobile menu)">
 		<div class="w-full overflow-hidden rounded-md border border-border">
-			<SiteNavbar />
+			<SiteNavbar
+				brand="eDoctor"
+				brandHref="#domain"
+				brandIcon="medical-outline"
+				links={[
+					{ label: 'Doctors', href: '#doctors' },
+					{ label: 'Clinics', href: '#clinics' },
+					{ label: 'Plans', href: '#plans' }
+				]}
+				primaryNavLabel="Primary"
+				mobileNavLabel="Mobile"
+				openMenuLabel="Open menu"
+				closeMenuLabel="Close"
+				userName="Maria Alexiou"
+				accountMenuLabel="Account menu"
+				menuItems={[
+					{ label: 'Profile' },
+					{ label: 'Appointments' },
+					{ label: 'Sign out', destructive: true }
+				]}
+			/>
 		</div>
 	</DemoRow>
 
@@ -113,10 +134,10 @@
 
 	<DemoRow label="Image carousel">
 		<div class="w-full max-w-text">
-			<Carousel class="px-section-lg">
+			<Carousel roleDescription="carousel">
 				<CarouselContent>
 					{#each ['clinic1', 'clinic2', 'clinic3'] as seed (seed)}
-						<CarouselItem>
+						<CarouselItem roleDescription="slide">
 							<AspectRatio ratio={16 / 9} class="overflow-hidden rounded-xl bg-muted">
 								<img
 									src={`https://picsum.photos/seed/${seed}/480/270`}
@@ -127,14 +148,23 @@
 						</CarouselItem>
 					{/each}
 				</CarouselContent>
-				<div class="absolute top-1/2 left-0 -translate-y-1/2"><CarouselPrevious /></div>
-				<div class="absolute top-1/2 right-0 -translate-y-1/2"><CarouselNext /></div>
-				<CarouselDots class="mt-3" />
+				<CarouselPrevious label={m.common_previous_slide()} />
+				<CarouselNext label={m.common_next_slide()} />
+				<CarouselDots
+					class="mt-3"
+					dotLabel={(index) => m.common_go_to_slide({ position: index + 1 })}
+				/>
 			</Carousel>
 		</div>
 	</DemoRow>
 
 	<DemoRow label="Cookie consent">
-		<CookieConsent />
+		<CookieConsent
+			title="We value your privacy"
+			description="We use cookies to improve your experience, analyse traffic and personalise content. You can accept all or only the essentials."
+			acceptLabel="Accept all"
+			rejectLabel="Essentials only"
+			aria-label="Cookie consent"
+		/>
 	</DemoRow>
 </DemoSection>

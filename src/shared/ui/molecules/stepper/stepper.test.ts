@@ -1,30 +1,25 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
-import { page } from '$app/state';
 import { createForm, Validators } from '$shared/lib/form';
 import Stepper from './stepper.svelte';
 
 const TITLE = 'Ελάχιστος χρόνος πριν την κράτηση (ώρες)';
 const HELP = 'Πόσες ώρες πριν σταματά η κράτηση για μια ώρα (0-72).';
 
-function visit(path: string) {
-	(page as { url: URL }).url = new URL(path, 'http://localhost');
-}
+// The names come from the caller, already in the page's language (U-03.5: no catalog of its own).
+const GREEK = { decreaseLabel: 'Μείωση', increaseLabel: 'Αύξηση', emptyValueLabel: 'Κενό' };
+const ENGLISH = { decreaseLabel: 'Decrease', increaseLabel: 'Increase', emptyValueLabel: 'Empty' };
 
 function renderStepper(props: Record<string, unknown> = {}) {
 	return render(Stepper, {
-		props: { label: TITLE, helperText: HELP, min: 0, max: 72, value: '2', ...props }
+		props: { label: TITLE, helperText: HELP, min: 0, max: 72, value: '2', ...GREEK, ...props }
 	});
 }
 
 const spinbutton = () => screen.getByRole('spinbutton');
 const decrease = () => screen.getByRole('button', { name: 'Μείωση' });
 const increase = () => screen.getByRole('button', { name: 'Αύξηση' });
-
-afterEach(() => {
-	visit('/');
-});
 
 describe('Stepper', () => {
 	it('S-26.4: the stepper puts − left of the number, the number centred, + right', () => {
@@ -38,7 +33,6 @@ describe('Stepper', () => {
 	});
 
 	it('S-26.4: − and + are touch-size targets with localised accessible names', () => {
-		visit('/doctors');
 		const greek = renderStepper();
 
 		for (const button of [decrease(), increase()]) expect(button).toHaveClass('size-touch');
@@ -46,8 +40,7 @@ describe('Stepper', () => {
 		expect(screen.queryByRole('button', { name: 'Increase' })).not.toBeInTheDocument();
 		greek.unmount();
 
-		visit('/en/doctors');
-		renderStepper();
+		renderStepper(ENGLISH);
 
 		expect(screen.getByRole('button', { name: 'Decrease' })).toHaveClass('size-touch');
 		expect(screen.getByRole('button', { name: 'Increase' })).toHaveClass('size-touch');
@@ -125,8 +118,7 @@ describe('Stepper', () => {
 		expect(spinbutton()).not.toHaveAttribute('aria-valuenow');
 		blank.unmount();
 
-		visit('/en/doctors');
-		const english = renderStepper({ value: '' });
+		const english = renderStepper({ value: '', ...ENGLISH });
 		expect(spinbutton()).toHaveAttribute('aria-valuetext', 'Empty');
 		english.unmount();
 
@@ -173,7 +165,8 @@ describe('Stepper', () => {
 		expect(spinbutton()).toHaveAttribute('aria-invalid', 'true');
 		expect(spinbutton()).toHaveAccessibleDescription('Από 0 έως 72');
 		expect(screen.queryByText(HELP)).not.toBeInTheDocument();
-		expect(spinbutton().parentElement).toHaveClass('border-destructive');
+		expect(spinbutton().parentElement).toHaveClass('border-danger');
+		expect(screen.getByText('Από 0 έως 72')).toHaveClass('text-danger-text');
 		expect(spinbutton().parentElement).not.toHaveClass('focus-within:border-ring');
 	});
 

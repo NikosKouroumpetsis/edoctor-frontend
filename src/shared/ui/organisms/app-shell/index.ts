@@ -1,1 +1,9 @@
-export { default } from './app-shell.svelte';
+import Root from './app-shell.svelte';
+
+export {
+	Root,
+	//
+	Root as AppShell
+};
+
+export default Root;

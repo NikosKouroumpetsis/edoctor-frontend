@@ -2,7 +2,9 @@ import Root, {
 	REGEXP_ONLY_DIGITS,
 	REGEXP_ONLY_CHARS,
 	REGEXP_ONLY_DIGITS_AND_CHARS,
+	inputOtpSizes,
 	type InputOtpContext,
+	type InputOtpSize,
 	type OtpSlotState
 } from './input-otp.svelte';
 import Group from './input-otp-group.svelte';
@@ -17,7 +19,9 @@ export {
 	REGEXP_ONLY_DIGITS,
 	REGEXP_ONLY_CHARS,
 	REGEXP_ONLY_DIGITS_AND_CHARS,
+	inputOtpSizes,
 	type InputOtpContext,
+	type InputOtpSize,
 	type OtpSlotState,
 	//
 	Root as InputOTP,

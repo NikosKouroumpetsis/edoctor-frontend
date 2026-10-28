@@ -1,99 +1,97 @@
-<script lang="ts">
-	import type { Pathname } from '$app/types';
-	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
-	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
-	import { m } from '$paraglide/messages.js';
-	import { localizeHref } from '$paraglide/runtime';
-	import LanguageSwitcher from '$shared/ui/molecules/language-switcher';
-	import ThemeToggle from '$shared/ui/molecules/theme-toggle';
-	import FacebookIcon from '~icons/lucide/facebook';
-	import InstagramIcon from '~icons/lucide/instagram';
-	import TwitterIcon from '~icons/lucide/twitter';
+<script lang="ts" module>
+	import type { BottomNavHideFrom } from '$shared/ui/organisms/bottom-nav';
 
-	const currentLocale = $derived(getPageLocale(page.url));
-	const messageOptions = $derived({ locale: currentLocale });
+	export type FooterLink = {
+		label: string;
+		/** A page; without one the entry is a button the caller wires with `onclick`. */
+		href?: string;
+		onclick?: () => void;
+	};
 
-	const localizedHref = (path: string) =>
-		resolve(localizeHref(path, { locale: currentLocale }) as Pathname);
+	export type FooterColumn = { title: string; links: FooterLink[] };
 
+	// The footer's link look: columns and the legal row alike, a full touch box around a text link.
 	const linkClass =
-		'inline-flex min-h-touch min-w-touch items-center text-start text-body-sm text-muted-foreground transition-colors hover:text-foreground hover:underline outline-none focus-visible:text-foreground';
-	const socialClass =
-		'grid size-touch place-items-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:border-border hover:text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
-
-	const socialLinks = [
-		{ label: 'Facebook', icon: FacebookIcon },
-		{ label: 'Instagram', icon: InstagramIcon },
-		{ label: 'X', icon: TwitterIcon }
-	];
+		'inline-flex min-h-touch min-w-touch items-center text-start text-body-sm text-muted-foreground transition-colors hover:text-foreground hover:underline outline-none focus-visible:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 rounded-sm';
 </script>
 
-<footer class="mt-section-lg border-t border-border bg-card pb-bar-bottom laptop:pb-0">
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import { cn } from '$shared/lib/utils';
+	import { bottomNavReserveClasses } from '$shared/ui/organisms/bottom-nav';
+
+	let {
+		columns,
+		legalNote,
+		legalLinks = [],
+		actions,
+		reserveBottomNav = 'laptop',
+		'aria-label': ariaLabel
+	}: {
+		/** The link columns, with their words and hrefs already localized. */
+		columns: FooterColumn[];
+		/** The bottom row's rights line, already localized. */
+		legalNote?: string;
+		/** The bottom row's legal entries, after the note. */
+		legalLinks?: FooterLink[];
+		/** The bottom row's right part (language, theme, social). */
+		actions?: Snippet;
+		/** Keep room for the bottom bar until the zone it hides from (`false`: no bar). */
+		reserveBottomNav?: BottomNavHideFrom | false;
+		'aria-label'?: string;
+	} = $props();
+</script>
+
+{#snippet footerLink(link: FooterLink)}
+	{#if link.href}
+		<a href={link.href} class={linkClass}>{link.label}</a>
+	{:else}
+		<button type="button" class={linkClass} onclick={() => link.onclick?.()}>{link.label}</button>
+	{/if}
+{/snippet}
+
+<footer
+	data-slot="site-footer"
+	aria-label={ariaLabel}
+	class={cn(
+		'mt-section-lg border-t border-border bg-card',
+		reserveBottomNav && bottomNavReserveClasses[reserveBottomNav]
+	)}
+>
 	<div class="container-page py-section-lg">
 		<div class="grid grid-cols-2 gap-x-section gap-y-section tablet:grid-cols-3">
-			<div class="flex flex-col gap-touch-gap">
-				<h2 class="text-label-lg font-semibold text-foreground">
-					{m.footer_support_title({}, messageOptions)}
-				</h2>
-				<button type="button" class={linkClass}>{m.footer_help({}, messageOptions)}</button>
-				<button type="button" class={linkClass}>{m.footer_contact({}, messageOptions)}</button>
-				<button type="button" class={linkClass}>{m.footer_safety({}, messageOptions)}</button>
-			</div>
-
-			<div class="flex flex-col gap-touch-gap">
-				<h2 class="text-label-lg font-semibold text-foreground">
-					{m.footer_company_title({}, messageOptions)}
-				</h2>
-				<a href={localizedHref('/doctors')} class={linkClass}>{m.nav_doctors({}, messageOptions)}</a
-				>
-				<a href={localizedHref('/clinics')} class={linkClass}>{m.nav_clinics({}, messageOptions)}</a
-				>
-				<a href={localizedHref('/plans')} class={linkClass}>{m.nav_plans({}, messageOptions)}</a>
-			</div>
-
-			<div class="flex flex-col gap-touch-gap">
-				<h2 class="text-label-lg font-semibold text-foreground">
-					{m.footer_legal_title({}, messageOptions)}
-				</h2>
-				<button type="button" class={linkClass}>{m.footer_terms({}, messageOptions)}</button>
-				<button type="button" class={linkClass}>{m.footer_privacy({}, messageOptions)}</button>
-				<button type="button" class={linkClass}>{m.footer_cookies({}, messageOptions)}</button>
-				<a href={localizedHref('/account-deletion')} class={linkClass}>
-					{m.footer_account_deletion({}, messageOptions)}
-				</a>
-			</div>
-		</div>
-	</div>
-
-	<div class="border-t border-border/70">
-		<div
-			class="container-page flex flex-col gap-4 py-6 tablet:flex-row tablet:items-center tablet:justify-between"
-		>
-			<div class="flex flex-wrap items-center gap-touch-gap text-body-sm text-muted-foreground">
-				<span>{m.footer_rights({}, messageOptions)}</span>
-				<span aria-hidden="true" class="hidden tablet:inline">·</span>
-				<button type="button" class={linkClass}>{m.footer_terms({}, messageOptions)}</button>
-				<span aria-hidden="true">·</span>
-				<button type="button" class={linkClass}>{m.footer_privacy({}, messageOptions)}</button>
-				<span aria-hidden="true">·</span>
-				<button type="button" class={linkClass}>{m.footer_cookies({}, messageOptions)}</button>
-			</div>
-
-			<div class="flex items-center gap-2">
-				<LanguageSwitcher />
-				<ThemeToggle />
-				<ul class="ml-1 flex items-center gap-touch-gap">
-					{#each socialLinks as social (social.label)}
-						{@const Icon = social.icon}
-						<li>
-							<button type="button" aria-label={social.label} class={socialClass}>
-								<Icon class="icon-sm" />
-							</button>
-						</li>
+			<!-- Keys are position + target: two entries may share a label (the same page in two columns). -->
+			{#each columns as column, columnIndex (`${columnIndex}:${column.title}`)}
+				<div class="flex flex-col gap-touch-gap">
+					<h2 class="text-label-lg font-semibold text-foreground">{column.title}</h2>
+					{#each column.links as link, index (`${index}:${link.href ?? link.label}`)}
+						{@render footerLink(link)}
 					{/each}
-				</ul>
-			</div>
+				</div>
+			{/each}
 		</div>
 	</div>
+
+	{#if legalNote || legalLinks.length > 0 || actions}
+		<div class="border-t border-border/70">
+			<div
+				class="container-page flex flex-col gap-4 py-6 tablet:flex-row tablet:items-center tablet:justify-between"
+			>
+				<div class="flex flex-wrap items-center gap-touch-gap text-body-sm text-muted-foreground">
+					{#if legalNote}<span>{legalNote}</span>{/if}
+					{#each legalLinks as link, index (`${index}:${link.href ?? link.label}`)}
+						{#if legalNote || index > 0}
+							<span aria-hidden="true" class={index === 0 ? 'hidden tablet:inline' : undefined}
+								>·</span
+							>
+						{/if}
+						{@render footerLink(link)}
+					{/each}
+				</div>
+				<div class="flex items-center gap-2">
+					{@render actions?.()}
+				</div>
+			</div>
+		</div>
+	{/if}
 </footer>

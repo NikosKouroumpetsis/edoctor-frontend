@@ -15,12 +15,21 @@ describe('Input placeholder', () => {
 });
 
 describe('Input sizes', () => {
-	it('never renders a control under the touch target and keeps its text at 16px', () => {
-		expect(Object.keys(inputSizes)).toEqual(['default', 'lg', 'xl']);
-		for (const classes of Object.values(inputSizes)) {
-			expect(classes).toMatch(/\bmin-h-control-(md|lg|xl)\b/);
-			expect(classes.split(' ')).toContain('text-body-lg');
-		}
+	// U-07.1 renames the web's `default | lg | xl` (48 / 56 / 64) this test pinned to the application's `sm | md | lg`
+	// with its boxes (48 / 48 / 56, `px-3 | px-3.5 | px-4`); the 16px text stays (iOS Safari zooms under 16).
+	it('U-07.1: the application’s sizes and boxes, md by default, never under the touch target, text 16px', () => {
+		expect(inputSizes).toEqual({
+			sm: 'min-h-control-md px-3 text-body-lg',
+			md: 'min-h-control-md px-3.5 text-body-lg',
+			lg: 'min-h-control-lg px-4 text-body-lg'
+		});
+		render(Input, { props: { 'aria-label': 'x' } });
+		expect(screen.getByLabelText('x')).toHaveClass('min-h-control-md', 'px-3.5');
+	});
+
+	it('U-07.1: `invalid` is the error look through aria-invalid (the application’s prop)', () => {
+		render(Input, { props: { 'aria-label': 'x', invalid: true } });
+		expect(screen.getByLabelText('x')).toHaveAttribute('aria-invalid', 'true');
 	});
 
 	it('renders the shared field geometry as classes', () => {
@@ -32,6 +41,7 @@ describe('Input sizes', () => {
 			expect(classes, size).toContain(`pb-${stepOf(box.paddingBottom)}`);
 			expect(classes, size).toContain(`text-${box.text}`);
 			expect(geometry.start, size).toBe(`pl-${stepOf(box.paddingLeft)}`);
+			expect(geometry.end, size).toBe(`pr-${stepOf(box.paddingLeft)}`);
 		}
 	});
 });

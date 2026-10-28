@@ -2,12 +2,24 @@
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { Switch } from '$shared/ui/primitives/switch';
 
+	// The application's meta (`atoms/switch`); its `accessibilityLabel` is the web's `aria-label`.
 	const { Story } = defineMeta({
 		title: 'Primitives/Switch',
 		component: Switch,
 		tags: ['autodocs'],
-		args: { showCheck: true },
-		argTypes: { showCheck: { control: 'boolean' } }
+		args: {
+			checked: false,
+			disabled: false,
+			showCheck: true,
+			size: 'md',
+			'aria-label': 'Ειδοποιήσεις'
+		},
+		argTypes: {
+			checked: { control: 'boolean' },
+			disabled: { control: 'boolean' },
+			showCheck: { control: 'boolean' },
+			size: { control: 'select', options: ['sm', 'md', 'lg'] }
+		}
 	});
 </script>
 
@@ -17,45 +29,37 @@
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<label class="flex items-center gap-2 text-body-sm">
-			<Switch bind:checked {...args} aria-label="Notifications" />
-			<span>Notifications — {checked ? 'on' : 'off'}</span>
-		</label>
-	{/snippet}
-</Story>
-
-<Story name="Checked">
-	{#snippet template()}
-		<Switch checked aria-label="Checked" />
-	{/snippet}
-</Story>
-
-<Story name="Disabled">
-	{#snippet template()}
-		<div class="flex items-center gap-4">
-			<Switch disabled aria-label="Off disabled" />
-			<Switch checked disabled aria-label="On disabled" />
-		</div>
+		<Switch {...args} bind:checked />
 	{/snippet}
 </Story>
 
 <Story name="Sizes">
-	{#snippet template()}
-		<div class="flex items-center gap-4">
-			<Switch size="sm" checked aria-label="Small" />
-			<Switch size="default" checked aria-label="Default" />
-			<Switch size="lg" checked aria-label="Large" />
+	{#snippet template(args)}
+		<div class="flex flex-row items-center gap-4">
+			<Switch {...args} size="sm" checked />
+			<Switch {...args} size="md" checked />
+			<Switch {...args} size="lg" checked />
 		</div>
 	{/snippet}
 </Story>
 
-<!-- The ON-state check is opt-out: left keeps the default check, right is the
-     same ON state with showCheck={false}. -->
-<Story name="Optional check">
-	{#snippet template()}
-		<div class="flex items-center gap-4">
-			<Switch checked aria-label="With check (default)" />
-			<Switch checked showCheck={false} aria-label="Without check" />
+<Story name="States">
+	{#snippet template(args)}
+		<div class="flex flex-col items-start gap-4">
+			<Switch {...args} checked={false} />
+			<Switch {...args} checked />
+			<Switch {...args} checked={false} disabled />
+			<Switch {...args} checked disabled />
+		</div>
+	{/snippet}
+</Story>
+
+<!-- The ON checkmark is opt-out: the same ON state with and without `showCheck`. -->
+<Story name="Optional Check">
+	{#snippet template(args)}
+		<div class="flex flex-row items-center gap-4">
+			<Switch {...args} checked showCheck />
+			<Switch {...args} checked showCheck={false} />
 		</div>
 	{/snippet}
 </Story>

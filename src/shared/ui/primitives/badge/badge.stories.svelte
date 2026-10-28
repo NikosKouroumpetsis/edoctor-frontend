@@ -2,52 +2,67 @@
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { Badge } from '$shared/ui/primitives/badge';
 
+	const tones = [
+		'primary',
+		'secondary',
+		'accent',
+		'muted',
+		'success',
+		'warning',
+		'danger',
+		'outline'
+	] as const;
+	const statusTones = ['success', 'warning', 'danger'] as const;
+	const sizes = ['sm', 'md'] as const;
+
+	// The application's meta (`atoms/badge`).
 	const { Story } = defineMeta({
 		title: 'Primitives/Badge',
 		component: Badge,
 		tags: ['autodocs'],
-		args: { variant: 'default', size: 'default' },
+		args: { label: 'Διαθέσιμο', tone: 'primary', size: 'md', solid: false },
 		argTypes: {
-			variant: {
-				control: 'select',
-				options: ['default', 'secondary', 'destructive', 'success', 'warning', 'outline']
-			},
-			size: { control: 'select', options: ['sm', 'default', 'lg'] }
+			tone: { control: 'select', options: tones },
+			size: { control: 'radio', options: sizes },
+			solid: { control: 'boolean' },
+			label: { control: 'text' }
 		}
 	});
 </script>
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<Badge {...args}>Badge</Badge>
+		<Badge {...args} />
 	{/snippet}
 </Story>
 
-<Story name="Variants">
-	{#snippet template()}
-		<div class="flex flex-wrap gap-2">
-			<Badge>Default</Badge>
-			<Badge variant="secondary">Secondary</Badge>
-			<Badge variant="destructive">Destructive</Badge>
-			<Badge variant="success">Success</Badge>
-			<Badge variant="warning">Warning</Badge>
-			<Badge variant="outline">Outline</Badge>
+<Story name="Tones">
+	{#snippet template(args)}
+		<div class="flex flex-row flex-wrap gap-2">
+			{#each tones as tone (tone)}
+				<Badge {...args} {tone} label={tone} />
+			{/each}
 		</div>
 	{/snippet}
 </Story>
 
 <Story name="Sizes">
-	{#snippet template()}
-		<div class="flex items-center gap-2">
-			<Badge size="sm">Small</Badge>
-			<Badge size="default">Default</Badge>
-			<Badge size="lg">Large</Badge>
+	{#snippet template(args)}
+		<div class="flex flex-row items-center gap-2">
+			{#each sizes as size (size)}
+				<Badge {...args} {size} label={size} />
+			{/each}
 		</div>
 	{/snippet}
 </Story>
 
-<Story name="As link">
-	{#snippet template()}
-		<Badge href="https://example.com">View profile</Badge>
+<!-- The opt-in solid status fills; the other tones ignore `solid`. -->
+<Story name="Solid" args={{ solid: true }}>
+	{#snippet template(args)}
+		<div class="flex flex-row flex-wrap gap-2">
+			{#each statusTones as tone (tone)}
+				<Badge {...args} {tone} label={tone} />
+			{/each}
+		</div>
 	{/snippet}
 </Story>

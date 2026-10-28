@@ -39,10 +39,16 @@ src/shared/ui/
   molecules/   composed controls
   organisms/   larger reusable sections
   templates/   reusable layouts
-  icons/       project icon wrappers when virtual imports are not enough
+  icons/       the application's Ionicons (`ionicon/`) and brand marks (U-03.3)
 ```
 
 shadcn-svelte generated components belong in `primitives`. Feature-specific composition belongs in `src/modules/<feature>`.
+
+Everything under `src/shared/ui` is generic (U-02.1, guarded by
+`tests/architecture/shared-ui-generic.test.ts`): words, hrefs and the locale
+come from the caller as props, a Paraglide key is only `common_*` or the
+component's own name (`date_of_birth_field_*`, `image_uploader_*`), and the
+product's frame lives in `src/modules/shell`.
 
 ## Provider access
 

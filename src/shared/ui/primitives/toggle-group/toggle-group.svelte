@@ -7,6 +7,7 @@
 		readonly variant: ToggleVariant;
 		readonly size: ToggleSize;
 		readonly disabled: boolean;
+		readonly orientation: 'horizontal' | 'vertical';
 		readonly items: string[];
 		isPressed: (value: string) => boolean;
 		toggle: (value: string) => void;
@@ -27,7 +28,7 @@
 		value = $bindable(),
 		type = 'single',
 		variant = 'default',
-		size = 'default',
+		size = 'md',
 		disabled = false,
 		orientation = 'horizontal',
 		class: className,
@@ -58,6 +59,9 @@
 		},
 		get disabled() {
 			return disabled;
+		},
+		get orientation() {
+			return orientation;
 		},
 		get items() {
 			return items;
@@ -95,7 +99,10 @@
 	data-slot="toggle-group"
 	data-orientation={orientation}
 	{onkeydown}
-	class={cn('flex w-fit items-center rounded-md data-[orientation=vertical]:flex-col', className)}
+	class={cn(
+		'flex w-fit items-center rounded-sm data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch',
+		className
+	)}
 	{...restProps}
 >
 	{@render children?.()}

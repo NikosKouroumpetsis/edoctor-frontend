@@ -10,23 +10,20 @@
 @import '../generated/design-tokens.css';
 
 @custom-variant dark (&:is(.dark *));
+/* A screen with a pointer that hovers (U-09.3): the photo arrows wait for the pointer there; on touch they show. */
+@custom-variant can-hover (@media (hover: hover));
 
 /*
  * ──────────────────────────────────────────────────────────────────────────
  * SHARED PALETTE — SINGLE SOURCE OF TRUTH
  * ──────────────────────────────────────────────────────────────────────────
- * These semantic color tokens are kept in 1:1 sync with the eDoctor mobile
- * application (the canonical source). When a color changes in one project it
- * MUST change in the other.
- *
- * Canonical values live in:
- *   edoctor-application/src/shared/preferences/theme/light.ts
- *   edoctor-application/src/shared/preferences/theme/dark.ts
- *
- * Token name parity: background, foreground, card, card-foreground, primary,
- * primary-foreground, secondary, secondary-foreground, accent,
- * accent-foreground, muted, muted-foreground, border, input, ring, success,
- * warning, danger, overlay. (`destructive` is a shadcn alias of `danger`.)
+ * The application is canonical (U-03.4): every token below carries the value of
+ *   application/src/shared/preferences/theme/light/index.ts   (:root)
+ *   application/src/shared/preferences/theme/dark/index.ts    (.dark)
+ * in the same order, and tests/architecture/color-parity.test.ts fails on the
+ * first name or value that differs. Change the application file first, then
+ * copy the value here. `chart-*` and `sidebar-*` are the only web-only names
+ * (shadcn, no consumer).
  * ──────────────────────────────────────────────────────────────────────────
  */
 
@@ -39,19 +36,36 @@
 	--popover-foreground: #1e293b;
 	--primary: #2563eb;
 	--primary-foreground: #eff6ff;
+	/* A fill that is also a text has a text colour of its own, ≥ 4.5:1 (S-32.16). */
+	--primary-text: #1d4ed8;
 	--secondary: #0f172a;
 	--secondary-foreground: #f8fafc;
-	--muted: #f3ede7;
-	--muted-foreground: #64748b;
 	--accent: #be185d;
 	--accent-foreground: #831843;
-	--success: #16a34a;
-	--warning: #f59e0b;
-	--danger: #ef4444;
-	--destructive: #ef4444;
+	/* Rating stars and laurels (S-32.11). */
+	--rating: #be185d;
+	--muted: #f3ede7;
+	--muted-foreground: #5b6b80;
 	--border: #d7e0ea;
 	--input: #c7d2e0;
 	--ring: #93c5fd;
+	/* White scrim under controls that sit on a photo, the same in both themes; used with an alpha. */
+	--media-scrim: #ffffff;
+	/* Dialog/sheet backdrop, 50% black and the same in both themes (S-26.6). */
+	--overlay: #00000080;
+	--success: #16a34a;
+	--success-foreground: #ffffff;
+	--success-text: #02771f;
+	--warning: #f59e0b;
+	--warning-foreground: #1e293b;
+	/* A warning is never a text: its words wear `foreground`, its icon this (S-32.16). */
+	--warning-icon: #db5900;
+	--danger: #ef4444;
+	--danger-foreground: #ffffff;
+	--danger-text: #ba3214;
+	/* `destructive` is the shadcn alias of `danger`. */
+	--destructive: #ef4444;
+	--destructive-foreground: #ffffff;
 	--chart-1: #2563eb;
 	--chart-2: #16a34a;
 	--chart-3: #f59e0b;
@@ -65,8 +79,6 @@
 	--sidebar-accent-foreground: #1e293b;
 	--sidebar-border: #d7e0ea;
 	--sidebar-ring: #93c5fd;
-	/* Dialog/sheet backdrop, 50% black and the same in both themes (S-26.6, as in the application). */
-	--overlay: #00000080;
 }
 
 .dark {
@@ -78,19 +90,30 @@
 	--popover-foreground: #f8fbff;
 	--primary: #60a5fa;
 	--primary-foreground: #081120;
+	--primary-text: #60a5fa;
 	--secondary: #172338;
 	--secondary-foreground: #e8eef7;
-	--muted: #1a2639;
-	--muted-foreground: #aab7c8;
 	--accent: #be185d;
 	--accent-foreground: #831843;
-	--success: #34d399;
-	--warning: #fbbf24;
-	--danger: #fb7185;
-	--destructive: #fb7185;
+	--rating: #f472b6;
+	--muted: #1a2639;
+	--muted-foreground: #aab7c8;
 	--border: #24324b;
 	--input: #30405b;
 	--ring: #93c5fd;
+	--media-scrim: #ffffff;
+	--overlay: #00000080;
+	--success: #34d399;
+	--success-foreground: #081120;
+	--success-text: #34d399;
+	--warning: #fbbf24;
+	--warning-foreground: #081120;
+	--warning-icon: #fbbf24;
+	--danger: #fb7185;
+	--danger-foreground: #081120;
+	--danger-text: #fb7185;
+	--destructive: #fb7185;
+	--destructive-foreground: #081120;
 	--chart-1: #60a5fa;
 	--chart-2: #34d399;
 	--chart-3: #fbbf24;
@@ -104,7 +127,6 @@
 	--sidebar-accent-foreground: #e8eef7;
 	--sidebar-border: #24324b;
 	--sidebar-ring: #93c5fd;
-	--overlay: #00000080;
 }
 
 @theme inline {
@@ -118,19 +140,30 @@
 	--color-popover-foreground: var(--popover-foreground);
 	--color-primary: var(--primary);
 	--color-primary-foreground: var(--primary-foreground);
+	--color-primary-text: var(--primary-text);
 	--color-secondary: var(--secondary);
 	--color-secondary-foreground: var(--secondary-foreground);
-	--color-muted: var(--muted);
-	--color-muted-foreground: var(--muted-foreground);
 	--color-accent: var(--accent);
 	--color-accent-foreground: var(--accent-foreground);
-	--color-success: var(--success);
-	--color-warning: var(--warning);
-	--color-danger: var(--danger);
-	--color-destructive: var(--destructive);
+	--color-rating: var(--rating);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
+	--color-media-scrim: var(--media-scrim);
+	--color-overlay: var(--overlay);
+	--color-success: var(--success);
+	--color-success-foreground: var(--success-foreground);
+	--color-success-text: var(--success-text);
+	--color-warning: var(--warning);
+	--color-warning-foreground: var(--warning-foreground);
+	--color-warning-icon: var(--warning-icon);
+	--color-danger: var(--danger);
+	--color-danger-foreground: var(--danger-foreground);
+	--color-danger-text: var(--danger-text);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
 	--color-chart-1: var(--chart-1);
 	--color-chart-2: var(--chart-2);
 	--color-chart-3: var(--chart-3);
@@ -144,20 +177,75 @@
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
-	--color-overlay: var(--overlay);
+}
+
+/*
+ * Motion of the busy indicators, as the application draws them: the spinner turns in
+ * eight steps (the native activity indicator's spokes), the skeleton breathes between
+ * 0.9 and 0.4 opacity, 850 ms each way, and the indeterminate upload ring turns smoothly
+ * once every 900 ms. The code field's caret blinks as shadcn's (its `caret-blink`, kept
+ * here so the kit uses no class of `tw-animate-css`, U-12.2). They run whatever the
+ * device's motion setting (U-12.1).
+ */
+@theme {
+	--animate-spinner: spinner-turn 1s steps(8, end) infinite;
+	--animate-skeleton: skeleton-breathe 1.7s ease-in-out infinite;
+	--animate-upload-ring: spinner-turn 900ms linear infinite;
+	--animate-caret-blink: caret-blink 1.25s ease-out infinite;
+
+	@keyframes caret-blink {
+		0%,
+		70%,
+		100% {
+			opacity: 1;
+		}
+		20%,
+		50% {
+			opacity: 0;
+		}
+	}
+
+	@keyframes spinner-turn {
+		to {
+			transform: rotate(1turn);
+		}
+	}
+
+	@keyframes skeleton-breathe {
+		0%,
+		100% {
+			opacity: 0.9;
+		}
+		50% {
+			opacity: 0.4;
+		}
+	}
 }
 
 /*
  * Centered page container with the shared responsive gutters. Use on the
  * header bar, page <main>, and footer instead of repeating the raw classes.
+ * 1440 wide, 1920 from 1920 (Airbnb's 4K zone, U-04.1): `Container width="page"`.
  */
 @utility container-page {
-	@apply mx-auto w-full max-w-page px-gutter-sm split:px-gutter-md desktop:px-gutter-lg;
+	@apply mx-auto w-full max-w-page px-gutter-sm split:px-gutter-md desktop:px-gutter-lg wide:max-w-wide;
 }
 
 /* A rail that bleeds into the page gutters while keeping its content aligned with them. */
 @utility container-bleed {
 	@apply -mx-gutter-sm px-gutter-sm split:-mx-gutter-md split:px-gutter-md desktop:-mx-gutter-lg desktop:px-gutter-lg;
+}
+
+/*
+ * A row that scrolls sideways by touch, wheel or keys with no visible bar, as Airbnb's rails (U-06.4). Every
+ * sideways scroller of the kit takes it; `ScrollArea` alone draws its own thin bar instead.
+ */
+@utility scrollbar-none {
+	scrollbar-width: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
 }
 
 /* A page's minimum height below the sticky top bar. */
@@ -168,6 +256,26 @@
 /* Bottom padding of a bar pinned to the screen edge: one step plus the device safe area. */
 @utility pb-safe-area {
 	padding-bottom: calc(--spacing(2) + env(safe-area-inset-bottom));
+}
+
+/* The kit's action bar (`ActionBar`), as the application pads it: its own 16 plus the device safe area. */
+@utility pb-safe-area-action {
+	padding-bottom: calc(--spacing(4) + env(safe-area-inset-bottom));
+}
+
+/* The phone's pinned summary bar (`StickyActionBar`): 16, or the safe area plus 6 where that is more. */
+@utility pb-safe-area-sticky {
+	padding-bottom: max(--spacing(4), calc(--spacing(1.5) + env(safe-area-inset-bottom)));
+}
+
+/*
+ * The modal surface's zoom end (U-12.2, the application's `use-modal-animation`): the tapped control's place, size
+ * and corner, measured by `ModalScreenSurface` into the two variables; `starting:` opens from it, `data-[state=closed]:`
+ * closes into it.
+ */
+@utility modal-zoom-from {
+	transform: var(--modal-zoom-from);
+	border-radius: var(--modal-zoom-radius);
 }
 
 @layer base {

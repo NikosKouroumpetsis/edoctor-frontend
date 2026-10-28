@@ -46,6 +46,11 @@ export interface FocusTrapOptions {
 	enabled?: boolean;
 	/** Move focus into the container on activation. Default true. */
 	autoFocus?: boolean;
+	/**
+	 * Where that focus lands: `container` (default) the panel itself (`tabindex=-1`, no outline), so a window opens
+	 * with no ring on its «×» and Tab reaches the «×» next (U-09.7, Airbnb's); `first` its first focusable control.
+	 */
+	initialFocus?: 'container' | 'first';
 	/** Restore focus to the previously focused element on teardown. Default true. */
 	restoreFocus?: boolean;
 }
@@ -56,7 +61,13 @@ export interface FocusTrapOptions {
  * @example  <div use:focusTrap={{ enabled: open }}> ... </div>
  */
 export const focusTrap: Action<HTMLElement, FocusTrapOptions | undefined> = (node, params) => {
-	let opts: FocusTrapOptions = { enabled: true, autoFocus: true, restoreFocus: true, ...params };
+	let opts: FocusTrapOptions = {
+		enabled: true,
+		autoFocus: true,
+		restoreFocus: true,
+		initialFocus: 'container',
+		...params
+	};
 	let previouslyFocused: HTMLElement | null = null;
 
 	function onKeydown(event: KeyboardEvent) {
@@ -84,8 +95,8 @@ export const focusTrap: Action<HTMLElement, FocusTrapOptions | undefined> = (nod
 		previouslyFocused = document.activeElement as HTMLElement | null;
 		node.addEventListener('keydown', onKeydown);
 		if (opts.autoFocus) {
-			const focusable = getFocusableElements(node);
-			(focusable[0] ?? node).focus({ preventScroll: true });
+			const first = opts.initialFocus === 'first' ? getFocusableElements(node)[0] : undefined;
+			(first ?? node).focus({ preventScroll: true });
 		}
 	}
 
@@ -99,7 +110,13 @@ export const focusTrap: Action<HTMLElement, FocusTrapOptions | undefined> = (nod
 	return {
 		update(next) {
 			const wasEnabled = opts.enabled !== false;
-			opts = { enabled: true, autoFocus: true, restoreFocus: true, ...next };
+			opts = {
+				enabled: true,
+				autoFocus: true,
+				restoreFocus: true,
+				initialFocus: 'container',
+				...next
+			};
 			const isEnabled = opts.enabled !== false;
 			if (isEnabled && !wasEnabled) activate();
 			else if (!isEnabled && wasEnabled) deactivate();

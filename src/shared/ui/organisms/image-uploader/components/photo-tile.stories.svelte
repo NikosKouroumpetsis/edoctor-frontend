@@ -26,7 +26,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="w-narrow">
+		<div class="w-full max-w-narrow">
 			<StoryHarness items={[item]}>
 				<PhotoTile {item} />
 			</StoryHarness>

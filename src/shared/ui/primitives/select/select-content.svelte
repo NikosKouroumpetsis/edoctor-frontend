@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { scale } from 'svelte/transition';
 	import { step } from '$shared/design/tokens';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
 	import {
+		Presence,
 		portal,
 		dismissable,
 		floating,
@@ -22,6 +22,8 @@
 
 	const ctx = getSelectContext();
 	const typeahead = createTypeahead();
+	// In the DOM until its CSS leave ends (U-12.2): it grows from 95 % as it fades in, and back out.
+	const presence = new Presence(() => ctx.open, { duration: 'standard' });
 
 	// On open, focus the selected option (or the first) so keyboard nav starts there.
 	function autofocusSelected(node: HTMLElement) {
@@ -49,15 +51,17 @@
 	}
 </script>
 
-{#if ctx.open}
+{#if presence.present}
 	<div
 		bind:this={ref}
 		use:portal
+		use:presence.track
 		role="listbox"
 		id={ctx.contentId}
 		aria-labelledby={ctx.triggerId}
 		data-slot="select-content"
-		data-state="open"
+		data-state={presence.state}
+		inert={presence.closing}
 		tabindex={-1}
 		use:floating={{
 			reference: ctx.triggerEl,
@@ -65,12 +69,16 @@
 			sideOffset: step(1),
 			onPlaced: setMinWidth
 		}}
-		use:dismissable={{ onDismiss: () => ctx.setOpen(false), ignore: [ctx.triggerEl] }}
+		use:dismissable={{
+			enabled: presence.open,
+			onDismiss: () => ctx.setOpen(false),
+			ignore: [ctx.triggerEl]
+		}}
 		use:autofocusSelected
 		{onkeydown}
-		transition:scale={{ start: 0.95, duration: 120 }}
 		class={cn(
 			'z-50 max-h-menu-max-h overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-overlay outline-none',
+			'transition-[opacity,scale] duration-standard ease-standard data-[state=closed]:pointer-events-none data-[state=closed]:scale-95 data-[state=closed]:opacity-0 starting:scale-95 starting:opacity-0',
 			className
 		)}
 		{...restProps}

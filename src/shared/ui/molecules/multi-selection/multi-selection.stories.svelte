@@ -2,36 +2,44 @@
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { MultiSelection } from '$shared/ui/molecules/multi-selection';
 
+	const options = [
+		{ label: 'Καρδιολογία', value: 'cardio' },
+		{ label: 'Δερματολογία', value: 'derma' },
+		{ label: 'Παιδιατρική', value: 'pediatrics' },
+		{ label: 'Ορθοπεδική', value: 'ortho' }
+	];
+
+	// The application's meta (`molecules/multi-selection`).
 	const { Story } = defineMeta({
 		title: 'Molecules/Multi selection',
 		component: MultiSelection,
-		tags: ['autodocs']
+		tags: ['autodocs'],
+		args: { label: 'Ειδικότητες', options, disabled: false },
+		argTypes: { disabled: { control: 'boolean' }, max: { control: 'number' } }
 	});
-
-	const options = [
-		{ value: 'cardio', label: 'Cardiology' },
-		{ value: 'derma', label: 'Dermatology' },
-		{ value: 'neuro', label: 'Neurology' },
-		{ value: 'pedia', label: 'Pediatrics' }
-	];
 </script>
 
 <script lang="ts">
-	let value = $state<string[]>([]);
-	let preselected = $state<string[]>(['cardio', 'neuro']);
+	let playground = $state<string[]>(['cardio']);
+	let limited = $state<string[]>(['cardio']);
+	let disabled = $state<string[]>(['cardio']);
 </script>
 
-<Story name="Default">
-	{#snippet template()}
-		<div class="w-narrow"><MultiSelection label="Specialties" {options} bind:value /></div>
+<Story name="Playground">
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><MultiSelection {...args} bind:value={playground} /></div>
 	{/snippet}
 </Story>
 
-<Story name="Pre-selected">
-	{#snippet template()}
-		<div class="w-narrow">
-			<MultiSelection label="Specialties" {options} bind:value={preselected} />
-			<p class="mt-2 text-body-sm text-muted-foreground">Selected: {preselected.join(', ')}</p>
-		</div>
+<!-- At two chosen, the rest are disabled. -->
+<Story name="With Max" args={{ max: 2 }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><MultiSelection {...args} bind:value={limited} /></div>
+	{/snippet}
+</Story>
+
+<Story name="Disabled" args={{ disabled: true }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><MultiSelection {...args} bind:value={disabled} /></div>
 	{/snippet}
 </Story>

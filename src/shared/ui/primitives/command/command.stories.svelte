@@ -8,73 +8,99 @@
 		CommandGroup,
 		CommandItem
 	} from '$shared/ui/primitives/command';
+	import { HighlightText } from '$shared/ui/primitives/highlight-text';
 	import { Popover, PopoverTrigger, PopoverContent } from '$shared/ui/primitives/popover';
-	import { buttonVariants } from '$shared/ui/primitives/button';
+	import { buttonClasses } from '$shared/ui/primitives/button';
+	import { Ionicon, type IoniconName } from '$shared/ui/icons/ionicon';
 
+	type Entry = { icon: IoniconName; label: string; value: string; shortcut?: string };
+
+	// The application's groups (`molecules/command` stories): a heading, a glyph, the words and a shortcut.
+	const groups: { heading: string; items: Entry[] }[] = [
+		{
+			heading: 'Προτάσεις',
+			items: [
+				{ icon: 'calendar-outline', label: 'Ημερολόγιο', value: 'ημερολόγιο calendar' },
+				{ icon: 'search-outline', label: 'Αναζήτηση γιατρού', value: 'αναζήτηση γιατρού search' }
+			]
+		},
+		{
+			heading: 'Ρυθμίσεις',
+			items: [
+				{ icon: 'person-outline', label: 'Προφίλ', value: 'προφίλ profile', shortcut: '⌘P' },
+				{
+					icon: 'settings-outline',
+					label: 'Ρυθμίσεις',
+					value: 'ρυθμίσεις settings',
+					shortcut: '⌘S'
+				}
+			]
+		}
+	];
+
+	// The application's Command is a sheet opened by a button; the web's opens in a popover under it.
 	const { Story } = defineMeta({
 		title: 'Primitives/Command',
 		component: Command,
 		tags: ['autodocs']
 	});
-
-	const specialties = ['Cardiology', 'Dermatology', 'Neurology', 'Pediatrics', 'Radiology'];
 </script>
 
 <script lang="ts">
-	let selected = $state('');
+	let query = $state('');
+	let emptyQuery = $state('Πληρωμές');
 </script>
 
-<Story name="Default (filter)">
+{#snippet palette(search: string)}
+	<CommandInput placeholder="Αναζήτηση εντολής" aria-label="Αναζήτηση εντολής" />
+	<CommandList>
+		<CommandEmpty>Δεν βρέθηκαν αποτελέσματα.</CommandEmpty>
+		{#each groups as group (group.heading)}
+			<CommandGroup heading={group.heading}>
+				{#each group.items as item (item.value)}
+					<CommandItem value={item.value}>
+						<Ionicon name={item.icon} class="icon-md shrink-0 text-muted-foreground" />
+						<HighlightText
+							text={item.label}
+							query={search}
+							lines={1}
+							class="flex-1 text-body-sm text-foreground"
+						/>
+						{#if item.shortcut}
+							<span class="ms-auto text-body-sm tracking-widest text-muted-foreground">
+								{item.shortcut}
+							</span>
+						{/if}
+					</CommandItem>
+				{/each}
+			</CommandGroup>
+		{/each}
+	</CommandList>
+{/snippet}
+
+<Story name="Default">
 	{#snippet template()}
-		<Command class="w-narrow rounded-lg border">
-			<CommandInput placeholder="Search specialty…" aria-label="Search specialty" />
-			<CommandList>
-				<CommandEmpty>No results.</CommandEmpty>
-				<CommandGroup>
-					{#each specialties as item (item)}
-						<CommandItem value={item} onSelect={(v) => (selected = v)}>{item}</CommandItem>
-					{/each}
-				</CommandGroup>
-			</CommandList>
-		</Command>
+		<div class="flex flex-col gap-3">
+			<Popover>
+				<PopoverTrigger class={buttonClasses()}>Άνοιγμα εντολών</PopoverTrigger>
+				<PopoverContent class="w-popover-md p-0">
+					<Command bind:value={query}>{@render palette(query)}</Command>
+				</PopoverContent>
+			</Popover>
+		</div>
 	{/snippet}
 </Story>
 
-<Story name="Empty state">
+<!-- A search the caller holds, opened on «Πληρωμές»: nothing matches. -->
+<Story name="Empty State">
 	{#snippet template()}
-		<Command class="w-narrow rounded-lg border">
-			<CommandInput placeholder="Search…" aria-label="Search" value="zzz" />
-			<CommandList>
-				<CommandEmpty>No results found.</CommandEmpty>
-				<CommandGroup>
-					{#each specialties as item (item)}
-						<CommandItem value={item}>{item}</CommandItem>
-					{/each}
-				</CommandGroup>
-			</CommandList>
-		</Command>
-	{/snippet}
-</Story>
-
-<Story name="In popover (combobox recipe)">
-	{#snippet template()}
-		<Popover>
-			<PopoverTrigger class={buttonVariants({ variant: 'outline' })}>
-				{selected || 'Select specialty…'}
-			</PopoverTrigger>
-			<PopoverContent class="w-popover-md p-0">
-				<Command>
-					<CommandInput placeholder="Search specialty…" aria-label="Search specialty" />
-					<CommandList>
-						<CommandEmpty>No results.</CommandEmpty>
-						<CommandGroup>
-							{#each specialties as item (item)}
-								<CommandItem value={item} onSelect={(v) => (selected = v)}>{item}</CommandItem>
-							{/each}
-						</CommandGroup>
-					</CommandList>
-				</Command>
-			</PopoverContent>
-		</Popover>
+		<div class="flex flex-col gap-3">
+			<Popover>
+				<PopoverTrigger class={buttonClasses()}>Άνοιγμα εντολών</PopoverTrigger>
+				<PopoverContent class="w-popover-md p-0">
+					<Command bind:value={emptyQuery}>{@render palette(emptyQuery)}</Command>
+				</PopoverContent>
+			</Popover>
+		</div>
 	{/snippet}
 </Story>

@@ -28,7 +28,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="w-narrow">
+		<div class="w-full max-w-narrow">
 			<StoryHarness><UploadTile staged={valid} /></StoryHarness>
 		</div>
 	{/snippet}
@@ -42,7 +42,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="w-narrow">
+		<div class="w-full max-w-narrow">
 			<StoryHarness><UploadTile staged={uploading} /></StoryHarness>
 		</div>
 	{/snippet}
@@ -51,7 +51,7 @@
 <!-- done: checkmark ring -->
 <Story name="Done">
 	{#snippet template()}
-		<div class="w-narrow">
+		<div class="w-full max-w-narrow">
 			<StoryHarness><UploadTile staged={done} /></StoryHarness>
 		</div>
 	{/snippet}
@@ -60,7 +60,7 @@
 <!-- error: destructive ring + reason -->
 <Story name="Error">
 	{#snippet template()}
-		<div class="w-narrow">
+		<div class="w-full max-w-narrow">
 			<StoryHarness><UploadTile staged={errored} /></StoryHarness>
 		</div>
 	{/snippet}
@@ -76,7 +76,7 @@
 	}}
 >
 	{#snippet template()}
-		<div class="w-narrow">
+		<div class="w-full max-w-narrow">
 			<StoryHarness><UploadTile staged={invalid} /></StoryHarness>
 		</div>
 	{/snippet}

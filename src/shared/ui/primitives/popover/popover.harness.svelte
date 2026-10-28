@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { Popover, PopoverTrigger, PopoverContent, type PopoverSize } from './index';
 
-	let { open = $bindable(false), size = 'default' }: { open?: boolean; size?: PopoverSize } =
-		$props();
+	let { open = $bindable(false), size = 'md' }: { open?: boolean; size?: PopoverSize } = $props();
 </script>
 
 <div>

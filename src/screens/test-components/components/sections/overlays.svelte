@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { buttonVariants } from '$shared/ui/primitives/button';
+	import { buttonClasses } from '$shared/ui/primitives/button';
 	import {
 		Dialog,
 		DialogTrigger,
@@ -23,7 +23,7 @@
 	import { HoverCard, HoverCardTrigger, HoverCardContent } from '$shared/ui/primitives/hover-card';
 	import { Input } from '$shared/ui/primitives/input';
 	import { Label } from '$shared/ui/primitives/label';
-	import InfoIcon from '~icons/lucide/info';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import DemoSection from '../demo-section.svelte';
 	import DemoRow from '../demo-row.svelte';
 </script>
@@ -35,15 +35,15 @@
 >
 	<DemoRow label="Dialog (modal)">
 		<Dialog>
-			<DialogTrigger class={buttonVariants()}>Book appointment</DialogTrigger>
-			<DialogContent>
+			<DialogTrigger class={buttonClasses()}>Book appointment</DialogTrigger>
+			<DialogContent closeLabel="Close">
 				<DialogHeader>
 					<DialogTitle>Confirm booking</DialogTitle>
 					<DialogDescription>Confirm your appointment with Dr. Alexiou.</DialogDescription>
 				</DialogHeader>
 				<DialogFooter>
-					<DialogClose class={buttonVariants({ variant: 'outline' })}>Cancel</DialogClose>
-					<DialogClose class={buttonVariants()}>Confirm</DialogClose>
+					<DialogClose class={buttonClasses({ tone: 'outline' })}>Cancel</DialogClose>
+					<DialogClose class={buttonClasses()}>Confirm</DialogClose>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
@@ -52,8 +52,8 @@
 	<DemoRow label="Sheet (sides)">
 		{#each ['left', 'right', 'top', 'bottom'] as const as side (side)}
 			<Sheet>
-				<SheetTrigger class={buttonVariants({ variant: 'outline' })}>{side}</SheetTrigger>
-				<SheetContent {side}>
+				<SheetTrigger class={buttonClasses({ tone: 'outline' })}>{side}</SheetTrigger>
+				<SheetContent {side} closeLabel="Close">
 					<SheetHeader>
 						<SheetTitle>Filters</SheetTitle>
 						<SheetDescription>Refine your search ({side}).</SheetDescription>
@@ -65,12 +65,12 @@
 
 	<DemoRow label="Popover">
 		<Popover>
-			<PopoverTrigger class={buttonVariants({ variant: 'outline' })}>Open popover</PopoverTrigger>
+			<PopoverTrigger class={buttonClasses({ tone: 'outline' })}>Open popover</PopoverTrigger>
 			<PopoverContent>
 				<div class="grid gap-2">
 					<p class="text-title-sm">Dimensions</p>
 					<Label for="w">Width</Label>
-					<Input id="w" value="320px" />
+					<Input id="w" class="px-2.5" value="320px" />
 				</div>
 			</PopoverContent>
 		</Popover>
@@ -78,8 +78,11 @@
 
 	<DemoRow label="Tooltip">
 		<Tooltip>
-			<TooltipTrigger class={buttonVariants({ variant: 'ghost', size: 'icon' })} aria-label="Info">
-				<InfoIcon />
+			<TooltipTrigger
+				class="inline-flex size-touch items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+				aria-label="Info"
+			>
+				<Ionicon name="information-circle-outline" class="icon-lg text-foreground" />
 			</TooltipTrigger>
 			<TooltipContent>Average wait time: 10 minutes</TooltipContent>
 		</Tooltip>

@@ -12,11 +12,12 @@
 
 	const ctx = getAvatarContext();
 
-	// Initials track the root avatar size set on the shared context.
+	// The application's initials per size (U-07.1): semibold, `label-md` (tight in the 32 circle) up to `title-sm`.
 	const fallbackTextSizes: Record<AvatarSize, string> = {
-		sm: 'text-label-md',
-		default: 'text-body-sm',
-		lg: 'text-body-md'
+		sm: 'text-label-md leading-tight',
+		md: 'text-label-md',
+		lg: 'text-label-lg',
+		xl: 'text-title-sm'
 	};
 </script>
 
@@ -25,7 +26,7 @@
 		bind:this={ref}
 		data-slot="avatar-fallback"
 		class={cn(
-			'flex size-full items-center justify-center rounded-full bg-muted text-muted-foreground',
+			'flex size-full items-center justify-center rounded-full bg-muted font-semibold text-muted-foreground',
 			fallbackTextSizes[ctx.size],
 			className
 		)}

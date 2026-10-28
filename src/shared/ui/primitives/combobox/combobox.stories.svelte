@@ -2,86 +2,90 @@
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { Combobox, type ComboboxOption } from '$shared/ui/primitives/combobox';
 
+	const cities: ComboboxOption[] = [
+		{ label: 'Αθήνα', value: 'athens' },
+		{ label: 'Θεσσαλονίκη', value: 'thessaloniki' },
+		{ label: 'Πάτρα', value: 'patras' },
+		{ label: 'Ηράκλειο', value: 'heraklion' },
+		{ label: 'Λάρισα', value: 'larissa' }
+	];
+
+	// The application's meta (`molecules/combobox`). The web types in the field itself, so its placeholder is the
+	// application's `searchPlaceholder`; the trailing button is named by `clearLabel` / `toggleLabel`.
 	const { Story } = defineMeta({
 		title: 'Primitives/Combobox',
 		component: Combobox,
 		tags: ['autodocs'],
 		args: {
-			label: 'Specialty',
-			placeholder: 'Αναζήτηση ειδικότητας…',
-			size: 'default',
-			allowFreeText: true,
-			searchIcon: true,
-			chevron: true,
-			disabled: false
+			emptyText: 'Δεν βρέθηκαν αποτελέσματα',
+			options: cities,
+			label: 'Πόλη',
+			placeholder: 'Αναζήτηση',
+			clearLabel: 'Καθαρισμός',
+			toggleLabel: 'Επιλογές'
 		},
 		argTypes: {
-			size: { control: 'select', options: ['default', 'lg', 'xl'] },
 			allowFreeText: { control: 'boolean' },
-			searchIcon: { control: 'boolean' },
 			chevron: { control: 'boolean' },
-			disabled: { control: 'boolean' }
+			disabled: { control: 'boolean' },
+			searchIcon: { control: 'boolean' },
+			label: { control: 'text' },
+			error: { control: 'text' }
 		}
 	});
-
-	const specialties: ComboboxOption[] = [
-		{ label: 'Καρδιολόγος', value: 'cardio' },
-		{ label: 'Δερματολόγος', value: 'derma' },
-		{ label: 'Νευρολόγος', value: 'neuro' },
-		{ label: 'Παιδίατρος', value: 'pedia' },
-		{ label: 'Παθολόγος', value: 'internal' },
-		{ label: 'Ακτινολόγος', value: 'radio' }
-	];
 </script>
 
 <script lang="ts">
-	let value = $state('');
-	let preselected = $state('derma');
+	// Each story is controlled with its own value, as the application's `Controlled`.
+	let playground = $state('');
+	let filled = $state('patras');
+	let invalid = $state('');
+	let disabled = $state('athens');
+	let strict = $state('');
+	let withSearchIcon = $state('');
+	let noChevron = $state('');
 </script>
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class="w-narrow"><Combobox {...args} options={specialties} bind:value /></div>
+		<div class="w-full max-w-narrow"><Combobox {...args} bind:value={playground} /></div>
 	{/snippet}
 </Story>
 
-<Story name="Pre-selected">
-	{#snippet template()}
-		<div class="w-narrow">
-			<Combobox label="Specialty" options={specialties} bind:value={preselected} />
-			<p class="mt-2 text-body-sm text-muted-foreground">value: {preselected || '(empty)'}</p>
-		</div>
+<Story name="Filled">
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><Combobox {...args} bind:value={filled} /></div>
 	{/snippet}
 </Story>
 
-<Story name="Strict (no free text)">
-	{#snippet template()}
-		<div class="w-narrow">
-			<Combobox label="Specialty" options={specialties} allowFreeText={false} />
-		</div>
+<Story name="With Error" args={{ error: 'Απαιτείται επιλογή.' }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><Combobox {...args} bind:value={invalid} /></div>
 	{/snippet}
 </Story>
 
-<Story name="No search icon">
-	{#snippet template()}
-		<div class="w-narrow">
-			<Combobox label="Specialty" options={specialties} searchIcon={false} />
-		</div>
+<Story name="Disabled" args={{ disabled: true }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><Combobox {...args} bind:value={disabled} /></div>
 	{/snippet}
 </Story>
 
-<Story name="No chevron">
-	{#snippet template()}
-		<div class="w-narrow">
-			<Combobox label="Specialty" options={specialties} chevron={false} />
-		</div>
+<!-- Only an option can be committed: typed text that matches none is dropped. -->
+<Story name="Strict" args={{ allowFreeText: false }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><Combobox {...args} bind:value={strict} /></div>
 	{/snippet}
 </Story>
 
-<Story name="Bare (no icons)">
-	{#snippet template()}
-		<div class="w-narrow">
-			<Combobox label="Specialty" options={specialties} searchIcon={false} chevron={false} />
-		</div>
+<!-- The search glyph is opt-in (off by default, the application's look, U-07.3). -->
+<Story name="With Search Icon" args={{ searchIcon: true }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><Combobox {...args} bind:value={withSearchIcon} /></div>
+	{/snippet}
+</Story>
+
+<Story name="Without Chevron" args={{ chevron: false }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><Combobox {...args} bind:value={noChevron} /></div>
 	{/snippet}
 </Story>

@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	import { createContext } from '$shared/lib/headless';
 
-	type CommandItemEntry = { id: string; value: string; onSelect: () => void };
+	type CommandItemEntry = { id: string; value: string; groupId?: string; onSelect: () => void };
 
 	export type CommandContext = {
 		readonly search: string;
@@ -16,8 +16,17 @@
 		selectActive: () => void;
 		registerItem: (entry: CommandItemEntry) => void;
 		unregisterItem: (id: string) => void;
+		registerGroup: (id: string) => void;
+		unregisterGroup: (id: string) => void;
+		/** A group hides when it has items and none matches; a shown group after another shown one is separated. */
+		groupState: (id: string) => { hidden: boolean; separated: boolean };
 	};
 	export const [getCommandContext, setCommandContext] = createContext<CommandContext>('Command');
+
+	/** The group an item sits in, so a group without a match hides and the next one draws the line. */
+	export const [, setCommandGroupContext, getCommandGroupContext] = createContext<{ id: string }>(
+		'CommandGroup'
+	);
 </script>
 
 <script lang="ts">
@@ -40,12 +49,20 @@
 	const id = useId(undefined, 'command');
 	let activeId = $state<string | undefined>(undefined);
 	let items = $state<CommandItemEntry[]>([]);
+	let groups = $state<string[]>([]);
 
 	function matches(itemValue: string): boolean {
 		return itemValue.toLowerCase().includes(value.toLowerCase());
 	}
 
 	const visibleItems = $derived(items.filter((i) => matches(i.value)));
+	// Before its items mount (and on the server) a group shows: only a group whose items all miss hides.
+	const visibleGroups = $derived(
+		groups.filter((groupId) => {
+			const own = items.filter((item) => item.groupId === groupId);
+			return own.length === 0 || own.some((item) => matches(item.value));
+		})
+	);
 
 	// Keep the active descendant on a visible item as the query changes.
 	$effect(() => {
@@ -90,6 +107,25 @@
 		},
 		unregisterItem(itemId) {
 			items = items.filter((i) => i.id !== itemId);
+		},
+		registerGroup(groupId) {
+			if (groups.includes(groupId)) return;
+			// In DOM order, not mount order: a group that mounts later above another (a `{#if}`, data that
+			// arrives) takes its place, so the line is drawn between the shown groups as the reader sees them.
+			groups = [...groups, groupId].sort((a, b) => {
+				const first = document.getElementById(a);
+				const second = document.getElementById(b);
+				if (!first || !second) return 0;
+				return first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+			});
+		},
+		unregisterGroup(groupId) {
+			groups = groups.filter((g) => g !== groupId);
+		},
+		groupState(groupId) {
+			if (!groups.includes(groupId)) return { hidden: false, separated: false };
+			const place = visibleGroups.indexOf(groupId);
+			return { hidden: place === -1, separated: place > 0 };
 		}
 	});
 </script>

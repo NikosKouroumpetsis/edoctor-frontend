@@ -1,45 +1,51 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { Toggle } from '$shared/ui/primitives/toggle';
-	import BoldIcon from '~icons/lucide/bold';
 
+	// The application's meta (`atoms/toggle`): its `label` is the web toggle's text child.
 	const { Story } = defineMeta({
 		title: 'Primitives/Toggle',
 		component: Toggle,
 		tags: ['autodocs'],
-		args: { variant: 'default', size: 'default', disabled: false },
+		args: { pressed: false, variant: 'default', size: 'md', disabled: false },
 		argTypes: {
-			variant: { control: 'select', options: ['default', 'outline'] },
-			size: { control: 'select', options: ['default', 'lg'] },
+			variant: { control: 'inline-radio', options: ['default', 'outline'] },
+			size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
 			disabled: { control: 'boolean' }
 		}
 	});
 </script>
 
 <script lang="ts">
-	let pressed = $state(false);
+	let playground = $state(false);
+	let outline = $state(false);
+	const sized = $state<Record<string, boolean>>({ sm: false, md: false, lg: false });
 </script>
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<Toggle bind:pressed {...args} aria-label="Toggle bold"><BoldIcon /></Toggle>
+		<Toggle {...args} bind:pressed={playground}>Έντονα</Toggle>
 	{/snippet}
 </Story>
 
-<Story name="Variants">
-	{#snippet template()}
-		<div class="flex items-center gap-3">
-			<Toggle aria-label="Default bold"><BoldIcon /></Toggle>
-			<Toggle variant="outline" aria-label="Outline bold"><BoldIcon /></Toggle>
-		</div>
+<Story name="Outline" args={{ variant: 'outline' }}>
+	{#snippet template(args)}
+		<Toggle {...args} bind:pressed={outline}>Έντονα</Toggle>
+	{/snippet}
+</Story>
+
+<Story name="Pressed" args={{ pressed: true }}>
+	{#snippet template(args)}
+		<Toggle {...args}>Έντονα</Toggle>
 	{/snippet}
 </Story>
 
 <Story name="Sizes">
-	{#snippet template()}
-		<div class="flex items-center gap-3">
-			<Toggle size="default" aria-label="Default bold"><BoldIcon /></Toggle>
-			<Toggle size="lg" aria-label="Large bold"><BoldIcon /></Toggle>
+	{#snippet template(args)}
+		<div class="flex flex-row items-center gap-3">
+			{#each ['sm', 'md', 'lg'] as const as size (size)}
+				<Toggle {...args} {size} bind:pressed={sized[size]}>{size}</Toggle>
+			{/each}
 		</div>
 	{/snippet}
 </Story>

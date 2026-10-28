@@ -1,21 +1,23 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import BottomNav from '$shared/ui/organisms/bottom-nav';
+	import { sampleBottomNavItems } from './bottom-nav.sample';
 
 	const { Story } = defineMeta({
-		title: 'Organisms/Bottom nav',
+		title: 'Organisms/BottomNav',
 		component: BottomNav,
-		tags: ['autodocs']
+		tags: ['autodocs'],
+		parameters: { layout: 'fullscreen' },
+		args: { items: sampleBottomNavItems, 'aria-label': 'Πλοήγηση', hideFrom: 'laptop' },
+		argTypes: { hideFrom: { control: 'select', options: ['tablet', 'split', 'laptop', 'desktop'] } }
 	});
 </script>
 
-<!-- Mobile bottom navigation. Reads $app/state (page.url) for the active item. -->
+<!-- The caller gives the tabs (the shell module for the product); it hides from `hideFrom` up. -->
 <Story name="Default">
-	{#snippet template()}
-		<div
-			class="relative mx-auto h-bar-bottom w-narrow overflow-hidden rounded-lg border bg-background"
-		>
-			<BottomNav />
+	{#snippet template(args)}
+		<div class="relative h-bar-bottom w-full overflow-hidden bg-background">
+			<BottomNav {...args} />
 		</div>
 	{/snippet}
 </Story>

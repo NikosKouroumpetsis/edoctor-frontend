@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date';
-	import { buttonVariants } from '$shared/ui/primitives/button';
+	import { buttonClasses } from '$shared/ui/primitives/button';
 	import { Popover, PopoverTrigger, PopoverContent } from '$shared/ui/primitives/popover';
 	import {
 		Command,
@@ -34,7 +34,7 @@
 >
 	<DemoRow label="Combobox (city: {city ?? 'none'})">
 		<Popover bind:open={comboOpen}>
-			<PopoverTrigger class={buttonVariants({ variant: 'outline' })}>
+			<PopoverTrigger class={buttonClasses({ tone: 'outline' })}>
 				{city ?? 'Select city…'}
 			</PopoverTrigger>
 			<PopoverContent class="w-popover-md p-0">
@@ -62,17 +62,23 @@
 
 	<DemoRow label="Date picker">
 		<Popover bind:open={dateOpen}>
-			<PopoverTrigger class={buttonVariants({ variant: 'outline' })}>
+			<PopoverTrigger class={buttonClasses({ tone: 'outline' })}>
 				<CalendarIcon class="size-4" />
 				{dateLabel}
 			</PopoverTrigger>
 			<PopoverContent class="w-auto p-0">
-				<Calendar bind:value={date} locale="en-GB" onValueChange={() => (dateOpen = false)} />
+				<Calendar
+					bind:value={date}
+					locale="en-GB"
+					previousMonthLabel="Previous month"
+					nextMonthLabel="Next month"
+					onValueChange={() => (dateOpen = false)}
+				/>
 			</PopoverContent>
 		</Popover>
 	</DemoRow>
 
 	<DemoRow label="Calendar (inline)">
-		<Calendar locale="en-GB" />
+		<Calendar locale="en-GB" previousMonthLabel="Previous month" nextMonthLabel="Next month" />
 	</DemoRow>
 </DemoSection>

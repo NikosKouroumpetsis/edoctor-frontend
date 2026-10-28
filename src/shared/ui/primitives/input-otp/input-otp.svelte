@@ -7,8 +7,18 @@
 		hasFakeCaret: boolean;
 	};
 
+	/** The application's `InputOtp` sizes (U-07.1): the row's resting height, inset and digits. */
+	export type InputOtpSize = 'sm' | 'md' | 'lg';
+
+	export const inputOtpSizes: Record<InputOtpSize, { container: string; digit: string }> = {
+		sm: { container: 'min-h-control-md px-3', digit: 'text-title-sm' },
+		md: { container: 'min-h-control-lg px-4', digit: 'text-title-sm' },
+		lg: { container: 'min-h-control-xl px-5', digit: 'text-title-md' }
+	};
+
 	export type InputOtpContext = {
 		readonly maxlength: number;
+		readonly size: InputOtpSize;
 		getSlot: (index: number) => OtpSlotState;
 	};
 
@@ -33,9 +43,12 @@
 		pattern = REGEXP_ONLY_DIGITS,
 		inputmode = 'numeric',
 		disabled = false,
+		size = 'md',
+		invalid = false,
 		class: className,
 		containerClass,
 		onComplete,
+		label,
 		children,
 		...restProps
 	}: WithElementRef<
@@ -48,6 +61,11 @@
 		/** Extra classes for the wrapper that lays out the slots. */
 		containerClass?: string;
 		onComplete?: (value: string) => void;
+		/** The code field's accessible name, already localized by the caller. */
+		label: string;
+		size?: InputOtpSize;
+		/** The error look (the application's): the danger border and `aria-invalid`. */
+		invalid?: boolean;
 		children?: Snippet;
 	} = $props();
 
@@ -94,6 +112,9 @@
 		get maxlength() {
 			return maxlength;
 		},
+		get size() {
+			return size;
+		},
 		getSlot(index) {
 			const char = value[index];
 			const collapsed = selStart === selEnd;
@@ -111,9 +132,11 @@
 <div
 	data-slot="input-otp"
 	data-disabled={disabled ? '' : undefined}
+	data-size={size}
 	class={cn(
-		'relative flex h-control-md w-full items-center rounded-lg border border-input bg-card px-3 transition-[color,box-shadow]',
-		isFocused && 'border-ring',
+		'relative flex w-full items-stretch rounded-md border border-input bg-card transition-[color,box-shadow]',
+		inputOtpSizes[size].container,
+		invalid ? 'border-danger' : isFocused && 'border-ring',
 		disabled && 'opacity-50',
 		containerClass
 	)}
@@ -134,7 +157,8 @@
 		autocomplete="one-time-code"
 		autocapitalize="none"
 		spellcheck="false"
-		aria-label="One-time passcode"
+		aria-label={label}
+		aria-invalid={invalid ? 'true' : undefined}
 		data-slot="input-otp-input"
 		class={cn(
 			'absolute inset-0 size-full min-h-touch cursor-text bg-transparent text-transparent caret-transparent opacity-0 outline-none disabled:cursor-not-allowed',

@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { buttonVariants } from '$shared/ui/primitives/button';
+	import { buttonClasses } from '$shared/ui/primitives/button';
+	import { Select } from '$shared/ui/molecules/select';
 	import {
-		Select,
+		SelectRoot,
 		SelectTrigger,
 		SelectValue,
 		SelectContent,
@@ -26,6 +27,7 @@
 	import DemoRow from '../demo-row.svelte';
 
 	let specialty = $state<string>();
+	let sortBy = $state<string>();
 	let showAvailability = $state(true);
 	let sort = $state('rating');
 </script>
@@ -36,7 +38,7 @@
 	description="In-house listbox & menu (keyboard, typeahead, positioning) — rewritten without Bits UI."
 >
 	<DemoRow label="Select (value: {specialty ?? 'none'})">
-		<Select bind:value={specialty}>
+		<SelectRoot bind:value={specialty}>
 			<SelectTrigger class="w-full max-w-narrow" aria-label="Specialty">
 				<SelectValue placeholder="Choose a specialty" />
 			</SelectTrigger>
@@ -54,14 +56,38 @@
 					<SelectItem value="pedia">Paediatrics</SelectItem>
 				</SelectGroup>
 			</SelectContent>
-		</Select>
+		</SelectRoot>
+	</DemoRow>
+
+	<DemoRow label="Select, the application's data API (value: {sortBy ?? 'none'})">
+		<div class="flex w-full max-w-narrow flex-col gap-3">
+			<Select
+				bind:value={sortBy}
+				placeholder="Sort reviews"
+				aria-label="Sort reviews"
+				options={[
+					{ value: 'recent', label: 'Most recent' },
+					{ value: 'high', label: 'Highest rated', subtitle: 'Five stars first' },
+					{ value: 'low', label: 'Lowest rated' }
+				]}
+			/>
+			<Select
+				variant="pill"
+				bind:value={sortBy}
+				placeholder="Sort"
+				aria-label="Sort (pill)"
+				options={[
+					{ value: 'recent', label: 'Most recent' },
+					{ value: 'high', label: 'Highest rated' },
+					{ value: 'low', label: 'Lowest rated' }
+				]}
+			/>
+		</div>
 	</DemoRow>
 
 	<DemoRow label="Dropdown menu (sort: {sort}, availability: {showAvailability})">
 		<DropdownMenu>
-			<DropdownMenuTrigger class={buttonVariants({ variant: 'outline' })}
-				>Options</DropdownMenuTrigger
-			>
+			<DropdownMenuTrigger class={buttonClasses({ tone: 'outline' })}>Options</DropdownMenuTrigger>
 			<DropdownMenuContent class="w-popover-sm">
 				<DropdownMenuLabel>Filters</DropdownMenuLabel>
 				<DropdownMenuCheckboxItem bind:checked={showAvailability}>

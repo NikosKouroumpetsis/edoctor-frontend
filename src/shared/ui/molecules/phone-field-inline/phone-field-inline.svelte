@@ -11,126 +11,150 @@
 </script>
 
 <script lang="ts">
-	import AlertIcon from '~icons/lucide/circle-alert';
-	import { Select, SelectTrigger, SelectContent, SelectItem } from '$shared/ui/primitives/select';
+	import { untrack } from 'svelte';
+	import { SelectRoot, SelectTrigger } from '$shared/ui/primitives/select';
 	import { cn } from '$shared/lib/utils';
 	import { useId } from '$shared/lib/headless';
+	import { FieldMessage } from '$shared/ui/primitives/field-message';
+	import { FloatingLabel } from '$shared/ui/primitives/floating-label';
 	import { fieldSizes } from '$shared/ui/primitives/input';
+	import { SelectOptions } from '$shared/ui/molecules/select';
+	import {
+		DEFAULT_PHONE_DIAL_CODE,
+		PHONE_COUNTRIES,
+		type PhoneValue
+	} from '$shared/ui/molecules/phone-field/countries';
 	import type { FieldApi } from '$shared/lib/form';
 
-	// Structured so the trigger can show only the dial code (e.g. "+30") while the
-	// dropdown shows "code + country name" (e.g. "+30  Ελλάδα").
-	const DIAL_CODES = [
-		{ value: '+30', name: 'Ελλάδα' },
-		{ value: '+357', name: 'Κύπρος' },
-		{ value: '+44', name: 'United Kingdom' },
-		{ value: '+49', name: 'Deutschland' },
-		{ value: '+1', name: 'United States' }
-	];
-
 	let {
-		label = 'Phone number',
-		countryLabel = 'Country',
-		value = $bindable(''),
-		dialCode = $bindable('+30'),
+		label,
+		countryAccessibilityLabel,
+		searchPlaceholder,
+		numberPlaceholder = '',
+		value = $bindable({ dialCode: DEFAULT_PHONE_DIAL_CODE, number: '' }),
+		onChange,
 		field,
 		error,
+		helperText,
 		size = 'default',
-		placeholder = '',
-		disabled = false
+		disabled = false,
+		id,
+		inputTestId,
+		class: className
 	}: {
-		label?: string;
-		countryLabel?: string;
-		value?: string;
-		dialCode?: string;
+		/** The floating label and the number's accessible name. */
+		label: string;
+		/** The country trigger's accessible name. */
+		countryAccessibilityLabel: string;
+		/** The country list's search field. */
+		searchPlaceholder: string;
+		/** Shown only while the number is focused. */
+		numberPlaceholder?: string;
+		/** The application's combined value `{ dialCode, number }`. */
+		value?: PhoneValue;
+		onChange?: (value: PhoneValue) => void;
+		/** Connect the NUMBER to a `createForm` field; the dial code stays in `value`. */
 		field?: FieldApi<string>;
 		error?: string;
+		helperText?: string;
 		size?: TextFieldSize;
-		placeholder?: string;
 		disabled?: boolean;
+		id?: string;
+		inputTestId?: string;
+		class?: string;
 	} = $props();
 
-	const inputId = useId(undefined, 'phone-inline');
-	const errorId = `${inputId}-error`;
+	const inputId = useId(untrack(() => id) ?? undefined, 'phone-inline');
+	const messageId = `${inputId}-message`;
 
-	const currentValue = $derived(field ? (field.value ?? '') : value);
+	const dialCode = $derived(value.dialCode || DEFAULT_PHONE_DIAL_CODE);
+	const currentNumber = $derived(field ? (field.value ?? '') : value.number);
 	const currentError = $derived(field ? field.error : error);
+	const hasMessage = $derived(Boolean(currentError || helperText));
+	const countryOptions = PHONE_COUNTRIES.map((country) => ({
+		label: country.value,
+		subtitle: country.name,
+		value: country.value,
+		leading: country.flag
+	}));
 
-	// Placeholder is shown only while focused (an empty, unfocused field shows just
-	// the resting label); a non-empty space otherwise keeps `:placeholder-shown`
-	// driving the floating label. 1:1 with the text-field family.
+	// Placeholder is shown only while focused (an empty, unfocused field shows just the resting label).
 	let placeholderText = $state(' ');
+	let focused = $state(false);
+	// The application's `floated = focused || hasValue` (R3-3); an autofilled number floats it by CSS.
+	const floated = $derived(focused || currentNumber !== '');
+
+	function commit(next: PhoneValue) {
+		value = next;
+		onChange?.(next);
+	}
+
+	function handleDialCode(next: string) {
+		commit({ dialCode: next, number: currentNumber });
+	}
 
 	function handleInput(event: Event) {
-		const next = (event.target as HTMLInputElement).value;
-		if (field) field.setValue(next);
-		else value = next;
-	}
-
-	function handleFocus() {
-		placeholderText = placeholder || ' ';
-	}
-
-	function handleBlur() {
-		placeholderText = ' ';
-		field?.handleBlur();
+		const input = event.target as HTMLInputElement;
+		// The application keeps digits and spaces only.
+		const sanitized = input.value.replace(/[^\d\s]/g, '');
+		if (sanitized !== input.value) input.value = sanitized;
+		if (field) field.setValue(sanitized);
+		commit({ dialCode, number: sanitized });
 	}
 </script>
 
 <!--
-	Inline / serial layout: one control owns the focus-within / invalid states, so
-	the whole control highlights as one unit. Its border is an overlay drawn on top,
-	so it adds no height: the field stays 48 / 56 / 64 like the other field
-	molecules. Inside: a muted country select on the LEFT (dial code only), a 1px
-	divider, and the floating-label phone input on the RIGHT. The error sits
-	OUTSIDE the box so it never stretches the select.
+	Inline / serial layout: one control owns the focus-within / invalid states, so the whole control
+	highlights as one unit. Its border is an overlay drawn on top, so it adds no height: the field stays
+	48 / 56 / 64 like the other field molecules. Inside: a muted dial-code trigger on the LEFT, a 1px
+	divider, and the floating-label number on the RIGHT. The message sits OUTSIDE the box.
 -->
-<div class="w-full pb-1" data-slot="phone-field-inline">
+<div class={cn('w-full pb-1', className)} data-slot="phone-field-inline">
 	<div
 		data-slot="phone-field-inline-control"
 		class={cn(
-			'group relative flex w-full items-stretch overflow-hidden rounded-md bg-card',
-			currentError && 'bg-destructive/10',
+			'group relative flex w-full flex-row items-stretch overflow-hidden rounded-md bg-card',
+			currentError && 'bg-danger/10',
 			disabled && 'pointer-events-none opacity-50'
 		)}
 	>
-		<!-- Country select: borderless except a right divider, muted, dial code only. -->
-		<Select bind:value={dialCode} {disabled}>
+		<SelectRoot value={dialCode} {disabled} onValueChange={handleDialCode}>
 			<SelectTrigger
 				class={cn(
-					'h-auto shrink-0 items-center justify-center gap-1 rounded-none border-transparent border-r-input bg-muted font-medium focus-visible:border-transparent focus-visible:border-r-input focus-visible:ring-0',
+					'h-auto shrink-0 items-center justify-center gap-1 rounded-none border-transparent border-r-input bg-muted font-medium text-foreground focus-visible:border-transparent focus-visible:border-r-input focus-visible:ring-0',
 					CODE_PAD[size]
 				)}
-				aria-label={countryLabel}
+				chevronSize="sm"
+				aria-label={countryAccessibilityLabel}
 			>
 				<span class="truncate">{dialCode}</span>
 			</SelectTrigger>
-			<SelectContent>
-				{#each DIAL_CODES as code (code.value)}
-					<SelectItem value={code.value} label={code.value}>
-						<span class="w-dial-code-w shrink-0 font-medium text-foreground">{code.value}</span>
-						<span class="text-muted-foreground">{code.name}</span>
-					</SelectItem>
-				{/each}
-			</SelectContent>
-		</Select>
+			<SelectOptions options={countryOptions} value={dialCode} {searchPlaceholder} />
+		</SelectRoot>
 
-		<!-- Phone number input with floating label. -->
 		<div class="relative flex-1">
 			<input
 				id={inputId}
 				type="tel"
 				inputmode="tel"
-				autocomplete="tel"
+				autocomplete="tel-national"
 				{disabled}
-				value={currentValue}
+				value={currentNumber}
 				placeholder={placeholderText}
 				aria-invalid={currentError ? 'true' : undefined}
-				aria-describedby={currentError ? errorId : undefined}
+				aria-describedby={hasMessage ? messageId : undefined}
 				oninput={handleInput}
-				onfocus={handleFocus}
-				onblur={handleBlur}
+				onfocus={() => {
+					focused = true;
+					placeholderText = numberPlaceholder || ' ';
+				}}
+				onblur={() => {
+					focused = false;
+					placeholderText = ' ';
+					field?.handleBlur();
+				}}
 				data-slot="phone-field-inline-input"
+				data-testid={inputTestId}
 				class={cn(
 					'peer block w-full appearance-none bg-transparent pr-3 text-foreground outline-none',
 					'placeholder:text-muted-foreground',
@@ -140,21 +164,16 @@
 				)}
 			/>
 
-			<label
+			<!-- Not `insideBorder`: the box's border is an overlay, so the label's parent starts at its outer edge. -->
+			<FloatingLabel
 				for={inputId}
 				data-slot="phone-field-inline-label"
-				class={cn(
-					'pointer-events-none absolute z-10 origin-left transform truncate pr-3 text-muted-foreground duration-200',
-					'scale-75',
-					'peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100',
-					'peer-focus:scale-75 peer-focus:text-foreground',
-					'peer-aria-[invalid=true]:text-destructive',
-					fieldSizes[size].label,
-					fieldSizes[size].left
-				)}
-			>
 				{label}
-			</label>
+				{floated}
+				{focused}
+				error={Boolean(currentError)}
+				{size}
+			/>
 		</div>
 
 		<span
@@ -162,19 +181,10 @@
 			data-slot="phone-field-inline-border"
 			class={cn(
 				'pointer-events-none absolute inset-0 rounded-md border transition-colors',
-				currentError ? 'border-destructive' : 'border-input group-focus-within:border-ring'
+				currentError ? 'border-danger' : 'border-input group-focus-within:border-ring'
 			)}
 		></span>
 	</div>
 
-	{#if currentError}
-		<p
-			id={errorId}
-			data-slot="phone-field-inline-error"
-			class="mt-1 flex items-center gap-1 text-body-sm text-destructive"
-		>
-			<AlertIcon class="size-4 shrink-0" />
-			{currentError}
-		</p>
-	{/if}
+	<FieldMessage id={messageId} error={currentError} {helperText} />
 </div>

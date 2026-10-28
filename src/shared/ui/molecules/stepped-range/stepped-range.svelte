@@ -66,6 +66,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
 	import { Slider } from '$shared/ui/primitives/slider';
+	import { pickStepLabels } from './pick-step-labels';
 
 	let {
 		ref = $bindable(null),
@@ -112,6 +113,36 @@
 	function isEndpoint(i: number): boolean {
 		return i === startIndex || i === endIndex;
 	}
+
+	// Step labels without overlap (U-06.10): every label is measured (`bind:clientWidth`, a ResizeObserver), the
+	// row is the track's width, and `pickStepLabels` says which ones show and where. Until measured, none shows.
+	let trackWidth = $state(0);
+	let labelWidths = $state<number[]>([]);
+	let mergedWidth = $state(0);
+	const selected = $derived(startIndex === endIndex ? [startIndex] : [startIndex, endIndex]);
+	const mergedText = $derived(`${steps[startIndex] ?? ''} – ${steps[endIndex] ?? ''}`);
+	const measured = $derived(
+		trackWidth > 0 && steps.every((_, index) => (labelWidths[index] ?? 0) > 0) && mergedWidth > 0
+	);
+	const placements = $derived(
+		measured
+			? pickStepLabels({
+					centers: steps.map((_, index) => (percent(index) / 100) * trackWidth),
+					widths: steps.map((_, index) => labelWidths[index] ?? 0),
+					trackWidth,
+					selected,
+					mergedWidth
+				})
+			: []
+	);
+	const shownAt = $derived(
+		new Map(
+			placements
+				.filter((place) => place.mergedWith === undefined)
+				.map((place) => [place.index, place.x] as const)
+		)
+	);
+	const merged = $derived(placements.find((place) => place.mergedWith !== undefined));
 
 	function onSliderChange(next: number | number[]) {
 		const arr = Array.isArray(next) ? next : [next, next];
@@ -160,15 +191,19 @@
 			trackClass={cn('bg-muted-foreground/20', spec.track)}
 			rangeClass="bg-foreground"
 			thumbClass={cn(
-				'border-input bg-card shadow-sm transition-[border-color,box-shadow] focus-visible:border-2 focus-visible:border-foreground focus-visible:ring-0 data-[dragging=true]:border-2 data-[dragging=true]:border-foreground data-[dragging=true]:shadow-md',
+				'border-input bg-card shadow-raised transition-[border-color,box-shadow] data-[dragging=true]:border-2 data-[dragging=true]:border-foreground data-[dragging=true]:shadow-overlay',
 				spec.thumb
 			)}
 			formatValue={(stop) => steps[stop] ?? String(stop)}
 			onValueChange={onSliderChange}
-			aria-label={ariaLabel ?? title ?? 'Range'}
+			aria-label={ariaLabel ?? title}
 		/>
 
-		<div aria-hidden="true" class="pointer-events-none absolute inset-0 flex items-center">
+		<!-- On the slider's rail: inset by half the touch box, as the track (U-06.2). -->
+		<div
+			aria-hidden="true"
+			class="pointer-events-none absolute inset-x-6 inset-y-0 flex items-center"
+		>
 			{#each stopIndices as i (i)}
 				{#if !isEndpoint(i)}
 					<span
@@ -185,27 +220,45 @@
 		</div>
 	</div>
 
-	<!-- Per-stop labels. Edge labels are anchored to the track edges (left / right
-	     aligned) so they cannot clip; interior labels are centred on their stop. -->
-	<div class={cn('relative', spec.labelsMt, spec.labelsH)}>
+	<!-- Per-stop labels on the track's width: the first aligned left, the last right, the rest centred on their tick;
+	     only those `pickStepLabels` places show (the others stay measured, invisible). -->
+	<div
+		data-slot="stepped-range-labels"
+		class={cn('relative mx-6', spec.labelsMt, spec.labelsH)}
+		bind:clientWidth={trackWidth}
+	>
 		{#each steps as label, i (i)}
+			{@const x = shownAt.get(i)}
 			<span
 				data-slot="stepped-range-label"
+				data-shown={x === undefined ? undefined : ''}
 				class={cn(
-					'absolute top-0 whitespace-nowrap',
+					'absolute top-0 left-0 whitespace-nowrap',
 					spec.label,
-					i === 0
-						? 'text-left'
-						: i === maxIndex
-							? '-translate-x-full text-right'
-							: '-translate-x-1/2 text-center',
 					isEndpoint(i) ? 'font-medium text-foreground' : 'text-muted-foreground',
+					x === undefined && 'invisible',
 					disabled && 'opacity-50'
 				)}
-				style={`left: ${percent(i)}%`}
+				style:transform={x === undefined ? undefined : `translateX(${x}px)`}
+				bind:clientWidth={labelWidths[i]}
 			>
 				{label}
 			</span>
 		{/each}
+		<span
+			data-slot="stepped-range-merged-label"
+			data-shown={merged ? '' : undefined}
+			aria-hidden={merged ? undefined : 'true'}
+			class={cn(
+				'absolute top-0 left-0 font-medium whitespace-nowrap text-foreground',
+				spec.label,
+				!merged && 'invisible',
+				disabled && 'opacity-50'
+			)}
+			style:transform={merged ? `translateX(${merged.x}px)` : undefined}
+			bind:clientWidth={mergedWidth}
+		>
+			{mergedText}
+		</span>
 	</div>
 </div>

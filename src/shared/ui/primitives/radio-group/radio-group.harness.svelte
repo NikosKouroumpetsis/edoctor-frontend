@@ -2,7 +2,7 @@
 	import { RadioGroup, RadioGroupItem, type RadioGroupItemSize } from './index';
 	import { Label } from '$shared/ui/primitives/label';
 
-	let { value = $bindable(), size = 'default' }: { value?: string; size?: RadioGroupItemSize } =
+	let { value = $bindable(), size = 'md' }: { value?: string; size?: RadioGroupItemSize } =
 		$props();
 </script>
 

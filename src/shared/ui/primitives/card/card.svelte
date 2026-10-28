@@ -1,12 +1,11 @@
 <script lang="ts" module>
-	export type CardSize = 'sm' | 'default' | 'lg';
-
-	/** Vertical padding + section gap on the card root. */
-	const cardSizes: Record<CardSize, string> = {
-		sm: 'gap-4 py-4',
-		default: 'gap-6 py-6',
-		lg: 'gap-section py-section'
-	};
+	/**
+	 * The application's card (its `Card` molecule, U-09.2): ONE shell, the soft card surface with the 70 % hairline and
+	 * the 24 inset, a column, no size. The kit's state cards (`ResultsCount`, `KeyValueList`, a `framed` empty state)
+	 * draw it with their own inset after it: `cn(cardShellClasses, 'gap-2 p-5')`.
+	 */
+	export const cardShellClasses =
+		'flex flex-col rounded-xl border border-border/70 bg-card/95 p-6 shadow-soft';
 </script>
 
 <script lang="ts">
@@ -15,21 +14,16 @@
 
 	let {
 		ref = $bindable(null),
-		size = 'default',
 		class: className,
 		children,
 		...restProps
-	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & { size?: CardSize } = $props();
+	}: WithElementRef<HTMLAttributes<HTMLDivElement>> = $props();
 </script>
 
 <div
 	bind:this={ref}
 	data-slot="card"
-	class={cn(
-		'flex flex-col rounded-xl border border-border bg-card text-card-foreground shadow-raised',
-		cardSizes[size],
-		className
-	)}
+	class={cn(cardShellClasses, 'text-card-foreground', className)}
 	{...restProps}
 >
 	{@render children?.()}

@@ -23,6 +23,7 @@
 		inputsMt: string;
 	};
 
+	// The application's `sizeConfig`, class for class; the web pill keeps the 48 touch box and 16 text at `sm`.
 	const sizeConfig: Record<RangeHistogramSize, SizeSpec> = {
 		sm: {
 			histogram: 'h-histogram-sm',
@@ -30,10 +31,10 @@
 			track: 'h-0.5',
 			thumb: 'size-6',
 			pill: 'min-h-control-md px-4 text-body-lg',
-			field: 'w-2/5',
+			field: 'w-range-field-sm',
 			title: 'text-body-lg',
-			subtitle: 'text-label-md font-normal',
-			label: 'text-label-md font-normal',
+			subtitle: 'text-label-md',
+			label: 'text-label-md',
 			titleMb: 'mb-4',
 			inputsMt: 'mt-6'
 		},
@@ -41,9 +42,9 @@
 			histogram: 'h-histogram-md',
 			barGap: 'gap-1',
 			track: 'h-0.5',
-			thumb: 'size-control-xs',
-			pill: 'min-h-control-lg px-5 text-body-lg',
-			field: 'w-2/5',
+			thumb: 'size-6',
+			pill: 'min-h-control-md px-5 text-body-lg',
+			field: 'w-range-field-md',
 			title: 'text-title-sm',
 			subtitle: 'text-body-sm',
 			label: 'text-body-sm',
@@ -54,9 +55,9 @@
 			histogram: 'h-histogram-lg',
 			barGap: 'gap-1.5',
 			track: 'h-1',
-			thumb: 'size-control-sm',
-			pill: 'min-h-control-xl px-6 text-title-sm font-normal',
-			field: 'w-2/5',
+			thumb: 'size-control-xs',
+			pill: 'min-h-control-lg px-6 text-title-sm',
+			field: 'w-range-field-lg',
 			title: 'text-title-lg',
 			subtitle: 'text-body-lg',
 			label: 'text-body-lg',
@@ -65,12 +66,8 @@
 		}
 	};
 
-	/**
-	 * Brand pink from the reference mockups (Airbnb-style price filter). A
-	 * deliberate one-off kept close to this feature — brand accents are constant
-	 * across light/dark, so it is not routed through a semantic theme token.
-	 */
-	const ACTIVE_FILL = 'bg-[#e31c5f]';
+	/** The selected bars and range: the brand `accent`, as in the application's price filter. */
+	const ACTIVE_FILL = 'bg-accent';
 </script>
 
 <script lang="ts">
@@ -82,6 +79,7 @@
 	let {
 		ref = $bindable(null),
 		value = $bindable<[number, number]>([0, 100]),
+		onChange,
 		data = [],
 		min = 0,
 		max = 100,
@@ -90,18 +88,18 @@
 		disabled = false,
 		title,
 		subtitle,
-		minLabel = 'Min',
-		maxLabel = 'Max',
-		currencyPrefix = '€',
-		showPlusAtMax = true,
+		minLabel,
+		maxLabel,
 		formatValue,
 		class: className,
 		'aria-label': ariaLabel,
 		...restProps
-	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
+	}: WithElementRef<Omit<HTMLAttributes<HTMLDivElement>, 'title'>> & {
 		/** Selected `[min, max]` range; two-way bound, clamped and non-crossing. */
 		value?: [number, number];
-		/** Histogram magnitudes; rendered as evenly-spaced bars. */
+		/** The new range (the application's `onChange`). */
+		onChange?: (value: [number, number]) => void;
+		/** Histogram magnitudes; rendered as evenly-spaced bars. Without data: no bars and no height. */
 		data?: number[];
 		min?: number;
 		max?: number;
@@ -110,29 +108,27 @@
 		disabled?: boolean;
 		title?: string;
 		subtitle?: string;
-		minLabel?: string;
-		maxLabel?: string;
-		/** Leading currency symbol for the default `formatValue`. */
-		currencyPrefix?: string;
-		/** Append `+` when the max value sits at the ceiling (default formatter). */
-		showPlusAtMax?: boolean;
-		/** Format a value for the resting input display; `atCeiling` is true for the
-		 * max field when its value equals `max`. Defaults to `€{value}` / `€{value}+`. */
-		formatValue?: (value: number, atCeiling: boolean) => string;
+		/** The captions of the two value pills, already localized by the caller. */
+		minLabel: string;
+		maxLabel: string;
+		/**
+		 * 🔴 U-03.11: the value as the pills and the thumbs show it, from the caller (no currency inside the kit):
+		 * `atCeiling` is true for the max at `max` («420+ €»).
+		 */
+		formatValue: (value: number, atCeiling: boolean) => string;
 	} = $props();
 
 	const spec = $derived(sizeConfig[size]);
+	const hasHistogram = $derived(data.length > 0);
 
 	const minValue = $derived(value[0]);
 	const maxValue = $derived(value[1]);
 	const maxAtCeiling = $derived(maxValue >= max);
 
-	const format = $derived(
-		formatValue ??
-			((v: number, atCeiling: boolean) =>
-				`${currencyPrefix}${v}${atCeiling && showPlusAtMax ? '+' : ''}`)
-	);
-
+	function commit(next: [number, number]) {
+		value = next;
+		onChange?.(next);
+	}
 	// Histogram geometry ----------------------------------------------------
 	const peak = $derived(data.length ? Math.max(...data, 0) : 0);
 
@@ -164,11 +160,10 @@
 	let minFocused = $state(false);
 	let maxFocused = $state(false);
 
-	const minDisplay = $derived(minFocused ? minBuffer : format(minValue, false));
-	const maxDisplay = $derived(maxFocused ? maxBuffer : format(maxValue, maxAtCeiling));
+	const minDisplay = $derived(minFocused ? minBuffer : formatValue(minValue, false));
+	const maxDisplay = $derived(maxFocused ? maxBuffer : formatValue(maxValue, maxAtCeiling));
 
-	// Pill-shaped field (label above, centred value, currency prefix) — matches
-	// the reference mockup; on-pattern focus indicator via `focus-visible:border-ring`.
+	// The application's pill (label above, the value centred) with the web's border-colour focus.
 	const pillClass = $derived(
 		cn(
 			'min-h-touch w-full rounded-full border border-input bg-card text-center font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50',
@@ -190,19 +185,19 @@
 		const parsed = Number.parseInt(buffer, 10);
 		if (Number.isNaN(parsed)) return;
 		// Non-crossing: the min cannot exceed the current max.
-		value = [Math.min(Math.max(snap(parsed), min), maxValue), maxValue];
+		commit([Math.min(Math.max(snap(parsed), min), maxValue), maxValue]);
 	}
 
 	function commitMax(buffer: string) {
 		const parsed = Number.parseInt(buffer, 10);
 		if (Number.isNaN(parsed)) return;
 		// Non-crossing: the max cannot fall below the current min.
-		value = [minValue, Math.max(Math.min(snap(parsed), max), minValue)];
+		commit([minValue, Math.max(Math.min(snap(parsed), max), minValue)]);
 	}
 
 	function onSliderChange(next: number | number[]) {
 		const arr = Array.isArray(next) ? next : [next, next];
-		value = [arr[0], arr[1]];
+		commit([arr[0], arr[1]]);
 	}
 
 	type InputEvt = Event & { currentTarget: HTMLInputElement };
@@ -251,46 +246,50 @@
 		</div>
 	{/if}
 
-	<!-- Histogram + slider group. The group's bottom edge is the track baseline:
-	     bars grow up from it and the slider is vertically centred on it, so the
-	     handles straddle the line exactly as in the mockup. -->
-	<div class={cn('relative', spec.histogram)}>
-		<div
-			aria-hidden="true"
-			class={cn(
-				'pointer-events-none absolute inset-0 flex items-end',
-				spec.barGap,
-				disabled && 'opacity-50'
-			)}
-		>
-			{#each data as magnitude, i (i)}
-				<div
-					data-slot="range-histogram-bar"
-					data-active={isActive(i) ? '' : undefined}
-					class={cn(
-						'min-h-0.5 flex-1 rounded-t-sm',
-						isActive(i) ? ACTIVE_FILL : 'bg-muted-foreground/25'
-					)}
-					style={`height: ${barHeight(magnitude)}%`}
-				></div>
-			{/each}
-		</div>
+	<!-- The chart; its bars sit on the slider's rail (inset by half the touch box, U-06.2). With data its bottom edge is the track baseline: the bars grow up from it
+	     and the slider straddles it; without data there are no bars and no reserved height (the application's). -->
+	<div data-slot="range-histogram-chart" class={cn('relative', hasHistogram && spec.histogram)}>
+		{#if hasHistogram}
+			<div
+				aria-hidden="true"
+				class={cn(
+					'pointer-events-none absolute inset-x-6 inset-y-0 flex flex-row items-end',
+					spec.barGap,
+					disabled && 'opacity-50'
+				)}
+			>
+				{#each data as magnitude, i (i)}
+					<div
+						data-slot="range-histogram-bar"
+						data-active={isActive(i) ? '' : undefined}
+						class={cn(
+							'min-h-0.5 flex-1 rounded-t-xs',
+							isActive(i) ? ACTIVE_FILL : 'bg-muted-foreground/25'
+						)}
+						style={`height: ${barHeight(magnitude)}%`}
+					></div>
+				{/each}
+			</div>
+		{/if}
 
-		<div class="absolute inset-x-0 bottom-0 translate-y-1/2">
+		<div
+			data-slot="range-histogram-slider"
+			class={cn(hasHistogram && 'absolute inset-x-0 bottom-0 translate-y-1/2')}
+		>
 			<Slider
 				{value}
 				{min}
 				{max}
 				{step}
 				{disabled}
+				tone="accent"
 				trackClass={cn('bg-muted-foreground/20', spec.track)}
-				rangeClass={ACTIVE_FILL}
 				thumbClass={cn(
-					'border-neutral-300 bg-white shadow-md transition-[border-color,box-shadow] data-[dragging=true]:border-2 data-[dragging=true]:border-[#e31c5f] data-[dragging=true]:shadow-lg',
+					'border-input bg-card shadow-overlay transition-[border-color,box-shadow] data-[dragging=true]:border-2 data-[dragging=true]:border-accent',
 					spec.thumb
 				)}
 				formatValue={(thumbValue, thumbIndex) =>
-					format(thumbValue, thumbIndex === 1 && thumbValue >= max)}
+					formatValue(thumbValue, thumbIndex === 1 && thumbValue >= max)}
 				onValueChange={onSliderChange}
 				aria-label={ariaLabel ?? title ?? `${minLabel} / ${maxLabel}`}
 			/>

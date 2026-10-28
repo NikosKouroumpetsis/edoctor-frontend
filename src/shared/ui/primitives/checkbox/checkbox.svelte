@@ -1,30 +1,31 @@
 <script lang="ts" module>
-	export type CheckboxSize = 'sm' | 'default' | 'lg';
+	export type CheckboxSize = 'sm' | 'md' | 'lg';
 
-	/** Box and check/indeterminate icon scale together, inside a touch-sized button. */
-	const checkboxBoxSizes: Record<CheckboxSize, string> = {
-		sm: 'size-4',
-		default: 'size-5',
-		lg: 'size-6'
+	/** The application's box per size (20 / 24 / 32) and its «✓» text, inside the 48 touch button. */
+	export const checkboxBoxSizes: Record<CheckboxSize, string> = {
+		sm: 'size-5 rounded-xs',
+		md: 'size-6 rounded-sm',
+		lg: 'size-control-xs rounded-sm'
 	};
-	const checkboxIconSizes: Record<CheckboxSize, string> = {
-		sm: 'size-3',
-		default: 'size-3.5',
-		lg: 'size-4'
+	export const checkboxMarkSizes: Record<CheckboxSize, string> = {
+		sm: 'text-label-md',
+		md: 'text-label-md',
+		lg: 'text-label-lg'
 	};
+	/** The drawn box in its states (a row that is itself the checkbox draws the same box, `CheckboxRow`). */
+	export const checkboxBoxStates =
+		'flex items-center justify-center border border-input bg-card data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=indeterminate]:border-primary data-[state=indeterminate]:bg-primary';
 </script>
 
 <script lang="ts">
 	import type { HTMLButtonAttributes } from 'svelte/elements';
-	import CheckIcon from '~icons/lucide/check';
-	import MinusIcon from '~icons/lucide/minus';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
 
 	let {
 		ref = $bindable(null),
 		checked = $bindable(false),
 		indeterminate = $bindable(false),
-		size = 'default',
+		size = 'md',
 		class: className,
 		disabled,
 		name,
@@ -34,6 +35,7 @@
 		...restProps
 	}: WithElementRef<HTMLButtonAttributes, HTMLButtonElement> & {
 		checked?: boolean;
+		/** The mixed state of a parent checkbox (`aria-checked="mixed"`), as the application's (R4-1). */
 		indeterminate?: boolean;
 		size?: CheckboxSize;
 		name?: string;
@@ -73,18 +75,22 @@
 		data-slot="checkbox-box"
 		data-state={state}
 		class={cn(
-			'flex items-center justify-center rounded-xs border border-input bg-card shadow-xs transition-shadow',
+			checkboxBoxStates,
 			checkboxBoxSizes[size],
 			'group-focus-visible:border-ring group-focus-visible:ring-3 group-focus-visible:ring-ring/50',
-			'data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground',
-			'data-[state=indeterminate]:border-primary data-[state=indeterminate]:bg-primary data-[state=indeterminate]:text-primary-foreground',
-			'group-aria-invalid:border-destructive group-aria-invalid:ring-destructive/20'
+			'group-aria-invalid:border-danger'
 		)}
 	>
 		{#if indeterminate}
-			<MinusIcon class={checkboxIconSizes[size]} />
+			<span
+				aria-hidden="true"
+				class={cn('font-bold text-primary-foreground', checkboxMarkSizes[size])}>−</span
+			>
 		{:else if checked}
-			<CheckIcon class={checkboxIconSizes[size]} />
+			<span
+				aria-hidden="true"
+				class={cn('font-bold text-primary-foreground', checkboxMarkSizes[size])}>✓</span
+			>
 		{/if}
 	</span>
 </button>

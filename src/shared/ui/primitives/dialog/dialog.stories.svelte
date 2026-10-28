@@ -9,10 +9,15 @@
 		DialogTitle,
 		DialogDescription,
 		DialogFooter,
-		DialogClose
+		DialogClose,
+		type DialogSize
 	} from '$shared/ui/primitives/dialog';
-	import { buttonVariants } from '$shared/ui/primitives/button';
+	import { buttonClasses } from '$shared/ui/primitives/button';
 
+	const sizes: DialogSize[] = ['sm', 'md', 'lg'];
+
+	// The application's dialog (`molecules/dialog`): «Άνοιγμα» opens «Διαγραφή λογαριασμού». It fades in and grows from
+	// 95 % (U-09.8), and the focus lands on the panel, not on its «×» (U-09.7): Tab reaches the «×» first.
 	const { Story } = defineMeta({
 		title: 'Primitives/Dialog',
 		component: Dialog,
@@ -20,32 +25,26 @@
 	});
 </script>
 
-<Story name="Default">
+<Story
+	name="Playground"
+	play={async ({ canvas }) => {
+		await userEvent.click(canvas.getByRole('button', { name: 'Άνοιγμα' }));
+		await expect(await screen.findByRole('dialog')).toBeInTheDocument();
+	}}
+>
 	{#snippet template()}
 		<Dialog>
-			<DialogTrigger class={buttonVariants()}>Open dialog</DialogTrigger>
-			<DialogContent class="max-w-text">
+			<DialogTrigger class={buttonClasses()}>Άνοιγμα</DialogTrigger>
+			<DialogContent closeLabel="Κλείσιμο">
 				<DialogHeader>
-					<DialogTitle>Confirm booking</DialogTitle>
-					<DialogDescription>Confirm your appointment with the doctor.</DialogDescription>
-				</DialogHeader>
-			</DialogContent>
-		</Dialog>
-	{/snippet}
-</Story>
-
-<Story name="With footer">
-	{#snippet template()}
-		<Dialog>
-			<DialogTrigger class={buttonVariants()}>Open dialog</DialogTrigger>
-			<DialogContent class="max-w-text">
-				<DialogHeader>
-					<DialogTitle>Cancel appointment</DialogTitle>
-					<DialogDescription>This action cannot be undone.</DialogDescription>
+					<DialogTitle>Διαγραφή λογαριασμού</DialogTitle>
+					<DialogDescription>
+						Αυτή η ενέργεια είναι μόνιμη και δεν μπορεί να αναιρεθεί.
+					</DialogDescription>
 				</DialogHeader>
 				<DialogFooter>
-					<DialogClose class={buttonVariants({ variant: 'outline' })}>Keep</DialogClose>
-					<DialogClose class={buttonVariants({ variant: 'destructive' })}>Cancel it</DialogClose>
+					<DialogClose class={buttonClasses({ tone: 'ghost' })}>Άκυρο</DialogClose>
+					<DialogClose class={buttonClasses()}>Διαγραφή</DialogClose>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
@@ -55,40 +54,17 @@
 <Story name="Sizes">
 	{#snippet template()}
 		<div class="flex flex-wrap gap-3">
-			{#each ['sm', 'default', 'lg'] as const as size (size)}
+			{#each sizes as size (size)}
 				<Dialog>
-					<DialogTrigger class={buttonVariants({ variant: 'outline' })}>Open {size}</DialogTrigger>
-					<DialogContent {size}>
+					<DialogTrigger class={buttonClasses()}>Άνοιγμα {size}</DialogTrigger>
+					<DialogContent {size} closeLabel="Κλείσιμο">
 						<DialogHeader>
-							<DialogTitle>Size {size}</DialogTitle>
-							<DialogDescription>The dialog panel uses the {size} max-width.</DialogDescription>
+							<DialogTitle>Μέγεθος {size}</DialogTitle>
+							<DialogDescription>Το παράθυρο έχει το μέγιστο πλάτος του {size}.</DialogDescription>
 						</DialogHeader>
 					</DialogContent>
 				</Dialog>
 			{/each}
 		</div>
-	{/snippet}
-</Story>
-
-<Story
-	name="Opened"
-	play={async ({ canvas }) => {
-		await userEvent.click(canvas.getByRole('button', { name: 'Open dialog' }));
-		await expect(await screen.findByRole('dialog')).toBeInTheDocument();
-	}}
->
-	{#snippet template()}
-		<Dialog>
-			<DialogTrigger class={buttonVariants()}>Open dialog</DialogTrigger>
-			<DialogContent class="max-w-text">
-				<DialogHeader>
-					<DialogTitle>Confirm</DialogTitle>
-					<DialogDescription>The dialog is opened by the play function.</DialogDescription>
-				</DialogHeader>
-				<DialogFooter>
-					<DialogClose class={buttonVariants({ variant: 'outline' })}>Close</DialogClose>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
 	{/snippet}
 </Story>

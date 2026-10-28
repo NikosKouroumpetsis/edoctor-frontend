@@ -1,34 +1,43 @@
 <script lang="ts">
 	import type { HTMLButtonAttributes } from 'svelte/elements';
-	import ChevronRightIcon from '~icons/lucide/chevron-right';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
-	import { getCarouselContext } from './carousel.svelte';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
+	import { carouselArrowClasses, getCarouselContext } from './carousel.svelte';
 
 	let {
 		ref = $bindable(null),
+		label,
 		class: className,
 		...restProps
-	}: WithElementRef<HTMLButtonAttributes, HTMLButtonElement> = $props();
+	}: WithElementRef<HTMLButtonAttributes, HTMLButtonElement> & {
+		/** The button's accessible name, already localized by the caller. */
+		label: string;
+	} = $props();
 
 	const ctx = getCarouselContext();
+	$effect(() => {
+		ctx.setArrow('next', ref);
+		return () => ctx.setArrow('next', null);
+	});
 </script>
 
+<!-- Over the slides, at their side, centred on their height (U-09.3); gone at an end without `loop`. -->
 <button
 	bind:this={ref}
 	type="button"
-	aria-label="Next slide"
+	aria-label={label}
 	data-slot="carousel-next"
 	disabled={!ctx.canNext}
 	onclick={() => ctx.scrollNext()}
 	class={cn(
-		'group inline-flex size-touch items-center justify-center rounded-full outline-none disabled:pointer-events-none disabled:opacity-40',
+		'z-10 col-start-1 row-start-1 mr-1 size-touch self-center justify-self-end',
+		carouselArrowClasses.box,
+		carouselArrowClasses.reveal,
 		className
 	)}
 	{...restProps}
 >
-	<span
-		class="inline-flex size-control-sm items-center justify-center rounded-full border border-border bg-card shadow-xs group-hover:bg-muted group-focus-visible:ring-3 group-focus-visible:ring-ring/50"
-	>
-		<ChevronRightIcon class="size-4" />
+	<span class={carouselArrowClasses.shape}>
+		<Ionicon name="chevron-forward" class={carouselArrowClasses.glyph} />
 	</span>
 </button>

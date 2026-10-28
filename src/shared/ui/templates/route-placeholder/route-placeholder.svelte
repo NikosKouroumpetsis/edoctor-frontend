@@ -1,33 +1,28 @@
 <script lang="ts">
-	import type { Pathname } from '$app/types';
-	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
-	import ArrowLeftIcon from '~icons/lucide/arrow-left';
-	import PanelsTopLeftIcon from '~icons/lucide/panels-top-left';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { Button } from '$shared/ui/primitives/button';
-	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
-	import { m } from '$paraglide/messages.js';
-	import { localizeHref } from '$paraglide/runtime';
 
 	let {
 		eyebrow,
 		title,
-		body
+		body,
+		backHref,
+		backLabel,
+		documentTitle
 	}: {
 		eyebrow: string;
 		title: string;
 		body: string;
+		/** Where «back» leads (the localized home page), resolved by the caller. */
+		backHref: string;
+		backLabel: string;
+		/** The tab's title; the caller adds the product name (`title` when absent). */
+		documentTitle?: string;
 	} = $props();
-
-	const currentLocale = $derived(getPageLocale(page.url));
-	const messageOptions = $derived({ locale: currentLocale });
-
-	const localizedHref = (path: string) =>
-		resolve(localizeHref(path, { locale: currentLocale }) as Pathname);
 </script>
 
 <svelte:head>
-	<title>{title} | eDoctor</title>
+	<title>{documentTitle ?? title}</title>
 	<meta name="description" content={body} />
 </svelte:head>
 
@@ -38,19 +33,20 @@
 				<div
 					class="grid size-icon-tile shrink-0 place-items-center rounded-md bg-accent text-accent-foreground"
 				>
-					<PanelsTopLeftIcon class="size-5" />
+					<Ionicon name="browsers-outline" class="icon-md" />
 				</div>
 				<div>
-					<p class="text-body-sm font-semibold text-primary">{eyebrow}</p>
+					<p class="text-body-sm font-semibold text-primary-text">{eyebrow}</p>
 					<h1 class="mt-2 text-heading-xl text-balance">{title}</h1>
 					<p class="mt-3 text-body-lg text-muted-foreground">{body}</p>
 				</div>
 			</div>
 
 			<div class="mt-6">
-				<Button href={localizedHref('/')} variant="outline">
-					<ArrowLeftIcon class="size-4" />
-					{m.back_home({}, messageOptions)}
+				<Button href={backHref} label={backLabel} tone="outline">
+					{#snippet leading()}
+						<Ionicon name="arrow-back" class="icon-sm text-foreground" />
+					{/snippet}
 				</Button>
 			</div>
 		</div>

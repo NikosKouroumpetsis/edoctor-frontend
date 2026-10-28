@@ -3,37 +3,41 @@
 	import { CalendarDate } from '@internationalized/date';
 	import { Calendar } from '$shared/ui/primitives/calendar';
 
+	// The application's meta (`molecules/calendar`): June 2026 with the 20th chosen, the month arrows in Greek.
 	const { Story } = defineMeta({
 		title: 'Primitives/Calendar',
 		component: Calendar,
-		tags: ['autodocs']
+		tags: ['autodocs'],
+		args: { previousMonthLabel: 'Προηγούμενος μήνας', nextMonthLabel: 'Επόμενος μήνας' }
 	});
 </script>
 
 <script lang="ts">
-	let value = $state<CalendarDate | undefined>(undefined);
-	let withValue = $state<CalendarDate | undefined>(new CalendarDate(2026, 6, 24));
-	let bounded = $state<CalendarDate | undefined>(new CalendarDate(2026, 6, 15));
+	let playground = $state<CalendarDate | undefined>(new CalendarDate(2026, 6, 20));
+	let ranged = $state<CalendarDate | undefined>(new CalendarDate(2026, 6, 20));
+	let empty = $state<CalendarDate | undefined>(undefined);
 </script>
 
-<Story name="Default">
-	{#snippet template()}
-		<Calendar bind:value />
+<Story name="Playground">
+	{#snippet template(args)}
+		<Calendar {...args} bind:value={playground} />
 	{/snippet}
 </Story>
 
-<Story name="With value">
-	{#snippet template()}
-		<Calendar bind:value={withValue} />
-	{/snippet}
-</Story>
-
-<Story name="Min/max range">
-	{#snippet template()}
+<Story name="With Range">
+	{#snippet template(args)}
 		<Calendar
-			bind:value={bounded}
-			minValue={new CalendarDate(2026, 6, 10)}
-			maxValue={new CalendarDate(2026, 6, 20)}
+			{...args}
+			bind:value={ranged}
+			minValue={new CalendarDate(2026, 6, 5)}
+			maxValue={new CalendarDate(2026, 6, 25)}
 		/>
+	{/snippet}
+</Story>
+
+<!-- No day chosen yet. -->
+<Story name="Without Value">
+	{#snippet template(args)}
+		<Calendar {...args} bind:value={empty} />
 	{/snippet}
 </Story>

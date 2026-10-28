@@ -1,9 +1,19 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { expect, userEvent, screen } from 'storybook/test';
-	import { Popover, PopoverTrigger, PopoverContent } from '$shared/ui/primitives/popover';
-	import { buttonVariants } from '$shared/ui/primitives/button';
+	import {
+		Popover,
+		PopoverTrigger,
+		PopoverContent,
+		type PopoverSize
+	} from '$shared/ui/primitives/popover';
+	import { buttonClasses } from '$shared/ui/primitives/button';
 
+	const placements = ['top', 'bottom', 'left', 'right'] as const;
+	const sizes: PopoverSize[] = ['sm', 'md', 'lg'];
+
+	// The application's popover (`molecules/popover`): «Λεπτομέρειες» opens «Διαστάσεις». It fades in and grows from
+	// 95 % on Airbnb's 0.25 s curve, the reverse on leaving (U-09.8), whatever the motion setting (U-12.1).
 	const { Story } = defineMeta({
 		title: 'Primitives/Popover',
 		component: Popover,
@@ -11,26 +21,34 @@
 	});
 </script>
 
-<Story name="Default">
+<Story
+	name="Playground"
+	play={async ({ canvas }) => {
+		await userEvent.click(canvas.getByRole('button', { name: 'Λεπτομέρειες' }));
+		await expect(await screen.findByText('Ορίστε τις διαστάσεις του στοιχείου εδώ.')).toBeVisible();
+	}}
+>
 	{#snippet template()}
 		<Popover>
-			<PopoverTrigger class={buttonVariants({ variant: 'outline' })}>Open popover</PopoverTrigger>
-			<PopoverContent class="w-popover-md">
-				<p class="text-body-sm">Set your notification preferences here.</p>
+			<PopoverTrigger class={buttonClasses()}>Λεπτομέρειες</PopoverTrigger>
+			<PopoverContent>
+				<div class="flex flex-col gap-1.5">
+					<p class="text-title-sm font-semibold text-foreground">Διαστάσεις</p>
+					<p class="text-body-sm text-muted-foreground">Ορίστε τις διαστάσεις του στοιχείου εδώ.</p>
+				</div>
 			</PopoverContent>
 		</Popover>
 	{/snippet}
 </Story>
 
-<Story name="Placement variants">
+<Story name="Placements">
 	{#snippet template()}
 		<div class="flex flex-wrap gap-3">
-			{#each ['top', 'bottom', 'left', 'right'] as const as placement (placement)}
+			{#each placements as placement (placement)}
 				<Popover>
-					<PopoverTrigger class={buttonVariants({ variant: 'outline' })}>{placement}</PopoverTrigger
-					>
-					<PopoverContent {placement} class="w-popover-sm">
-						<p class="text-body-sm">Placed {placement}.</p>
+					<PopoverTrigger class={buttonClasses()}>{placement}</PopoverTrigger>
+					<PopoverContent {placement}>
+						<p class="text-body-sm text-muted-foreground">Θέση {placement}.</p>
 					</PopoverContent>
 				</Popover>
 			{/each}
@@ -41,31 +59,14 @@
 <Story name="Sizes">
 	{#snippet template()}
 		<div class="flex flex-wrap gap-3">
-			{#each ['sm', 'default', 'lg'] as const as size (size)}
+			{#each sizes as size (size)}
 				<Popover>
-					<PopoverTrigger class={buttonVariants({ variant: 'outline' })}>{size}</PopoverTrigger>
+					<PopoverTrigger class={buttonClasses()}>{size}</PopoverTrigger>
 					<PopoverContent {size}>
-						<p class="text-body-sm">The {size} popover sets the panel width.</p>
+						<p class="text-body-sm text-muted-foreground">Το {size} ορίζει το πλάτος.</p>
 					</PopoverContent>
 				</Popover>
 			{/each}
 		</div>
-	{/snippet}
-</Story>
-
-<Story
-	name="Opened"
-	play={async ({ canvas }) => {
-		await userEvent.click(canvas.getByRole('button', { name: 'Open popover' }));
-		await expect(await screen.findByText('Set your notification preferences here.')).toBeVisible();
-	}}
->
-	{#snippet template()}
-		<Popover>
-			<PopoverTrigger class={buttonVariants({ variant: 'outline' })}>Open popover</PopoverTrigger>
-			<PopoverContent class="w-popover-md">
-				<p class="text-body-sm">Set your notification preferences here.</p>
-			</PopoverContent>
-		</Popover>
 	{/snippet}
 </Story>

@@ -384,6 +384,7 @@ src/shared/ui/
   molecules/
   organisms/
   templates/
+  icons/
 ```
 
 Definitions:
@@ -393,15 +394,21 @@ Definitions:
   Domain-free, low-level, accessible controls. This is the atomic base of the system.
 - `molecules/`: composed controls with a focused app-wide job, such as language switcher or theme
   toggle.
-- `organisms/`: larger reusable app-wide sections, such as app shell.
+- `organisms/`: larger reusable app-wide sections, such as the app shell. The frame organisms
+  (`app-shell`, `app-header`, `bottom-nav`, `site-footer`, `site-navbar`, `cookie-consent`) are
+  generic: words, hrefs, tabs and columns come from the caller. The eDoctor frame that fills them
+  (logo, tabs, footer columns, language and theme controls) is the `src/modules/shell` module
+  (`ui/site-frame`, `ui/placeholder-page`), rendered by `src/routes/+layout.svelte` (U-03.8).
 - `templates/`: reusable layout structures. Keep them generic and prop-driven.
+- `icons/` (since wave 0, U-03.3): the application's glyphs — `ionicon/` (Ionicons as local SVG
+  paths, the application's names, MIT note in `LICENSE.md`) and the brand marks (`brand-apple`,
+  `brand-google`, the laurel halves).
 
 Optional, create-on-demand buckets (not currently present — add only when an existing bucket is
 insufficient, do not pre-create empty layers):
 
 - `atoms/`: project-specific domain-free pieces smaller than a molecule, when `primitives` are not
   enough.
-- `icons/`: project icon wrappers only when virtual Icones imports are not enough.
 
 `src/shared/ui/primitives` is where shadcn-svelte generated components belong.
 
@@ -679,12 +686,13 @@ Use shadcn-svelte primitives from:
 src/shared/ui/primitives
 ```
 
-Use Icones/Iconify virtual imports:
+Use the application's glyphs from the icons bucket (U-03.3):
 
-```ts
-import SearchIcon from '~icons/lucide/search';
+```svelte
+<Ionicon name="search" class="icon-md" />
 ```
 
+Older screens still use Icones virtual imports (`~icons/lucide/*`) until their units are rebuilt.
 Do not add direct icon component packages such as `@lucide/svelte`.
 
 Feature-specific composition belongs in modules. Shared UI belongs in shared only after the
@@ -714,7 +722,11 @@ When test tooling is added, architecture tests should enforce:
 - Authored runtime code does not use wildcard `export *` barrels.
 - shadcn-svelte primitives live under `src/shared/ui/primitives`.
 - i18n keys have Greek and English parity.
-- Icons use Icones virtual imports.
+- Icons of the kit are the application's Ionicons from `src/shared/ui/icons` (no icon package).
+- The shared UI is generic (`tests/architecture/shared-ui-generic.test.ts`, «U-02.1: …»): no
+  import from modules/screens/routes, no product word, no fixed text, keys only `common_*` or the
+  component's own name, colours and shadows only from tokens, no route/locale reading.
+- The web palette is the application's (`tests/architecture/color-parity.test.ts`, «U-03.4: …»).
 
 ## Change Checklist
 

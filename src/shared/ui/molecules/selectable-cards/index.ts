@@ -1,16 +1,21 @@
 import Root, {
-	type SelectableCardsContext,
-	getSelectableCardsContext,
-	setSelectableCardsContext
+	type SelectableCardsOption,
+	type SelectableCardsProps,
+	type SelectableCardsValue
 } from './selectable-cards.svelte';
-import Item from './selectable-card.svelte';
+import Item, {
+	type SelectableCardIconPlacement,
+	type SelectableCardProps
+} from './selectable-card.svelte';
 
 export {
 	Root,
 	Item,
-	type SelectableCardsContext,
-	getSelectableCardsContext,
-	setSelectableCardsContext,
+	type SelectableCardIconPlacement,
+	type SelectableCardProps,
+	type SelectableCardsOption,
+	type SelectableCardsProps,
+	type SelectableCardsValue,
 	//
 	Root as SelectableCards,
 	Item as SelectableCard

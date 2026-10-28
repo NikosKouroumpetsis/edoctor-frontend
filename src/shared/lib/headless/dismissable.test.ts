@@ -62,4 +62,39 @@ describe('dismissable action', () => {
 		outside.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
 		expect(onDismiss).not.toHaveBeenCalled();
 	});
+
+	it('U-03.1 (MINOR-7): a layer that closes on Escape consumes the key, so the modal under it stays open', () => {
+		const { layer } = mountLayer();
+		created.push(layer);
+		const onDismiss = vi.fn();
+		const action = dismissable(layer, { onDismiss });
+		const event = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+		document.dispatchEvent(event);
+		expect(onDismiss).toHaveBeenCalledOnce();
+		expect(event.defaultPrevented).toBe(true);
+		const handled = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+		handled.preventDefault();
+		document.dispatchEvent(handled);
+		expect(onDismiss).toHaveBeenCalledOnce();
+		action?.destroy?.();
+	});
+
+	it('U-03.1 (NIT-1 of dyad 3): a layer on its way out (inert) takes neither the Escape nor an outside press', () => {
+		const { layer, outside } = mountLayer();
+		created.push(layer, outside);
+		const onDismiss = vi.fn();
+		const onEscapeKeydown = vi.fn();
+		const action = dismissable(layer, { onDismiss, onEscapeKeydown });
+		layer.inert = true;
+		const event = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+		document.dispatchEvent(event);
+		outside.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+		expect(onEscapeKeydown).not.toHaveBeenCalled();
+		expect(onDismiss).not.toHaveBeenCalled();
+		expect(event.defaultPrevented).toBe(false);
+		layer.inert = false;
+		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
+		expect(onDismiss).toHaveBeenCalledOnce();
+		action?.destroy?.();
+	});
 });

@@ -45,15 +45,15 @@
 	<DemoRow label="Radio group (selected: {plan})">
 		<RadioGroup bind:value={plan} name="plan" class="flex flex-col gap-3">
 			<div class="flex items-center gap-2">
-				<RadioGroupItem value="free" id="r-free" />
+				<RadioGroupItem value="free" id="r-free" size="sm" />
 				<Label for="r-free">Free</Label>
 			</div>
 			<div class="flex items-center gap-2">
-				<RadioGroupItem value="pro" id="r-pro" />
+				<RadioGroupItem value="pro" id="r-pro" size="sm" />
 				<Label for="r-pro">Pro</Label>
 			</div>
 			<div class="flex items-center gap-2">
-				<RadioGroupItem value="team" id="r-team" />
+				<RadioGroupItem value="team" id="r-team" size="sm" />
 				<Label for="r-team">Team</Label>
 			</div>
 		</RadioGroup>

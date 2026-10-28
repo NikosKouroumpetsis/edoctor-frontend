@@ -1,4 +1,8 @@
 <script lang="ts" module>
+	// «−» and «+»: 48 × 48 targets, dimmed at their bound like the application's.
+	const stepperButton =
+		'inline-flex size-touch shrink-0 items-center justify-center rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50';
+
 	/** `next` held inside the optional `min`/`max` bounds. */
 	function clamp(next: number, min?: number, max?: number): number {
 		const floor = min == null ? next : Math.max(min, next);
@@ -8,16 +12,11 @@
 
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { page } from '$app/state';
-	import AlertIcon from '~icons/lucide/circle-alert';
-	import MinusIcon from '~icons/lucide/minus';
-	import PlusIcon from '~icons/lucide/plus';
-	import { m } from '$paraglide/messages.js';
 	import type { FieldApi } from '$shared/lib/form';
 	import { useId } from '$shared/lib/headless';
 	import { cn } from '$shared/lib/utils';
-	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
-	import { Button } from '$shared/ui/primitives/button';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
+	import { FieldMessage } from '$shared/ui/primitives/field-message';
 
 	let {
 		label,
@@ -52,21 +51,16 @@
 		max?: number;
 		step?: number;
 		disabled?: boolean;
-		/** Names of «−» / «+» and the spoken blank value; default to the page locale's messages. */
-		decreaseLabel?: string;
-		increaseLabel?: string;
-		emptyValueLabel?: string;
+		/** Names of «−» / «+» and the spoken blank value, already localized by the caller (U-03.5). */
+		decreaseLabel: string;
+		increaseLabel: string;
+		emptyValueLabel: string;
 		class?: string;
 	} = $props();
 
 	// Generated once; `id` is treated as a static prop on mount.
 	const inputId = useId(untrack(() => id) ?? undefined, 'stepper');
 	const messageId = `${inputId}-message`;
-
-	const messageOptions = $derived({ locale: getPageLocale(page.url) });
-	const decreaseText = $derived(decreaseLabel ?? m.stepper_decrease({}, messageOptions));
-	const increaseText = $derived(increaseLabel ?? m.stepper_increase({}, messageOptions));
-	const emptyText = $derived(emptyValueLabel ?? m.stepper_empty({}, messageOptions));
 
 	const current = $derived(field ? (field.value ?? '') : value);
 	const currentError = $derived(field ? field.error : error);
@@ -108,7 +102,7 @@
 	<label
 		for={inputId}
 		data-slot="stepper-label"
-		class={cn('text-label-lg text-foreground', disabled && 'opacity-50')}
+		class={cn('text-label-lg font-medium text-foreground', disabled && 'opacity-50')}
 	>
 		{label}
 	</label>
@@ -117,20 +111,21 @@
 		data-slot="stepper-box"
 		class={cn(
 			'flex min-h-control-lg items-center rounded-md border bg-card px-1',
-			currentError ? 'border-destructive' : 'border-input focus-within:border-ring',
+			currentError ? 'border-danger' : 'border-input focus-within:border-ring',
 			disabled && 'opacity-50'
 		)}
 	>
-		<Button
-			variant="ghost"
-			size="icon"
-			aria-label={decreaseText}
+		<button
+			type="button"
+			aria-label={decreaseLabel}
 			tabindex={-1}
 			disabled={!canDecrease}
 			onclick={() => nudge(-1)}
+			data-slot="stepper-decrease"
+			class={stepperButton}
 		>
-			<MinusIcon class="size-5" />
-		</Button>
+			<Ionicon name="remove" class="icon-md text-foreground" />
+		</button>
 
 		<input
 			id={inputId}
@@ -143,7 +138,7 @@
 			aria-valuemin={min}
 			aria-valuemax={max}
 			aria-valuenow={isBlank || !Number.isFinite(parsed) ? undefined : parsed}
-			aria-valuetext={isBlank ? emptyText : current}
+			aria-valuetext={isBlank ? emptyValueLabel : current}
 			aria-invalid={currentError ? 'true' : undefined}
 			aria-describedby={hasMessage ? messageId : undefined}
 			oninput={handleInput}
@@ -153,30 +148,18 @@
 			class="min-h-touch min-w-touch flex-1 self-stretch bg-transparent text-center text-body-lg text-foreground outline-none disabled:cursor-not-allowed"
 		/>
 
-		<Button
-			variant="ghost"
-			size="icon"
-			aria-label={increaseText}
+		<button
+			type="button"
+			aria-label={increaseLabel}
 			tabindex={-1}
 			disabled={!canIncrease}
 			onclick={() => nudge(1)}
+			data-slot="stepper-increase"
+			class={stepperButton}
 		>
-			<PlusIcon class="size-5" />
-		</Button>
+			<Ionicon name="add" class="icon-md text-foreground" />
+		</button>
 	</div>
 
-	{#if currentError}
-		<p
-			id={messageId}
-			data-slot="stepper-error"
-			class="mt-1 flex items-center gap-1 text-body-sm text-destructive"
-		>
-			<AlertIcon class="size-4 shrink-0" />
-			{currentError}
-		</p>
-	{:else if helperText}
-		<p id={messageId} data-slot="stepper-helper" class="mt-1 text-body-sm text-muted-foreground">
-			{helperText}
-		</p>
-	{/if}
+	<FieldMessage id={messageId} error={currentError} {helperText} />
 </div>

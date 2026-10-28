@@ -1,6 +1,18 @@
+<script lang="ts" module>
+	import type { FieldSize } from '$shared/ui/primitives/floating-label';
+
+	/** Each segment's box per field size (R3-11): the family's 48 / 56 / 64 with its side padding. */
+	const segmentBoxes: Record<FieldSize, string> = {
+		default: 'min-h-control-md px-2.5',
+		lg: 'min-h-control-lg px-3',
+		xl: 'min-h-control-xl px-3.5'
+	};
+</script>
+
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { Input, type InputSize } from '$shared/ui/primitives/input';
+	import { cn } from '$shared/lib/utils';
+	import { Input } from '$shared/ui/primitives/input';
 	import AlertIcon from '~icons/lucide/circle-alert';
 	import { m } from '$paraglide/messages.js';
 	import type { FieldApi } from '$shared/lib/form';
@@ -10,6 +22,7 @@
 		value = $bindable(''),
 		field,
 		error,
+		helperText,
 		size = 'default',
 		disabled = false
 	}: {
@@ -18,7 +31,10 @@
 		value?: string;
 		field?: FieldApi<string>;
 		error?: string;
-		size?: InputSize;
+		/** The muted line under the boxes while there is no error (the application's port). */
+		helperText?: string;
+		/** The field family's size (`default | lg | xl`), as the other fields. */
+		size?: FieldSize;
 		disabled?: boolean;
 	} = $props();
 
@@ -84,12 +100,12 @@
 		const isReal =
 			dt.getUTCFullYear() === yNum && dt.getUTCMonth() === mNum - 1 && dt.getUTCDate() === dNum;
 		if (!isReal) {
-			localError = m.dob_error_invalid();
+			localError = m.date_of_birth_field_error_invalid();
 			emit('');
 			return;
 		}
 		if (dt.getTime() > Date.now()) {
-			localError = m.dob_error_future();
+			localError = m.date_of_birth_field_error_future();
 			emit('');
 			return;
 		}
@@ -137,25 +153,25 @@
 </script>
 
 <fieldset class="w-full" data-slot="date-of-birth-field" {disabled}>
-	<legend class="mb-1.5 text-label-lg text-muted-foreground">{label ?? m.dob_label()}</legend>
+	<legend class="mb-1.5 text-label-lg text-muted-foreground"
+		>{label ?? m.date_of_birth_field_label()}</legend
+	>
 	<div class="grid max-w-narrow grid-cols-4 items-start gap-touch-gap">
 		<Input
 			bind:ref={dayEl}
-			{size}
 			{disabled}
 			bind:value={day}
 			oninput={onDay}
 			onblur={onBlur}
 			inputmode="numeric"
 			maxlength={2}
-			placeholder={m.dob_day_placeholder()}
-			aria-label={m.dob_day()}
+			placeholder={m.date_of_birth_field_day_placeholder()}
+			aria-label={m.date_of_birth_field_day()}
 			aria-invalid={currentError ? 'true' : undefined}
-			class="text-center"
+			class={cn(segmentBoxes[size], 'text-center')}
 		/>
 		<Input
 			bind:ref={monthEl}
-			{size}
 			{disabled}
 			bind:value={month}
 			oninput={onMonth}
@@ -163,14 +179,13 @@
 			onkeydown={(e) => onSegmentKeydown(e, month, dayEl)}
 			inputmode="numeric"
 			maxlength={2}
-			placeholder={m.dob_month_placeholder()}
-			aria-label={m.dob_month()}
+			placeholder={m.date_of_birth_field_month_placeholder()}
+			aria-label={m.date_of_birth_field_month()}
 			aria-invalid={currentError ? 'true' : undefined}
-			class="text-center"
+			class={cn(segmentBoxes[size], 'text-center')}
 		/>
 		<Input
 			bind:ref={yearEl}
-			{size}
 			{disabled}
 			bind:value={year}
 			oninput={onYear}
@@ -178,20 +193,24 @@
 			onkeydown={(e) => onSegmentKeydown(e, year, monthEl)}
 			inputmode="numeric"
 			maxlength={4}
-			placeholder={m.dob_year_placeholder()}
-			aria-label={m.dob_year()}
+			placeholder={m.date_of_birth_field_year_placeholder()}
+			aria-label={m.date_of_birth_field_year()}
 			aria-invalid={currentError ? 'true' : undefined}
-			class="col-span-2 text-center"
+			class={cn(segmentBoxes[size], 'col-span-2 text-center')}
 		/>
 	</div>
 
 	{#if currentError}
 		<p
 			data-slot="date-of-birth-field-error"
-			class="mt-1 flex items-center gap-1 text-body-sm text-destructive"
+			class="mt-1 flex items-center gap-1 text-body-sm text-danger-text"
 		>
 			<AlertIcon class="size-4 shrink-0" />
 			{currentError}
+		</p>
+	{:else if helperText}
+		<p data-slot="date-of-birth-field-helper" class="mt-1 text-body-sm text-muted-foreground">
+			{helperText}
 		</p>
 	{/if}
 </fieldset>

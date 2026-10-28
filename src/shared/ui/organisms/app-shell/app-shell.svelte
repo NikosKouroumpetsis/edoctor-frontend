@@ -1,93 +1,44 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { Pathname } from '$app/types';
-	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
-	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
-	import { Button } from '$shared/ui/primitives/button';
-	import LanguageSwitcher from '$shared/ui/molecules/language-switcher';
-	import ThemeToggle from '$shared/ui/molecules/theme-toggle';
-	import BottomNav from '$shared/ui/organisms/bottom-nav';
-	import SiteFooter from '$shared/ui/organisms/site-footer';
-	import { m } from '$paraglide/messages.js';
-	import { deLocalizeHref, locales, localizeHref } from '$paraglide/runtime';
 
-	let { children }: { children: Snippet } = $props();
-
-	const currentLocale = $derived(getPageLocale(page.url));
-	const messageOptions = $derived({ locale: currentLocale });
-	const basePath = $derived(deLocalizeHref(page.url.pathname));
-
-	const localizedHref = (path: string) =>
-		resolve(localizeHref(path, { locale: currentLocale }) as Pathname);
-
-	const localizedCurrentHref = (locale: (typeof locales)[number]) =>
-		resolve(localizeHref(basePath, { locale }) as Pathname);
+	let {
+		header,
+		footer,
+		bottomNav,
+		skipLinkLabel,
+		contentId = 'content',
+		children
+	}: {
+		/** The top bar (an `AppHeader`), sticky by its own classes. */
+		header?: Snippet;
+		footer?: Snippet;
+		/** The mobile bar pinned to the bottom edge (a `BottomNav`). */
+		bottomNav?: Snippet;
+		/** With it, a «skip to content» link is the page's first stop for the keyboard. */
+		skipLinkLabel?: string;
+		/** The id of the content region the skip link moves to. */
+		contentId?: string;
+		children: Snippet;
+	} = $props();
 </script>
 
-<div class="flex min-h-dvh flex-col bg-background text-foreground">
-	<header
-		class="@container sticky top-0 z-50 border-b border-border/80 bg-background/92 backdrop-blur supports-backdrop-filter:bg-background/75"
-	>
-		<div class="container-page flex h-bar-top items-center gap-4">
-			<a
-				href={localizedHref('/')}
-				class="flex min-h-touch min-w-touch shrink-0 items-center gap-2.5 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-			>
-				<span
-					class="grid size-brand-mark place-items-center rounded-md bg-primary text-body-sm font-semibold text-primary-foreground shadow-xs"
-				>
-					e+
-				</span>
-				<span class="hidden text-body-lg font-semibold @narrow:inline">
-					{m.brand_name({}, messageOptions)}
-				</span>
-			</a>
+<!-- Layout only (U-03.8): the caller brings the header, footer and bottom bar, with their words and links. -->
+<div data-slot="app-shell" class="flex min-h-dvh flex-col bg-background text-foreground">
+	{#if skipLinkLabel}
+		<a
+			href={`#${contentId}`}
+			class="sr-only inline-flex min-h-touch min-w-touch items-center rounded-md bg-card px-4 text-body-sm font-semibold text-foreground focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-60 focus:ring-3 focus:ring-ring/50"
+		>
+			{skipLinkLabel}
+		</a>
+	{/if}
 
-			<nav
-				class="ml-4 hidden items-center gap-touch-gap laptop:flex"
-				aria-label={m.primary_navigation({}, messageOptions)}
-			>
-				<a
-					href={localizedHref('/doctors')}
-					class="inline-flex min-h-touch min-w-touch items-center justify-center rounded-md px-3 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-				>
-					{m.nav_doctors({}, messageOptions)}
-				</a>
-				<a
-					href={localizedHref('/clinics')}
-					class="inline-flex min-h-touch min-w-touch items-center justify-center rounded-md px-3 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-				>
-					{m.nav_clinics({}, messageOptions)}
-				</a>
-				<a
-					href={localizedHref('/plans')}
-					class="inline-flex min-h-touch min-w-touch items-center justify-center rounded-md px-3 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-				>
-					{m.nav_plans({}, messageOptions)}
-				</a>
-			</nav>
+	{@render header?.()}
 
-			<div class="ml-auto flex items-center gap-2">
-				<LanguageSwitcher />
-				<ThemeToggle />
-				<Button href={localizedHref('/login')} variant="outline" class="hidden @form:inline-flex">
-					{m.nav_login({}, messageOptions)}
-				</Button>
-			</div>
-		</div>
-	</header>
-
-	<div class="flex-1">
+	<div id={contentId} class="flex-1">
 		{@render children()}
 	</div>
 
-	<SiteFooter />
-	<BottomNav />
-</div>
-
-<div style="display:none">
-	{#each locales as locale (locale)}
-		<a href={localizedCurrentHref(locale)} aria-hidden="true" tabindex="-1">{locale}</a>
-	{/each}
+	{@render footer?.()}
+	{@render bottomNav?.()}
 </div>

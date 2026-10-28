@@ -15,6 +15,35 @@ describe('Avatar', () => {
 
 		const lg = render(Avatar, { props: { size: 'lg' } });
 		expect(lg.container.querySelector('[data-slot="avatar"]')).toHaveClass('size-avatar-lg');
+		lg.unmount();
+
+		const xl = render(Avatar, { props: { size: 'xl' } });
+		expect(xl.container.querySelector('[data-slot="avatar"]')).toHaveClass('size-avatar-xl');
+	});
+
+	it('U-02.2 (K5.8): the application’s xl avatar — 64, its initials in the 18 title role', () => {
+		render(Harness, { props: { size: 'xl' } });
+		expect(document.querySelector('[data-slot="avatar"]')).toHaveClass('size-avatar-xl');
+		expect(screen.getByText('JD')).toHaveClass('text-title-sm');
+		expect(screen.getByText('JD')).not.toHaveClass('text-body-sm');
+	});
+
+	// U-07.1 renames the web's `default` to the application's `md` and takes its initials (semibold, label-md up to
+	// title-sm) instead of the web's body-sm / body-md: a page that keeps the old look passes its own class.
+	it('U-07.1: the application’s initials per size, semibold', () => {
+		for (const [size, role] of [
+			['sm', 'text-label-md'],
+			['md', 'text-label-md'],
+			['lg', 'text-label-lg'],
+			['xl', 'text-title-sm']
+		] as const) {
+			const view = render(Harness, { props: { size } });
+			expect(screen.getByText('JD')).toHaveClass(role, 'font-semibold');
+			view.unmount();
+		}
+		render(Harness);
+		expect(document.querySelector('[data-slot="avatar"]')).toHaveClass('size-avatar-md');
+		expect(screen.getByText('JD')).toHaveClass('text-label-md');
 	});
 
 	it('shows the fallback while the image has not loaded', () => {

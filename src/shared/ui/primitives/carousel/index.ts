@@ -1,4 +1,4 @@
-import Root from './carousel.svelte';
+import Root, { carouselArrowClasses } from './carousel.svelte';
 import Content from './carousel-content.svelte';
 import Item from './carousel-item.svelte';
 import Previous from './carousel-previous.svelte';
@@ -12,6 +12,7 @@ export {
 	Previous,
 	Next,
 	Dots,
+	carouselArrowClasses,
 	//
 	Root as Carousel,
 	Content as CarouselContent,

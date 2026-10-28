@@ -1,4 +1,4 @@
-import Root from './tabs.svelte';
+import Root, { type TabsSurface } from './tabs.svelte';
 import List from './tabs-list.svelte';
 import Trigger from './tabs-trigger.svelte';
 import Content from './tabs-content.svelte';
@@ -8,6 +8,7 @@ export {
 	List,
 	Trigger,
 	Content,
+	type TabsSurface,
 	//
 	Root as Tabs,
 	List as TabsList,

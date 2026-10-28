@@ -1,7 +1,7 @@
 /**
  * Shared context for the `image-uploader` organism.
  *
- * Mirrors the `selectable-cards` pattern: the orchestrator root calls
+ * Mirrors the `accordion` pattern: the orchestrator root calls
  * `setImageUploaderContext(controller)` and every sub-part reads it through
  * `getImageUploaderContext()`. Keyed by a unique `Symbol`, so it never
  * collides with other primitives' contexts.

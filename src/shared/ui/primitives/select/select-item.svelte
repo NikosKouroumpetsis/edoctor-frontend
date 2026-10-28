@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { onMount } from 'svelte';
-	import CheckIcon from '~icons/lucide/check';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { getSelectContext } from './select.svelte';
 
 	let {
@@ -52,8 +52,8 @@
 >
 	{@render children?.()}
 	{#if selected}
-		<span class="absolute right-2 flex size-4 items-center justify-center">
-			<CheckIcon class="size-4" />
+		<span class="absolute right-2 flex items-center justify-center">
+			<Ionicon name="checkmark" class="icon-md text-primary" />
 		</span>
 	{/if}
 </button>

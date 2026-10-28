@@ -1,43 +1,57 @@
 <script lang="ts" module>
 	export type DrawerDirection = 'top' | 'bottom' | 'left' | 'right';
-	export type DrawerSize = 'sm' | 'default' | 'lg';
+	export type DrawerSize = 'sm' | 'md' | 'lg';
 
 	// Panel extent along the open axis: a sheet height for top/bottom, a named
 	// max-width for left/right.
 	const drawerExtent: Record<DrawerDirection, Record<DrawerSize, string>> = {
-		bottom: { sm: 'max-h-sheet-md', default: 'max-h-sheet-lg', lg: 'max-h-sheet-xl' },
-		top: { sm: 'max-h-sheet-md', default: 'max-h-sheet-lg', lg: 'max-h-sheet-xl' },
-		left: { sm: 'max-w-narrow', default: 'max-w-text', lg: 'max-w-form' },
-		right: { sm: 'max-w-narrow', default: 'max-w-text', lg: 'max-w-form' }
+		bottom: { sm: 'max-h-sheet-md', md: 'max-h-sheet-lg', lg: 'max-h-sheet-xl' },
+		top: { sm: 'max-h-sheet-md', md: 'max-h-sheet-lg', lg: 'max-h-sheet-xl' },
+		left: { sm: 'max-w-narrow', md: 'max-w-text', lg: 'max-w-form' },
+		right: { sm: 'max-w-narrow', md: 'max-w-text', lg: 'max-w-form' }
 	};
 </script>
 
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
-	import { fade, fly } from 'svelte/transition';
-	import XIcon from '~icons/lucide/x';
 	import { platform, step } from '$shared/design/tokens';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
-	import { portal, focusTrap, dismissable, scrollLock } from '$shared/lib/headless';
+	import { portal, focusTrap, escapeKeydown, Presence, scrollLock } from '$shared/lib/headless';
 	import { getDialogContext } from '$shared/ui/primitives/dialog/dialog.svelte';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
+
+	/** The close «×» needs a name in the page's language: required once it is shown. */
+	type CloseProps =
+		| { showClose?: false; closeLabel?: string }
+		| { showClose: true; closeLabel: string };
 
 	let {
 		ref = $bindable(null),
 		class: className,
 		direction = 'bottom',
-		size: panelSize = 'default',
+		size: panelSize = 'md',
 		showHandle = true,
 		showClose = false,
+		closeLabel,
+		dismissible = true,
+		bodyClass,
+		handleClass,
+		style: callerStyle,
 		children,
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
 		direction?: DrawerDirection;
 		size?: DrawerSize;
 		showHandle?: boolean;
-		showClose?: boolean;
+		/** Off: only the drawer's own controls close it — no outside press, Escape or drag (a write in flight). */
+		dismissible?: boolean;
+		/** Classes of the padded body (`p-card gap-4`); a caller that pads its own content clears them. */
+		bodyClass?: string;
+		/** Classes of the handle (the bottom sheet draws the application's 4-high bar in a 24 band). */
+		handleClass?: string;
 		children?: Snippet;
-	} = $props();
+	} & CloseProps = $props();
 
 	const ctx = getDialogContext();
 
@@ -51,18 +65,20 @@
 		right: 'inset-y-0 right-0 w-3/4 flex-row-reverse rounded-l-xl border-l'
 	};
 
+	// Its whole size beyond its edge, the way in (`starting:`) and the way out (`data-[state=closed]:`), U-12.2.
+	const slideClasses: Record<DrawerDirection, string> = {
+		bottom: 'starting:translate-y-full data-[state=closed]:translate-y-full',
+		top: 'starting:-translate-y-full data-[state=closed]:-translate-y-full',
+		left: 'starting:-translate-x-full data-[state=closed]:-translate-x-full',
+		right: 'starting:translate-x-full data-[state=closed]:translate-x-full'
+	};
+
+	// In the DOM until its CSS leave ends: the panel goes back to its edge while the backdrop fades.
+	const presence = new Presence(() => ctx.open, { duration: 'sheet' });
+
 	// Drag axis + the sign of the dismiss direction along that axis.
 	const axis = $derived<'x' | 'y'>(direction === 'left' || direction === 'right' ? 'x' : 'y');
 	const dismissSign = $derived(direction === 'bottom' || direction === 'right' ? 1 : -1);
-
-	const flyParams = $derived(
-		{
-			bottom: { y: platform.motion.drawer, duration: 320 },
-			top: { y: -platform.motion.drawer, duration: 320 },
-			left: { x: -platform.motion.drawer, duration: 320 },
-			right: { x: platform.motion.drawer, duration: 320 }
-		}[direction]
-	);
 
 	// --- Drag-to-dismiss state -------------------------------------------------
 	let dragging = $state(false);
@@ -117,6 +133,7 @@
 	}
 
 	function onpointerdown(e: PointerEvent) {
+		if (!dismissible) return;
 		if (e.button !== 0) return; // primary button / touch / pen only
 		if (snapping) return;
 		pointerId = e.pointerId;
@@ -166,12 +183,14 @@
 		pointerId = null;
 
 		if (draggedFar || flung) {
+			// It leaves from where the drag left it (the drag's offset stays, the slide adds its whole size), and the
+			// backdrop fades from the dimming the drag reached (review R2: it no longer turns full first).
+			leftAt = offset;
 			ctx.setOpen(false);
-			offset = 0;
 			return;
 		}
-		// Snap back to the resting position with a short transition.
-		snapping = true;
+		// Snap back to the resting position on the sheet's motion; a press that never moved has nothing to snap.
+		snapping = offset !== 0;
 		offset = 0;
 	}
 
@@ -185,26 +204,41 @@
 		if (pointerId === null || e.pointerId !== pointerId) return;
 		dragging = false;
 		pointerId = null;
-		snapping = true;
+		snapping = offset !== 0;
 		offset = 0;
 	}
 
-	function onTransitionEnd() {
-		snapping = false;
+	function onTransitionEnd(event: TransitionEvent) {
+		if (event.target === ref && event.propertyName === 'transform') snapping = false;
 	}
 
+	// A drag that closed it: where the panel was when it let go (cleared when it opens again).
+	let leftAt = $state<number | null>(null);
+	$effect.pre(() => {
+		if (presence.open) leftAt = null;
+	});
+
+	// The drag's offset after the caller's own style (a bottom sheet's fixed height, its snap point): `transform`,
+	// apart from the `translate` that slides it in and out, so the two add up.
+	const dragOffset = $derived(leftAt !== null ? leftAt : dragging || snapping ? offset : null);
 	const transformStyle = $derived(
-		dragging || snapping
-			? `transform: translate${axis === 'y' ? 'Y' : 'X'}(${offset}px)`
-			: undefined
+		[
+			callerStyle,
+			dragOffset !== null
+				? `transform: translate${axis === 'y' ? 'Y' : 'X'}(${dragOffset}px)`
+				: undefined
+		]
+			.filter(Boolean)
+			.join('; ') || undefined
 	);
 
 	// Overlay dims less as the drawer is pulled away.
-	const overlayOpacity = $derived.by(() => {
-		if (!dragging) return 1;
+	function overlayOpacityAt(distance: number) {
 		const size = sizeOf() || FALLBACK_DISTANCE * 4;
-		return Math.max(0, 1 - Math.abs(offset) / size);
-	});
+		return Math.max(0, 1 - Math.abs(distance) / size);
+	}
+	// Only while a finger holds it: an inline opacity would outrank the CSS fade in and out.
+	const overlayStyle = $derived(dragging ? `opacity: ${overlayOpacityAt(offset)}` : undefined);
 
 	const handleClasses: Record<DrawerDirection, string> = {
 		bottom: 'mx-auto mt-3 h-1.5 w-drawer-handle rounded-full bg-muted-foreground/40',
@@ -214,31 +248,46 @@
 	};
 </script>
 
-{#if ctx.open}
+{#if presence.present}
 	<div
 		use:portal
+		use:presence.track
 		data-slot="drawer-overlay"
-		transition:fade={{ duration: 200 }}
-		style="opacity: {overlayOpacity}"
-		class="fixed inset-0 z-50 bg-black/50"
+		data-state={presence.state}
+		aria-hidden="true"
+		inert={presence.closing}
+		style={overlayStyle}
+		class={cn(
+			'fixed inset-0 z-50 bg-overlay transition-opacity duration-sheet ease-sheet data-[state=closed]:pointer-events-none data-[state=closed]:opacity-0 starting:opacity-0',
+			dragging && 'transition-none'
+		)}
+		onclick={() => dismissible && ctx.setOpen(false)}
 	></div>
-	<!-- `use:portal` before `use:focusTrap`: relocate to <body> before focusing in. -->
+	<!-- `use:portal` before `use:focusTrap`: relocate to <body> before focusing in. It rises from its edge and goes back
+	     to it with the application's bottom sheet motion (gorhom: 250 ms `out(exp)` on Android, a spring of ~0.26 s
+	     on iOS; the web's 250 ms `expoOut` is near both, U-09.8), in CSS (U-12.2: `translate` in and out, the drag on
+	     `transform`); the focus lands on the panel, not on a «×» (U-09.7), and goes back as the leave starts. -->
 	<div
 		bind:this={ref}
 		use:portal
 		role="dialog"
+		tabindex={-1}
 		aria-modal={ctx.modal}
 		id={ctx.contentId}
 		aria-labelledby={ctx.titleId}
 		aria-describedby={ctx.descriptionId}
 		data-slot="drawer-content"
-		data-state="open"
+		data-state={presence.state}
 		data-direction={direction}
 		data-dragging={dragging ? '' : undefined}
-		use:focusTrap={{ enabled: true }}
-		use:dismissable={{ onDismiss: () => ctx.setOpen(false) }}
+		inert={presence.closing}
+		use:presence.track
+		use:focusTrap={{ enabled: presence.open }}
+		use:escapeKeydown={{
+			enabled: dismissible && presence.open,
+			onEscape: () => ctx.setOpen(false)
+		}}
 		use:scrollLock={ctx.modal}
-		transition:fly={flyParams}
 		{onpointerdown}
 		{onpointermove}
 		{onpointerup}
@@ -251,33 +300,35 @@
 			// inner body keeps native (touch) scrolling because `touch-none` lives on
 			// the handle, not here.
 			dragging && 'select-none',
-			snapping && 'transition-transform duration-300 ease-out',
+			'transition-[translate,transform] duration-sheet ease-sheet data-[state=closed]:pointer-events-none',
+			dragging && 'transition-none',
+			slideClasses[direction],
 			directionClasses[direction],
 			drawerExtent[direction][panelSize],
 			className
 		)}
 		{...restProps}
 	>
+		{#if showClose}
+			<button
+				type="button"
+				aria-label={closeLabel}
+				data-slot="drawer-close"
+				onclick={() => ctx.setOpen(false)}
+				class="absolute top-0 right-0 grid size-touch place-items-center rounded-full opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50"
+			>
+				<Ionicon name="close" class="icon-sm" />
+			</button>
+		{/if}
 		{#if showHandle}
 			<div
 				data-slot="drawer-handle"
 				aria-hidden="true"
-				class={cn('shrink-0 touch-none', handleClasses[direction])}
+				class={cn('shrink-0 touch-none', handleClasses[direction], handleClass)}
 			></div>
 		{/if}
-		<div data-slot="drawer-body" class="flex min-h-0 flex-1 flex-col gap-4 p-card">
+		<div data-slot="drawer-body" class={cn('flex min-h-0 flex-1 flex-col gap-4 p-card', bodyClass)}>
 			{@render children?.()}
 		</div>
-		{#if showClose}
-			<button
-				type="button"
-				aria-label="Close"
-				data-slot="drawer-close"
-				onclick={() => ctx.setOpen(false)}
-				class="absolute top-2 right-2 grid size-touch place-items-center rounded-full opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50"
-			>
-				<XIcon class="size-4" />
-			</button>
-		{/if}
 	</div>
 {/if}

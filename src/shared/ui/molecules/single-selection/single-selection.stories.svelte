@@ -3,41 +3,31 @@
 	import { expect, userEvent } from 'storybook/test';
 	import { SingleSelection } from '$shared/ui/molecules/single-selection';
 
+	const options = [
+		{ label: 'Πρωί', value: 'morning' },
+		{ label: 'Μεσημέρι', value: 'noon' },
+		{ label: 'Βράδυ', value: 'evening' }
+	];
+
+	// The application's meta (`molecules/single-selection`).
 	const { Story } = defineMeta({
 		title: 'Molecules/Single selection',
 		component: SingleSelection,
-		tags: ['autodocs']
+		tags: ['autodocs'],
+		args: { label: 'Προτιμώμενη ώρα', options, disabled: false },
+		argTypes: { disabled: { control: 'boolean' } }
 	});
-
-	const options = [
-		{ value: 'morning', label: 'Morning' },
-		{ value: 'afternoon', label: 'Afternoon' },
-		{ value: 'evening', label: 'Evening' }
-	];
 </script>
 
 <script lang="ts">
-	let value = $state('');
-	let preselected = $state('afternoon');
-	let navValue = $state('morning');
+	let playground = $state('morning');
+	let invalid = $state('');
+	let disabled = $state('morning');
 </script>
 
-<Story name="Default">
-	{#snippet template()}
-		<div class="w-narrow"><SingleSelection label="Preferred time" {options} bind:value /></div>
-	{/snippet}
-</Story>
-
-<Story name="Pre-selected">
-	{#snippet template()}
-		<div class="w-narrow">
-			<SingleSelection label="Preferred time" {options} bind:value={preselected} />
-		</div>
-	{/snippet}
-</Story>
-
+<!-- The arrows move the choice within the radio group (the web's interaction check). -->
 <Story
-	name="Arrow navigation"
+	name="Playground"
 	play={async ({ canvas }) => {
 		const radios = canvas.getAllByRole('radio');
 		radios[0].focus();
@@ -45,9 +35,19 @@
 		await expect(radios[1]).toHaveFocus();
 	}}
 >
-	{#snippet template()}
-		<div class="w-narrow">
-			<SingleSelection label="Preferred time" {options} bind:value={navValue} />
-		</div>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><SingleSelection {...args} bind:value={playground} /></div>
+	{/snippet}
+</Story>
+
+<Story name="With Error" args={{ error: 'Επιλέξτε μία ώρα' }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><SingleSelection {...args} bind:value={invalid} /></div>
+	{/snippet}
+</Story>
+
+<Story name="Disabled" args={{ disabled: true }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><SingleSelection {...args} bind:value={disabled} /></div>
 	{/snippet}
 </Story>

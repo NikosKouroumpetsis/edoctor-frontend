@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Avatar, AvatarImage, AvatarFallback } from './index';
+	import { Avatar, AvatarImage, AvatarFallback, type AvatarSize } from './index';
 
-	let { src }: { src?: string } = $props();
+	let { src, size }: { src?: string; size?: AvatarSize } = $props();
 </script>
 
-<Avatar>
+<Avatar {size}>
 	<AvatarImage {src} alt="Jane Doe" />
 	<AvatarFallback>JD</AvatarFallback>
 </Avatar>

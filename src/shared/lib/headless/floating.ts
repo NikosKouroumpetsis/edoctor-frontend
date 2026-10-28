@@ -145,6 +145,19 @@ export interface FloatingOptions extends ComputePositionOptions {
 	enabled?: boolean;
 }
 
+/** The node's own `scale` right now (`0.95`, `95% 95%`, `none`), per axis; 1 where it has none. */
+function scaleOf(node: Element): [number, number] {
+	const value = getComputedStyle(node).scale;
+	if (!value || value === 'none') return [1, 1];
+	const parts = value
+		.trim()
+		.split(/\s+/)
+		.map((part) => (part.endsWith('%') ? Number.parseFloat(part) / 100 : Number.parseFloat(part)));
+	const x = Number.isFinite(parts[0]) && parts[0] > 0 ? parts[0] : 1;
+	const y = Number.isFinite(parts[1]) && parts[1] > 0 ? parts[1] : x;
+	return [x, y];
+}
+
 /** Svelte action: position the node (a fixed overlay) against `reference`. */
 export const floating: Action<HTMLElement, FloatingOptions> = (node, params) => {
 	let opts = params;
@@ -163,9 +176,16 @@ export const floating: Action<HTMLElement, FloatingOptions> = (node, params) => 
 		node.style.margin = '0';
 		const refRect = opts.reference.getBoundingClientRect();
 		const floatRect = node.getBoundingClientRect();
+		// The panel enters and leaves scaled (`starting:scale-95`, U-12.2): place it by its own size, not the scaled one.
+		const [scaleX, scaleY] = scaleOf(node);
 		const result = computePosition(
 			{ x: refRect.x, y: refRect.y, width: refRect.width, height: refRect.height },
-			{ x: floatRect.x, y: floatRect.y, width: floatRect.width, height: floatRect.height },
+			{
+				x: floatRect.x,
+				y: floatRect.y,
+				width: floatRect.width / scaleX,
+				height: floatRect.height / scaleY
+			},
 			{ width: window.innerWidth, height: window.innerHeight },
 			opts
 		);

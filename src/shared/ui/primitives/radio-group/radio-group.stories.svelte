@@ -1,91 +1,106 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { RadioGroup, RadioGroupItem } from '$shared/ui/primitives/radio-group';
+	import {
+		RadioGroup,
+		RadioGroupItem,
+		type RadioGroupItemSize
+	} from '$shared/ui/primitives/radio-group';
 	import { Label } from '$shared/ui/primitives/label';
 
+	const options = [
+		{ label: 'Όλα', value: 'all' },
+		{ label: 'Άνδρας', value: 'male' },
+		{ label: 'Γυναίκα', value: 'female' }
+	];
+	const sizes = ['sm', 'md', 'lg'] as const;
+
+	// The application's stories (`molecules/radio-group`), composed: one 48 row per option, the radio and its words
+	// 12 apart (`text-body-md`), the rows 12 apart (a wrapping row when horizontal).
 	const { Story } = defineMeta({
 		title: 'Primitives/Radio group',
 		component: RadioGroup,
-		tags: ['autodocs']
+		tags: ['autodocs'],
+		args: { orientation: 'vertical', disabled: false },
+		argTypes: {
+			orientation: { control: 'inline-radio', options: ['vertical', 'horizontal'] },
+			disabled: { control: 'boolean' }
+		}
 	});
 </script>
 
 <script lang="ts">
-	let plan = $state('');
-	let preselected = $state('pro');
-	let horizontal = $state('email');
-	let sized = $state('default');
+	let playground = $state('all');
+	let horizontal = $state('all');
+	let unselected = $state<string | undefined>(undefined);
+	let disabledOption = $state('all');
+	const sized = $state<Record<string, string>>({ sm: 'all', md: 'all', lg: 'all' });
 </script>
 
-<Story name="Default">
-	{#snippet template()}
-		<RadioGroup bind:value={plan} name="plan-default">
-			<div class="flex items-center gap-2">
-				<RadioGroupItem value="free" id="d-free" /><Label for="d-free">Free</Label>
-			</div>
-			<div class="flex items-center gap-2">
-				<RadioGroupItem value="pro" id="d-pro" /><Label for="d-pro">Pro</Label>
-			</div>
-			<div class="flex items-center gap-2">
-				<RadioGroupItem value="team" id="d-team" /><Label for="d-team">Team</Label>
-			</div>
+{#snippet rows(prefix: string, size: RadioGroupItemSize = 'md', disabledValue?: string)}
+	{#each options as option (option.value)}
+		{@const off = option.value === disabledValue}
+		<div class="flex min-h-touch flex-row items-center gap-3">
+			<RadioGroupItem value={option.value} id={`${prefix}-${option.value}`} {size} disabled={off} />
+			<Label for={`${prefix}-${option.value}`} class="text-body-md font-normal" disabled={off}>
+				{option.label}
+			</Label>
+		</div>
+	{/each}
+{/snippet}
+
+<Story name="Playground">
+	{#snippet template(args)}
+		<RadioGroup {...args} bind:value={playground} name="rg-playground">
+			{@render rows('rg-playground')}
 		</RadioGroup>
 	{/snippet}
 </Story>
 
-<Story name="Pre-selected">
-	{#snippet template()}
-		<RadioGroup bind:value={preselected} name="plan-pre">
-			<div class="flex items-center gap-2">
-				<RadioGroupItem value="free" id="p-free" /><Label for="p-free">Free</Label>
-			</div>
-			<div class="flex items-center gap-2">
-				<RadioGroupItem value="pro" id="p-pro" /><Label for="p-pro">Pro</Label>
-			</div>
+<Story name="Horizontal" args={{ orientation: 'horizontal' }}>
+	{#snippet template(args)}
+		<RadioGroup
+			{...args}
+			bind:value={horizontal}
+			name="rg-horizontal"
+			class="flex flex-row flex-wrap gap-3"
+		>
+			{@render rows('rg-horizontal')}
 		</RadioGroup>
 	{/snippet}
 </Story>
 
-<Story name="Disabled item">
-	{#snippet template()}
-		<RadioGroup value="free" name="plan-disabled">
-			<div class="flex items-center gap-2">
-				<RadioGroupItem value="free" id="x-free" /><Label for="x-free">Free</Label>
-			</div>
-			<div class="flex items-center gap-2 opacity-50">
-				<RadioGroupItem value="team" id="x-team" disabled /><Label for="x-team">Team (soon)</Label>
-			</div>
+<Story name="Disabled" args={{ disabled: true }}>
+	{#snippet template(args)}
+		<RadioGroup {...args} value="all" name="rg-disabled">
+			{@render rows('rg-disabled')}
 		</RadioGroup>
 	{/snippet}
 </Story>
 
-<Story name="Horizontal">
-	{#snippet template()}
-		<RadioGroup bind:value={horizontal} name="contact" orientation="horizontal" class="flex gap-6">
-			<div class="flex items-center gap-2">
-				<RadioGroupItem value="email" id="h-email" /><Label for="h-email">Email</Label>
-			</div>
-			<div class="flex items-center gap-2">
-				<RadioGroupItem value="sms" id="h-sms" /><Label for="h-sms">SMS</Label>
-			</div>
+<Story name="Unselected">
+	{#snippet template(args)}
+		<RadioGroup {...args} bind:value={unselected} name="rg-unselected">
+			{@render rows('rg-unselected')}
+		</RadioGroup>
+	{/snippet}
+</Story>
+
+<Story name="Disabled Option">
+	{#snippet template(args)}
+		<RadioGroup {...args} bind:value={disabledOption} name="rg-disabled-option">
+			{@render rows('rg-disabled-option', 'md', 'female')}
 		</RadioGroup>
 	{/snippet}
 </Story>
 
 <Story name="Sizes">
-	{#snippet template()}
-		<RadioGroup bind:value={sized} name="plan-sizes">
-			<div class="flex items-center gap-2">
-				<RadioGroupItem value="sm" id="s-sm" size="sm" /><Label for="s-sm">Small</Label>
-			</div>
-			<div class="flex items-center gap-2">
-				<RadioGroupItem value="default" id="s-default" size="default" /><Label for="s-default">
-					Default
-				</Label>
-			</div>
-			<div class="flex items-center gap-2">
-				<RadioGroupItem value="lg" id="s-lg" size="lg" /><Label for="s-lg">Large</Label>
-			</div>
-		</RadioGroup>
+	{#snippet template(args)}
+		<div class="flex flex-col gap-6">
+			{#each sizes as size (size)}
+				<RadioGroup {...args} bind:value={sized[size]} name={`rg-size-${size}`}>
+					{@render rows(`rg-size-${size}`, size)}
+				</RadioGroup>
+			{/each}
+		</div>
 	{/snippet}
 </Story>

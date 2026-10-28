@@ -42,7 +42,22 @@ export default defineConfig(
 		}
 	},
 	{
-		files: ['src/shared/ui/primitives/button/button.svelte'],
+		// Generic link renderers of the kit: the href is the caller's, already resolved by the page that knows
+		// the route and the language (U-02.1 / U-03.8: shared/ui never reads either).
+		files: [
+			'src/shared/ui/primitives/button/button.svelte',
+			'src/shared/ui/primitives/date-card/date-card.svelte',
+			'src/shared/ui/primitives/icon-button/icon-button.svelte',
+			'src/shared/ui/primitives/text-button/text-button.svelte',
+			'src/shared/ui/primitives/inline-link-text/inline-link-text.svelte',
+			'src/shared/ui/molecules/info-row/info-row.svelte',
+			'src/shared/ui/molecules/language-switcher/language-switcher.svelte',
+			'src/shared/ui/organisms/bottom-nav/bottom-nav.svelte',
+			'src/shared/ui/organisms/media-card/media-card.svelte',
+			'src/shared/ui/organisms/photo-carousel/photo-carousel.svelte',
+			'src/shared/ui/organisms/site-footer/site-footer.svelte',
+			'src/shared/ui/organisms/site-navbar/site-navbar.svelte'
+		],
 		rules: {
 			'svelte/no-navigation-without-resolve': 'off'
 		}

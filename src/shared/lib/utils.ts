@@ -1,16 +1,31 @@
 import { clsx, type ClassValue } from 'clsx';
-import { extendTailwindMerge } from 'tailwind-merge';
-import { createTV } from 'tailwind-variants';
-import { mergeTheme } from '$shared/design/tokens';
+import {
+	extendTailwindMerge,
+	type ConfigExtension,
+	type DefaultClassGroupIds,
+	type DefaultThemeGroupIds
+} from 'tailwind-merge';
+import { createTV, type TVConfig } from 'tailwind-variants';
+import { icon, mergeTheme } from '$shared/design/tokens';
 
 export type { VariantProps } from 'tailwind-variants';
 
+type ClassGroupIds = DefaultClassGroupIds | 'glyph-size';
+
 // One merge config for `cn` and `tv`: tailwind-variants keeps a single merger cache for the whole app.
-const twMergeConfig = { extend: { theme: mergeTheme } };
+// The `icon-*` utilities set width and height, so the later icon size (or `size-*`) wins over the earlier.
+const twMergeConfig = {
+	extend: {
+		theme: mergeTheme,
+		classGroups: { 'glyph-size': [{ icon: Object.keys(icon) }] },
+		conflictingClassGroups: { 'glyph-size': ['size', 'w', 'h'], size: ['glyph-size'] }
+	}
+} satisfies ConfigExtension<ClassGroupIds, DefaultThemeGroupIds>;
 
-const twMerge = extendTailwindMerge(twMergeConfig);
+const twMerge = extendTailwindMerge<'glyph-size'>(twMergeConfig);
 
-export const tv = createTV({ twMergeConfig });
+// tailwind-variants types its config with the default group names only; the runtime takes ours as they are.
+export const tv = createTV({ twMergeConfig: twMergeConfig as TVConfig['twMergeConfig'] });
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));

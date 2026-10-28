@@ -1,7 +1,7 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import {
-		Select,
+		SelectRoot,
 		SelectTrigger,
 		SelectValue,
 		SelectContent,
@@ -13,7 +13,7 @@
 
 	const { Story } = defineMeta({
 		title: 'Primitives/Select',
-		component: Select,
+		component: SelectRoot,
 		tags: ['autodocs']
 	});
 </script>
@@ -27,8 +27,8 @@
 
 <Story name="Default">
 	{#snippet template()}
-		<Select bind:value name="specialty">
-			<SelectTrigger class="w-narrow" aria-label="Specialty">
+		<SelectRoot bind:value name="specialty">
+			<SelectTrigger class="w-full max-w-narrow" aria-label="Specialty">
 				<SelectValue placeholder="Pick a specialty" />
 			</SelectTrigger>
 			<SelectContent>
@@ -36,14 +36,14 @@
 				<SelectItem value="derma">Dermatology</SelectItem>
 				<SelectItem value="neuro">Neurology</SelectItem>
 			</SelectContent>
-		</Select>
+		</SelectRoot>
 	{/snippet}
 </Story>
 
 <Story name="Pre-selected">
 	{#snippet template()}
-		<Select bind:value={preselected} name="specialty-pre">
-			<SelectTrigger class="w-narrow" aria-label="Specialty">
+		<SelectRoot bind:value={preselected} name="specialty-pre">
+			<SelectTrigger class="w-full max-w-narrow" aria-label="Specialty">
 				<SelectValue placeholder="Pick a specialty" />
 			</SelectTrigger>
 			<SelectContent>
@@ -51,14 +51,14 @@
 				<SelectItem value="derma">Dermatology</SelectItem>
 				<SelectItem value="neuro">Neurology</SelectItem>
 			</SelectContent>
-		</Select>
+		</SelectRoot>
 	{/snippet}
 </Story>
 
 <Story name="Grouped + separator">
 	{#snippet template()}
-		<Select bind:value={grouped} name="city">
-			<SelectTrigger class="w-narrow" aria-label="City">
+		<SelectRoot bind:value={grouped} name="city">
+			<SelectTrigger class="w-full max-w-narrow" aria-label="City">
 				<SelectValue placeholder="Pick a city" />
 			</SelectTrigger>
 			<SelectContent>
@@ -73,7 +73,7 @@
 					<SelectItem value="nic">Nicosia</SelectItem>
 				</SelectGroup>
 			</SelectContent>
-		</Select>
+		</SelectRoot>
 	{/snippet}
 </Story>
 
@@ -81,15 +81,15 @@
 	{#snippet template()}
 		<div class="flex flex-col gap-3">
 			{#each ['default', 'lg', 'xl'] as const as s (s)}
-				<Select bind:value={sizes} name={`size-${s}`}>
-					<SelectTrigger size={s} class="w-narrow" aria-label={s}>
+				<SelectRoot bind:value={sizes} name={`size-${s}`}>
+					<SelectTrigger size={s} class="w-full max-w-narrow" aria-label={s}>
 						<SelectValue placeholder={s} />
 					</SelectTrigger>
 					<SelectContent>
 						<SelectItem value="cardio">Cardiology</SelectItem>
 						<SelectItem value="derma">Dermatology</SelectItem>
 					</SelectContent>
-				</Select>
+				</SelectRoot>
 			{/each}
 		</div>
 	{/snippet}
@@ -97,13 +97,13 @@
 
 <Story name="Disabled">
 	{#snippet template()}
-		<Select value="" name="specialty-disabled" disabled>
-			<SelectTrigger class="w-narrow" aria-label="Specialty">
+		<SelectRoot value="" name="specialty-disabled" disabled>
+			<SelectTrigger class="w-full max-w-narrow" aria-label="Specialty">
 				<SelectValue placeholder="Disabled" />
 			</SelectTrigger>
 			<SelectContent>
 				<SelectItem value="cardio">Cardiology</SelectItem>
 			</SelectContent>
-		</Select>
+		</SelectRoot>
 	{/snippet}
 </Story>

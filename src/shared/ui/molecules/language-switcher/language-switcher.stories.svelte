@@ -3,15 +3,22 @@
 	import LanguageSwitcher from '$shared/ui/molecules/language-switcher';
 
 	const { Story } = defineMeta({
-		title: 'Molecules/Language switcher',
+		title: 'Molecules/LanguageSwitcher',
 		component: LanguageSwitcher,
-		tags: ['autodocs']
+		tags: ['autodocs'],
+		args: {
+			'aria-label': 'Γλώσσα',
+			options: [
+				{ locale: 'el', href: '#el', label: 'Ελληνικά', shortLabel: 'EL', current: true },
+				{ locale: 'en', href: '#en', label: 'English', shortLabel: 'EN', current: false }
+			]
+		}
 	});
 </script>
 
-<!-- Reads $app/state (page.url) + Paraglide runtime, both provided by @storybook/sveltekit. -->
+<!-- The caller (the shell module) resolves the same page in each language. -->
 <Story name="Default">
-	{#snippet template()}
-		<LanguageSwitcher />
+	{#snippet template(args)}
+		<LanguageSwitcher {...args} />
 	{/snippet}
 </Story>

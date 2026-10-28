@@ -8,8 +8,6 @@
   programmatically by the header "+", the dropzone "Browse", and drop.
 -->
 <script lang="ts">
-	import XIcon from '~icons/lucide/x';
-	import PlusIcon from '~icons/lucide/plus';
 	import { m } from '$paraglide/messages.js';
 	import {
 		Dialog,
@@ -18,6 +16,7 @@
 		DialogDescription
 	} from '$shared/ui/primitives/dialog';
 	import { Button } from '$shared/ui/primitives/button';
+	import { IconButton } from '$shared/ui/primitives/icon-button';
 	import { getImageUploaderContext } from '../lib/context';
 	import UploadDropzone from './upload-dropzone.svelte';
 	import UploadTile from './upload-tile.svelte';
@@ -52,17 +51,17 @@
 </script>
 
 <Dialog open={ctx.dialogOpen} onOpenChange={(open) => !open && ctx.closeDialog()}>
-	<DialogContent showClose={false} size="lg" class="max-w-form gap-0 p-0">
+	<DialogContent showClose={false} size="md" class="gap-0 p-0">
 		<!-- Header: X · (title + counter) · + -->
 		<div class="flex items-center justify-between gap-inline p-card pb-inline">
-			<Button
-				variant="ghost"
-				size="icon"
+			<IconButton
+				appearance="tint"
+				surface="soft"
+				size="xs"
+				icon="close"
 				aria-label={m.image_uploader_cancel()}
 				onclick={() => ctx.closeDialog()}
-			>
-				<XIcon class="icon-sm" />
-			</Button>
+			/>
 			<div class="min-w-0 flex-1 text-center">
 				<DialogTitle>
 					{m.image_uploader_dialog_title()}
@@ -71,14 +70,14 @@
 					{subtitle}
 				</DialogDescription>
 			</div>
-			<Button
-				variant="ghost"
-				size="icon"
+			<IconButton
+				appearance="tint"
+				surface="soft"
+				size="xs"
+				icon="add"
 				aria-label={m.image_uploader_add_more()}
 				onclick={openPicker}
-			>
-				<PlusIcon class="icon-sm" />
-			</Button>
+			/>
 		</div>
 
 		<!-- Body -->
@@ -98,14 +97,16 @@
 		<!-- Footer: ghost (Done ↔ Cancel) · secondary (Upload) -->
 		<div class="flex items-center justify-between border-t border-border p-card">
 			<Button
-				variant="ghost"
+				tone="ghost"
+				label={ctx.staged.length > 0 ? m.image_uploader_cancel() : m.image_uploader_done()}
 				onclick={() => (ctx.staged.length > 0 ? ctx.cancelAll() : ctx.closeDialog())}
-			>
-				{ctx.staged.length > 0 ? m.image_uploader_cancel() : m.image_uploader_done()}
-			</Button>
-			<Button variant="secondary" disabled={!ctx.canUpload} onclick={() => ctx.confirm()}>
-				{m.image_uploader_upload()}
-			</Button>
+			/>
+			<Button
+				tone="contrast"
+				label={m.image_uploader_upload()}
+				disabled={!ctx.canUpload}
+				onclick={() => ctx.confirm()}
+			/>
 		</div>
 
 		<input

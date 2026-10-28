@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { cn, type WithElementRef } from '$shared/lib/utils';
 	import { useId } from '$shared/lib/headless';
-	import { getCommandContext } from './command.svelte';
+	import { getCommandContext, getCommandGroupContext } from './command.svelte';
 
 	let {
 		ref = $bindable(null),
@@ -18,12 +18,13 @@
 	} = $props();
 
 	const ctx = getCommandContext();
+	const group = getCommandGroupContext();
 	const id = useId(undefined, 'command-item');
 	const visible = $derived(ctx.matches(value));
 	const active = $derived(ctx.isActive(id));
 
 	onMount(() => {
-		ctx.registerItem({ id, value, onSelect: () => onSelect?.(value) });
+		ctx.registerItem({ id, value, groupId: group?.id, onSelect: () => onSelect?.(value) });
 		return () => ctx.unregisterItem(id);
 	});
 </script>

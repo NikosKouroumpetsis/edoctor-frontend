@@ -12,10 +12,9 @@
    - the "…" menu's "move forward" promotes an item to the cover slot (index 0).
 -->
 <script lang="ts">
-	import PlusIcon from '~icons/lucide/plus';
 	import GripVerticalIcon from '~icons/lucide/grip-vertical';
 	import { m } from '$paraglide/messages.js';
-	import { Button } from '$shared/ui/primitives/button';
+	import { IconButton } from '$shared/ui/primitives/icon-button';
 	import { getImageUploaderContext } from '../lib/context';
 	import PhotoCover from './photo-cover.svelte';
 	import PhotoTile from './photo-tile.svelte';
@@ -87,15 +86,14 @@
 			</h2>
 			<p class="text-body-sm text-muted-foreground">{m.image_uploader_gallery_subtitle()}</p>
 		</div>
-		<Button
-			variant="secondary"
-			size="icon"
-			class="rounded-full"
+		<IconButton
+			appearance="tint"
+			surface="strong"
+			size="touch"
+			icon="add"
 			aria-label={m.image_uploader_add_more()}
 			onclick={() => ctx.openDialog()}
-		>
-			<PlusIcon class="icon-sm" />
-		</Button>
+		/>
 	</div>
 
 	{#if cover}

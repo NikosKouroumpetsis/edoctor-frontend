@@ -55,8 +55,8 @@
 	<Popover bind:open={specialtyOpen}>
 		<PopoverTrigger
 			class={cn(
-				buttonVariants({ variant: 'ghost' }),
-				'h-control-md flex-1 justify-start gap-2 font-normal'
+				buttonVariants({ tone: 'ghost', bordered: false }),
+				'h-control-md flex-1 justify-start gap-2 text-body-sm font-normal'
 			)}
 		>
 			<StethoscopeIcon class="size-4 text-muted-foreground" />
@@ -100,20 +100,31 @@
 	<Popover bind:open={dateOpen}>
 		<PopoverTrigger
 			class={cn(
-				buttonVariants({ variant: 'ghost' }),
-				'h-control-md flex-1 justify-start gap-2 font-normal'
+				buttonVariants({ tone: 'ghost', bordered: false }),
+				'h-control-md flex-1 justify-start gap-2 text-body-sm font-normal'
 			)}
 		>
 			<CalendarIcon class="size-4 text-muted-foreground" />
 			<span class={cn(!date && 'text-muted-foreground')}>{dateLabel}</span>
 		</PopoverTrigger>
 		<PopoverContent class="w-auto p-0">
-			<Calendar bind:value={date} locale="en-GB" onValueChange={() => (dateOpen = false)} />
+			<Calendar
+				bind:value={date}
+				locale="en-GB"
+				previousMonthLabel="Previous month"
+				nextMonthLabel="Next month"
+				onValueChange={() => (dateOpen = false)}
+			/>
 		</PopoverContent>
 	</Popover>
 
-	<Button class="gap-2 tablet:w-auto" onclick={() => onSearch?.({ specialty, location, date })}>
-		<SearchIcon class="size-4" />
-		Search
+	<Button
+		label="Search"
+		class="tablet:w-auto"
+		onclick={() => onSearch?.({ specialty, location, date })}
+	>
+		{#snippet leading()}
+			<SearchIcon class="size-4 text-primary-foreground" />
+		{/snippet}
 	</Button>
 </div>

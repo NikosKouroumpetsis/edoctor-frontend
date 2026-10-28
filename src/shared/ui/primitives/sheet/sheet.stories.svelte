@@ -6,10 +6,17 @@
 		SheetContent,
 		SheetHeader,
 		SheetTitle,
-		SheetDescription
+		SheetDescription,
+		SheetClose,
+		type SheetSide,
+		type SheetSize
 	} from '$shared/ui/primitives/sheet';
-	import { buttonVariants } from '$shared/ui/primitives/button';
+	import { buttonClasses } from '$shared/ui/primitives/button';
 
+	const sizes: SheetSize[] = ['sm', 'md', 'lg'];
+
+	// The application's sheet (`molecules/sheet`): «Άνοιγμα (side)» opens «Φίλτρα». It slides in from its side and out
+	// to it while the backdrop fades (U-09.8, whatever the motion setting, U-12.1); the focus lands on the panel (U-09.7).
 	const { Story } = defineMeta({
 		title: 'Primitives/Sheet',
 		component: Sheet,
@@ -17,60 +24,47 @@
 	});
 </script>
 
-{#snippet sheetExample(side: 'top' | 'bottom' | 'left' | 'right', label: string)}
+{#snippet sheet(
+	side: SheetSide,
+	size: SheetSize | undefined = undefined,
+	label = `Άνοιγμα (${side})`,
+	description = 'Περιορίστε τα αποτελέσματα αναζήτησης.'
+)}
 	<Sheet>
-		<SheetTrigger class={buttonVariants({ variant: 'outline' })}>{label}</SheetTrigger>
-		<SheetContent {side}>
+		<SheetTrigger class={buttonClasses()}>{label}</SheetTrigger>
+		<SheetContent {side} {size} closeLabel="Κλείσιμο">
 			<SheetHeader>
-				<SheetTitle>Filters</SheetTitle>
-				<SheetDescription>Narrow down the doctor search.</SheetDescription>
+				<SheetTitle>Φίλτρα</SheetTitle>
+				<SheetDescription>{description}</SheetDescription>
 			</SheetHeader>
+			<p class="text-body-md text-muted-foreground">Περιεχόμενο φύλλου.</p>
+			<SheetClose class={buttonClasses({ tone: 'ghost' })}>Κλείσιμο</SheetClose>
 		</SheetContent>
 	</Sheet>
 {/snippet}
 
-{#snippet sizedSheet(size: 'sm' | 'default' | 'lg')}
-	<Sheet>
-		<SheetTrigger class={buttonVariants({ variant: 'outline' })}>Right {size}</SheetTrigger>
-		<SheetContent side="right" {size}>
-			<SheetHeader>
-				<SheetTitle>Filters</SheetTitle>
-				<SheetDescription>The {size} panel sets the right-side width.</SheetDescription>
-			</SheetHeader>
-		</SheetContent>
-	</Sheet>
-{/snippet}
-
-<Story name="Right">
-	{#snippet template()}
-		{@render sheetExample('right', 'Open right')}
-	{/snippet}
+<Story name="Playground">
+	{#snippet template()}{@render sheet('right')}{/snippet}
 </Story>
 
 <Story name="Left">
-	{#snippet template()}
-		{@render sheetExample('left', 'Open left')}
-	{/snippet}
+	{#snippet template()}{@render sheet('left')}{/snippet}
 </Story>
 
 <Story name="Top">
-	{#snippet template()}
-		{@render sheetExample('top', 'Open top')}
-	{/snippet}
+	{#snippet template()}{@render sheet('top')}{/snippet}
 </Story>
 
 <Story name="Bottom">
-	{#snippet template()}
-		{@render sheetExample('bottom', 'Open bottom')}
-	{/snippet}
+	{#snippet template()}{@render sheet('bottom')}{/snippet}
 </Story>
 
 <Story name="Sizes">
 	{#snippet template()}
 		<div class="flex flex-wrap gap-3">
-			{@render sizedSheet('sm')}
-			{@render sizedSheet('default')}
-			{@render sizedSheet('lg')}
+			{#each sizes as size (size)}
+				{@render sheet('right', size, `Δεξιά ${size}`, `Το ${size} ορίζει το πλάτος του φύλλου.`)}
+			{/each}
 		</div>
 	{/snippet}
 </Story>

@@ -2,53 +2,66 @@
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { PasswordField } from '$shared/ui/molecules/password-field';
 
+	// The application's meta (`molecules/password-field`).
 	const { Story } = defineMeta({
-		title: 'Molecules/Password field',
+		title: 'Molecules/PasswordField',
 		component: PasswordField,
 		tags: ['autodocs'],
 		args: {
-			label: 'Password',
-			placeholder: 'Enter your password',
-			size: 'default',
-			disabled: false
+			hideLabel: 'Απόκρυψη κωδικού',
+			label: 'Κωδικός πρόσβασης',
+			placeholder: '••••••••',
+			showLabel: 'Εμφάνιση κωδικού'
 		},
 		argTypes: {
-			size: { control: 'select', options: ['default', 'lg', 'xl'] },
+			label: { control: 'text' },
+			helperText: { control: 'text' },
+			error: { control: 'text' },
+			required: { control: 'boolean' },
 			disabled: { control: 'boolean' }
 		}
 	});
 </script>
 
 <script lang="ts">
-	let value = $state('');
-	let revealValue = $state('hunter2');
+	// Each story is controlled with its own value, as the application's `ControlledPasswordField`.
+	let playground = $state('');
+	let reveal = $state('Str0ngPass');
+	let helper = $state('');
+	let invalid = $state('abc');
+	let disabled = $state('secret');
 </script>
 
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class="w-narrow"><PasswordField {...args} /></div>
+		<div class="w-full max-w-narrow"><PasswordField {...args} bind:value={playground} /></div>
 	{/snippet}
 </Story>
 
-<Story name="Default">
-	{#snippet template()}
-		<div class="w-narrow"><PasswordField label="Password" bind:value /></div>
+<!-- The spelled-out toggle: the words «Εμφάνιση»/«Απόκρυψη» are the affordance, not an eye glyph. -->
+<Story
+	name="Text Reveal"
+	args={{ hideLabel: 'Απόκρυψη', revealVariant: 'text', showLabel: 'Εμφάνιση' }}
+>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><PasswordField {...args} bind:value={reveal} /></div>
 	{/snippet}
 </Story>
 
-<Story name="Reveal toggle">
-	{#snippet template()}
-		<div class="w-narrow">
-			<PasswordField label="Password" bind:value={revealValue} autocomplete="new-password" />
-			<p class="mt-2 text-body-sm text-muted-foreground">Use the eye button to reveal the value.</p>
-		</div>
+<Story name="With Helper Text" args={{ helperText: 'Τουλάχιστον 8 χαρακτήρες.', required: true }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><PasswordField {...args} bind:value={helper} /></div>
 	{/snippet}
 </Story>
 
-<Story name="With error">
-	{#snippet template()}
-		<div class="w-narrow">
-			<PasswordField label="Password" value="123" error="Use at least 8 characters" />
-		</div>
+<Story name="With Error" args={{ error: 'Ο κωδικός είναι πολύ σύντομος.' }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><PasswordField {...args} bind:value={invalid} /></div>
+	{/snippet}
+</Story>
+
+<Story name="Disabled" args={{ disabled: true }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><PasswordField {...args} bind:value={disabled} /></div>
 	{/snippet}
 </Story>

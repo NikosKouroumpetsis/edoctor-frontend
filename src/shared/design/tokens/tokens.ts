@@ -145,6 +145,8 @@ export const media = {
 	'choice-max-w': 128,
 	'preference-min-w': 138,
 	'search-pill': 64,
+	'search-bar-w': 850,
+	'search-bar-h': 66,
 	qr: 160,
 	'placeholder-sm': 64,
 	'placeholder-md': 80,
@@ -158,16 +160,19 @@ export const containers = {
 	narrow: 360,
 	text: 480,
 	form: 560,
+	dialog: 568,
 	content: 760,
 	listing: 1120,
-	page: 1440
+	page: 1440,
+	wide: 1920
 } as const satisfies Record<string, number>;
 
 export const breakpoints = {
 	tablet: 744,
 	split: 950,
 	laptop: 1128,
-	desktop: 1440
+	desktop: 1440,
+	wide: 1920
 } as const satisfies Record<string, number>;
 
 export const icon = {

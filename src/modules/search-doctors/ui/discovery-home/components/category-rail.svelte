@@ -28,9 +28,7 @@
 	};
 </script>
 
-<div
-	class="-mx-1 flex gap-5 overflow-x-auto px-1 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
->
+<div class="-mx-1 scrollbar-none flex gap-5 overflow-x-auto px-1 py-2">
 	{#each categories as category (category.id)}
 		{@const Icon = categoryIcons[category.id]}
 		{@const isSelected = category.id === activeCategory}
