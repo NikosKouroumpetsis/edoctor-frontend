@@ -61,6 +61,7 @@ export function useDoctorProfileScreen(slug: () => string) {
 		get backHref() {
 			return resolve(localize('/doctors') as Pathname);
 		},
+		href: (path: string) => resolve(localize(path) as Pathname),
 		onSignIn: signIn,
 		onRetry: () => void invalidateAll()
 	};

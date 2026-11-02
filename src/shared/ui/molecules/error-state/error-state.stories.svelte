@@ -79,7 +79,7 @@
 			<ErrorState
 				title="Δεν μπορέσαμε να φορτώσουμε τους γιατρούς"
 				description="Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά."
-				actionLabel="Δοκιμή ξανά"
+				actionLabel="Δοκιμάστε ξανά"
 				onActionPress={() => {}}
 				variant="framed"
 			>

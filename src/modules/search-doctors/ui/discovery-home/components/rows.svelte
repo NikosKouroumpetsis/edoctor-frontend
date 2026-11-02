@@ -53,7 +53,7 @@
 	const rowHref = (criteria: SearchDoctorsCriteria | null) =>
 		criteria ? searchResultsHref(resultsPath, criteria) : resultsPath;
 
-	/** «Δοκιμή ξανά» (U-20, app = web): only what failed is asked again — a streamed row, or a category's scope or rows. */
+	/** «Δοκιμάστε ξανά» (U-20, app = web): only what failed is asked again — a streamed row, or a category's scope or rows. */
 	function retry() {
 		if (discovery.shownCategory === 'all') void streamed.retry();
 		else void home.refetch();
@@ -155,7 +155,7 @@
 	class="flex flex-col gap-6 transition-opacity duration-standard ease-standard data-[leaving=true]:opacity-0"
 >
 	<!-- The application's order (`discovery-rows`): waiting ⇒ failed ⇒ the rows ⇒ empty. A failed section is
-	     the error with «Δοκιμή ξανά», never a row left out (app = web, U-20). -->
+	     the error with «Δοκιμάστε ξανά», never a row left out (app = web, U-20). -->
 	{#if discovery.shownCategory === 'all'}
 		{#if streamed.isError}
 			{@render errorState()}

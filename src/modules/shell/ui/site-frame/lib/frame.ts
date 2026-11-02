@@ -158,9 +158,11 @@ export function showsSiteFooter(basePath: string): boolean {
 /**
  * 🔴 Π1 (wave 1.5, screen 5): whether the phone's capsule shows on `basePath` (the path without the language) — every
  * page but a doctor's profile and its windows (`/doctors/<slug>`, `/doctors/<slug>/details/<section>`), a page over
- * the tabs with its own booking bar at the bottom, as in the application and on Airbnb's 402.
+ * the tabs with its own booking bar at the bottom, as in the application and on Airbnb's 402. 🔴 U-61.2 Ε3: an error
+ * page (`status` ≥ 400) shows it everywhere, a doctor's «δεν βρέθηκε» too (no booking bar there).
  */
-export function showsBottomNav(basePath: string): boolean {
+export function showsBottomNav(basePath: string, status = 200): boolean {
+	if (status >= 400) return true;
 	const path = basePath.length > 1 ? basePath.replace(/\/+$/, '') : basePath;
 	return !/^\/doctors\/[^/]+(?:\/details\/[^/]+)?$/u.test(path);
 }

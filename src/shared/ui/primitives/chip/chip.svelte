@@ -33,6 +33,43 @@
 		tinted: 'text-primary',
 		outline: 'text-foreground'
 	};
+	// 🔴 U-58.1 (`phoneVariant`): the chosen look per width zone, written whole for the theme's scanner — below 744 one
+	// variant (the application's outline on the mobile web), from 744 another (the web's tint). The idle look is one.
+	type ZonedLook = { pill: string; text: string; icon: string };
+	const phoneActive: Record<ChipVariant, ZonedLook> = {
+		filled: {
+			pill: 'max-tablet:border-primary max-tablet:bg-primary',
+			text: 'max-tablet:text-primary-foreground',
+			icon: 'max-tablet:text-primary'
+		},
+		tinted: {
+			pill: 'max-tablet:border-primary max-tablet:bg-primary/10',
+			text: 'max-tablet:text-primary-text',
+			icon: 'max-tablet:text-primary'
+		},
+		outline: {
+			pill: 'max-tablet:border-foreground max-tablet:bg-background max-tablet:ring-1 max-tablet:ring-foreground max-tablet:ring-inset',
+			text: 'max-tablet:text-foreground',
+			icon: 'max-tablet:text-foreground'
+		}
+	};
+	const tabletActive: Record<ChipVariant, ZonedLook> = {
+		filled: {
+			pill: 'tablet:border-primary tablet:bg-primary',
+			text: 'tablet:text-primary-foreground',
+			icon: 'tablet:text-primary'
+		},
+		tinted: {
+			pill: 'tablet:border-primary tablet:bg-primary/10',
+			text: 'tablet:text-primary-text',
+			icon: 'tablet:text-primary'
+		},
+		outline: {
+			pill: 'tablet:border-foreground tablet:bg-background tablet:ring-1 tablet:ring-foreground tablet:ring-inset',
+			text: 'tablet:text-foreground',
+			icon: 'tablet:text-foreground'
+		}
+	};
 
 	// The button is the 48 touch box; the drawn pill (32 or 40) sits inside it and grows with its label.
 	const chipBox =
@@ -59,11 +96,21 @@
 		onRemove?: () => void;
 		/** `filled` solid primary when active, `tinted` the primary tint, `outline` the 2 dark ring (U-24.3). */
 		variant?: ChipVariant;
+		/** Below 744 the chosen look of another variant (U-58.1: the application's outline); `variant` from 744. */
+		phoneVariant?: ChipVariant;
 		size?: ChipSize;
 		/** Classes of the label: a text role only, never a colour. */
 		textClass?: string;
+		/**
+		 * Web only (U-57.2, U-60.1): the chip is a link (`<a href>`, before JavaScript too) — a filter kept in the
+		 * address (`?type=`), a jump to an anchor. `selected` is then `aria-current`; no group, no ✕.
+		 */
+		href?: string;
 		ref?: HTMLButtonElement | null;
 	};
+
+	// A link is never `:enabled`: its hover darkens the border without that state (U-28.4).
+	const linkHover = 'can-hover:group-hover:border-foreground';
 </script>
 
 <script lang="ts">
@@ -81,12 +128,14 @@
 		removable = false,
 		onRemove,
 		variant = 'filled',
+		phoneVariant,
 		size = 'md',
 		textClass,
 		disabled = false,
 		type = 'button',
 		class: className,
 		onclick,
+		href,
 		ref = $bindable(null),
 		...restProps
 	}: ChipProps = $props();
@@ -104,7 +153,21 @@
 	);
 	onDestroy(() => unregister?.());
 	const active = $derived(selected || removable);
-	const activeText = $derived(activeTextClasses[variant]);
+	const activeText = $derived(
+		phoneVariant
+			? cn(phoneActive[phoneVariant].text, tabletActive[variant].text)
+			: activeTextClasses[variant]
+	);
+	const activePill = $derived(
+		phoneVariant
+			? cn(phoneActive[phoneVariant].pill, tabletActive[variant].pill)
+			: pillLooks[variant].active
+	);
+	const activeIcon = $derived(
+		phoneVariant
+			? cn(phoneActive[phoneVariant].icon, tabletActive[variant].icon)
+			: activeIconClasses[variant]
+	);
 	// The outline's count stays muted when chosen (the prototype's `.fchip small`), the fills' take the label's colour.
 	const countTone = $derived(
 		active && variant !== 'outline' ? activeText : 'text-muted-foreground'
@@ -116,34 +179,18 @@
 	}
 </script>
 
-<button
-	bind:this={ref}
-	{type}
-	{disabled}
-	role={isRadio ? 'radio' : undefined}
-	aria-checked={isRadio ? selected : undefined}
-	aria-pressed={!isRadio && !removable ? selected : undefined}
-	data-slot="chip"
-	data-state={active ? 'on' : 'off'}
-	data-roving-item={isRadio ? '' : undefined}
-	tabindex={tabIndex}
-	class={cn(chipBox, className)}
-	onclick={handleClick}
-	{...restProps}
->
+{#snippet pill()}
 	<span
 		data-slot="chip-pill"
 		class={cn(
 			'inline-flex flex-row items-center justify-center gap-1.5 rounded-full border',
-			active ? pillLooks[variant].active : pillLooks[variant].idle,
+			active ? activePill : pillLooks[variant].idle,
+			!active && href && linkHover,
 			pillSizes[size]
 		)}
 	>
 		{#if icon}
-			<Ionicon
-				name={icon}
-				class={cn('icon-sm', active ? activeIconClasses[variant] : 'text-foreground')}
-			/>
+			<Ionicon name={icon} class={cn('icon-sm', active ? activeIcon : 'text-foreground')} />
 		{/if}
 		{#snippet labelText()}
 			<span
@@ -179,4 +226,35 @@
 			</span>
 		{/if}
 	</span>
-</button>
+{/snippet}
+
+{#if href}
+	<a
+		{href}
+		aria-current={selected ? 'page' : undefined}
+		data-slot="chip"
+		data-state={selected ? 'on' : 'off'}
+		class={cn(chipBox, className)}
+		{...restProps as Record<string, unknown>}
+	>
+		{@render pill()}
+	</a>
+{:else}
+	<button
+		bind:this={ref}
+		{type}
+		{disabled}
+		role={isRadio ? 'radio' : undefined}
+		aria-checked={isRadio ? selected : undefined}
+		aria-pressed={!isRadio && !removable ? selected : undefined}
+		data-slot="chip"
+		data-state={active ? 'on' : 'off'}
+		data-roving-item={isRadio ? '' : undefined}
+		tabindex={tabIndex}
+		class={cn(chipBox, className)}
+		onclick={handleClick}
+		{...restProps}
+	>
+		{@render pill()}
+	</button>
+{/if}

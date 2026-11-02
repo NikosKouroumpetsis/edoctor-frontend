@@ -12,6 +12,12 @@ describe('the frame’s rules per page', () => {
 		expect(showsBottomNav('/doctors/dr-athena/other')).toBe(true);
 	});
 
+	it('U-61.2 Ε3: an error page shows the capsule on every path — a doctor’s «δεν βρέθηκε» too (no booking bar there)', () => {
+		expect(showsBottomNav('/doctors/den-yparxei', 404)).toBe(true);
+		expect(showsBottomNav('/doctors/dr-athena', 503)).toBe(true);
+		expect(showsBottomNav('/doctors/dr-athena', 200)).toBe(false);
+	});
+
 	it('MINOR-4 (r1, U-25.2): a profile is no page of the search, and keeps the footer', () => {
 		expect(isExploreFlow('/doctors/dr-athena')).toBe(false);
 		expect(showsSiteFooter('/doctors/dr-athena')).toBe(true);

@@ -1,20 +1,23 @@
 import { m } from '$paraglide/messages.js';
 import { resolveMediaUrl } from '$shared/lib/http';
+import { extractPlainText } from '$shared/lib/rich-text';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type {
 	ArticleAuthorView,
 	ArticlePublicView,
 	ArticleRichTextDoc,
-	ArticleRichTextNode,
 	HomeArticlesFeed
 } from '$modules/articles/api/types';
+
+// Common v2 §B: the ONE plain-text extractor of rich text (both dialects) is the shared one, the application's rules.
+export { extractPlainText };
 
 /** One article of the home's last row (U-20): the words and the photo it shows, in the page's language. */
 export type HomeArticle = {
 	id: string;
 	slug: string;
 	title: string;
-	/** «Δρ. Μαρία Παπαδοπούλου · 5΄ ανάγνωση», or the part that is known. */
+	/** «Δρ. Μαρία Παπαδοπούλου · 5΄ ανάγνωσης», or the part that is known. */
 	meta: string;
 	imageUrl: string | null;
 };
@@ -25,25 +28,20 @@ export type HomeArticlesResult = { status: 'ok'; articles: HomeArticle[] } | { s
 // Words read in a minute: the application's measure of a reading time (`articles/lib/article-card`).
 const WORDS_PER_MINUTE = 200;
 
-/** The plain text of a rich-text document, both of the backend's dialects (`content` and `children`). */
-export function extractPlainText(doc: ArticleRichTextDoc | null | undefined): string {
-	const parts: string[] = [];
-	const walk = (nodes: ArticleRichTextNode[] | null | undefined) => {
-		for (const node of nodes ?? []) {
-			if (typeof node.text === 'string' && node.text.trim()) parts.push(node.text.trim());
-			walk(node.content);
-			walk(node.children);
-		}
-	};
-	walk(doc?.content);
-	walk(doc?.blocks);
-	return parts.join(' ');
-}
-
-/** The reading time in whole minutes, at least one; `0` for a body the feed did not send. */
-export function readingMinutes(doc: ArticleRichTextDoc | null | undefined): number {
-	const words = extractPlainText(doc).split(/\s+/u).filter(Boolean).length;
-	return words > 0 ? Math.max(1, Math.round(words / WORDS_PER_MINUTE)) : 0;
+/**
+ * 🔴 U-57.5 Ε3 (app = web): the reading time in whole minutes, ROUNDED UP (200 words a minute), at least one; `0` for
+ * a body the feed did not send. One document or several (an article's sections), counted as one text.
+ */
+export function readingMinutes(
+	doc: ArticleRichTextDoc | readonly (ArticleRichTextDoc | null | undefined)[] | null | undefined
+): number {
+	const docs = Array.isArray(doc) ? doc : [doc];
+	const words = docs
+		.map((entry) => extractPlainText(entry))
+		.join(' ')
+		.split(/\s+/u)
+		.filter(Boolean).length;
+	return words > 0 ? Math.max(1, Math.ceil(words / WORDS_PER_MINUTE)) : 0;
 }
 
 /** The primary author's name, else the first author with one, else none (the application's rule). */

@@ -11,7 +11,7 @@ import type { PageServerLoad } from './$types';
  * `categories` resolves immediately so the rail renders with the frame. Each home section and the articles are
  * returned as un-awaited promises, so SvelteKit streams them into the document as the backend responds —
  * skeletons while pending (the doctors' rows only), cards once resolved. This is the `all` view; category
- * filtering is handled client-side by `useHomeSections`. «Δοκιμή ξανά» asks the failed sections again, in the browser.
+ * filtering is handled client-side by `useHomeSections`. «Δοκιμάστε ξανά» asks the failed sections again, in the browser.
  */
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	const lang = getPageLocale(url);

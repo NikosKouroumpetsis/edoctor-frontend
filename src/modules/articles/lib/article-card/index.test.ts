@@ -12,12 +12,19 @@ const words = (count: number) =>
 	Array.from({ length: count }, (_, index) => `λέξη${index}`).join(' ');
 
 describe('articles::lib::article-card', () => {
-	it('U-20: the reading time is the application’s — 200 words a minute, rounded, at least one; none without a body', () => {
+	it('U-57.5 Ε3 (app = web; αντικαθιστά το στρογγύλεμα του U-20): 200 words a minute, ROUNDED UP, at least one; none without a body', () => {
 		expect(readingMinutes({ content: [{ type: 'paragraph', text: words(1000) }] })).toBe(5);
 		expect(readingMinutes({ content: [{ type: 'paragraph', text: words(20) }] })).toBe(1);
-		expect(readingMinutes({ content: [{ type: 'paragraph', text: words(299) }] })).toBe(1);
-		expect(readingMinutes({ content: [{ type: 'paragraph', text: words(300) }] })).toBe(2);
+		expect(readingMinutes({ content: [{ type: 'paragraph', text: words(200) }] })).toBe(1);
+		expect(readingMinutes({ content: [{ type: 'paragraph', text: words(201) }] })).toBe(2);
+		expect(readingMinutes({ content: [{ type: 'paragraph', text: words(1210) }] })).toBe(7);
 		expect(readingMinutes(null)).toBe(0);
+	});
+
+	it('U-57.4: several documents (an article\u2019s sections) are counted as ONE text', () => {
+		const half = { content: [{ type: 'paragraph', text: words(150) }] };
+		expect(readingMinutes([half, half])).toBe(2);
+		expect(readingMinutes([null, half])).toBe(1);
 	});
 
 	it('U-20: reads both rich-text dialects (`content` and `children`, `blocks`)', () => {
@@ -35,8 +42,7 @@ describe('articles::lib::article-card', () => {
 		expect(authorName(null)).toBeNull();
 	});
 
-	// Live r1 (3): «1΄ / ανάγνωση» broke over two lines; the number and its word are held by a no-break space.
-	it('U-20: the home card — «συγγραφέας · χρόνος ανάγνωσης» (the minutes never part from «ανάγνωση»), the photo or none', () => {
+	it('U-20 / U-57.5 Ε3: the home card — «συγγραφέας · N΄ ανάγνωσης» (the minutes never part from their word), the photo or none', () => {
 		const article = buildHomeArticle(
 			{
 				id: 'a1',
@@ -52,7 +58,7 @@ describe('articles::lib::article-card', () => {
 			id: 'a1',
 			slug: 'kardia',
 			title: 'Η υγεία της καρδιάς',
-			meta: 'Δρ. Μαρία Παπαδοπούλου · 2΄\u00a0ανάγνωση',
+			meta: 'Δρ. Μαρία Παπαδοπούλου · 2΄\u00a0ανάγνωσης',
 			imageUrl: 'https://cdn.example.com/a.jpg'
 		});
 		const bare = buildHomeArticle({ id: 'a2', slug: 's', title: 'Τ', image: null }, 'el');

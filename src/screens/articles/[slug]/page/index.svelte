@@ -1,16 +1,30 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
-	import PlaceholderPage from '$modules/shell/ui/placeholder-page';
-	import { m } from '$paraglide/messages.js';
+	import ArticleDetail from '$modules/articles/ui/detail';
+	import { useArticleScreen } from '../hooks';
+	import type { ArticleScreenProps } from '../types';
 
-	const currentLocale = $derived(getPageLocale(page.url));
-	const messageOptions = $derived({ locale: currentLocale });
+	let { data }: ArticleScreenProps = $props();
+
+	const screen = useArticleScreen(
+		() => data.article.slug,
+		() => data.article.type,
+		() => data.article.canonicalUrl
+	);
 </script>
 
-<!-- One article (wave 1.5, screen 6): the placeholder at its final address (`/articles/[slug]`). -->
-<PlaceholderPage
-	eyebrow={m.nav_articles({}, messageOptions)}
-	title={m.article_page_title({}, messageOptions)}
-	body={m.placeholder_page_body({}, messageOptions)}
-/>
+<!-- One article (wave 1.5, screen 6, U-57.4): the articles module's page, drawn whole by the server. -->
+<main class="bg-card">
+	<ArticleDetail
+		article={data.article}
+		related={data.related}
+		locale={screen.locale}
+		listHref={screen.listHref}
+		kindHref={screen.kindHref}
+		articleHref={screen.articleHref}
+		doctorHref={screen.doctorHref}
+		internalHref={screen.internalHref}
+		onAnchor={screen.onAnchor}
+		canonicalUrl={screen.canonicalUrl}
+		alternateUrls={screen.alternateUrls}
+	/>
+</main>

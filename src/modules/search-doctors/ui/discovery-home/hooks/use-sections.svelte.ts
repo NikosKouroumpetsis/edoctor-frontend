@@ -19,7 +19,7 @@ export type HomeSectionsController = {
 	readonly isError: boolean;
 	/** The sections that have doctors, in the application's order. */
 	readonly sections: HomeSection[];
-	/** «Δοκιμή ξανά» (U-20, the application's `retry`): the scope first while it is unknown, else only what failed. */
+	/** «Δοκιμάστε ξανά» (U-20, the application's `retry`): the scope first while it is unknown, else only what failed. */
 	refetch: () => Promise<void>;
 };
 
@@ -96,7 +96,7 @@ export function useHomeSections(
 
 	/**
 	 * The application's `hasFailed`: the scope or ANY section failed, or could not be asked (paused: no network) —
-	 * reported with the errors and asked again by «Δοκιμή ξανά», never an empty home (app = web, U-20).
+	 * reported with the errors and asked again by «Δοκιμάστε ξανά», never an empty home (app = web, U-20).
 	 */
 	const hasFailed = () => {
 		const states = sectionStates();

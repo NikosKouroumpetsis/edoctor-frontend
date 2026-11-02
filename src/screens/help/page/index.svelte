@@ -1,16 +1,24 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
-	import PlaceholderPage from '$modules/shell/ui/placeholder-page';
-	import { m } from '$paraglide/messages.js';
+	import HelpCenter from '$modules/help/ui/center';
+	import { useHelpScreen } from '../hooks';
+	import type { HelpScreenProps } from '../types';
 
-	const currentLocale = $derived(getPageLocale(page.url));
-	const messageOptions = $derived({ locale: currentLocale });
+	let { data }: HelpScreenProps = $props();
+
+	const screen = useHelpScreen();
 </script>
 
-<!-- The help centre and its FAQ (wave 1.5, screen 8): the placeholder at its final address. -->
-<PlaceholderPage
-	eyebrow={m.nav_help({}, messageOptions)}
-	title={m.help_page_title({}, messageOptions)}
-	body={m.placeholder_page_body({}, messageOptions)}
-/>
+<!-- The help centre and its FAQ (wave 1.5, screen 8, U-60.1): the CMS page `faq` in the help module's page. -->
+<main class="bg-card">
+	<HelpCenter
+		faq={data.faq}
+		locale={screen.locale}
+		helpHref={screen.helpHref}
+		backHref={screen.backHref}
+		internalHref={screen.internalHref}
+		supportEmail={screen.supportEmail}
+		onRetry={screen.onRetry}
+		canonicalUrl={screen.canonicalUrl}
+		alternateUrls={screen.alternateUrls}
+	/>
+</main>

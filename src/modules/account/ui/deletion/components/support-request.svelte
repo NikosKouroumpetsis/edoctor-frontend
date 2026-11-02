@@ -4,7 +4,7 @@
 	import { m } from '$paraglide/messages.js';
 	import type { DeletionSupportProps } from '../types';
 
-	let { messageOptions, supportEmail }: DeletionSupportProps = $props();
+	let { messageOptions, supportEmail, headingClass }: DeletionSupportProps = $props();
 
 	const subject = $derived(
 		encodeURIComponent(m.account_deletion_support_subject({}, messageOptions))
@@ -17,33 +17,30 @@
 	]);
 </script>
 
-<section
-	aria-labelledby="account-deletion-support-title"
-	class="rounded-xl border border-border/70 bg-card p-card"
->
-	<h2
-		id="account-deletion-support-title"
-		class="text-heading-md text-foreground tablet:text-heading-lg"
-	>
+<!-- 🔴 U-62.1 (the prototype 10, Π3; U-62.2 Ε3): «Χωρίς πρόσβαση στην εφαρμογή» — the address on its own line (18/600),
+     the three notes, and «Στείλτε email» as the dark pill (the main action of screens 5/9), a `mailto` with its
+     subject. -->
+<section aria-labelledby="without-the-app" data-slot="account-deletion-support">
+	<h2 id="without-the-app" class={headingClass}>
 		{m.account_deletion_support_title({}, messageOptions)}
 	</h2>
-	<p class="mt-4 text-body-lg text-foreground">
-		{m.account_deletion_support_body({}, messageOptions)}
-	</p>
-	<p class="mt-2 text-title-lg break-words text-foreground">{supportEmail}</p>
-	<ul class="mt-4 flex list-disc flex-col gap-2 pl-5 text-body-md text-muted-foreground">
+	<p class="mb-2">{m.account_deletion_support_body({}, messageOptions)}</p>
+	<p class="mb-4 text-title-sm wrap-anywhere text-foreground">{supportEmail}</p>
+	<ul class="mb-4 list-disc pl-6">
 		{#each notes as note (note)}
-			<li>{note}</li>
+			<li class="mb-2.5 pl-1 last:mb-0">{note}</li>
 		{/each}
 	</ul>
 	<Button
 		href={`mailto:${supportEmail}?subject=${subject}`}
-		size="lg"
+		tone="contrast"
+		radius="full"
 		label={m.account_deletion_support_action({}, messageOptions)}
-		class="mt-6 w-full tablet:w-auto"
+		textClass="text-body-md"
+		class="mt-2"
 	>
 		{#snippet leading()}
-			<Ionicon name="mail-outline" class="icon-sm text-primary-foreground" />
+			<Ionicon name="mail-outline" class="icon-md text-secondary-foreground" />
 		{/snippet}
 	</Button>
 </section>

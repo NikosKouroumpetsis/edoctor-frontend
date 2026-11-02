@@ -358,6 +358,31 @@
 	mask-image: linear-gradient(#000 85%, transparent);
 }
 
+/*
+ * The text pages' reading sizes (U-57.4, U-59.1, the approved prototypes 06/07/10): an article's body 18/28 and a
+ * legal text's 16/26. The sizes are the roles' (`title-sm`, `body-lg`); the leading has no shared name (the
+ * prototypes' «new token»), so it lives here, web-only, as a ratio of its size.
+ */
+@utility text-article-body {
+	font-size: var(--text-title-sm);
+	line-height: calc(28 / 18);
+	font-weight: 400;
+}
+
+@utility text-document-body {
+	font-size: var(--text-body-lg);
+	line-height: calc(26 / 16);
+	font-weight: 400;
+}
+
+/*
+ * Where an anchor of a text page stops below 744 (the prototypes' 132): under the phone's bar (64) and the sticky
+ * «Σε αυτό το …» row (52) plus 16. From 744 the pages take `scroll-mt-card-sticky-top` (104).
+ */
+@utility scroll-mt-document {
+	scroll-margin-top: calc(var(--spacing-bar-top) + var(--spacing-reading-row) + --spacing(4));
+}
+
 @layer base {
 	* {
 		@apply border-border outline-ring/50;

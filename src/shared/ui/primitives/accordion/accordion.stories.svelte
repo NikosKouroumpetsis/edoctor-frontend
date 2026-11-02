@@ -4,7 +4,8 @@
 		Accordion,
 		AccordionItem,
 		AccordionTrigger,
-		AccordionContent
+		AccordionContent,
+		AccordionDetails
 	} from '$shared/ui/primitives/accordion';
 
 	const faqs = [
@@ -97,5 +98,31 @@
 				</AccordionItem>
 			{/each}
 		</Accordion>
+	{/snippet}
+</Story>
+
+<!-- U-60.1 (web): the same accordion as a native `<details>`: the answers are in the page's markup and open without
+     JavaScript; once the page is alive, the same 220 ms motion. One open at a time with a shared `name`. -->
+<Story name="Details (works without JavaScript)">
+	{#snippet template()}
+		<div class="w-full max-w-form">
+			{#each faqs as faq (faq.value)}
+				<AccordionDetails summary={faq.question} summaryAs="h3" name="faq">
+					<p class="text-body-md text-muted-foreground">{faq.answer}</p>
+				</AccordionDetails>
+			{/each}
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Details with an eyebrow">
+	{#snippet template()}
+		<div class="w-full max-w-form">
+			{#each faqs as faq, index (faq.value)}
+				<AccordionDetails summary={faq.question} eyebrow="Κατηγορία" open={index === 0}>
+					<p class="text-body-md text-muted-foreground">{faq.answer}</p>
+				</AccordionDetails>
+			{/each}
+		</div>
 	{/snippet}
 </Story>

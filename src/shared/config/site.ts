@@ -23,3 +23,20 @@ export function siteUrl(path: string): string {
 	const { pathname, search } = new URL(path, `${origin}/`);
 	return `${origin}${pathname}${search}`;
 }
+
+/**
+ * 🔴 Common v2 (U-28.4, U-57.4): a canonical address the backend proposes (`canonicalUrl` of an article or a CMS page), kept ONLY
+ * when it is `https:` on the site's own origin; anything else (another host, `http:`, a path, a malformed value) is
+ * `null` and the page writes its own.
+ */
+export function ownSiteUrl(candidate: string | null | undefined): string | null {
+	if (typeof candidate !== 'string' || !candidate.trim()) return null;
+	let url: URL;
+	try {
+		url = new URL(candidate.trim());
+	} catch {
+		return null;
+	}
+	if (url.protocol !== 'https:' || url.username || url.password) return null;
+	return url.origin === getSiteOrigin() ? url.href : null;
+}

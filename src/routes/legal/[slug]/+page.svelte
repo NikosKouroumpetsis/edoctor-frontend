@@ -5,4 +5,4 @@
 	let { data }: { data: PageData } = $props();
 </script>
 
-<LegalScreen slug={data.slug} />
+<LegalScreen {data} />

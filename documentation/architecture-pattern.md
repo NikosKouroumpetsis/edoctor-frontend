@@ -862,10 +862,10 @@ Wave 1.0 (D1) adds, in the same shape:
   the route layout composes it into the frame as a snippet (`+layout.svelte`: `<SiteFrame {popularSearches}>`).
 - `src/modules/articles` — the home's last row (`api/feed.ts`, `lib/article-card`, `ui/home-row`), composed with the
   doctors' rows by `src/screens/home`.
-- The placeholders of wave 1.5 at their final addresses: `/articles`, `/articles/[slug]`, `/help`,
-  `/doctors/[slug]`, `/legal/[slug]` (only the application's three slugs; any other is a 404), each screen mirrored
-  under its route as the application's (`src/screens/articles/[slug]`, `src/screens/doctors/[slug]`,
-  `src/screens/legal/[slug]`).
+- The addresses of wave 1.5 (built since: screen 5 and screens 6–10, below): `/articles`, `/articles/[slug]`,
+  `/help`, `/doctors/[slug]`, `/legal`, `/legal/[slug]` (only the application's three slugs; any other is a 404), each
+  screen mirrored under its route as the application's (`src/screens/articles/[slug]`, `src/screens/doctors/[slug]`,
+  `src/screens/legal`, `src/screens/legal/[slug]`).
 - The guest's account menu is ONE list (`site-frame/lib/frame.ts` `buildAccountEntries`) drawn by the ☰ menu from
   744 and by the capsule's «Προφίλ» sheet below it (U-19.1).
 
@@ -991,3 +991,33 @@ Wave 1.5 · screen 5 adds the doctor's profile `/doctors/[slug]` and its windows
   which re-exports `formatInstantDayTime`; `msUntilNextPlatformDay` for the midnight redraw, S-34.1), the new
   `MediaGallery` and `RevealingPhoto` (the application's names and props), and the new props of `TwoColumnDetail`,
   `StickyActionBar` and `MapView` (`styling-guidelines.md`).
+
+Wave 1.5 · screens 6–10 (U-57 … U-62, common v2) add the text pages and the site's status page; from 744 the approved
+prototypes 06–10, below 744 the application's design (U-58.1) — but the articles' list itself (its featured and its
+cards) the prototype 06 v3's at every width (U-63) — the zones by CSS only (U-03.1). One declared exception,
+in a module and for behaviour only, never for drawing: the help centre's field reads `matchMedia(min-width: 744)` while
+it is typed in, to filter as typed below 744 (the application's) and suggest from 744 — the server's page and every
+look stay CSS (`help/ui/center/page/index.svelte`, NIT-r2-2):
+
+- Articles (`src/modules/articles`): `api/list.ts` (the list as ONE infinite query of 12 a page, `?type ?q ?service`
+  validated at the route, the envelope's `meta` through `httpGetWithMeta`, the suggestions' query asked after 250 ms
+  of quiet), `api/article.ts` `loadArticle` (the article and «Περισσότερα άρθρα» at once, never throws), `lib/article-list`
+  and `lib/article` (the views, the SEO and the JSON-LD `Article`), `ui/list` (the list page and its hook),
+  `ui/detail` (the article on `DocumentPage`), `ui/article-card` (`rail` the home's, `grid` «Περισσότερα», `list` the
+  list's — the prototype 06 v3's card at every width, U-63; `framed` the application's framed card below 744, kept
+  unused, U-30.2). Routes `routes/articles/+page.server.ts` and
+  `routes/articles/[slug]/+page.server.ts` (a 404 the site's 404, a failed read its 503).
+- Legal texts (`src/modules/legal`): `api/page` `loadContentPage` (ONE CMS read, never throws; also the FAQ's),
+  `lib/document` (the edition notice, the language note, the meta), `ui/document` (a text on `DocumentPage`, `phone="app"`),
+  `ui/directory` (the «Νομικά» page at `/legal`, U-59.3 Ε2).
+- Help centre (`src/modules/help`): `config/faq.ts`, `types.ts` (`HelpFaqSource`), `lib/faq` (`buildFaq`: an H2 a topic,
+  an H3 a question, an H4 part of the answer — the application's levels; popular by `attrs.popularRank`; a page
+  without that structure is `text`, drawn as a legal text, an empty one says so), `ui/center` (ONE page: search with
+  suggestions from 744, filtering as typed below 744, topic chips, popular, accordions, anchors). Route
+  `routes/help/+page.server.ts`.
+- Account deletion (`src/modules/account/ui/deletion`, `lib/deletion`): the legal texts' template (U-62.1).
+- Status page: the root `routes/+error.svelte` ⇒ `src/screens/home` `SiteErrorScreen` ⇒ `modules/shell/ui/status-page`
+  (`lib/status.ts`: the words and the ways on of a 404 and of a failure; `noindex`, inside the frame, the capsule shown,
+  `frame.ts` `showsBottomNav(path, status)`). A doctor nobody may see draws the same `StatusPage`.
+- Shared (`shared.md`): `DocumentPage`, `PageBar`, `ListHeader`, `StatusPage`/`StatusArt`, `SearchPill`, `RichText`,
+  `LinkRows`, `StatePanel`, the `Chip`'s `phoneVariant`, the `AccordionDetails` and `$shared/lib/rich-text`, `seo`, `text`.

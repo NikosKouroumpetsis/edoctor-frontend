@@ -32,6 +32,19 @@ describe('cn', () => {
 		expect(cn('icon-md text-foreground')).toBe('icon-md text-foreground');
 	});
 
+	it('common v2 §A: the reading sizes of `layout.css` are text sizes — a colour after them never drops them', () => {
+		expect(cn('min-w-0 text-article-body text-foreground')).toBe(
+			'min-w-0 text-article-body text-foreground'
+		);
+		expect(cn('text-document-body text-muted-foreground')).toBe(
+			'text-document-body text-muted-foreground'
+		);
+		expect(
+			cn('text-body-lg leading-relaxed tablet:text-document-body tablet:text-foreground')
+		).toBe('text-body-lg leading-relaxed tablet:text-document-body tablet:text-foreground');
+		expect(cn('text-document-body', 'text-article-body')).toBe('text-article-body');
+	});
+
 	it('keeps an elevation next to a shadow colour', () => {
 		expect(cn('shadow-raised shadow-primary/20')).toBe('shadow-raised shadow-primary/20');
 	});

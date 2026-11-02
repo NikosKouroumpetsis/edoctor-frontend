@@ -44,7 +44,7 @@
 		() => discovery.activeCategory,
 		() => getPageLocale(page.url)
 	);
-	// The `all` view: the streamed SSR sections, «Δοκιμή ξανά» asking only the failed ones again.
+	// The `all` view: the streamed SSR sections, «Δοκιμάστε ξανά» asking only the failed ones again.
 	const streamed = useStreamedSections(
 		() => data.sections,
 		() => getPageLocale(page.url)

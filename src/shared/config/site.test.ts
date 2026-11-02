@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { env } from '$env/dynamic/public';
-import { getSiteOrigin, siteUrl } from './site';
+import { getSiteOrigin, ownSiteUrl, siteUrl } from './site';
 
 afterEach(() => {
 	delete env.PUBLIC_SITE_ORIGIN;
@@ -51,4 +51,34 @@ describe('siteUrl', () => {
 		);
 		expect(siteUrl('//evil.example/doctors/x')).toBe('https://web.example/doctors/x');
 	});
+});
+
+describe('ownSiteUrl', () => {
+	it('common v2 (U-28.4, MINOR-5 of r1): the backend’s canonical stays only when it is https on our own origin', () => {
+		env.PUBLIC_SITE_ORIGIN = 'https://web.example';
+		expect(ownSiteUrl('https://web.example/articles/x')).toBe('https://web.example/articles/x');
+		expect(ownSiteUrl(' https://web.example/legal/terms-of-use?edition=upcoming ')).toBe(
+			'https://web.example/legal/terms-of-use?edition=upcoming'
+		);
+	});
+
+	it.each([
+		null,
+		undefined,
+		'',
+		'   ',
+		'/articles/x',
+		'http://web.example/articles/x',
+		'https://evil.example/articles/x',
+		'https://web.example.evil.example/x',
+		'https://user:pass@web.example/x',
+		'javascript:alert(1)',
+		'not a url'
+	])(
+		'common v2 (negative): %j is never our canonical — `null`, the page writes its own',
+		(value) => {
+			env.PUBLIC_SITE_ORIGIN = 'https://web.example';
+			expect(ownSiteUrl(value)).toBeNull();
+		}
+	);
 });

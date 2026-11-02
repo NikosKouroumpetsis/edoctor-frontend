@@ -101,7 +101,7 @@
 	{/snippet}
 
 	{#snippet bottomNav()}
-		{#if showsBottomNav(basePath)}
+		{#if showsBottomNav(basePath, page.status)}
 			<BottomNav
 				aria-label={m.bottom_navigation({}, messageOptions)}
 				items={buildBottomNavItems(
@@ -122,8 +122,8 @@
 		popular={popularSearches}
 		legalNote={m.footer_rights({}, messageOptions)}
 		legalLinks={buildLegalLinks(messageOptions, localizedHref)}
-		reserveBottomNav={showsBottomNav(basePath) ? 'tablet' : false}
-		reservePageBar={showsBottomNav(basePath) ? false : 'tablet'}
+		reserveBottomNav={showsBottomNav(basePath, page.status) ? 'tablet' : false}
+		reservePageBar={showsBottomNav(basePath, page.status) ? false : 'tablet'}
 	>
 		{#snippet actions()}
 			<button

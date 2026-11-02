@@ -11,6 +11,46 @@ export function foldSearchText(value: string): string {
 		.replace(/ς/g, 'σ');
 }
 
+/** The folded words of a search (`foldSearchText`, split on white space, empty ones dropped). */
+export function searchWords(query: string | null | undefined): string[] {
+	return foldSearchText(query ?? '')
+		.split(/\s+/u)
+		.filter(Boolean);
+}
+
+/** Whether every word of a search is somewhere in `text` (folded, anywhere inside a word). */
+export function matchesSearch(text: string, words: readonly string[]): boolean {
+	const folded = foldSearchText(text);
+	return words.every((word) => folded.includes(word));
+}
+
+/** One run of a highlighted text: its words and whether they matched the search. */
+export type HighlightRun = { text: string; match: boolean };
+
+/**
+ * U-57.3 / U-60.1 (the prototypes' `hl`): `text` cut into runs, the parts that match a word of the search marked —
+ * anywhere inside a word, ignoring case and accents. Each character is folded on its own, so a place found in the
+ * folded text is the same place in the text (a letter never folds into two).
+ */
+export function highlightSearch(text: string, words: readonly string[]): HighlightRun[] {
+	const chars = Array.from(text);
+	const folded = chars.map((char) => foldSearchText(char).charAt(0) || char).join('');
+	const marked = chars.map(() => false);
+	for (const word of words) {
+		if (!word) continue;
+		for (let at = folded.indexOf(word); at >= 0; at = folded.indexOf(word, at + word.length)) {
+			for (let index = at; index < at + word.length; index += 1) marked[index] = true;
+		}
+	}
+	const runs: HighlightRun[] = [];
+	chars.forEach((char, index) => {
+		const last = runs.at(-1);
+		if (last && last.match === marked[index]) last.text += char;
+		else runs.push({ text: char, match: marked[index] });
+	});
+	return runs;
+}
+
 /** A Greek letter carrying the acute, possibly behind other combining marks such as dialytika. */
 const GREEK_LETTER_WITH_ACUTE = /([Ͱ-Ͽ])([̀-ͯ]*)́/gu;
 

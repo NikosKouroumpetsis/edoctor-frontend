@@ -330,13 +330,31 @@ describe('the doctor’s profile page', () => {
 		expect(document.head.querySelector('link[rel="canonical"]')).toBeNull();
 	});
 
-	it('MINOR-6 of r1: a profile nobody may see (the route’s 404) — «Ο γιατρός δεν βρέθηκε» as the title, the way to the search, never indexed', async () => {
-		render(ErrorPage, { props: { status: 404, locale: 'el', backHref: '/doctors', onRetry } });
+	it('MINOR-6 of r1 / U-61.1 (the prototype 09 `?v=doctor`): a profile nobody may see (the route’s 404) is the site’s status page — «Ο γιατρός δεν βρέθηκε», the way to the search, never indexed', async () => {
+		render(ErrorPage, {
+			props: {
+				status: 404,
+				locale: 'el',
+				backHref: '/doctors',
+				href: (path: string) => path,
+				onRetry
+			}
+		});
 		expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Ο γιατρός δεν βρέθηκε');
-		expect(screen.getByRole('link', { name: 'Αναζήτηση γιατρών' })).toHaveAttribute(
-			'href',
-			'/doctors'
-		);
+		const searches = screen.getAllByRole('link', { name: 'Αναζήτηση γιατρών' });
+		expect(searches.length).toBeGreaterThan(0);
+		for (const link of searches) expect(link).toHaveAttribute('href', '/doctors');
+		const page = screen.getByTestId('doctor-detail-error-page');
+		expect(page).toHaveTextContent('Μπορεί το προφίλ να μην είναι πια διαθέσιμο.');
+		expect(page).toHaveTextContent('Κωδικός σφάλματος: 404');
+		expect(screen.getByText('Ωχ!')).toHaveAttribute('aria-hidden', 'true');
+		expect(page.querySelector('[data-slot="status-art"]')).toHaveAttribute('data-art', 'card');
+		const helpful = screen.getByRole('navigation', { name: 'Ίσως σας βοηθήσουν:' });
+		expect(
+			within(helpful)
+				.getAllByRole('link')
+				.map((link) => link.getAttribute('href'))
+		).toEqual(['/', '/articles', '/help']);
 		expect(screen.queryByRole('button', { name: 'Δοκιμάστε ξανά' })).toBeNull();
 		await waitFor(() => expect(document.title).toBe('Ο γιατρός δεν βρέθηκε | eDoctor'));
 		expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute(

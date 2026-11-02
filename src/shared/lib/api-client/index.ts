@@ -20,6 +20,8 @@ export type {
 	ConsentPlatform,
 	ConsentPublicRegistryResponseView,
 	ConsentToolView,
+	ContentPublicPageUpcomingView,
+	ContentPublicPageView,
 	DoctorPublicMarketplaceAvailability,
 	DoctorPublicMarketplaceCardView,
 	DoctorPublicMarketplaceFacetOptionView,

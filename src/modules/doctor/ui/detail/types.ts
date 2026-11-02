@@ -49,6 +49,8 @@ export type DoctorDetailErrorProps = {
 	status: number;
 	locale: SupportedLocale;
 	backHref: ResolvedPathname;
+	/** A path of the site in the page's language (the 404's useful links, U-61.1); as it is by default. */
+	href?: (path: string) => string;
 	/** «Δοκιμάστε ξανά» of a failed read: the route's load again. */
 	onRetry: () => void;
 };

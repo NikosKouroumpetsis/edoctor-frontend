@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages.js';
+	import { splitDuration } from '$modules/account/lib/deletion';
 	import type { DeletionSupportProps, RetainedRecord } from '../types';
 
-	let { messageOptions, supportEmail }: DeletionSupportProps = $props();
+	let { messageOptions, supportEmail, headingClass }: DeletionSupportProps = $props();
 
 	const retained = $derived<RetainedRecord[]>([
 		{
@@ -38,50 +39,37 @@
 	]);
 </script>
 
-<section
-	aria-labelledby="account-deletion-removed-title"
-	class="rounded-xl border border-border/70 bg-card p-card"
->
-	<h2
-		id="account-deletion-removed-title"
-		class="text-heading-md text-foreground tablet:text-heading-lg"
-	>
+<!-- 🔴 U-62.1 (the prototype 10, Π3; U-62.2 Ε1): «Τι σβήνεται αμέσως» and «Τι κρατάμε, γιατί και για πόσο» as H2s of
+     the text — what is kept as five H3s (a list, not a table), each with its line and «Διάρκεια:» bold before the rest
+     of the same words, a hairline above each. -->
+<section aria-labelledby="deleted-at-once" data-slot="account-deletion-removed">
+	<h2 id="deleted-at-once" class={headingClass}>
 		{m.account_deletion_removed_title({}, messageOptions)}
 	</h2>
-	<p class="mt-4 text-body-lg text-foreground">
-		{m.account_deletion_removed_body({}, messageOptions)}
-	</p>
-	<p class="mt-3 text-body-md text-muted-foreground">
-		{m.account_deletion_removed_doctor({}, messageOptions)}
-	</p>
+	<p class="mb-4">{m.account_deletion_removed_body({}, messageOptions)}</p>
+	<p>{m.account_deletion_removed_doctor({}, messageOptions)}</p>
 </section>
 
-<section
-	aria-labelledby="account-deletion-retained-title"
-	class="rounded-xl border border-border/70 bg-card p-card"
->
-	<h2
-		id="account-deletion-retained-title"
-		class="text-heading-md text-foreground tablet:text-heading-lg"
-	>
+<section aria-labelledby="what-we-keep" data-slot="account-deletion-retained">
+	<h2 id="what-we-keep" class={headingClass}>
 		{m.account_deletion_retained_title({}, messageOptions)}
 	</h2>
-	<p class="mt-4 text-body-lg text-foreground">
-		{m.account_deletion_retained_intro({}, messageOptions)}
-	</p>
-	<ul class="mt-6 flex flex-col gap-list">
+	<p>{m.account_deletion_retained_intro({}, messageOptions)}</p>
+	<ul class="mb-6">
 		{#each retained as record (record.id)}
-			<li class="flex flex-col gap-2 border-t border-border/70 pt-list">
-				<h3 class="text-title-md text-foreground">{record.title}</h3>
-				<p class="text-body-md text-muted-foreground">{record.body}</p>
-				<p class="text-body-md font-medium text-foreground">{record.duration}</p>
+			{@const duration = splitDuration(record.duration)}
+			<li class="mt-5 border-t border-border/60 pt-5">
+				<h3 class="mb-2 text-title-sm text-foreground">{record.title}</h3>
+				<p class="mb-2">{record.body}</p>
+				<p class="text-body-md text-foreground/85">
+					{#if duration.label}<strong class="font-semibold text-foreground">{duration.label}</strong
+						>{/if}{duration.label ? ` ${duration.rest}` : duration.rest}
+				</p>
 			</li>
 		{/each}
 	</ul>
-	<p class="mt-6 text-body-md text-muted-foreground">
-		{m.account_deletion_retained_private({}, messageOptions)}
-	</p>
-	<p class="mt-3 text-body-md break-words text-foreground">
+	<p class="mb-4">{m.account_deletion_retained_private({}, messageOptions)}</p>
+	<p class="wrap-break-word">
 		{m.account_deletion_record_copy({ email: supportEmail }, messageOptions)}
 	</p>
 </section>

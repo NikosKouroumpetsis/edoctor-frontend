@@ -115,7 +115,11 @@ function buildUrl(path: string, params?: HttpQueryParams): string {
 	return `${baseUrl}${normalizedPath}${query ? `?${query}` : ''}`;
 }
 
-export async function httpGet<T>(path: string, options: HttpGetOptions = {}): Promise<T> {
+/** The whole JSON envelope of a GET (`status`, `data` and, when the endpoint sends one, `meta`). */
+async function readEnvelope<T>(
+	path: string,
+	options: HttpGetOptions
+): Promise<ApiEnvelope<T> & { meta?: unknown }> {
 	const url = buildUrl(path, options.params);
 	const fetchImpl = options.fetch ?? fetch;
 
@@ -139,13 +143,25 @@ export async function httpGet<T>(path: string, options: HttpGetOptions = {}): Pr
 		throw new ApiError(`Request failed with status ${response.status}`, response.status, url);
 	}
 
-	let envelope: ApiEnvelope<T>;
-
 	try {
-		envelope = (await response.json()) as ApiEnvelope<T>;
+		return (await response.json()) as ApiEnvelope<T> & { meta?: unknown };
 	} catch {
 		throw new ApiError('Response was not valid JSON', response.status, url);
 	}
+}
 
-	return envelope.data;
+export async function httpGet<T>(path: string, options: HttpGetOptions = {}): Promise<T> {
+	return (await readEnvelope<T>(path, options)).data;
+}
+
+/**
+ * A GET whose envelope also carries `meta` (a list's total, the filter it applied: the public articles, U-57.3);
+ * `meta` is `null` when the endpoint sends none (an older backend).
+ */
+export async function httpGetWithMeta<T>(
+	path: string,
+	options: HttpGetOptions = {}
+): Promise<{ data: T; meta: unknown }> {
+	const envelope = await readEnvelope<T>(path, options);
+	return { data: envelope.data, meta: envelope.meta ?? null };
 }

@@ -109,7 +109,23 @@ export const platform = {
 		'office-map-lg': 480,
 		// The profile's two columns of a section from 744 (Airbnb's 64 between them) and its reviews' rows (40).
 		'profile-columns': 64,
-		'review-rows': 40
+		'review-rows': 40,
+		// Wave 1.5 · screens 6–10 (U-57.4, U-59.1, U-62.1, the approved prototypes 06/07/10): the `DocumentPage`'s text
+		// column from 1128 (600; 568 = `container-dialog` at 744–1127), its sticky aside (320) and the FAQ's wider
+		// column (U-60.1, 720: the top of the text pages' 600–720).
+		'document-column': 600,
+		'document-aside': 320,
+		'document-wide': 720,
+		// Their rhythm, off the 4 grid's first six steps: a heading's room above (40 · 36 in a legal text), the
+		// breadcrumbs' top (28), the sticky «Σε αυτό το …» row below 744 (52) and the gap before «Περισσότερα άρθρα»
+		// and between the FAQ's topics (56).
+		'reading-gap': 40,
+		'reading-gap-sm': 36,
+		'reading-crumbs': 28,
+		'reading-row': 52,
+		'reading-more': 56,
+		// The status page's picture from 1128 (U-61.1, the prototype 09: 440 beside the words; 320 below 1128).
+		'status-art': 440
 	},
 	// The sixth corner (U-25.4): 32, ONLY for the web's panels and windows from 744 (`rounded-panel`: the search
 	// panel 425, the filters window 568). The shared five (`radius`) stay the application's.

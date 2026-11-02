@@ -195,6 +195,15 @@
 	--spacing-office-map-lg: 480px;
 	--spacing-profile-columns: 64px;
 	--spacing-review-rows: 40px;
+	--spacing-document-column: 600px;
+	--spacing-document-aside: 320px;
+	--spacing-document-wide: 720px;
+	--spacing-reading-gap: 40px;
+	--spacing-reading-gap-sm: 36px;
+	--spacing-reading-crumbs: 28px;
+	--spacing-reading-row: 52px;
+	--spacing-reading-more: 56px;
+	--spacing-status-art: 440px;
 	--spacing-sheet-sm: 60dvh;
 	--spacing-sheet-md: 70dvh;
 	--spacing-sheet-lg: 85dvh;

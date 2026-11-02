@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { foldSearchText, toGreekUpperCase } from './index';
+import {
+	foldSearchText,
+	highlightSearch,
+	matchesSearch,
+	searchWords,
+	toGreekUpperCase
+} from './index';
 
 describe('toGreekUpperCase', () => {
 	it.each([
@@ -49,5 +55,31 @@ describe('foldSearchText', () => {
 	it('keeps the length of a precomposed letter at one and does not trim', () => {
 		expect(foldSearchText('ά')).toHaveLength(1);
 		expect(foldSearchText(' α ')).toBe(' α ');
+	});
+});
+
+describe('search words and highlight (U-57.3, U-60.1)', () => {
+	it('U-57.3 / U-60.1 (app = web): the words are folded — no accents, no case, the final sigma a sigma — and blanks dropped', () => {
+		expect(searchWords('  ΠΡΟΛΗΠΤΙΚΟΣ   Έλεγχος ')).toEqual(['προληπτικοσ', 'ελεγχοσ']);
+		expect(searchWords('')).toEqual([]);
+		expect(searchWords(null)).toEqual([]);
+	});
+
+	it('U-57.3 / U-60.1: a text matches when it holds EVERY word, anywhere inside a word, whatever its accents', () => {
+		expect(matchesSearch('Προληπτικός έλεγχος (check-up)', searchWords('προλ ελεγ'))).toBe(true);
+		expect(matchesSearch('Πώς μπορώ να ακυρώσω το ραντεβού μου;', searchWords('ΡΑΝΤΕΒΟΥ'))).toBe(
+			true
+		);
+		expect(matchesSearch('Πώς μπορώ να ακυρώσω;', searchWords('ραντεβού ακυρώσω'))).toBe(false);
+	});
+
+	it('U-57.3: the parts that match are marked in the text as it is written (accents kept)', () => {
+		expect(highlightSearch('Αιματολογικές εξετάσεις', searchWords('αιμα εξετ'))).toEqual([
+			{ text: 'Αιμα', match: true },
+			{ text: 'τολογικές ', match: false },
+			{ text: 'εξετ', match: true },
+			{ text: 'άσεις', match: false }
+		]);
+		expect(highlightSearch('Τίποτα', [])).toEqual([{ text: 'Τίποτα', match: false }]);
 	});
 });

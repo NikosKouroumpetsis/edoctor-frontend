@@ -24,7 +24,10 @@ src/shared/
   lib/          pure framework-agnostic helpers (`format`: clocks, numbers, amounts and counts per locale,
                 `calendar-day`: `formatCalendarDay`, `formatCalendarDayParts`, the application's, `format-day-time`:
                 the ONE «Σήμερα · 10:00» phrase of the cards and the profile, `debounce`, `location`,
-                `query-state`, `server-clock`, …), and the runes-based building blocks in `.svelte.ts`
+                `query-state`, `server-clock`, `rich-text`: the CMS document as allowlisted blocks and the
+                headings' ids, the application's `createAnchorIds`, `seo`: `jsonLdScript`, `text`: the search's
+                fold, words and highlight runs, `http`: `httpGet` and `httpGetWithMeta` (the envelope's `meta`),
+                …), and the runes-based building blocks in `.svelte.ts`
                 (`form`, `headless`, `debounce`)
   preferences/ theme, language, and preferences resolution
   providers/   root and subtree providers
@@ -50,6 +53,18 @@ src/shared/ui/
 ```
 
 shadcn-svelte generated components belong in `primitives`. Feature-specific composition belongs in `src/modules/<feature>`.
+
+The text pages and the lists of wave 1.5 (screens 6–10, common v2) share: `templates/document-page` (`DocumentPage`:
+breadcrumbs, eyebrow, h1, meta, notices, the ToC — right ≥1128, box 744–1127, row + sheet below 744 — the cards, «↑»),
+`organisms/page-bar` (the phone's «‹» bar, its title rising with the page's; `ground="background"` on a
+grey screen, unused since U-63 put the articles' list on white), `organisms/list-header` (the centred h1, search and chips from 744; below 744 the
+application's: the name in the bar, the chips on a dragging row with the `chosen` one brought into view),
+`organisms/status-page` (the 404/error page and its own inline pictures, `StatusArt`), `molecules/search-pill` (the
+combobox with grouped suggestions in an APG grouped listbox, ↑↓/Enter/Esc, `keep` for the address without JavaScript;
+below 744 the application's `SearchField` `inset` pill), `molecules/rich-text` (`RichText`, variants
+`article | document | legal | answer`, `highlight` for a search's words), `molecules/link-rows`,
+`molecules/state-panel`, the `Chip`'s `phoneVariant` (the application's outline below 744), `AccordionDetails`'s
+`highlight` and `Banner`'s `actionLabel`/`actionHref` and `inline`.
 
 Everything under `src/shared/ui` is generic (U-02.1, guarded by
 `tests/architecture/shared-ui-generic.test.ts`): words, hrefs and the locale

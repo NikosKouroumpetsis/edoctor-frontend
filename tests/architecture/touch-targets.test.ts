@@ -70,6 +70,18 @@ const EXCEPTIONS: TouchException[] = [
 		reason: 'WCAG 2.5.8 inline: the policy links are words of the consent sentence (U-16.5)'
 	},
 	{
+		path: 'src/shared/ui/molecules/rich-text/rich-text.svelte',
+		marker: 'data-slot="rich-text-link"',
+		reason:
+			'WCAG 2.5.8 inline: a link of a CMS text is a word of its sentence (common v2 §B, U-57.4, U-59.1, U-60.1)'
+	},
+	{
+		path: 'src/modules/articles/ui/detail/page/index.svelte',
+		marker: 'data-slot="article-meta-author"',
+		reason:
+			'WCAG 2.5.8 inline: the author’s name is a word of «Από <γιατρός> · ημέρα · N΄ ανάγνωσης» (U-57.4, the prototype 06 Π6)'
+	},
+	{
 		path: 'src/modules/search-doctors/ui/search-doctor-card/components/fee-sign-in.svelte',
 		marker: 'data-slot="doctor-card-fee-action"',
 		reason:

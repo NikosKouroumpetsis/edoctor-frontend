@@ -66,3 +66,6 @@ export type ConsentPublicRegistryResponseView = Schemas['ConsentPublicRegistryRe
 export type ConsentToolView = Schemas['ConsentToolView'];
 export type ConsentCategory = Schemas['ConsentCategory'];
 export type ConsentPlatform = Schemas['ConsentPlatform'];
+// Wave 1.5 · screens 7 and 8 (U-59.1, U-60.1): a public CMS page — the legal texts and the FAQ (`getPublicContentPage`).
+export type ContentPublicPageView = Schemas['ContentPublicPageView'];
+export type ContentPublicPageUpcomingView = Schemas['ContentPublicPageUpcomingView'];

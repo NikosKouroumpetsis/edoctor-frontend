@@ -7,7 +7,7 @@
 	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
 	import { RAIL_CARDS_PER_VIEW, Rail } from '$shared/ui/organisms/rail';
 	import type { HomeArticlesResult } from '$modules/articles/lib/article-card';
-	import ArticleCard from '../components/article-card.svelte';
+	import ArticleCard from '$modules/articles/ui/article-card';
 
 	let { articles }: { articles: Promise<HomeArticlesResult> } = $props();
 

@@ -536,8 +536,9 @@ them yet (U-01.2). The map: MapLibre is in the web since wave 1.0 (U-26.3, the r
 ### States kit (wave 0, dyad 6)
 
 The application's state units (cards K6.1–K6.4) and its `Banner`, class for class; every word comes from the caller
-(U-02.1), the zones only by CSS (U-03.1). No page uses them yet (U-01.2); the error page (`routes/+error.svelte`) waits
-for its screen's discussion.
+(U-02.1), the zones only by CSS (U-03.1). The site's error page (`routes/+error.svelte`, wave 1.5 screen 9) is the
+organism `StatusPage` with its own pictures (`StatusArt`); a list's empty or failed state is `StatePanel`, with
+«Δοκιμάστε ξανά» (U-61.2).
 
 - The application's `Card` is ONE shell, `cardShellClasses` of the `Card` primitive (`rounded-xl border
 border-border/70 bg-card/95 p-6 shadow-soft`, a column); the state cards draw it with their own inset after it

@@ -21,7 +21,7 @@ export type StreamedSectionsController = {
 	readonly isWaiting: boolean;
 	/** ANY section failed: the rows give way to the error (the application's `hasFailed`, app = web, U-20). */
 	readonly isError: boolean;
-	/** «Δοκιμή ξανά»: asks again only the sections that failed, in the browser (the application's `retry`). */
+	/** «Δοκιμάστε ξανά»: asks again only the sections that failed, in the browser (the application's `retry`). */
 	retry: () => Promise<void>;
 };
 
@@ -75,13 +75,13 @@ export function useStreamedSections(
 			const current = lang;
 			return {
 				queryKey: sectionKey(config.id, current),
-				// U-32.1: «Δοκιμή ξανά» reads the row's facts; the row keeps the page's words (`lib/section-link`).
+				// U-32.1: «Δοκιμάστε ξανά» reads the row's facts; the row keeps the page's words (`lib/section-link`).
 				queryFn: ({ signal }: { signal: AbortSignal }) =>
 					fetchHomeSection(queryClient, config, EMPTY_CATEGORY_SCOPE, current, { signal }).then(
 						(section) => buildHomeSection(section, current)
 					),
 				// D-103: never asked by itself (no read on mount, focus or reconnect, no automatic retry); the streamed
-				// answer fills it and «Δοκιμή ξανά» refetches it, asked even offline as the server's search is.
+				// answer fills it and «Δοκιμάστε ξανά» refetches it, asked even offline as the server's search is.
 				enabled: false,
 				retry: false,
 				networkMode: 'always' as const

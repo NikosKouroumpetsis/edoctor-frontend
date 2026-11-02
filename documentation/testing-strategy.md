@@ -299,13 +299,17 @@ In place:
 - `tests/architecture/card-media.test.ts` (D13, «U-29 (MINOR-5): …») — the doctor card and its skeletons draw the
   same aspect, from `searchDoctorCardMedia`, and none writes its own; `tests/architecture/map-bundle.test.ts`
   («U-24.4: …», NIT-1 of U-29: moved out of the map's spec) — `maplibre-gl` reaches no first bundle.
+- `tests/architecture/raw-html.test.ts` (common v2 §B) — no `{@html}` in `src/` but the page's JSON-LD: inside
+  `<svelte:head>`, in a file that builds it with `jsonLdScript` (its `<` `>` `&` escaped); a CMS text is drawn by
+  `RichText` from its allowlist, never as markup.
 - Each checker ships with negative fixtures next to the project scan, plus a
   proof that the scan read the code (file, token and tag counts).
 
 The token registry and the class merger have unit specs next to them:
 `src/shared/design/tokens/tokens.test.ts` (value rules, unique names, generated
 theme) and `src/shared/lib/utils.test.ts` (`cn`/`tv` keep a role beside a color,
-merge named sizes, drop a leading written before its role).
+merge named sizes, drop a leading written before its role, keep the reading sizes `text-article-body` /
+`text-document-body` beside a colour).
 
 Architecture tests should also enforce (not yet in place; the route mirror, the screen files and the shared imports
 are, above):

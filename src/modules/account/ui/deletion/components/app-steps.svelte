@@ -1,33 +1,42 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages.js';
+	import { emphasizeNames } from '$modules/account/lib/deletion';
 	import type { DeletionSectionProps } from '../types';
 
-	let { messageOptions }: DeletionSectionProps = $props();
+	let { messageOptions, headingClass }: DeletionSectionProps = $props();
 
-	const steps = $derived([
-		m.account_deletion_app_step_open({}, messageOptions),
-		m.account_deletion_app_step_path({}, messageOptions),
-		m.account_deletion_app_step_review({}, messageOptions),
-		m.account_deletion_app_step_code({}, messageOptions)
+	// The names on the application's tab, rows and buttons (its i18n, word for word), bold in the steps (U-62.1 Π3).
+	const names = $derived([
+		m.account_deletion_app_name_profile({}, messageOptions),
+		m.account_deletion_app_name_settings({}, messageOptions),
+		m.account_deletion_app_name_delete({}, messageOptions),
+		m.account_deletion_app_name_send({}, messageOptions),
+		m.account_deletion_app_name_confirm({}, messageOptions)
 	]);
+	const steps = $derived(
+		[
+			m.account_deletion_app_step_open({}, messageOptions),
+			m.account_deletion_app_step_path({}, messageOptions),
+			m.account_deletion_app_step_review({}, messageOptions),
+			m.account_deletion_app_step_code({}, messageOptions)
+		].map((step) => ({ step, runs: emphasizeNames(step, names) }))
+	);
 </script>
 
-<section
-	aria-labelledby="account-deletion-app-title"
-	class="rounded-xl border border-border/70 bg-card p-card"
->
-	<h2
-		id="account-deletion-app-title"
-		class="text-heading-md text-foreground tablet:text-heading-lg"
-	>
+<!-- 🔴 U-62.1 (the prototype 10, Π3): «Από την εφαρμογή» as an H2 of the text, no card — the numbered steps with the
+     application's names bold, then what happens after them. -->
+<section aria-labelledby="from-the-app" data-slot="account-deletion-app">
+	<h2 id="from-the-app" class={headingClass}>
 		{m.account_deletion_app_title({}, messageOptions)}
 	</h2>
-	<ol class="mt-4 flex list-decimal flex-col gap-3 pl-5 text-body-lg text-foreground">
-		{#each steps as step (step)}
-			<li>{step}</li>
+	<ol class="mb-4 list-decimal pl-6">
+		{#each steps as { step, runs } (step)}
+			<li class="mb-2.5 pl-1 marker:text-foreground/85 last:mb-0">
+				{#each runs as run, index (index)}{#if run.strong}<strong class="font-semibold"
+							>{run.text}</strong
+						>{:else}{run.text}{/if}{/each}
+			</li>
 		{/each}
 	</ol>
-	<p class="mt-4 text-body-md text-muted-foreground">
-		{m.account_deletion_app_result({}, messageOptions)}
-	</p>
+	<p>{m.account_deletion_app_result({}, messageOptions)}</p>
 </section>

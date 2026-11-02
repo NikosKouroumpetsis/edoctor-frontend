@@ -11,13 +11,24 @@
 		| { dismissLabel?: undefined; onDismiss?: undefined }
 		| { dismissLabel: string; onDismiss: () => void };
 
+	/** At most one way on, a link, always with its words (the notice of a text page, U-59.2). */
+	export type BannerAction =
+		| { actionLabel: string; actionHref: string }
+		| { actionLabel?: undefined; actionHref?: undefined };
+
 	export type BannerProps = Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'title'> &
-		BannerDismiss & {
+		BannerDismiss &
+		BannerAction & {
 			title: string;
 			description?: string;
 			tone?: BannerTone;
 			/** The success / warning / danger fill instead of the soft tint (off by default, S-34.1). */
 			solid?: boolean;
+			/**
+			 * One sentence (U-62.1, the text pages' notice): the title runs into the description on the same line, the
+			 * title bold in the tone's colour, the rest in the text's (15).
+			 */
+			inline?: boolean;
 		};
 
 	const toneContainerClasses: Record<BannerTone, string> = {
@@ -83,6 +94,9 @@
 		description,
 		tone = 'info',
 		solid = false,
+		inline = false,
+		actionLabel,
+		actionHref,
 		dismissLabel,
 		onDismiss,
 		class: className,
@@ -123,9 +137,26 @@
 	<Ionicon name={toneIcons[tone]} class={cn('icon-md', iconClass)} />
 
 	<div class="flex min-w-0 flex-1 flex-col gap-1">
-		<p class={cn('text-body-md font-semibold', titleClass)}>{title}</p>
-		{#if description}
-			<p class={cn('text-body-sm', descriptionClass)}>{description}</p>
+		{#if inline}
+			<p class="text-body-md text-foreground">
+				<strong class={cn('font-semibold', titleClass)}>{title}</strong
+				>{#if description}{` ${description}`}{/if}
+			</p>
+		{:else}
+			<p class={cn('text-body-md font-semibold', titleClass)}>{title}</p>
+			{#if description}
+				<p class={cn('text-body-sm', descriptionClass)}>{description}</p>
+			{/if}
+		{/if}
+		{#if actionLabel && actionHref}
+			<a
+				href={actionHref}
+				data-slot="banner-action"
+				class={cn(
+					'inline-flex min-h-touch min-w-touch items-center self-start rounded-sm text-body-md font-semibold underline outline-none focus-visible:ring-3 focus-visible:ring-ring/50 can-hover:hover:decoration-2',
+					titleClass
+				)}>{actionLabel}</a
+			>
 		{/if}
 	</div>
 

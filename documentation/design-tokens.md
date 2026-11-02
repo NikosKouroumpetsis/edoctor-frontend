@@ -65,6 +65,11 @@ intentional override. Never under 12px; running text is `body-lg` (16).
 
 Tailwind's `text-xs … text-9xl` do not compile (`--text-*: initial`).
 
+Two reading sizes live as `@utility` in `src/routes/layout.css` (common v2 §A, the approved prototypes 06/07/10):
+`text-article-body` 18 / 28 / 400 (an article's text) and `text-document-body` 16 / 26 / 400 (a legal text, the
+deletion page, an FAQ answer). `cn` knows both as text sizes (`readingTextSizes` in `src/shared/lib/utils.ts`), so a
+colour after them never drops them. `scroll-mt-document` stops an anchor under the phone's bar and the sticky ToC row.
+
 ## Line height (`leading-<name>`)
 
 `flat` 1 · `tight` 1.25 · `normal` 1.5 · `relaxed` 1.75 · `loose` 2. Write a
@@ -93,13 +98,15 @@ each target and of each recipe `base`, and fails on a class that shrinks the box
 again (`min-w-0`, `h-8`) or on a size passed to a target component
 (`<Button class="size-6">`).
 
-The test lists three exceptions (`EXCEPTIONS` in `touch-targets.test.ts`, file +
+The test lists its exceptions (`EXCEPTIONS` in `touch-targets.test.ts`, file +
 marker + reason; an entry without a match fails):
 
-- **Inline links:** the link of `InlineLinkText` (`data-slot="inline-link-text-link"`)
-  and the consent card's policy links (`data-slot="cookie-consent-link"`, U-16.5) are
-  words of a running sentence and take the sentence's line height — the WCAG 2.5.8
-  «inline» exception, as in the application.
+- **Inline links:** the link of `InlineLinkText` (`data-slot="inline-link-text-link"`),
+  the consent card's policy links (`data-slot="cookie-consent-link"`, U-16.5), a link
+  inside a CMS text (`RichText`, `data-slot="rich-text-link"`, common v2 §B) and the
+  author's name in an article's «Από <γιατρός> · ημέρα · N΄ ανάγνωσης»
+  (`data-slot="article-meta-author"`, U-57.4) are words of a running sentence and take
+  the sentence's line height — the WCAG 2.5.8 «inline» exception, as in the application.
 - 🔴 **U-29.2 (the owner, 29/10): the card's «🔒 Συνδεθείτε για κόστος»**
   (`data-slot="doctor-card-fee-action"`, U-27.4) stays as it is. WCAG 2.2 SC 2.5.8
   (AA) asks at least 24 × 24 CSS px, or a target inline in a line of text; the
@@ -196,7 +203,11 @@ and `gallery-thumb` 56, `profile-gutter` 40 / `profile-gutter-lg` 80 (the profil
 `section-bar` 80 (the fixed section bar from 744, also `scroll-mt-section-bar`), `card-sticky-top` 104 (the booking
 card's sticky top: the bar 80 + 24), `window-wide` 1032 (the reviews' and the location's window), `office-map` 300 /
 `office-map-md` 400 / `office-map-lg` 480 (the office map below 744, from 744, from 1128), `profile-columns` 64 (two
-columns of a section from 744) and `review-rows` 40 (the reviews' rows), and `platform.motion.dismiss` 80 (drag distance that closes a drawer whose size cannot be measured; the
+columns of a section from 744) and `review-rows` 40 (the reviews' rows), the text pages and the status page of
+wave 1.5 (screens 6–10, common v2 §A/§E): `document-column` 600 (the text's column), `document-aside` 320 (the right
+column from 1128), `document-wide` 720 (the FAQ's column), `reading-gap` 40 / `reading-gap-sm` 36 (an H2's distance in
+an article / a legal text), `reading-crumbs` 28 (the breadcrumbs' top), `reading-row` 52 (the phone's sticky ToC row),
+`reading-more` 56 (between the FAQ's topics) and `status-art` 440 (the status picture from 1128), and `platform.motion.dismiss` 80 (drag distance that closes a drawer whose size cannot be measured; the
 panels travel their own size, U-09.8). They reach the theme next to the shared names; promote one to the shared
 file when the application needs it.
 

@@ -1,4 +1,5 @@
 import Root, {
+	type BannerAction,
 	type BannerDismiss,
 	type BannerProps,
 	type BannerSolidTone,
@@ -7,6 +8,7 @@ import Root, {
 
 export {
 	Root,
+	type BannerAction,
 	type BannerDismiss,
 	type BannerProps,
 	type BannerSolidTone,

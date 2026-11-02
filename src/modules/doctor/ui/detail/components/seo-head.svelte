@@ -1,13 +1,12 @@
 <script lang="ts">
-	import { serializeJsonLd, type DoctorSeo } from '$modules/doctor/lib/detail';
+	import type { DoctorSeo } from '$modules/doctor/lib/detail';
+	import { jsonLdScript } from '$shared/lib/seo';
 
 	let { seo }: { seo: DoctorSeo } = $props();
 
-	// The JSON-LD as the page's own script, its `<` `>` `&` and line separators escaped (`serializeJsonLd`): a doctor's
-	// words can never close the tag.
-	const jsonLd = $derived(
-		`<script type="application/ld+json">${serializeJsonLd(seo.jsonLd)}</` + `script>`
-	);
+	// The JSON-LD as the page's own script, its `<` `>` `&` and line separators escaped (`jsonLdScript`, common v2 §B): a
+	// doctor's words can never close the tag.
+	const jsonLd = $derived(jsonLdScript(seo.jsonLd));
 </script>
 
 <!-- 🔴 U-28.4 (the web's own): the profile's head, in the server's page — «Όνομα · Ειδικότητα · Περιοχή | eDoctor»,

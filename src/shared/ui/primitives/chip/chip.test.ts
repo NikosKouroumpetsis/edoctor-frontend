@@ -129,4 +129,44 @@ describe('Chip', () => {
 		expect(chip).toBeDisabled();
 		expect(chip).toHaveClass('disabled:opacity-50');
 	});
+
+	it('U-58.1 (app = web): `phoneVariant` draws the chosen chip as another variant below 744 — the application’s outline ring — and `variant` from 744', () => {
+		render(Chip, {
+			props: {
+				label: 'Όλα',
+				href: '/help',
+				selected: true,
+				variant: 'tinted',
+				phoneVariant: 'outline'
+			}
+		});
+		const link = screen.getByRole('link', { name: 'Όλα' });
+		expect(link).toHaveAttribute('aria-current', 'page');
+		expect(pillOf(link)).toHaveClass(
+			'max-tablet:border-foreground',
+			'max-tablet:ring-1',
+			'max-tablet:ring-foreground',
+			'tablet:border-primary',
+			'tablet:bg-primary/10'
+		);
+		expect(pillOf(link)).not.toHaveClass('bg-primary/10');
+		expect(screen.getByText('Όλα')).toHaveClass(
+			'max-tablet:text-foreground',
+			'tablet:text-primary-text'
+		);
+	});
+
+	it('U-58.1 (negative): an idle chip is the same at every width, whatever its zones', () => {
+		render(Chip, {
+			props: {
+				label: 'Άρθρα',
+				href: '/articles?type=article',
+				variant: 'tinted',
+				phoneVariant: 'outline'
+			}
+		});
+		const pill = pillOf(screen.getByRole('link', { name: 'Άρθρα' }));
+		expect(pill).toHaveClass('border-border', 'bg-card');
+		expect(pill.className).not.toMatch(/tablet:/u);
+	});
 });

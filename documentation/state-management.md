@@ -63,14 +63,14 @@ queries in the browser build theirs in their `queryFn`.
 The home's last row, «Άρθρα & συμβουλές υγείας», is the `articles` module's (`loadHomeArticles`, streamed, never
 rejects). The rows follow the application's order (`discovery-rows`): waiting ⇒ failed ⇒ rows ⇒ empty; ONE failed
 section is the error, and so is a read paused without a network (the application's 'unavailable', never an empty
-home; app = web, U-20). «Δοκιμή ξανά» asks again only what failed or was paused — a streamed section through
+home; app = web, U-20). «Δοκιμάστε ξανά» asks again only what failed or was paused — a streamed section through
 `fetchHomeSection` in the browser (`useStreamedSections`), a category's scope first, then only its failed rows
 (`useHomeSections.refetch`, the application's `retry`); the error stays until the answer.
 🔴 U-29.3 (BLOCKER-1 of the audit): the `all` view's rows are TanStack queries too, never a copy in runes
 (`discovery-home/hooks/use-streamed-sections.svelte.ts`): ONE query per row on the key of its `fetchHomeSection`
 (`searchDoctorsQueryKeys.homeSection(id, lang, EMPTY_CATEGORY_SCOPE)`), filled by `fetchQuery` from the streamed SSR
 answer as it settles (a failed one is the query's error), off by itself (`enabled: false`, no retry, no read on
-focus or reconnect: D-103) and refetched by «Δοκιμή ξανά». A new page load (or language) resets every row's query
+focus or reconnect: D-103) and refetched by «Δοκιμάστε ξανά». A new page load (or language) resets every row's query
 before it is read (`resetQueries`, which also silently cancels a retry of the previous load), so a row never shows a
 former visit's cards; the category rows keep a key of their own until their scope is known (`null`), so the rows
 fading out keep the previous category's cards (`keepPreviousData`). A category is asked at
@@ -150,6 +150,20 @@ failed one says «Δοκιμάστε ξανά» and asks again only what failed 
 page waits (the times are the browser's). The open window is the page's history state (`page.state.doctorDetails`,
 shallow routing), else the `details/<section>` route's own section with the address's hints. «Σήμερα / Αύριο» is the
 server's clock (`recordServerNow`, D-118), drawn again at Greek midnight (`msUntilNextPlatformDay`, S-34.1).
+
+## The text pages and the lists (wave 1.5, screens 6–10)
+
+Every text is the ROUTE's load, awaited on the server (the article and «Περισσότερα άρθρα» at once, a legal text, the
+CMS page `faq`, the list's first page of 12), so each page is whole without JavaScript; nothing of it is copied into
+runes. The articles' list is ONE TanStack infinite query per kind, words and service, seeded with the server's first
+page (`initialData`, so it asks nothing at hydration); «Εμφάνιση περισσότερων» asks the next page at the press (D-103).
+Its suggestions are their own query per words, asked after 250 ms of quiet (`useDebouncedValue`, the application's
+value) and never for the words already searched (a page with `?q=`, an Enter: D-103); they show only for the words now
+in the field (the application's `isVisible`: none while typing or loading), and the panel never says «none» before its
+words' answer. The FAQ is read once per page: the search, the topic and the anchor live in the address (`?q=`,
+`?topic=`, `#…`); from 744 the field suggests, below 744 it filters as typed, the words written into the address after
+250 ms (the application's). A failed read is «Δοκιμάστε ξανά» (`invalidateAll` for a route's read, `refetch` for a
+query), U-61.2.
 
 ## The search «Τι / Πού / Πότε» (wave 1.0, D2)
 

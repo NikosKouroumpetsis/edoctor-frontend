@@ -421,7 +421,7 @@ describe('DiscoveryHome (the web’s home, screen 2)', () => {
 	});
 
 	// MINOR-6 (r1): the r0 web left a failed section out while another had doctors; the application shows the error.
-	it('U-20 (app = web): ONE failed section is the error, never a row left out; «Δοκιμή ξανά» asks only the failed one again', async () => {
+	it('U-20 (app = web): ONE failed section is the error, never a row left out; «Δοκιμάστε ξανά» (αντικαθίσταται από U-61.2 η «Δοκιμή ξανά») asks only the failed one again', async () => {
 		fetchHomeSection.mockImplementation(
 			async (_client: unknown, config: { id: SectionId }): Promise<SearchDoctorsSection> => ({
 				id: config.id,
@@ -434,7 +434,7 @@ describe('DiscoveryHome (the web’s home, screen 2)', () => {
 		});
 		const error = await screen.findByTestId('home-error');
 		expect(rows()).toHaveLength(0);
-		await user().click(within(error).getByRole('button', { name: 'Δοκιμή ξανά' }));
+		await user().click(within(error).getByRole('button', { name: 'Δοκιμάστε ξανά' }));
 		expect(fetchHomeSection).toHaveBeenCalledOnce();
 		expect(fetchHomeSection.mock.calls[0][1]).toMatchObject({ id: 'popular-psychologists' });
 		expect(fetchHomeSection.mock.calls[0][2]).toEqual({});
@@ -482,7 +482,7 @@ describe('DiscoveryHome (the web’s home, screen 2)', () => {
 		);
 	});
 
-	it('U-20: a failure is the error state; «Δοκιμή ξανά» asks the failed sections again, in the browser', async () => {
+	it('U-20: a failure is the error state; «Δοκιμάστε ξανά» (αντικαθίσταται από U-61.2 η «Δοκιμή ξανά») asks the failed sections again, in the browser', async () => {
 		fetchHomeSection.mockRejectedValue(new Error('offline'));
 		render(Harness, {
 			props: { data: homeData([{ status: 'error' }, { status: 'error' }, ok([])]) }
@@ -492,7 +492,7 @@ describe('DiscoveryHome (the web’s home, screen 2)', () => {
 		expect(error).toHaveTextContent('Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.');
 		// MINOR-4 (r2): the application's and the prototype's «no connection» glyph.
 		expect(error.querySelector('[data-icon="cloud-offline-outline"]')).not.toBeNull();
-		await user().click(within(error).getByRole('button', { name: 'Δοκιμή ξανά' }));
+		await user().click(within(error).getByRole('button', { name: 'Δοκιμάστε ξανά' }));
 		// NIT-1 (r2): the error stays until the answer, never rows of skeletons in between.
 		expect(screen.getByTestId('home-error')).toBeInTheDocument();
 		await waitFor(() => expect(fetchHomeSection).toHaveBeenCalledTimes(2));
@@ -607,7 +607,7 @@ describe('DiscoveryHome (the web’s home, screen 2)', () => {
 		expect(screen.getByRole('button', { name: 'Όλοι' })).toHaveAttribute('aria-pressed', 'true');
 	});
 
-	it('U-20: a category whose rows fail is the error state; «Δοκιμή ξανά» asks only the failed rows again', async () => {
+	it('U-20: a category whose rows fail is the error state; «Δοκιμάστε ξανά» (αντικαθίσταται από U-61.2 η «Δοκιμή ξανά») asks only the failed rows again', async () => {
 		resolveCategoryScope.mockResolvedValue({ professionalIds: ['derm'] });
 		fetchHomeSection.mockRejectedValue(new Error('offline'));
 		render(Harness, { props: { data: homeData([ok([doctor('1')])]) } });
@@ -616,15 +616,15 @@ describe('DiscoveryHome (the web’s home, screen 2)', () => {
 		const error = await screen.findByTestId('home-error');
 		const calls = fetchHomeSection.mock.calls.length;
 		const scopeCalls = resolveCategoryScope.mock.calls.length;
-		await user().click(within(error).getByRole('button', { name: 'Δοκιμή ξανά' }));
+		await user().click(within(error).getByRole('button', { name: 'Δοκιμάστε ξανά' }));
 		await waitFor(() => expect(fetchHomeSection.mock.calls.length).toBe(calls + 3));
 		expect(resolveCategoryScope.mock.calls.length).toBe(scopeCalls);
 		expect(invalidateAll).not.toHaveBeenCalled();
 	});
 
 	// MAJOR-2 (r1): the r0 web kept the previous category's rows under the new chip when its scope failed, and its
-	// «Δοκιμή ξανά» fetched every row with no scope at all (every doctor under «Δερματολόγος»).
-	it('U-20 (app = web): a category whose scope fails shows the error, never another category’s rows; «Δοκιμή ξανά» asks the scope first', async () => {
+	// «Δοκιμάστε ξανά» fetched every row with no scope at all (every doctor under «Δερματολόγος»).
+	it('U-20 (app = web): a category whose scope fails shows the error, never another category’s rows; «Δοκιμάστε ξανά» (αντικαθίσταται από U-61.2 η «Δοκιμή ξανά») asks the scope first', async () => {
 		resolveCategoryScope.mockImplementation(async (_client: unknown, categoryId: string) => {
 			if (categoryId === 'dermatology') throw new Error('suggestions down');
 			return { professionalIds: ['card'] };
@@ -651,7 +651,7 @@ describe('DiscoveryHome (the web’s home, screen 2)', () => {
 		expect(screen.queryAllByRole('link', { name: /Γιατρός card-/u })).toHaveLength(0);
 		expect(rows()).toHaveLength(0);
 		const sectionCalls = fetchHomeSection.mock.calls.length;
-		await user().click(within(error).getByRole('button', { name: 'Δοκιμή ξανά' }));
+		await user().click(within(error).getByRole('button', { name: 'Δοκιμάστε ξανά' }));
 		await waitFor(() =>
 			expect(
 				resolveCategoryScope.mock.calls.filter((call) => call[1] === 'dermatology')
@@ -665,7 +665,7 @@ describe('DiscoveryHome (the web’s home, screen 2)', () => {
 
 	// MAJOR-1 (r2): offline, a read is «paused» — r1 counted it as nothing: (α) «Δεν υπάρχουν ακόμη γιατροί» with the
 	// articles under it, (β) a skeleton without end. The application reports it with the errors ('unavailable').
-	it('U-20 (app = web): a category asked while offline is the error with «Δοκιμή ξανά» — never «Δεν υπάρχουν ακόμη γιατροί», never an endless skeleton', async () => {
+	it('U-20 (app = web): a category asked while offline is the error with «Δοκιμάστε ξανά» (αντικαθίσταται από U-61.2 η «Δοκιμή ξανά») — never «Δεν υπάρχουν ακόμη γιατροί», never an endless skeleton', async () => {
 		resolveCategoryScope.mockImplementation(async (_client: unknown, categoryId: string) => ({
 			professionalIds: [categoryId]
 		}));
@@ -693,7 +693,7 @@ describe('DiscoveryHome (the web’s home, screen 2)', () => {
 			expect(screen.queryByTestId('home-empty')).not.toBeInTheDocument();
 			expect(screen.queryByTestId('after')).not.toBeInTheDocument();
 			expect(resolveCategoryScope).not.toHaveBeenCalled();
-			await user().click(within(error).getByRole('button', { name: 'Δοκιμή ξανά' }));
+			await user().click(within(error).getByRole('button', { name: 'Δοκιμάστε ξανά' }));
 			expect(screen.getByTestId('home-error')).toBeInTheDocument();
 			// Back online, the paused reads go on by themselves: the rows.
 			onlineManager.setOnline(true);
@@ -796,13 +796,13 @@ describe('DiscoveryHome · the «Όλοι» rows in TanStack Query (U-29.3)', ()
 			doctors: [],
 			criteria: athensCriteria
 		});
-		// «Δοκιμή ξανά» refetches that same query: its answer lands on the same key.
+		// «Δοκιμάστε ξανά» refetches that same query: its answer lands on the same key.
 		fetchHomeSection.mockResolvedValue({
 			id: 'popular-psychologists',
 			items: [card('again')],
 			link: athensLink
 		});
-		await user().click(screen.getByRole('button', { name: 'Δοκιμή ξανά' }));
+		await user().click(screen.getByRole('button', { name: 'Δοκιμάστε ξανά' }));
 		await waitFor(() =>
 			expect(client.getQueryData(allKey('popular-psychologists'))).toMatchObject({
 				doctors: [doctor('again')]

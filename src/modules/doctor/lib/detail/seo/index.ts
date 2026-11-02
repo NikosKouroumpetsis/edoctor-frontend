@@ -1,4 +1,5 @@
 import { m } from '$paraglide/messages.js';
+import { clipText } from '$shared/lib/seo';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type { DoctorProfile } from '$modules/doctor/api/profile';
 import { doctorNameLabel, specialtyLabel } from '../labels';
@@ -23,18 +24,8 @@ function areaOf(doctor: DoctorProfile): string {
 	return doctor.office?.city?.trim() || doctor.office?.state?.trim() || '';
 }
 
-/** The two separators JavaScript reads as a line's end, written as code points (never typed in a source). */
-const LINE_SEPARATOR = new RegExp(String.fromCodePoint(0x2028), 'gu');
-const PARAGRAPH_SEPARATOR = new RegExp(String.fromCodePoint(0x2029), 'gu');
-
-/** Words cut at a word's end within the limit, «…» when cut. */
-function clip(text: string, limit: number): string {
-	const flat = text.replace(/\s+/gu, ' ').trim();
-	if (flat.length <= limit) return flat;
-	const cut = flat.slice(0, limit - 1);
-	const end = cut.lastIndexOf(' ');
-	return `${(end > 0 ? cut.slice(0, end) : cut).trimEnd()}…`;
-}
+// Common v2 §B: the JSON-LD's escaping is the shared `$shared/lib/seo` (the articles and the help centre write one too).
+export { serializeJsonLd } from '$shared/lib/seo';
 
 /**
  * 🔴 U-28.4 (owner, SEO): «Όνομα · Ειδικότητα · Περιοχή | eDoctor»; the description from the FIRST paragraph (else the
@@ -60,7 +51,7 @@ export function buildDoctorSeo({
 		? m.doctor_seo_title({ name, specialty, area }, { locale })
 		: m.doctor_seo_title_short({ name, specialty }, { locale });
 	const intro = doctor.description?.paragraphs[0];
-	const description = clip(
+	const description = clipText(
 		intro ?? [name, specialty, area].filter(Boolean).join(' · '),
 		DESCRIPTION_LIMIT
 	);
@@ -107,17 +98,4 @@ export function buildDoctorSeo({
 		.map((language) => ({ hreflang: language, href: alternateUrls?.[language] ?? '' }));
 	if (alternateUrls?.el) alternates.push({ hreflang: 'x-default', href: alternateUrls.el });
 	return { title, description, canonicalUrl, alternates, imageUrl, jsonLd };
-}
-
-/**
- * JSON for a `<script type="application/ld+json">` that no profile text can end: every `<` (so `</script>`), `>`
- * and `&` written as a JSON escape, and the two line separators JavaScript does not take inside a string.
- */
-export function serializeJsonLd(document: Record<string, unknown>): string {
-	return JSON.stringify(document)
-		.replace(/</gu, '\\u003c')
-		.replace(/>/gu, '\\u003e')
-		.replace(/&/gu, '\\u0026')
-		.replace(LINE_SEPARATOR, '\\u2028')
-		.replace(PARAGRAPH_SEPARATOR, '\\u2029');
 }
