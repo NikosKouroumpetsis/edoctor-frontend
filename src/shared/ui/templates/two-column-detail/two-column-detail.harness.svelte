@@ -1,13 +1,18 @@
 <script lang="ts">
-	import { TwoColumnDetail, type TwoColumnAsidePosition } from './index';
+	import { TwoColumnDetail, type TwoColumnAsidePosition, type TwoColumnFrom } from './index';
 
 	let {
 		asidePosition,
-		stickyAside
-	}: { asidePosition?: TwoColumnAsidePosition; stickyAside?: boolean } = $props();
+		stickyAside,
+		from
+	}: {
+		asidePosition?: TwoColumnAsidePosition;
+		stickyAside?: boolean;
+		from?: TwoColumnFrom;
+	} = $props();
 </script>
 
-<TwoColumnDetail {asidePosition} {stickyAside} data-testid="detail">
+<TwoColumnDetail {asidePosition} {stickyAside} {from} data-testid="detail">
 	{#snippet aside()}
 		<p>Πλευρική</p>
 	{/snippet}

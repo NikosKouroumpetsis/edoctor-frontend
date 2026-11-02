@@ -21,12 +21,17 @@
 			placeholder: { control: 'text' },
 			title: { control: 'text' },
 			subtitle: { control: 'text' },
-			hideFrom: { control: 'select', options: ['tablet', 'none'] }
+			hideFrom: { control: 'select', options: ['tablet', 'none'] },
+			variant: { control: 'radio', options: ['card', 'pill'] }
 		}
 	});
 </script>
 
 <Story name="Playground" />
+
+<!-- Web only: the home's phone pill (the wave record §4.1, the prototype's `.mpill`) — 56 high, a hairline rim, the
+     glyph and the 14/600 words in the middle. -->
+<Story name="Home Pill" args={{ variant: 'pill' }} />
 
 <Story name="Without Press" args={{ onclick: undefined }} />
 

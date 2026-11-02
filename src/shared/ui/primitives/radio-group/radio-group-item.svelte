@@ -75,10 +75,12 @@
 		data-slot="radio-group-item-box"
 		data-state={checked ? 'checked' : 'unchecked'}
 		class={cn(
-			'flex aspect-square items-center justify-center rounded-full border border-input bg-card text-primary transition-shadow',
+			'flex aspect-square items-center justify-center rounded-full border border-input bg-card text-primary transition-[border-color,box-shadow] duration-standard ease-standard',
 			radioBoxSizes[size],
 			'group-focus-visible:border-ring group-focus-visible:ring-3 group-focus-visible:ring-ring/50',
-			'data-[state=checked]:border-primary'
+			'data-[state=checked]:border-primary',
+			// U-28.4: with a pointer, an empty ring darkens while its button is hovered (not the chosen or a disabled one).
+			'can-hover:group-enabled:group-hover:data-[state=unchecked]:border-foreground'
 		)}
 	>
 		{#if checked}

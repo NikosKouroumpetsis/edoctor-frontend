@@ -1,7 +1,7 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { Container } from '$shared/ui/molecules/container';
-	import { Rail } from '$shared/ui/organisms/rail';
+	import { RAIL_CARDS_PER_VIEW, Rail } from '$shared/ui/organisms/rail';
 
 	const cards = ['Κάρτα 1', 'Κάρτα 2', 'Κάρτα 3', 'Κάρτα 4'];
 	// The web's own examples (arrows, bleed) need a row long enough to scroll on a laptop.
@@ -28,7 +28,7 @@
 	</div>
 {/snippet}
 
-<!-- The home's doctor rails: the static circle at the end of the header. -->
+<!-- The application's rail (U-20): the static 32 soft circle right after the title. -->
 <Story name="Gap">
 	{#snippet template(args)}
 		<Rail title={args.title} subtitle={args.subtitle} trailing={args.trailing}>
@@ -127,6 +127,56 @@
 		<Container class="py-section">
 			<Rail title={args.title} subtitle={args.subtitle} bleed {scrollLabels}>
 				{#each manyCards as label (label)}{@render card(label)}{/each}
+			</Rail>
+		</Container>
+	{/snippet}
+</Story>
+
+<!-- Web (U-20, Airbnb's home): the circle right after the title opens the row's results, the arrows stay at the end
+     from 744, faint at an end. -->
+<Story name="Arrow Beside The Title" parameters={{ layout: 'fullscreen' }}>
+	{#snippet template(args)}
+		<Container class="py-section">
+			<Rail
+				title={args.title}
+				trailing={{ icon: 'arrow-forward', label: 'Δείτε όλους', href: '#all' }}
+				controlsFrom="tablet"
+				{scrollLabels}
+			>
+				{#each manyCards as label (label)}{@render card(label)}{/each}
+			</Rail>
+		</Container>
+	{/snippet}
+</Story>
+
+<!-- The application's `CarouselSection` circle: the 40 card circle at the header's end (`trailingAt="end"`). -->
+<Story name="Arrow At The End">
+	{#snippet template(args)}
+		<Rail title={args.title} subtitle={args.subtitle} trailing={args.trailing} trailingAt="end">
+			{#each cards as label (label)}{@render card(label)}{/each}
+		</Rail>
+	{/snippet}
+</Story>
+
+<!-- The application's «HomeRow» (U-20, `perView={RAIL_CARDS_PER_VIEW}`): ~2.3 cards on the phone (the row runs
+     into the gutters), 4 · 5 · 6 · 7 from 744 · 950 · 1128 · 1440 — 12 apart. -->
+<Story name="Home Row" parameters={{ layout: 'fullscreen' }}>
+	{#snippet template(args)}
+		<Container class="py-section">
+			<Rail
+				title={args.title}
+				trailing={{ icon: 'arrow-forward', label: 'Δείτε όλους', href: '#all' }}
+				controlsFrom="tablet"
+				perView={RAIL_CARDS_PER_VIEW}
+				{scrollLabels}
+			>
+				{#each manyCards as label (label)}
+					<div>
+						<div class="flex aspect-square w-full items-center justify-center rounded-lg bg-muted">
+							<p class="text-body-md text-foreground">{label}</p>
+						</div>
+					</div>
+				{/each}
 			</Rail>
 		</Container>
 	{/snippet}

@@ -7,7 +7,8 @@
 		subtitle,
 		showRule,
 		headingAs,
-		withTrailing = false
+		withTrailing = false,
+		withEnd = false
 	}: {
 		variant?: SectionVariant;
 		title?: string;
@@ -15,11 +16,16 @@
 		showRule?: boolean;
 		headingAs?: string;
 		withTrailing?: boolean;
+		withEnd?: boolean;
 	} = $props();
 </script>
 
-{#snippet end()}
+{#snippet beside()}
 	<button type="button" class="size-touch">Όλα</button>
+{/snippet}
+
+{#snippet end()}
+	<button type="button" class="size-touch">Επόμενα</button>
 {/snippet}
 
 <Section
@@ -28,7 +34,8 @@
 	{subtitle}
 	{showRule}
 	{headingAs}
-	trailing={withTrailing ? end : undefined}
+	trailing={withTrailing ? beside : undefined}
+	end={withEnd ? end : undefined}
 	data-testid="section"
 >
 	<p>Σώμα</p>

@@ -189,7 +189,8 @@
 	data-disabled={disabled ? '' : undefined}
 	class={cn(
 		'relative flex min-h-touch w-full touch-none items-center select-none',
-		disabled && 'opacity-50',
+		// U-31.1: a disabled slider shows `not-allowed` over its track and thumbs (they let the pointer through).
+		disabled && 'cursor-not-allowed opacity-50',
 		className
 	)}
 	{...restProps}
@@ -240,6 +241,8 @@
 					data-dragging={activeThumb === index ? 'true' : undefined}
 					class={cn(
 						'rounded-full border bg-card shadow-raised transition-[color,box-shadow] group-focus-visible:ring-3 group-focus-visible:ring-ring/50',
+						// U-28.4: with a pointer, the dot lifts on hover (a disabled thumb takes no pointer).
+						'can-hover:group-hover:shadow-overlay',
 						thumbToneClass,
 						sliderThumbSizes[size],
 						thumbClass

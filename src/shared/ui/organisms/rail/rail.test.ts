@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { spacing, step } from '$shared/design/tokens';
 import Harness from './rail.harness.svelte';
-import type { RailContent, RailTrailing } from './index';
+import { RAIL_CARDS_PER_VIEW, type RailContent, type RailTrailing } from './index';
 
 /** The kit's focus ring (`focus-visible:ring-3`, `design-tokens.md`), drawn outside a card's box, no offset. */
 const RING = 3;
@@ -137,29 +137,85 @@ describe('Rail', () => {
 		);
 	});
 
-	it('U-03.1 (K2.3): a trailing arrow without an action is the static circle, hidden from assistive tech', () => {
+	// U-20 rewrites the two K2.3 guards of the circle (a 40 card circle at the header's end, `mt-0.5`): the owner's
+	// home asks «Τίτλος … + κύκλος «→»» beside the title, the application's 32 soft circle (its rail of 28/10).
+	it('U-20: a trailing arrow without an action is the static 32 soft circle right after the title, hidden from assistive tech', () => {
 		render(Harness, { props: { trailing: {} } });
-		const header = screen.getByTestId('rail').querySelector('[data-slot="section-header"]');
-		const arrow = header?.querySelector('[data-slot="icon-button"]');
+		const titleRow = screen
+			.getByRole('heading', { name: 'Δημοφιλείς' })
+			.closest('[data-slot="section-title-row"]');
+		const arrow = titleRow?.querySelector('[data-slot="icon-button"]');
 		expect(arrow?.tagName).toBe('SPAN');
 		expect(arrow).toHaveAttribute('aria-hidden', 'true');
-		expect(arrow).toHaveClass('mt-0.5', 'size-control-sm', 'rounded-full', 'bg-card');
-		expect(arrow).not.toHaveClass('size-touch');
-		expect(arrow?.querySelector('[data-icon="arrow-forward"]')).not.toBeNull();
+		expect(arrow).toHaveClass('size-control-xs', 'rounded-full', 'bg-foreground/6');
+		expect(arrow).not.toHaveClass('size-touch', 'mt-0.5', 'bg-card');
+		expect(arrow?.querySelector('[data-icon="arrow-forward"]')).toHaveClass('icon-sm');
 		expect(screen.queryByRole('button')).not.toBeInTheDocument();
 	});
 
-	it('U-03.1 (K2.3): a trailing arrow with an action is a 40 card circle named by the caller', async () => {
+	it('U-20: a trailing arrow with an action is the 32 soft circle beside the title, named by the caller, in its 48 box', async () => {
 		const user = userEvent.setup({ delay: null });
 		const onclick = vi.fn();
 		render(Harness, { props: { trailing: { label: 'Όλοι', onclick } } });
 		const arrow = screen.getByRole('button', { name: 'Όλοι' });
+		expect(arrow.closest('[data-slot="section-title-row"]')).not.toBeNull();
+		expect(arrow).toHaveClass('size-touch');
 		expect(arrow.querySelector('[data-slot="icon-button-shape"]')).toHaveClass(
-			'size-control-sm',
-			'bg-card'
+			'size-control-xs',
+			'bg-foreground/6'
 		);
 		await user.click(arrow);
 		expect(onclick).toHaveBeenCalledOnce();
+	});
+
+	it('U-20: an arrow with an href is a link to the row’s results, beside the title; the ‹ › stay at the row’s end', () => {
+		render(Harness, {
+			props: { trailing: { label: 'Όλοι', href: '/doctors?what=x' }, withControls: true }
+		});
+		const link = screen.getByRole('link', { name: 'Όλοι' });
+		expect(link).toHaveAttribute('href', '/doctors?what=x');
+		expect(link.closest('[data-slot="section-title-row"]')).not.toBeNull();
+		const header = screen.getByTestId('rail').querySelector('[data-slot="section-header"]');
+		expect(header?.lastElementChild).toHaveAttribute('data-slot', 'rail-controls');
+	});
+
+	it('U-09.4: `trailingAt="end"` keeps the application’s `CarouselSection` circle — the 40 card circle at the header’s end', () => {
+		render(Harness, { props: { trailing: {}, trailingAt: 'end', withControls: true } });
+		const header = screen.getByTestId('rail').querySelector('[data-slot="section-header"]');
+		const arrow = header?.querySelector('[data-slot="icon-button"]');
+		expect(arrow?.closest('[data-slot="section-title-row"]')).toBeNull();
+		expect(arrow).toHaveClass('size-control-sm', 'bg-card', 'mt-0.5');
+		expect(header?.lastElementChild).toHaveAttribute('data-slot', 'rail-controls');
+	});
+
+	it('U-20: `perView={RAIL_CARDS_PER_VIEW}` is Airbnb’s cards per row (the application’s table) — ~2.3 on the phone into the gutters, 4 · 5 · 6 · 7 from 744, 12 apart', () => {
+		expect(RAIL_CARDS_PER_VIEW).toEqual({ phone: 2.3, tablet: 4, split: 5, laptop: 6, desktop: 7 });
+		render(Harness, { props: { byZone: true } });
+		const items = itemsOf();
+		expect(items).toHaveClass(
+			'-mx-gutter-sm',
+			'px-4.5',
+			'scroll-px-4.5',
+			'gap-0',
+			'tablet:-mx-1.5',
+			'tablet:px-0',
+			'*:w-4/9',
+			'*:px-1.5',
+			'tablet:*:w-1/4',
+			'split:*:w-1/5',
+			'laptop:*:w-1/6',
+			'desktop:*:w-1/7'
+		);
+		expect(items).not.toHaveClass('gap-3', '-mx-1');
+	});
+
+	it('U-20 (negative): without `perView` the cells keep their own width, and a `separated` row never takes it', () => {
+		const plain = render(Harness);
+		expect(itemsOf()).not.toHaveClass('*:w-4/9', '-mx-gutter-sm');
+		plain.unmount();
+		render(Harness, { props: { byZone: true, separated: true } });
+		expect(itemsOf()).not.toHaveClass('-mx-gutter-sm');
+		expect(itemsOf().querySelector('[data-slot="rail-item"]')).not.toHaveClass('w-4/9');
 	});
 
 	it('U-03.1 (NIT-2, MINOR-2): an acting arrow needs its name, and separated takes items, not children', () => {

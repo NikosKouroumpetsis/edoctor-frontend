@@ -37,8 +37,10 @@
 	tabindex={selected ? 0 : -1}
 	onclick={() => !disabled && tabs.setValue(value)}
 	class={cn(
-		"relative inline-flex min-h-touch min-w-touch flex-1 items-center justify-center gap-1.5 rounded-sm border border-transparent px-2 py-1 text-body-sm font-medium whitespace-nowrap outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		"relative inline-flex min-h-touch min-w-touch flex-1 items-center justify-center gap-1.5 rounded-sm border border-transparent px-2 py-1 text-body-sm font-medium whitespace-nowrap outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50 data-[state=active]:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 		tabs.surface === 'handoff' ? 'transition-[color]' : 'transition-[color,box-shadow]',
+		// U-28.4: with a pointer, a tab not chosen takes the text colour on hover (shadcn's), never while disabled.
+		'duration-standard ease-standard can-hover:enabled:hover:text-foreground',
 		tabs.surface === 'own' && 'data-[state=active]:bg-card data-[state=active]:shadow-raised',
 		className
 	)}

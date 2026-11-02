@@ -1,75 +1,134 @@
 import type { QueryClient } from '@tanstack/svelte-query';
 
-import type { HomeSection } from '../../types';
-import { mapCardToDoctor } from './card-adapter';
+import { mapCardToFacts } from './card-adapter';
 import type { CategoryScope } from './category-scope';
 import { searchDoctors } from './endpoints';
-import { resolveLocationSlug, resolveServiceSlug } from './resolvers';
-import { HOME_SECTION_LIMIT, type HomeSectionConfig } from './sections';
-import type { MarketplaceRequestContext, MarketplaceSearchParams } from './types';
+import { resolveLocationSlug, resolveSpecialtyScope, type ResolvedProfessional } from './resolvers';
+import { HOME_SECTION_LIMIT, termFor, type HomeSectionConfig } from './sections';
+import type {
+	MarketplaceRequestContext,
+	MarketplaceSearchParams,
+	SearchDoctorsSection,
+	SearchDoctorsSectionLink,
+	SearchDoctorsSectionWhat,
+	SearchDoctorsSectionWhere
+} from './types';
 
-function mergeText(base: string | undefined, extra: string | undefined): string | undefined {
-	const parts = [base, extra].filter((part): part is string => Boolean(part && part.trim()));
+/**
+ * A section's search and the facts of what its «→» opens (U-32.1, the application's `SectionQuery`: the same scope;
+ * `lib/section-link` makes the link the results' criteria).
+ */
+export type SectionQuery = { params: MarketplaceSearchParams; link: SearchDoctorsSectionLink };
 
-	return parts.length > 0 ? parts.join(' ') : undefined;
+/**
+ * The «Τι» of the row's link: ONE resolved professional is a structured `professional` (the row's term as its
+ * label); several (internal medicine + GPs) or none is the first term as words — the URL holds one «Τι».
+ */
+function whatOf(
+	terms: string[],
+	professionals: ResolvedProfessional[],
+	categoryProfessionals: ResolvedProfessional[] | undefined
+): SearchDoctorsSectionWhat | null {
+	if (professionals.length === 1) {
+		const [professional] = professionals;
+		return {
+			kind: 'professional',
+			label: terms[0] ?? professional.label,
+			id: professional.id,
+			slug: professional.slug
+		};
+	}
+	if (terms.length > 0) return { kind: 'text', label: terms[0] };
+	if (categoryProfessionals?.length === 1) {
+		const [professional] = categoryProfessionals;
+		return {
+			kind: 'professional',
+			label: professional.label,
+			id: professional.id,
+			slug: professional.slug
+		};
+	}
+	return null;
 }
 
 /**
- * Resolves a section's own scope (location/service) plus the active category scope into a
- * concrete `MarketplaceSearchParams`. Unresolved location/service degrade to text or to
- * no scope rather than failing, so a section always runs.
+ * Resolves a section's own scope (the application's `buildSectionSearchParams`): each specialty term to its
+ * `professionalId`s (or, unresolved, to its words), the location to a `locationSlug`, plus the active category's
+ * scope. A section with a `location` that does not resolve is `null`: hidden, never unscoped.
  */
-export async function buildSectionSearchParams(
+export async function buildSectionQuery(
 	queryClient: QueryClient,
 	config: HomeSectionConfig,
 	categoryScope: CategoryScope,
 	lang: string,
 	fetchImpl?: typeof fetch
-): Promise<MarketplaceSearchParams> {
-	const serviceSlugs: string[] = [];
-	let textFallback: string | undefined;
-	let locationSlug: string | undefined;
+): Promise<SectionQuery | null> {
+	const professionals: ResolvedProfessional[] = [];
+	const textParts: string[] = [];
+	const terms = (config.specialties ?? []).map((term) => termFor(term, lang));
 
-	if (config.serviceValue) {
-		const service = await resolveServiceSlug(queryClient, config.serviceValue, {
-			lang,
-			fallbackText: config.serviceTextFallback,
-			fetch: fetchImpl
-		});
-
-		if (service.serviceSlug) {
-			serviceSlugs.push(service.serviceSlug);
-		} else if (service.textFallback) {
-			textFallback = service.textFallback;
-		}
+	// The terms and the area resolve side by side (no waterfall), then are read in the row's order.
+	const locationTerm = config.location ? termFor(config.location, lang) : null;
+	const [scopes, location] = await Promise.all([
+		Promise.all(
+			terms.map((term) =>
+				resolveSpecialtyScope(queryClient, term, { lang, queryTerm: term, fetch: fetchImpl })
+			)
+		),
+		locationTerm
+			? resolveLocationSlug(queryClient, locationTerm, {
+					lang,
+					queryTerm: locationTerm,
+					fetch: fetchImpl
+				})
+			: Promise.resolve(null)
+	]);
+	for (const scope of scopes) {
+		if (scope.professionals) professionals.push(...scope.professionals);
+		else if (scope.textFallback) textParts.push(scope.textFallback);
 	}
 
-	if (config.locationValue) {
-		const location = await resolveLocationSlug(queryClient, config.locationValue, {
-			lang,
-			fetch: fetchImpl
-		});
-		locationSlug = location.locationSlug;
+	let where: SearchDoctorsSectionWhere | null = null;
+	if (location && locationTerm) {
+		if (!location.locationSlug) return null;
+		// S-03.2: the link's «Πού» is the area's own words (its label), the matcher's term only without one.
+		where = {
+			kind: 'location',
+			label: location.label ?? locationTerm,
+			slug: location.locationSlug,
+			...(location.locationType ? { locationType: location.locationType } : {})
+		};
 	}
 
-	const mergedServiceSlugs = [...serviceSlugs, ...(categoryScope.serviceSlugs ?? [])];
+	const professionalIds = [
+		...professionals.map((professional) => professional.id),
+		...(categoryScope.professionalIds ?? [])
+	];
+	const text = [...textParts, categoryScope.text]
+		.filter((part): part is string => Boolean(part && part.trim()))
+		.join(' ');
+	const what = whatOf(terms, professionals, categoryScope.professionals);
 
 	return {
-		sortBy: config.sortBy,
-		availability: config.availability,
-		limit: HOME_SECTION_LIMIT,
-		lang,
-		...(locationSlug ? { locationSlug } : {}),
-		...(mergedServiceSlugs.length > 0 ? { serviceSlugs: mergedServiceSlugs } : {}),
-		...(categoryScope.professionalIds ? { professionalIds: categoryScope.professionalIds } : {}),
-		...(mergeText(textFallback, categoryScope.text)
-			? { text: mergeText(textFallback, categoryScope.text) }
-			: {})
+		params: {
+			sortBy: config.sortBy,
+			availability: config.availability,
+			limit: HOME_SECTION_LIMIT,
+			lang,
+			...(where?.slug ? { locationSlug: where.slug } : {}),
+			...(categoryScope.serviceSlugs && categoryScope.serviceSlugs.length > 0
+				? { serviceSlugs: categoryScope.serviceSlugs }
+				: {}),
+			...(professionalIds.length > 0 ? { professionalIds } : {}),
+			...(text ? { text } : {})
+		},
+		link: { availability: config.availability, what, where }
 	};
 }
 
 /**
- * Runs one home section: resolves scope, performs the search, and adapts the cards.
+ * Runs one home section: resolves the scope, searches, adapts the cards to their facts (U-32.1). A section whose
+ * location does not resolve comes back empty (no search), and the page hides it.
  */
 export async function fetchHomeSection(
 	queryClient: QueryClient,
@@ -77,20 +136,20 @@ export async function fetchHomeSection(
 	categoryScope: CategoryScope,
 	lang: string,
 	context: MarketplaceRequestContext = {}
-): Promise<HomeSection> {
-	const params = await buildSectionSearchParams(
-		queryClient,
-		config,
-		categoryScope,
-		lang,
-		context.fetch
-	);
-	const result = await searchDoctors(params, context);
+): Promise<SearchDoctorsSection> {
+	const query = await buildSectionQuery(queryClient, config, categoryScope, lang, context.fetch);
+
+	if (!query) {
+		return { id: config.id, items: [], link: null };
+	}
+
+	const result = await searchDoctors(query.params, context);
 
 	return {
 		id: config.id,
-		doctors: result.items.map((card) =>
-			mapCardToDoctor(card, { pricingVisible: result.pricingVisible })
-		)
+		items: result.items.map((card) =>
+			mapCardToFacts(card, { pricingVisible: result.pricingVisible })
+		),
+		link: query.link
 	};
 }

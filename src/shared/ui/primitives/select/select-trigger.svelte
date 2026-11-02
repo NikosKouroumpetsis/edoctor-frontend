@@ -62,7 +62,9 @@
 	onclick={() => ctx.setOpen(!ctx.open)}
 	{onkeydown}
 	class={cn(
-		'flex w-fit max-w-full min-w-touch items-center justify-between gap-2 rounded-md border border-input bg-card whitespace-nowrap transition-[color,box-shadow] outline-none select-none focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger [&_svg]:pointer-events-none [&_svg]:shrink-0',
+		'flex w-fit max-w-full min-w-touch items-center justify-between gap-2 rounded-md border border-input bg-card whitespace-nowrap transition-[color,border-color,box-shadow] duration-standard ease-standard outline-none select-none focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-danger [&_svg]:pointer-events-none [&_svg]:shrink-0',
+		// U-28.4: with a pointer, the bordered trigger darkens its border on hover (not while disabled).
+		'can-hover:enabled:hover:border-foreground',
 		selectTriggerSizes[size],
 		className
 	)}

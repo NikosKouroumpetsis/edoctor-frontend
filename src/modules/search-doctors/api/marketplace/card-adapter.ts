@@ -1,96 +1,81 @@
+import { toStarScore } from '$shared/lib/rating-stars';
 import { resolveMediaUrl } from '$shared/lib/http';
+import { readServerNow } from '$shared/lib/server-clock';
 
-import type { DoctorCard } from '../../types';
-import type { DoctorPublicMarketplaceCardView } from './types';
+import type {
+	DoctorPublicMarketplaceCardView,
+	SearchDoctorsCardFacts,
+	SearchDoctorsCardPoint
+} from './types';
 
 export type CardAdapterContext = {
 	pricingVisible: boolean;
-	/** Optional preformatted currency function; defaults to a neutral EUR label. */
-	formatFee?: (min: number, max: number) => string;
+	/** «Now» the card is read at; the server's «now» by default (D-118: never the device's clock alone). */
+	now?: number;
 };
 
-function formatAvailabilityLabel(card: DoctorPublicMarketplaceCardView): string {
-	const { nextAvailableAt, hasToday, hasNext3Days } = card.availability;
-
-	if (nextAvailableAt) {
-		const parsed = new Date(nextAvailableAt);
-
-		if (!Number.isNaN(parsed.getTime())) {
-			return parsed.toLocaleString(undefined, {
-				weekday: 'short',
-				hour: '2-digit',
-				minute: '2-digit'
-			});
-		}
-	}
-
-	if (hasToday) {
-		return 'Today';
-	}
-
-	if (hasNext3Days) {
-		return 'Next 3 days';
-	}
-
-	return '';
+/** The visit price only when it is a finite number (the application's `buildPrimaryServicePrice`), else none. */
+function buildPrimaryServicePrice(price: unknown): number | null {
+	return typeof price === 'number' && Number.isFinite(price) ? price : null;
 }
 
-function formatCityLabel(card: DoctorPublicMarketplaceCardView): string {
+const isCoordinate = (value: unknown): value is number =>
+	typeof value === 'number' && Number.isFinite(value);
+
+/** The office's point for the results map (U-24.4, §7.1): none without both coordinates. */
+function buildPoint(card: DoctorPublicMarketplaceCardView): SearchDoctorsCardPoint | null {
 	const office = card.primaryOffice;
-
-	if (!office) {
-		return '';
-	}
-
-	return [office.city, office.state].filter((part): part is string => Boolean(part)).join(' · ');
-}
-
-function formatFeeLabel(
-	card: DoctorPublicMarketplaceCardView,
-	context: CardAdapterContext
-): string {
-	if (!context.pricingVisible || !card.priceRange) {
-		return '';
-	}
-
-	const { min, max } = card.priceRange;
-
-	// The contract allows an open-ended price range (`min`/`max` nullable); treat a
-	// missing bound like no price rather than rendering a partial "EUR null" label.
-	if (min === null || max === null) {
-		return '';
-	}
-
-	if (context.formatFee) {
-		return context.formatFee(min, max);
-	}
-
-	return min === max ? `EUR ${min}` : `EUR ${min}-${max}`;
+	return office && isCoordinate(office.latitude) && isCoordinate(office.longitude)
+		? { latitude: office.latitude, longitude: office.longitude }
+		: null;
 }
 
 /**
- * Adapts a backend marketplace card to the feature's `DoctorCard`.
+ * 🔴 U-32.1: a backend marketplace card as FACTS (the application's `mapCardToFacts`), no words and no display format
+ * — the home's and the results' cards are `lib/doctor-card`'s (`buildDoctorCard`, `buildSearchResultCard`):
  *
- * - `imageUrl` prefers `mediumSizeUrl`, falls back to `smSizeUrl`, then to a placeholder
- *   (relative paths are made absolute) via `resolveMediaUrl`.
- * - `visitFeeLabel` is blank when pricing is not visible (anonymous callers).
- * - `rating` falls back to `0` when the backend rating average is `null`.
- * - category `tags` no longer exist; category scoping happens server-side via the section query.
+ * - `imageUrl` prefers `mediumSizeUrl`, then `smSizeUrl`, as an absolute address; none (or blank) is `null`;
+ * - `office` and `availability` as the server sends them; `point` only with both coordinates (§7.1);
+ * - `rating` the average (`0` when the server sends none), `reviewCount` the number of reviews (S-31.1);
+ * - `primaryServicePrice` only a finite number, with the page's pricing gate;
+ * - `readAt` the server's «now» the card was read at (D-118): its day words are told against it;
+ * - 🔴 U-45.2: `badgeId: 'patient-favorite'` only for `isPatientsChoice === true` (the backend's verdict, always on
+ *   the wire, optional in the contract);
+ * - 🔴 U-49: `rating` only on the 5 stars (`toStarScore`): a value of the old 1–10 scale is none (`0`).
  */
-export function mapCardToDoctor(
+export function mapCardToFacts(
 	card: DoctorPublicMarketplaceCardView,
 	context: CardAdapterContext
-): DoctorCard {
+): SearchDoctorsCardFacts {
+	const photo = card.primaryImage?.mediumSizeUrl?.trim() || card.primaryImage?.smSizeUrl?.trim();
+	const office = card.primaryOffice;
+
 	return {
 		id: card.doctorId,
 		doctorSlug: card.slug,
 		name: card.fullName,
-		specialty: card.professional?.name ?? '',
-		city: formatCityLabel(card),
-		imageUrl: resolveMediaUrl(card.primaryImage?.mediumSizeUrl ?? card.primaryImage?.smSizeUrl),
-		availabilityLabel: formatAvailabilityLabel(card),
-		visitFeeLabel: formatFeeLabel(card, context),
-		rating: card.rating.average ?? 0,
-		reviewCount: card.rating.count
+		professionalName: card.professional?.name ?? '',
+		imageUrl: photo ? resolveMediaUrl(photo) : null,
+		office: office
+			? {
+					city: office.city,
+					street: office.street,
+					streetNumber: office.streetNumber,
+					distanceKm: office.distanceKm
+				}
+			: null,
+		point: buildPoint(card),
+		description: card.descriptionExcerpt ?? null,
+		availability: {
+			nextAvailableAt: card.availability.nextAvailableAt,
+			hasToday: card.availability.hasToday,
+			hasNext3Days: card.availability.hasNext3Days
+		},
+		rating: toStarScore(card.rating.average) ?? 0,
+		reviewCount: card.rating.count,
+		pricingVisible: context.pricingVisible,
+		primaryServicePrice: buildPrimaryServicePrice(card.primaryServicePrice),
+		readAt: context.now ?? readServerNow(),
+		...(card.isPatientsChoice === true ? { badgeId: 'patient-favorite' as const } : {})
 	};
 }

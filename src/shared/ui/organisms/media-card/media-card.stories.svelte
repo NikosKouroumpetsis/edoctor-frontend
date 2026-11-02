@@ -5,6 +5,7 @@
 	import { FavoriteButton } from '$shared/ui/primitives/favorite-button';
 	import { MapThumbnail } from '$shared/ui/primitives/map-thumbnail';
 	import { MediaBadge } from '$shared/ui/primitives/media-badge';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { brokenPhoto, samplePhotos } from './media-card.sample';
 
 	const noop = () => {};
@@ -24,7 +25,7 @@
 		argTypes: {
 			variant: { control: 'radio', options: ['plain', 'framed'] },
 			loading: { control: 'select', options: ['lazy', 'eager'] },
-			aspect: { control: 'select', options: [undefined, '4/3'] }
+			aspect: { control: 'select', options: [undefined, '4/3', '1/1'] }
 		},
 		render: template
 	});
@@ -112,6 +113,25 @@
 <Story name="Aspect Four By Three">
 	{#snippet template()}
 		<MediaCard imageUrl={samplePhotos[1]} aspect="4/3" class="w-full max-w-content">
+			{@render meta()}
+		</MediaCard>
+	{/snippet}
+</Story>
+
+<!-- Web only (U-20, the home's doctor card): the 1:1 photo with the 16 corner. -->
+<Story name="Aspect Square" args={{ aspect: '1/1', imageClass: 'rounded-lg' }} />
+
+<!-- U-14.1 / U-14.6: the photo lights up on its arrival (0.8 s) over the muted frame; once shown in the session it
+     shows at once. -->
+<Story name="Reveal" args={{ aspect: '1/1', imageClass: 'rounded-lg', reveal: true }} />
+
+<!-- The application's article card without a photo (U-20): the muted 4:3 frame with a page glyph in `photoFallback`. -->
+<Story name="With Placeholder">
+	{#snippet template()}
+		<MediaCard imageUrl={null} aspect="4/3" imageClass="rounded-lg" class="w-full max-w-content">
+			{#snippet photoFallback()}
+				<Ionicon name="document-text-outline" class="icon-xl text-muted-foreground" />
+			{/snippet}
 			{@render meta()}
 		</MediaCard>
 	{/snippet}

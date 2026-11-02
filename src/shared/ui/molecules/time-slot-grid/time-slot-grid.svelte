@@ -91,7 +91,13 @@
 				data-value={slot.value}
 				data-testid={testIdOf(`slot-${slot.value}`)}
 				onclick={() => choose(slot.value)}
-				class={cn(chipClasses, selected ? 'border-primary bg-primary' : 'border-border/70 bg-card')}
+				class={cn(
+					chipClasses,
+					// U-28.4: with a pointer, a time not chosen darkens its border on hover.
+					selected
+						? 'border-primary bg-primary'
+						: 'border-border/70 bg-card transition-colors duration-standard ease-standard can-hover:hover:border-foreground'
+				)}
 			>
 				<span
 					class={cn(

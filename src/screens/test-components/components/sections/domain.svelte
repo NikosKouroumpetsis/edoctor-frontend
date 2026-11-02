@@ -3,7 +3,7 @@
 	import { m } from '$paraglide/messages.js';
 	import { SiteNavbar } from '$shared/ui/organisms/site-navbar';
 	import { CookieConsent } from '$shared/ui/organisms/cookie-consent';
-	import { DoctorCard } from '$modules/doctors/ui/doctor-card';
+	import { DoctorCard } from '$modules/doctors/ui/card';
 	import { AvailabilityTable } from '$modules/doctors/ui/availability-table';
 	import { DoctorSearchBar, type DoctorSearchQuery } from '$modules/doctors/ui/search-bar';
 	import {

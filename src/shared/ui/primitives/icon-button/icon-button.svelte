@@ -6,7 +6,7 @@
 	export type IconButtonAppearance = 'bare' | 'outline' | 'scrim' | 'tint' | 'tile';
 	export type IconButtonSize = 'xs' | 'sm' | 'md' | 'touch' | 'xl';
 	export type IconButtonSurface = 'card' | 'muted' | 'subtle' | 'soft' | 'strong';
-	export type IconButtonIconSize = 'md' | 'lg' | 'xl';
+	export type IconButtonIconSize = 'sm' | 'md' | 'lg' | 'xl';
 	export type IconButtonIconTone = 'foreground' | 'secondary' | 'muted';
 	/** The sizes whose shape IS the target (48, 64); the smaller ones sit inside the 48 box. */
 	export type IconButtonOwnShapeSize = Extract<IconButtonSize, 'touch' | 'xl'>;
@@ -24,7 +24,7 @@
 	};
 	const tileLook = 'rounded-md border border-border bg-card';
 	const boxBase =
-		'relative inline-flex shrink-0 items-center justify-center outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
+		'group relative inline-flex shrink-0 items-center justify-center outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
 
 	// The drawn circle (D1): its diameter, then its fill or ring per appearance.
 	const shapeSizes: Record<IconButtonSize, string> = {
@@ -46,7 +46,24 @@
 		soft: 'bg-foreground/6',
 		strong: 'bg-foreground/8'
 	};
+	// U-28.4 (Airbnb's round controls): with a pointer, the circle takes a light fill while its button is hovered — the
+	// bare and the outlined one the 5 % foreground, the photo's scrim its whole white, a tint one step stronger.
+	// (A tile draws no circle: its border darkens instead, on the box.)
+	const shapeHovers: Record<Exclude<IconButtonAppearance, 'tint'>, string> = {
+		bare: 'can-hover:group-hover:bg-foreground/5',
+		outline: 'can-hover:group-hover:bg-foreground/5',
+		scrim: 'can-hover:group-hover:bg-media-scrim',
+		tile: ''
+	};
+	const surfaceHovers: Record<IconButtonSurface, string> = {
+		card: 'can-hover:group-hover:bg-muted',
+		muted: 'can-hover:group-hover:bg-foreground/8',
+		subtle: 'can-hover:group-hover:bg-foreground/8',
+		soft: 'can-hover:group-hover:bg-foreground/10',
+		strong: 'can-hover:group-hover:bg-foreground/12'
+	};
 	const iconSizes: Record<IconButtonIconSize, string> = {
+		sm: 'icon-sm',
 		md: 'icon-md',
 		lg: 'icon-lg',
 		xl: 'icon-xl'
@@ -173,11 +190,24 @@
 			isActive && 'border-2 border-foreground'
 		)
 	);
+	// U-28.4: the hover of a target that presses (a decorative shape or a blocked one has none).
+	const shapeHover = $derived(
+		isBlocked || isTile
+			? ''
+			: cn(
+					'transition-colors duration-standard ease-standard',
+					appearance === 'tint' ? surfaceHovers[surface] : shapeHovers[appearance]
+				)
+	);
 	const tileSize = $derived<IconButtonOwnShapeSize>(ownShape ?? 'xl');
 	const roundSize = $derived<IconButtonOwnShapeSize>(shape === 'xl' ? 'xl' : 'touch');
 	const boxState = $derived(
 		cn(
 			isTile && 'active:bg-muted',
+			// U-28.4: a tile is bordered: with a pointer its border darkens on hover.
+			isTile &&
+				!isBlocked &&
+				'transition-colors duration-standard ease-standard can-hover:hover:border-foreground',
 			elevated && ownShape && 'shadow-floating',
 			isBlocked && 'opacity-50'
 		)
@@ -196,7 +226,7 @@
 	{#if isTile}
 		{@render glyph()}
 	{:else}
-		<span class={circle} data-slot="icon-button-shape">{@render glyph()}</span>
+		<span class={cn(circle, shapeHover)} data-slot="icon-button-shape">{@render glyph()}</span>
 	{/if}
 	{#if isActive}
 		<span

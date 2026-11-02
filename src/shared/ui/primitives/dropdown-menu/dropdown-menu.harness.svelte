@@ -9,8 +9,11 @@
 		DropdownMenuLabel
 	} from './index';
 
-	let { onProfile, showGrid = $bindable(false) }: { onProfile?: () => void; showGrid?: boolean } =
-		$props();
+	let {
+		onProfile,
+		showGrid = $bindable(false),
+		withLink = false
+	}: { onProfile?: () => void; showGrid?: boolean; withLink?: boolean } = $props();
 </script>
 
 <DropdownMenu>
@@ -20,6 +23,9 @@
 		<DropdownMenuItem onclick={() => onProfile?.()}>Profile</DropdownMenuItem>
 		<DropdownMenuItem icon="settings-outline">Settings</DropdownMenuItem>
 		<DropdownMenuItem icon="trash-outline" variant="destructive">Delete</DropdownMenuItem>
+		{#if withLink}
+			<DropdownMenuItem href="#help">Help</DropdownMenuItem>
+		{/if}
 		<DropdownMenuSeparator />
 		<DropdownMenuCheckboxItem bind:checked={showGrid}>Show grid</DropdownMenuCheckboxItem>
 	</DropdownMenuContent>

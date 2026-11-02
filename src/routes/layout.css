@@ -192,6 +192,30 @@
 	--animate-skeleton: skeleton-breathe 1.7s ease-in-out infinite;
 	--animate-upload-ring: spinner-turn 900ms linear infinite;
 	--animate-caret-blink: caret-blink 1.25s ease-out infinite;
+	/* The home's search dropping under the top bar from its pill (U-16.7, §6.4 of the wave record): the bar is already
+	   in the page, so a keyframe moves it in (an existing element has no `@starting-style`), 0.25 s on Airbnb's curve. */
+	--animate-search-drop: search-drop var(--transition-duration-standard) var(--ease-standard);
+	/* U-14 / U-14.6(α), wave 1.5: a photo that arrives lights up 0 ⇒ 1 in Airbnb's 0.8 s (`reveal`) on its curve, as a
+	   keyframe — so it plays without JavaScript too: the server's first photo carries it from the first paint (seen
+	   without JS, never hidden until hydration), a photo mounted in the browser takes it at its `load`. `both`: it is
+	   transparent before it starts, opaque after. */
+	--animate-reveal: reveal var(--transition-duration-reveal) var(--ease-standard) both;
+
+	@keyframes reveal {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes search-drop {
+		from {
+			translate: 0 calc(var(--spacing) * -5);
+			opacity: 0;
+		}
+	}
 
 	@keyframes caret-blink {
 		0%,
@@ -269,6 +293,28 @@
 }
 
 /*
+ * The room the page's end keeps for a bar the page pins to the bottom edge (the profile's booking bar, MINOR-8 of r1):
+ * its measured height (`StickyActionBar` with `room="page"` writes `--page-bar-room` while it lives), the shared
+ * `bar-booking` before that (the server's page).
+ */
+@utility pb-page-bar {
+	padding-bottom: var(--page-bar-room, var(--spacing-bar-booking));
+}
+
+/*
+ * The phone's floating tab capsule (U-16.10, U-17.1): 16 above the screen's lower edge plus the device safe area,
+ * flower-application's place. What floats over the page above it (the consent card, U-16.5) keeps the room the
+ * capsule takes (`bar-bottom`) plus the same safe area.
+ */
+@utility bottom-safe-area {
+	bottom: calc(--spacing(4) + env(safe-area-inset-bottom));
+}
+
+@utility bottom-above-tab-bar {
+	bottom: calc(var(--spacing-bar-bottom) + env(safe-area-inset-bottom));
+}
+
+/*
  * The modal surface's zoom end (U-12.2, the application's `use-modal-animation`): the tapped control's place, size
  * and corner, measured by `ModalScreenSurface` into the two variables; `starting:` opens from it, `data-[state=closed]:`
  * closes into it.
@@ -276,6 +322,40 @@
 @utility modal-zoom-from {
 	transform: var(--modal-zoom-from);
 	border-radius: var(--modal-zoom-radius);
+}
+
+/*
+ * Airbnb's filters window from 744 (U-24.3, §7.5 of the wave record): at most the screen's height less 80, so the
+ * dimmed page shows above and below it.
+ */
+@utility max-h-window {
+	max-height: calc(100dvh - --spacing(20));
+}
+
+/*
+ * The results' map from 1128 (U-24.4, §7.2): beside the list, stuck 24 under the top bar and as tall as the screen
+ * under it less 24 above and below (the prototype's `top: 88px; height: calc(100vh - 112px)`).
+ */
+@utility map-pane-sticky {
+	position: sticky;
+	top: calc(var(--spacing-bar-top) + --spacing(6));
+	height: calc(100dvh - var(--spacing-bar-top) - --spacing(12));
+}
+
+/*
+ * The profile's photo square from 744 (U-41.1, the application's `MediaGallery`): 26 % of the window, held between
+ * 260 and 360 (the prototype's `clamp(260px, 26vw, 360px)`).
+ */
+@utility w-gallery-fluid {
+	width: clamp(var(--spacing-gallery-main), 26vw, var(--spacing-gallery-main-lg));
+}
+
+/*
+ * A list that scrolls inside its card fades out at its lower edge (U-23.2, the phone's search window, the
+ * prototype's mask): the last 15 % of its box go from the content to nothing, so the card reads «more below».
+ */
+@utility edge-fade-bottom {
+	mask-image: linear-gradient(#000 85%, transparent);
 }
 
 @layer base {
@@ -291,5 +371,54 @@
 	}
 	html.dark {
 		color-scheme: dark;
+	}
+
+	/*
+	 * U-28.4 (Airbnb, measured 29/10): what a pointer presses shows the hand, what is disabled `not-allowed`. Tailwind 4
+	 * draws buttons with the browser's default cursor (its upgrade guide, «Buttons use the default cursor»); this is
+	 * the guide's own `@layer base` fix, widened to every pressable role, a `summary`, a `select` and a label that holds
+	 * or sits beside a pressable control. In `base`, under every utility: a cursor of the kit (the slider's
+	 * `cursor-grab`, a field's `cursor-text`) wins.
+	 */
+	button:not(:disabled),
+	:is(
+		[role='button'],
+		[role='radio'],
+		[role='checkbox'],
+		[role='switch'],
+		[role='tab'],
+		[role='option'],
+		[role='menuitem'],
+		[role='menuitemradio'],
+		[role='menuitemcheckbox']
+	):not(:disabled, [aria-disabled='true']),
+	summary,
+	select:not(:disabled),
+	label:has(
+		:is(
+			input:is([type='checkbox'], [type='radio'], [type='file']),
+			button,
+			[role='checkbox'],
+			[role='radio'],
+			[role='switch']
+		):not(:disabled, [aria-disabled='true'])
+	),
+	:is(button, [role='checkbox'], [role='radio'], [role='switch']):not(
+			:disabled,
+			[aria-disabled='true']
+		)
+		+ label[for],
+	label[for]:has(
+			+ :is(button, [role='checkbox'], [role='radio'], [role='switch']):not(
+					:disabled,
+					[aria-disabled='true']
+				)
+		) {
+		cursor: pointer;
+	}
+
+	:disabled,
+	[aria-disabled='true'] {
+		cursor: not-allowed;
 	}
 }

@@ -234,4 +234,57 @@ describe('MediaCard', () => {
 		expect(within(card).getAllByRole('link')).toHaveLength(1);
 		expect(within(card).queryAllByRole('button')).toHaveLength(0);
 	});
+	it('U-20: the 1:1 option is the square photo (the home’s doctor card), a ratio instead of a height', () => {
+		const { container } = render(MediaCard, {
+			props: { imageUrl: samplePhotos[0], aspect: '1/1', imageClass: 'rounded-lg' }
+		});
+		expect(container.querySelector('img')).toHaveClass('aspect-square', 'h-auto', 'rounded-lg');
+		expect(container.querySelector('img')).not.toHaveClass('aspect-4/3');
+	});
+
+	it('U-20 (U-14.1): `reveal` lights the photo up on arrival (0.8 s on the curve) over the muted frame; shown before, at once', async () => {
+		const url = `${samplePhotos[1]}?reveal-test`;
+		const first = render(MediaCard, { props: { imageUrl: url, aspect: '1/1', reveal: true } });
+		const frame = first.container.querySelector('[data-slot="media-card-frame"]') as HTMLElement;
+		expect(frame).toHaveClass('relative', 'overflow-hidden', 'bg-muted', 'aspect-square');
+		const photo = first.container.querySelector('img') as HTMLImageElement;
+		expect(photo).toHaveAttribute('data-loaded', 'false');
+		expect(photo).toHaveClass(
+			'opacity-0',
+			'data-[loaded=true]:opacity-100',
+			'transition-opacity',
+			'duration-reveal',
+			'ease-standard'
+		);
+		await fireEvent.load(photo);
+		expect(photo).toHaveAttribute('data-loaded', 'true');
+		first.unmount();
+		const again = render(MediaCard, { props: { imageUrl: url, aspect: '1/1', reveal: true } });
+		const shown = again.container.querySelector('img') as HTMLImageElement;
+		await vi.waitFor(() => expect(shown).toHaveAttribute('data-loaded', 'true'));
+		expect(shown).not.toHaveClass('transition-opacity');
+	});
+
+	it('U-20 (negative): without `reveal` the photo is the plain image, no frame, no fade', () => {
+		const { container } = render(MediaCard, { props: { imageUrl: samplePhotos[0] } });
+		expect(container.querySelector('[data-slot="media-card-frame"]')).toBeNull();
+		expect(container.querySelector('img')).not.toHaveAttribute('data-loaded');
+		expect(container.querySelector('img')).not.toHaveClass('opacity-0');
+	});
+	it('U-20: `photoFallback` stands in for a missing or broken photo inside the muted frame, instead of the silhouette', async () => {
+		const glyph = createRawSnippet(() => ({ render: () => '<span data-testid="glyph">▤</span>' }));
+		const missing = render(MediaCard, {
+			props: { imageUrl: null, aspect: '4/3', photoFallback: glyph }
+		});
+		const frame = missing.container.querySelector('[data-slot="media-card-placeholder"]');
+		expect(frame).toHaveClass('flex', 'items-center', 'justify-center', 'bg-muted', 'aspect-4/3');
+		expect(frame?.querySelector('[data-testid="glyph"]')).not.toBeNull();
+		expect(missing.container.querySelector('[data-slot="media-placeholder"]')).toBeNull();
+		missing.unmount();
+		const broken = render(MediaCard, {
+			props: { imageUrl: brokenPhoto, aspect: '4/3', photoFallback: glyph }
+		});
+		await fireEvent.error(broken.container.querySelector('img') as HTMLImageElement);
+		expect(broken.container.querySelector('[data-slot="media-card-placeholder"]')).not.toBeNull();
+	});
 });

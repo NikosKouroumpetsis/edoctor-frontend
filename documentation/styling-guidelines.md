@@ -86,9 +86,10 @@ tables and rules in [`design-tokens.md`](./design-tokens.md):
   `section` 32 · `section-lg` 48; page gutters `gutter-sm/md/lg` 24/32/48.
 - Containers: `narrow` 360 · `text` 480 · `form` 560 · `dialog` 568 ·
   `content` 760 · `listing` 1120 · `page` 1440 · `wide` 1920.
-- Radii: `xs` 4 · `sm` 8 · `md` 12 · `lg` 16 · `xl` 24 (+ `full`/`none`) — five
-  steps and no sixth (the owner's decision, which the Airbnb dialog's 32 does not
-  override).
+- Radii: `xs` 4 · `sm` 8 · `md` 12 · `lg` 16 · `xl` 24 (+ `full`/`none`) — the
+  application's five steps, and ONE web-only sixth, `panel` 32 (`rounded-panel`,
+  U-25.4): only the web's panels and windows from 744 (the search panel, the filters
+  window); see `design-tokens.md`.
 - Elevation: `shadow-raised | overlay | floating | soft | bar` — the only
   shadows: the generated theme resets `--shadow-*`, so Tailwind's
   `shadow-xs | sm | md | lg …` do not exist (U-03.4).
@@ -253,6 +254,40 @@ guards both.
   `data-loaded` turns it 1: `@starting-style` cannot give the start, as its `opacity: 0` loses to the more specific
   `data-[loaded=true]:` rule.
 
+## Pressable (U-28.4)
+
+What presses looks pressable, in the components (the owner, 29/10; Airbnb measured):
+
+- **Cursor:** `src/routes/layout.css` `@layer base` gives `cursor: pointer` to `button:not(:disabled)`, the
+  pressable roles (`button`, `radio`, `checkbox`, `switch`, `tab`, `option`, `menuitem*`, not while `:disabled` or
+  `aria-disabled=true`), `summary`, `select:not(:disabled)` and a `label` that holds or sits beside (`for`) a
+  pressable control, and `cursor: not-allowed` to `:disabled` / `[aria-disabled=true]` (Tailwind 4 draws buttons with
+  the default cursor: its upgrade guide's own fix, widened). It is under every utility, so a cursor of the kit wins
+  (`cursor-grab`, `cursor-text`); the menu, select and command items no longer write `cursor-default`. `Button`,
+  `TextButton` and `TabsTrigger` no longer take `disabled:pointer-events-none` (a disabled button refuses its press
+  by itself and shows `not-allowed`); a blocked link keeps `aria-disabled:pointer-events-none`. U-31.1 (the owner,
+  29/10): a disabled `Toggle` / `ToggleGroup` item takes the pointer too (so `not-allowed`), its hover undone by
+  `disabled:bg-transparent disabled:text-muted-foreground` (after `hover:`, before the pressed `data-[state=on]:` in
+  Tailwind's variant order: the pressed look stays); a disabled day of the `Calendar` and a disabled `Slider`'s thumb
+  keep letting the pointer through (no hover reaches them) and show `not-allowed` through their cell
+  (`has-[:disabled]:cursor-not-allowed`) and the slider (`cursor-not-allowed`); an enabled thumb keeps `cursor-grab`.
+- **Focus from the keyboard:** every control the keyboard reaches shows it — the uploader's «Προσθήκη περισσοτέρων»
+  draws the kit's ring on its tile's corner (`rounded-xl focus-visible:ring-3 focus-visible:ring-ring/50`, U-31.1);
+  a field that drives a listbox with the arrows names the active option (`aria-activedescendant`, each option with
+  its ONE id): `SearchField`, `SearchBar`, `Command` and the `Combobox` (U-31.1).
+- **Hover**, only with a pointer (`can-hover:`), on `transition-colors duration-standard ease-standard`, never on
+  the chosen or the disabled look (`enabled:` / `not-disabled:` / the state's own class): a bordered choice (outline
+  chip, selectable card, checkbox box and row, radio ring, pill tab, day / time / date card, select trigger, the idle
+  filter button, a bordered option row, the launcher field) darkens its border to `foreground`; a round icon control
+  and the map's buttons take the light fill (`bg-foreground/5`; the photo's scrim its whole white, a tint one step
+  stronger), as an unchosen segment, a row (`ListItem`, `OptionRow`, `InfoRow`), the stepper's «−» / «+», a banner's
+  «×» and the action bar's secondary; a `Button` tone a shade lighter (`/90`) or a step stronger; a text action its
+  underline (an underlined one twice as thick); a card that is a button (`StepCard`, the home's search pill) lifts;
+  the heart over a photo grows 8 % (the map pin's). What already had a hover keeps it.
+- **Semantics:** every press is a `<a href>`, a `<button>`, an input or a role with its keys; a backdrop that closes
+  on a press is `aria-hidden` (Escape is its key); the card's «🔒 Συνδεθείτε για κόστος» (`span role="button"`,
+  U-27.4 f1b) is the known inline exception (`tests/architecture/pressable.test.ts`).
+
 ## Components
 
 - Use the in-house primitives in `src/shared/ui/primitives` for common controls.
@@ -325,7 +360,13 @@ count comes from the caller (U-02.1), the zones only by CSS (U-03.1):
   `handleListboxKeydown`; Enter commits through `search.onCommit`), the panel snippet gets
   `{ listboxId, activeId }` to wrap its `option` rows in. Choosing one step and moving on to the next (Airbnb's
   «Πού ⇒ Πότε») is the caller's `active`; the keyboard's focus follows it — the new segment's field or button,
-  the closed one's button after Escape — unless the user took it outside the bar (MINOR-3).
+  the closed one's button after Escape — unless the user took it outside the bar (MINOR-3). Wave 1.0 (U-23.2):
+  the open bar is Airbnb's grey (`#ebeef2`, not the kit's beige `bg-muted`): the card with a 12 % tint of
+  `muted-foreground` laid over it (`bg-card bg-linear-to-r from-muted-foreground/12 to-muted-foreground/12`,
+  #ebedf0, no new colour name); a segment's value is one line cut by «…» where its room ends (`truncate`, the
+  prototype's mid-word «Προσθήκη διαθε…» at 744); the pill is measured again when ANY segment's box changes; the
+  panel is Airbnb's `tablet:w-search-panel-w` (424) × `tablet:rounded-panel` (32, U-25.4), at most
+  `tablet:max-h-sheet-sm`, from the bar's left edge, the last segment's («Πότε») from its right (`data-align="end"`).
 - `SearchPanel` (organism, web only) — the generic shell of a search panel: below 744 the whole screen with the
   search modal's header and a pinned footer (modal: focus trap, scroll lock), from 744 a dropdown card under its
   `relative` parent (not modal). CSS picks the shape; the panel reads its own computed `position` to know which
@@ -347,6 +388,82 @@ count comes from the caller (U-02.1), the zones only by CSS (U-03.1):
   name is the label alone (the application's `accessibilityLabel`), the muted line and the count its
   description. `SuggestionGroupHeader` names a group, above the listbox (only options inside it);
   `HighlightText` (primitive) folds case and Greek accents (`foldSearchText` in `src/shared/lib/text`).
+  Wave 1.0 (U-21/U-23.2, Airbnb's search rows): `OptionRow size="xl"` (the 72 row, the 56 `size-tile` tile corner
+  12, the 15 name in its regular weight, a 14 muted line that takes two lines before «…»), `tileTone="primary"`
+  (the blue glyph on a blue tile, «Κοντά μου»), `queryMatch="word-start"` (bold only at the start of a word,
+  `HighlightText match`); `OptionRowSkeleton size="xl"`; `SuggestionGroupHeader size="sm" tone="muted"` (12/600
+  grey group words).
+- `StepCard` (molecule, web, U-21/U-23.2) — Airbnb's search cards on the phone: closed, one 56 line on the card
+  (corner 24) — the label muted left, the choice or the placeholder 600 right, cut by «…»; open (`expanded`), a
+  `section` named by its 24/700 title over the caller's content, rising in on `starting:` (250 ms). One open at a
+  time is the caller's. The search window's list scrolls inside the open card and fades at its lower edge
+  (`edge-fade-bottom`, `layout.css`: a mask from the content to nothing over the last 15 %).
+- `ActionBar primaryShape="pill"` — the full round of the search's «Αναζήτηση» (U-23.1, on purpose unlike Airbnb).
+  Wave 1.0 (U-24.3): `primaryTone="contrast"` the dark `secondary` of the filters' «Εμφάνιση N γιατρών»;
+  `singleLine` never wraps (16 a side and 8 between on the phone, 24 / 16 from 744, the labels `whitespace-nowrap`).
+- 🔴 A third party's CSS outside every cascade layer (`maplibre-gl.css`) beats every Tailwind 4 utility
+  (`@layer utilities`), whatever the specificity or order: a node a library manages takes no utility of a property
+  its CSS sets (position, overflow, font) — it only fills (`size-full`) and a frame of ours places it (MAJOR-1 of
+  D3 r1: the map's `absolute inset-0` became `position: relative`, 0 high).
+- Results (wave 1.0, U-24.4): `MapView` (organism) — MapLibre made only in the browser once its box has a size
+  (`import('maplibre-gl')` and its worker file, `remove()` with the page), the caller's `styleUrl` (the ONE
+  `$shared/config/map`), `name:<labelLanguage>` first on the symbol layers that write a name, the attribution
+  kept, the caller's `pin` snippet centred on each point (`isolate`: the page's layers stay above every pin), the
+  camera fitted to the points. `MapPricePin` — the white 28 pill (13/700) or the 14 dark dot, `selected` dark (the
+  dot accent) and 8 % bigger, `hot` bigger. `MapPinCard` — one link over the whole card (U-27.4: an empty `<a>`
+  under the photo and the lines, as the `MediaCard`'s, so a button of the lines is its own target outside it; the
+  link's focus ring is the card's own, `has-[…:focus-visible]:ring-3`), the 128 photo left, the lines, its own «×»,
+  rising in on `starting:` (the page keys it by the pin). `MapSheet` (organism) — the phone's list over the map,
+  `snap` `peek | half | full` on the `sheet` token (the first scroll ⇒ `full`, the handle ⇒ `half`; `peek` and
+  `half` show the list from its top, `scrollTop = 0`), a plain column from 744 (no top room of its own). The handle
+  is a control only at the strip (at half the grip is only drawn; pressed, the focus goes to the sheet), and at the
+  strip below 744 only the header stays reachable: what follows it is `max-tablet:` invisible (NIT-7, app = web).
+  U-27.1 (app = web, Airbnb's, measured): below 744 a finger (or the mouse on the 48 top strip) carries the sheet
+  1:1 between full and the strip — from its top at every rest, and from its list off `full`, where the list does not
+  scroll (`max-tablet:touch-none`); at `full` the list scrolls natively and a pull DOWN from the top strip, or from a
+  list at its top, moves the sheet (the one non-passive `touchmove` listener stops that scroll at its first move).
+  During the drag the sheet is the whole stage high, moved by `transform` alone, no transition; let go, it rests at
+  `mapSheetRestFor(offset, velocity, rests)` (the application's rule: at least `MAP_SHEET_FLING_VELOCITY`, 500 px/s,
+  ⇒ the next rest that way, else the nearest; `mapSheetOffsetOf` the three rests) on the `sheet` token from where it
+  was let go; the click of a drag's release opens nothing. The wheel, the keys and assistive tech keep the old way
+  (a scroll at half ⇒ `full`). From 744 nothing moves (the sheet reads its own computed `position`). `MapView`
+  takes `fitKey` (the camera fits once per search, a next page leaves it) and `fitPadding` (the results keep the
+  phone sheet's half clear, `MAP_SHEET_HALF_SHARE`); Escape and the pin card's «×» give the focus back to its pin.
+  U-27.2: `zoomControls={{ zoomInLabel, zoomOutLabel }}` draws Airbnb's «+» / «−» from 744 (none below it: the
+  phone pinches): ONE pill 40 × 81 (two 40 halves, a 1 px `border` line) 16 from the map's top and right,
+  `bg-card/92.5` (the theme's card), `rounded-full`, `shadow-overlay` + a 1 px `ring-foreground/2`, `icon-sm`
+  glyphs, drawn once behind two 48 targets (`size-touch`, none over the other) with the kit's ring on the focused
+  half; each steps MapLibre's zoom on its own motion (`zoomIn` / `zoomOut` with `essential: true`, so the device's
+  motion setting never skips it, U-12.1) and is `disabled` at its limit (`getMaxZoom()`, `getMinZoom(true)`: the
+  world fitting the box), read on `load`, `zoom` and `resize`; they sit above the pins, inside the map's `isolate`.
+  While they show (from 744) a fit keeps their column clear: at least 72 on the right (16 + 40 + 16,
+  `withZoomColumn`), the caller's room on the other sides; below 744 the room is the caller's alone (f1b).
+  U-28.2 (Airbnb, measured at 1128 · 1440 · 1920): `expandControl={{ expanded, expandLabel, collapseLabel,
+onExpandedChange }}` draws, from 1128 only, the round «⤢» (`expand-outline`) as the right column's first target —
+  the zoom's look in a 40 circle 16 from the top and the right — and the zoom follows 8 under its 48 box (its pill at
+  72; below 1128 the circle is not drawn and the zoom is back at 16); while `expanded` the SAME node is the «×»
+  (`close`, the caller's `collapseLabel`), so the focus stays on it. `hideControl={{ label, onHide }}` draws the
+  «Απόκρυψη χάρτη» pill at the top left (16 / 16, 40 high, 14/600, the same look), from 1128 only and never while
+  expanded; while it shows a fit keeps its band (72 at the top, `withHideBand`). The caller owns the state and lays
+  the map out; the profile's map passes neither. The results (U-28.1): from 1128 the list on 2/3 and the map on 1/3
+  (`laptop:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]`, 24 apart), the list's columns 2 · 3 · 4 from 1128 · 1440 · 1920;
+  expanded, the map on the whole stage (the sheet with the count, the cards and the legal line `laptop:hidden`, the
+  page at its top); hidden, no map and the list 3 · 4 · 5 with the floating «Εμφάνιση χάρτη» of 744–1127 drawn from
+  1128 too. Every class the three states change is a `laptop:` one; the state is the page's (no address, no storage).
+  From 1128 the pin's card is at most 360 and keeps 12 from the map's sides (`laptop:inset-x-3 laptop:mx-auto
+laptop:max-w-narrow`).
+  `FilterButton` — `circle` (its own 40 circle in the 48 box: the whole 1 `border` hairline at rest, §7.3, the 2
+  dark ring + the count badge with filters) or `pill` («⚙ Φίλτρα [2]», the inset 2 ring + the dark badge).
+  `Chip variant="outline"` and the selected `SelectableCard` read 2 dark through an inset `ring-1` inside the 1
+  border (nothing reflows); a chip's count sits on its label's baseline. U-28.3: `SelectableCards size` /
+  `SelectableCard size` — `md` (the default, the application's: `p-6`, the `title-md` title 4 over the line, the cards
+  12 apart) or `sm` (the web filters' «Ταξινόμηση»: `px-4 py-3`, the 16/600 title 2 over the 14 muted line, both
+  `leading-tight`, the cards 8 apart, a card of ~66; `selectableCardSizes`); the caller's glyph keeps its size
+  (`icon-md` beside `sm`). `FullscreenModalTemplate shape="sheet"` —
+  the filters: a sheet 12 under the top with the 24 corner and the dimmed page below 744, the 568 / 32 window at
+  most `max-h-window` (the screen less 80) from 744, its header Airbnb's (`ModalHeader plain`: a bare «×», a
+  hairline under it). `SelectableCards labelledBy` (web only) names the group by the caller's own heading. The results' layout per zone is CSS only (`max-tablet:`,
+  `tablet:max-laptop:`, `laptop:`; `map-pane-sticky` in `layout.css`).
 - `Accordion` (primitive) — the application's API: `collapsible` and `showChevron` off by default,
   `toggleOnClick`, 220 ms, the height and the opacity together (one grid row `0fr ⇔ 1fr` in CSS, U-12.6), the
   chevron turning 180° on the same 220 ms (`duration-accordion ease-accordion`, U-09.11);
@@ -366,7 +483,8 @@ variant="divided"` and `ActionBar preset="filters"` (`Showcases/Filters dialog`)
 
 The application's profile units (cards K5.1–K5.11) plus the web's Airbnb photo grid (U-05.7); every word, date, time,
 score and amount comes formatted from the caller (U-02.1, S-31.2, S-32.9), the zones only by CSS (U-03.1). No page uses
-them yet (U-01.2). The map (K5.12 `MapPreview`) is not on the web: it needs MapLibre, a new dependency (U-03.10).
+them yet (U-01.2). The map: MapLibre is in the web since wave 1.0 (U-26.3, the results' `MapView` on the ONE
+`$shared/config/map`); the profile's `MapPreview` (K5.12) comes with the profile in wave 1.5.
 
 - `DateStrip` (molecule) — every day in ONE sideways row (S-26.1): the application's card (`min-w-day-card-min-w`,
   `rounded-lg border`, the chosen one `border-foreground` and semibold, a closed one `opacity-40` and disabled), as wide
@@ -426,6 +544,9 @@ border-border/70 bg-card/95 p-6 shadow-soft`, a column); the state cards draw it
   (`cn(cardShellClasses, 'gap-2 p-5')`). The `Card` compound is that shell too (U-09.2): its header, content
   and footer add no inset of their own (the card's 24 holds them); a caller that wants the former shadcn look says
   so with its classes (`DoctorCard`).
+- `StateGlyph` (molecule, MINOR-6 of U-29) — the glyph over an empty or failed state's words, the `icon` of
+  `EmptyState` / `ErrorState`: the 24 glyph in the 56 round tile on the 5 % tint (the application's `StateGlyph`, `bg-foreground/5`, U-03.4),
+  decorative; the home and the results draw theirs with it.
 - `EmptyState` (molecule) — a title (`titleAs`, `p` unless the page names its level), a line and at most one way on:
   the sentence-case outlined `Button` (`radius="md"`, `text-body-md`, S-32.3) with `onActionPress` (the
   application's) or, web only, `actionHref`; words without either draw no button (a type error too). `framed` sets
@@ -503,6 +624,75 @@ words; the web's own idiom only where the platform needs it, e.g. an `aria-label
   message itself, so a screen reader may not announce a new error (NIT-2); inside a `MediaCard` link the badge lets
   the press through (`pointer-events-none`), so its `title` shows no tooltip — its words are in the DOM (NIT-4).
 
+- **A photo of the profile** (`RevealingPhoto`, U-14 / U-14.6(α), the application's): the theme keyframe
+  `animate-reveal` (`layout.css`: opacity 0 ⇒ 1 in `--transition-duration-reveal`, 0.8 s, on `ease-standard`, fill
+  `both`). A photo of the server's page takes it from the first paint — so it is seen without JavaScript and is never
+  hidden until hydration, and the fade still plays every time (U-12); the server's markup is told by a
+  hydration-stable `$props.id()` already in the document when the script runs. A photo mounted in the browser waits
+  at `opacity-0` until its `load`, then takes the keyframe; one this session showed (ONE module memory for the
+  gallery, the tour and the viewer, `wasPhotoShown`) shows at once.
+
+### Frame and home kit (wave 1.0, D1)
+
+- `AppHeader` (organism) — `brand`, `nav`, `compact` + `compactOn` (the page's small search pill takes the links'
+  place: the links fade out, the pill grows in from 92 %, 0.25 s on the standard curve; the hidden one is `inert`),
+  `actions`, `showFrom` (`tablet` | `none`).
+- `BottomNav` (organism) — the glass capsule; `items` (`href` link or `onclick` button, `icon` / `activeIcon`,
+  `current`), `hideFrom` (default `tablet`).
+- `SiteFooter` (organism) — `popular` (a snippet over the columns), `columns`, `actions` (the row above the rights
+  line: the language and the networks), `legalNote`, `legalLinks`, `reserveBottomNav` (default `tablet`),
+  `reservePageBar` (default `false`: the room of a bar the page pins to the bottom, `pb-page-bar`, until its zone);
+  on the grey band (`bg-background`), one column with rules on the phone, three from 744.
+- `LinkDirectory` (molecule) — Airbnb's popular searches: `title` (22/600), `headingAs`, `tabs`
+  (`{ id, label, links: { label, description?, href }[] }`, underlined 2 when chosen, the arrows move and choose),
+  a grid of 2 · 4 · 6 columns, `initialCount` + `moreLabel` («Εμφάνιση περισσότερων ⌄» as the grid's last cell, at
+  most the cell's width: one line where it fits, two where not, as Airbnb's — never past the page; the focus moves
+  to the first new link), `testId`.
+- `CookieConsent` (organism) — the floating card: `title`, `description` (text, or text with inline
+  `{ label, href }` links), `acceptLabel` and `rejectLabel` in the same dark look (`tone="contrast"`, the 8 corner),
+  `manageLabel` + `onManage` (a link-styled third way), stacked on the phone, one row of three from 744; it rises
+  in and fades out by CSS (`Presence`) in Airbnb's 0.4 s (`duration-consent`). The caller places it and stores the
+  choice.
+- `MediaCard` — `aspect="1/1"` (the home's square photo), `reveal` (the photo lights up on arrival, 0.8 s
+  `duration-reveal`, over the muted frame; a photo shown before in the session shows at once) and `photoFallback`
+  (what stands in for a missing or broken photo in the muted frame — the article's page glyph — instead of the
+  silhouette).
+- `SearchTrigger` — `variant="pill"` (web only): the home's phone pill of the wave record, 56 high
+  (`min-h-control-lg`) with a hairline rim, the glyph and the 14/600 words in the middle; `card` (the default) stays
+  the application's pill.
+- The home's drop of its `SearchBar` from the top bar's pill is the theme keyframe `animate-search-drop`
+  (`layout.css`): the bar already exists, and an existing element has no `@starting-style`, so `starting:` would never
+  play there (U-12.2 allows a theme keyframe).
+- `FavoriteButton` — `appearance="overlay"`: Airbnb's white outline over a dark see-through fill (the accent when
+  saved), for a heart over a photo; the default stays the application's bare heart. The web adds no text shadow
+  (shadows are the elevation scale only).
+- `IconButton` — `iconSize="sm"` (the 16 glyph of the rails' 32 circle). `ErrorState` — an `icon` snippet above the
+  words (the application's).
+
+### Profile kit (wave 1.5, screen 5)
+
+- `MediaGallery` (organism, U-41.1, the application's name and props) — `images` (addresses, the first the cover),
+  `photoLabel(index, total)`, `counterLabel` («1 / N» by default), `moreLabel`, `onOpenPhoto(index, event)`,
+  `onOpenAll(event)`, `loading`, `testId`, and the web's `photoHref(index)` / `moreHref` (a press is a link, before
+  JavaScript too). The phone's ONE square inside the margins that swipes (`snap-x`, `scrollbar-none`) with its pill;
+  from 744 a column of up to `MEDIA_GALLERY_PREVIEWS` (5) thumbnails of 56 (`size-gallery-thumb`, the shown one ringed
+  2, the fifth «+N») beside the square of `w-gallery-fluid` (`layout.css`: `clamp(260, 26vw, 360)`, the prototype's);
+  no photo or a broken cover, the silhouette alone (S-32.8, S-32.13).
+- `RevealingPhoto` (molecule) — `url`, `alt`, `fit` (`cover` | `contain`), `eager`, `onError`, `testId` (`-media`
+  the image); see «Motion». A photo of the server's page still loading when the page comes alive waits transparent
+  and lights up at its `load` (`pending`, U-14.1(γ)), never its 0.8 s on an empty frame.
+- `TwoColumnDetail` — `from` (`split` 950 by default | `tablet` 744: the profile is two columns already at 744, 7 + 1
+  - 4 of 12, Airbnb's).
+- `StickyActionBar` — `zone` (`split` by default | `tablet`: pinned below 744 and nothing from 744, where the page has
+  its own card), `layout` (`row` | `stack`: the statement over the full-width call to action and a `secondary`
+  snippet under it, U-42.2), `supportingAction` (the last line becomes an underlined 48 button), `cta.icon`,
+  `cta.onclick(event)`, and `room` (`inline` by default: a spacer where the bar is drawn | `page`: no spacer, the
+  measured height as `--page-bar-room` on the document while the bar lives — the room of the footer's `pb-page-bar`
+  utility, `layout.css`, the shared `bar-booking` before hydration; the profile, MINOR-8 of r1).
+- `MapView` — `scrollZoom` (default on; the profile's map lets the wheel scroll the page), `fitAnimate` (a later fit
+  glides, `essential`: the profile's pin moving to another office), and `expandControl.from` (`laptop` by default |
+  `tablet`: the profile's «⤢» from 744).
+
 ## Icons
 
 The kit draws the application's glyphs (U-03.3): **Ionicons**, as local SVG
@@ -544,11 +734,13 @@ Breakpoints (mobile-first; base styles target the 375px phone design):
 - Content is centered with a max width of 1440 (`max-w-page` via
   `container-page`), 1920 from 1920 (`wide:max-w-wide`, U-04.1); the side margins
   grow beyond it. Gutters: 24 below 950, 32 from 950, 48 from 1440.
-- The desktop top navigation shows from `laptop:` (1128) up; below it the
-  app-style bottom navigation (`laptop:hidden`) is shown instead.
-- Bottom navigation items are 48 × 48 targets (`min-h-touch min-w-touch`) with
-  12px labels; the row spaces them evenly and reserves the device safe area
-  (`pb-safe-area`). The footer reserves the bar's space with `pb-bar-bottom`.
+- The frame (wave 1.0, U-16/U-17): **below 744 no top bar** — the glass capsule `BottomNav` (280 in the middle,
+  16 over the safe area: `bottom-safe-area`, white 50 % `backdrop-blur-glass backdrop-saturate-180`, a 65 % white
+  rim, three tabs «Εξερευνήστε · Αγαπημένα · Προφίλ», the current one in the 7 % bubble), hidden from 744
+  (`hideFrom="tablet"`, the default). **From 744** apple.com's `AppHeader` (`showFrom="tablet"`): sticky 64, white
+  80 % `backdrop-blur-bar backdrop-saturate-180`, the hairline only once the page scrolls (`data-scrolled`), its
+  content in the 1024 box with 22 a side (`max-w-bar-content px-5.5`). The footer reserves the capsule's room
+  until 744 (`pb-bar-bottom tablet:pb-0`). The language and the theme live only in the «Ρυθμίσεις» dialog (U-16.1).
 
 - The layout kit (wave 0, dyad 2) switches with the zone **only through CSS** —
   the zone prefixes and the container names, never `innerWidth`, a width
@@ -568,8 +760,14 @@ Breakpoints (mobile-first; base styles target the 375px phone design):
     `scroll-px-1` keeps the snap and an arrow's page. With `bleed` the gutters hold
     the sides. Its sides reach 4 into the parent's padding: a rail sits in a gutter. Without a `title` it is the
     row alone (no header, no arrows); `separated` ends with the application's `endPadding` (`sm` 12 · `md` 18).
-  - `CarouselSection` (organism) — the application's titled sideways row: a thin `Rail` (`gap`) with `title`,
-    `subtitle`, `trailing` (`{ icon?, label, onclick }`) and `itemsClass`.
+    Its `trailing` is the application's since U-20: the 32 soft circle right after the title (`icon-sm`, a link
+    with `href`), the ‹ › at the header's end; `trailingAt="end"` keeps the 40 card circle at the end (the
+    application's `CarouselSection`). `perView={RAIL_CARDS_PER_VIEW}` (the application's name and table, U-20, the
+    `gap` row only) sizes every cell by the zone — `w-4/9` (~2.3) on the phone with the row into the gutters, 1/4 ·
+    1/5 · 1/6 · 1/7 from 744 · 950 · 1128 · 1440, 12 apart (each cell's 6 a side); Tailwind reads no built class, so
+    it takes that one table.
+  - `CarouselSection` (organism) — the application's titled sideways row: a thin `Rail` (`gap`, `trailingAt="end"`)
+    with `title`, `subtitle`, `trailing` (`{ icon?, label, onclick }`) and `itemsClass`.
   - `Carousel` (primitive) — the slides with the U-09.3 arrows over them (12 from the sides, centred, gone at an
     end without `loop`), `autoPlay` / `autoPlayIntervalMs` (4000, the application's), paused while the pointer is
     over it or the keyboard's focus is in it (`:focus-visible`; a press on an arrow or a dot re-arms the timer, as
@@ -578,7 +776,9 @@ Breakpoints (mobile-first; base styles target the 375px phone design):
   - `ListItem` (molecule) — the application's row: `title`, `subtitle`, `leading` / `trailing`, `onclick` (a
     button) or none (a `div`), `disabled`, `query` (bold match), `titleTone`.
   - `Section` / `SectionHeader` — `plain` (rails), `ruled` (profile), `divided`
-    (filters); the header only with a `title` (`divided`: a title or a subtitle).
+    (filters); the header only with a `title` (`divided`: a title or a subtitle). In `plain` the `trailing`
+    snippet sits right after the title (`data-slot="section-title-row"`, the application's since U-20) and the
+    web-only `end` snippet at the row's end (a rail's ‹ ›).
   - `TwoColumnDetail` — one column below 950, from 950 a 12-column grid: main 7,
     one column of air, a sticky aside 4 (`top-bar-top`), at the `end` or `start`.
   - `StickyTopBar` (pinned over the hero, its surface fading in by the caller's
@@ -586,8 +786,8 @@ Breakpoints (mobile-first; base styles target the 375px phone design):
     the `bar-booking` room at the page end; the aside's card from 950).
   - `ModalScreenTemplate` / `FullscreenModalTemplate` — one surface in two shapes
     by CSS: the whole screen below 744, from 744 the Airbnb dialog
-    (`max-w-dialog` 568, `rounded-xl` 24 — Airbnb's 32 is an open question for the
-    owner, `max-h-sheet-xl`, centred by `h-fit` +
+    (`max-w-dialog` 568, `rounded-xl` 24 — Airbnb's 32 is the web's `panel`, U-25.4, for
+    the windows that take it: the filters window, `shape="sheet"` —, `max-h-sheet-xl`, centred by `h-fit` +
     auto margins so a zoom owns `transform`). The full-screen template zooms out
     of `sourceLayout` (the pressed control's rect, 220 ms, open `out(cubic)` and
     close `in(cubic)`, in CSS, U-12.2); its `contentGap`
@@ -595,7 +795,8 @@ Breakpoints (mobile-first; base styles target the 375px phone design):
   - `GeneralScreenTemplate` (back-nav page), `ActionBar` (presets `default`,
     `filters`, `plain`), `ModalHeader`, `BottomSheet` (the drawer from the bottom,
     `dismissOnBackdropPress`, `scrollable`, `snapPoints` — its first point the panel's height, `'50%'` ⇒ `50dvh`
-    —, `onDismiss` on every close). `DropdownMenuItem` takes the application's `icon` (an Ionicon name).
+    —, `onDismiss` on every close). `DropdownMenuItem` takes the application's `icon` (an Ionicon name) and, web
+    only, an `href` (a `role="menuitem"` link in the arrows' order; choosing it closes the menu).
 - Define stable dimensions for fixed-format UI such as toolbars, controls, counters, boards, and icon buttons — always with named tokens.
 - Elements that hold text use `min-h-*`, not `h-*`, so they grow at 200% zoom and with text-spacing overrides (WCAG 1.4.4 / 1.4.12).
 - Do not scale font size with viewport width.

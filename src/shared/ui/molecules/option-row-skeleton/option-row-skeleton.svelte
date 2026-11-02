@@ -1,5 +1,25 @@
+<script lang="ts" module>
+	/** The row it stands for: `md` (default) the criteria row, `xl` Airbnb's search row (`OptionRow size="xl"`). */
+	export type OptionRowSkeletonSize = 'md' | 'xl';
+
+	const rowSizes: Record<OptionRowSkeletonSize, string> = {
+		md: 'min-h-row gap-2.5 rounded-md px-2',
+		xl: 'min-h-row-lg gap-4 rounded-lg px-4'
+	};
+	const tileSizes: Record<OptionRowSkeletonSize, string> = {
+		md: 'size-control-sm',
+		xl: 'size-tile'
+	};
+</script>
+
 <script lang="ts">
-	let { count = 3, testId }: { count?: number; testId?: string } = $props();
+	import { cn } from '$shared/lib/utils';
+
+	let {
+		count = 3,
+		size = 'md',
+		testId
+	}: { count?: number; size?: OptionRowSkeletonSize; testId?: string } = $props();
 
 	const rows = $derived(Array.from({ length: count }, (_, row) => row));
 </script>
@@ -14,8 +34,8 @@
 	class="flex flex-col gap-1"
 >
 	{#each rows as row (row)}
-		<div class="flex min-h-row flex-row items-center gap-2.5 rounded-md px-2 py-2">
-			<div class="size-control-sm rounded-md bg-foreground/5"></div>
+		<div class={cn('flex flex-row items-center py-2', rowSizes[size])}>
+			<div class={cn('rounded-md bg-foreground/5', tileSizes[size])}></div>
 			<div class="h-3 flex-1 rounded-full bg-muted"></div>
 		</div>
 	{/each}

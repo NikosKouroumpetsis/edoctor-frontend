@@ -128,8 +128,76 @@ describe('SelectableCards', () => {
 		expect(onChange).not.toHaveBeenCalled();
 	});
 
+	it('U-24.3: the chosen card reads 2 dark (the sort cards) — an inset ring inside the 1 border, so nothing reflows', () => {
+		render(Harness, { props: { value: 'alpha' } });
+		const alpha = screen.getByRole('radio', { name: /Alpha/ });
+		const beta = screen.getByRole('radio', { name: /Beta/ });
+		expect(alpha).toHaveClass('border', 'ring-1', 'ring-inset', 'ring-foreground', 'p-6');
+		expect(alpha).not.toHaveClass('border-2');
+		expect(beta).not.toHaveClass('ring-1');
+	});
+
 	it('U-03.1 (light/dark): only theme tokens, the same classes in both themes', () => {
 		const { container } = render(Harness, { props: { value: 'beta' } });
 		expect(container.innerHTML).not.toMatch(/\bdark:|#[0-9a-f]{3,8}\b|bg-white|text-black/i);
+	});
+
+	it('U-28.3: `sm` — 12 / 16 of inset, the 16 semibold title over the 14 muted line 2 apart, the cards 8 apart (a card of ~66); the same border, states and touch box', () => {
+		render(Harness, { props: { value: 'alpha', size: 'sm' } });
+		const alpha = screen.getByRole('radio', { name: /Alpha/ });
+		const beta = screen.getByRole('radio', { name: /Beta/ });
+		expect(alpha).toHaveClass('px-4', 'py-3', 'min-h-touch', 'rounded-md', 'border', 'gap-4');
+		expect(alpha).not.toHaveClass('p-6');
+		expect(screen.getByText('Alpha')).toHaveClass(
+			'text-body-lg',
+			'leading-tight',
+			'font-semibold',
+			'text-foreground'
+		);
+		expect(screen.getByText('Alpha')).not.toHaveClass('text-title-md');
+		expect(screen.getByText('Alpha').parentElement).toHaveClass('flex-col', 'gap-0.5');
+		expect(screen.getByText('First option')).toHaveClass(
+			'text-body-sm',
+			'leading-tight',
+			'text-muted-foreground'
+		);
+		expect(alpha.parentElement).toHaveClass('flex', 'flex-col', 'gap-2');
+		expect(alpha.parentElement).not.toHaveClass('gap-3');
+		// The chosen card's look is the one of `md` (U-24.3: 2 dark through the inset ring).
+		expect(alpha).toHaveClass(
+			'border-foreground',
+			'bg-muted',
+			'shadow-raised',
+			'ring-1',
+			'ring-foreground',
+			'ring-inset'
+		);
+		expect(beta).toHaveClass('border-border', 'bg-transparent', 'px-4', 'py-3');
+	});
+
+	it('U-28.3 (negative): without `size` the card is `md`, the application’s, class for class as before — no class of `sm`', () => {
+		render(Harness, { props: { value: 'alpha' } });
+		const alpha = screen.getByRole('radio', { name: /Alpha/ });
+		expect(alpha).toHaveClass('p-6');
+		for (const name of ['px-4', 'py-3']) expect(alpha).not.toHaveClass(name);
+		expect(screen.getByText('Alpha')).toHaveClass('text-title-md');
+		expect(screen.getByText('Alpha')).not.toHaveClass('text-body-lg', 'leading-tight');
+		expect(screen.getByText('Alpha').parentElement).toHaveClass('gap-1');
+		expect(screen.getByText('First option')).not.toHaveClass('leading-tight');
+		expect(alpha.parentElement).toHaveClass('gap-3');
+		expect(alpha.parentElement).not.toHaveClass('gap-2');
+	});
+
+	it('U-28.4: with a pointer a card not chosen darkens its border on hover (only while enabled); the chosen one has no hover', () => {
+		render(Harness, { props: { value: 'alpha' } });
+		const alpha = screen.getByRole('radio', { name: /Alpha/ });
+		const beta = screen.getByRole('radio', { name: /Beta/ });
+		expect(beta).toHaveClass(
+			'can-hover:enabled:hover:border-foreground',
+			'transition-colors',
+			'duration-standard',
+			'ease-standard'
+		);
+		expect([...alpha.classList].filter((name) => name.includes('hover:'))).toEqual([]);
 	});
 });

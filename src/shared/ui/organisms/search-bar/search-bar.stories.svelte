@@ -61,6 +61,13 @@
 		{ label: 'Επόμενες 3 ημέρες', value: 'next-3' }
 	];
 
+	// The prototype's three placeholders (U-23.2), the longest the bar writes.
+	const longPlaceholders: SearchBarSegment[] = [
+		{ id: 'what', label: 'Τι;', placeholder: 'Αναζήτηση ειδικότητας, υπηρεσίας, ονόματος' },
+		{ id: 'where', label: 'Πού;', placeholder: 'Αναζήτηση περιοχής' },
+		{ id: 'when', label: 'Πότε;', placeholder: 'Προσθήκη διαθεσιμότητας' }
+	];
+
 	const { Story } = defineMeta({
 		title: 'Organisms/SearchBar',
 		component: SearchBar,
@@ -148,11 +155,12 @@
 		{#each items as item (item.id)}
 			<OptionRow
 				accessibilityRole="option"
+				size="xl"
+				queryMatch="word-start"
 				id={item.id}
 				label={item.label}
 				supportingLabel={item.supporting}
 				icon={item.icon}
-				labelClass="font-medium"
 				{query}
 				active={context.activeId === item.id}
 				isSelected={selected === item.id}
@@ -223,7 +231,6 @@
 				panelTitle="Πού"
 				closeLabel="Κλείσιμο"
 				panel={openWhere}
-				panelClass="tablet:w-text"
 			/>
 		</div>
 	{/snippet}
@@ -241,12 +248,12 @@
 				panelTitle="Τι"
 				closeLabel="Κλείσιμο"
 				panel={openWhat}
-				panelClass="tablet:w-text"
 			/>
 		</div>
 	{/snippet}
 </Story>
 
+<!-- U-23.2: the last segment's panel hangs from the bar's right edge (Airbnb's «Who»). -->
 <Story name="When Open" globals={{ viewport: { value: 'z1920', isRotated: false } }}>
 	{#snippet template()}
 		<div class="container-page py-section">
@@ -258,6 +265,22 @@
 				panelTitle="Πότε"
 				closeLabel="Κλείσιμο"
 				panel={openWhen}
+			/>
+		</div>
+	{/snippet}
+</Story>
+
+<!-- U-23.2 (live D1 finding): at 744 the long placeholders cut mid-word where their room ends, as the prototype
+     («Προσθήκη διαθε…»), never at the last whole word. -->
+<Story name="Placeholders At 744" globals={{ viewport: { value: 'z744', isRotated: false } }}>
+	{#snippet template()}
+		<div class="container-page py-section">
+			<SearchBar
+				segments={longPlaceholders}
+				submitLabel="Αναζήτηση"
+				onSubmit={noop}
+				panelTitle="Αναζήτηση"
+				closeLabel="Κλείσιμο"
 			/>
 		</div>
 	{/snippet}

@@ -1,7 +1,8 @@
 import Root, {
 	buildHighlightSegments,
 	type HighlightSegment,
-	type HighlightTextLines
+	type HighlightTextLines,
+	type HighlightTextMatch
 } from './highlight-text.svelte';
 
 export {
@@ -9,6 +10,7 @@ export {
 	buildHighlightSegments,
 	type HighlightSegment,
 	type HighlightTextLines,
+	type HighlightTextMatch,
 	//
 	Root as HighlightText
 };

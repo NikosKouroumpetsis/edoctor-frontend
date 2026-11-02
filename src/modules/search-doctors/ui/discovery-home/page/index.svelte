@@ -1,64 +1,96 @@
 <script lang="ts">
+	import { useQueryClient } from '@tanstack/svelte-query';
+	import type { Pathname } from '$app/types';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
 	import { m } from '$paraglide/messages.js';
-	import type { CategoryId, SectionId } from '$modules/search-doctors/types';
-	import type { HomePageData } from '$modules/search-doctors/api/home';
-	import { DiscoveryState, useHomeSections } from '../hooks';
-	import SearchHeader from '../components/search-header.svelte';
-	import CategoryRail from '../components/category-rail.svelte';
-	import DoctorsSection from '../components/doctors-section.svelte';
-	import SectionSkeleton from '../components/section-skeleton.svelte';
+	import { localizeHref } from '$paraglide/runtime';
+	import { recordServerNow } from '$shared/lib/server-clock';
+	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
+	import { readFreshDeviceLocation } from '$shared/state/device-location';
+	import { getSearchDockOptional } from '$shared/state/search-dock';
+	import { layoutOf } from '$shared/ui/molecules/search-trigger';
+	import type { SearchBarPanelContext } from '$shared/ui/organisms/search-bar';
+	import type { ModalOrigin } from '$shared/ui/templates/modal-screen';
+	import { prefetchSearchResults } from '$modules/search-doctors/api/results';
+	import { readResultsPress } from '$modules/search-doctors/lib/results-scope';
+	import { searchResultsHref } from '$modules/search-doctors/lib/search-criteria';
+	import SearchCriteria, {
+		CriteriaPanel,
+		CriteriaSearchBar,
+		useCriteriaWiring
+	} from '$modules/search-doctors/ui/search-criteria';
+	import DiscoveryHeader from '$modules/search-doctors/ui/discovery-header';
+	import { useSignIn } from '$modules/search-doctors/ui/search-doctor-card';
+	import { DiscoveryState, useHomeSections, useStreamedSections } from '../hooks';
+	import Rows from '../components/rows.svelte';
+	import type { DiscoveryHomeProps } from '../types';
 
-	let { data }: { data: HomePageData } = $props();
+	let { data, after }: DiscoveryHomeProps = $props();
 
 	const discovery = new DiscoveryState();
+	const dock = getSearchDockOptional();
+	const queryClient = useQueryClient();
 
 	const locale = $derived(getPageLocale(page.url));
 	const messageOptions = $derived({ locale });
+	const localizedHref = (path: string) => resolve(localizeHref(path, { locale }) as Pathname);
+	const resultsPath = $derived(localizedHref('/doctors'));
+	const signIn = useSignIn(() => locale);
 
-	// Category-scoped sections (client-side filtering through TanStack Query). The `all`
-	// view is served by the streamed SSR `data.sections` instead, so this stays disabled
-	// until a category is picked.
+	// Category-scoped sections (client-side, TanStack Query); the `all` view is the streamed SSR `data.sections`.
 	const home = useHomeSections(
 		() => discovery.activeCategory,
 		() => getPageLocale(page.url)
 	);
-
-	const categoryLabels = $derived<Record<CategoryId, string>>({
-		all: m.category_all({}, messageOptions),
-		'internal-medicine': m.category_internal_medicine({}, messageOptions),
-		pediatrics: m.category_pediatrics({}, messageOptions),
-		cardiology: m.category_cardiology({}, messageOptions),
-		dermatology: m.category_dermatology({}, messageOptions),
-		online: m.category_online({}, messageOptions)
-	});
-
-	const categories = $derived(
-		data.categories.map((category) => ({
-			id: category.id,
-			label: categoryLabels[category.id]
-		}))
+	// The `all` view: the streamed SSR sections, «Δοκιμή ξανά» asking only the failed ones again.
+	const streamed = useStreamedSections(
+		() => data.sections,
+		() => getPageLocale(page.url)
 	);
 
-	type SectionMeta = { title: string; subtitle: string };
+	// The category rows write «Σήμερα / Αύριο» on the server's clock, not the device's (D-118).
+	$effect(() => recordServerNow(data.serverNow));
 
-	const sectionMeta = $derived<Record<SectionId, SectionMeta>>({
-		'popular-athens': {
-			title: m.section_popular_athens_title({}, messageOptions),
-			subtitle: m.section_popular_athens_subtitle({}, messageOptions)
-		},
-		'online-this-week': {
-			title: m.section_online_week_title({}, messageOptions),
-			subtitle: m.section_online_week_subtitle({}, messageOptions)
-		},
-		'preventive-checkup': {
-			title: m.section_preventive_title({}, messageOptions),
-			subtitle: m.section_preventive_subtitle({}, messageOptions)
+	/**
+	 * 🔗 The search (D2, U-21 ⇒ U-23): ONE state for the phone's window of cards (< 744) and the big bar's panel
+	 * (≥ 744). Its search goes to the results with the application's names (`/doctors?what=…&whereSlug=…`); a doctor
+	 * row opens the doctor's page (the application's: one without a slug does nothing).
+	 */
+	const { search, lists, bar } = useCriteriaWiring({
+		locale: () => locale,
+		dock,
+		onSearch: (criteria) => {
+			// `resolve()` takes the localized path with its query (SvelteKit's `PathnameWithSearchOrHash`, the route
+			// `/doctors` with a search; the cast is the one `localizedHref` makes for a localized path).
+			const href = searchResultsHref(localizeHref('/doctors', { locale }), criteria);
+			// D-103 (MINOR-7 of r1): the results' first page is asked at the press, not after the route's round trip.
+			prefetchSearchResults(queryClient, readResultsPress(href, readFreshDeviceLocation()), locale);
+			void goto(resolve(href as `/doctors?${string}`));
 		}
 	});
 
-	const sectionSkeletonKeys = [0, 1, 2];
+	// The phone's window grows out of the pill that opened it.
+	let sheetOrigin = $state<ModalOrigin | undefined>();
+	function openSheet(event: MouseEvent) {
+		sheetOrigin = layoutOf(event.currentTarget as Element);
+		search.open('sheet', 'what');
+	}
+
+	// The bar's small pill writes what the search holds (U-23.2), part by part.
+	$effect(() => {
+		if (!dock) return;
+		const [what, where, when] = bar.segments.map((segment) => segment.value);
+		dock.summary = { what, where, when };
+	});
+
+	// What follows the rows (the articles) shows only once they are neither loading nor failed (the application's).
+	const rowsSettled = $derived(
+		discovery.shownCategory === 'all'
+			? !streamed.isWaiting && !streamed.isError
+			: !home.isLoading && !home.isError
+	);
 </script>
 
 <svelte:head>
@@ -66,82 +98,47 @@
 	<meta name="description" content={m.home_meta_description({}, messageOptions)} />
 </svelte:head>
 
-<main class="container-page">
-	<div class="sticky top-bar-top z-30 bg-background pt-6 pb-4">
-		<SearchHeader placeholder={m.search_discovery_placeholder({}, messageOptions)} />
-	</div>
+{#snippet barPanel(field: string, context: SearchBarPanelContext)}
+	<CriteriaPanel {field} {context} {bar} {lists} {locale} />
+{/snippet}
 
-	<div class="flex flex-col gap-section pb-section-lg">
-		<CategoryRail
-			{categories}
-			activeCategory={discovery.activeCategory}
-			onSelect={discovery.selectCategory}
+<CriteriaSearchBar
+	{dock}
+	segments={bar.segments}
+	active={bar.active}
+	onActiveChange={bar.setActive}
+	panel={barPanel}
+	submitLabel={m.search_submit({}, messageOptions)}
+	panelTitle={m.search_title({}, messageOptions)}
+	closeLabel={m.search_close({}, messageOptions)}
+	onSubmit={() => search.submitCriteria()}
+/>
+
+<SearchCriteria {search} {lists} {locale} sourceLayout={sheetOrigin} />
+
+<div class="container-page">
+	<!-- The home's header (U-32.6, the application's `discovery-header`): the phone's pill and the categories. -->
+	<DiscoveryHeader
+		categories={data.categories}
+		selectedCategoryId={discovery.activeCategory}
+		onSelectCategory={discovery.selectCategory}
+		searchOpen={search.surface === 'sheet'}
+		onOpenSearch={openSheet}
+		{locale}
+	/>
+
+	<div class="flex flex-col gap-6 pt-5 pb-section">
+		<Rows
+			{discovery}
+			{home}
+			{streamed}
+			sections={data.sections}
+			{messageOptions}
+			{resultsPath}
+			onSignIn={signIn}
 		/>
-
-		{#if discovery.activeCategory === 'all'}
-			<!-- Streamed SSR sections: each reveals serially as the backend responds. -->
-			{#each data.sections as section (section.id)}
-				{@const meta = sectionMeta[section.id]}
-				{#await section.result}
-					<SectionSkeleton />
-				{:then result}
-					{#if result.status === 'ok' && result.doctors.length > 0}
-						<DoctorsSection
-							title={meta.title}
-							subtitle={meta.subtitle}
-							doctors={result.doctors}
-							viewAllLabel={m.section_view_all({}, messageOptions)}
-							favoriteLabel={m.favorite_toggle({}, messageOptions)}
-							isFavorite={discovery.isFavorite}
-							onToggleFavorite={discovery.toggleFavorite}
-						/>
-					{:else if result.status === 'error'}
-						<div class="rounded-xl border border-border/70 bg-card p-card shadow-soft">
-							<h2 class="text-heading-sm text-foreground">
-								{m.section_error_title({}, messageOptions)}
-							</h2>
-							<p class="mt-1 text-body-md text-muted-foreground">
-								{m.section_error_body({}, messageOptions)}
-							</p>
-						</div>
-					{/if}
-				{/await}
-			{/each}
-		{:else if home.isLoading}
-			{#each sectionSkeletonKeys as key (key)}
-				<SectionSkeleton />
-			{/each}
-		{:else if home.isError}
-			<div class="rounded-xl border border-border/70 bg-card p-card shadow-soft">
-				<h2 class="text-heading-sm text-foreground">
-					{m.section_error_title({}, messageOptions)}
-				</h2>
-				<p class="mt-1 text-body-md text-muted-foreground">
-					{m.section_error_body({}, messageOptions)}
-				</p>
-			</div>
-		{:else if home.sections.length > 0}
-			{#each home.sections as section (section.id)}
-				{@const meta = sectionMeta[section.id]}
-				<DoctorsSection
-					title={meta.title}
-					subtitle={meta.subtitle}
-					doctors={section.doctors}
-					viewAllLabel={m.section_view_all({}, messageOptions)}
-					favoriteLabel={m.favorite_toggle({}, messageOptions)}
-					isFavorite={discovery.isFavorite}
-					onToggleFavorite={discovery.toggleFavorite}
-				/>
-			{/each}
-		{:else}
-			<div class="rounded-xl border border-border/70 bg-card p-card shadow-soft">
-				<h2 class="text-heading-sm text-foreground">
-					{m.no_results_title({}, messageOptions)}
-				</h2>
-				<p class="mt-1 text-body-md text-muted-foreground">
-					{m.no_results_body({}, messageOptions)}
-				</p>
-			</div>
+		{#if after && rowsSettled && !discovery.leaving}
+			{@render after()}
 		{/if}
 	</div>
-</main>
+</div>

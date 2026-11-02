@@ -20,6 +20,7 @@ export default defineConfig({
 		alias: {
 			// SvelteKit virtual modules used by shared components, mocked for jsdom.
 			'$app/environment': r('./vitest-mocks/app-environment.ts'),
+			'$app/navigation': r('./vitest-mocks/app-navigation.ts'),
 			'$app/state': r('./vitest-mocks/app-state.ts'),
 			'$app/paths': r('./vitest-mocks/app-paths.ts'),
 			'$env/dynamic/public': r('./vitest-mocks/env-dynamic-public.ts'),

@@ -4,9 +4,11 @@
 	/**
 	 * The application's `atoms/toggle` (R4-16): the `label-md` words in the muted colour, pressed on the accent fill
 	 * with the secondary foreground, the `sm` corner; sizes `sm | md | lg` (U-07.1), each box the touch target.
+	 * U-31.1: a disabled toggle takes the pointer, so the base layer shows `not-allowed` on it; its hover is undone by
+	 * the `disabled:` fill and words (after `hover:`, before the pressed `data-[state=on]:`, Tailwind's variant order).
 	 */
 	export const toggleVariants = tv({
-		base: "inline-flex min-w-touch items-center justify-center gap-2 rounded-sm text-label-md font-medium whitespace-nowrap text-muted-foreground transition-[color,box-shadow] outline-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-secondary-foreground aria-invalid:border-destructive aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		base: "inline-flex min-w-touch items-center justify-center gap-2 rounded-sm text-label-md font-medium whitespace-nowrap text-muted-foreground transition-[color,box-shadow] outline-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:bg-transparent disabled:text-muted-foreground disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-secondary-foreground aria-invalid:border-destructive aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 		variants: {
 			variant: {
 				default: 'bg-transparent',

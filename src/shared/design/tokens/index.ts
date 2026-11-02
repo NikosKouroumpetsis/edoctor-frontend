@@ -40,7 +40,8 @@ export const brandName = 'edoctor';
 export const platform = {
 	spacing: {
 		'bar-top': 64,
-		'brand-mark': 40,
+		// The top bar's «e+» square (U-16.8): the prototype's 26 is off the 4px grid every name keeps, so 24.
+		'brand-mark': 24,
 		'icon-tile': 48,
 		'dial-code-w': 56,
 		'menu-max-h': 288,
@@ -64,7 +65,64 @@ export const platform = {
 		'drawer-handle': 48,
 		'drawer-inset': 96,
 		// The application's platform name for the pill CTA's inline padding (`StickyActionBar`), same name, same value.
-		'cta-inline': 32
+		'cta-inline': 32,
+		// Wave 1.0 frame (U-16 ⇒ U-19, the approved prototype): apple.com's top bar box (980 + 22 a side), the glass
+		// tab capsule below 744, the account menu and the floating consent card from 744.
+		'bar-content': 1024,
+		'tab-capsule-w': 280,
+		'account-menu-w': 260,
+		'consent-card-w': 720,
+		// Wave 1.0 search (U-23.2): Airbnb's panel under the bar from 744, 425 wide — 424 on the 4px grid.
+		'search-panel-w': 424,
+		// The top bar's small search pill (U-16.7): each of its three parts at most 224 before «…» (NIT-7 of U-29: its
+		// own name, the value it had as `popover-sm`).
+		'compact-search-part': 224,
+		// Wave 1.0 results (U-24.4, §7.1–7.2 of the wave record, the prototype's numbers): the price pin's 28, the pin
+		// card's 128 photo, the pin card over the phone's sheet (184) and over the 744 map switch (96), the phone
+		// sheet's top strip when only «Βρέθηκαν N» shows (168), the phone list's end clearing the capsule (150 ⇒ 152)
+		// and the results grid's row gap (Airbnb's 28 × 24, §7.4).
+		'results-row-gap': 28,
+		'map-pin': 28,
+		'map-card-media': 128,
+		'map-card-over-sheet': 184,
+		'map-card-over-switch': 96,
+		'map-sheet-peek': 168,
+		'results-list-end': 152,
+		// The 744 map switch's distance from the bottom edge (NIT-7 of U-29, U-32.3: its own name, the value it had as
+		// `control-xs`).
+		'map-switch-bottom': 32,
+		// Wave 1.5 · screen 5, the profile (U-41.1, the prototype `?ph=a`, the application's names): the `MediaGallery`'s
+		// square from 744 held between 260 and 360 (`w-gallery-fluid`: the prototype's `clamp(260px, 26vw, 360px)`) and
+		// its 56 thumbnails; the profile's sides from 744 and 1128 (Airbnb's 40 / 80); the section bar (fixed 80); the
+		// sticky card's top (the section bar 80 + 24); the wide window of the reviews and the location (1032).
+		'gallery-main': 260,
+		'gallery-main-lg': 360,
+		'gallery-thumb': 56,
+		'profile-gutter': 40,
+		'profile-gutter-lg': 80,
+		'section-bar': 80,
+		'card-sticky-top': 104,
+		'window-wide': 1032,
+		// The profile's office map (the prototype's `.p-map`): 300 on the phone, 400 from 744, 480 from 1128.
+		'office-map': 300,
+		'office-map-md': 400,
+		'office-map-lg': 480,
+		// The profile's two columns of a section from 744 (Airbnb's 64 between them) and its reviews' rows (40).
+		'profile-columns': 64,
+		'review-rows': 40
+	},
+	// The sixth corner (U-25.4): 32, ONLY for the web's panels and windows from 744 (`rounded-panel`: the search
+	// panel 425, the filters window 568). The shared five (`radius`) stay the application's.
+	radius: {
+		panel: 32
+	},
+	// The frosted surfaces of the frame (U-16.8, U-16.10): `backdrop-blur-bar` (apple.com's 20) and
+	// `backdrop-blur-glass` (the capsule's 7), emitted as the theme's `--blur-*`; `backdrop-blur-search` the
+	// phone's search window over the page (U-23.2, 18).
+	blur: {
+		bar: 20,
+		glass: 7,
+		search: 18
 	},
 	// The drag distance that closes a drawer whose size cannot be measured; the panels travel their own size (U-09.8).
 	motion: {
@@ -82,7 +140,8 @@ export const platform = {
  * `label` the `FloatingLabel`'s `labelAnimationDuration` + the same `withTiming` default, `segment` the
  * `SegmentedControl`'s `THUMB_SLIDE_DURATION_MS` + `out(cubic)`. Every other motion is Airbnb's
  * 0.25 s `cubic-bezier(0.2, 0, 0, 1)` (`standard`); `reveal` is Airbnb's fade of what arrives (0.8 s on that same
- * curve, measured, U-14.1): a photo that loads goes 0 ⇒ 1 on `duration-reveal ease-standard`. They play whatever
+ * curve, measured, U-14.1): a photo that loads goes 0 ⇒ 1 on `duration-reveal ease-standard`; `consent` is Airbnb's
+ * consent card rising in and out (0.4 s on that curve, the wave record §4.5). They play whatever
  * the device's motion setting (U-12.1).
  */
 export const motion = {
@@ -93,7 +152,8 @@ export const motion = {
 		zoom: 220,
 		label: 200,
 		segment: 180,
-		reveal: 800
+		reveal: 800,
+		consent: 400
 	},
 	easing: {
 		standard: [0.2, 0, 0, 1],
@@ -181,11 +241,14 @@ export const spacingScale: Readonly<Record<string, string>> = Object.fromEntries
 	])
 ]);
 
+/** Every `--radius-<name>` the theme defines: the shared five, then the web's panel corner (U-25.4). */
+export const radiusScale: Readonly<Record<string, number>> = { ...radius, ...platform.radius };
+
 /** The theme keys `tailwind-merge` needs to tell our named sizes apart from colors and each other. */
 export const mergeTheme = {
 	text: Object.keys(typography),
 	spacing: Object.keys(spacingScale),
-	radius: Object.keys(radius),
+	radius: Object.keys(radiusScale),
 	container: Object.keys(containers),
 	leading: Object.keys(leading),
 	shadow: Object.keys(elevation)

@@ -45,7 +45,8 @@ describe('motion of the kit (U-09.8, U-12)', () => {
 		document.body.innerHTML = '';
 	});
 
-	it('U-09.8: the tokens name every duration and curve in one place; the theme makes them classes', () => {
+	// Rewritten for U-16.5 (the wave record §4.5, r1 NIT-1): the consent card's 0.4 s joins the one list, as `reveal` did.
+	it('U-09.8/U-16.5: the tokens name every duration and curve in one place; the theme makes them classes', () => {
 		expect(motion.duration).toEqual({
 			standard: 250,
 			sheet: 250,
@@ -54,7 +55,9 @@ describe('motion of the kit (U-09.8, U-12)', () => {
 			label: 200,
 			segment: 180,
 			// U-14.1: Airbnb's fade of what arrives, on the `standard` curve.
-			reveal: 800
+			reveal: 800,
+			// U-16.5: Airbnb's consent card rising in and out (§4.5), on the `standard` curve.
+			consent: 400
 		});
 		expect(cubicBezierCss('standard')).toBe('cubic-bezier(0.2, 0, 0, 1)');
 		const css = tokensToCss();

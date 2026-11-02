@@ -26,6 +26,7 @@
 		headingAs = 'h2',
 		titleId,
 		trailing,
+		end,
 		class: className,
 		children,
 		...restProps
@@ -39,8 +40,10 @@
 		headingAs?: string;
 		/** The id of the title, for a region the caller names by it. */
 		titleId?: string;
-		/** A control at the end of the header row. */
+		/** The control right after the title (`plain` only: the rail's «→», U-20). */
 		trailing?: Snippet;
+		/** Web only: controls at the end of the header row (`plain` only: the rail's ‹ ›). */
+		end?: Snippet;
 		children?: Snippet;
 	} = $props();
 </script>
@@ -70,6 +73,7 @@
 			as={headingAs}
 			id={titleId}
 			trailing={variant === 'plain' ? trailing : undefined}
+			end={variant === 'plain' ? end : undefined}
 		/>
 	{/if}
 	{@render children?.()}

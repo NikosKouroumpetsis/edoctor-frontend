@@ -41,7 +41,7 @@
 
 <Story name="Plain" args={{ subtitle: 'Κοντά σας', title: 'Δημοφιλή', variant: 'plain' }} />
 
-<!-- The home rail's header with its static circle at the end of the row. -->
+<!-- The home rail's header (U-20, as the application's): its static circle right after the title. -->
 <Story
 	name="Plain With Trailing"
 	args={{ subtitle: 'Κοντά σας', title: 'Δημοφιλή', variant: 'plain' }}
@@ -52,12 +52,40 @@
 				<IconButton
 					icon="arrow-forward"
 					appearance="tint"
-					surface="card"
-					size="sm"
-					iconSize="md"
+					surface="soft"
+					size="xs"
+					iconSize="sm"
 					aria-label=""
 					decorative
-					class="mt-0.5"
+				/>
+			{/snippet}
+			{@render body()}
+		</Section>
+	{/snippet}
+</Story>
+
+<!-- Web only: the pressable circle beside the title and a control at the row's end (the rail's ‹ ›). -->
+<Story name="Plain With End" args={{ title: 'Δημοφιλή', variant: 'plain' }}>
+	{#snippet template(args)}
+		<Section {...args}>
+			{#snippet trailing()}
+				<IconButton
+					icon="arrow-forward"
+					appearance="tint"
+					surface="soft"
+					size="xs"
+					iconSize="sm"
+					aria-label="Δείτε όλα"
+					href="#all"
+				/>
+			{/snippet}
+			{#snippet end()}
+				<IconButton
+					icon="chevron-forward"
+					appearance="outline"
+					size="xs"
+					iconSize="md"
+					aria-label="Επόμενα"
 				/>
 			{/snippet}
 			{@render body()}

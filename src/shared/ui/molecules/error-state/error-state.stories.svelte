@@ -1,6 +1,7 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { ErrorState } from '$shared/ui/molecules/error-state';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
 
 	const { Story } = defineMeta({
 		title: 'Molecules/ErrorState',
@@ -67,6 +68,29 @@
 				onActionPress={() => {}}
 				variant="framed"
 			/>
+		</div>
+	{/snippet}
+</Story>
+
+<!-- With a glyph over the words (the application's `icon`): the home's rows that could not load (U-20). -->
+<Story name="With Icon">
+	{#snippet template()}
+		<div class="w-full max-w-content bg-background p-card">
+			<ErrorState
+				title="Δεν μπορέσαμε να φορτώσουμε τους γιατρούς"
+				description="Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά."
+				actionLabel="Δοκιμή ξανά"
+				onActionPress={() => {}}
+				variant="framed"
+			>
+				{#snippet icon()}
+					<span
+						class="grid size-tile place-items-center rounded-full bg-foreground/5 text-foreground"
+					>
+						<Ionicon name="alert-circle" class="icon-lg" />
+					</span>
+				{/snippet}
+			</ErrorState>
 		</div>
 	{/snippet}
 </Story>

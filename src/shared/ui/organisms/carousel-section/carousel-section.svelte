@@ -44,6 +44,7 @@
 	{title}
 	{subtitle}
 	{trailing}
+	trailingAt="end"
 	{itemsClass}
 	{headingAs}
 	variant="gap"

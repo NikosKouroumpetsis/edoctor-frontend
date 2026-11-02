@@ -3,9 +3,17 @@
 
 	export type TextButtonTone = 'foreground' | 'primary' | 'muted' | 'danger';
 
-	// A link drawn at its label's size inside the 48 touch box, so it is as easy to hit as a button.
+	// A link drawn at its label's size inside the 48 touch box, so it is as easy to hit as a button. A disabled one keeps
+	// its presses refused by the browser and shows the `not-allowed` cursor (U-28.4, `layout.css`).
 	const textButtonBox =
-		'inline-flex min-h-touch min-w-touch items-center rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50';
+		'inline-flex min-h-touch min-w-touch items-center rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50';
+
+	// U-28.4: with a pointer, the words take their line on hover — a plain label its underline, an underlined one the
+	// line twice as thick (never while disabled).
+	const hoverClasses = {
+		plain: 'can-hover:not-disabled:hover:[&>span]:underline',
+		underlined: 'can-hover:not-disabled:hover:[&>span]:decoration-2'
+	};
 
 	const toneClasses: Record<TextButtonTone, string> = {
 		foreground: 'text-foreground',
@@ -72,7 +80,7 @@
 		bind:this={ref}
 		{href}
 		data-slot="text-button"
-		class={cn(textButtonBox, className)}
+		class={cn(textButtonBox, underline ? hoverClasses.underlined : hoverClasses.plain, className)}
 		{...restProps}
 	>
 		<span class={labelClasses}>{label}</span>
@@ -82,7 +90,7 @@
 		bind:this={ref}
 		{type}
 		data-slot="text-button"
-		class={cn(textButtonBox, className)}
+		class={cn(textButtonBox, underline ? hoverClasses.underlined : hoverClasses.plain, className)}
 		{...restProps}
 	>
 		<span class={labelClasses}>{label}</span>

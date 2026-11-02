@@ -134,7 +134,7 @@
 			type="button"
 			data-slot="banner-dismiss"
 			aria-label={dismissLabel}
-			class="inline-flex size-touch shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+			class="inline-flex size-touch shrink-0 items-center justify-center rounded-full transition-colors duration-standard ease-standard outline-none focus-visible:ring-3 focus-visible:ring-ring/50 can-hover:hover:bg-foreground/5"
 			onclick={() => onDismiss?.()}
 		>
 			<Ionicon name="close" class={cn('icon-md', dismissClass)} />

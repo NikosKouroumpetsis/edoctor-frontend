@@ -50,14 +50,15 @@ describe('Section and SectionHeader', () => {
 		).not.toBeInTheDocument();
 	});
 
-	it('U-03.1 (K2.4): the heading level is the page’s, the trailing control sits at the header’s end', () => {
-		render(Harness, { props: { headingAs: 'h3', withTrailing: true } });
-		expect(screen.getByRole('heading', { level: 3, name: 'Τοποθεσία' })).toBeInTheDocument();
-		const header = screen
-			.getByRole('heading', { level: 3 })
-			.closest('[data-slot="section-header"]');
+	it('U-20: the heading level is the page’s; the trailing control sits right after the title, the web’s `end` at the row’s end', () => {
+		render(Harness, { props: { headingAs: 'h3', withTrailing: true, withEnd: true } });
+		const heading = screen.getByRole('heading', { level: 3, name: 'Τοποθεσία' });
+		const titleRow = heading.closest('[data-slot="section-title-row"]');
+		expect(titleRow).toHaveClass('flex-row', 'items-center', 'gap-2.5');
+		expect(titleRow?.lastElementChild).toHaveTextContent('Όλα');
+		const header = heading.closest('[data-slot="section-header"]');
 		expect(header).toHaveClass('flex-row', 'items-start', 'justify-between', 'gap-4');
-		expect(header?.lastElementChild).toHaveTextContent('Όλα');
+		expect(header?.lastElementChild).toHaveTextContent('Επόμενα');
 	});
 
 	it('U-03.1 (K2.4): without a title or subtitle there is no header, only the body', () => {

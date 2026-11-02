@@ -124,6 +124,68 @@ true, value: new EventTarget() })` + a `loadingdone` event, undone with `Reflect
   it with per-field render probes (`$effect` reading only one field's value) and
   assert no `console.error`/`warn` during interaction.
 
+### Wave 1.0 test helpers
+
+- `$app/navigation` is mocked for Vitest (`vitest-mocks/app-navigation.ts`): `goto`, `invalidateAll` … are spies a
+  spec reads with `expect(goto).toHaveBeenCalledWith(…)`; `clearMocks` resets them between tests.
+- A component that reads TanStack Query renders inside `$shared/query/query.harness.svelte` (its own client, no
+  retries); the home has its own harness (`discovery-home.harness.svelte`) that also sets the page tree's
+  `SearchDock` (and takes `client`, a client the spec reads or filled first: the «Όλοι» rows' queries, U-29.3).
+  Network calls are mocked at the module's API (`vi.mock('$modules/shell/api/consent', …)`), at the leaf the code
+  imports (MINOR-4 of U-29: the home's rows at `api/marketplace/build-section-query` and `…/category-scope`). Since
+  U-32.1 a mock of the api answers FACTS (`fetchHomeSection` a `SearchDoctorsSection`, `fetchSearchResults` pages of
+  `SearchDoctorsCardFacts` with a fixed `readAt`), and the page writes them; a spec of an api function whose input
+  became the scope reads the address as its caller does (`readResultsScope`, `readResultsPress`) and keeps its
+  assertions.
+- The results (D3) mock their reads one level up, at `api/marketplace/search-source` (`fetchSearchResults`) and
+  `api/marketplace/facets-source` (`fetchFilterFacets`), and stub `IntersectionObserver` to bring the list's end
+  into view; the page's address is the `$app/state` mock's `page.url` (set before the render). The map is MapLibre
+  mocked (`vi.mock('maplibre-gl')` + its worker `?url`) with `clientWidth`/`clientHeight` spied (a box with no size
+  makes no map: jsdom, a hidden 744 map, the server). A spec that reads the server's first page as fresh renders in
+  the app's own client (`search-results.harness.svelte`, `createQueryClient`: 30 s fresh; `client` a client a
+  test already prefetched into, `dock` the page tree's `SearchDock`). The stubbed observer is told ONCE where the
+  end is: the page asks every next page while it stays in view (D3 r1 MAJOR-2). The filters' 350 ms window is
+  measured with fake timers (`vi.advanceTimersByTimeAsync`, real timers back in `finally`). The home mocks
+  `search-source` too: its «Αναζήτηση» prefetches the results' first page. The filters' and the results' specs
+  port the application's titles («S-31.7», «S-34.6» …).
+- The search (D2) mocks its three reads at `$modules/search-doctors/api/marketplace/endpoints` (`getFacets`,
+  `getDoctorSuggestions`, `getLocationSuggestions`) and the device's position at `$shared/lib/location`
+  (`resolveDeviceLocation`), in its own spec and in the home's: opening the search never calls out of a test. Its
+  specs port the application's, title for title (`module::useCriteriaModalState`, `CriteriaWhatResults`,
+  `CriteriaWhereResults`, the libs' «S-xx: …»); where U-23.2 replaces a step (a choice opens the next card, one card
+  always open) the test is rewritten and says so. A rune class (`CriteriaState`, `useDebouncedValue`) is set up in
+  `$effect.root` (its teardown is the unmount); a hook's arrow must not return a function (`beforeEach(() =>
+mock.mockReset())` runs the mock as its cleanup). The position's memory (`$shared/state/device-location`, U-29.1)
+  is module state of the tab: a spec that reads it calls `forgetDeviceLocation()` in `beforeEach`/`afterEach` (the application's
+  `resetAppStoreState`). `$shared/lib/location` keeps the application's eight «S-34.3: …» guards on a stubbed
+  `navigator.geolocation` / `navigator.permissions` and `vi.getTimerCount()`. The window's focus is guarded by
+  keyboard (`card.focus()` + Enter): it never falls to `document.body` when a card changes (MAJOR-1 of r1).
+- The profile (wave 1.5, screen 5): `src/modules/doctor/lib/detail/detail.sample.ts` is the tests' doctor (two
+  offices, three services, made-up names) and `sampleAvailability(office, times)` an office's 28 days; the page's
+  spec renders `ui/detail/page/doctor-detail.harness.svelte` (the app's own client) and mocks the browser's reads one
+  level up, at `api/availability` `doctorAvailabilitySlotsQuery` and `api/office` `doctorOfficeQuery` (query options
+  that answer FACTS), with `Date` faked at the sample's clock; shallow routing is the `$app/navigation` mock's
+  `pushState` and the `$app/state` mock's `page.state`. Its titles are the owner's «U-34…U-42: … (app = web)».
+- jsdom has no `inert` IDL attribute: Svelte sets the property, so a spec reads `element.inert`, not the attribute.
+- The consent card's inline policy links are a touch-target exception added in this wave (WCAG 2.5.8 inline
+  links, `data-slot="cookie-consent-link"` in `tests/architecture/touch-targets.test.ts`); round f1b adds the card's
+  inline «Συνδεθείτε για κόστος» (`data-slot="doctor-card-fee-action"`: words of its line, its target grown 4 on every
+  side by a pseudo-element, ≥ 24 × 24, WCAG 2.5.8 AA), the owner's explicit exception U-29.2 (`design-tokens.md`).
+- The sheet's drag (U-27.1, `map-sheet.test.ts`): jsdom has no CSS, so the computed `position` is the initial
+  `static` — the spec stubs `getComputedStyle` for the sheet (`absolute` below 744, `static` from 744, the
+  `SearchPanel` precedent); the stage's height is a `clientHeight` spy keyed by its `data-testid`; the release's speed
+  comes from the events' `timeStamp`, which jsdom takes from `Date.now()` (a `vi.spyOn(Date, 'now')` clock); the
+  non-passive `touchmove` is a `new TouchEvent('touchmove', { cancelable: true, touches: [{ clientX, clientY }] })`
+  whose `defaultPrevented` is read (jsdom has no `Touch`, plain objects pass). The map's zoom (U-27.2) is the
+  MapLibre fake's `zoomIn` / `zoomOut` spies and its `getZoom` / `getMinZoom` / `getMaxZoom`, a `zoom` event read again;
+  whether the zoom's column shows (from 744) is one stubbed rect of `getClientRects` on `[data-slot=map-view-zoom]`.
+  U-28.2: the map's «⤢» / «×» and «Απόκρυψη χάρτη» are the harness's `expandControl` / `hideControl` (a `rerender`
+  with `expanded: true` shows the same node renamed, the focus kept); the hide pill's band is a stubbed rect on
+  `[data-slot=map-view-hide]`. The results' three states are read on `data-desktop-map` and their classes; «below 1128
+  nothing changes» is the classes of the stage, the sheet, the grid, the pane and the switch with every `laptop:`,
+  `desktop:` and `wide:` class left out, equal across the states; the page's top is `document.scrollingElement`
+  (jsdom keeps a `scrollTop` it is given).
+
 ## Architecture coverage
 
 In place:
@@ -152,9 +214,10 @@ In place:
   passed to a target component (`<Button class="size-6">`) and on an `IconButton`
   whose `class` sizes it at all (`size-*`, `w-*`, `h-*`, `min-*`, `max-*`, at any
   breakpoint: its size is the `size` prop, delta R1 of the application); hidden form mirrors
-  are skipped. The one listed exception is the inline link of `InlineLinkText`
-  (WCAG 2.5.8 «inline»; `EXCEPTIONS` with file, marker and reason, and a stale
-  entry fails). The 8 gap between targets is not tested (see `design-tokens.md`).
+  are skipped. Three listed exceptions (`EXCEPTIONS` with file, marker and reason,
+  and a stale entry fails): the inline links of `InlineLinkText` and of the consent
+  card (WCAG 2.5.8 «inline») and U-29.2, the card's «Συνδεθείτε για κόστος»
+  (`design-tokens.md`). The 8 gap between targets is not tested (see `design-tokens.md`).
 - `tests/architecture/color-parity.test.ts` (node environment) — transpiles the
   application's theme palettes (`application/src/shared/preferences/theme/{light,dark}/index.ts`,
   read only) and compares them with the `:root` / `.dark` blocks of
@@ -213,6 +276,29 @@ In place:
   keeps the same `<label>` through focus, typing, emptying and blur («U-12.5: …»).
 - `tests/architecture/class-merge-imports.test.ts` — `tailwind-merge` and
   `tailwind-variants` are imported only by `src/shared/lib/utils.ts`.
+- `tests/architecture/pressable.test.ts` (U-28.4) — the `@layer base` cursor rule of `layout.css` (`pointer` on
+  buttons and the pressable roles, never while disabled; `not-allowed` on `:disabled` / `[aria-disabled=true]`; no
+  cursor rule outside `base`), a sample of the kit with its `can-hover:` hover (outline chip, selectable card,
+  segmented control: none on the chosen look; every `Button` tone, guarded by `not-disabled:`), and (γ) no `div` /
+  `span` / `li` of `src/` with a press or key handler and no role, outside `aria-hidden` backdrops and the listed
+  slider track.
+- `tests/architecture/results-url.test.ts` (D3) — the results address is read ONLY by `readSearchDoctorsCriteria`
+  and `readSearchDoctorsFilters` («S-07.3 (κανόνας 11, web): …»): nothing else calls their resolvers, and no page,
+  screen or route of the search reads a query parameter itself.
+- `tests/architecture/route-mirror.test.ts` («U-29.3: …») — every page route has its mirrored screen with the five
+  files and renders it through `$screens/<path>` (the root ⇔ `home`, a `(group)` adds no folder).
+- `tests/architecture/import-boundaries.test.ts` («U-29.3: …») — routes ⇒ screens ⇒ modules ⇒ shared: no import
+  against the direction (shared → feature, module → module, module or screen → page layer, screen → screen), no
+  private file of a slice or a screen from outside it, no relative import out of its unit (MINOR-3), no `$lib`, no
+  `export *`, `$generated/api` only in the api client, no atomic layer of the shared UI importing one above it (Π2).
+- `tests/architecture/module-segments.test.ts` («U-29.1: …», «U-29.3: …») — the modules' segments, rune-free `lib/`
+  and `config/`, a static `config/`, type-only `types.ts`, «`api/` never imports `lib/`» with no exception (U-32.1:
+  the list is empty, a type import counts, and the former shapes are its negative),
+  and the remote answers out of runes (no `$state<…>` of an `api/` type, the transport only inside a `queryFn`; the
+  negative is the former streamed-rows hook, BLOCKER-1 of the audit).
+- `tests/architecture/card-media.test.ts` (D13, «U-29 (MINOR-5): …») — the doctor card and its skeletons draw the
+  same aspect, from `searchDoctorCardMedia`, and none writes its own; `tests/architecture/map-bundle.test.ts`
+  («U-24.4: …», NIT-1 of U-29: moved out of the map's spec) — `maplibre-gl` reaches no first bundle.
 - Each checker ships with negative fixtures next to the project scan, plus a
   proof that the scan read the code (file, token and tag counts).
 
@@ -221,14 +307,12 @@ The token registry and the class merger have unit specs next to them:
 theme) and `src/shared/lib/utils.test.ts` (`cn`/`tv` keep a role beside a color,
 merge named sizes, drop a leading written before its role).
 
-Architecture tests should also enforce:
+Architecture tests should also enforce (not yet in place; the route mirror, the screen files and the shared imports
+are, above):
 
-- every non-layout page route has a mirrored screen folder
-- screen folders contain `index.ts`, `page/index.svelte`, `hooks/index.ts`, `hooks/use-screen.svelte.ts`, and `types.ts`
 - module UI slices follow the slice contract
 - shadcn primitives live under shared UI primitives
 - runtime code uses leaf imports instead of broad parent barrels
-- shared code does not import from feature modules
 - preferences are sanitized and stored under `edoctor.<appEnv>.preferences.v1`
 
 ## Browser coverage

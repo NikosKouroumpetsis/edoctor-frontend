@@ -17,7 +17,8 @@
 		argTypes: {
 			inset: { control: 'radio', options: ['sm', 'md'] },
 			selected: { control: 'boolean' },
-			size: { control: 'radio', options: ['md', 'lg'] }
+			size: { control: 'radio', options: ['md', 'lg'] },
+			appearance: { control: 'radio', options: ['bare', 'overlay'] }
 		}
 	});
 </script>
@@ -51,6 +52,26 @@
 <Story name="Rail Card Selected" args={{ inset: 'sm', selected: true, size: 'md' }}>
 	{#snippet template(args)}
 		<div class="relative h-card-rail-media w-card-rail-w rounded-xl bg-muted">
+			<FavoriteButton {...args} />
+		</div>
+	{/snippet}
+</Story>
+
+<!-- U-20 (Airbnb's, as the application's `overlay`): the white outline over the dark see-through fill, on a photo. -->
+<Story name="Overlay" args={{ appearance: 'overlay', inset: 'sm', size: 'md' }}>
+	{#snippet template(args)}
+		<div class="relative h-card-rail-media w-card-rail-w rounded-xl bg-primary">
+			<FavoriteButton {...args} />
+		</div>
+	{/snippet}
+</Story>
+
+<Story
+	name="Overlay Selected"
+	args={{ appearance: 'overlay', inset: 'sm', selected: true, size: 'md' }}
+>
+	{#snippet template(args)}
+		<div class="relative h-card-rail-media w-card-rail-w rounded-xl bg-primary">
 			<FavoriteButton {...args} />
 		</div>
 	{/snippet}

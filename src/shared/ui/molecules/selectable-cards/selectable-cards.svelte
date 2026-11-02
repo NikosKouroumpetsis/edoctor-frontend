@@ -1,6 +1,6 @@
 <script lang="ts" module>
 	import type { Snippet } from 'svelte';
-	import type { SelectableCardIconPlacement } from './selectable-card.svelte';
+	import type { SelectableCardIconPlacement, SelectableCardSize } from './selectable-card.svelte';
 
 	/** One card: the caller's words, its value and an optional glyph. */
 	export type SelectableCardsOption = {
@@ -22,8 +22,15 @@
 		onChange?: (value: SelectableCardsValue) => void;
 		disabled?: boolean;
 		iconPlacement?: SelectableCardIconPlacement;
+		/** U-28.3: `md` (default, the application's cards 12 apart) or `sm` (the smaller cards, 8 apart). */
+		size?: SelectableCardSize;
 		/** The question over the cards, also the group's name. */
 		label?: string;
+		/**
+		 * Web only (MINOR-3 of r1; React Native has no `aria-labelledby`): the id of the caller's own heading that names
+		 * the group, when the question is drawn there (a section's title) — no second question over the cards.
+		 */
+		labelledBy?: string;
 		/** `<id>` on the group, `<id>-<value>` on each card. */
 		testId?: string;
 		class?: string;
@@ -42,7 +49,9 @@
 		onChange,
 		disabled = false,
 		iconPlacement = 'trailing',
+		size = 'md',
 		label,
+		labelledBy,
 		testId,
 		class: className
 	}: SelectableCardsProps = $props();
@@ -79,7 +88,7 @@
 	}
 </script>
 
-<!-- The application's `SelectableCards`: the optional question (heading 24), then the cards 12 apart. -->
+<!-- The application's `SelectableCards`: the optional question (heading 24), then the cards 12 apart (`sm` 8). -->
 <div data-slot="selectable-cards" data-testid={testId} class={cn('w-full', className)}>
 	{#if label}
 		<p id={labelId} class="mb-4 text-heading-md font-semibold text-foreground">{label}</p>
@@ -87,8 +96,8 @@
 	<div
 		bind:this={group}
 		role={isMultiple ? 'group' : 'radiogroup'}
-		aria-labelledby={label ? labelId : undefined}
-		class="flex w-full flex-col gap-3"
+		aria-labelledby={label ? labelId : labelledBy}
+		class={cn('flex w-full flex-col', size === 'sm' ? 'gap-2' : 'gap-3')}
 		{onkeydown}
 	>
 		{#each options as option (option.value)}
@@ -98,6 +107,7 @@
 				description={option.description}
 				icon={option.icon}
 				{iconPlacement}
+				{size}
 				selected={chosen.includes(option.value)}
 				{disabled}
 				data-roving-item

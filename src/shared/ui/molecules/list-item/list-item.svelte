@@ -91,7 +91,7 @@
 
 <!-- The application's `ListItem` (U-09.4): a 48-high row of a list or a picker — leading, the one-line title over a
      two-line muted subtitle, trailing — a button with `onclick`, else a plain row. The application has no pressed or
-     hover look, so the web adds none: only the kit's keyboard ring. -->
+     hover look; the web adds the kit's keyboard ring and (U-28.4) with a pointer the light fill on hover. -->
 {#if onclick}
 	<button
 		type="button"
@@ -100,7 +100,7 @@
 		{disabled}
 		{onclick}
 		class={cn(
-			'text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset',
+			'text-left transition-colors duration-standard ease-standard outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset can-hover:enabled:hover:bg-foreground/5',
 			rowClass
 		)}
 	>

@@ -47,13 +47,18 @@ export default defineConfig(
 		files: [
 			'src/shared/ui/primitives/button/button.svelte',
 			'src/shared/ui/primitives/date-card/date-card.svelte',
+			'src/shared/ui/primitives/dropdown-menu/dropdown-menu-item.svelte',
 			'src/shared/ui/primitives/icon-button/icon-button.svelte',
 			'src/shared/ui/primitives/text-button/text-button.svelte',
 			'src/shared/ui/primitives/inline-link-text/inline-link-text.svelte',
 			'src/shared/ui/molecules/info-row/info-row.svelte',
 			'src/shared/ui/molecules/language-switcher/language-switcher.svelte',
+			'src/shared/ui/molecules/link-directory/link-directory.svelte',
+			'src/shared/ui/molecules/map-pin-card/map-pin-card.svelte',
 			'src/shared/ui/organisms/bottom-nav/bottom-nav.svelte',
+			'src/shared/ui/organisms/cookie-consent/cookie-consent.svelte',
 			'src/shared/ui/organisms/media-card/media-card.svelte',
+			'src/shared/ui/organisms/media-gallery/media-gallery.svelte',
 			'src/shared/ui/organisms/photo-carousel/photo-carousel.svelte',
 			'src/shared/ui/organisms/site-footer/site-footer.svelte',
 			'src/shared/ui/organisms/site-navbar/site-navbar.svelte'

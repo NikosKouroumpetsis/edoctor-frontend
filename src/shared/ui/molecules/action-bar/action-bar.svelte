@@ -7,6 +7,25 @@
 	export type ActionBarPrimaryAppearance = 'default' | 'compact';
 	/** The three bars of the application (M-39): the criteria footer, the filter footer, the availability footer. */
 	export type ActionBarPreset = 'default' | 'filters' | 'plain';
+	/** The primary's corners: `default` the 12 of every bar, `pill` the full round of the search (U-23.1). */
+	export type ActionBarPrimaryShape = 'default' | 'pill';
+
+	const primaryShapeClasses: Record<ActionBarPrimaryShape, string> = {
+		default: 'rounded-md',
+		pill: 'rounded-full'
+	};
+
+	/** The primary's fill: `accent` the search's (the default), `contrast` the dark of the filters' count (U-24.3). */
+	export type ActionBarPrimaryTone = 'accent' | 'contrast';
+
+	const primaryToneClasses: Record<ActionBarPrimaryTone, string> = {
+		accent: 'border-accent bg-accent',
+		contrast: 'border-secondary bg-secondary'
+	};
+	const primaryHoverClasses: Record<ActionBarPrimaryTone, string> = {
+		accent: 'can-hover:hover:bg-accent/90',
+		contrast: 'can-hover:hover:bg-secondary/90'
+	};
 
 	const secondaryAppearanceClasses: Record<ActionBarSecondaryAppearance, string> = {
 		link: 'text-body-sm font-semibold underline',
@@ -52,6 +71,8 @@
 		primaryDisabled = false,
 		primaryIcon,
 		primaryLoading = false,
+		primaryShape = 'default',
+		primaryTone = 'accent',
 		primaryTestId,
 		secondaryLabel,
 		onSecondaryClick,
@@ -60,6 +81,7 @@
 		secondaryDisabled = false,
 		secondaryTestId,
 		separated,
+		singleLine = false,
 		contentWidthClass,
 		class: className
 	}: {
@@ -75,6 +97,8 @@
 		primaryIcon?: IoniconName;
 		/** A busy indicator instead of the glyph; presses refused. */
 		primaryLoading?: boolean;
+		primaryShape?: ActionBarPrimaryShape;
+		primaryTone?: ActionBarPrimaryTone;
 		primaryTestId?: string;
 		secondaryLabel: string;
 		onSecondaryClick: () => void;
@@ -85,6 +109,11 @@
 		secondaryTestId?: string;
 		/** An upward shadow (`shadow-bar`, no border) over the scrolling content. */
 		separated?: boolean;
+		/**
+		 * The two never wrap (U-24.3, the filters' footer «at every width»): both labels on one line, 16 a side and
+		 * 8 between on the phone (the prototype's narrow gaps), 24 and 16 from 744, the primary 24 in from 744.
+		 */
+		singleLine?: boolean;
 		/** The row's width (the application's `contentWidthClassName`), e.g. `tablet:max-w-form`. */
 		contentWidthClass?: string;
 		class?: string;
@@ -105,12 +134,19 @@
 <div
 	data-slot="action-bar"
 	data-preset={preset}
-	class={cn('px-5 pt-3 pb-safe-area-action', isSeparated && 'bg-background shadow-bar', className)}
+	data-single-line={singleLine || undefined}
+	class={cn(
+		singleLine ? 'px-4 pt-3 tablet:px-6' : 'px-5 pt-3',
+		'pb-safe-area-action',
+		isSeparated && 'bg-background shadow-bar',
+		className
+	)}
 >
 	<div
 		data-slot="action-bar-row"
 		class={cn(
-			'mx-auto flex w-full flex-row flex-wrap items-center justify-between gap-4',
+			'mx-auto flex w-full flex-row items-center justify-between',
+			singleLine ? 'flex-nowrap gap-2 tablet:gap-4' : 'flex-wrap gap-4',
 			contentWidthClass
 		)}
 	>
@@ -123,12 +159,19 @@
 			class={cn(
 				'inline-flex min-h-touch min-w-touch items-center justify-center rounded-sm',
 				focusRing,
-				secondaryDisabled && 'opacity-40'
+				// U-28.4: with a pointer, the light fill on hover (Airbnb's «Εκκαθάριση όλων»), never while disabled.
+				secondaryDisabled
+					? 'opacity-40'
+					: 'transition-colors duration-standard ease-standard can-hover:hover:bg-foreground/5'
 			)}
 			onclick={() => onSecondaryClick()}
 		>
 			<span
-				class={cn(secondaryLook, secondaryDisabled ? 'text-muted-foreground' : 'text-foreground')}
+				class={cn(
+					secondaryLook,
+					singleLine && 'whitespace-nowrap',
+					secondaryDisabled ? 'text-muted-foreground' : 'text-foreground'
+				)}
 			>
 				{secondaryLabel}
 			</span>
@@ -142,10 +185,19 @@
 			aria-busy={primaryLoading || undefined}
 			disabled={isPrimaryBlocked}
 			class={cn(
-				'ml-auto inline-flex min-h-control-md min-w-touch flex-row items-center justify-center gap-2.5 rounded-md border border-accent bg-accent shadow-soft',
+				'ml-auto inline-flex min-h-control-md min-w-touch flex-row items-center justify-center gap-2.5 border shadow-soft',
+				primaryToneClasses[primaryTone],
+				primaryShapeClasses[primaryShape],
 				primaryLook.pressable,
+				singleLine && 'shrink-0 tablet:px-6',
 				focusRing,
-				isPrimaryBlocked && 'opacity-50'
+				// U-28.4: with a pointer, the fill a shade lighter on hover (as the kit's `Button`), never while blocked.
+				isPrimaryBlocked
+					? 'opacity-50'
+					: cn(
+							'transition-colors duration-standard ease-standard',
+							primaryHoverClasses[primaryTone]
+						)
 			)}
 			onclick={() => onPrimaryClick()}
 		>
@@ -154,7 +206,13 @@
 			{:else if primaryIcon}
 				<Ionicon name={primaryIcon} class="icon-md text-secondary-foreground" />
 			{/if}
-			<span class={cn(primaryLook.label, 'shrink font-semibold text-secondary-foreground')}>
+			<span
+				class={cn(
+					primaryLook.label,
+					'shrink font-semibold text-secondary-foreground',
+					singleLine && 'whitespace-nowrap'
+				)}
+			>
 				{primaryLabel}
 			</span>
 		</button>

@@ -213,4 +213,72 @@ describe('OptionRow', () => {
 		});
 		expect(container.innerHTML).not.toMatch(/\bdark:|#[0-9a-f]{3,8}\b|bg-white|text-black/i);
 	});
+
+	it('U-23.2: `xl` is Airbnb’s search row — the 56 tile (corner 12), the 15 regular name over the 14 muted line', () => {
+		render(OptionRow, {
+			props: {
+				size: 'xl',
+				label: 'Πειραιάς',
+				supportingLabel: 'Περιφερειακή Ενότητα Πειραιά, Αττική',
+				icon: 'location-outline',
+				isSelected: false
+			}
+		});
+		const row = screen.getByRole('button', { name: 'Πειραιάς' });
+		expect(row).toHaveClass('min-h-row-lg', 'gap-4', 'rounded-lg', 'px-4', 'py-2');
+		expect(row).not.toHaveClass('min-h-row', 'rounded-md');
+		expect(tileOf(row)).toHaveClass('size-tile', 'rounded-md', 'bg-foreground/5');
+		expect(tileOf(row).querySelector('svg')).toHaveClass('icon-lg', 'text-foreground');
+		const label = screen.getByText('Πειραιάς');
+		expect(label).toHaveClass('text-body-md', 'text-foreground');
+		expect(label).not.toHaveClass('font-semibold');
+		expect(screen.getByText('Περιφερειακή Ενότητα Πειραιά, Αττική')).toHaveClass(
+			'line-clamp-2',
+			'text-body-sm',
+			'text-muted-foreground'
+		);
+	});
+
+	it('U-21/U-22: «Κοντά μου» wears the blue glyph on the blue tile; chosen, any row is the tint, the card tile and the blue check', () => {
+		const { rerender } = render(OptionRow, {
+			props: {
+				size: 'xl',
+				label: 'Κοντά μου',
+				icon: 'navigate-outline',
+				tileTone: 'primary',
+				isSelected: false
+			}
+		});
+		const row = screen.getByRole('button', { name: 'Κοντά μου' });
+		expect(tileOf(row)).toHaveClass('bg-primary/10');
+		expect(tileOf(row)).toHaveAttribute('data-tone', 'primary');
+		expect(tileOf(row).querySelector('svg')).toHaveClass('text-primary');
+		expect(row).not.toHaveClass('bg-primary/10');
+		rerender({
+			size: 'xl',
+			label: 'Κοντά μου',
+			icon: 'navigate-outline',
+			tileTone: 'primary',
+			isSelected: true
+		});
+		expect(row).toHaveClass('bg-primary/10');
+		expect(tileOf(row)).toHaveClass('bg-card');
+		expect(row.querySelector('[data-icon="checkmark"]')).toHaveClass('icon-md', 'text-primary');
+	});
+
+	it('U-21: `queryMatch="word-start"` bolds what was typed only at the start of a word', () => {
+		render(OptionRow, {
+			props: {
+				size: 'xl',
+				label: 'Υπέρηχος καρδιάς',
+				query: 'καρ',
+				queryMatch: 'word-start',
+				isSelected: false
+			}
+		});
+		const matches = [...document.querySelectorAll('[data-slot="highlight-text-match"]')].map(
+			(match) => match.textContent
+		);
+		expect(matches).toEqual(['καρ']);
+	});
 });

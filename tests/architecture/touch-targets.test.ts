@@ -50,6 +50,11 @@ const touch = controls.touch;
  * Targets WCAG 2.5.8 exempts as «inline»: a link that is a word of a running sentence takes the sentence's line
  * height, not the 48 box (the application's `InlineLinkText`). Each entry names its file and the marker its tag
  * carries; an entry that no longer matches a tag fails the project test, so the list cannot go stale.
+ * 🔴 U-29.2 (the owner, 29/10): the card's «🔒 Συνδεθείτε για κόστος» is the one exception that is not a sentence's
+ * link. WCAG 2.2 SC 2.5.8 (AA) asks at least 24 × 24 CSS px, or a target inline in a line of text (the 44 × 44 is
+ * 2.5.5, AAA, not required; EN 301 549 rests on WCAG 2.1 AA, which has no size). Measured 20:3x: the list's and the pin
+ * card's target 181 × 26, the home's inline in « · ★» (117 × 33); the application's the line + hitSlop 4. The 48 of
+ * this repository is a stricter rule of our own; this target stays within the international one.
  */
 type TouchException = { path: string; marker: string; reason: string };
 
@@ -58,6 +63,17 @@ const EXCEPTIONS: TouchException[] = [
 		path: 'src/shared/ui/primitives/inline-link-text/inline-link-text.svelte',
 		marker: 'data-slot="inline-link-text-link"',
 		reason: 'WCAG 2.5.8 inline: the link is part of the sentence'
+	},
+	{
+		path: 'src/shared/ui/organisms/cookie-consent/cookie-consent.svelte',
+		marker: 'data-slot="cookie-consent-link"',
+		reason: 'WCAG 2.5.8 inline: the policy links are words of the consent sentence (U-16.5)'
+	},
+	{
+		path: 'src/modules/search-doctors/ui/search-doctor-card/components/fee-sign-in.svelte',
+		marker: 'data-slot="doctor-card-fee-action"',
+		reason:
+			'U-29.2 (the owner, 29/10), U-27.4 f1b: words of the card’s line, the target grown 4 on every side by a pseudo-element — WCAG 2.2 SC 2.5.8 AA (≥ 24 × 24, or inline in a line of text); measured 181 × 26 (list, pin card), inline on the home; the application’s line + hitSlop 4; our 48 is a stricter rule of our own'
 	}
 ];
 

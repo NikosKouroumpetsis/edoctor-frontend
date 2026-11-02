@@ -64,3 +64,15 @@
 		</Container>
 	{/snippet}
 </Story>
+
+<!-- Wave 1.5 (the doctor's profile): two columns already from 744, as Airbnb's listing page. -->
+<Story name="From Tablet" globals={{ viewport: { value: 'z744' } }}>
+	{#snippet template()}
+		<Container width="listing" class="py-section">
+			<TwoColumnDetail from="tablet">
+				{#snippet aside()}{@render card('Κάρτα κράτησης')}{/snippet}
+				{@render mainColumn()}
+			</TwoColumnDetail>
+		</Container>
+	{/snippet}
+</Story>

@@ -39,7 +39,9 @@
 			testId: 'option-piraeus'
 		},
 		argTypes: {
-			size: { control: 'select', options: ['md', 'lg'] },
+			size: { control: 'select', options: ['md', 'lg', 'xl'] },
+			tileTone: { control: 'select', options: ['neutral', 'primary'] },
+			queryMatch: { control: 'select', options: ['anywhere', 'word-start'] },
 			accessibilityRole: { control: 'select', options: ['button', 'radio', 'option'] }
 		}
 	});
@@ -125,6 +127,54 @@
 		labelClass: 'font-medium',
 		query: 'Καρδ',
 		supportingLabel: undefined
+	}}
+/>
+
+<!-- Web (U-21/U-23): Airbnb's search row, `xl` — the 56 tile, the 15 name and the 14 muted line. -->
+<Story
+	name="Search Row"
+	args={{
+		size: 'xl',
+		icon: 'location-outline',
+		label: 'Πειραιάς',
+		supportingLabel: 'Περιφερειακή Ενότητα Πειραιά, Αττική'
+	}}
+/>
+
+<!-- «Κοντά μου»: the blue arrow on the blue tile (`tileTone="primary"`). -->
+<Story
+	name="Search Row Near Me"
+	args={{
+		size: 'xl',
+		icon: 'navigate-outline',
+		tileTone: 'primary',
+		label: 'Κοντά μου',
+		supportingLabel: 'Τρέχουσα τοποθεσία'
+	}}
+/>
+
+<!-- «Πότε;» chosen: the primary tint, the card tile, the blue glyph and the blue check (U-22). -->
+<Story
+	name="Search Row Selected"
+	args={{
+		size: 'xl',
+		icon: 'calendar-outline',
+		label: 'Επόμενες 3 ημέρες',
+		supportingLabel: '28 – 30 Οκτ',
+		isSelected: true
+	}}
+/>
+
+<!-- What was typed, in bold at the start of a word (`queryMatch="word-start"`). -->
+<Story
+	name="Search Row With Query"
+	args={{
+		size: 'xl',
+		icon: 'document-text-outline',
+		label: 'Υπέρηχος καρδιάς',
+		supportingLabel: undefined,
+		query: 'καρ',
+		queryMatch: 'word-start'
 	}}
 />
 

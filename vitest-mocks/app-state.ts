@@ -7,7 +7,9 @@ export const page = {
 	status: 200,
 	error: null as Error | null,
 	data: {} as Record<string, unknown>,
-	form: undefined as unknown
+	form: undefined as unknown,
+	// Shallow routing's state (wave 1.5, the profile's windows): a spec sets it before the render, as `page.url`.
+	state: {} as App.PageState
 };
 
 export const navigating = null;

@@ -68,6 +68,18 @@ describe('ActionBar', () => {
 		expect(barOf()).not.toHaveClass('shadow-bar');
 	});
 
+	it('U-23.1 (app = web): `primaryShape="pill"` is the search’s full round (on purpose unlike Airbnb) instead of the 12 corner', () => {
+		const view = render(ActionBar, {
+			props: { ...base, primaryIcon: 'search', primaryShape: 'pill' }
+		});
+		const pill = screen.getByRole('button', { name: 'Αναζήτηση' });
+		expect(pill).toHaveClass('rounded-full', 'bg-accent', 'min-h-control-md');
+		expect(pill).not.toHaveClass('rounded-md');
+		view.unmount();
+		render(ActionBar, { props: base });
+		expect(screen.getByRole('button', { name: 'Αναζήτηση' })).toHaveClass('rounded-md');
+	});
+
 	it('U-03.1 (K2.8): a named appearance or separation wins over the preset', () => {
 		render(ActionBar, {
 			props: { ...base, preset: 'filters', separated: false, primaryAppearance: 'default' }
@@ -130,5 +142,37 @@ describe('ActionBar', () => {
 		expect(onSecondaryClick).toHaveBeenCalledOnce();
 		expect(screen.getByTestId('apply')).toHaveAttribute('data-slot', 'action-bar-primary');
 		expect(document.querySelector('[data-slot="action-bar-row"]')).toHaveClass('tablet:max-w-form');
+	});
+
+	it('U-24.3: the filters’ footer — «Εκκαθάριση όλων» left, the DARK pill right, ONE line at every width', () => {
+		render(ActionBar, {
+			props: {
+				...base,
+				preset: 'filters',
+				primaryLabel: 'Εμφάνιση 1.000+ γιατρών',
+				primaryShape: 'pill',
+				primaryTone: 'contrast',
+				singleLine: true
+			}
+		});
+		expect(barOf()).toHaveClass('px-4', 'tablet:px-6');
+		const row = document.querySelector('[data-slot="action-bar-row"]');
+		expect(row).toHaveClass('flex-nowrap', 'gap-2', 'tablet:gap-4');
+		expect(row).not.toHaveClass('flex-wrap');
+		const primary = screen.getByRole('button', { name: 'Εμφάνιση 1.000+ γιατρών' });
+		expect(primary).toHaveClass('border-secondary', 'bg-secondary', 'rounded-full', 'shrink-0');
+		expect(primary).not.toHaveClass('bg-accent');
+		expect(labelOf(primary)).toHaveClass('whitespace-nowrap', 'text-secondary-foreground');
+		expect(screen.getByRole('button', { name: 'Εκκαθάριση όλων' }).firstElementChild).toHaveClass(
+			'whitespace-nowrap',
+			'underline'
+		);
+	});
+
+	it('U-24.3 (negative): without `singleLine` the row still wraps and the primary stays the accent', () => {
+		render(ActionBar, { props: base });
+		expect(document.querySelector('[data-slot="action-bar-row"]')).toHaveClass('flex-wrap');
+		expect(screen.getByRole('button', { name: 'Αναζήτηση' })).toHaveClass('bg-accent');
+		expect(barOf()).not.toHaveAttribute('data-single-line');
 	});
 });

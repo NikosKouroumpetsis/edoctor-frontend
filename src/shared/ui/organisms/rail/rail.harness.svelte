@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { Rail, type RailControlsFrom, type RailTrailing } from './index';
+	import {
+		RAIL_CARDS_PER_VIEW,
+		Rail,
+		type RailControlsFrom,
+		type RailTrailing,
+		type RailTrailingAt
+	} from './index';
 
 	let {
 		separated = false,
@@ -9,6 +15,8 @@
 		bleed,
 		untitled = false,
 		endPadding,
+		byZone = false,
+		trailingAt,
 		cards = ['Α', 'Β', 'Γ', 'Δ']
 	}: {
 		untitled?: boolean;
@@ -18,6 +26,9 @@
 		withControls?: boolean;
 		controlsFrom?: RailControlsFrom;
 		bleed?: boolean;
+		/** The home rows' `perView={RAIL_CARDS_PER_VIEW}`. */
+		byZone?: boolean;
+		trailingAt?: RailTrailingAt;
 		cards?: string[];
 	} = $props();
 
@@ -43,6 +54,7 @@
 		{scrollLabels}
 		{controlsFrom}
 		{bleed}
+		perView={byZone ? RAIL_CARDS_PER_VIEW : undefined}
 		data-testid="rail"
 	>
 		{#snippet renderItem(name)}{@render card(name)}{/snippet}
@@ -52,9 +64,11 @@
 		title="Δημοφιλείς"
 		subtitle="Αυτή την εβδομάδα"
 		{trailing}
+		{trailingAt}
 		{scrollLabels}
 		{controlsFrom}
 		{bleed}
+		perView={byZone ? RAIL_CARDS_PER_VIEW : undefined}
 		data-testid="rail"
 	>
 		{#each cards as name (name)}{@render card(name)}{/each}

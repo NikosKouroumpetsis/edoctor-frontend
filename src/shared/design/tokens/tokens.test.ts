@@ -9,6 +9,7 @@ import {
 	media,
 	platform,
 	radius,
+	radiusScale,
 	sheet,
 	spacing,
 	spacingScale,
@@ -36,7 +37,15 @@ describe('shared size scale', () => {
 	});
 
 	it('puts every named length, container, icon and radius on the 4px grid', () => {
-		const families = { spacing, controls, containers, icon, radius, platform: platform.spacing };
+		const families = {
+			spacing,
+			controls,
+			containers,
+			icon,
+			radius,
+			platform: platform.spacing,
+			'platform.radius': platform.radius
+		};
 		for (const [family, values] of Object.entries(families)) {
 			for (const [name, value] of Object.entries(values)) {
 				expect(onGrid(value), `${family}.${name} = ${value}`).toBe(true);
@@ -58,6 +67,25 @@ describe('shared size scale', () => {
 		expect(Object.keys(spacingScale)).toHaveLength(names.length + sheetNames.length);
 		for (const name of Object.keys(leading)) expect(name in spacingScale, name).toBe(false);
 		for (const name of Object.keys(containers)) expect(name in spacingScale, name).toBe(false);
+	});
+
+	it('U-25.4: the sixth corner is the web’s alone — `panel` 32 for the panels from 744; the shared five unchanged', () => {
+		expect(radius).toEqual({ xs: 4, sm: 8, md: 12, lg: 16, xl: 24 });
+		expect(platform.radius).toEqual({ panel: 32 });
+		expect(radiusScale).toEqual({ ...radius, panel: 32 });
+		expect(Object.keys(radius)).not.toContain('panel');
+	});
+
+	it('U-23.2: the search panel is Airbnb’s 425 on the 4px grid (424), the phone window’s blur 18', () => {
+		expect(platform.spacing['search-panel-w']).toBe(424);
+		expect(platform.blur.search).toBe(18);
+	});
+
+	it('U-32.3 (NIT-7 of U-29): the 744 map switch stands `map-switch-bottom` above the bottom edge — its own name, the 32 it had as `control-xs`', () => {
+		expect(platform.spacing['map-switch-bottom']).toBe(32);
+		expect(platform.spacing['map-switch-bottom']).toBe(controls['control-xs']);
+		expect(spacingScale['map-switch-bottom']).toBe('32px');
+		expect(tokensToCss()).toContain('--spacing-map-switch-bottom: 32px;');
 	});
 
 	it('measures runtime lengths on the step scale', () => {
@@ -89,6 +117,8 @@ describe('tokensToCss', () => {
 		expect(css).toContain('--container-form: 560px;');
 		expect(css).toContain('--breakpoint-split: 950px;');
 		expect(css).toContain('--radius-md: 12px;');
+		expect(css).toContain('--radius-panel: 32px;');
+		expect(css).toContain('--blur-search: 18px;');
 		for (const name of Object.keys(elevation)) expect(css).toContain(`--shadow-${name}:`);
 		for (const name of Object.keys(spacingScale)) expect(css).toContain(`--spacing-${name}:`);
 		for (const name of Object.keys(icon)) expect(css).toContain(`@utility icon-${name} {`);

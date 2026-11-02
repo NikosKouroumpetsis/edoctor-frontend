@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import { createRawSnippet } from 'svelte';
 import SiteFooter from './site-footer.svelte';
 
 const columns = [
@@ -62,12 +63,80 @@ describe('SiteFooter', () => {
 		expect(view.container.querySelectorAll('footer > div')).toHaveLength(1);
 	});
 
-	it('U-03.8: keeps room for the bottom bar until the zone it hides from', () => {
+	// Rewrites the U-03.8 reserve guard (room until the laptop): U-16.3 hides the capsule from 744.
+	it('U-16.3: keeps room for the capsule until 744 by default, until the zone the caller names, or none', () => {
 		const view = render(SiteFooter, { props: { columns } });
 		const footer = view.container.querySelector('footer') as HTMLElement;
-		expect(footer).toHaveClass('pb-bar-bottom', 'laptop:pb-0');
+		expect(footer).toHaveClass('pb-bar-bottom', 'tablet:pb-0');
+		expect(footer).not.toHaveClass('laptop:pb-0');
 		view.unmount();
+		const laptop = render(SiteFooter, { props: { columns, reserveBottomNav: 'laptop' } });
+		expect(laptop.container.querySelector('footer')).toHaveClass('laptop:pb-0');
+		laptop.unmount();
 		const none = render(SiteFooter, { props: { columns, reserveBottomNav: false } });
 		expect(none.container.querySelector('footer')).not.toHaveClass('pb-bar-bottom');
+	});
+
+	it('U-16.9: Airbnb’s order on the grey band — popular searches, the columns (one with rules on the phone, three from 744), the actions row, the rights line', () => {
+		const view = render(SiteFooter, {
+			props: {
+				columns,
+				popular: createRawSnippet(() => ({ render: () => '<h2>Δημοφιλείς αναζητήσεις</h2>' })),
+				actions: createRawSnippet(() => ({ render: () => '<button>Ελληνικά (GR)</button>' })),
+				legalNote: '© 2026 eDoctor',
+				legalLinks: [{ label: 'Απόρρητο', href: '/legal/privacy-policy' }]
+			}
+		});
+		const footer = view.container.querySelector('footer') as HTMLElement;
+		expect(footer).toHaveClass('bg-background', 'border-t');
+		const slots = [...footer.querySelectorAll('[data-slot^="site-footer-"]')]
+			.map((node) => node.getAttribute('data-slot'))
+			.filter((slot) => slot !== 'site-footer-column' && slot !== 'site-footer-legal-note');
+		expect(slots).toEqual([
+			'site-footer-popular',
+			'site-footer-columns',
+			'site-footer-actions',
+			'site-footer-legal'
+		]);
+		expect(footer.querySelector('[data-slot="site-footer-columns"]')).toHaveClass(
+			'grid-cols-1',
+			'tablet:grid-cols-3',
+			'border-t'
+		);
+		expect(footer.querySelector('[data-slot="site-footer-column"]')).toHaveClass(
+			'border-b',
+			'tablet:border-b-0'
+		);
+		expect(
+			screen.getByRole('button', { name: 'Ελληνικά (GR)' }).closest('[data-slot]')
+		).toHaveAttribute('data-slot', 'site-footer-actions');
+		expect(screen.getByRole('link', { name: 'Απόρρητο' })).toHaveClass(
+			'min-h-touch',
+			'min-w-touch'
+		);
+	});
+	// Live r1 (4): r0's «Όροι» sat in a wider 48 box than its word, so the gaps around its «·» were wider.
+	it('U-16.9: every «·» of the legal row has the same room on both sides (each word’s own 12, never the 48 width)', () => {
+		const view = render(SiteFooter, {
+			props: {
+				columns,
+				legalNote: '© 2026 eDoctor',
+				legalLinks: [
+					{ label: 'Απόρρητο', href: '/a' },
+					{ label: 'Όροι', href: '/b' },
+					{ label: 'Cookies', href: '/c' }
+				]
+			}
+		});
+		for (const name of ['Απόρρητο', 'Όροι', 'Cookies']) {
+			expect(screen.getByRole('link', { name })).toHaveClass(
+				'px-3',
+				'min-h-touch',
+				'justify-center'
+			);
+		}
+		const note = view.container.querySelector('[data-slot="site-footer-legal-note"]');
+		expect(note).toHaveClass('tablet:pr-3');
+		expect(note?.nextElementSibling).toHaveTextContent('·');
 	});
 });

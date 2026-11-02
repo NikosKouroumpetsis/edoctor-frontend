@@ -44,7 +44,10 @@
 		closeLabel: string;
 		/** The open segment's panel content; without it the bar opens no panel. */
 		panel?: Snippet<[string, SearchBarPanelContext]>;
-		/** Places and sizes the dropdown (`tablet:w-popover-lg`); the bar's full width by default. */
+		/**
+		 * Places and sizes the dropdown over the default — Airbnb's 424 × `rounded-panel`, ≤ 60 % of the screen, from
+		 * the left edge (the last segment's from the right, `data-align="end"`), U-23.2.
+		 */
 		panelClass?: string;
 		/**
 		 * `<id>`, `<id>-<segment>` per segment (its button, or the island of a typed one), `<id>-<segment>-input`,
@@ -145,14 +148,18 @@
 	$effect(() => {
 		const id = active;
 		const bar = row;
+		// What the segments show: a new value or query may draw a new node (the field ⇄ its button), observed anew.
+		void segments.map((segment) => [
+			segment.value,
+			segment.search?.query,
+			segment.search?.clearLabel
+		]);
 		if (!bar || !id) {
 			measured = false;
 			return;
 		}
-		const segmentOf = () =>
-			[...bar.querySelectorAll<HTMLElement>('[data-segment-id]')].find(
-				(element) => element.dataset.segmentId === id
-			);
+		const segmentsOf = () => [...bar.querySelectorAll<HTMLElement>('[data-segment-id]')];
+		const segmentOf = () => segmentsOf().find((element) => element.dataset.segmentId === id);
 		const measure = () => {
 			const segment = segmentOf();
 			if (!segment) return;
@@ -165,10 +172,10 @@
 			measured = true;
 		};
 		measure();
+		// The row and EVERY segment (U-23.2): a segment before the open one that grows or shrinks moves its place.
 		const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
 		observer?.observe(bar);
-		const open = segmentOf();
-		if (open) observer?.observe(open);
+		for (const segment of segmentsOf()) observer?.observe(segment);
 		return () => observer?.disconnect();
 	});
 
@@ -195,6 +202,10 @@
 	$effect.pre(() => {
 		if (active) panelSegment = active;
 	});
+	// The last segment's panel hangs from the bar's right edge (U-23.2); it keeps its side while it fades out.
+	const panelAlign = $derived<'start' | 'end'>(
+		segments.length > 1 && panelSegment === segments[segments.length - 1]?.id ? 'end' : 'start'
+	);
 
 	// The row the keyboard reached stays in view inside the panel's scroll.
 	$effect(() => {
@@ -242,8 +253,10 @@
 		data-slot="search-bar-row"
 		data-state={active ? 'open' : 'closed'}
 		class={cn(
-			'relative flex min-h-search-pill w-full flex-row items-center rounded-full border border-border shadow-floating split:min-h-search-bar-h',
-			active ? 'bg-muted' : 'bg-card'
+			'relative flex min-h-search-pill w-full flex-row items-center rounded-full border border-border bg-card shadow-floating split:min-h-search-bar-h',
+			// U-23.2: Airbnb's open bar is grey (#ebeef2), not the kit's beige `bg-muted`: a 12 % tint of
+			// `muted-foreground` laid over the card (#ebedf0, opaque, no new colour name).
+			active && 'bg-linear-to-r from-muted-foreground/12 to-muted-foreground/12'
 		)}
 	>
 		<span
@@ -349,9 +362,11 @@
 					)}
 				>
 					<span class="text-label-md font-semibold text-foreground">{segment.label}</span>
+					<!-- One line cut by «…» where the room ends, mid-word as the prototype («Προσθήκη διαθε…»): a
+					     `line-clamp-1` broke at the last whole word and showed «Προσθήκη…» at 744 (live D1 finding). -->
 					<span
 						class={cn(
-							'line-clamp-1 text-body-sm',
+							'truncate text-body-sm',
 							segment.value ? 'text-foreground' : 'text-muted-foreground'
 						)}>{segment.value || segment.placeholder}</span
 					>
@@ -367,6 +382,8 @@
 			data-state={active ? 'open' : 'closed'}
 			class={cn(
 				'mx-2 inline-flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-full bg-accent text-secondary-foreground transition-[padding] duration-standard ease-standard outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+				// U-28.4: with a pointer, the accent a shade lighter on hover (at once: the transition is the growth's, U-13.2).
+				'can-hover:hover:bg-accent/90',
 				active ? 'px-4' : 'px-3.5'
 			)}
 		>
@@ -399,6 +416,9 @@
 	</div>
 
 	{#if panel}
+		<!-- U-23.2: Airbnb's panel — 425 (424 on the grid) × the web's 32 corner (U-25.4), at most 60 % of the screen;
+		     under the first segments from the bar's left edge, the last segment's (Airbnb's «Who», our «Πότε») from
+		     its right edge. -->
 		<SearchPanel
 			open={Boolean(active)}
 			title={panelTitle}
@@ -406,7 +426,12 @@
 			anchor={row}
 			testId={idOf('panel')}
 			onClose={() => open(null)}
-			class={panelClass}
+			data-align={panelAlign}
+			class={cn(
+				'tablet:max-h-sheet-sm tablet:w-search-panel-w tablet:max-w-full tablet:rounded-panel',
+				panelAlign === 'end' && 'tablet:right-0 tablet:left-auto',
+				panelClass
+			)}
 		>
 			{#if panelSegment}
 				{@render panel(panelSegment, { listboxId, activeId: activeOptionId })}

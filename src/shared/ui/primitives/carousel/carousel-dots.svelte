@@ -28,8 +28,11 @@
 		>
 			<span
 				class={cn(
-					'size-2 rounded-full transition-colors group-focus-visible:ring-3 group-focus-visible:ring-ring/50',
-					ctx.index === i ? 'bg-primary' : 'bg-muted-foreground/30'
+					'size-2 rounded-full transition-colors duration-standard ease-standard group-focus-visible:ring-3 group-focus-visible:ring-ring/50',
+					// U-28.4: with a pointer, a dot not shown darkens on hover.
+					ctx.index === i
+						? 'bg-primary'
+						: 'bg-muted-foreground/30 can-hover:group-hover:bg-muted-foreground/60'
 				)}
 			></span>
 		</button>

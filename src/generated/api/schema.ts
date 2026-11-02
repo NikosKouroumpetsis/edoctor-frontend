@@ -2616,9 +2616,11 @@ export interface components {
             pricingVisible: boolean;
             appliedFilters: components["schemas"]["DoctorPublicMarketplaceAppliedFilters"];
         };
+        /** @description One search item (`/public/doctors`, `/nearby`): `rating.average` on the 0–5 stars the clients draw, and U-45.2 `isPatientsChoice` always present on the wire, judged on those stars by the application. */
         DoctorPublicMarketplaceCardView: {
             doctorId: string;
             slug: string;
+            isPatientsChoice?: boolean;
             fullName: string;
             professional: {
                 id: string;
@@ -2665,12 +2667,14 @@ export interface components {
             min: number | null;
             max: number | null;
         };
+        /** @description `total` counts the doctors of the whole filter set, ignoring `limit`/`cursor`, the same on every page. With an `availability` other than `all` it counts the doctors with a slot among the first candidates up to a fixed cap: `totalIsLowerBound` is true only when that scan stopped at the cap with candidates left, and `total` is then a lower bound, shown «N+» (S-34.6). */
         DoctorPublicMarketplacePageInfo: {
             limit: number;
             cursor: string | null;
             nextCursor: string | null;
             hasNextPage: boolean;
             total: number;
+            totalIsLowerBound: boolean;
         };
         DoctorPublicMarketplaceAppliedFilters: {
             language: components["schemas"]["ILanguage"];
@@ -2717,6 +2721,7 @@ export interface components {
         DoctorPublicMarketplacePaymentOption: "CASH" | "CARD" | "IRIS" | "ONLINE_DOCTOR_PAY" | "ONLINE_OFFICE_PAY" | "STUDENT_CARD" | "UNEMPLOYMENT_CARD";
         /** @enum {string} */
         DoctorPublicMarketplaceGender: "MALE" | "FEMALE" | "ANY";
+        /** @description Facet counts of the current filters. With an `availability` other than `all` they count among the first candidates up to a fixed cap: `facets.countsAreLowerBounds` is true only when that scan stopped at the cap with candidates left, and every count is then a lower bound, shown «N+», with `priceRange` over the scanned doctors only (S-34.6). */
         DoctorPublicMarketplaceFacetsResponseView: {
             pricingVisible: boolean;
             appliedFilters: {
@@ -2746,6 +2751,7 @@ export interface components {
                 speakLanguages: components["schemas"]["DoctorPublicMarketplaceFacetOptionView"][];
                 amenities: components["schemas"]["DoctorPublicMarketplaceFacetOptionView"][];
                 priceRange: components["schemas"]["DoctorPublicMarketplacePriceRangeView"] | null;
+                countsAreLowerBounds: boolean;
             };
         };
         DoctorPublicMarketplaceFacetOptionView: {
@@ -2822,6 +2828,8 @@ export interface components {
                 hasNext7Days: boolean;
             };
             articlesSummary: components["schemas"]["DoctorPublicMarketplaceArticlesSummaryView"];
+            responseMetrics: components["schemas"]["DoctorPublicMarketplaceResponseMetricsView"];
+            isPatientsChoice: boolean;
         };
         DoctorPublicMarketplaceProfileOfficeView: {
             officeId: string;
@@ -2885,6 +2893,7 @@ export interface components {
             normalized: string;
             slug: string;
         };
+        /** @description The rating of a profile, all on the 0–5 stars (U-49): `average` over `count` approved ratings and `aspectAverages`. */
         DoctorPublicMarketplaceProfileRatingView: {
             average: number | null;
             count: number;
@@ -2897,6 +2906,7 @@ export interface components {
             punctualRating: number | null;
             friendlyRating: number | null;
         };
+        /** @description A public review, the same in the profile `reviewsPreview` and in `/reviews`: `overallRating` and every `aspect` score on the 0–5 stars the clients draw (U-49; an aspect in half stars). The doctor module owns this type and reads the rating tables directly, an accepted in-module read-only precedent. */
         DoctorPublicMarketplaceReviewPreviewView: {
             id: string;
             appointmentId: string;
@@ -2921,6 +2931,15 @@ export interface components {
             articlesCount: number;
             healthAdviceCount: number;
         };
+        /** @description How fast and how often the doctor answers the requests that wait for a confirmation, over the last `windowMonths` whole months: a word, never minutes. `responseTime` and `responseRatePercent` are null below five judged requests; every value is null before the first computation. The same for a guest and a signed-in viewer. */
+        DoctorPublicMarketplaceResponseMetricsView: {
+            windowMonths: number;
+            responseTime: components["schemas"]["DoctorResponseTime"] | null;
+            responseRatePercent: number | null;
+            completedVisitCount: number | null;
+        };
+        /** @enum {string} */
+        DoctorResponseTime: "WITHIN_HOUR" | "WITHIN_FEW_HOURS" | "WITHIN_DAY" | "FEW_DAYS";
         DoctorPublicMarketplaceReviewsResponseView: {
             reviews: components["schemas"]["DoctorPublicMarketplaceReviewPreviewView"][] | null;
             language: components["schemas"]["ILanguage"];
@@ -3458,7 +3477,7 @@ export interface components {
         AppointmentRatingInvitationStatus: "OPEN" | "SUBMITTED" | "EXPIRED" | "REVOKED";
         /** @enum {string} */
         RatingInvitationSubmitBlocker: "RATING_INVITATION_NOT_OPEN" | "RATING_INVITATION_EXPIRED" | "RATING_PATIENT_IS_THE_DOCTOR" | "RATING_DOCTOR_LICENSE_INACTIVE";
-        /** @description Ε-Φ7-1 (D-55): a rating as every response carries it, built only by the actor-scoped mapper — every field of the rating but the tenant, which is always the reader's own and never part of the published contract. */
+        /** @description Ε-Φ7-1 (D-55): a rating as every response carries it, built only by the actor-scoped mapper — every field of the rating but the tenant, which is always the reader's own. `overallRating` and the aspects are on the 0–5 stars (U-49). */
         AppointmentRatingResponseView: {
             id: string;
             appointmentId: string;
@@ -6201,7 +6220,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Full public marketplace doctor profile for the selected office. */
+            /** @description Full public marketplace doctor profile for the selected office, with the response metrics of the last six months. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -7615,7 +7634,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The created rating as its patient reads it; `overallRating` is computed by the server from the five aspects and the rating waits for moderation before the public reads it. One rating per invitation, on the SERVER clock. A refusal names its `RatingInvitationSubmitBlocker` code in the message: 403 `RATING_INVITATION_NOT_OPEN` (already rated, revoked or closed), 403 `RATING_INVITATION_EXPIRED` (past `expiresAt`; the invitation is closed unless something else closed it first), 403 `RATING_PATIENT_IS_THE_DOCTOR` (the doctor of the visit is this very account: one account is never both sides of a visit), 403 `RATING_DOCTOR_LICENSE_INACTIVE` (the doctor holds no active marketplace licence now; the invitation stays open). An invitation of another account or one that does not exist answers the one 403 `rating invitation is not accessible to this account.`; a second rating of one visit answers 409. */
+            /** @description The created rating as its patient reads it; `overallRating` is computed by the server from the five 1–10 aspects (a whole point is half a star) and published with them on the 0–5 stars, and the rating waits for moderation before the public reads it. One rating per invitation, on the SERVER clock. A refusal names its `RatingInvitationSubmitBlocker` code in the message: 403 `RATING_INVITATION_NOT_OPEN` (already rated, revoked or closed), 403 `RATING_INVITATION_EXPIRED` (past `expiresAt`; the invitation is closed unless something else closed it first), 403 `RATING_PATIENT_IS_THE_DOCTOR` (the doctor of the visit is this very account: one account is never both sides of a visit), 403 `RATING_DOCTOR_LICENSE_INACTIVE` (the doctor holds no active marketplace licence now; the invitation stays open). An invitation of another account or one that does not exist answers the one 403 `rating invitation is not accessible to this account.`; a second rating of one visit answers 409. */
             201: {
                 headers: {
                     [name: string]: unknown;

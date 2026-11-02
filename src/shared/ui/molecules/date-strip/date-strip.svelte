@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	import { controls, media } from '$shared/design/tokens';
 	import type { IoniconName } from '$shared/ui/icons/ionicon';
-	import type { RailControlsFrom, RailScrollLabels } from '$shared/ui/organisms/rail';
+	import type { RailControlsFrom, RailScrollLabels } from '$shared/design/scroll-controls';
 
 	/** One day: the caller's words (`label` over `sublabel`), its whole date as the name, and whether it is closed. */
 	export type DateStripDay = {
@@ -39,7 +39,7 @@
 	import { handleRovingKeydown, keepArrowFocus, useId } from '$shared/lib/headless';
 	import { cn } from '$shared/lib/utils';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
-	import { railControlsClasses } from '$shared/ui/organisms/rail';
+	import { railControlsClasses } from '$shared/design/scroll-controls';
 	import { IconButton } from '$shared/ui/primitives/icon-button';
 
 	let {
@@ -214,7 +214,11 @@
 					class={cn(
 						dayClasses,
 						selected ? 'border-foreground' : 'border-border',
-						day.disabled && 'opacity-40'
+						day.disabled && 'opacity-40',
+						// U-28.4: with a pointer, a day not chosen darkens its border on hover (not a closed one).
+						!selected &&
+							!day.disabled &&
+							'transition-colors duration-standard ease-standard can-hover:hover:border-foreground'
 					)}
 				>
 					{#if icon}

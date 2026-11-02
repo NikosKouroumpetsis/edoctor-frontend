@@ -38,4 +38,19 @@ describe('TwoColumnDetail', () => {
 		expect(main()).toHaveClass('split:col-span-7', 'split:col-start-6');
 		expect(root).toHaveTextContent(/Πλευρική.*Κύρια/);
 	});
+
+	it('U-41.1 / wave 1.5 (the profile, Airbnb at 744): `from="tablet"` is two columns from 744 — 7 + 1 + 4, the aside sticky there; the default stays 950', () => {
+		render(Harness, { props: { from: 'tablet' } });
+		const root = screen.getByTestId('detail');
+		expect(root).toHaveAttribute('data-from', 'tablet');
+		expect(root).toHaveClass('tablet:grid', 'tablet:grid-cols-12', 'tablet:gap-x-0');
+		expect(root.className).not.toMatch(/split:/u);
+		expect(main()).toHaveClass('tablet:col-span-7', 'tablet:col-start-1');
+		expect(aside()).toHaveClass(
+			'tablet:col-span-4',
+			'tablet:col-start-9',
+			'tablet:sticky',
+			'tablet:self-start'
+		);
+	});
 });

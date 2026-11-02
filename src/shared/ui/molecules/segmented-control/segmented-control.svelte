@@ -89,7 +89,12 @@
 				data-testid={testId ? `${testId}-${segment.value}` : undefined}
 				{disabled}
 				onclick={() => choose(segment.value)}
-				class="relative flex min-h-touch min-w-touch flex-1 items-center justify-center rounded-md px-3 py-2 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+				class={cn(
+					'relative flex min-h-touch min-w-touch flex-1 items-center justify-center rounded-md px-3 py-2 outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+					// U-28.4: with a pointer, a segment not chosen takes the light fill on hover (the thumb is the chosen one's).
+					!selected &&
+						'transition-colors duration-standard ease-standard can-hover:enabled:hover:bg-foreground/5'
+				)}
 			>
 				{#if index > 0 && !selected && !previousSelected}
 					<span

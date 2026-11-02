@@ -6,6 +6,7 @@
 		layoutOf,
 		type SearchTriggerLayout
 	} from '$shared/ui/molecules/search-trigger';
+	import { FilterButton } from '$shared/ui/molecules/filter-button';
 	import { IconButton } from '$shared/ui/primitives/icon-button';
 
 	let {
@@ -71,11 +72,13 @@
 			onclick={(event) => onOpenSearch(layoutOf(event.currentTarget))}
 		/>
 	</div>
-	<IconButton
-		icon="options-outline"
+	<!-- U-24.2: the filters' 40 circle with its hairline while nothing is set (the shared `FilterButton`). -->
+	<FilterButton
+		shape="circle"
+		label={filtersLabel}
 		aria-label={filtersLabel}
 		count={filterCount}
-		data-testid={idOf('filter')}
+		testId={idOf('filter')}
 		onclick={(event) => onOpenFilters?.(layoutOf(event.currentTarget))}
 	/>
 </div>

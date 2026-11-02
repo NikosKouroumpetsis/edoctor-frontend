@@ -1,96 +1,168 @@
 import { m } from '$paraglide/messages.js';
-import { languages, type SupportedLocale } from '$shared/preferences/i18n';
+import { languages, type SupportedLocale } from '$shared/preferences/i18n/locales';
 import type { LanguageOption } from '$shared/ui/molecules/language-switcher';
 import type { BottomNavItem } from '$shared/ui/organisms/bottom-nav';
 import type { FooterColumn, FooterLink } from '$shared/ui/organisms/site-footer';
-import type { FrameMessageOptions, LocalizedHref } from '../types';
+import { legalPath } from '$modules/shell/lib/legal';
+import type { AccountEntry, FrameMessageOptions, LocalizedHref } from '../types';
 
 /**
- * The five tabs of the application (`app/(tabs)/_layout.tsx`): search is the home page; the other four have
- * no web page yet and stay inert buttons until their screens are discussed (U-01.2).
+ * The guest's account menu (U-17.2, U-17.5, U-19.1), the same four everywhere: «Σύνδεση ή εγγραφή» (bold) · —
+ * · «Ρυθμίσεις» · «Κέντρο βοήθειας» · — · «Είστε γιατρός;» with its line. The ☰ menu and the «Προφίλ» sheet draw it.
+ */
+export function buildAccountEntries(
+	messageOptions: FrameMessageOptions,
+	href: LocalizedHref
+): AccountEntry[] {
+	return [
+		{
+			key: 'sign-in',
+			kind: 'link',
+			label: m.account_menu_sign_in({}, messageOptions),
+			href: href('/login'),
+			emphasis: true
+		},
+		{
+			key: 'settings',
+			kind: 'settings',
+			label: m.account_menu_settings({}, messageOptions),
+			separated: true
+		},
+		{ key: 'help', kind: 'link', label: m.nav_help({}, messageOptions), href: href('/help') },
+		{
+			key: 'doctor',
+			kind: 'link',
+			label: m.account_menu_doctor_title({}, messageOptions),
+			description: m.account_menu_doctor_body({}, messageOptions),
+			href: href('/plans'),
+			separated: true
+		}
+	];
+}
+
+/** The search's own pages: the home and its results (U-25.2, the approved prototype's `s4-375`). */
+const exploreFlowPages = ['/', '/doctors'];
+
+/**
+ * 🔴 MINOR-4 (r1, U-25.2): whether `basePath` (the path without the language) belongs to the search, so the capsule
+ * marks «Εξερευνήστε» there: the home and the results — never a profile or any other page (U-26.1's rule).
+ */
+export function isExploreFlow(basePath: string): boolean {
+	const path = basePath.length > 1 ? basePath.replace(/\/+$/, '') : basePath;
+	return exploreFlowPages.includes(path);
+}
+
+/**
+ * The phone's capsule (U-16.6, U-26.1: the web keeps three): «Εξερευνήστε» is the search (the home and its results,
+ * U-25.2); «Αγαπημένα» asks a guest to sign in first; «Προφίλ» opens the guest's account menu from below (U-19.1:
+ * the settings, for a guest too) — the web has no session yet (U-20: every tab goes somewhere).
  */
 export function buildBottomNavItems(
 	messageOptions: FrameMessageOptions,
 	href: LocalizedHref,
-	isHome: boolean
+	isExplore: boolean,
+	onProfile: () => void
 ): BottomNavItem[] {
 	return [
 		{
-			key: 'search',
-			label: m.tab_search({}, messageOptions),
+			key: 'explore',
+			label: m.tab_explore({}, messageOptions),
 			icon: 'search-outline',
 			activeIcon: 'search',
 			href: href('/'),
-			current: isHome
+			current: isExplore
 		},
 		{
 			key: 'favorites',
 			label: m.tab_favorites({}, messageOptions),
 			icon: 'heart-outline',
-			activeIcon: 'heart'
-		},
-		{
-			key: 'appointments',
-			label: m.tab_appointments({}, messageOptions),
-			icon: 'calendar-outline',
-			activeIcon: 'calendar'
-		},
-		{
-			key: 'messages',
-			label: m.tab_messages({}, messageOptions),
-			icon: 'chatbubble-outline',
-			activeIcon: 'chatbubble'
+			activeIcon: 'heart',
+			href: href('/login')
 		},
 		{
 			key: 'profile',
 			label: m.tab_profile({}, messageOptions),
 			icon: 'person-outline',
-			activeIcon: 'person'
+			activeIcon: 'person',
+			onclick: onProfile
 		}
 	];
 }
 
-/** The footer's three columns; entries without a page yet are inert buttons, as before the kit. */
+/**
+ * Airbnb's three columns (U-16.9): «Υποστήριξη», «Για γιατρούς», «eDoctor». Every entry goes somewhere (U-20): the
+ * pages of wave 1.5 open their placeholder at their final address (help, articles), «Επικοινωνία» writes to the
+ * support mailbox, the doctor-facing entries open the plans.
+ */
 export function buildFooterColumns(
 	messageOptions: FrameMessageOptions,
-	href: LocalizedHref
+	href: LocalizedHref,
+	supportEmail: string
 ): FooterColumn[] {
 	return [
 		{
 			title: m.footer_support_title({}, messageOptions),
 			links: [
-				{ label: m.footer_help({}, messageOptions) },
-				{ label: m.footer_contact({}, messageOptions) },
-				{ label: m.footer_safety({}, messageOptions) }
+				{ label: m.footer_help({}, messageOptions), href: href('/help') },
+				{ label: m.footer_how_to_book({}, messageOptions), href: `${href('/help')}#booking` },
+				{
+					label: m.footer_cancel_appointment({}, messageOptions),
+					href: `${href('/help')}#cancellation`
+				},
+				{ label: m.footer_contact({}, messageOptions), href: `mailto:${supportEmail}` },
+				{ label: m.footer_account_deletion({}, messageOptions), href: href('/account-deletion') }
+			]
+		},
+		{
+			title: m.footer_doctors_title({}, messageOptions),
+			links: [
+				{ label: m.footer_join({}, messageOptions), href: href('/plans') },
+				{ label: m.footer_plans({}, messageOptions), href: href('/plans') },
+				{ label: m.nav_clinics({}, messageOptions), href: href('/clinics') }
 			]
 		},
 		{
 			title: m.footer_company_title({}, messageOptions),
 			links: [
 				{ label: m.nav_doctors({}, messageOptions), href: href('/doctors') },
-				{ label: m.nav_clinics({}, messageOptions), href: href('/clinics') },
-				{ label: m.nav_plans({}, messageOptions), href: href('/plans') }
-			]
-		},
-		{
-			title: m.footer_legal_title({}, messageOptions),
-			links: [
-				{ label: m.footer_terms({}, messageOptions) },
-				{ label: m.footer_privacy({}, messageOptions) },
-				{ label: m.footer_cookies({}, messageOptions) },
-				{ label: m.footer_account_deletion({}, messageOptions), href: href('/account-deletion') }
+				{ label: m.nav_articles({}, messageOptions), href: href('/articles') }
 			]
 		}
 	];
 }
 
-/** The legal entries of the footer's bottom row; they have no page yet and stay inert, as before the kit. */
-export function buildLegalLinks(messageOptions: FrameMessageOptions): FooterLink[] {
+/** «Απόρρητο · Όροι · Cookies» after the rights line: the legal pages at the application's slugs (`legal/[slug]`). */
+export function buildLegalLinks(
+	messageOptions: FrameMessageOptions,
+	href: LocalizedHref
+): FooterLink[] {
 	return [
-		{ label: m.footer_terms({}, messageOptions) },
-		{ label: m.footer_privacy({}, messageOptions) },
-		{ label: m.footer_cookies({}, messageOptions) }
+		{ label: m.footer_privacy({}, messageOptions), href: href(legalPath('privacy-policy')) },
+		{ label: m.footer_terms_short({}, messageOptions), href: href(legalPath('terms-of-use')) },
+		{ label: m.footer_cookies({}, messageOptions), href: href(legalPath('cookies-policy')) }
 	];
+}
+
+/** The pages that end without the footer: the results (§7.2 of the wave record, Airbnb's map page). */
+const pagesWithoutFooter = ['/doctors'];
+
+/**
+ * Whether the frame draws its footer on `basePath` (the path without the language): every page but the results,
+ * which end their list with the thin legal line instead («© 2026 eDoctor · Απόρρητο · Όροι · Cookies · 🌐»).
+ */
+export function showsSiteFooter(basePath: string): boolean {
+	const path = basePath.length > 1 ? basePath.replace(/\/+$/, '') : basePath;
+	return !pagesWithoutFooter.includes(path);
+}
+
+/**
+ * 🔴 Π1 (wave 1.5, screen 5): whether the phone's capsule shows on `basePath` (the path without the language) — every
+ * page but a doctor's profile and its windows (`/doctors/<slug>`, `/doctors/<slug>/details/<section>`), a page over
+ * the tabs with its own booking bar at the bottom, as in the application and on Airbnb's 402.
+ */
+export function showsBottomNav(basePath: string): boolean {
+	const path = basePath.length > 1 ? basePath.replace(/\/+$/, '') : basePath;
+	return !/^\/doctors\/[^/]+(?:\/details\/[^/]+)?$/u.test(path);
 }
 
 /** One option per language, each pointing at the same page in that language. */

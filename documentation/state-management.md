@@ -28,7 +28,8 @@ The discovery home reads the public doctor marketplace backend
 contract: `src/shared/lib/http` is the fetch/envelope/error/media-URL layer,
 `src/shared/config/api.ts` resolves the base URL, and
 `src/modules/search-doctors/api/marketplace` owns the typed endpoints, the
-server-side card adapter, the per-section scope configs, and the slug/id resolvers.
+card adapter (the cards' facts, U-32.1: their words are `lib/doctor-card`'s), the
+per-section scope configs, and the slug/id resolvers.
 
 Two complementary mechanisms drive the home, each used where it is strongest:
 
@@ -37,7 +38,12 @@ Two complementary mechanisms drive the home, each used where it is strongest:
   (`home/load.ts`). SvelteKit streams them into the document, so sections reveal
   serially as the backend responds — skeleton while pending, cards once resolved.
   Streamed promises never reject: a failed section degrades to a per-section error
-  state instead of crashing the response.
+  state instead of crashing the response. 🔴 U-32.9: every streamed chain ends in its
+  `catch` (`api/home/load.ts`, `articles/api/load.ts`, `lib/section-link`
+  `buildStreamedHomeRows`, `lib/article-card` `buildStreamedHomeArticles`), so a mapper
+  or builder that throws (a backend card of another shape) is the error too — never
+  `.then(onOk, onErr)`, whose `onErr` misses a throw of `onOk`: SvelteKit's server
+  dies on an unhandled rejection of a promise it has not rendered yet.
 - **Category filtering — TanStack Svelte Query.** Selecting a rail category is a
   client interaction owned by `useHomeSections`. The category is resolved into a
   server-side scope fragment (professional ids / service slugs / text) embedded in
@@ -45,6 +51,34 @@ Two complementary mechanisms drive the home, each used where it is strongest:
   `keepPreviousData` swaps content in place instead of flashing the skeleton, and
   caching bounds backend load. The `all` view stays disabled here because it is
   served by the streamed SSR load.
+
+The home's rows are the application's `homeSectionConfigs` (U-20): «Δημοφιλείς γιατροί στην Αθήνα» (an area scope:
+an unresolved area hides the row), «Δημοφιλείς Ψυχολόγοι», «Παθολόγοι & Γενικοί Ιατροί», each `popularity` +
+`next7Days`, 8 cards (`HOME_SECTION_LIMIT`, the application's 8; up to 7 show from 1440). Each section
+also returns the facts of what its «→» opens (`link`), which `lib/section-link` makes the `SearchDoctorsCriteria`
+(`lib/search-criteria`, the application's URL names); the card's lines come from `lib/doctor-card` (the application's
+day-and-time, fee and rating rules on the Greek clock, against the card's `readAt`). U-32.1: the route's load builds
+the streamed rows and articles with those libs (`buildStreamedHomeRows`, `buildStreamedHomeArticles`), the rows'
+queries in the browser build theirs in their `queryFn`.
+The home's last row, «Άρθρα & συμβουλές υγείας», is the `articles` module's (`loadHomeArticles`, streamed, never
+rejects). The rows follow the application's order (`discovery-rows`): waiting ⇒ failed ⇒ rows ⇒ empty; ONE failed
+section is the error, and so is a read paused without a network (the application's 'unavailable', never an empty
+home; app = web, U-20). «Δοκιμή ξανά» asks again only what failed or was paused — a streamed section through
+`fetchHomeSection` in the browser (`useStreamedSections`), a category's scope first, then only its failed rows
+(`useHomeSections.refetch`, the application's `retry`); the error stays until the answer.
+🔴 U-29.3 (BLOCKER-1 of the audit): the `all` view's rows are TanStack queries too, never a copy in runes
+(`discovery-home/hooks/use-streamed-sections.svelte.ts`): ONE query per row on the key of its `fetchHomeSection`
+(`searchDoctorsQueryKeys.homeSection(id, lang, EMPTY_CATEGORY_SCOPE)`), filled by `fetchQuery` from the streamed SSR
+answer as it settles (a failed one is the query's error), off by itself (`enabled: false`, no retry, no read on
+focus or reconnect: D-103) and refetched by «Δοκιμή ξανά». A new page load (or language) resets every row's query
+before it is read (`resetQueries`, which also silently cancels a retry of the previous load), so a row never shows a
+former visit's cards; the category rows keep a key of their own until their scope is known (`null`), so the rows
+fading out keep the previous category's cards (`keepPreviousData`). A category is asked at
+the press (D-103: the queries follow `activeCategory`), alongside the rows' 0.25 s fade-out, during which the
+previous cards stay; after the fade the previous category's cards (`keepPreviousData`) never show: the rows show
+their skeleton until the new ones land (the application's `isRefreshing`). The articles show
+only once the rows neither load nor fail. The category rows write «Σήμερα / Αύριο» on the server's clock
+(`$shared/lib/server-clock`, D-118): the home's load sends `serverNow`, the browser keeps the difference.
 
 Category filtering is server-scoped, not client-side tag filtering: backend cards
 carry no category tags, and the `online` category requires a service scope only the
@@ -59,8 +93,94 @@ Two seed-data alignments live in the marketplace layer: section/category scoping
 each rail specialty to its professional display term (`SPECIALTY_SEARCH_TERMS`) so the
 `/suggestions` lookup resolves real `professionalId`s, and home sections fall back to a
 text term the backend matcher recognizes (e.g. `online`) when no service slug applies.
-Cards with no backend image resolve to a local `static/doctor-placeholder.svg` via
-`resolveMediaUrl`, so a missing photo never renders as a broken image.
+A home card with no backend image is `imageUrl: null` and draws the kit's no-photo silhouette (S-32.8);
+`resolveMediaUrl` still resolves relative photo paths against the API origin.
+
+## Page-tree shared state
+
+`$shared/state/search-dock` (`SearchDock`, set by the site frame with `setSearchDock`, read by the home with
+`getSearchDockOptional`) is the one meeting point of the top bar and a page's big search (U-16.7): the page
+`register`s its search and sets `docked` when it passes under the bar; the bar then shows its small pill, whose
+press `drop`s the search under the bar; a press outside or Escape `lift`s it. It is a context, never a module
+singleton, so SSR requests never share it. The page also writes `summary` (U-23.2: what its search holds, in
+words); the small pill shows each part instead of its own «Οποιαδήποτε ειδικότητα | Οπουδήποτε | Οποτεδήποτε», and
+a page that leaves clears it. A page whose search is part of its address gives `languageHref` (the results, D3 r1
+MINOR-5: the clean address of its readers' criteria and filters in each language, never the raw query); the
+frame's settings and the results' legal line use it for «English / Ελληνικά», else the same path.
+
+## The results and the filters (wave 1.0, D3)
+
+`$modules/search-doctors/ui/search-results` `SearchResultsState` is the application's
+`useSearchDoctorsResultsScreen`: the criteria and the filters come ONLY from the page's address
+(`readSearchDoctorsCriteria`, `readSearchDoctorsFilters`), the scope a search sends, ONE `createInfiniteQuery` of
+five a page (`api/marketplace/search-results.ts`), the next page while the list's end is in view (the application's
+`onEndReached`: an `IntersectionObserver` only records `endInView`, an `$effect` asks again after every page — D3
+r1 MAJOR-2, an observer tells only crossings), the count of the first page (S-32.10, «N+» on a lower bound). A
+failed next page, or one paused without a network (`isNextPageUnavailable`), keeps the cards and offers
+«Δοκιμάστε ξανά» at the list's end, never a loop of calls; its skeleton shows first while a retry runs. The server's
+first page seeds the read (`initialData` + `initialDataUpdatedAt`) only when it was drawn for the same scope and
+language (`hashKey`); the route reads its query untracked, so a new filter never waits for its load again. D-103:
+a press that goes to the results (the home's «Αναζήτηση», «Εμφάνιση N γιατρών», an empty state's button) starts the
+first page at once (`api/results` `prefetchSearchResults`, the scope read from the SAME href by the readers,
+`lib/results-scope` `readResultsPress`, so the page finds that key; the read holds the cards' facts and the page writes
+them in its `select`, U-32.1); «Κοντά μου» without this visit's position prefetches nothing. «Κοντά μου» (S-07.3 rule 11): the address has no position — the
+visit's memory (`readFreshDeviceLocation`) gives it, or the device is asked (`resolveDeviceLocation`, 10″); until
+then the read is off and the view waits, never the default Αττική; refused ⇒ the message and «Αλλαγή αναζήτησης».
+An old link with `whereLat`/`whereLng` is replaced at once by the clean address (`goto(…, { replaceState })`).
+Filters and searches are new addresses (a push): the filters by the application's names after the criteria.
+`$modules/search-doctors/ui/search-filters` `FiltersState` is the application's `useFilterModalState`: the draft
+(seeded at each open), the facets scoped by the criteria alone, the live count of criteria + draft after 350 ms of
+quiet; both reads run only while the window is open (D-103) and never without the criteria («Κοντά μου» without its
+position reads nothing). The layout state (the phone sheet's rest, the 744 map switch, the open pin, the hovered
+card, and from 1128 the map `split | expanded | hidden`, U-28.2) is the page's own `$state`: never the address
+(S-07.3 rule 11) or a storage.
+
+## The doctor's profile (wave 1.5, screen 5)
+
+The profile's facts are the ROUTE's load (`routes/doctors/[slug]/+page.server.ts`, `api/profile/load.ts`), never
+copied into runes: the page is whole on the server. `$modules/doctor/ui/detail` `DoctorDetailState` is the
+application's `useDoctorDetailScreen` on the web: the browser's reads as TanStack queries — every office's window of 28
+days at once for the service the page books (`createQueries`, the moment the page lives, D-103, U-37.1), the active
+office's facts when it is not the main one (`createQuery`, once, `staleTime: Infinity`, U-39.1; the main office came
+with the profile and asks nothing), the whole list of reviews while their window is open — and the reader's choices
+as `$state`: the ONE active office (the pill, a link's `office`, else the office with the nearest time, U-39.1/2), the
+service of the card's «ΥΠΗΡΕΣΙΑ», the confirmed time (U-40.3), the share window. Every view (the sections, the card,
+the bar, the windows) is a `$derived` of the `lib/detail` builders over these; a read that waits claims nothing, a
+failed one says «Δοκιμάστε ξανά» and asks again only what failed (`retryAvailability`, `retryReviews`), the server's
+page waits (the times are the browser's). The open window is the page's history state (`page.state.doctorDetails`,
+shallow routing), else the `details/<section>` route's own section with the address's hints. «Σήμερα / Αύριο» is the
+server's clock (`recordServerNow`, D-118), drawn again at Greek midnight (`msUntilNextPlatformDay`, S-34.1).
+
+## The search «Τι / Πού / Πότε» (wave 1.0, D2)
+
+`$modules/search-doctors/ui/search-criteria` is the application's `search-criteria-modal` on the web (S-01.6, the
+same logic): `CriteriaState` (`hooks/use-state.svelte.ts`, the application's `useCriteriaModalState`) holds
+the open card, the typing page, the criteria (`$state.raw`, replaced whole), the typed words and «Κοντά μου» with
+its search that waits for the position (S-32.2, the 10″ of S-34.3 in `$shared/lib/location`, the browser's
+Geolocation API). ONE state drives the phone's window of cards (`surface: 'sheet'`) and the big bar's panel from
+744 (`'bar'`), so a resize never loses a choice; U-23.2 makes a choice open the next card («Τι» ⇒ «Πού» ⇒ «Πότε»).
+`CriteriaLists` (`use-lists.svelte.ts`) runs the application's reads as TanStack queries
+(`api/marketplace/suggestions.ts`: the same keys, limits, windows): each starts the moment its list shows (D-103,
+never after a motion) — the ready «Πού» rows (S-18.8) the moment the search OPENS, with «Τι» still open (D3, app =
+web), so «Πού» reads them from the cache — the typeahead from 3 letters after 500 ms of quiet (`$shared/lib/debounce`, the
+application's `useDebouncedValue` with `active`: a list opens on its words at once, as the application's newly
+mounted one); the states are `readQueryState`'s (a read paused without a network is the error with «Δοκιμάστε
+ξανά», never «no results»). `useCriteriaBar` gives `SearchBar` its segments on the same state. The home and the
+results create the three through `useCriteriaWiring` (`hooks/use-wiring.svelte.ts`, MINOR-6 of U-29: a search closes
+the window and lifts the bar first); the home sends a search to `/doctors?…` with the application's names
+(`searchResultsHref`, through `resolve()`);
+a doctor row opens its page. The home keeps what it gathered across opens (the application's: no
+`initialCriteria`); the results page (D3) passes its criteria (`readSearchDoctorsCriteria` of its URL) as
+`initialCriteria`.
+
+🔴 S-07.3 rule 11 on the web (a declared platform difference, 29/10): the results ADDRESS never carries the
+device's coordinates — «Κοντά μου» rides as `whereKind=current-location` + `whereLabel`, and an old link's
+`whereLat`/`whereLng` are ignored (`searchResultsParamKeys`). The position just read lives only in the tab's memory,
+`$shared/state/device-location` (`rememberDeviceLocation`, `readFreshDeviceLocation`, written only in
+the browser; no storage, no cookie, gone with a reload), the application's store on the web. The results page takes
+it from there, or asks the device (a shared link opens «Κοντά μου» with the receiver's own position). A browser's
+position request may never answer (its prompt is not modal), so an open or a close of the search lets the read go
+(«S-32.2 (web)»: the «Πού» rows work again, the late answer writes nothing).
 
 ## Svelte runes
 
@@ -111,7 +231,16 @@ Greek is the canonical default route language at `/`; English is exposed at `/en
 
 ```txt
 edoctor.<appEnv>.preferences.v1
+edoctor.<appEnv>.consent.v1
 ```
+
+The consent key keeps the visitor's tracking decision (`$shared/storage/consent-storage`, the application's
+`ConsentSnapshot`: the registry version and one boolean per tool, sanitized on read). The web has no session yet,
+so it does not call `POST /consent/record`; the card does not show again while the stored decision covers the
+registry's web tools. The registry is checked at the boundary (`mapConsentRegistryToFacts`, the application's: a tool
+without an id, a known category, a platform or both languages is dropped; no usable version ⇒ the bundled
+registry), and a version that changed only essential tools is reconciled into the stored decision silently
+(`resolveConsentPrompt`).
 
 - Sanitize payloads during hydration.
 - When the browser blocks storage (all cookies blocked, storage disabled), reads fall back to the system preferences and writes are skipped without an error, so the theme still switches and stays until the next full page load.

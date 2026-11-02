@@ -30,6 +30,7 @@
 	let tight = $state(true);
 	let loose = $state(true);
 	let covered = $state(true);
+	let sheet = $state(true);
 	let zoomed = $state(false);
 	let origin = $state<ModalOrigin | undefined>();
 </script>
@@ -90,6 +91,36 @@
 		>
 			{@render groupsOf()}
 			{#snippet footer()}{@render footerOf('loose')}{/snippet}
+		</FullscreenModalTemplate>
+	{/snippet}
+</Story>
+
+<!-- U-24.3: Airbnb's filters frame — a sheet 12 under the top with the 24 corner below 744, the 568 / 32 window from
+     744 — with the dark single-line footer. -->
+<Story name="Filters Sheet">
+	{#snippet template()}
+		{@render page(() => (sheet = true))}
+		<FullscreenModalTemplate
+			bind:open={sheet}
+			title="Φίλτρα"
+			closeLabel="Κλείσιμο"
+			contentGap="loose"
+			shape="sheet"
+			onClose={noop}
+		>
+			{@render groupsOf()}
+			{#snippet footer()}
+				<ActionBar
+					preset="filters"
+					singleLine
+					primaryShape="pill"
+					primaryTone="contrast"
+					primaryLabel="Εμφάνιση 1.000+ αποτελεσμάτων"
+					secondaryLabel="Εκκαθάριση όλων"
+					onPrimaryClick={noop}
+					onSecondaryClick={noop}
+				/>
+			{/snippet}
 		</FullscreenModalTemplate>
 	{/snippet}
 </Story>

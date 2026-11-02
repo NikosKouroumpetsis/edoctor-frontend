@@ -1,31 +1,26 @@
 <script lang="ts">
+	import { RAIL_CARDS_PER_VIEW, Rail } from '$shared/ui/organisms/rail';
+	import { cn } from '$shared/lib/utils';
 	import { Skeleton } from '$shared/ui/primitives/skeleton';
+	import { searchDoctorCardMedia } from '$modules/search-doctors/ui/search-doctor-card';
 
-	const cardPlaceholders = Array.from({ length: 3 }, (_, index) => index);
+	const cards = Array.from({ length: 8 }, (_, index) => index);
 </script>
 
-<div class="flex flex-col gap-3.5">
-	<div class="flex items-start justify-between gap-4">
-		<div class="flex flex-1 flex-col gap-2">
-			<Skeleton class="h-6 w-3/4 rounded-full" />
-			<Skeleton class="h-5 w-3/5 rounded-full" />
-		</div>
-		<Skeleton class="mt-0.5 size-control-sm rounded-full" />
-	</div>
-	<div class="flex gap-rail overflow-hidden pb-1">
-		{#each cardPlaceholders as cardIndex (cardIndex)}
-			<div class="flex w-card-rail-w shrink-0 flex-col gap-2.5 tablet:w-card-rail-w-lg">
-				<Skeleton class="h-card-rail-media w-full rounded-xl tablet:h-card-rail-media-lg" />
-				<Skeleton class="h-6 w-4/5 rounded-full" />
-				<Skeleton class="h-5 w-3/5 rounded-full" />
-				<Skeleton class="h-4 w-2/3 rounded-full" />
-				<Skeleton class="h-4 w-1/2 rounded-full" />
-				<div class="flex flex-wrap items-center gap-3 pt-1">
-					<Skeleton class="h-4 w-1/2 rounded-full" />
-					<Skeleton class="h-4 w-1/4 rounded-full" />
-					<Skeleton class="h-4 w-1/4 rounded-full" />
+<!-- A row while its doctors load (U-20): the kit's breathing skeleton in the row's own cells (the same zone map as
+     the cards, so nothing moves when they arrive) — a title line, then the 1:1 photo and three lines per card. -->
+<div data-slot="home-row-skeleton" aria-hidden="true" class="flex flex-col gap-3.5">
+	<Skeleton class="h-5.5 w-3/5 rounded-sm tablet:w-1/3" />
+	<Rail perView={RAIL_CARDS_PER_VIEW} class="pointer-events-none overflow-hidden">
+		{#each cards as card (card)}
+			<div>
+				<div class="flex w-full flex-col gap-2">
+					<Skeleton class={cn(searchDoctorCardMedia.rail.skeletonClass, 'w-full rounded-lg')} />
+					<Skeleton class="h-3.5 w-4/5 rounded-sm" />
+					<Skeleton class="h-3 w-3/5 rounded-sm" />
+					<Skeleton class="h-3 w-2/5 rounded-sm" />
 				</div>
 			</div>
 		{/each}
-	</div>
+	</Rail>
 </div>

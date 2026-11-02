@@ -4,7 +4,8 @@ import { getDoctorSuggestions, getFacets, getLocationSuggestions } from './endpo
 import { marketplaceQueryKeys } from './query-keys';
 import type { MarketplaceFacetEntry } from './types';
 
-const RESOLVER_STALE_TIME = 10 * 60 * 1000;
+/** The resolvers' cache window; the ready «Πού;» rows share their location reads (the application's). */
+export const RESOLVER_STALE_TIME = 10 * 60 * 1000;
 
 /**
  * Shared resolver options. `fetch` is threaded through to the underlying endpoint so the
@@ -83,8 +84,18 @@ export async function resolveServiceSlug(
 	return { textFallback: fallbackText ?? toResolverQuery(value) };
 }
 
+/** A professional a suggestion resolved: its id, slug and the label the backend writes. */
+export type ResolvedProfessional = { id: string; slug: string; label: string };
+
 export type ResolvedSpecialtyScope = {
 	professionalIds?: string[];
+	/**
+	 * The resolved specialties' slugs, where the suggestions carry them (the application's): a search prefers them
+	 * and keeps `professionalIds` for a professional without one.
+	 */
+	professionalSlugs?: string[];
+	/** The resolved professionals themselves, for a structured «Τι» selection (one id ⇒ `professional`). */
+	professionals?: ResolvedProfessional[];
 	/** Free-text fallback applied to `text` when no professional resolves. */
 	textFallback?: string;
 };
@@ -105,16 +116,24 @@ export async function resolveSpecialtyScope(
 
 	const suggestions = await queryClient.fetchQuery({
 		queryKey: marketplaceQueryKeys.suggestions(queryTerm, lang),
-		queryFn: ({ signal }) => getDoctorSuggestions(queryTerm, lang, { signal, fetch: fetchImpl }),
+		queryFn: ({ signal }) =>
+			getDoctorSuggestions({ query: queryTerm, lang }, { signal, fetch: fetchImpl }),
 		staleTime: RESOLVER_STALE_TIME
 	});
 
-	const professionalIds = suggestions.items
+	const professionals = suggestions.items
 		.filter((item) => item.type === 'professional')
-		.map((item) => item.id);
+		.map((item) => ({ id: item.id, slug: item.slug, label: item.label }));
 
-	if (professionalIds.length > 0) {
-		return { professionalIds };
+	if (professionals.length > 0) {
+		const professionalSlugs = professionals
+			.map((item) => item.slug)
+			.filter((slug): slug is string => Boolean(slug));
+		return {
+			professionalIds: professionals.map((item) => item.id),
+			...(professionalSlugs.length > 0 ? { professionalSlugs } : {}),
+			professionals
+		};
 	}
 
 	return { textFallback: queryTerm };
@@ -122,6 +141,10 @@ export async function resolveSpecialtyScope(
 
 export type ResolvedLocationScope = {
 	locationSlug?: string;
+	/** The administrative type of the resolved area (the application's `WhereSelection.locationType`). */
+	locationType?: string;
+	/** The area's own words in the page's language (S-03.2: the «Πού» a link opens shows these). */
+	label?: string;
 };
 
 /**
@@ -139,12 +162,53 @@ export async function resolveLocationSlug(
 
 	const suggestions = await queryClient.fetchQuery({
 		queryKey: marketplaceQueryKeys.locations(queryTerm, lang),
-		queryFn: ({ signal }) => getLocationSuggestions(queryTerm, lang, { signal, fetch: fetchImpl }),
+		queryFn: ({ signal }) =>
+			getLocationSuggestions({ query: queryTerm, lang }, { signal, fetch: fetchImpl }),
 		staleTime: RESOLVER_STALE_TIME
 	});
 
 	const normalizedValue = value.toLocaleLowerCase();
 	const exact = suggestions.items.find((item) => item.slug.toLocaleLowerCase() === normalizedValue);
 
-	return { locationSlug: (exact ?? suggestions.items[0])?.slug };
+	const location = exact ?? suggestions.items[0];
+
+	if (!location) return {};
+	const label = location.label?.trim();
+	return {
+		locationSlug: location.slug,
+		locationType: location.type,
+		...(label ? { label } : {})
+	};
+}
+
+/** An area as the search applies it: a `location` with its slug, and its own words for the «Πού» field. */
+export type SimilarDoctorsArea = {
+	label: string;
+	locationType?: string;
+	slug: string;
+};
+
+/**
+ * 🔴 U-37.2 «Δείτε παρόμοιους γιατρούς» (app = web, the application's `resolveSimilarDoctorsArea`): the active
+ * office's city as a searchable area — the `locationSlug` `resolveLocationSlug` finds for it, with the location's own
+ * label. `null` without a city or a slug, so the search never shows an area it would not apply (MAJOR-2 of r1).
+ */
+export async function resolveSimilarDoctorsArea(
+	queryClient: QueryClient,
+	city: string | undefined,
+	options: { lang?: string } = {}
+): Promise<SimilarDoctorsArea | null> {
+	const term = city?.trim();
+	if (!term) return null;
+	const resolved = await resolveLocationSlug(queryClient, term, {
+		lang: options.lang,
+		queryTerm: term
+	});
+	return resolved.locationSlug
+		? {
+				label: resolved.label ?? term,
+				slug: resolved.locationSlug,
+				...(resolved.locationType ? { locationType: resolved.locationType } : {})
+			}
+		: null;
 }

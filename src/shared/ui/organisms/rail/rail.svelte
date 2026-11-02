@@ -1,11 +1,17 @@
 <script lang="ts" module>
 	import type { Snippet } from 'svelte';
+	import {
+		railControlsClasses,
+		type RailControlsFrom,
+		type RailScrollLabels
+	} from '$shared/design/scroll-controls';
 	import type { IoniconName } from '$shared/ui/icons/ionicon';
 
 	/** `gap`: the home rails' row (`gap-3`); `separated`: a hairline between cells (the profile's reviews, M-18). */
 	export type RailVariant = 'gap' | 'separated';
-	/** The zone from which the previous / next arrows show (a pointer's screen; touch scrolls by itself). */
-	export type RailControlsFrom = 'tablet' | 'split' | 'laptop';
+	// The zone from which the previous / next arrows show (a pointer's screen; touch scrolls by itself) and the names
+	// of the two arrows, already localized (without them the rail draws no arrows) are `$shared/design/scroll-controls`,
+	// one layer down, so the date strip (a molecule) reads them too (Π2, U-30.1); `index.ts` re-exports them.
 
 	/**
 	 * The header's circle at the row's end: a pressable one is named and acts (`onclick` or an already resolved
@@ -16,8 +22,35 @@
 		| { icon?: IoniconName; label: string; onclick: () => void; href?: undefined }
 		| { icon?: IoniconName; label: string; href: string; onclick?: undefined };
 
-	/** The names of the two arrows, already localized; without them the rail draws no arrows. */
-	export type RailScrollLabels = { previous: string; next: string };
+	/**
+	 * Where the circle sits: right after the title (`title`, the application's `Rail` since U-20: the 32 soft
+	 * circle), or at the header's end (`end`, the application's `CarouselSection`: the 40 card circle).
+	 */
+	export type RailTrailingAt = 'title' | 'end';
+
+	/**
+	 * Airbnb's cards per row (U-20), the application's `RAIL_CARDS_PER_VIEW`: ~2.3 on the phone (the row running into
+	 * the gutters, a peek of the third), then 4 · 5 · 6 · 7 from 744 · 950 · 1128 · 1440 (bigger at 1920, where the page
+	 * column grows), 12 apart. Each cell's 6 a side makes the 12 and holds a card's focus ring; the row gives them back
+	 * at its ends. Tailwind reads no built class, so the web's `perView` takes this one table (its classes below).
+	 */
+	export const RAIL_CARDS_PER_VIEW = {
+		phone: 2.3,
+		tablet: 4,
+		split: 5,
+		laptop: 6,
+		desktop: 7
+	} as const;
+
+	/** How many cells a `gap` row shows across its width by zone (the application's name; the one table above). */
+	export type RailPerView = typeof RAIL_CARDS_PER_VIEW;
+
+	// 🔴 The ONE size map of `RAIL_CARDS_PER_VIEW` (cards and their skeletons alike, as `cardSizeOf`, D13).
+	const zoneRowClasses =
+		'-mx-gutter-sm gap-0 px-4.5 scroll-px-4.5 tablet:-mx-1.5 tablet:px-0 tablet:scroll-px-0';
+	const zoneCellClasses = 'w-4/9 px-1.5 tablet:w-1/4 split:w-1/5 laptop:w-1/6 desktop:w-1/7';
+	const zoneChildClasses =
+		'*:w-4/9 *:px-1.5 tablet:*:w-1/4 split:*:w-1/5 laptop:*:w-1/6 desktop:*:w-1/7';
 
 	/** The room after the last cell of a `separated` row: `sm` 12, `md` 18 (the application's `endPadding`). */
 	export type RailEndPadding = 'sm' | 'md';
@@ -60,12 +93,6 @@
 				endPadding?: RailEndPadding;
 		  };
 
-	export const railControlsClasses: Record<RailControlsFrom, string> = {
-		tablet: 'hidden tablet:flex',
-		split: 'hidden split:flex',
-		laptop: 'hidden laptop:flex'
-	};
-
 	// A rail that runs into the page gutters and snaps its cards to them (Airbnb's peek on the phone).
 	const bleedClasses =
 		'container-bleed scroll-px-gutter-sm split:scroll-px-gutter-md desktop:scroll-px-gutter-lg';
@@ -95,6 +122,8 @@
 		itemsClass,
 		endPadding = 'sm',
 		trailing,
+		trailingAt = 'title',
+		perView,
 		scrollLabels,
 		controlsFrom = 'laptop',
 		bleed = false,
@@ -107,6 +136,9 @@
 		title?: string;
 		subtitle?: string;
 		trailing?: RailTrailing;
+		trailingAt?: RailTrailingAt;
+		/** The `gap` row's cells by zone (`RAIL_CARDS_PER_VIEW`); without it each cell keeps its own width. */
+		perView?: RailPerView;
 		scrollLabels?: RailScrollLabels;
 		controlsFrom?: RailControlsFrom;
 		/** Run the row into the page gutters (inside a `Container` with the zone gutter). */
@@ -114,6 +146,8 @@
 		headingAs?: string;
 	} & RailContent<T> = $props();
 
+	// Only the `gap` row takes cells by zone (the application's `perView`).
+	const byZone = $derived(variant === 'gap' && perView !== undefined);
 	const listId = useId(undefined, 'rail');
 	let list = $state<HTMLElement | null>(null);
 	// Off until the browser has measured the row: the server cannot know whether it overflows.
@@ -160,16 +194,19 @@
 	}
 </script>
 
-{#snippet headerEnd()}
+<!-- The «→» right after the title (U-20, as the application's `Rail`): the 32 soft circle, pressable in its 48
+     box; at the header's end (`trailingAt="end"`, the application's `CarouselSection`) the 40 card circle. -->
+{#snippet trailingControl()}
 	{#if trailing}
 		{@const icon = trailing.icon ?? 'arrow-forward'}
+		{@const atEnd = trailingAt === 'end'}
 		{#if trailing.label !== undefined}
 			<IconButton
 				{icon}
 				appearance="tint"
-				surface="card"
-				size="sm"
-				iconSize="md"
+				surface={atEnd ? 'card' : 'soft'}
+				size={atEnd ? 'sm' : 'xs'}
+				iconSize={atEnd ? 'md' : 'sm'}
 				aria-label={trailing.label}
 				href={trailing.href}
 				onclick={trailing.onclick}
@@ -178,14 +215,20 @@
 			<IconButton
 				{icon}
 				appearance="tint"
-				surface="card"
-				size="sm"
-				iconSize="md"
+				surface={atEnd ? 'card' : 'soft'}
+				size={atEnd ? 'sm' : 'xs'}
+				iconSize={atEnd ? 'md' : 'sm'}
 				aria-label=""
 				decorative
-				class="mt-0.5"
+				class={atEnd ? 'mt-0.5' : undefined}
 			/>
 		{/if}
+	{/if}
+{/snippet}
+
+{#snippet headerEnd()}
+	{#if trailingAt === 'end'}
+		{@render trailingControl()}
 	{/if}
 	{#if scrollLabels}
 		<div
@@ -230,6 +273,8 @@
 			variant === 'gap' && 'gap-3',
 			children && '*:shrink-0 *:snap-start',
 			bleed ? bleedClasses : ringRoomInlineClasses,
+			byZone && zoneRowClasses,
+			byZone && children && zoneChildClasses,
 			itemsClass
 		)}
 	>
@@ -245,7 +290,10 @@
 						<Separator orientation="vertical" spacing="none" />
 					</div>
 				{/if}
-				<div data-slot="rail-item" class="flex shrink-0 snap-start">
+				<div
+					data-slot="rail-item"
+					class={cn('flex shrink-0 snap-start', byZone && zoneCellClasses)}
+				>
 					{@render renderItem(item, index)}
 				</div>
 			{/each}
@@ -273,7 +321,8 @@
 		{subtitle}
 		{headingAs}
 		variant="plain"
-		trailing={trailing || scrollLabels ? headerEnd : undefined}
+		trailing={trailing && trailingAt === 'title' ? trailingControl : undefined}
+		end={scrollLabels || (trailing && trailingAt === 'end') ? headerEnd : undefined}
 		data-slot="rail"
 		data-variant={variant}
 		class={className}

@@ -4,6 +4,14 @@
 	/** How many lines the words keep before «…» (the application's `numberOfLines`). */
 	export type HighlightTextLines = 1 | 2 | 3;
 	export type HighlightSegment = { highlighted: boolean; text: string };
+	/**
+	 * `anywhere` (default) bolds every place the query sits; `word-start` only where a word starts with it (Airbnb's
+	 * search rows, U-21: what was typed, at the start of a word).
+	 */
+	export type HighlightTextMatch = 'anywhere' | 'word-start';
+
+	// A letter or a digit of any alphabet: what continues a word.
+	const WORD_CHARACTER = /[\p{L}\p{N}]/u;
 
 	const lineClasses: Record<HighlightTextLines, string> = {
 		1: 'line-clamp-1',
@@ -15,9 +23,14 @@
 	 * The runs of `text`, each marked when it matches the folded `query` (case and Greek-accent insensitive, the
 	 * application's `buildHighlightSegments`). The label is folded one character at a time with a folded ⇒ original
 	 * index map, so an accented letter never shifts a slice; the ORIGINAL text is sliced, its accents kept. An empty
-	 * query, or one absent from the visible words (a filter may match hidden keywords), gives one plain run.
+	 * query, or one absent from the visible words (a filter may match hidden keywords), gives one plain run. With
+	 * `word-start` a place counts only where no letter or digit stands before it.
 	 */
-	export function buildHighlightSegments(text: string, query: string): HighlightSegment[] {
+	export function buildHighlightSegments(
+		text: string,
+		query: string,
+		match: HighlightTextMatch = 'anywhere'
+	): HighlightSegment[] {
 		const plain: HighlightSegment[] = [{ highlighted: false, text }];
 		const needle = foldSearchText(query.trim());
 		if (!needle || !text) return plain;
@@ -36,6 +49,10 @@
 		for (;;) {
 			const at = folded.indexOf(needle, from);
 			if (at === -1) break;
+			if (match === 'word-start' && at > 0 && WORD_CHARACTER.test(folded[at - 1])) {
+				from = at + 1;
+				continue;
+			}
 			matched = true;
 			for (let position = at; position < at + needle.length; position += 1)
 				highlighted[originalIndexOf[position]] = true;
@@ -64,6 +81,7 @@
 		text,
 		query,
 		highlightClass = 'font-bold',
+		match = 'anywhere',
 		lines,
 		testId,
 		class: className,
@@ -75,11 +93,13 @@
 		query: string;
 		/** The matched runs' weight or style (default `font-bold`). */
 		highlightClass?: string;
+		/** Where the query counts: anywhere (default) or only at the start of a word. */
+		match?: HighlightTextMatch;
 		lines?: HighlightTextLines;
 		testId?: string;
 	} = $props();
 
-	const segments = $derived(buildHighlightSegments(text, query));
+	const segments = $derived(buildHighlightSegments(text, query, match));
 </script>
 
 <!-- The application's `HighlightText`: one run of words, the matched part in its own weight; the words read once. -->

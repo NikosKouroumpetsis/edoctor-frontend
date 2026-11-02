@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { ComponentProps } from 'svelte';
+import { createRawSnippet, type ComponentProps } from 'svelte';
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import ErrorState from './error-state.svelte';
@@ -88,6 +88,18 @@ describe('ErrorState', () => {
 			expect(container.innerHTML).not.toMatch(/\b(tablet|split|laptop|desktop|wide):/);
 			expect(container.innerHTML).not.toMatch(/\bdark:|#[0-9a-f]{3,8}\b|bg-white|text-black/i);
 			unmount();
+		}
+	});
+	it('U-20: the caller’s glyph sits above the words (the application’s `icon`), framed or plain', () => {
+		const glyph = createRawSnippet(() => ({ render: () => '<span data-testid="glyph">!</span>' }));
+		for (const variant of ['framed', 'plain'] as const) {
+			const view = renderError({ icon: glyph, variant });
+			const surface = screen.getByTestId('surface-error');
+			const order = [...surface.querySelectorAll('[data-testid="glyph"], p, h2, h3')].map(
+				(node) => node.getAttribute('data-testid') ?? node.tagName
+			);
+			expect(order[0]).toBe('glyph');
+			view.unmount();
 		}
 	});
 });

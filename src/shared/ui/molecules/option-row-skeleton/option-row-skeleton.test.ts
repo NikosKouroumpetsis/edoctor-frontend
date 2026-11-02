@@ -30,6 +30,18 @@ describe('OptionRowSkeleton', () => {
 		}
 	});
 
+	it('U-21: `size="xl"` stands for Airbnb’s search row — the 72 row, the 56 tile, 16 apart', () => {
+		render(OptionRowSkeleton, { props: { size: 'xl', count: 2, testId: 'loading' } });
+		const root = screen.getByTestId('loading');
+		expect(root.children).toHaveLength(2);
+		for (const row of root.children) {
+			expect(row).toHaveClass('min-h-row-lg', 'gap-4', 'rounded-lg', 'px-4', 'py-2');
+			expect(row).not.toHaveClass('min-h-row', 'gap-2.5', 'px-2');
+			expect(row.children[0]).toHaveClass('size-tile', 'rounded-md', 'bg-foreground/5');
+			expect(row.children[0]).not.toHaveClass('size-control-sm');
+		}
+	});
+
 	it('U-03.1 (a11y, reduced motion): the count it is given, decorative, announcing nothing, never breathing', () => {
 		const { container } = render(OptionRowSkeleton, { props: { count: 1 } });
 		const root = container.querySelector('[data-slot="option-row-skeleton"]') as HTMLElement;

@@ -1,25 +1,34 @@
 <script lang="ts">
-	import type { IoniconName } from '$shared/ui/icons/ionicon';
-	import { IconButton } from '$shared/ui/primitives/icon-button';
-
-	// The networks of the footer; they have no address yet and stay inert, as before the kit.
-	const networks: { label: string; icon: IoniconName }[] = [
-		{ label: 'Facebook', icon: 'logo-facebook' },
-		{ label: 'Instagram', icon: 'logo-instagram' },
-		{ label: 'X', icon: 'logo-x' }
-	];
+	import { Ionicon } from '$shared/ui/icons/ionicon';
+	import { socialNetworks } from '$modules/shell/config/social';
 </script>
 
-<ul class="ml-1 flex items-center gap-touch-gap">
-	{#each networks as network (network.label)}
-		<li>
-			<IconButton
-				appearance="outline"
-				icon={network.icon}
-				iconSize="md"
-				iconTone="muted"
-				aria-label={network.label}
-			/>
+<!-- 🔴 U-26.2: Facebook · X · Instagram (20) beside the language. A network without an address is its icon alone,
+     named for assistive tech, never a dead link or a button that does nothing; with one it opens in a new tab. -->
+<ul data-slot="social-links" class="flex flex-row items-center gap-2">
+	{#each socialNetworks as network (network.key)}
+		<li class="flex">
+			{#if network.url}
+				<a
+					href={network.url}
+					target="_blank"
+					rel="external noopener noreferrer"
+					aria-label={network.label}
+					data-testid={`social-${network.key}`}
+					class="grid min-h-touch min-w-touch place-items-center rounded-full text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+				>
+					<Ionicon name={network.icon} class="icon-md" />
+				</a>
+			{:else}
+				<span
+					role="img"
+					aria-label={network.label}
+					data-testid={`social-${network.key}`}
+					class="grid size-touch place-items-center text-foreground"
+				>
+					<Ionicon name={network.icon} class="icon-md" />
+				</span>
+			{/if}
 		</li>
 	{/each}
 </ul>

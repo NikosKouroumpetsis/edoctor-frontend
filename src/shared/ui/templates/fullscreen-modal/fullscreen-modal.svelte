@@ -15,7 +15,11 @@
 	import { cn } from '$shared/lib/utils';
 	import { containerWidthClasses, type ContainerWidth } from '$shared/ui/molecules/container';
 	import { ModalHeader } from '$shared/ui/molecules/modal-header';
-	import { ModalScreenSurface, type ModalOrigin } from '$shared/ui/templates/modal-screen';
+	import {
+		ModalScreenSurface,
+		type ModalOrigin,
+		type ModalSurfaceShape
+	} from '$shared/ui/templates/modal-screen';
 
 	let {
 		open = $bindable(false),
@@ -29,6 +33,7 @@
 		contentClass,
 		sourceLayout,
 		hideContentFromA11y = false,
+		shape = 'screen',
 		overlay,
 		children,
 		...restProps
@@ -49,6 +54,8 @@
 		sourceLayout?: ModalOrigin;
 		/** A panel lies over the column: keep it from assistive tech and the keyboard (`inert`). */
 		hideContentFromA11y?: boolean;
+		/** `screen` (the search, the default) or `sheet` (the filters: a sheet below 744, the 32 window from 744). */
+		shape?: ModalSurfaceShape;
 		/**
 		 * Drawn last inside the surface, over the column (the application's `overlay`); the caller places it
 		 * (`absolute inset-0 …`) and pairs it with `hideContentFromA11y`.
@@ -72,12 +79,22 @@
 	bind:open
 	{sourceLayout}
 	tone="background"
+	{shape}
 	onDismiss={close}
 	aria-labelledby={titleId}
 	data-slot="fullscreen-modal"
 	{...restProps}
 >
-	<ModalHeader {title} {titleId} {closeLabel} {closeTestId} closeElevated onClose={close} />
+	<!-- `sheet` (the filters, NIT-2 of r1): Airbnb's plain «×» over a hairline; `screen` (the search): the lifted «×». -->
+	<ModalHeader
+		{title}
+		{titleId}
+		{closeLabel}
+		{closeTestId}
+		closeElevated={shape !== 'sheet'}
+		plain={shape === 'sheet'}
+		onClose={close}
+	/>
 	<div
 		data-slot="fullscreen-modal-scroll"
 		inert={hideContentFromA11y}

@@ -9,7 +9,7 @@
 		component: ModalHeader,
 		tags: ['autodocs'],
 		args: { title: 'Αναζήτηση', closeLabel: 'Κλείσιμο', onClose: () => {} },
-		argTypes: { closeElevated: { control: 'boolean' } },
+		argTypes: { closeElevated: { control: 'boolean' }, plain: { control: 'boolean' } },
 		render: template
 	});
 </script>
@@ -34,3 +34,6 @@
 
 <!-- The search modals' lifted «×» (the application's `closeButtonShadowStyle`, here `closeElevated`). -->
 <Story name="Elevated Close" args={{ title: 'Φίλτρα', closeElevated: true }} />
+
+<!-- Airbnb's filters header (§7.5, NIT-2 of r1): the bare «×» and the hairline under the header (`plain`). -->
+<Story name="Plain" args={{ title: 'Φίλτρα', plain: true }} />

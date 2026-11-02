@@ -35,6 +35,15 @@ describe('SuggestionGroupHeader', () => {
 		);
 	});
 
+	it('U-21: `size="sm"` + `tone="muted"` are Airbnb’s group words of the search — 12 semibold, grey', () => {
+		render(SuggestionGroupHeader, {
+			props: { label: 'Ειδικότητες', size: 'sm', tone: 'muted' }
+		});
+		const words = screen.getByText('Ειδικότητες');
+		expect(words).toHaveClass('text-label-md', 'font-semibold', 'text-muted-foreground');
+		expect(words).not.toHaveClass('text-body-sm', 'text-foreground');
+	});
+
 	it('U-03.1 (a11y, light/dark): the glyph is decorative, the colours are theme tokens', () => {
 		const { container } = render(SuggestionGroupHeader, {
 			props: { label: 'Γιατροί', icon: 'person-outline' }

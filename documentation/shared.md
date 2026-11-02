@@ -18,24 +18,31 @@ Do not promote speculative abstractions.
 
 ```txt
 src/shared/
-  config/       app env, variants, public config parsing
-  design/       design assets, tokens, and design-system helpers
-  hooks/        app-wide Svelte hooks/runes
-  lib/          pure framework-agnostic helpers
+  config/       app env, variants, public config parsing (`env`, `api`, `support`, `map`: the ONE map look,
+                `time-zone`: the product's zone, Europe/Athens; `consentStorageKey` beside `preferencesStorageKey`)
+  design/       design assets, tokens, and design-system helpers (`scroll-controls`: the rows' ‹ › zones, Π2)
+  lib/          pure framework-agnostic helpers (`format`: clocks, numbers, amounts and counts per locale,
+                `calendar-day`: `formatCalendarDay`, `formatCalendarDayParts`, the application's, `format-day-time`:
+                the ONE «Σήμερα · 10:00» phrase of the cards and the profile, `debounce`, `location`,
+                `query-state`, `server-clock`, …), and the runes-based building blocks in `.svelte.ts`
+                (`form`, `headless`, `debounce`)
   preferences/ theme, language, and preferences resolution
   providers/   root and subtree providers
   query/       TanStack Svelte Query setup
-  state/       app-wide local state when provider scope is not required
-  storage/     browser/server-safe storage adapters
+  state/       app-wide local state: a tab's module state written only in the browser (`device-location`, the
+                visit's position of «Κοντά μου»), or a context scoped to the page tree (`search-dock`)
+  storage/     browser/server-safe storage adapters (`consent-storage`)
   ui/          reusable UI hierarchy
 ```
+
+Create-on-demand folders (not present; add one only when an existing folder is insufficient, Β4 of U-30): `hooks/`
+for app-wide Svelte hooks, and `ui/atoms/`.
 
 ## UI hierarchy
 
 ```txt
 src/shared/ui/
   primitives/  shadcn-svelte and low-level wrappers
-  atoms/       small project-specific UI pieces
   molecules/   composed controls
   organisms/   larger reusable sections
   templates/   reusable layouts
@@ -58,10 +65,12 @@ Root providers belong in `src/shared/providers` and are composed from `src/route
 
 ## Storage and preferences
 
-Persist only small, sanitized preference snapshots. The shared storage key is:
+Persist only small, sanitized preference snapshots. The shared storage keys are (`$shared/config`
+`preferencesStorageKey`, `consentStorageKey`):
 
 ```txt
 edoctor.<appEnv>.preferences.v1
+edoctor.<appEnv>.consent.v1
 ```
 
 Do not persist TanStack Query caches, auth sessions, or large business payloads in the preferences store.

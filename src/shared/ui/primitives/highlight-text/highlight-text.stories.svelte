@@ -33,6 +33,9 @@
 	{/snippet}
 </Story>
 
+<!-- Web: the search rows bold what was typed only at the start of a word (Airbnb's, U-21). -->
+<Story name="Word Start" args={{ text: 'Υπέρηχος καρδιάς', query: 'καρ', match: 'word-start' }} />
+
 <Story name="Examples">
 	{#snippet template(args)}
 		<div class="flex flex-col gap-3">

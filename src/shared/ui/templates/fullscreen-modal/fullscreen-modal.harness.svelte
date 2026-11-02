@@ -8,9 +8,11 @@
 		contentGap,
 		hideContentFromA11y,
 		withOverlay = false,
+		shape,
 		onClose = () => {}
 	}: {
 		withOverlay?: boolean;
+		shape?: 'screen' | 'sheet';
 		initialOpen?: boolean;
 		contentGap?: FullscreenModalContentGap;
 		hideContentFromA11y?: boolean;
@@ -28,6 +30,7 @@
 	closeTestId="filters-close"
 	{contentGap}
 	{hideContentFromA11y}
+	{shape}
 	{onClose}
 	data-testid="filters"
 >

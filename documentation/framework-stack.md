@@ -60,6 +60,10 @@
 - Tailwind helpers: `clsx`, `tailwind-merge`, `tailwind-variants`, `tw-animate-css` (still imported by
   `src/routes/layout.css`, but no class of it is used: the kit's motion is its own CSS, U-12.2)
 - Font: `@fontsource-variable/inter`
+- Maps: `maplibre-gl` `6.14.0` (runtime, the owner's approval U-24.4 / U-26.3), only through the shared `MapView`
+  (`src/shared/ui/organisms/map-view`): imported in the browser with `import()` once the map's box has a size, its
+  CSS with it, never in a first bundle or on the server (`tests/architecture/map-bundle.test.ts`); the map's ONE look
+  is `$shared/config/map`.
 - Icons: the kit draws the application's Ionicons from local SVG paths in
   `src/shared/ui/icons/ionicon` (no package, U-03.3); older screens still use
   Icones through `unplugin-icons` and Iconify icon JSON packages.
@@ -104,10 +108,12 @@
   - Vitest `^4` (`vitest.config.ts`, jsdom)
   - Svelte Testing Library `^5` + `@testing-library/user-event`
   - `@testing-library/jest-dom` matchers (types in `src/vitest.d.ts`)
-  - architecture contract tests under `tests/architecture` (i18n parity in place)
+  - architecture contract tests under `tests/architecture` (i18n parity, the size scale and its parity, colours,
+    touch targets, the generic shared UI, motion, pressable, the route mirror, the import boundaries, the modules'
+    segments; `documentation/testing-strategy.md` «Architecture coverage»)
 - Target test stack (not yet added):
   - Playwright for browser flows
-  - the remaining architecture contract tests (route mirrors, slices, imports)
+  - the remaining architecture contract tests (the slice contract, leaf imports, the preferences' key)
 
 ## Notes
 

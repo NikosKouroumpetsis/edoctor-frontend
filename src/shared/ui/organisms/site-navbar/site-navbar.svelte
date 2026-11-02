@@ -97,7 +97,7 @@
 				<DropdownMenu>
 					<DropdownMenuTrigger
 						aria-label={accountMenuLabel}
-						class="rounded-full focus-visible:ring-3 focus-visible:ring-ring/50"
+						class="rounded-full transition-shadow duration-standard ease-standard focus-visible:ring-3 focus-visible:ring-ring/50 can-hover:hover:shadow-raised"
 					>
 						<Avatar size="md">
 							<AvatarImage src="" alt={userName} />
@@ -119,7 +119,7 @@
 
 			<Sheet>
 				<SheetTrigger
-					class="inline-flex size-touch items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50 laptop:hidden"
+					class="inline-flex size-touch items-center justify-center rounded-full transition-colors duration-standard ease-standard outline-none focus-visible:ring-3 focus-visible:ring-ring/50 laptop:hidden can-hover:hover:bg-foreground/5"
 					aria-label={openMenuLabel}
 				>
 					<Ionicon name="menu" class="icon-lg text-foreground" />

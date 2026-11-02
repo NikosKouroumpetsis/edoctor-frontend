@@ -69,7 +69,9 @@
 		class={cn(
 			'inline-flex items-center rounded-full border border-transparent transition-all',
 			'group-focus-visible:border-ring group-focus-visible:ring-3 group-focus-visible:ring-ring/50',
-			'data-[state=checked]:bg-primary data-[state=unchecked]:bg-input'
+			'data-[state=checked]:bg-primary data-[state=unchecked]:bg-input',
+			// U-28.4: with a pointer, an off track darkens on hover (an on or a disabled one stays).
+			'can-hover:group-enabled:group-hover:data-[state=unchecked]:bg-muted-foreground/50'
 		)}
 		style:width={`${geometry.trackWidth}px`}
 		style:height={`${geometry.trackHeight}px`}

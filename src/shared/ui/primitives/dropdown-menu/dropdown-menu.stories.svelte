@@ -61,3 +61,19 @@
 		</DropdownMenu>
 	{/snippet}
 </Story>
+
+<!-- Web only: an item with an `href` is a link in the menu (the frame's ☰ menu: «Σύνδεση ή εγγραφή», «Κέντρο
+     βοήθειας»), in the arrows' order with the buttons; choosing one closes the menu. -->
+<Story name="With Links">
+	{#snippet template()}
+		<DropdownMenu>
+			<DropdownMenuTrigger class={buttonClasses()}>Μενού</DropdownMenuTrigger>
+			<DropdownMenuContent>
+				<DropdownMenuItem href="#login" class="font-semibold">Σύνδεση ή εγγραφή</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem>Ρυθμίσεις</DropdownMenuItem>
+				<DropdownMenuItem href="#help">Κέντρο βοήθειας</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	{/snippet}
+</Story>

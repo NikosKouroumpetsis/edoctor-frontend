@@ -1,4 +1,5 @@
 import Root, {
+	type FavoriteButtonAppearance,
 	type FavoriteButtonInset,
 	type FavoriteButtonProps,
 	type FavoriteButtonSize
@@ -6,6 +7,7 @@ import Root, {
 
 export {
 	Root,
+	type FavoriteButtonAppearance,
 	type FavoriteButtonInset,
 	type FavoriteButtonProps,
 	type FavoriteButtonSize,

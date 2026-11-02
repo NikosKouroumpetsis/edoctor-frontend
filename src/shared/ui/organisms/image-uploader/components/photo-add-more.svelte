@@ -15,7 +15,7 @@
 	type="button"
 	data-slot="photo-add-more"
 	onclick={() => ctx.openDialog()}
-	class="min-h-touch w-full outline-none"
+	class="min-h-touch w-full rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
 	aria-label={m.image_uploader_add_more()}
 >
 	<AspectRatio

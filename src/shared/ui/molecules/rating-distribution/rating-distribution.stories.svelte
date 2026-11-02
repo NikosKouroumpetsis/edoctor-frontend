@@ -11,11 +11,11 @@
 		{ star: 1, share: 0.01, count: 1 }
 	];
 	const categories = [
-		{ icon: 'sparkles-outline' as const, id: 'clean', score: '9,8', title: 'Καθαριότητα' },
-		{ icon: 'chatbubble-outline' as const, id: 'talk', score: '9,6', title: 'Επικοινωνία' },
-		{ icon: 'time-outline' as const, id: 'time', score: '9,4', title: 'Συνέπεια' },
-		{ icon: 'happy-outline' as const, id: 'kind', score: '9,7', title: 'Φιλικότητα' },
-		{ icon: 'ribbon-outline' as const, id: 'skill', score: '9,9', title: 'Γνώση' }
+		{ icon: 'sparkles-outline' as const, id: 'clean', score: '4,9', title: 'Καθαριότητα' },
+		{ icon: 'chatbubble-outline' as const, id: 'talk', score: '4,8', title: 'Επικοινωνία' },
+		{ icon: 'time-outline' as const, id: 'time', score: '4,7', title: 'Συνέπεια' },
+		{ icon: 'happy-outline' as const, id: 'kind', score: '4,8', title: 'Φιλικότητα' },
+		{ icon: 'ribbon-outline' as const, id: 'skill', score: '5,0', title: 'Γνώση' }
 	];
 
 	const { Story } = defineMeta({

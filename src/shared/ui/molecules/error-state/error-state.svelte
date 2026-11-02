@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { EmptyState, type EmptyStateVariant } from '$shared/ui/molecules/empty-state';
 
 	let {
@@ -6,6 +7,7 @@
 		description,
 		actionLabel,
 		onActionPress,
+		icon,
 		variant = 'plain',
 		titleAs,
 		testId
@@ -15,6 +17,8 @@
 		/** The one action that can change it (a retry): the caller's words and press, always. */
 		actionLabel: string;
 		onActionPress: () => void;
+		/** A glyph or a picture above the words (the application's `icon`). */
+		icon?: Snippet;
 		variant?: EmptyStateVariant;
 		/** The title's tag (`h1` on a page of its own); the look stays. */
 		titleAs?: string;
@@ -29,6 +33,7 @@
 	<EmptyState
 		{title}
 		{description}
+		{icon}
 		{actionLabel}
 		{onActionPress}
 		{titleAs}
@@ -37,6 +42,6 @@
 	/>
 {:else}
 	<div data-slot="error-state" class="flex flex-col items-center py-6">
-		<EmptyState {title} {description} {actionLabel} {onActionPress} {titleAs} {testId} />
+		<EmptyState {title} {description} {icon} {actionLabel} {onActionPress} {titleAs} {testId} />
 	</div>
 {/if}

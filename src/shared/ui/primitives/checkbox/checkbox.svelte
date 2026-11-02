@@ -12,9 +12,12 @@
 		md: 'text-label-md',
 		lg: 'text-label-lg'
 	};
-	/** The drawn box in its states (a row that is itself the checkbox draws the same box, `CheckboxRow`). */
+	/**
+	 * The drawn box in its states (a row that is itself the checkbox draws the same box, `CheckboxRow`). U-28.4: with a
+	 * pointer, an empty box darkens its border while its button (the `group`) is hovered; a ticked or disabled one does not.
+	 */
 	export const checkboxBoxStates =
-		'flex items-center justify-center border border-input bg-card data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=indeterminate]:border-primary data-[state=indeterminate]:bg-primary';
+		'flex items-center justify-center border border-input bg-card transition-colors duration-standard ease-standard data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=indeterminate]:border-primary data-[state=indeterminate]:bg-primary can-hover:group-enabled:group-hover:data-[state=unchecked]:border-foreground';
 </script>
 
 <script lang="ts">

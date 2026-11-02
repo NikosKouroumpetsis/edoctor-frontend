@@ -67,3 +67,37 @@ describe('Calendar', () => {
 		expect(container.querySelector('[data-date="2026-06-20"]')).not.toBeDisabled();
 	});
 });
+
+// U-31.1 (the owner, 29/10, f2's open point): a disabled day shows `not-allowed` — through its cell, as the day keeps
+// letting the pointer through (so no hover reaches it and its look stays).
+describe('Calendar · disabled days (U-31.1)', () => {
+	it('U-31.1: a disabled day’s cell shows `not-allowed`; the day itself still lets the pointer through (no hover)', () => {
+		const { container } = render(Calendar, {
+			props: {
+				previousMonthLabel: 'Previous month',
+				nextMonthLabel: 'Next month',
+				value: june2026,
+				minValue: new CalendarDate(2026, 6, 10)
+			}
+		});
+		const day = container.querySelector('[data-date="2026-06-05"]') as HTMLButtonElement;
+		expect(day).toBeDisabled();
+		expect(day).toHaveClass('disabled:pointer-events-none', 'disabled:opacity-30');
+		expect(day.closest('td')).toHaveClass('has-[:disabled]:cursor-not-allowed');
+	});
+
+	it('U-31.1 (negative): an enabled day keeps its own cursor and hover — its cell matches no `:disabled`', () => {
+		const { container } = render(Calendar, {
+			props: {
+				previousMonthLabel: 'Previous month',
+				nextMonthLabel: 'Next month',
+				value: june2026,
+				minValue: new CalendarDate(2026, 6, 10)
+			}
+		});
+		const day = container.querySelector('[data-date="2026-06-20"]') as HTMLButtonElement;
+		expect(day).not.toBeDisabled();
+		expect(day).toHaveClass('hover:bg-muted');
+		expect(day.closest('td')?.querySelector(':disabled')).toBeNull();
+	});
+});

@@ -8,7 +8,8 @@ import {
 	leading,
 	motion,
 	panelFade,
-	radius,
+	platform,
+	radiusScale,
 	spacingScale,
 	steps,
 	tracking,
@@ -82,7 +83,7 @@ export function tokensToCss(): string {
 		lines.push(`\t--tracking-${name}: ${value};`);
 	for (const [name, value] of Object.entries(spacingScale))
 		lines.push(`\t--spacing-${name}: ${value};`);
-	for (const [name, value] of Object.entries(radius))
+	for (const [name, value] of Object.entries(radiusScale))
 		lines.push(`\t--radius-${name}: ${px(value)};`);
 	for (const [name, value] of Object.entries(elevation))
 		lines.push(`\t--shadow-${name}: ${value};`);
@@ -91,6 +92,10 @@ export function tokensToCss(): string {
 	}
 	for (const [name, value] of Object.entries(breakpoints)) {
 		lines.push(`\t--breakpoint-${name}: ${px(value)};`);
+	}
+	// The frame's frosted surfaces (web only): `backdrop-blur-<name>` next to Tailwind's own blur steps.
+	for (const [name, value] of Object.entries(platform.blur)) {
+		lines.push(`\t--blur-${name}: ${px(value)};`);
 	}
 	// Motion (U-09.8): `duration-<name>` and `ease-<name>` next to Tailwind's own `ease-in | out | in-out`.
 	for (const [name, value] of Object.entries(motion.duration)) {

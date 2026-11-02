@@ -8,7 +8,10 @@
 		component: OptionRowSkeleton,
 		tags: ['autodocs'],
 		args: { count: 3 },
-		argTypes: { count: { control: { type: 'number', min: 1, max: 8, step: 1 } } },
+		argTypes: {
+			count: { control: { type: 'number', min: 1, max: 8, step: 1 } },
+			size: { control: 'select', options: ['md', 'xl'] }
+		},
 		render: template
 	});
 </script>
@@ -21,3 +24,6 @@
 <Story name="Playground" />
 
 <Story name="One Row" args={{ count: 1 }} />
+
+<!-- Web (U-21): the still rows of Airbnb's search row (`OptionRow size="xl"`). -->
+<Story name="Search Rows" args={{ size: 'xl' }} />

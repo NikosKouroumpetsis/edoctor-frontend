@@ -169,3 +169,25 @@ describe('Slider', () => {
 		}
 	});
 });
+
+// U-31.1 (the owner, 29/10, f2's open point): a disabled slider shows `not-allowed` over its thumbs (they let the
+// pointer through to the slider, whose cursor they inherit); an enabled thumb keeps its grab.
+describe('Slider · disabled (U-31.1)', () => {
+	it('U-31.1: a disabled slider shows `not-allowed` — over its track and its thumb, which lets the pointer through', () => {
+		const { container } = render(Slider, {
+			props: { value: 50, 'aria-label': 'Volume', disabled: true }
+		});
+		const root = container.querySelector('[data-slot="slider"]') as HTMLElement;
+		expect(root).toHaveClass('cursor-not-allowed', 'opacity-50');
+		const thumb = screen.getByRole('slider', { name: 'Volume' });
+		expect(thumb).toBeDisabled();
+		expect(thumb).toHaveClass('disabled:pointer-events-none', 'disabled:cursor-not-allowed');
+	});
+
+	it('U-31.1 (negative): an enabled slider has no `not-allowed`; its thumb keeps `cursor-grab` (`active:cursor-grabbing`)', () => {
+		const { container } = render(Slider, { props: { value: 50, 'aria-label': 'Volume' } });
+		expect(container.querySelector('[data-slot="slider"]')).not.toHaveClass('cursor-not-allowed');
+		const thumb = screen.getByRole('slider', { name: 'Volume' });
+		expect(thumb).toHaveClass('cursor-grab', 'active:cursor-grabbing');
+	});
+});

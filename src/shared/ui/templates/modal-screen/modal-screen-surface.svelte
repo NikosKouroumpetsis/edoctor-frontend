@@ -17,6 +17,24 @@
 		background: 'bg-background'
 	};
 
+	/**
+	 * The surface's frame: `screen` the whole screen below 744 (the search), `sheet` Airbnb's filters (U-24.3, §7.5 of
+	 * the wave record) — a sheet from the bottom nearly the whole height (12 under the top, the 24 corner on top, the
+	 * dimmed page above it) below 744 and the 32 window (`rounded-panel`) at most the screen less 80 from 744.
+	 */
+	export type ModalSurfaceShape = 'screen' | 'sheet';
+
+	const shapeClasses: Record<ModalSurfaceShape, { overlay: string; surface: string }> = {
+		screen: {
+			overlay: 'hidden tablet:block',
+			surface: 'tablet:max-h-sheet-xl tablet:rounded-xl'
+		},
+		sheet: {
+			overlay: 'block',
+			surface: 'top-3 rounded-t-xl tablet:top-0 tablet:max-h-window tablet:rounded-panel'
+		}
+	};
+
 	/** A CSS function call, `name(a,b)`. */
 	const cssFunction = (name: string, ...args: string[]) => `${name}(${args.join(',')})`;
 
@@ -86,6 +104,7 @@
 		onDismiss,
 		sourceLayout,
 		tone = 'card',
+		shape = 'screen',
 		class: className,
 		children,
 		...restProps
@@ -99,6 +118,7 @@
 		/** Where the modal zooms from; without it, it fades. */
 		sourceLayout?: ModalOrigin;
 		tone?: ModalSurfaceTone;
+		shape?: ModalSurfaceShape;
 		children: Snippet;
 	} = $props();
 
@@ -123,7 +143,10 @@
 		data-state={presence.state}
 		aria-hidden="true"
 		inert={presence.closing}
-		class="fixed inset-0 z-50 hidden bg-overlay transition-opacity duration-standard ease-standard data-[state=closed]:pointer-events-none data-[state=closed]:opacity-0 tablet:block starting:opacity-0"
+		class={cn(
+			'fixed inset-0 z-50 bg-overlay transition-opacity duration-standard ease-standard data-[state=closed]:pointer-events-none data-[state=closed]:opacity-0 starting:opacity-0',
+			shapeClasses[shape].overlay
+		)}
 		onclick={() => onDismiss?.()}
 	></div>
 	<!-- One element, two shapes by CSS (SSR-safe): the whole screen below 744, from 744 the centred dialog of the
@@ -142,6 +165,7 @@
 		data-slot="modal-screen-surface"
 		data-state={presence.state}
 		data-tone={tone}
+		data-shape={shape}
 		inert={presence.closing}
 		use:focusTrap={{ enabled: presence.open }}
 		use:escapeKeydown={{
@@ -151,7 +175,8 @@
 		use:scrollLock={true}
 		class={cn(
 			'fixed inset-0 z-50 m-0 flex flex-col overflow-hidden outline-none',
-			'tablet:m-auto tablet:h-fit tablet:max-h-sheet-xl tablet:w-full tablet:max-w-dialog tablet:rounded-xl tablet:shadow-soft',
+			'tablet:m-auto tablet:h-fit tablet:w-full tablet:max-w-dialog tablet:shadow-soft',
+			shapeClasses[shape].surface,
 			'transition-[transform,border-radius,opacity] duration-zoom ease-zoom-in data-[state=closed]:pointer-events-none data-[state=closed]:ease-zoom-out',
 			sourceLayout
 				? 'data-[state=closed]:modal-zoom-from starting:modal-zoom-from'

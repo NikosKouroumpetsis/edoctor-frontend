@@ -1,3 +1,4 @@
+import { tick } from 'svelte';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
@@ -111,5 +112,69 @@ describe('StickyActionBar', () => {
 		view.unmount();
 		render(Harness, { props: { cta: { label: 'Κράτηση', href: '/el/booking' } } });
 		expect(screen.getByRole('link', { name: 'Κράτηση' })).toHaveAttribute('href', '/el/booking');
+	});
+
+	it('Wave 1.5 (the profile, U-42.2): `zone="tablet"` is pinned below 744 and gone from 744 (the page draws its card), never a card', () => {
+		render(Harness, { props: { zone: 'tablet' } });
+		const bar = screen.getByTestId('bar');
+		expect(bar).toHaveClass('fixed', 'bottom-0', 'tablet:hidden');
+		expect(bar.className).not.toMatch(/split:/u);
+		const room = document.querySelector('[data-slot="sticky-action-bar-room"]');
+		expect(room).toHaveClass('min-h-bar-booking', 'tablet:hidden');
+		expect(room).not.toHaveClass('split:hidden');
+	});
+
+	it('U-42 — MINOR-8 of r1: `room="page"` draws no spacer — the bar’s measured height is the page end’s room (`--page-bar-room`, the footer’s `pb-page-bar`) while the bar lives', async () => {
+		Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+			configurable: true,
+			get: () => 152
+		});
+		try {
+			const view = render(Harness, { props: { zone: 'tablet', room: 'page' } });
+			await tick();
+			expect(document.querySelector('[data-slot="sticky-action-bar-room"]')).toBeNull();
+			expect(document.documentElement.style.getPropertyValue('--page-bar-room')).toBe('152px');
+			view.unmount();
+			expect(document.documentElement.style.getPropertyValue('--page-bar-room')).toBe('');
+		} finally {
+			Reflect.deleteProperty(HTMLElement.prototype, 'clientHeight');
+		}
+	});
+
+	it('U-42.2 (app = web): `stack` — the statement in two lines at most, the call to action across, ONE link under it', () => {
+		render(Harness, {
+			props: {
+				layout: 'stack',
+				zone: 'tablet',
+				withSecondary: true,
+				cta: { label: 'Δείτε παρόμοιους γιατρούς', href: '/doctors', icon: 'people-outline' }
+			}
+		});
+		const row = screen.getByTestId('bar').querySelector('[data-slot="sticky-action-bar-row"]');
+		expect(row).toHaveAttribute('data-layout', 'stack');
+		expect(row).toHaveClass('flex-col', 'items-stretch');
+		expect(document.querySelector('[data-slot="sticky-action-bar-statement"]')).toHaveClass(
+			'line-clamp-2',
+			'font-semibold'
+		);
+		const cta = screen.getByTestId('cta');
+		expect(cta).toHaveAttribute('href', '/doctors');
+		expect(cta).toHaveClass('w-full');
+		expect(cta.querySelector('svg')).not.toBeNull();
+		const links = document.querySelector('[data-slot="sticky-action-bar-secondary"]');
+		expect(links?.querySelectorAll('a')).toHaveLength(1);
+	});
+
+	it('Wave 1.5 (U-40.3): with `supportingAction` the last line is a text button of its own (the time opens the day-and-time window); without it, words', async () => {
+		const supportingAction = vi.fn();
+		const { unmount } = render(Harness, { props: { supportingAction } });
+		const line = screen.getByRole('button', { name: 'Επόμενη: Τρι 10:00' });
+		expect(line).toHaveClass('min-h-touch', 'underline');
+		await userEvent.click(line);
+		expect(supportingAction).toHaveBeenCalledTimes(1);
+		unmount();
+		render(Harness);
+		expect(screen.queryByRole('button', { name: 'Επόμενη: Τρι 10:00' })).toBeNull();
+		expect(screen.getByText('Επόμενη: Τρι 10:00').tagName).toBe('P');
 	});
 });

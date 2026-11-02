@@ -145,4 +145,30 @@ describe('SearchTrigger', () => {
 		});
 		expect(two.getByRole('button', { name: 'Καρδιολόγος' })).toHaveClass(...pill, ...twoLine);
 	});
+	it('U-16.4 (web only): `variant="pill"` is the web home’s phone pill — 56 high with a hairline rim, the glyph and 14/600 words in the middle; the default stays the application’s', () => {
+		const view = render(SearchTrigger, {
+			props: { placeholder: 'Ξεκινήστε αναζήτηση γιατρού', onclick: () => {}, variant: 'pill' }
+		});
+		const pill = pillOf();
+		expect(pill).toHaveClass(
+			'min-h-control-lg',
+			'w-full',
+			'rounded-full',
+			'border',
+			'border-foreground/6',
+			'shadow-overlay'
+		);
+		expect(pill).not.toHaveClass('py-5', 'shadow-floating');
+		const words = pill.querySelector('[data-slot="search-trigger-words"]') as HTMLElement;
+		expect(words).toHaveClass('justify-center', 'gap-2.5');
+		expect(screen.getByText('Ξεκινήστε αναζήτηση γιατρού')).toHaveClass(
+			'text-body-sm',
+			'font-semibold',
+			'text-foreground'
+		);
+		view.unmount();
+		render(SearchTrigger, { props: { placeholder: 'x', onclick: () => {} } });
+		expect(pillOf()).toHaveClass('py-5', 'shadow-floating');
+		expect(pillOf()).not.toHaveClass('min-h-control-lg', 'border');
+	});
 });

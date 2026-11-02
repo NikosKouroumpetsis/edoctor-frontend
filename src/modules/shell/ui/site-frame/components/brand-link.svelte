@@ -7,17 +7,21 @@
 		$props();
 </script>
 
-<!-- The eDoctor mark and name, the home link of the header; the name shows from a 360 header (`@narrow:`). -->
+<!-- The eDoctor mark, the home link of the top bar: the «e+» square (primary, the 8 corner) alone at 744, with the
+     word from 1128 (Airbnb's, U-16.8). -->
 <a
 	{href}
-	class="flex min-h-touch min-w-touch shrink-0 items-center gap-2.5 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+	aria-label={m.brand_name({}, messageOptions)}
+	data-slot="brand-link"
+	class="flex min-h-touch min-w-touch shrink-0 flex-row items-center gap-2 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
 >
 	<span
-		class="grid size-brand-mark place-items-center rounded-md bg-primary text-body-sm font-semibold text-primary-foreground"
+		aria-hidden="true"
+		class="grid size-brand-mark place-items-center rounded-sm bg-primary text-label-md font-bold text-primary-foreground"
 	>
 		e+
 	</span>
-	<span class="hidden text-body-lg font-semibold @narrow:inline">
+	<span aria-hidden="true" class="hidden text-title-xs font-semibold text-foreground laptop:inline">
 		{m.brand_name({}, messageOptions)}
 	</span>
 </a>

@@ -7,12 +7,14 @@
 		value = $bindable(),
 		disabled = false,
 		iconPlacement = 'trailing',
+		size,
 		onChange = () => {}
 	}: {
 		type?: 'single' | 'multiple';
 		value?: string | string[];
 		disabled?: boolean;
 		iconPlacement?: 'leading' | 'trailing';
+		size?: 'md' | 'sm';
 		onChange?: (value: string | string[] | undefined) => void;
 	} = $props();
 </script>
@@ -39,6 +41,7 @@
 		bind:value
 		{disabled}
 		{iconPlacement}
+		{size}
 		{onChange}
 		label="Choose a space"
 		testId="space"

@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/svelte-query';
 
-import type { CategoryId } from '../../types';
-import { resolveServiceSlug, resolveSpecialtyScope } from './resolvers';
+import type { CategoryId } from '$modules/search-doctors/types';
+import { resolveServiceSlug, resolveSpecialtyScope, type ResolvedProfessional } from './resolvers';
 import type { MarketplaceSearchParams } from './types';
 
 /**
@@ -12,7 +12,10 @@ import type { MarketplaceSearchParams } from './types';
 export type CategoryScope = Pick<
 	MarketplaceSearchParams,
 	'professionalIds' | 'serviceSlugs' | 'text'
->;
+> & {
+	/** The resolved professionals, for the row's «→» link (a structured «Τι» when there is one). */
+	professionals?: ResolvedProfessional[];
+};
 
 export const EMPTY_CATEGORY_SCOPE: CategoryScope = {};
 
@@ -80,7 +83,7 @@ export async function resolveCategoryScope(
 		});
 
 		if (specialty.professionalIds) {
-			return { professionalIds: specialty.professionalIds };
+			return { professionalIds: specialty.professionalIds, professionals: specialty.professionals };
 		}
 
 		return specialty.textFallback ? { text: specialty.textFallback } : EMPTY_CATEGORY_SCOPE;

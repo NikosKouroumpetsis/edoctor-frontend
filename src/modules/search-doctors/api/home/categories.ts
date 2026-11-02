@@ -1,4 +1,4 @@
-import type { CategorySeed } from '../../types';
+import type { CategorySeed } from '$modules/search-doctors/types';
 
 /**
  * Static client-side category rail. Rail taps re-query the home sections scoped to the

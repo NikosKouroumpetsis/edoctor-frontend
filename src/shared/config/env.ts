@@ -31,3 +31,4 @@ export const appVariant: AppVariant = isAppVariant(configuredAppVariant)
 			: 'development';
 
 export const preferencesStorageKey = `edoctor.${appEnv}.preferences.v1`;
+export const consentStorageKey = `edoctor.${appEnv}.consent.v1`;

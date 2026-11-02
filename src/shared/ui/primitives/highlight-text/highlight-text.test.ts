@@ -48,6 +48,29 @@ describe('HighlightText', () => {
 		expect(container.querySelector('[aria-hidden]')).toBeNull();
 	});
 
+	it('U-21: `word-start` bolds what was typed only where a word starts with it (Airbnb’s rows)', () => {
+		const { container } = render(HighlightText, {
+			props: { text: 'Υπέρηχος καρδιάς, Καρδιολόγος', query: 'καρ', match: 'word-start' }
+		});
+		expect(matches(container)).toEqual(['καρ', 'Καρ']);
+		expect(buildHighlightSegments('Ελένη Καρρά', 'καρ', 'word-start')).toEqual([
+			{ highlighted: false, text: 'Ελένη ' },
+			{ highlighted: true, text: 'Καρ' },
+			{ highlighted: false, text: 'ρά' }
+		]);
+	});
+
+	it('U-21 (negative): `word-start` never bolds the inside of a word; `anywhere` (the default) still does', () => {
+		expect(buildHighlightSegments('Μακαρόνι', 'καρ', 'word-start')).toEqual([
+			{ highlighted: false, text: 'Μακαρόνι' }
+		]);
+		expect(buildHighlightSegments('Μακαρόνι', 'καρ')).toEqual([
+			{ highlighted: false, text: 'Μα' },
+			{ highlighted: true, text: 'καρ' },
+			{ highlighted: false, text: 'όνι' }
+		]);
+	});
+
 	it('maps a folded match back to the original slice (a precomposed accent never shifts it)', () => {
 		expect(buildHighlightSegments('Ελλάδα', 'λαδ')).toEqual([
 			{ highlighted: false, text: 'Ελ' },

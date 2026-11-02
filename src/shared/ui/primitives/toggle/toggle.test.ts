@@ -46,3 +46,33 @@ describe('Toggle', () => {
 		);
 	});
 });
+
+// U-31.1 (the owner, 29/10, f2's open point): a disabled toggle shows `not-allowed` (the base layer's `:disabled`
+// rule, `pressable.test.ts`), so it takes the pointer — and its hover is undone, its look otherwise the same.
+describe('Toggle · disabled (U-31.1)', () => {
+	it('U-31.1: a disabled toggle takes the pointer (no `pointer-events-none`), and its hover gives way to its own fill and words', () => {
+		render(Toggle, { props: { 'aria-label': 'Bold', disabled: true, children: label('B') } });
+		const btn = screen.getByRole('button', { name: 'Bold' });
+		expect(btn).toBeDisabled();
+		expect(btn).not.toHaveClass('disabled:pointer-events-none');
+		expect(btn).toHaveClass(
+			'disabled:bg-transparent',
+			'disabled:text-muted-foreground',
+			'disabled:opacity-50'
+		);
+	});
+
+	it('U-31.1 (negative): the enabled hover and the pressed accent stay as they were', () => {
+		render(Toggle, {
+			props: { 'aria-label': 'Bold', pressed: true, variant: 'outline', children: label('B') }
+		});
+		const btn = screen.getByRole('button', { name: 'Bold' });
+		expect(btn).toHaveClass(
+			'hover:bg-muted',
+			'hover:text-foreground',
+			'data-[state=on]:bg-accent',
+			'data-[state=on]:text-secondary-foreground'
+		);
+		expect(btn).toHaveAttribute('data-state', 'on');
+	});
+});

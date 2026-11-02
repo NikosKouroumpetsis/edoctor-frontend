@@ -56,11 +56,14 @@ describe('SearchBar', () => {
 		expect(what).toHaveAttribute('aria-expanded', 'false');
 		expect(what).toHaveAttribute('aria-haspopup', 'dialog');
 		expect(screen.getByText('Τι')).toHaveClass('text-label-md', 'font-semibold', 'text-foreground');
+		// Rewritten for U-23.2 (the prototype cuts mid-word, «Προσθήκη διαθε…»): `truncate` replaces `line-clamp-1`,
+		// which broke at the last whole word («Προσθήκη…» at 744, the live D1 finding).
 		expect(screen.getByText('Καρδιολόγος')).toHaveClass(
-			'line-clamp-1',
+			'truncate',
 			'text-body-sm',
 			'text-foreground'
 		);
+		expect(screen.getByText('Καρδιολόγος')).not.toHaveClass('line-clamp-1');
 		expect(screen.getByText('Περιοχή')).toHaveClass('text-muted-foreground');
 		expect(
 			screen.getByTestId('search-bar').querySelectorAll('[data-slot="search-bar-divider"]')
@@ -77,11 +80,13 @@ describe('SearchBar', () => {
 		expect(screen.queryByRole('dialog')).toBeNull();
 	});
 
-	it('U-05.4 (Airbnb): the open segment is a card island on the muted bar, its panel under the bar; the button grows its words', async () => {
+	it('U-05.4 (Airbnb): the open segment is a card island on the grey bar, its panel under the bar; the button grows its words', async () => {
 		const user = userEvent.setup({ delay: null });
 		render(Harness);
 		await user.click(segmentOf('where'));
-		expect(rowOf()).toHaveClass('bg-muted');
+		// Rewritten for U-23.2 («γκρι #ebeef2, όχι μπεζ»): the open bar was the kit's `bg-muted`.
+		expect(rowOf()).toHaveClass('bg-card', 'from-muted-foreground/12', 'to-muted-foreground/12');
+		expect(rowOf()).not.toHaveClass('bg-muted');
 		// U-09.10: the island's card surface is the ONE sliding pill under the segment, no longer the segment's own.
 		expect(pillOf()).toHaveClass('bg-card', 'shadow-floating', 'rounded-full');
 		expect(pillOf()).toHaveAttribute('data-state', 'open');
@@ -316,6 +321,7 @@ describe('SearchBar', () => {
 		await user.keyboard('{Escape}');
 		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 		expect(rowOf()).toHaveClass('bg-card');
+		expect(rowOf()).not.toHaveClass('from-muted-foreground/12');
 		await user.click(segmentOf('when'));
 		await user.click(screen.getByRole('button', { name: 'Έξω' }));
 		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
@@ -465,6 +471,53 @@ describe('SearchBar', () => {
 		width = 240;
 		for (const callback of callbacks) callback([], {} as ResizeObserver);
 		await waitFor(() => expect(pillOf().style.width).toBe('240px'));
+	});
+
+	it('U-23.2: the panel is Airbnb’s 424 × the 32 corner, ≤ 60 % high — «Τι»/«Πού» from the left, the last («Πότε») from the right', async () => {
+		const user = userEvent.setup({ delay: null });
+		render(Harness);
+		await user.click(segmentOf('what'));
+		const panel = screen.getByTestId('search-bar-panel');
+		expect(panel).toHaveClass(
+			'tablet:w-search-panel-w',
+			'tablet:max-w-full',
+			'tablet:max-h-sheet-sm',
+			'tablet:rounded-panel'
+		);
+		expect(panel).not.toHaveClass('tablet:w-full', 'tablet:rounded-xl', 'tablet:max-h-sheet-md');
+		expect(panel).toHaveAttribute('data-align', 'start');
+		expect(panel).not.toHaveClass('tablet:right-0');
+		await user.click(segmentOf('where'));
+		expect(screen.getByTestId('search-bar-panel')).toHaveAttribute('data-align', 'start');
+		await user.click(segmentOf('when'));
+		const right = screen.getByTestId('search-bar-panel');
+		expect(right).toHaveAttribute('data-align', 'end');
+		expect(right).toHaveClass('tablet:right-0', 'tablet:left-auto');
+	});
+
+	it('U-23.2: the pill is measured again when ANY segment’s box changes — every segment is observed, a new field too', async () => {
+		const observed: Element[] = [];
+		const original = window.ResizeObserver;
+		window.ResizeObserver = class {
+			observe(target: Element) {
+				observed.push(target);
+			}
+			unobserve() {}
+			disconnect() {}
+		} as unknown as typeof ResizeObserver;
+		onTestFinished(() => {
+			window.ResizeObserver = original;
+		});
+		const user = userEvent.setup({ delay: null });
+		render(Harness);
+		await user.click(segmentOf('when'));
+		await waitFor(() => {
+			for (const id of ['what', 'where', 'when']) expect(observed).toContain(segmentOf(id));
+		});
+		// «Τι» opened: its field is a new node, observed as well.
+		await user.click(segmentOf('what'));
+		await waitFor(() => expect(observed).toContain(segmentOf('what')));
+		expect(segmentOf('what').tagName).toBe('DIV');
 	});
 
 	it('U-09.10 (negative): no segment draws a card surface of its own, open or closed', async () => {

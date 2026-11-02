@@ -1,4 +1,4 @@
-import type { SectionId } from '../../types';
+import type { SectionId } from '$modules/search-doctors/types';
 
 export const searchDoctorsQueryKeys = {
 	all: ['search-doctors'] as const,

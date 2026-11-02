@@ -99,7 +99,13 @@
 						data-value={tab.value}
 						data-testid={testIdPrefix ? `${testIdPrefix}-${tab.value}` : undefined}
 						onclick={() => choose(tab.value)}
-						class={cn(pillClasses, selected ? 'border-foreground' : 'border-border')}
+						class={cn(
+							pillClasses,
+							// U-28.4: with a pointer, a pill not chosen darkens its border on hover (Airbnb's).
+							selected
+								? 'border-foreground'
+								: 'border-border transition-colors duration-standard ease-standard can-hover:hover:border-foreground'
+						)}
 					>
 						<span class={cn('text-body-sm text-foreground', selected && 'font-semibold')}
 							>{tab.label}</span

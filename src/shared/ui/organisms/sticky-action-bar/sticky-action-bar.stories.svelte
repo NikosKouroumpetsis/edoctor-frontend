@@ -5,6 +5,7 @@
 	import { Section } from '$shared/ui/molecules/section';
 	import { StickyActionBar } from '$shared/ui/organisms/sticky-action-bar';
 	import { PriceLabel } from '$shared/ui/primitives/price-label';
+	import { TextButton } from '$shared/ui/primitives/text-button';
 	import { TwoColumnDetail } from '$shared/ui/templates/two-column-detail';
 
 	const noop = () => {};
@@ -88,6 +89,42 @@
 <Story name="Sign In Price">
 	{#snippet template()}
 		{#snippet bar()}<StickyActionBar {...base} price={signIn} />{/snippet}
+		{@render frame(bar)}
+	{/snippet}
+</Story>
+
+<!-- Wave 1.5 (U-42.2): `stack` — the statement over the full-width call to action, the other way as a link under it;
+     `zone="tablet"` pins it below 744 only (the profile draws its own card from 744). -->
+<Story name="Stack Statement">
+	{#snippet template()}
+		{#snippet bar()}
+			<StickyActionBar
+				zone="tablet"
+				layout="stack"
+				summary="Δεν υπάρχουν διαθέσιμες ώρες τις επόμενες 4 εβδομάδες"
+				cta={{ label: 'Δείτε παρόμοιους γιατρούς', href: '#similar', icon: 'people-outline' }}
+			>
+				{#snippet secondary()}
+					<TextButton label="Κλήση ιατρείου" href="#call" tone="foreground" underline />
+				{/snippet}
+			</StickyActionBar>
+		{/snippet}
+		{@render frame(bar)}
+	{/snippet}
+</Story>
+
+<!-- Wave 1.5: the time line is a button (`supportingAction`): it opens the day-and-time window. -->
+<Story name="Supporting Action">
+	{#snippet template()}
+		{#snippet bar()}
+			<StickyActionBar
+				{...base}
+				zone="tablet"
+				supporting="Αύριο · 10:00 · Νίκης 12"
+				supportingAction={noop}
+				price={amount}
+			/>
+		{/snippet}
 		{@render frame(bar)}
 	{/snippet}
 </Story>

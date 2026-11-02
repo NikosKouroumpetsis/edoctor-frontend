@@ -35,6 +35,7 @@
 		as = 'h2',
 		id,
 		trailing,
+		end,
 		class: className
 	}: {
 		title?: string;
@@ -44,8 +45,10 @@
 		as?: string;
 		/** The heading's id, for a region the caller names by it (`aria-labelledby`). */
 		id?: string;
-		/** A control at the row's end (the rail's arrow, a «show all»). */
+		/** The control right after the title, on its line (U-20: the rail's «→», as the application's). */
 		trailing?: Snippet;
+		/** Web only: controls at the row's end (the rail's ‹ › from 744). */
+		end?: Snippet;
 		class?: string;
 	} = $props();
 </script>
@@ -55,7 +58,19 @@
 	class={cn('flex flex-row items-start justify-between gap-4', className)}
 >
 	<div class={cn('flex min-w-0 flex-1 flex-col', stackClasses[variant])}>
-		{#if title}
+		{#if title && trailing}
+			<div data-slot="section-title-row" class="flex flex-row items-center gap-2.5">
+				<svelte:element
+					this={as}
+					{id}
+					data-slot="section-title"
+					class={sectionTitleClasses[variant]}
+				>
+					{title}
+				</svelte:element>
+				{@render trailing()}
+			</div>
+		{:else if title}
 			<svelte:element this={as} {id} data-slot="section-title" class={sectionTitleClasses[variant]}>
 				{title}
 			</svelte:element>
@@ -64,5 +79,5 @@
 			<p data-slot="section-subtitle" class={sectionSubtitleClasses[variant]}>{subtitle}</p>
 		{/if}
 	</div>
-	{@render trailing?.()}
+	{@render end?.()}
 </div>

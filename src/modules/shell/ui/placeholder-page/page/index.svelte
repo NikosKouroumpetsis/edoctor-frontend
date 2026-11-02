@@ -4,7 +4,7 @@
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages.js';
 	import { localizeHref } from '$paraglide/runtime';
-	import { getPageLocale } from '$shared/preferences/i18n';
+	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
 	import RoutePlaceholder from '$shared/ui/templates/route-placeholder';
 
 	let { eyebrow, title, body }: { eyebrow: string; title: string; body: string } = $props();

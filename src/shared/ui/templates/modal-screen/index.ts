@@ -8,6 +8,7 @@ import Surface, {
 	MODAL_ZOOM_DURATION,
 	zoomEnd,
 	type ModalOrigin,
+	type ModalSurfaceShape,
 	type ModalSurfaceTone,
 	type ModalZoomEnd
 } from './modal-screen-surface.svelte';
@@ -25,6 +26,7 @@ export {
 	type ModalScreenCloseProps,
 	type ModalScreenContentAlignment,
 	type ModalScreenTitleSize,
+	type ModalSurfaceShape,
 	type ModalSurfaceTone,
 	type ModalZoomEnd
 };

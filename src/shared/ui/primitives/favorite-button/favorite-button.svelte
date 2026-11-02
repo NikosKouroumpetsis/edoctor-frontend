@@ -3,10 +3,21 @@
 
 	export type FavoriteButtonSize = 'md' | 'lg';
 	export type FavoriteButtonInset = 'sm' | 'md';
+	/** `bare` the application's heart; `overlay` (U-20, Airbnb's) a white outline lifted over a dark see-through fill. */
+	export type FavoriteButtonAppearance = 'bare' | 'overlay';
 
 	// The heart over a card's photo (M-04): a transparent 48 box at the photo's top-right corner.
 	const favoriteButtonBox =
-		'absolute inline-flex size-touch items-center justify-center rounded-full bg-transparent outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
+		'group absolute inline-flex size-touch items-center justify-center rounded-full bg-transparent outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
+
+	// U-28.4, with a pointer: the bare heart (on a surface) takes the round controls' light fill on hover; over a photo
+	// (`overlay`) the heart itself grows, as Airbnb's does (the map pin's 8 %), and no fill covers the photo.
+	const boxHoverClasses: Record<FavoriteButtonAppearance, string> = {
+		bare: 'transition-colors duration-standard ease-standard can-hover:hover:bg-foreground/5',
+		overlay: ''
+	};
+	const overlayGlyphHover =
+		'transition-transform duration-standard ease-standard can-hover:group-hover:scale-108';
 
 	const insets: Record<FavoriteButtonInset, string> = {
 		sm: 'top-1.5 right-1.5',
@@ -28,6 +39,7 @@
 		size?: FavoriteButtonSize;
 		/** The application's default `md` (10 from the corner); a rail card passes `sm`. */
 		inset?: FavoriteButtonInset;
+		appearance?: FavoriteButtonAppearance;
 	};
 </script>
 
@@ -40,6 +52,7 @@
 		onToggle,
 		size = 'lg',
 		inset = 'md',
+		appearance = 'bare',
 		type = 'button',
 		class: className,
 		...restProps
@@ -51,12 +64,31 @@
 	aria-pressed={selected}
 	data-slot="favorite-button"
 	data-state={selected ? 'on' : 'off'}
-	class={cn(favoriteButtonBox, insets[inset], className)}
+	class={cn(favoriteButtonBox, insets[inset], boxHoverClasses[appearance], className)}
 	onclick={() => onToggle(!selected)}
 	{...restProps}
 >
-	<Ionicon
-		name={selected ? 'heart' : 'heart-outline'}
-		class={cn(glyphSizes[size], selected ? 'text-accent/90' : 'text-foreground/78')}
-	/>
+	{#if appearance === 'overlay'}
+		<!-- U-20: the dark see-through fill (the accent when saved) under the white outline, which reads on any photo
+		     (the application adds a 2 text shadow; the web's shadows are the elevation scale only, so none here). -->
+		<Ionicon
+			name="heart"
+			data-slot="favorite-button-fill"
+			class={cn(
+				glyphSizes[size],
+				selected ? 'text-accent/90' : 'text-secondary/45',
+				overlayGlyphHover
+			)}
+		/>
+		<Ionicon
+			name="heart-outline"
+			data-slot="favorite-button-outline"
+			class={cn('absolute', glyphSizes[size], 'text-media-scrim', overlayGlyphHover)}
+		/>
+	{:else}
+		<Ionicon
+			name={selected ? 'heart' : 'heart-outline'}
+			class={cn(glyphSizes[size], selected ? 'text-accent/90' : 'text-foreground/78')}
+		/>
+	{/if}
 </button>

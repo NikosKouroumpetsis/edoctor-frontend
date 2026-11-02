@@ -16,7 +16,7 @@
 		argTypes: {
 			appearance: { control: 'select', options: ['bare', 'outline', 'scrim', 'tint', 'tile'] },
 			count: { control: { type: 'number', min: 0 } },
-			iconSize: { control: 'radio', options: ['md', 'lg'] },
+			iconSize: { control: 'radio', options: ['sm', 'md', 'lg'] },
 			iconTone: { control: 'radio', options: ['foreground', 'secondary', 'muted'] },
 			size: { control: 'select', options: ['xs', 'sm', 'md', 'touch', 'xl'] },
 			surface: { control: 'select', options: ['card', 'muted', 'subtle', 'soft', 'strong'] }
@@ -205,6 +205,32 @@
 			<IconButton aria-label="" appearance="tile" size="xl" decorative>
 				<BrandGoogle class="icon-lg" />
 			</IconButton>
+		</div>
+	{/snippet}
+</Story>
+
+<!-- The rails' «→» (U-20, the application's): the 32 soft circle with the 16 glyph, static or a link in its 48 box. -->
+<Story name="Rail Arrow">
+	{#snippet template()}
+		<div class="flex flex-row items-center gap-4">
+			<IconButton
+				aria-label=""
+				appearance="tint"
+				surface="soft"
+				icon="arrow-forward"
+				size="xs"
+				iconSize="sm"
+				decorative
+			/>
+			<IconButton
+				aria-label="Δείτε όλους"
+				appearance="tint"
+				surface="soft"
+				icon="arrow-forward"
+				size="xs"
+				iconSize="sm"
+				href="#all"
+			/>
 		</div>
 	{/snippet}
 </Story>

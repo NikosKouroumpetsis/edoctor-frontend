@@ -25,6 +25,9 @@
 {#snippet house()}<HouseIcon class="icon-lg text-foreground" />{/snippet}
 {#snippet door()}<DoorOpenIcon class="icon-lg text-foreground" />{/snippet}
 {#snippet bed()}<BedDoubleIcon class="icon-lg text-foreground" />{/snippet}
+{#snippet houseSm()}<HouseIcon class="icon-md text-foreground" />{/snippet}
+{#snippet doorSm()}<DoorOpenIcon class="icon-md text-foreground" />{/snippet}
+{#snippet bedSm()}<BedDoubleIcon class="icon-md text-foreground" />{/snippet}
 
 <Story name="Booking Space Image">
 	{#snippet template()}
@@ -86,6 +89,47 @@
 				]}
 			/>
 		</div>
+	{/snippet}
+</Story>
+
+<!-- U-28.3: the smaller cards of the web filters' «Ταξινόμηση» — 12 / 16 of inset, the 20 glyph, the 16 title over the
+     14 line, 8 apart (a card of about 66). -->
+{#snippet smallCards()}
+	<div class="w-full max-w-form p-4">
+		<SelectableCards
+			type="single"
+			size="sm"
+			iconPlacement="leading"
+			bind:value={sort}
+			label="Ταξινόμηση"
+			options={[
+				{
+					value: 'popularity',
+					title: 'Προτεινόμενα',
+					description: 'Οι πιο προτεινόμενοι πρώτα',
+					icon: houseSm
+				},
+				{
+					value: 'rating',
+					title: 'Αξιολόγηση',
+					description: 'Καλύτερη αξιολόγηση πρώτα',
+					icon: doorSm
+				},
+				{ value: 'distance', title: 'Απόσταση', description: 'Κοντινότεροι πρώτα', icon: bedSm }
+			]}
+		/>
+	</div>
+{/snippet}
+
+<Story name="Small">
+	{#snippet template()}
+		{@render smallCards()}
+	{/snippet}
+</Story>
+
+<Story name="Small Dark" globals={{ theme: 'dark' }}>
+	{#snippet template()}
+		{@render smallCards()}
 	{/snippet}
 </Story>
 

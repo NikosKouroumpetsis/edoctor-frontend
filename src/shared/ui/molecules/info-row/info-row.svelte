@@ -52,8 +52,9 @@
 	};
 
 	/** 🔴 U-02.2: the acting inline row's box (the application's `Pressable`); the focus ring is the web's own state. */
+	// U-28.4: the inline row that acts takes the light fill on hover with a pointer.
 	const actionClasses =
-		'flex min-h-touch w-full flex-row items-start gap-3 rounded-sm text-start outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
+		'flex min-h-touch w-full flex-row items-start gap-3 rounded-sm text-start transition-colors duration-standard ease-standard outline-none focus-visible:ring-3 focus-visible:ring-ring/50 can-hover:hover:bg-foreground/5';
 </script>
 
 <script lang="ts">

@@ -36,8 +36,9 @@
 	}: InlineLinkTextProps = $props();
 
 	// The link is part of the sentence: the WCAG 2.5.8 «inline» exception to the 48 target (touch-targets test).
+	// U-28.4: with a pointer, its line grows twice as thick on hover.
 	const linkClass =
-		'text-body-sm font-semibold text-foreground underline outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
+		'text-body-sm font-semibold text-foreground underline outline-none focus-visible:ring-3 focus-visible:ring-ring/50 can-hover:hover:decoration-2';
 </script>
 
 <p

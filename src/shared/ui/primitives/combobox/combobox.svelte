@@ -94,6 +94,8 @@
 
 	const inputId = useId(untrack(() => id) ?? undefined, 'combobox');
 	const listId = `${inputId}-list`;
+	// U-31.1: each option's ONE id (its place in `options`, the same whatever is typed), for `aria-activedescendant`.
+	const optionId = (option: ComboboxOption) => `${listId}-option-${options.indexOf(option)}`;
 
 	const currentValue = $derived(field ? (field.value ?? '') : value);
 	const currentError = $derived(field ? field.error : error);
@@ -258,6 +260,9 @@
 			role="combobox"
 			aria-expanded={open}
 			aria-controls={listId}
+			aria-activedescendant={open && filtered[highlighted]
+				? optionId(filtered[highlighted])
+				: undefined}
 			aria-autocomplete="list"
 			autocomplete="off"
 			aria-invalid={currentError ? 'true' : undefined}
@@ -319,6 +324,7 @@
 		>
 			{#each filtered as option, i (option.value)}
 				<li
+					id={optionId(option)}
 					role="option"
 					aria-selected={currentValue === option.value}
 					onmousedown={(e) => {

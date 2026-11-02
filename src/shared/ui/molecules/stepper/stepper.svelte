@@ -1,7 +1,8 @@
 <script lang="ts" module>
 	// «−» and «+»: 48 × 48 targets, dimmed at their bound like the application's.
+	// U-28.4: «−» / «+» take the light fill on hover with a pointer, never at their bound (disabled).
 	const stepperButton =
-		'inline-flex size-touch shrink-0 items-center justify-center rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50';
+		'inline-flex size-touch shrink-0 items-center justify-center rounded-md transition-colors duration-standard ease-standard outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50 can-hover:enabled:hover:bg-foreground/5';
 
 	/** `next` held inside the optional `min`/`max` bounds. */
 	function clamp(next: number, min?: number, max?: number): number {

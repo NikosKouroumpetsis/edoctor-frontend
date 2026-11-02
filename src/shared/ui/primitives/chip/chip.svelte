@@ -3,11 +3,40 @@
 	import type { IoniconName } from '$shared/ui/icons/ionicon';
 
 	export type ChipSize = 'sm' | 'md';
-	export type ChipVariant = 'filled' | 'tinted';
+	/** `outline` the results' filters (U-24.3, the prototype): the chosen pill dark-ringed 2 on the band, no fill. */
+	export type ChipVariant = 'filled' | 'tinted' | 'outline';
+
+	// The drawn pill per variant: its idle and its active look (the ring is inset, so a choice never reflows the row).
+	// U-28.4 (Airbnb's): with a pointer, a chip not chosen darkens its border on hover; a chosen or disabled one does not.
+	const pillLooks: Record<ChipVariant, { idle: string; active: string }> = {
+		filled: {
+			idle: 'border-border bg-card transition-colors duration-standard ease-standard can-hover:group-enabled:group-hover:border-foreground',
+			active: 'border-primary bg-primary'
+		},
+		tinted: {
+			idle: 'border-border bg-card transition-colors duration-standard ease-standard can-hover:group-enabled:group-hover:border-foreground',
+			active: 'border-primary bg-primary/10'
+		},
+		outline: {
+			idle: 'border-border bg-card transition-colors duration-standard ease-standard can-hover:group-enabled:group-hover:border-foreground',
+			active: 'border-foreground bg-background ring-1 ring-foreground ring-inset'
+		}
+	};
+	// The active words and glyph per variant (the idle ones are always the foreground).
+	const activeTextClasses: Record<ChipVariant, string> = {
+		filled: 'text-primary-foreground',
+		tinted: 'text-primary-text',
+		outline: 'text-foreground'
+	};
+	const activeIconClasses: Record<ChipVariant, string> = {
+		filled: 'text-primary',
+		tinted: 'text-primary',
+		outline: 'text-foreground'
+	};
 
 	// The button is the 48 touch box; the drawn pill (32 or 40) sits inside it and grows with its label.
 	const chipBox =
-		'inline-flex min-h-touch min-w-touch shrink-0 items-center justify-center self-start rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50';
+		'group inline-flex min-h-touch min-w-touch shrink-0 items-center justify-center self-start rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50';
 
 	const pillSizes: Record<ChipSize, string> = {
 		sm: 'min-h-control-xs px-3',
@@ -28,7 +57,7 @@
 		/** A trailing ✕ that marks the chip active; pressing the chip then calls `onRemove`. */
 		removable?: boolean;
 		onRemove?: () => void;
-		/** `filled` solid primary when active, `tinted` the filter's primary tint. */
+		/** `filled` solid primary when active, `tinted` the primary tint, `outline` the 2 dark ring (U-24.3). */
 		variant?: ChipVariant;
 		size?: ChipSize;
 		/** Classes of the label: a text role only, never a colour. */
@@ -74,9 +103,12 @@
 		group?.register(chipId, () => ({ selected, eligible: isRadio && !disabled }))
 	);
 	onDestroy(() => unregister?.());
-	const tinted = $derived(variant === 'tinted');
 	const active = $derived(selected || removable);
-	const activeText = $derived(tinted ? 'text-primary-text' : 'text-primary-foreground');
+	const activeText = $derived(activeTextClasses[variant]);
+	// The outline's count stays muted when chosen (the prototype's `.fchip small`), the fills' take the label's colour.
+	const countTone = $derived(
+		active && variant !== 'outline' ? activeText : 'text-muted-foreground'
+	);
 
 	function handleClick(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
 		if (removable && onRemove) onRemove();
@@ -103,30 +135,43 @@
 		data-slot="chip-pill"
 		class={cn(
 			'inline-flex flex-row items-center justify-center gap-1.5 rounded-full border',
-			active
-				? tinted
-					? 'border-primary bg-primary/10'
-					: 'border-primary bg-primary'
-				: 'border-border bg-card',
+			active ? pillLooks[variant].active : pillLooks[variant].idle,
 			pillSizes[size]
 		)}
 	>
 		{#if icon}
-			<Ionicon name={icon} class={cn('icon-sm', active ? 'text-primary' : 'text-foreground')} />
+			<Ionicon
+				name={icon}
+				class={cn('icon-sm', active ? activeIconClasses[variant] : 'text-foreground')}
+			/>
 		{/if}
-		<span
-			class={cn(
-				'truncate font-medium',
-				labelSizes[size],
-				active ? activeText : 'text-foreground',
-				textClass
-			)}
-		>
-			{label}
-		</span>
-		{#if count}
-			<span class={cn('text-label-md', active ? activeText : 'text-muted-foreground')}>{count}</span
+		{#snippet labelText()}
+			<span
+				class={cn(
+					'truncate font-medium',
+					labelSizes[size],
+					active ? activeText : 'text-foreground',
+					textClass
+				)}
 			>
+				{label}
+			</span>
+		{/snippet}
+		{#if count}
+			<!-- NIT-3 (r1): the smaller count sits on the label's baseline (never raised like an exponent). On a narrow
+			     chip only the label gives way (`truncate`); the count never shrinks nor is clipped (final round). -->
+			<span
+				data-slot="chip-label-count"
+				class="inline-flex min-w-0 flex-row items-baseline gap-1.5"
+			>
+				{@render labelText()}
+				<span
+					data-slot="chip-count"
+					class={cn('shrink-0 text-label-md whitespace-nowrap', countTone)}>{count}</span
+				>
+			</span>
+		{:else}
+			{@render labelText()}
 		{/if}
 		{#if removable}
 			<span class="ml-0.5 inline-flex">

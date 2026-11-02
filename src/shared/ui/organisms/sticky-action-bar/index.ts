@@ -1,8 +1,16 @@
-import Root, { type StickyActionBarCta } from './sticky-action-bar.svelte';
+import Root, {
+	type StickyActionBarCta,
+	type StickyActionBarLayout,
+	type StickyActionBarRoom,
+	type StickyActionBarZone
+} from './sticky-action-bar.svelte';
 
 export {
 	Root,
 	//
 	Root as StickyActionBar,
-	type StickyActionBarCta
+	type StickyActionBarCta,
+	type StickyActionBarLayout,
+	type StickyActionBarRoom,
+	type StickyActionBarZone
 };

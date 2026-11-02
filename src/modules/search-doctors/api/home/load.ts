@@ -1,46 +1,38 @@
 import { QueryClient } from '@tanstack/svelte-query';
 
-import type { CategorySeed, DoctorCard, SectionId } from '../../types';
-import {
-	buildSectionSearchParams,
-	EMPTY_CATEGORY_SCOPE,
-	homeSectionConfigs,
-	mapCardToDoctor,
-	searchDoctors
-} from '../marketplace';
+import type { SectionId } from '$modules/search-doctors/types';
+import { buildSectionQuery } from '$modules/search-doctors/api/marketplace/build-section-query';
+import { mapCardToFacts } from '$modules/search-doctors/api/marketplace/card-adapter';
+import { EMPTY_CATEGORY_SCOPE } from '$modules/search-doctors/api/marketplace/category-scope';
+import { searchDoctors } from '$modules/search-doctors/api/marketplace/endpoints';
+import { homeSectionConfigs } from '$modules/search-doctors/api/marketplace/sections';
+import type {
+	SearchDoctorsCardFacts,
+	SearchDoctorsSectionLink
+} from '$modules/search-doctors/api/marketplace/types';
 
 /**
- * Resolved value of one streamed home section. The promise NEVER rejects: a failed
- * section degrades to `{ status: 'error' }` so a single backend hiccup cannot crash the
- * streamed SSR response, and the page renders a per-section error instead of the whole
- * page failing.
+ * Resolved value of one streamed home section, as FACTS (U-32.1: the row's cards and words are the page's, built by
+ * `lib/section-link`). The promise NEVER rejects: a failed section degrades to `{ status: 'error' }` so one backend
+ * hiccup cannot crash the streamed SSR response. `link` is what the row's «→» opens; a section whose location does
+ * not resolve is `ok` with no cards (hidden).
  */
-export type StreamedSectionResult = { status: 'ok'; doctors: DoctorCard[] } | { status: 'error' };
+export type StreamedSectionResult =
+	| { status: 'ok'; items: SearchDoctorsCardFacts[]; link: SearchDoctorsSectionLink | null }
+	| { status: 'error' };
 
 export type StreamedHomeSection = {
 	id: SectionId;
-	/** Streamed promise: pending -> skeleton, resolved -> cards (or per-section error). */
+	/** Streamed promise of the row's facts; the route builds the row the page shows (`lib/section-link`). */
 	result: Promise<StreamedSectionResult>;
 };
 
-/** Shape returned by the home `+page.server.ts` load and threaded to the discovery screen. */
-export type HomePageData = {
-	categories: CategorySeed[];
-	sections: StreamedHomeSection[];
-};
-
 /**
- * Builds the streamed home sections for the SSR `load` (the `all` view; category filtering
- * is a client concern handled by `useHomeSections`).
- *
- * Each section's scope is resolved first — cheap, cached `/facets` + `/locations` reads —
- * and only then is the heavier `searchDoctors` request kicked off. Because that request is
- * started while `load` is still awaiting (the caller awaits this function), SvelteKit
- * tracks the `fetch`; the returned `result` promise is left un-awaited, so it streams into
- * the document and the section reveals serially as the backend responds.
- *
- * A request-scoped `QueryClient` caches resolver reads so the three sections share one
- * network response per resolver within this request.
+ * Builds the streamed home sections for the SSR `load` (the `all` view; category filtering is a client concern
+ * handled by `useHomeSections`). Each section's scope is resolved first — cached `/doctors/suggestions` and
+ * `/locations/suggestions` reads, as the application's — and only then the search starts, while `load` still
+ * awaits, so SvelteKit tracks the `fetch`; the `result` promise is left un-awaited and streams into the document.
+ * A request-scoped `QueryClient` shares the resolver reads of the three sections.
  */
 export function loadHomeSections(
 	fetchImpl: typeof fetch,
@@ -50,23 +42,38 @@ export function loadHomeSections(
 
 	return Promise.all(
 		homeSectionConfigs.map(async (config) => {
-			const params = await buildSectionSearchParams(
+			const query = await buildSectionQuery(
 				queryClient,
 				config,
 				EMPTY_CATEGORY_SCOPE,
 				lang,
 				fetchImpl
-			);
+			).catch(() => undefined);
 
-			const result = searchDoctors(params, { fetch: fetchImpl }).then(
-				(data): StreamedSectionResult => ({
-					status: 'ok',
-					doctors: data.items.map((card) =>
-						mapCardToDoctor(card, { pricingVisible: data.pricingVisible })
-					)
-				}),
-				(): StreamedSectionResult => ({ status: 'error' })
-			);
+			if (query === undefined) {
+				return { id: config.id, result: Promise.resolve({ status: 'error' as const }) };
+			}
+
+			if (query === null) {
+				return {
+					id: config.id,
+					result: Promise.resolve({ status: 'ok' as const, items: [], link: null })
+				};
+			}
+
+			// U-32.9: the `catch` closes the chain, so neither a failed search nor a card the mapper cannot read (a
+			// backend card of another shape) ever rejects a streamed promise: the row is the error.
+			const result = searchDoctors(query.params, { fetch: fetchImpl })
+				.then(
+					(data): StreamedSectionResult => ({
+						status: 'ok',
+						items: data.items.map((card) =>
+							mapCardToFacts(card, { pricingVisible: data.pricingVisible })
+						),
+						link: query.link
+					})
+				)
+				.catch((): StreamedSectionResult => ({ status: 'error' }));
 
 			return { id: config.id, result };
 		})

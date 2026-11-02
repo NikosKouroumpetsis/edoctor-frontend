@@ -184,6 +184,8 @@
 		data-variant="launcher"
 		class={cn(
 			'flex min-h-row flex-row items-center gap-2 rounded-md border border-muted-foreground/50 bg-card px-3',
+			// U-28.4: the launcher is a button drawn as a field: with a pointer its border darkens while it is hovered.
+			'transition-colors duration-standard ease-standard can-hover:has-[[data-slot=search-field-launcher]:enabled:hover]:border-foreground',
 			className
 		)}
 	>

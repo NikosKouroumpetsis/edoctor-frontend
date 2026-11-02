@@ -1,4 +1,10 @@
 export {
+	readConsentSnapshot,
+	sanitizeConsentSnapshot,
+	writeConsentSnapshot
+} from './consent-storage';
+export type { ConsentSnapshot } from './consent-storage';
+export {
 	readPreferencesSnapshot,
 	sanitizePreferencesSnapshot,
 	writePreferencesSnapshot

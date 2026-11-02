@@ -7,7 +7,21 @@ declare global {
 		// interface Error {}
 		// interface Locals {}
 		// interface PageData {}
-		// interface PageState {}
+		/**
+		 * Shallow routing (wave 1.5, the doctor's profile): a window of `/doctors/<slug>/details/<section>` opened in
+		 * place (`pushState`) carries its section and hints here; `null` is a window closed in place (`replaceState`).
+		 */
+		interface PageState {
+			doctorDetails?: {
+				section: string;
+				focus?: string;
+				office?: string;
+				date?: string;
+				service?: string;
+				/** Opened from the page (its own history entry): closing it goes back one step. */
+				inPlace?: boolean;
+			} | null;
+		}
 		// interface Platform {}
 	}
 }

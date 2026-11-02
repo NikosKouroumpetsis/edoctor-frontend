@@ -7,19 +7,22 @@
 	/**
 	 * The application's `Button` (`atoms/button`), class for class: tone × bordered, the control heights and the
 	 * radius steps. The label's look is `buttonLabelVariants`; triggers of overlays reuse this recipe on their own
-	 * element. The keyboard focus ring is the web's own state (the application has no focus to draw).
+	 * element. The keyboard focus ring is the web's own state (the application has no focus to draw). U-28.4 (the
+	 * web's own state too, Airbnb's): with a pointer each tone changes its fill on hover (a solid one a shade lighter, a
+	 * light one a step stronger), never while disabled; a disabled button keeps its presses refused by the browser and
+	 * shows the `not-allowed` cursor (`layout.css`), a blocked link takes no pointer at all.
 	 */
 	export const buttonVariants = tv({
-		base: 'inline-flex min-w-touch shrink-0 items-center justify-center outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50',
+		base: 'inline-flex min-w-touch shrink-0 items-center justify-center transition-colors duration-standard ease-standard outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50',
 		variants: {
 			tone: {
-				primary: 'bg-primary',
-				secondary: 'bg-secondary/5',
-				accent: 'bg-accent',
-				contrast: 'bg-secondary',
-				ghost: 'bg-card/40',
-				muted: 'bg-foreground/5',
-				outline: 'bg-transparent'
+				primary: 'bg-primary can-hover:not-disabled:hover:bg-primary/90',
+				secondary: 'bg-secondary/5 can-hover:not-disabled:hover:bg-secondary/10',
+				accent: 'bg-accent can-hover:not-disabled:hover:bg-accent/90',
+				contrast: 'bg-secondary can-hover:not-disabled:hover:bg-secondary/90',
+				ghost: 'bg-card/40 can-hover:not-disabled:hover:bg-foreground/5',
+				muted: 'bg-foreground/5 can-hover:not-disabled:hover:bg-foreground/10',
+				outline: 'bg-transparent can-hover:not-disabled:hover:bg-foreground/5'
 			},
 			size: {
 				default: 'min-h-control-md min-w-touch px-5 py-3',

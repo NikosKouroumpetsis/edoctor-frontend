@@ -3,7 +3,7 @@
 	import { Chip } from '$shared/ui/primitives/chip';
 
 	const sizes = ['sm', 'md'] as const;
-	const variants = ['filled', 'tinted'] as const;
+	const variants = ['filled', 'tinted', 'outline'] as const;
 	const filters = ['Καρδιολόγος', 'Παιδίατρος', 'Δερματολόγος', 'Ορθοπαιδικός'] as const;
 
 	// The application's meta (`atoms/chip`).
@@ -61,6 +61,16 @@
 <Story
 	name="Tinted With Icon And Count"
 	args={{ variant: 'tinted', icon: 'cash-outline', count: '12', selected: true, label: 'Μετρητά' }}
+>
+	{#snippet template(args)}
+		<Chip {...args} />
+	{/snippet}
+</Story>
+
+<!-- U-24.3: the results' filters chip, chosen — the 2 dark ring on the band, the count muted. -->
+<Story
+	name="Outline With Icon And Count"
+	args={{ variant: 'outline', icon: 'card-outline', count: '64', selected: true, label: 'Κάρτα' }}
 >
 	{#snippet template(args)}
 		<Chip {...args} />

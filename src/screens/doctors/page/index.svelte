@@ -1,15 +1,17 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
-	import PlaceholderPage from '$modules/shell/ui/placeholder-page';
-	import { m } from '$paraglide/messages.js';
+	import SearchResults from '$modules/search-doctors/ui/search-results';
+	import { LegalLine } from '$modules/shell/ui/site-frame';
+	import type { DoctorsScreenProps } from '../types';
 
-	const currentLocale = $derived(getPageLocale(page.url));
-	const messageOptions = $derived({ locale: currentLocale });
+	let { data }: DoctorsScreenProps = $props();
 </script>
 
-<PlaceholderPage
-	eyebrow={m.nav_doctors({}, messageOptions)}
-	title={m.doctors_page_title({}, messageOptions)}
-	body={m.doctors_page_body({}, messageOptions)}
-/>
+<!-- The results (U-24 ⇒ U-26, §7 of the wave record): the search's list and map; the page ends with the frame's thin
+     legal line instead of the footer (§7.2). -->
+<main data-slot="doctors" class="bg-card">
+	<SearchResults {data}>
+		{#snippet legal()}
+			<LegalLine />
+		{/snippet}
+	</SearchResults>
+</main>

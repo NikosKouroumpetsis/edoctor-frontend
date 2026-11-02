@@ -22,7 +22,7 @@
 	 * `w-full`), so a grid cell decides how wide it is. The focus ring is the web's own state.
 	 */
 	export const dateCardClasses =
-		'flex min-h-control-xl w-full flex-col justify-center rounded-md border border-border/70 px-3 py-2.5 text-start outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
+		'flex min-h-control-xl w-full flex-col justify-center rounded-md border border-border/70 px-3 py-2.5 text-start transition-colors duration-standard ease-standard outline-none focus-visible:ring-3 focus-visible:ring-ring/50 can-hover:not-disabled:hover:border-foreground';
 </script>
 
 <script lang="ts">

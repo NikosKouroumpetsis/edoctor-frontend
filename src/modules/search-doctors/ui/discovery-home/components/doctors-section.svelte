@@ -1,58 +1,55 @@
 <script lang="ts">
-	import ArrowRightIcon from '~icons/lucide/arrow-right';
 	import type { DoctorCard as DoctorCardType } from '$modules/search-doctors/types';
-	import DoctorCard from './doctor-card.svelte';
+	import { RAIL_CARDS_PER_VIEW, Rail, type RailScrollLabels } from '$shared/ui/organisms/rail';
+	import DoctorCard from '$modules/search-doctors/ui/search-doctor-card';
 
 	let {
 		title,
-		subtitle,
 		viewAllLabel,
-		favoriteLabel,
+		viewAllHref,
+		scrollLabels,
 		doctors,
-		isFavorite,
-		onToggleFavorite
+		profileHref,
+		profileLabel,
+		favoriteLabel,
+		onFavorite,
+		onSignIn
 	}: {
 		title: string;
-		subtitle?: string;
+		/** The «→» beside the title: its name and the row's results (already localized and resolved). */
 		viewAllLabel: string;
-		favoriteLabel: string;
+		viewAllHref: string;
+		scrollLabels: RailScrollLabels;
 		doctors: DoctorCardType[];
-		isFavorite: (slug: string) => boolean;
-		onToggleFavorite: (slug: string) => void;
+		profileHref: (doctorSlug: string) => string;
+		profileLabel: string;
+		favoriteLabel: string;
+		onFavorite: () => void;
+		/** «Συνδεθείτε για κόστος» of a card whose fee is hidden: the sign-in (U-27.4). */
+		onSignIn: () => void;
 	} = $props();
 </script>
 
-<section class="flex flex-col gap-3.5">
-	<div class="flex items-start justify-between gap-4">
-		<div class="flex flex-1 flex-col gap-1">
-			<h2 class="text-heading-md text-foreground tablet:text-heading-lg">
-				{title}
-			</h2>
-			{#if subtitle}
-				<p class="text-body-md text-muted-foreground">{subtitle}</p>
-			{/if}
-		</div>
-		<button
-			type="button"
-			aria-label={viewAllLabel}
-			class="group grid size-touch shrink-0 place-items-center rounded-full outline-none"
-		>
-			<span
-				class="grid size-control-sm place-items-center rounded-full bg-card text-foreground shadow-soft group-focus-visible:ring-3 group-focus-visible:ring-ring/50"
-			>
-				<ArrowRightIcon class="icon-md" />
-			</span>
-		</button>
-	</div>
-
-	<div class="container-bleed scrollbar-none flex gap-rail overflow-x-auto pb-1">
-		{#each doctors as doctor (doctor.id)}
+<!-- A home row (U-20): the title (20, 22 from 744) with the «→» circle to the row's results beside it, no subtitle;
+     ‹ › always from 744, faint at an end; the cards by the zone (~2.3 · 4 · 5 · 6 · 7), 12 apart, snapping. -->
+<Rail
+	{title}
+	trailing={{ icon: 'arrow-forward', label: viewAllLabel, href: viewAllHref }}
+	controlsFrom="tablet"
+	perView={RAIL_CARDS_PER_VIEW}
+	{scrollLabels}
+	data-testid="home-row"
+>
+	{#each doctors as doctor (doctor.id)}
+		<div>
 			<DoctorCard
 				{doctor}
+				href={profileHref(doctor.doctorSlug)}
+				{profileLabel}
 				{favoriteLabel}
-				isFavorite={isFavorite(doctor.doctorSlug)}
-				{onToggleFavorite}
+				{onFavorite}
+				{onSignIn}
 			/>
-		{/each}
-	</div>
-</section>
+		</div>
+	{/each}
+</Rail>

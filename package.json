@@ -36,6 +36,7 @@
 		"@internationalized/date": "^3.12.1",
 		"@tanstack/svelte-query": "^6.1.27",
 		"clsx": "^2.1.1",
+		"maplibre-gl": "6.14.0",
 		"openapi-fetch": "^0.17.0",
 		"shadcn-svelte": "^1.2.7",
 		"tailwind-merge": "^3.5.0",

@@ -1,63 +1,58 @@
-import type { SectionId } from '../../types';
+import type { SectionId } from '$modules/search-doctors/types';
 import type { MarketplaceAvailability, MarketplaceSortBy } from './types';
 
-/** Page size for home section carousels. Lives ONLY here, never in the shared search call. */
+/**
+ * Page size for home section rails. Lives ONLY here, never in the shared search call. The same 8 as the
+ * application's `HOME_SECTION_LIMIT`: up to 7 cards show at once from 1440 (U-20).
+ */
 export const HOME_SECTION_LIMIT = 8;
 
 /**
- * One home section's fixed scope. `serviceValue`/`locationValue` are criteria vocabulary
- * values resolved to real slugs at runtime via `resolvers.ts`.
+ * A display term per language, resolved at runtime (the application's `LocalizedSpecialtyTerm` /
+ * `LocalizedLocationTerm`): the backend matchers index professionals and areas by their localized name, and the
+ * English area term is the transliteration the matcher accepts (`Athina`).
+ */
+export type LocalizedTerm = { el: string; en: string };
+
+/**
+ * One home section's fixed scope, the application's `homeSectionConfigs` (U-20: the web's rows are the
+ * application's, the same query). `specialties` resolve to `professionalId`s via `/doctors/suggestions` (several
+ * union their professionals), `location` to a `locationSlug` via `/locations/suggestions` — a hard scope: an
+ * area-titled row that does not resolve is hidden rather than showing doctors from the wrong city.
  */
 export type HomeSectionConfig = {
 	id: SectionId;
 	sortBy: MarketplaceSortBy;
 	availability: MarketplaceAvailability;
-	/** Service criteria value to resolve to a `serviceSlug` (with `text` fallback). */
-	serviceValue?: string;
-	/** Free-text fallback when the service slug cannot be resolved from `/facets`. */
-	serviceTextFallback?: string;
-	/** Area criteria value to resolve to a `locationSlug`. */
-	locationValue?: string;
+	specialties?: LocalizedTerm[];
+	location?: LocalizedTerm;
 };
 
 export const homeSectionConfigs: HomeSectionConfig[] = [
 	{
 		id: 'popular-athens',
 		sortBy: 'popularity',
-		availability: 'all',
-		locationValue: 'athens'
+		availability: 'next7Days',
+		location: { el: 'Αθήνα', en: 'Athina' }
 	},
 	{
-		id: 'online-this-week',
+		id: 'popular-psychologists',
 		sortBy: 'popularity',
-		availability: 'next3Days',
-		// No single "video/online" service slug spans specialties, so we scope by the text
-		// term the backend matcher recognizes ("online") to curate online doctors broadly.
-		serviceValue: 'video-consultation',
-		serviceTextFallback: 'online'
+		availability: 'next7Days',
+		specialties: [{ el: 'Ψυχολόγος', en: 'Psychologist' }]
 	},
 	{
-		// No dedicated "preventive" service exists in the catalog, so this row curates the
-		// top-rated doctors instead of scoping to a service that would return nothing.
-		id: 'preventive-checkup',
-		sortBy: 'rating',
-		availability: 'all'
+		id: 'internal-medicine-gp',
+		sortBy: 'popularity',
+		availability: 'next7Days',
+		specialties: [
+			{ el: 'Παθολόγος', en: 'Internal Medicine' },
+			{ el: 'Γενικός Ιατρός', en: 'General Practitioner' }
+		]
 	}
 ];
 
-/**
- * Maps an app-side availability criteria value to the backend availability filter.
- * `today` -> `today`; `tomorrow | this-week | 0-3-days` -> `next3Days`; empty -> `all`.
- */
-export function mapAvailability(value: string | undefined): MarketplaceAvailability {
-	switch (value) {
-		case 'today':
-			return 'today';
-		case 'tomorrow':
-		case 'this-week':
-		case '0-3-days':
-			return 'next3Days';
-		default:
-			return 'all';
-	}
+/** The term for the page's language (English for any other, as the application's builder). */
+export function termFor(term: LocalizedTerm, lang: string): string {
+	return lang === 'el' ? term.el : term.en;
 }

@@ -57,4 +57,17 @@ describe('DropdownMenu', () => {
 		);
 		expect(screen.getByRole('menuitem', { name: 'Profile' }).querySelector('svg')).toBeNull();
 	});
+	it('U-20: an item with an `href` is a link in the menu (role menuitem), in the arrows’ order; choosing it closes the menu', async () => {
+		const user = userEvent.setup();
+		render(Harness, { props: { withLink: true } });
+		await user.click(screen.getByRole('button', { name: 'Open menu' }));
+		const link = screen.getByRole('menuitem', { name: 'Help' });
+		expect(link.tagName).toBe('A');
+		expect(link).toHaveAttribute('href', '#help');
+		expect(link).toHaveAttribute('data-roving-item');
+		expect(link).toHaveClass('min-h-touch');
+		await user.click(link);
+		await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+		expect(screen.getByRole('button', { name: 'Open menu' })).not.toHaveFocus();
+	});
 });

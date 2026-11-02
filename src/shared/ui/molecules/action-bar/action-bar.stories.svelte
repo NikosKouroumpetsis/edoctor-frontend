@@ -21,6 +21,8 @@
 		argTypes: {
 			preset: { control: 'select', options: ['default', 'filters', 'plain'] },
 			primaryAppearance: { control: 'select', options: ['default', 'compact'] },
+			primaryShape: { control: 'select', options: ['default', 'pill'] },
+			primaryTone: { control: 'select', options: ['accent', 'contrast'] },
 			secondaryAppearance: { control: 'select', options: ['link', 'plain'] }
 		}
 	});
@@ -67,6 +69,12 @@
 
 <Story name="Primary Loading" args={{ primaryLoading: true }} />
 
+<!-- U-23.1: the search window's footer — «Διαγραφή όλων» and the pill «Αναζήτηση» (full round, unlike Airbnb). -->
+<Story
+	name="Primary Pill"
+	args={{ primaryShape: 'pill', secondaryLabel: 'Διαγραφή όλων', primaryLabel: 'Αναζήτηση' }}
+/>
+
 <Story
 	name="Primary Disabled"
 	args={{
@@ -74,6 +82,19 @@
 		primaryDisabled: true,
 		primaryIcon: undefined,
 		primaryLabel: 'Επιβεβαίωση'
+	}}
+/>
+
+<!-- U-24.3: the results' filters footer — the dark pill with the count, ONE line at every width (360 included). -->
+<Story
+	name="Filters Single Line"
+	args={{
+		preset: 'filters',
+		primaryIcon: undefined,
+		primaryLabel: 'Εμφάνιση 1.000+ γιατρών',
+		primaryShape: 'pill',
+		primaryTone: 'contrast',
+		singleLine: true
 	}}
 />
 

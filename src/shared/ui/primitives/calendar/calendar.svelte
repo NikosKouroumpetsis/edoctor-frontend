@@ -155,7 +155,12 @@
 						{@const selected = value ? isSameDay(day, value) : false}
 						{@const outside = !isSameMonth(day, displayMonth)}
 						{@const disabled = isDisabled(day)}
-						<td role="gridcell" aria-selected={selected} class="p-0">
+						<!-- U-31.1: a disabled day lets the pointer through to its cell, which shows `not-allowed`. -->
+						<td
+							role="gridcell"
+							aria-selected={selected}
+							class="p-0 has-[:disabled]:cursor-not-allowed"
+						>
 							<button
 								type="button"
 								data-date={day.toString()}

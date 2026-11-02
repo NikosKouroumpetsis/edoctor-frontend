@@ -40,7 +40,12 @@ so the generated wire types are re-exported through the shared client layer
 
 Allowed dependency rules:
 
-- `src/routes` may import mirrored screens and app-wide route shell/provider code.
+- `src/routes` may import mirrored screens and app-wide route shell/provider code. A route layout may compose a
+  feature slice into the shell's snippets (`+layout.svelte`: `<SiteFrame {popularSearches}>`, MINOR-1 of U-29: a
+  module never imports another, so the route meets them), and a route's load files may call a module's `api/` or
+  `lib/` for their load contract (`api/results` `loadResultsFirstPage`, `shell/lib/legal` `isLegalSlug`; U-32.1: the
+  facts of `api/`, the page's view by `lib/` — `section-link` `buildStreamedHomeRows`, `article-card`
+  `buildStreamedHomeArticles`, `results-scope` `readResultsScope`; U-32.9: a streamed promise never rejects).
 - `src/screens` may import modules, shared code, SvelteKit route state, and generated i18n.
 - `src/modules` may import shared code and generated i18n.
 - `src/shared` must not import routes, screens, or modules.
@@ -202,6 +207,14 @@ load functions or TanStack Svelte Query.
 
 Feature code lives under `src/modules/<feature>`.
 
+Names follow the parent-context rule (a folder never repeats its parent) with ONE listed exception, the application's
+parity (S-01.6, U-29.3): the slices `search-doctors/ui/search-*` (`search-criteria`, `search-results`,
+`search-filters`, `search-doctor-card`) and the libs `search-doctors/lib/search-*` and `articles/lib/article-card`
+keep the application's names, file for file. The units INSIDE a slice drop the slice's word, with the same names in
+both repositories: the results' `list`, `map`, `pin-card`, `map-switch`, `header`, `map-pane`, hook `use-stage`; the
+search's `option-list`, `panel`, `bar`, `typing-page`, hooks `use-state`, `use-lists`, `use-bar`, lib `fields`; the
+filters' hook `use-state`, lib `options`.
+
 A feature module is a product/domain capability, not a route. Examples:
 
 - `marketing`
@@ -213,6 +226,42 @@ A feature module is a product/domain capability, not a route. Examples:
 
 Prefer cohesive modules that can evolve independently. A module can have multiple UI slices if the
 feature has multiple surfaces.
+
+### Module Segments (U-29.1)
+
+`src/modules/<feature>/`: feature logic and feature UI slices, in the fixed segments `api/ lib/ config/ ui/` plus a
+type-only `types.ts` (the application's segments, owner decision U-29.1, 29/10):
+
+- `api/`: backend facts only — endpoints, DTO→domain adapters, query keys and TanStack query options; no localized
+  copy and no display formatting.
+- `lib/`: pure feature logic and view-model/label builders; no Svelte runes, no transport; `api/` never imports
+  `lib/`.
+- `config/`: static feature data (option lists, static maps); nothing computed at runtime.
+- `ui/<slice>/`: the feature's UI slices (below).
+
+State that needs runes is a slice's `hooks/` (one slice) or `src/shared/state` (two or more, e.g.
+`$shared/state/device-location`, the visit's position of «Κοντά μου»); never a `lib/`.
+`tests/architecture/module-segments.test.ts` («U-29.1: …», «U-32.1: …») guards the segments, the rune-free `lib/`
+and `config/`, the type-only `types.ts` and «`api/` never imports `lib/`», with no exception (U-32.1, the owner, 29/10):
+the api answers FACTS, the application's model, and `lib/` writes them —
+
+- the cards: `api/marketplace/card-adapter` `mapCardToFacts` (`SearchDoctorsCardFacts` in `api/marketplace/types`,
+  with `readAt`, the server's «now» the card was read at: its day words are told against it, D-118; `badgeId`
+  `patient-favorite` only for `items[].isPatientsChoice: true`, U-45.2);
+  `lib/doctor-card` `buildDoctorCard` (the home's card, «Επιλογή ασθενών» by `formatBadgeLabel`) and
+  `buildSearchResultCard` (the results card);
+- a home row: `fetchHomeSection` / `loadHomeSections` answer its cards and `link` (`SearchDoctorsSection`,
+  `SearchDoctorsSectionLink`); `lib/section-link` `buildSectionCriteria` (the «→» criteria), `buildHomeSection`,
+  `buildStreamedHomeRows`;
+- the results' address: `lib/results-scope` `readResultsScope` (the route's first page) and `readResultsPress` (a
+  press's read ahead); `api/results` takes the scope;
+- the home's articles: `articles/api` `loadHomeArticles` answers the feed's articles; `lib/article-card`
+  `buildHomeArticlesResult` (`buildStreamedHomeArticles` for the route's stream, U-32.9: never rejecting).
+
+Where the server streams a view (the «Όλοι» rows, the articles) the route's load builds it with the lib, as the
+words were built on the server before; a read of the browser builds it in its query (`queryFn` of the home's rows) or
+its observer (`select` of the results' read, whose cache holds facts: the press's prefetch and the server's page
+share its key).
 
 ## Module UI Slices
 
@@ -242,6 +291,11 @@ The current preferred import path for screens is the slice public API:
 ```ts
 import HomeLanding from '$modules/marketing/ui/home-landing';
 ```
+
+A slice may export a private component as part of its public API when another slice or a screen composes it
+(`search-criteria`'s `CriteriaPanel` and `CriteriaSearchBar`, `search-doctor-card`'s `FeeSignIn`,
+`site-frame`'s `LegalLine`, NIT-4 of U-29): once exported it is public, and its consumers import it from the slice's
+`index.ts`. Such a component may read the page itself, as a slice page does (`LegalLine` reads `page.url`).
 
 Do not import private slice components from outside the slice:
 
@@ -398,7 +452,8 @@ Definitions:
   (`app-shell`, `app-header`, `bottom-nav`, `site-footer`, `site-navbar`, `cookie-consent`) are
   generic: words, hrefs, tabs and columns come from the caller. The eDoctor frame that fills them
   (logo, tabs, footer columns, language and theme controls) is the `src/modules/shell` module
-  (`ui/site-frame`, `ui/placeholder-page`), rendered by `src/routes/+layout.svelte` (U-03.8).
+  (`ui/site-frame`, `ui/placeholder-page`, `ui/consent-prompt`; `api/consent`, `config/{social,consent-fallback-registry,legal}`,
+  `lib/{consent,legal}`), rendered by `src/routes/+layout.svelte` (U-03.8).
 - `templates/`: reusable layout structures. Keep them generic and prop-driven.
 - `icons/` (since wave 0, U-03.3): the application's glyphs — `ionicon/` (Ionicons as local SVG
   paths, the application's names, MIT note in `LICENSE.md`) and the brand marks (`brand-apple`,
@@ -474,6 +529,14 @@ module-local component
 
 Once promoted, the shared component must not import from the original module.
 
+### Built pieces stay (U-30.2)
+
+φτιαγμένα κομμάτια κρατιούνται ως βιβλιοθήκη (U-30.2): the one exception to the contract's «do not leave … unused
+helpers» (`project-architecture.md` «Documentation And Cleanup»). A component that was built and has no consumer yet
+(shared or module: e.g. `discovery-home`'s `skeletons.svelte`, `modules/doctors/ui/*`), what feeds it (builders,
+hooks, types) and the i18n keys without a reader stay, as the kit is a library; a shared component keeps its story and
+its test. Dead code INSIDE a file in use, a stale doc and a duplicated constant are still removed.
+
 ## Shared
 
 `src/shared` owns reusable contracts that are stable enough to be reused across screens and modules.
@@ -482,11 +545,13 @@ Once promoted, the shared component must not import from the original module.
 src/shared/
   config/       app env, variants, public config parsing
   design/       design assets, tokens, design-system helpers
-  lib/          pure framework-agnostic helpers
+  lib/          pure framework-agnostic helpers, and the runes-based building blocks in `.svelte.ts`
+                (`form`, `headless`, `debounce`)
   preferences/ theme, language, and preference resolution
   providers/   root and subtree providers
   query/        TanStack Svelte Query setup
-  state/        app-wide local state when provider scope is not required
+  state/        app-wide local state: a tab's module state written only in the browser (`device-location`),
+                or a context scoped to the page tree (`search-dock`), never a server singleton
   storage/      browser/server-safe storage adapters
   ui/           reusable UI hierarchy
 ```
@@ -710,16 +775,23 @@ bun run lint
 Run `bun run build` when routing, SvelteKit config, env behavior, providers, or public UI flows
 change.
 
-When test tooling is added, architecture tests should enforce:
+Architecture tests (`tests/architecture`) enforce:
 
-- Every non-layout page route has a mirrored screen folder.
-- Screen folders contain `index.ts`, `page/index.svelte`, `hooks/index.ts`,
-  `hooks/use-screen.svelte.ts`, and `types.ts`.
-- Module UI slices follow the `index/page/hooks/components/lib/types` contract.
-- Slice consumers import slice public APIs, not private components.
-- Shared code does not import feature modules, screens, or routes.
-- Runtime code does not use `$lib` for app imports.
-- Authored runtime code does not use wildcard `export *` barrels.
+- Every non-layout page route has its mirrored screen folder with `index.ts`, `page/index.svelte`, `hooks/index.ts`,
+  `hooks/use-screen.svelte.ts` and `types.ts`, and renders it through `$screens/<path>`
+  (`route-mirror.test.ts`, «U-29.3: …»).
+- The import boundaries (`import-boundaries.test.ts`, «U-29.3: …»): shared imports no module, screen or route; no
+  module → module, no module → screen or route, no screen → screen or route; a slice's and a screen's private files
+  only from inside them; a relative import never leaves its unit (the slice, the segment folder, the screen); no
+  `$lib`, no `export *`, `$generated/api` only in `src/shared/lib/api-client`; the shared UI's atomic layers never
+  import upward (primitives < molecules < organisms < templates, stories and harnesses aside).
+- The modules' segments (`module-segments.test.ts`, «U-29.1: …» and «U-29.3: …»): a module root holds only
+  `api/ lib/ config/ ui/` and `types.ts`; `lib/` and `config/` hold no runes and no Svelte file; `config/` computes
+  nothing and imports only types; every `types.ts` of `src/` is type-only; `api/` never imports `lib/` (no exception
+  since U-32.1, a type import included); no rune state is typed with an `api/` answer and a runes file calls the
+  transport only inside a TanStack `queryFn` (BLOCKER-1 of the audit).
+- The doctor card and its skeletons share ONE photo map (`card-media.test.ts`, D13, «U-29 (MINOR-5): …»);
+  `maplibre-gl` reaches no first bundle (`map-bundle.test.ts`, «U-24.4: …»).
 - shadcn-svelte primitives live under `src/shared/ui/primitives`.
 - i18n keys have Greek and English parity.
 - Icons of the kit are the application's Ionicons from `src/shared/ui/icons` (no icon package).
@@ -779,3 +851,143 @@ src/modules/marketing/ui/home-landing/
 
 This is the intended baseline for future feature slices: the public API stays small, the page root
 stays readable, and private components remain local until proven shared.
+
+Wave 1.0 (D1) adds, in the same shape:
+
+- `src/modules/shell/ui/site-frame` — the frame (apple.com's bar from 744, the capsule below it, the ☰ menu, the
+  «Ρυθμίσεις» dialog, the footer) and `ui/consent-prompt` (the consent card and its tools dialog; `api/consent`
+  reads `GET /consent/registry`, `config/consent-fallback-registry.ts` when it cannot, `config/social.ts` the
+  networks' ONE list, U-26.2).
+- `src/modules/search-doctors/ui/popular-searches` — the footer's popular searches. A module never imports another:
+  the route layout composes it into the frame as a snippet (`+layout.svelte`: `<SiteFrame {popularSearches}>`).
+- `src/modules/articles` — the home's last row (`api/feed.ts`, `lib/article-card`, `ui/home-row`), composed with the
+  doctors' rows by `src/screens/home`.
+- The placeholders of wave 1.5 at their final addresses: `/articles`, `/articles/[slug]`, `/help`,
+  `/doctors/[slug]`, `/legal/[slug]` (only the application's three slugs; any other is a 404), each screen mirrored
+  under its route as the application's (`src/screens/articles/[slug]`, `src/screens/doctors/[slug]`,
+  `src/screens/legal/[slug]`).
+- The guest's account menu is ONE list (`site-frame/lib/frame.ts` `buildAccountEntries`) drawn by the ☰ menu from
+  744 and by the capsule's «Προφίλ» sheet below it (U-19.1).
+
+Wave 1.0 (D2) adds the search «Τι / Πού / Πότε», the application's logic file for file (S-01.6):
+
+- `src/modules/search-doctors/lib/*` — the pure rules: `search-criteria` (types, static options, the URL both ways
+  with the application's names), `criteria-suggestions`, `criteria-locations`, `effective-criteria`,
+  `search-query` (the scope a search sends; an empty «Πότε» asks `next3Days`), `availability-dates` (U-22's dates),
+  `criteria-messages` (the catalog keys the libs carry); `config/criteria-icons.ts` the ONE glyph config of the rows
+  (its static maps; the lookups `specialtyIcon`, `serviceIcon`, `whatIcon` are `lib/criteria-icons`, U-29.1).
+- `src/modules/search-doctors/api/marketplace/*` — the reads: `suggestions.ts` (TanStack query options of
+  «Τι» / «Πού» / the popular specialties / the ready areas), the adapters, the application's query keys.
+- `src/modules/search-doctors/ui/search-criteria` — the slice: `page/index.svelte` the phone's window of cards
+  (default export), `CriteriaPanel` the bar's panel, the hooks `CriteriaState`, `CriteriaLists`, `useCriteriaBar`
+  (public API in `index.ts`); `discovery-home` composes them (the pill opens the window, the big bar and its drop
+  from the top bar's pill open the panel).
+- Shared: `$shared/lib/debounce`, `$shared/lib/location` (the device's position, 10″), `$shared/lib/query-state`,
+  `StepCard`, and the new props of `OptionRow`, `OptionRowSkeleton`, `SuggestionGroupHeader`, `HighlightText`,
+  `ActionBar`, `SearchBar` (see `styling-guidelines.md`).
+
+Wave 1.0 (D3) adds the results `/doctors` (screen 4: list, map, filters), the application's logic file for file:
+
+- `src/routes/doctors/+page.server.ts` — the first page of five on the server (`api/results/load.ts`
+  `loadResultsFirstPage`); a client navigation (`isDataRequest`) and «Κοντά μου» ask nothing there.
+  `src/screens/doctors` composes `ui/search-results` with the frame's `LegalLine` (no footer on the results,
+  `site-frame/lib/frame.ts` `showsSiteFooter`).
+- `src/modules/search-doctors/lib/*` — `search-filters` (the application's names, `readSearchDoctorsFilters` the
+  ONE reader of the address's filters), `results-count`, `results-empty`, `filters-label`; `search-query` carries the
+  filters in the scope; `search-criteria` `searchResultsHref` writes them after the criteria.
+- `src/modules/search-doctors/api/marketplace/*` — `build-search-query`, `search-source`, `facets-source`,
+  `facets-adapter`, `search-results.ts` (the infinite read, the live count, the facets as query options),
+  `card-adapter` (the card's facts, its map point among them; since U-32.1 the list card and its pin price are
+  `lib/doctor-card` `buildSearchResultCard`'s, from the SAME facts).
+- `src/modules/search-doctors/ui/search-results` (the page, `SearchResultsState`, the map and its pins),
+  `ui/search-filters` (the window, `FiltersState`, `lib/options`), `ui/search-doctor-card` (the ONE card,
+  `variant` `rail | list`, moved out of `discovery-home`), and `search-criteria` `CriteriaSearchBar` (the big bar,
+  moved out of `discovery-home`; `inline={false}` on the results: it exists only while dropped from the top bar).
+- 🔴 The results address is read ONLY through `readSearchDoctorsCriteria` and `readSearchDoctorsFilters`
+  (`tests/architecture/results-url.test.ts`: nothing outside their libs calls `resolveSearchDoctorsCriteria` or
+  `resolveSearchDoctorsFilters`, and no file of the search's module, the results' screen or route reads a query
+  parameter itself — the old link's detector only asks `.has`).
+- The capsule marks «Εξερευνήστε» on the search's pages, the home and the results (`site-frame/lib/frame.ts`
+  `isExploreFlow`, U-25.2).
+- Shared: `$shared/config/map` (the ONE map look), `MapView`, `MapSheet`, `MapPricePin`, `MapPinCard`,
+  `FilterButton`, and the new props of `ActionBar`, `Chip`, `SelectableCard`, `FullscreenModalTemplate`
+  (`styling-guidelines.md`).
+- Round f1 (U-27): the `MapSheet` drag and `mapSheetRestFor`, `MapView` `zoomControls`, the `MapPinCard` link under
+  its lines (`styling-guidelines.md`); `ui/search-doctor-card` exports `FeeSignIn` (U-27.4: the hidden
+  fee's «🔒 Συνδεθείτε για κόστος», its own action beside the card's one link — f1b: INLINE in its line, a `span` with
+  the button's role and keys, as a `<button>` is always an atomic box; no change of layout, its target grown 4 on
+  every side by a pseudo-element, the line's `-m-1 p-1` giving it room, a listed exception of
+  `tests/architecture/touch-targets.test.ts`), which the results' pin card uses through the slice's public API; the
+  card and the pin card take `onSignIn` (the pages' `signIn`: the sign-in page, pushed, the page beneath it in the
+  history).
+- Round f2 (U-28, web only): the results' map on 1/3 from 1128 and its three states (`desktopMap` of the page,
+  through `ResultsMap` `expandControl` / `hideControl` onto `MapView`), `SelectableCards size="sm"` in the filters,
+  and the pressable rule and hovers of the kit (`styling-guidelines.md` «Pressable»).
+- Round f3 (U-29 ⇒ U-31, the architecture audit closed): the modules' segments (U-29.1, above); the home's «Όλοι» rows
+  are TanStack queries (`discovery-home/hooks/use-streamed-sections.svelte.ts`, U-29.3); the visit's position of
+  «Κοντά μου» is `$shared/state/device-location` and `lib/device-location` the pure `criteriaWithDeviceLocation`; the
+  legal slugs' ONE list is `shell/config/legal.ts` (`lib/legal.ts`: `isLegalSlug`, `legalPath`); the results' page
+  is a skeleton of its units (`components/{header,list,map-pane,map,pin-card,map-switch,map-toggle,card-skeleton}`,
+  `hooks/{use-state,use-stage}`, `types.ts`) and the home's (`components/rows`, `types.ts`); both wire the search
+  with `search-criteria`'s `useCriteriaWiring` and sign in with `search-doctor-card`'s `useSignIn`, and draw their
+  states' glyph with the shared `StateGlyph`; the card's and its skeletons' photo is `searchDoctorCardMedia` (D13);
+  the row controls' zone classes are `$shared/design/scroll-controls` (Π2); `modules/doctors/ui/doctor-card` is
+  `modules/doctors/ui/card` (Π6).
+- Round f4 (U-32, the owner's «Ναι σε όλα», 29/10): the api answers facts and the libs write them (U-32.1, «Module
+  Segments» above); the home's header is its own slice, `src/modules/search-doctors/ui/discovery-header` (U-32.6, the
+  application's name and role: the phone's search pill and the categories' rail, `components/category-rail`), composed
+  by `discovery-home`'s page as `search-criteria` is (its state — the chosen category, the search's window — is the
+  home's; the big bar from 744 stays `search-criteria`'s `CriteriaSearchBar`); the old card's heart takes the
+  palette's `bg-overlay` and `accent` (U-32.2, `modules/doctors/ui/card`); the 744 map switch stands
+  `bottom-map-switch-bottom` (U-32.3, `design-tokens.md`). Round f4c (U-33.3): the card's «🔒 Συνδεθείτε για κόστος»
+  is `search-doctor-card/components/fee-sign-in.svelte`, exported as `FeeSignIn` — the application's `fee-sign-in` /
+  `FeeSignIn` (formerly `fee-action`, `SearchDoctorFeeAction`; its `data-slot` `doctor-card-fee-action` unchanged).
+
+Wave 1.5 · screen 5 adds the doctor's profile `/doctors/[slug]` and its windows, the application's logic file for file
+(S-01.6) in the module of its name, `src/modules/doctor` (the old `src/modules/doctors` stays as a library, U-30.2):
+
+- `src/routes/doctors/[slug]/+page.server.ts` — the profile on the server (`api/profile/load.ts`
+  `loadDoctorProfile`: ONE read through SvelteKit's `fetch`, never throws), so the page is whole without JavaScript
+  and its `<head>` speaks for it (U-28.4). Its language is the address's PATH (`getPathnameLocale`,
+  `shared/preferences/i18n/page-locale.ts`): the load depends on the path, so a change of language reads again, and
+  never reads the query (a window's `?office=` asks nothing). A profile nobody may see is a 404, a failed read a 503:
+  `routes/doctors/[slug]/+error.svelte` renders the screen's `page/error.svelte` (`DoctorProfileErrorScreen`, the
+  slice's `DoctorDetailError`) — its own `<title>`, `robots=noindex`, no canonical; «Δοκιμάστε ξανά» is
+  `invalidateAll`. `src/routes/doctors/[slug]/details/[section]/` is a window's own address (an unknown section is a
+  404, the same error page); both screens (`src/screens/doctors/[slug]`, `…/details/[section]`) compose the SAME slice
+  (a test holds the two hooks equal): the addresses on the site's public origin (`$shared/config/site`
+  `siteUrl`, `PUBLIC_SITE_ORIGIN`: canonical, `og:url`, `hreflang`, the shared link — never the request's host, never
+  a relative `resolve()`), «Δείτε παρόμοιους γιατρούς» as the search module's results (the application's names:
+  `api/marketplace` `resolveSimilarDoctorsArea` — the active office's city through `resolveLocationSlug`, asked when
+  cases 1 and 2 show — and `lib/similar-doctors` `buildSimilarDoctorsCriteria`: the specialty, and the area ONLY as a
+  `location` by its slug; without one no «Πού» at all, U-37.2) and the cards' `useSignIn`.
+- `src/modules/doctor/api/{profile,reviews,availability,office}` — the facts (the application's mappers; the
+  services' `isSpecialized`, U-36.2; `doctor.responseMetrics` ⇒ `DoctorResponseMetricsFacts` by `buildResponseMetrics`,
+  the wire's `WITHIN_HOUR`… as the design's `within-hour`…, each `null` left out, U-43; `doctor.isPatientsChoice` ⇒
+  `isPatientsChoice`, only a `true`, U-45.2 — the laurels of the identity and of the reviews only then; every score
+  — average, aspects' averages, a review's overall and aspects — on the 5 stars, U-49: `$shared/lib/rating-stars`
+  `toStarScore` keeps 0…5 and drops anything else, a review off the scale included; the cards' average too) and the browser's reads as TanStack query options: every office's 28 days at
+  once (U-37.1, D-103), a non-main office's facts once (U-39.1), the reviews while their window is open.
+- `src/modules/doctor/lib/detail/*` — the view model, the application's units and names (S-01.6): `build-content`
+  (`buildSpecializations`, …), `booking` (`buildDoctorBookingContent`, `buildDoctorSimilarSearch`; U-37 / U-38.1 /
+  U-40.3), `availability` (`resolveDoctorAvailabilityServiceId`, the section
+  and the window), `office` (`resolveDoctorActiveOfficeId`, `buildDoctorOfficeView`, `buildOfficeTabs`,
+  `buildDoctorAvailabilityElsewhere`; U-39), `metrics` (`buildDoctorResponseRows`: `AUTO` «Άμεση επιβεβαίωση»,
+  `MANUAL` the 6-month metrics, unknown none; `buildDoctorCompletedVisits`; U-36.1 / U-43), `share`
+  (`buildDoctorShareContent`), `sections` the windows' addresses and hints (the application's `focus`: a review's id,
+  in `photos` a photo's place from 0, `readDoctorPhotoFocus`), `seo` the title, description, canonical, `hreflang`,
+  Open Graph and JSON-LD `Physician`; `detail.sample.ts` is the tests' doctor, never imported by production code.
+- `src/modules/doctor/ui/detail` — the slice: `page/index.svelte` (the profile), `page/error.svelte` (the route's
+  error page), `hooks/use-state.svelte.ts` `DoctorDetailState` (the reads, the ONE active office, the service, the
+  confirmed time, the open window), `components/*` (one per section, the booking card from 744, the phone's bar, the
+  section bar, the windows, the share window, the head).
+- 🔴 The windows are shallow routing (`pushState` / `replaceState`, `App.PageState.doctorDetails`): a link to
+  `details/<section>` opens in place with its own history entry (`inPlace`), «×», Escape and «back» close it; the
+  same address loaded directly draws the profile with the window open (canonical: the profile).
+- The frame hides the phone's capsule on a profile and its windows (`site-frame/lib/frame.ts` `showsBottomNav`): the
+  page's own booking bar takes the bottom, as in the application; there the footer keeps the bar's measured room
+  (`SiteFooter` `reservePageBar`, `StickyActionBar` `room="page"`, `pb-page-bar`) instead of the capsule's.
+- Shared: `$shared/lib/format-day-time` (the ONE day-and-time phrase, moved out of `search-doctors/lib/doctor-card`,
+  which re-exports `formatInstantDayTime`; `msUntilNextPlatformDay` for the midnight redraw, S-34.1), the new
+  `MediaGallery` and `RevealingPhoto` (the application's names and props), and the new props of `TwoColumnDetail`,
+  `StickyActionBar` and `MapView` (`styling-guidelines.md`).

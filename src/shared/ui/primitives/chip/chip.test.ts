@@ -49,6 +49,63 @@ describe('Chip', () => {
 		expect(b.querySelector('[data-icon="card-outline"]')).toHaveClass('icon-sm', 'text-primary');
 	});
 
+	it('U-24.3: `outline` is the results’ filters chip — chosen ⇒ the 2 dark ring (inset) on the band, the words dark, the count muted', () => {
+		const chosen = render(Chip, {
+			props: {
+				label: 'Κάρτα',
+				selected: true,
+				variant: 'outline',
+				icon: 'card-outline',
+				count: '64'
+			}
+		});
+		const card = screen.getByRole('button', { name: 'Κάρτα 64' });
+		expect(pillOf(card)).toHaveClass(
+			'border-foreground',
+			'bg-background',
+			'ring-1',
+			'ring-inset',
+			'ring-foreground'
+		);
+		expect(pillOf(card)).not.toHaveClass('bg-primary', 'bg-primary/10');
+		expect(screen.getByText('Κάρτα')).toHaveClass('text-foreground');
+		expect(screen.getByText('64')).toHaveClass('text-muted-foreground');
+		expect(card.querySelector('[data-icon="card-outline"]')).toHaveClass('text-foreground');
+		chosen.unmount();
+
+		render(Chip, { props: { label: 'Μετρητά', variant: 'outline' } });
+		const idle = screen.getByRole('button', { name: 'Μετρητά' });
+		expect(pillOf(idle)).toHaveClass('border-border', 'bg-card');
+		expect(pillOf(idle)).not.toHaveClass('ring-1');
+	});
+
+	it('U-24.3 (NIT-3 of r1): the count sits on the label’s baseline, as the prototype’s `.fchip small` — never raised', () => {
+		render(Chip, { props: { label: 'Κάρτα', variant: 'outline', count: '64' } });
+		const pair = screen.getByText('64').parentElement;
+		expect(pair).toHaveAttribute('data-slot', 'chip-label-count');
+		expect(pair).toHaveClass('inline-flex', 'items-baseline');
+		expect(pair).toContainElement(screen.getByText('Κάρτα'));
+	});
+
+	it('U-24.3 (negative, final round): on a narrow chip only the label gives way — the count never shrinks nor is clipped', () => {
+		render(Chip, {
+			props: { label: 'Πληρωμή με κάρτα στο ιατρείο', variant: 'outline', count: '1.234' }
+		});
+		const count = screen.getByText('1.234');
+		expect(count).toHaveAttribute('data-slot', 'chip-count');
+		expect(count).toHaveClass('shrink-0', 'whitespace-nowrap');
+		expect(count).not.toHaveClass('truncate');
+		expect(count.className).not.toMatch(/\b(overflow-|line-clamp-|text-ellipsis)/);
+		expect(screen.getByText('Πληρωμή με κάρτα στο ιατρείο')).toHaveClass('truncate');
+	});
+
+	it('U-24.3 (negative, NIT-3 of r1): a chip without a count draws its label alone (no pair)', () => {
+		render(Chip, { props: { label: 'Μετρητά', variant: 'outline' } });
+		const chip = screen.getByRole('button', { name: 'Μετρητά' });
+		expect(chip.querySelector('[data-slot="chip-label-count"]')).toBeNull();
+		expect(screen.getByText('Μετρητά').parentElement).toHaveAttribute('data-slot', 'chip-pill');
+	});
+
 	it('U-03.1: a removable chip shows the ✕ and calls onRemove, not onclick', async () => {
 		const user = userEvent.setup({ delay: null });
 		const onRemove = vi.fn();

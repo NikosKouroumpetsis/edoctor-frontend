@@ -11,8 +11,8 @@ const BUCKETS = [
 	{ star: 1, share: 0.01, count: 1 }
 ];
 const CATEGORIES = [
-	{ icon: 'sparkles-outline' as const, id: 'clean', score: '9,8', title: 'Καθαριότητα' },
-	{ icon: 'time-outline' as const, id: 'time', score: '9,4', title: 'Συνέπεια' }
+	{ icon: 'sparkles-outline' as const, id: 'clean', score: '4,9', title: 'Καθαριότητα' },
+	{ icon: 'time-outline' as const, id: 'time', score: '4,7', title: 'Συνέπεια' }
 ];
 const BASE = {
 	title: 'Συνολική βαθμολογία',
@@ -103,7 +103,7 @@ describe('RatingDistribution', () => {
 			'font-semibold',
 			'text-muted-foreground'
 		);
-		expect(screen.getByText('9,8')).toHaveClass('text-body-md', 'font-semibold', 'text-foreground');
+		expect(screen.getByText('4,9')).toHaveClass('text-body-md', 'font-semibold', 'text-foreground');
 		const glyph = clean.querySelector('[data-icon="sparkles-outline"]');
 		expect(glyph).toHaveClass('icon-lg', 'text-foreground');
 		expect(glyph?.parentElement).toHaveClass('pt-3');

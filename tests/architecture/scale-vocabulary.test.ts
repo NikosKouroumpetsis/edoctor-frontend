@@ -5,7 +5,7 @@ import {
 	containers,
 	icon,
 	leading,
-	radius,
+	radiusScale,
 	spacingScale,
 	steps,
 	typography
@@ -121,7 +121,8 @@ const spacingNames = new Set(Object.keys(spacingScale));
 const containerNames = new Set(Object.keys(containers));
 const roleNames = new Set(Object.keys(typography));
 const leadingNames = new Set(Object.keys(leading));
-const radiusNames = new Set([...Object.keys(radius), 'full', 'none']);
+// U-25.4 replaces the closed five: the theme's corners are the shared five and the web's sixth (`panel`, 32).
+const radiusNames = new Set([...Object.keys(radiusScale), 'full', 'none']);
 const iconNames = new Set(Object.keys(icon));
 
 /** Why one utility (variants already removed) breaks the scale, or `null` when it is on it. */

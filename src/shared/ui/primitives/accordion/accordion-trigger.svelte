@@ -49,7 +49,11 @@
 		}}
 		class={cn(
 			'flex min-h-touch w-full flex-1 flex-row items-center justify-between gap-4 py-4 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset disabled:opacity-50',
-			item.variant === 'card' && 'rounded-lg px-4',
+			// U-28.4, with a pointer: the plain row underlines its words on hover (shadcn's), the card's row takes the
+			// light fill; a disabled one neither.
+			item.variant === 'card'
+				? 'rounded-lg px-4 transition-colors duration-standard ease-standard can-hover:enabled:hover:bg-foreground/5'
+				: 'can-hover:enabled:hover:underline',
 			className
 		)}
 		{...restProps}
