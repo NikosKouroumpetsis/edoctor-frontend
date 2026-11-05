@@ -12,6 +12,21 @@
 @custom-variant dark (&:is(.dark *));
 /* A screen with a pointer that hovers (U-09.3): the photo arrows wait for the pointer there; on touch they show. */
 @custom-variant can-hover (@media (hover: hover));
+/*
+ * U-70 (screen 14 Π5, by the box it sits in, never the screen): a list as wide as 520 keeps the fee beside its rows, a
+ * narrower one writes it under the title (the phone, the profile's column at 744–949). U-73 (screen 16 Π3): a card as
+ * wide as 340 has its numbers beside the person, a narrower one under.
+ */
+@custom-variant row-wide (@container (min-width: --theme(--spacing-row-wide)));
+@custom-variant card-wide {
+	@container (min-width: --theme(--spacing-card-wide)) {
+		@slot;
+	}
+	/* Below 744 every phone keeps Airbnb's shape, its 312 at 360 too. */
+	@media (width < --theme(--breakpoint-tablet)) {
+		@slot;
+	}
+}
 
 /*
  * ──────────────────────────────────────────────────────────────────────────
@@ -195,6 +210,34 @@
 	/* The home's search dropping under the top bar from its pill (U-16.7, §6.4 of the wave record): the bar is already
 	   in the page, so a keyframe moves it in (an existing element has no `@starting-style`), 0.25 s on Airbnb's curve. */
 	--animate-search-drop: search-drop var(--transition-duration-standard) var(--ease-standard);
+	/* A new toast in the place of the one showing (`20-favorites` Π6): it settles from 97 %, 0.25 s. */
+	--animate-toast-swap: toast-swap var(--transition-duration-standard) var(--ease-standard);
+	/* `20-favorites` Π4: a heart that fills, Airbnb's «pop» (1 ⇒ 1.28 ⇒ 0.94 ⇒ 1) in 0.42 s, the same on every heart. */
+	--animate-heart-pop: heart-pop 420ms var(--ease-standard);
+	/* `20-favorites` Π4: a card coming back to the favourites (fade + 0.92, the leave's reverse). */
+	--animate-card-enter: card-enter var(--transition-duration-standard) var(--ease-standard) both;
+	/* `23-helpful` Π2: the thumb pressed, a small jump (1.28 and ±12°) in 0.42 s. */
+	--animate-thumb-up-pop: thumb-up-pop 420ms var(--ease-standard);
+	--animate-thumb-down-pop: thumb-down-pop 420ms var(--ease-standard);
+	/* U-80.1 Π1: a step of the sign-in pushed in, as the application's stack — it slides in from its side while the one
+	   under it goes a third of the way out and fades; 0.25 s on Airbnb's curve. Kept here so no JS moves anything. */
+	--animate-auth-in-forward: auth-in-forward var(--transition-duration-standard)
+		var(--ease-standard) both;
+	--animate-auth-out-forward: auth-out-forward var(--transition-duration-standard)
+		var(--ease-standard) both;
+	--animate-auth-in-back: auth-in-back var(--transition-duration-standard) var(--ease-standard) both;
+	--animate-auth-out-back: auth-out-back var(--transition-duration-standard) var(--ease-standard)
+		both;
+	/* U-72.3 Ε3: a page coming into the same window, from its side (32 and a fade, 0.25 s), the other one gone. */
+	--animate-window-forward: window-forward var(--transition-duration-standard) var(--ease-standard)
+		both;
+	--animate-window-back: window-back var(--transition-duration-standard) var(--ease-standard) both;
+	/* U-73.1 Π2: the doctor's page: below 744 the application's sheet rising, from 744 a page settling (12 and a fade). */
+	--animate-sheet-rise: sheet-rise var(--transition-duration-sheet) var(--ease-sheet) both;
+	--animate-page-settle: page-settle var(--transition-duration-standard) var(--ease-standard) both;
+	/* Screen 21 (U-84, U-12): a conversation pushed in from the right below 950, a new message rising into place. */
+	--animate-thread-push: thread-push var(--transition-duration-sheet) var(--ease-sheet);
+	--animate-bubble-in: bubble-in var(--transition-duration-standard) var(--ease-standard);
 	/* U-14 / U-14.6(α), wave 1.5: a photo that arrives lights up 0 ⇒ 1 in Airbnb's 0.8 s (`reveal`) on its curve, as a
 	   keyframe — so it plays without JavaScript too: the server's first photo carries it from the first paint (seen
 	   without JS, never hidden until hydration), a photo mounted in the browser takes it at its `load`. `both`: it is
@@ -214,6 +257,118 @@
 		from {
 			translate: 0 calc(var(--spacing) * -5);
 			opacity: 0;
+		}
+	}
+
+	@keyframes toast-swap {
+		from {
+			scale: 0.97;
+		}
+	}
+
+	@keyframes heart-pop {
+		35% {
+			scale: 1.28;
+		}
+		70% {
+			scale: 0.94;
+		}
+	}
+
+	@keyframes card-enter {
+		from {
+			opacity: 0;
+			scale: 0.92;
+		}
+	}
+
+	@keyframes thumb-up-pop {
+		35% {
+			scale: 1.28;
+			rotate: -12deg;
+		}
+		70% {
+			scale: 0.95;
+			rotate: 3deg;
+		}
+	}
+
+	@keyframes thumb-down-pop {
+		35% {
+			scale: 1.28;
+			rotate: 12deg;
+		}
+		70% {
+			scale: 0.95;
+			rotate: -3deg;
+		}
+	}
+
+	@keyframes window-forward {
+		from {
+			translate: --spacing(8) 0;
+			opacity: 0;
+		}
+	}
+
+	@keyframes window-back {
+		from {
+			translate: calc(--spacing(8) * -1) 0;
+			opacity: 0;
+		}
+	}
+
+	@keyframes sheet-rise {
+		from {
+			translate: 0 100%;
+		}
+	}
+
+	@keyframes page-settle {
+		from {
+			translate: 0 --spacing(3);
+			opacity: 0;
+		}
+	}
+
+	@keyframes thread-push {
+		from {
+			translate: 28% 0;
+			opacity: 0.4;
+		}
+	}
+
+	@keyframes bubble-in {
+		from {
+			translate: 0 --spacing(2);
+			scale: 0.98;
+			opacity: 0;
+		}
+	}
+
+	@keyframes auth-in-forward {
+		from {
+			translate: 100% 0;
+		}
+	}
+
+	@keyframes auth-out-forward {
+		to {
+			translate: -30% 0;
+			opacity: 0;
+		}
+	}
+
+	@keyframes auth-in-back {
+		from {
+			translate: -30% 0;
+			opacity: 0;
+		}
+	}
+
+	@keyframes auth-out-back {
+		to {
+			translate: 100% 0;
 		}
 	}
 
@@ -282,6 +437,21 @@
 	padding-bottom: calc(--spacing(2) + env(safe-area-inset-bottom));
 }
 
+/* U-80.1 Ε1: from 744 the sign-in's window has the height its step asks for (the JS only measures and writes it). */
+@utility h-auth-window {
+	height: var(--auth-window-h, fit-content);
+}
+
+/* An `ExpandableText` while it opens (0,3 s): the JS only measures and writes the height the CSS moves to. */
+@utility max-h-expandable {
+	max-height: var(--expandable-h, none);
+}
+
+/* The sign-in's pinned footer (`modal-screen`'s, the application's): 12 plus the device safe area. */
+@utility pb-safe-area-3 {
+	padding-bottom: calc(--spacing(3) + env(safe-area-inset-bottom));
+}
+
 /* The kit's action bar (`ActionBar`), as the application pads it: its own 16 plus the device safe area. */
 @utility pb-safe-area-action {
 	padding-bottom: calc(--spacing(4) + env(safe-area-inset-bottom));
@@ -310,6 +480,10 @@
 	bottom: calc(--spacing(4) + env(safe-area-inset-bottom));
 }
 
+@utility bottom-above-page-bar {
+	bottom: calc(var(--page-bar-room, var(--spacing-bar-booking)) + var(--spacing) * 4);
+}
+
 @utility bottom-above-tab-bar {
 	bottom: calc(var(--spacing-bar-bottom) + env(safe-area-inset-bottom));
 }
@@ -330,6 +504,11 @@
  */
 @utility max-h-window {
 	max-height: calc(100dvh - --spacing(20));
+}
+
+/* U-70 Π2 (screens 14, 15): the window of the services, 780 and never closer than 40 to the screen's sides. */
+@utility max-w-window-fluid {
+	max-width: min(var(--spacing-window-md), calc(100vw - --spacing(20)));
 }
 
 /*
@@ -373,6 +552,53 @@
 	font-size: var(--text-body-lg);
 	line-height: calc(26 / 16);
 	font-weight: 400;
+}
+
+/* U-66.1 Π3: the reviews window's score from 744 (64/700 between laurels of 56, the approved window of screen 5). */
+@utility text-score-window {
+	font-size: --spacing(16);
+	line-height: 1;
+	font-weight: 700;
+}
+
+/* U-84 (screen 21), from 744, as the prototype: a message's words and a row's name 16 at 1.4; a row's other line 15 at 1.4.
+   Below 744 they take the application's `text-body-lg` and `text-body-md`, at 1.5 (U-81.2). */
+@utility text-bubble {
+	font-size: --spacing(4);
+	line-height: 1.4;
+}
+
+@utility text-row-line {
+	font-size: --spacing(3.75);
+	line-height: 1.4;
+}
+
+/* U-84 Π2: a message takes at most 78 % of its column, and from 744 at most 560. */
+@utility max-w-bubble {
+	max-width: 78%;
+
+	@media (width >= --theme(--breakpoint-tablet)) {
+		max-width: min(78%, var(--spacing-bubble-max-w));
+	}
+}
+
+/* U-84 Π1: from 950 the inbox fills the screen under the site's bar, each column scrolling on its own. */
+@utility h-inbox {
+	height: calc(100dvh - var(--spacing-bar-top));
+}
+
+/* U-84 Π1: from 950 the list on the left (380, 400 from 1128) and the conversation beside it. */
+@utility grid-inbox {
+	grid-template-columns: var(--spacing-inbox-list-w) minmax(0, 1fr);
+
+	@media (width >= --theme(--breakpoint-laptop)) {
+		grid-template-columns: var(--spacing-inbox-list-w-lg) minmax(0, 1fr);
+	}
+}
+
+/* U-84 Π2: the composer's six lines, then it scrolls. */
+@utility max-h-composer {
+	max-height: var(--spacing-composer-field);
 }
 
 /*

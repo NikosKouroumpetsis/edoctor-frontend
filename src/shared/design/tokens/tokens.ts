@@ -180,6 +180,8 @@ export const icon = {
 	sm: 16,
 	md: 20,
 	lg: 24,
+	// U-100: draws as wide as Airbnb's heart (22,5, measured); Ionicons' heart fills 81% of its box.
+	'card-heart': 28,
 	xl: 32
 } as const satisfies Record<string, number>;
 

@@ -46,8 +46,11 @@ describe('shared size scale', () => {
 			platform: platform.spacing,
 			'platform.radius': platform.radius
 		};
+		// U-84.1, the one off the grid: the approved prototype's corner where a message joins the next (21 Π2).
+		const offGrid = 'platform.radius.bubble-tail';
 		for (const [family, values] of Object.entries(families)) {
 			for (const [name, value] of Object.entries(values)) {
+				if (`${family}.${name}` === offGrid) continue;
 				expect(onGrid(value), `${family}.${name} = ${value}`).toBe(true);
 			}
 		}
@@ -69,10 +72,10 @@ describe('shared size scale', () => {
 		for (const name of Object.keys(containers)) expect(name in spacingScale, name).toBe(false);
 	});
 
-	it('U-25.4: the sixth corner is the web’s alone — `panel` 32 for the panels from 744; the shared five unchanged', () => {
+	it('U-25.4, U-84.1: the web’s own corners — `panel` 32 for the panels from 744, `bubble` 20 and `bubble-tail` 6 of a message; the shared five unchanged', () => {
 		expect(radius).toEqual({ xs: 4, sm: 8, md: 12, lg: 16, xl: 24 });
-		expect(platform.radius).toEqual({ panel: 32 });
-		expect(radiusScale).toEqual({ ...radius, panel: 32 });
+		expect(platform.radius).toEqual({ panel: 32, bubble: 20, 'bubble-tail': 6 });
+		expect(radiusScale).toEqual({ ...radius, panel: 32, bubble: 20, 'bubble-tail': 6 });
 		expect(Object.keys(radius)).not.toContain('panel');
 	});
 

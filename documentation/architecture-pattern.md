@@ -991,6 +991,14 @@ Wave 1.5 · screen 5 adds the doctor's profile `/doctors/[slug]` and its windows
   which re-exports `formatInstantDayTime`; `msUntilNextPlatformDay` for the midnight redraw, S-34.1), the new
   `MediaGallery` and `RevealingPhoto` (the application's names and props), and the new props of `TwoColumnDetail`,
   `StickyActionBar` and `MapView` (`styling-guidelines.md`).
+- Wave 2 · screens 14, 15, 16, 24 (U-70 … U-76): `details/services` and `details/specializations` are the two pages of
+  one window (`window-services.svelte`; «Τομείς εξειδίκευσης ›» is its own history step, `fromServices`), each row's
+  glyph from the backend's `kind` (never `online`, U-89.1). The biography is a page of its own,
+  `/doctors/[slug]/about` (`routes/…/about`, `screens/…/about`, the slice's `page/about.svelte`, `lib/detail/about`):
+  `details/description` answers `308` to it. Below 744 it is one element shaped as a sheet by CSS (no second tree, no
+  second read). The profile's last section is «Τι πρέπει να γνωρίζετε» (`know-section.svelte`, `lib/detail/know`), its
+  three windows `details/know?focus=cancel|booking|before`, on the active office's `bookingPolicy`; the office pills
+  only when the limits differ.
 
 Wave 1.5 · screens 6–10 (U-57 … U-62, common v2) add the text pages and the site's status page; from 744 the approved
 prototypes 06–10, below 744 the application's design (U-58.1) — but the articles' list itself (its featured and its
@@ -1016,6 +1024,11 @@ look stay CSS (`help/ui/center/page/index.svelte`, NIT-r2-2):
   suggestions from 744, filtering as typed below 744, topic chips, popular, accordions, anchors). Route
   `routes/help/+page.server.ts`.
 - Account deletion (`src/modules/account/ui/deletion`, `lib/deletion`): the legal texts' template (U-62.1).
+- Messages (`src/modules/messages`, wave 2, screens 18 + 21, U-84): `api/{conversations,preferences}`, `lib/{time,thread,
+people,paths,refusals,client-id,save-file}`, `config/limits.ts`; `ui/inbox` (ONE page for `/messages`, `/messages/<id>` and
+  `/messages/archive`, the same for a patient and a doctor; a route's `load` refuses what is no id), `ui/contact` (the button
+  and the #18, composed by the doctor's screens through a snippet of `DoctorDetail` and `DoctorAbout`), `ui/unread-host` (the
+  badge's one read, in the root layout).
 - Status page: the root `routes/+error.svelte` ⇒ `src/screens/home` `SiteErrorScreen` ⇒ `modules/shell/ui/status-page`
   (`lib/status.ts`: the words and the ways on of a 404 and of a failure; `noindex`, inside the frame, the capsule shown,
   `frame.ts` `showsBottomNav(path, status)`). A doctor nobody may see draws the same `StatusPage`.

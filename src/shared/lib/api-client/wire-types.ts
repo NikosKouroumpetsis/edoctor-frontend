@@ -41,6 +41,8 @@ export type DoctorPublicMarketplaceProfileResponseView =
 export type DoctorPublicMarketplaceProfileView = Schemas['DoctorPublicMarketplaceProfileView'];
 export type DoctorPublicMarketplaceProfileOfficeView =
 	Schemas['DoctorPublicMarketplaceProfileOfficeView'];
+export type DoctorPublicMarketplaceCredentialView =
+	Schemas['DoctorPublicMarketplaceCredentialView'];
 export type DoctorPublicMarketplaceProfileOfficeSummaryView =
 	Schemas['DoctorPublicMarketplaceProfileOfficeSummaryView'];
 export type DoctorPublicMarketplaceProfileServiceView =
@@ -55,8 +57,14 @@ export type DoctorPublicMarketplaceResponseMetricsView =
 export type DoctorResponseTime = Schemas['DoctorResponseTime'];
 export type DoctorPublicMarketplaceReviewsResponseView =
 	Schemas['DoctorPublicMarketplaceReviewsResponseView'];
+export type DoctorPublicMarketplaceReviewsSummaryResponseView =
+	Schemas['DoctorPublicMarketplaceReviewsSummaryResponseView'];
 export type DoctorPublicMarketplaceOfficeResponseView =
 	Schemas['DoctorPublicMarketplaceOfficeResponseView'];
+export type DoctorPublicMarketplaceOfficeDetailView =
+	Schemas['DoctorPublicMarketplaceOfficeDetailView'];
+export type DoctorPublicMarketplaceOfficeWeeklyHoursView =
+	Schemas['DoctorPublicMarketplaceOfficeWeeklyHoursView'];
 export type DoctorImagePublicView = Schemas['DoctorImagePublicView'];
 export type BookingPolicyView = Schemas['BookingPolicyView'];
 export type AvailabilityPublicSlotsView = Schemas['AvailabilityPublicSlotsView'];
@@ -69,3 +77,41 @@ export type ConsentPlatform = Schemas['ConsentPlatform'];
 // Wave 1.5 · screens 7 and 8 (U-59.1, U-60.1): a public CMS page — the legal texts and the FAQ (`getPublicContentPage`).
 export type ContentPublicPageView = Schemas['ContentPublicPageView'];
 export type ContentPublicPageUpcomingView = Schemas['ContentPublicPageUpcomingView'];
+
+/** The session's facts the auth module reads (U-80.1): sign-in answers and the signed-in patient. */
+export type AccessStartResult = Schemas['AccessStartResult'];
+export type AccessVerifyResult = Schemas['AccessVerifyResult'];
+export type AccessCompleteRegistrationResult = Schemas['AccessCompleteRegistrationResult'];
+export type LoginResult = Schemas['LoginResult'];
+export type LogoutResult = Schemas['LogoutResult'];
+export type PatientSelfResponseView = Schemas['PatientSelfResponseView'];
+export type DoctorProfileBaseView = Schemas['DoctorProfileBaseView'];
+// Wave 2 · screen 20 (U-83, U-85): the favorites of the signed-in patient.
+export type FavoriteDoctorListResponseView = Schemas['FavoriteDoctorListResponseView'];
+export type FavoriteDoctorItemView = Schemas['FavoriteDoctorItemView'];
+export type FavoriteDoctorIdsResponseView = Schemas['FavoriteDoctorIdsResponseView'];
+export type FavoriteDoctorSavedView = Schemas['FavoriteDoctorSavedView'];
+// Wave 2 · screens 18 + 21 (U-84): the messages of a member; a body is text, never markup and never a link.
+export type MessagingConversationListView = Schemas['MessagingConversationListView'];
+export type MessagingConversationView = Schemas['MessagingConversationView'];
+export type MessagingCounterpartView = Schemas['MessagingCounterpartView'];
+export type MessagingMessageView = Schemas['MessagingMessageView'];
+export type MessagingSentMessageView = Schemas['MessagingSentMessageView'];
+export type MessagingThreadView = Schemas['MessagingThreadView'];
+export type MessagingThreadStateView = Schemas['MessagingThreadStateView'];
+export type MessagingReadView = Schemas['MessagingReadView'];
+export type MessagingUnreadCountView = Schemas['MessagingUnreadCountView'];
+export type MessagingContactView = Schemas['MessagingContactView'];
+export type MessagingArchiveView = Schemas['MessagingArchiveView'];
+export type MessagingBlockView = Schemas['MessagingBlockView'];
+export type MessagingReportedView = Schemas['MessagingReportedView'];
+export type MessagingDoctorSettingsView = Schemas['MessagingDoctorSettingsView'];
+export type NotificationPreferencesView = Schemas['NotificationPreferencesView'];
+export type NotificationPreferenceCategory = Schemas['NotificationPreferenceCategory'];
+export type NotificationChannel = Schemas['NotificationChannel'];
+// Wave 2 · screen 23 (U-78): a device's own vote; no public answer holds a count (U-78.1).
+export type HelpfulVoteCastResponseView = Schemas['HelpfulVoteCastResponseView'];
+export type HelpfulVoteChoice = Schemas['HelpfulVoteChoice'];
+export type HelpfulVoteReason = Schemas['HelpfulVoteReason'];
+export type HelpfulVoteMineResponseView = Schemas['HelpfulVoteMineResponseView'];
+export type HelpfulVoteView = Schemas['HelpfulVoteView'];

@@ -67,6 +67,21 @@
 	{/snippet}
 </Story>
 
+<!-- U-60.2 (`20-favorites` Π1): a list's search, rounded whole. -->
+<Story name="Inset Pill">
+	{#snippet template()}
+		<SearchField
+			variant="inset"
+			shape="pill"
+			value="καρδ"
+			placeholder="Αναζήτηση στα αγαπημένα"
+			aria-label="Αναζήτηση στα αγαπημένα"
+			onClear={() => {}}
+			clearLabel="Καθαρισμός αναζήτησης"
+		/>
+	{/snippet}
+</Story>
+
 <Story name="Inset">
 	{#snippet template()}
 		{@render insetField({ get: () => inset, set: (next) => (inset = next) })}

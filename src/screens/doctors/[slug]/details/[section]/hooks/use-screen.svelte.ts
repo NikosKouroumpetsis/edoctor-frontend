@@ -6,16 +6,21 @@ import { page } from '$app/state';
 import { localizeHref } from '$paraglide/runtime';
 import { siteUrl } from '$shared/config/site';
 import { getPageLocale } from '$shared/preferences/i18n/page-locale';
+import { getSessionOptional } from '$shared/state/session';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import {
+	doctorDetailsPath,
 	doctorProfilePath,
 	type DoctorSimilarArea,
 	type DoctorSimilarSearch
 } from '$modules/doctor/lib/detail';
+import { faqAnchors } from '$modules/help/config/faq';
+import { conversationPath } from '$modules/messages/lib/paths';
 import { resolveSimilarDoctorsArea } from '$modules/search-doctors/api/marketplace';
 import { searchResultsHref } from '$modules/search-doctors/lib/search-criteria';
 import { buildSimilarDoctorsCriteria } from '$modules/search-doctors/lib/similar-doctors';
-import { useSignIn } from '$modules/search-doctors/ui/search-doctor-card';
+import { useFavoriteToggle, useSignIn } from '$modules/search-doctors/ui/search-doctor-card';
+import { legalPath } from '$modules/shell/lib/legal';
 
 /**
  * A window's own address (`/doctors/<slug>/details/<section>`, the application's `details/[section]`): the SAME
@@ -27,6 +32,9 @@ export function useDoctorDetailsScreen(slug: () => string) {
 	const localize = (path: string) => localizeHref(path, { locale });
 	const queryClient = useQueryClient();
 	const signIn = useSignIn(() => locale);
+	// 🔴 U-85: the profile's hearts are the search's writer; the toast clears the booking bar below 744.
+	const favorites = useFavoriteToggle(() => locale, { lift: 'page-bar' });
+	const session = getSessionOptional();
 
 	return {
 		get locale() {
@@ -61,7 +69,38 @@ export function useDoctorDetailsScreen(slug: () => string) {
 			return resolve(localize('/doctors') as Pathname);
 		},
 		href: (path: string) => resolve(localize(path) as Pathname),
+		// 🔴 U-67.1, U-69.2: «Πώς λειτουργούν οι κριτικές» leads to the Help Centre's question and to the review policy.
+		get reviewLinks() {
+			return {
+				helpHref: `${resolve(localize('/help') as Pathname)}#${faqAnchors.reviews}`,
+				policyHref: resolve(localize(legalPath('review-policy')) as Pathname)
+			};
+		},
+		// 🔴 U-75 Π3: «Τι πρέπει να γνωρίζετε» leads to the Help Centre's question and topic.
+		get knowLinks() {
+			const help = resolve(localize('/help') as Pathname);
+			return {
+				cancellationHref: `${help}#${faqAnchors.cancellation}`,
+				bookingHref: `${help}#${faqAnchors.booking}`
+			};
+		},
+		// 🔴 U-77: what the doctor's articles need from the rest of the site.
+		articleHref: (articleSlug: string) =>
+			resolve(localize(`/articles/${encodeURIComponent(articleSlug)}`) as Pathname),
+		get doctorArticlesHref() {
+			return resolve(localize(`${doctorProfilePath(slug())}/articles`) as Pathname);
+		},
+		// 🔴 U-84.6: where «Επικοινωνήστε» leads: a conversation, and «Κράτηση ραντεβού» of a doctor who accepts no messages.
+		conversationHref: (conversationId: string) =>
+			resolve(localize(conversationPath(conversationId)) as Pathname),
+		get bookHref() {
+			return resolve(localize(doctorDetailsPath(slug(), 'availability')) as Pathname);
+		},
+		get signedIn() {
+			return session?.isMember ?? false;
+		},
 		onSignIn: signIn,
+		favorites,
 		onRetry: () => void invalidateAll()
 	};
 }

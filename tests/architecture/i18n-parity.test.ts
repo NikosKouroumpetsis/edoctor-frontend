@@ -159,4 +159,15 @@ describe('i18n catalog parity of the project', () => {
 		expect(settings.locales).toContain(settings.baseLocale);
 		expect(findParityIssues(settings.baseLocale, settings.locales, catalogs)).toEqual([]);
 	});
+
+	it('Α9: no Greek letter is left in the English catalog', () => {
+		const { catalogs } = readProjectCatalogs();
+		const untranslated = Object.entries(catalogs.en)
+			.filter(
+				([, value]) => typeof value === 'string' && /[\u0370-\u03ff\u1f00-\u1fff]/u.test(value)
+			)
+			.map(([key]) => key);
+
+		expect(untranslated).toEqual([]);
+	});
 });

@@ -15,6 +15,10 @@
 			/** «124 αξιολογήσεις», or a `description` (the caller's own line). */
 			count?: string;
 			description?: string;
+			/** U-66.1 Π3: the reviews' window: from 744 the score of 64 between laurels of 56. */
+			scoreSize?: 'score' | 'score-window';
+			/** The link's words where they differ from the kit's text button. */
+			linkTextClass?: string;
 			testId?: string;
 			/** `<prefix>-count`, `<prefix>-description` (the application's test ids). */
 			testIdPrefix?: string;
@@ -35,6 +39,8 @@
 		linkLabel,
 		onLink,
 		linkHref,
+		scoreSize = 'score',
+		linkTextClass,
 		testId,
 		testIdPrefix,
 		class: className,
@@ -52,17 +58,23 @@
 	class={cn('flex flex-col items-center gap-3', className)}
 	{...restProps}
 >
-	<LaurelScore filled label={score} size="score" />
+	<LaurelScore filled label={score} size={scoreSize} />
 	<p class="text-heading-sm font-semibold text-foreground">{title}</p>
 	{#if count}
 		<Text variant="caption" data-testid={testIdOf('count')}>{count}</Text>
 	{/if}
 	{#if description}
-		<Text variant="caption" class="text-center" data-testid={testIdOf('description')}
+		<Text variant="caption" class="max-w-narrow text-center" data-testid={testIdOf('description')}
 			>{description}</Text
 		>
 	{/if}
 	{#if linkLabel !== undefined}
-		<TextButton label={linkLabel} underline href={linkHref} onclick={onLink} />
+		<TextButton
+			label={linkLabel}
+			underline
+			href={linkHref}
+			onclick={onLink}
+			textClass={linkTextClass}
+		/>
 	{/if}
 </div>

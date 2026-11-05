@@ -35,4 +35,6 @@ export interface RetainedRecord {
 	title: string;
 	body: string;
 	duration: string;
+	/** A line after the duration, on what is kept apart from the record's own period. */
+	note?: string;
 }

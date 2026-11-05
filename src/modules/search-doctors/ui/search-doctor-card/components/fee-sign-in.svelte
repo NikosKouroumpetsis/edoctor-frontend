@@ -8,7 +8,7 @@
 	}: {
 		/** «Συνδεθείτε για κόστος», unchanged: the action is named by its words (S-31.4). */
 		label: string;
-		/** Opens the sign-in (S-31.4), never the card's profile. */
+		/** A guest's sign-in (S-31.4), never the card's profile (the card decides, for a member whose read failed). */
 		onPress: () => void;
 		testId?: string;
 	} = $props();

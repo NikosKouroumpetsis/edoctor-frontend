@@ -113,8 +113,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List every public review for a marketplace doctor. */
+        /** List one page of the public reviews of a marketplace doctor. */
         get: operations["listPublicMarketplaceReviews"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/public/doctors/{doctorId}/reviews/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the totals of the public reviews of a marketplace doctor. */
+        get: operations["getPublicMarketplaceReviewsSummary"];
         put?: never;
         post?: never;
         delete?: never;
@@ -132,6 +149,23 @@ export interface paths {
         };
         /** Get a single public marketplace doctor office. */
         get: operations["getPublicMarketplaceOffice"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/article/public/articles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List one page of the published articles as cards. */
+        get: operations["listPublicArticles"];
         put?: never;
         post?: never;
         delete?: never;
@@ -304,6 +338,74 @@ export interface paths {
         put?: never;
         /** Verify a native Google ID token and sign in, provisioning the account when needed. */
         post: operations["verifyAccessGoogleToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/access/apple/nonce": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Issue the nonce of one native Apple sign-in. */
+        post: operations["issueAccessAppleNonce"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/access/apple": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify a native Apple identity token and sign in, provisioning the account when needed. */
+        post: operations["verifyAccessAppleToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/access/apple/browser": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start the Android Apple sign-in: the address to open and the flow secret. */
+        post: operations["startAccessAppleBrowser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/access/apple/browser/exchange": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Exchange the Android one-use code and the flow secret for a session. */
+        post: operations["exchangeAccessAppleBrowser"];
         delete?: never;
         options?: never;
         head?: never;
@@ -583,6 +685,284 @@ export interface paths {
         head?: never;
         /** Update one relative of a patient (requires session cookies). */
         patch: operations["updatePatientRelative"];
+        trace?: never;
+    };
+    "/patient/me/favorites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the favorite doctors of the signed-in patient (requires session cookies). */
+        get: operations["listMyFavoriteDoctors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/patient/me/favorites/ids": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the ids of the favorite doctors of the signed-in patient, to draw the hearts (requires session cookies). */
+        get: operations["listMyFavoriteDoctorIds"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/patient/me/favorites/{doctorId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Save a doctor to the favorites of the signed-in patient (requires session cookies). */
+        put: operations["saveMyFavoriteDoctor"];
+        post?: never;
+        /** Remove a doctor from the favorites of the signed-in patient (requires session cookies). */
+        delete: operations["removeMyFavoriteDoctor"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/helpful-votes/public/vote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Cast, change or take back the vote of this device on an article or a FAQ question. */
+        put: operations["castHelpfulVote"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/helpful-votes/public/vote/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the votes of this device: on one target, or on every FAQ question with `kind=faq`. */
+        get: operations["listMyHelpfulVotes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/helpful-votes/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the vote totals per article and FAQ question (requires a backoffice session). */
+        get: operations["getHelpfulVoteSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/messaging/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the conversations of the signed-in account, newest first. */
+        get: operations["listMessagingConversations"];
+        put?: never;
+        /** Open the one conversation with a doctor, or continue it, with a message. */
+        post: operations["startMessagingConversation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/messaging/conversations/{conversationId}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read a page of a conversation backwards, or poll its new messages. */
+        get: operations["listMessagingMessages"];
+        put?: never;
+        /** Send one message in a conversation of the signed-in account. */
+        post: operations["sendMessagingMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/messaging/conversations/{conversationId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark a conversation read up to a message, for this side only. */
+        post: operations["markMessagingConversationRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/messaging/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Count the conversations holding something unread, for the badge. */
+        get: operations["getMessagingUnreadCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/messaging/doctors/{doctorId}/contact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What the button of a doctor profile opens: the existing conversation, or whether a new one may start. */
+        get: operations["getMessagingDoctorContact"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/messaging/conversations/{conversationId}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Move a conversation to «Προηγούμενες συνομιλίες», for this side only. */
+        post: operations["archiveMessagingConversation"];
+        /** Take a conversation out of «Προηγούμενες συνομιλίες». */
+        delete: operations["unarchiveMessagingConversation"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/messaging/conversations/{conversationId}/block": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Block a conversation: neither side writes until the one who blocked lifts it. */
+        post: operations["blockMessagingConversation"];
+        /** Lift a block this side placed. */
+        delete: operations["unblockMessagingConversation"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/messaging/conversations/{conversationId}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download a copy of a conversation as plain text. */
+        get: operations["exportMessagingConversation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/messaging/messages/{messageId}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report a received message to the team, with a reason of the closed set. */
+        post: operations["reportMessagingMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/messaging/settings/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read «Δέχομαι νέα μηνύματα» of the signed-in doctor. */
+        get: operations["getMessagingSettings"];
+        /** Change «Δέχομαι νέα μηνύματα» of the signed-in doctor. */
+        put: operations["updateMessagingSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/appointment/booking-readiness": {
@@ -2796,6 +3176,7 @@ export interface components {
             pricingVisible: boolean;
             language: components["schemas"]["ILanguage"];
         };
+        /** @description The public profile of a doctor. U-73: `studies`, `workExperience` and `conferences` are deprecated copies of the texts of `credentials`, which also holds the years and the organization: a client reads `credentials`. */
         DoctorPublicMarketplaceProfileView: {
             doctorId: string;
             slug: string;
@@ -2827,6 +3208,7 @@ export interface components {
                 hasNext3Days: boolean;
                 hasNext7Days: boolean;
             };
+            credentials: components["schemas"]["DoctorPublicMarketplaceCredentialView"][];
             articlesSummary: components["schemas"]["DoctorPublicMarketplaceArticlesSummaryView"];
             responseMetrics: components["schemas"]["DoctorPublicMarketplaceResponseMetricsView"];
             isPatientsChoice: boolean;
@@ -2855,13 +3237,23 @@ export interface components {
             city: string | null;
             state: string | null;
             postalCode: string | null;
+            bookingPolicy: components["schemas"]["DoctorPublicMarketplaceOfficeBookingPolicyView"] | null;
         };
+        /** @description U-75: the limits a patient reads for one office, its overrides over the doctor's values; `null` if they could not be read. */
+        DoctorPublicMarketplaceOfficeBookingPolicyView: {
+            confirmationMode: components["schemas"]["AppointmentConfirmationMode"];
+            cancellationCutoffHours: number;
+            minBookingNoticeHours: number;
+        };
+        /** @enum {string} */
+        AppointmentConfirmationMode: "AUTO" | "MANUAL";
         DoctorPublicMarketplaceSocialLinksView: {
             website: string | null;
             facebook: string | null;
             instagram: string | null;
             linkedin: string | null;
         };
+        /** @description U-72, U-71.2: `kind` comes from the service name, so no one enters it. `completedVisitCount` is `null` for a service with none or before the first computation; a visit with two services counts once in each, so a client never sums them towards `responseMetrics.completedVisitCount`. `yearsOfExperience` is `null` when none was entered, never a zero. */
         DoctorPublicMarketplaceProfileServiceView: {
             doctorServiceId: string;
             serviceId: string;
@@ -2871,7 +3263,12 @@ export interface components {
             durationInMinutes: number | null;
             price: number | null;
             isSpecialized: boolean;
+            yearsOfExperience: number | null;
+            kind: components["schemas"]["DoctorServiceKind"];
+            completedVisitCount: number | null;
         };
+        /** @enum {string} */
+        DoctorServiceKind: "follow-up" | "check-up" | "visit" | "other";
         DoctorImagePublicView: {
             translations?: components["schemas"]["DoctorImageTranslationView"][];
             id: string;
@@ -2906,7 +3303,7 @@ export interface components {
             punctualRating: number | null;
             friendlyRating: number | null;
         };
-        /** @description A public review, the same in the profile `reviewsPreview` and in `/reviews`: `overallRating` and every `aspect` score on the 0–5 stars the clients draw (U-49; an aspect in half stars). The doctor module owns this type and reads the rating tables directly, an accepted in-module read-only precedent. */
+        /** @description A public review, the same in the profile `reviewsPreview` and in `/reviews`: `overallRating` and every `aspect` score on the 0–5 stars the clients draw (U-49; an aspect in half stars). `doctorReplyAt` follows `doctorReply`: only an APPROVED reply, otherwise null. The doctor module owns this type and reads the rating tables directly, an accepted in-module read-only precedent. */
         DoctorPublicMarketplaceReviewPreviewView: {
             id: string;
             appointmentId: string;
@@ -2916,6 +3313,7 @@ export interface components {
             overallRating: number;
             comment: string | null;
             doctorReply: string | null;
+            doctorReplyAt: string | null;
             /** Format: date-time */
             createdAt: string;
             aspect: {
@@ -2927,6 +3325,18 @@ export interface components {
                 weightVersion: number;
             };
         };
+        /** @description U-73: one line of the public biography, in the language of the profile, the newest first. */
+        DoctorPublicMarketplaceCredentialView: {
+            id: string;
+            kind: components["schemas"]["DoctorCredentialKind"];
+            startYear: number | null;
+            endYear: number | null;
+            isCurrent: boolean;
+            title: string;
+            organization: string | null;
+        };
+        /** @enum {string} */
+        DoctorCredentialKind: "STUDY" | "WORK" | "CONFERENCE";
         DoctorPublicMarketplaceArticlesSummaryView: {
             articlesCount: number;
             healthAdviceCount: number;
@@ -2942,10 +3352,32 @@ export interface components {
         DoctorResponseTime: "WITHIN_HOUR" | "WITHIN_FEW_HOURS" | "WITHIN_DAY" | "FEW_DAYS";
         DoctorPublicMarketplaceReviewsResponseView: {
             reviews: components["schemas"]["DoctorPublicMarketplaceReviewPreviewView"][] | null;
+            nextCursor: string | null;
+            total: number | null;
             language: components["schemas"]["ILanguage"];
         };
+        DoctorPublicMarketplaceReviewsSummaryResponseView: {
+            summary: components["schemas"]["DoctorPublicMarketplaceReviewsSummaryView"] | null;
+            language: components["schemas"]["ILanguage"];
+        };
+        DoctorPublicMarketplaceReviewsSummaryView: {
+            count: number;
+            average: number | null;
+            distribution: {
+                /** @enum {number} */
+                star: 1 | 2 | 3 | 4 | 5;
+                count: number;
+            }[];
+            aspectAverages: components["schemas"]["DoctorPublicMarketplaceProfileRatingAspectAverages"] | null;
+            topics: {
+                topic: components["schemas"]["ReviewTopic"];
+                count: number;
+            }[];
+        };
+        /** @enum {string} */
+        ReviewTopic: "COURTESY" | "EXPLANATION" | "ORGANIZATION" | "CLEANLINESS" | "PATIENCE" | "ACCESS";
         DoctorPublicMarketplaceOfficeResponseView: {
-            office: components["schemas"]["DoctorPublicMarketplaceProfileOfficeView"] | null;
+            office: components["schemas"]["DoctorPublicMarketplaceOfficeDetailView"] | null;
             availability: {
                 nextAvailableAt: string | null;
                 hasToday: boolean;
@@ -2955,14 +3387,91 @@ export interface components {
             bookingPolicy: components["schemas"]["BookingPolicyView"] | null;
             language: components["schemas"]["ILanguage"];
         };
+        DoctorPublicMarketplaceOfficeDetailView: {
+            images: components["schemas"]["DoctorPublicMarketplaceOfficeImageView"][];
+            weeklyHours: components["schemas"]["DoctorPublicMarketplaceOfficeWeeklyHoursView"] | null;
+            gettingThere: string | null;
+            officeId: string;
+            city: string;
+            state: string;
+            street: string;
+            streetNumber: string;
+            floor: number | null;
+            description: unknown;
+            postalCode: string;
+            phone: string | null;
+            parking: boolean;
+            disabilityAccess: boolean;
+            paymentOptions: components["schemas"]["DoctorPublicMarketplacePaymentOption"][];
+            latitude: number | null;
+            longitude: number | null;
+            distanceKm: number | null;
+        };
+        DoctorPublicMarketplaceOfficeImageView: {
+            id: string;
+            smSizeUrl: string;
+            mediumSizeUrl: string;
+            lgSizeUrl: string;
+            alt: string | null;
+        };
+        DoctorPublicMarketplaceOfficeWeeklyHoursView: {
+            timezone: string;
+            days: {
+                /** @enum {string} */
+                day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
+                ranges: {
+                    startMinute: number;
+                    endMinute: number;
+                }[];
+            }[];
+        };
         BookingPolicyView: {
             confirmationMode: components["schemas"]["AppointmentConfirmationMode"];
             cancellationCutoffHours: number;
             minBookingNoticeHours: number;
             maxBookingHorizonDays: number;
         };
+        /** @description The `data` of `GET /article/public/articles`. */
+        ArticlePublicCardListView: components["schemas"]["ArticlePublicCardView"][];
+        /** @description U-92.1: an article of a public list, a card: the body, the sections and the SEO fields travel only by slug. */
+        ArticlePublicCardView: {
+            id: string;
+            slug: string;
+            type: components["schemas"]["IArticleType"];
+            publishedAt: string | null;
+            language: components["schemas"]["ILanguage"];
+            title: string;
+            shortDescription: unknown;
+            image: components["schemas"]["ArticlePublicImageView"] | null;
+            authors: components["schemas"]["ArticlePublicAuthorView"][];
+            readingMinutes: number | null;
+        };
         /** @enum {string} */
-        AppointmentConfirmationMode: "AUTO" | "MANUAL";
+        IArticleType: "ARTICLE" | "HEALTH_ADVICE";
+        ArticlePublicImageView: {
+            id: string;
+            smSizeUrl: string;
+            mediumSizeUrl: string;
+            lgSizeUrl: string;
+            alt: string | null;
+            metaDescription: string | null;
+        };
+        ArticlePublicAuthorView: {
+            id: string;
+            doctorId: string | null;
+            name: string | null;
+            slug: string | null;
+            isPrimary: boolean;
+        };
+        /** @description U-57.3: what `meta` of the public list says: how many articles match in all, and the service it is filtered by. */
+        ArticlePublicListMetaView: {
+            total: number;
+            appliedService: components["schemas"]["ArticleAppliedServiceView"] | null;
+        };
+        ArticleAppliedServiceView: {
+            id: string;
+            name: string;
+        };
         AvailabilityPublicSlotsView: {
             doctorId: string;
             officeId: string;
@@ -3100,6 +3609,15 @@ export interface components {
             outcome: "signed-in";
             tenantUser: components["schemas"]["AccessTenantUserView"];
         };
+        AppleNonceResult: {
+            nonce: string;
+        };
+        AppleSignInResult: components["schemas"]["AccessGoogleResult"];
+        /** @description `flowSecret` stays in the app's memory: it never passes through a browser or an address (U-90.3). */
+        AppleBrowserStartResult: {
+            authorizationUrl: string;
+            flowSecret: string;
+        };
         AccessCompleteRegistrationResult: {
             tenantUser: components["schemas"]["AccessTenantUserView"];
         };
@@ -3136,7 +3654,7 @@ export interface components {
             count: number;
         };
         /** @enum {string} */
-        AccountDeletionWarning: "APPOINTMENTS_IN_PROGRESS" | "FAILED_TRANSMISSIONS" | "SMS_UNITS_LOST" | "LICENSE_LOST" | "RECORD_COPY_ON_REQUEST";
+        AccountDeletionWarning: "APPOINTMENTS_IN_PROGRESS" | "FAILED_TRANSMISSIONS" | "SMS_UNITS_LOST" | "LICENSE_LOST" | "RECORD_COPY_ON_REQUEST" | "MESSAGES_COPY_BEFORE_DELETION";
         /** @description D-125 rule 6: what this deletion leaves behind (archive or doctor's record), why, and for how long at most. */
         AccountDeletionRetainedCategoryView: {
             category: components["schemas"]["AccountRetainedCategory"];
@@ -3144,7 +3662,7 @@ export interface components {
             maxRetentionYears: number;
         };
         /** @enum {string} */
-        AccountRetainedCategory: "LEGAL_ACCEPTANCE" | "DELETION_TRACE" | "RATING_MODERATION" | "ABUSE_MEASURE" | "DOCTOR_PATIENT_RECORD" | "DOCTOR_APPOINTMENT_BOOK" | "DOCTOR_TAX_RECORDS" | "PLATFORM_ACCOUNTING";
+        AccountRetainedCategory: "LEGAL_ACCEPTANCE" | "DELETION_TRACE" | "RATING_MODERATION" | "ABUSE_MEASURE" | "MESSAGE_REPORT" | "DOCTOR_PATIENT_RECORD" | "DOCTOR_APPOINTMENT_BOOK" | "DOCTOR_TAX_RECORDS" | "PLATFORM_ACCOUNTING";
         /** @enum {string} */
         AccountRetainedPurpose: "LEGAL_CLAIMS_EVIDENCE" | "DELETION_ACCOUNTABILITY" | "MODERATION_EVIDENCE" | "ABUSE_PREVENTION" | "DOCTOR_RECORD_KEEPING" | "TAX_LAW_RETENTION" | "ACCOUNTING_RETENTION";
         AccountDeletionCodeSentView: {
@@ -3180,13 +3698,14 @@ export interface components {
             dismissedAt: string | null;
         };
         PatientSelfResponseView: components["schemas"]["PatientViewExt"] | null;
-        /** @description `firstName`/`lastName` and the two login-phone facts are resolved only by `GET /patient/me`; the other reads of this view omit them. The login phone is published masked (`+30 69•• ••• 678`), never in full (D-47). */
+        /** @description `firstName`/`lastName`, the two login-phone facts and `loginEmail` are resolved only by `GET /patient/me`, for the signed-in person alone; the other reads of this view omit them. The login phone is published masked (`+30 69•• ••• 678`), never in full (D-47). */
         PatientViewExt: {
             relatives?: components["schemas"]["RelativeView"][];
             firstName?: string | null;
             lastName?: string | null;
             loginPhoneVerified?: boolean;
             loginPhoneMasked?: string | null;
+            loginEmail?: string | null;
             id: string;
             userId: string;
             tenantUserId: string;
@@ -3237,22 +3756,175 @@ export interface components {
             updatedAt: string;
         };
         RelativeListResponseView: components["schemas"]["RelativeView"][];
-        /** @description What the app needs before the last booking step (D-05): only the missing fields are asked for. */
+        FavoriteDoctorListResponseView: {
+            items: components["schemas"]["FavoriteDoctorItemView"][];
+            total: number;
+        };
+        FavoriteDoctorItemView: {
+            /** Format: date-time */
+            savedAt: string;
+            card: components["schemas"]["DoctorPublicMarketplaceCardView"];
+        };
+        FavoriteDoctorIdsResponseView: {
+            doctorIds: string[];
+        };
+        FavoriteDoctorSavedView: components["schemas"]["FavoriteDoctorRecord"];
+        FavoriteDoctorRecord: {
+            doctorId: string;
+            /** Format: date-time */
+            savedAt: string;
+        };
+        /** @description `voterKey` appears only when the server has just minted it: the device keeps it and sends it from then on. */
+        HelpfulVoteCastResponseView: {
+            voterKey?: string;
+            target: string;
+            value: components["schemas"]["HelpfulVoteChoice"];
+            reason: components["schemas"]["HelpfulVoteReason"] | null;
+        };
+        /** @enum {string} */
+        HelpfulVoteChoice: "up" | "down" | "none";
+        /** @enum {string} */
+        HelpfulVoteReason: "not-answered" | "unclear" | "outdated";
+        HelpfulVoteMineResponseView: components["schemas"]["HelpfulVoteView"][];
+        /** @description U-78.1: one device's own vote on one target. No public answer carries a count. */
+        HelpfulVoteView: {
+            target: string;
+            value: components["schemas"]["HelpfulVoteChoice"];
+            reason: components["schemas"]["HelpfulVoteReason"] | null;
+        };
+        HelpfulVoteSummaryResponseView: components["schemas"]["HelpfulVoteSummaryItemView"][];
+        HelpfulVoteSummaryItemView: {
+            kind: components["schemas"]["HelpfulVoteKind"];
+            key: string;
+            title: string | null;
+            exists: boolean;
+            up: number;
+            down: number;
+            total: number;
+            helpfulShare: number | null;
+            reasons: {
+                notAnswered: number;
+                unclear: number;
+                outdated: number;
+            };
+            /** Format: date-time */
+            lastVoteAt: string;
+        };
+        /** @enum {string} */
+        HelpfulVoteKind: "article" | "faq";
+        HelpfulVoteSummaryMetaView: {
+            total: number;
+            nextCursor: string | null;
+        };
+        /** @description `sideCounts` is on the first page only: an account with both sides shows its chips from it (Π4). */
+        MessagingConversationListView: {
+            items: components["schemas"]["MessagingConversationView"][];
+            nextCursor: string | null;
+            sideCounts: {
+                asPatient: number;
+                asDoctor: number;
+            } | null;
+        };
+        /** @description One row of the list; `side` is the side of the reader. There is never a read state of the other person (U-84.2). */
+        MessagingConversationView: {
+            id: string;
+            /** @enum {string} */
+            side: "patient" | "doctor";
+            counterpart: components["schemas"]["MessagingCounterpartView"];
+            lastMessage: components["schemas"]["MessagingLastMessageView"] | null;
+            unreadCount: number;
+            archived: boolean;
+            blockedByMe: boolean;
+            blockedByOther: boolean;
+        };
+        /** @description The other person of a conversation. A patient shows only `fullName`, with `kind: 'patient'` (U-84.3). */
+        MessagingCounterpartView: {
+            /** @enum {string} */
+            kind: "doctor" | "patient";
+            fullName: string | null;
+            doctorId: string | null;
+            slug: string | null;
+            specialty: string | null;
+            photoUrl: string | null;
+        };
+        MessagingLastMessageView: {
+            preview: string;
+            mine: boolean;
+            /** Format: date-time */
+            sentAt: string;
+        };
+        MessagingSentMessageView: {
+            conversationId: string;
+            message: components["schemas"]["MessagingMessageView"];
+        };
+        MessagingMessageView: {
+            id: string;
+            mine: boolean;
+            body: string;
+            /** Format: date-time */
+            sentAt: string;
+            clientMessageId: string | null;
+        };
+        /** @description `counterpart` is null on a poll (`after`), which reads only the new messages and this state. */
+        MessagingThreadView: {
+            conversationId: string;
+            /** @enum {string} */
+            side: "patient" | "doctor";
+            counterpart: components["schemas"]["MessagingCounterpartView"] | null;
+            state: components["schemas"]["MessagingThreadStateView"];
+            items: components["schemas"]["MessagingMessageView"][];
+            hasMore: boolean;
+        };
+        /** @description What the composer of a conversation shows, cheap enough to travel on every poll. */
+        MessagingThreadStateView: {
+            archived: boolean;
+            blockedByMe: boolean;
+            blockedByOther: boolean;
+            preReplyLimitReached: boolean;
+        };
+        MessagingReadView: {
+            unreadCount: number;
+        };
+        MessagingUnreadCountView: {
+            conversations: number;
+        };
+        MessagingContactView: {
+            acceptsNewConversations: boolean;
+            conversationId: string | null;
+        };
+        MessagingArchiveView: {
+            archived: boolean;
+        };
+        MessagingBlockView: {
+            blockedByMe: boolean;
+            blockedByOther: boolean;
+        };
+        /** @description `text/plain; charset=utf-8`: the copy of one conversation, a file and not an envelope. */
+        MessagingConversationExportText: string;
+        MessagingReportedView: {
+            reported: boolean;
+        };
+        MessagingDoctorSettingsView: {
+            acceptsNewConversations: boolean;
+        };
+        /** @description What the app needs before the last booking step (D-05): only the missing fields are asked for. `insideCancellationCutoff` (U-90.1 A4) says the deadline of the chosen slot has already passed, by the server clock; `false` without a slot. */
         BookingReadinessView: {
             phoneVerified: boolean;
             nameComplete: boolean;
             dateOfBirthPresent: boolean;
             blockers: components["schemas"]["BookingReadinessBlocker"][];
+            insideCancellationCutoff: boolean;
         };
         /** @description Union of the two blocker vocabularies (D-47): the patient/appointment codes this module owns and the slot codes the availability module owns. */
         BookingReadinessBlocker: components["schemas"]["AppointmentBookingBlocker"] | components["schemas"]["PublicSlotEligibilityBlockerCode"];
         /** @enum {string} */
-        AppointmentBookingBlocker: "PATIENT_PHONE_UNVERIFIED" | "PATIENT_NAME_MISSING" | "RESCHEDULE_AFTER_CANCELLATION_CUTOFF" | "PATIENT_PENDING_LIMIT_REACHED" | "PATIENT_RESCHEDULE_LIMIT_REACHED" | "PATIENT_IS_THE_DOCTOR";
+        AppointmentBookingBlocker: "PATIENT_PHONE_UNVERIFIED" | "PATIENT_NAME_MISSING" | "RESCHEDULE_AFTER_CANCELLATION_CUTOFF" | "RESCHEDULE_INSIDE_CANCELLATION_CUTOFF" | "CANCEL_AFTER_CANCELLATION_CUTOFF" | "OFFICE_PHONE_REQUIRED" | "PATIENT_PENDING_LIMIT_REACHED" | "PATIENT_RESCHEDULE_LIMIT_REACHED" | "PATIENT_IS_THE_DOCTOR";
         /** @enum {string} */
         PublicSlotEligibilityBlockerCode: "DOCTOR_SERVICE_NOT_OWNED_BY_DOCTOR" | "AVAILABILITY_NOT_FOUND" | "AVAILABILITY_DISABLED" | "SCHEDULE_NOT_CONFIGURED" | "DOCTOR_NOT_VERIFIED" | "APPOINTMENTS_DISABLED" | "MARKETPLACE_LICENSE_INACTIVE" | "OUTSIDE_AVAILABILITY_WINDOW" | "OUTSIDE_WEEKLY_SCHEDULE" | "SLOT_STEP_MISMATCH" | "INTERVAL_DURATION_MISMATCH" | "INTERVAL_EXCEEDS_AVAILABLE_RANGE" | "SLOT_ALREADY_ELAPSED" | "BOOKING_NOTICE_TOO_SHORT" | "BOOKING_HORIZON_EXCEEDED" | "APPOINTMENT_OVERLAPS_EXISTING" | "EXTERNAL_CALENDAR_BUSY";
-        /** @description One appointment as every single-appointment response carries it: the list item plus its `actions`. */
+        /** @description One appointment as every single-appointment response carries it: the list item, its `actions`, and the phone a patient past the deadline calls (U-90.1 A5): the office's current number, else the number frozen at booking. */
         AppointmentDetailResponseView: {
             actions: components["schemas"]["AppointmentActionsView"];
+            officePhone: string | null;
             officeTimeZone: string;
             serviceLines?: components["schemas"]["AppointmentServiceLineView"][];
             auditLogs?: components["schemas"]["AppointmentAuditLogResponseView"][];
@@ -3593,7 +4265,7 @@ export interface components {
             cells: components["schemas"]["NotificationPreferenceCellView"][];
         };
         /** @enum {string} */
-        NotificationPreferenceCategory: "APPOINTMENT_UPDATES" | "REMINDERS" | "RATINGS" | "QUESTIONS" | "ACCOUNT" | "DOCTOR_NEW_APPOINTMENTS" | "DOCTOR_PATIENT_CHANGES" | "DOCTOR_RATINGS" | "DOCTOR_ACCOUNT" | "DOCTOR_OPERATIONS";
+        NotificationPreferenceCategory: "APPOINTMENT_UPDATES" | "REMINDERS" | "RATINGS" | "QUESTIONS" | "MESSAGES" | "ACCOUNT" | "DOCTOR_NEW_APPOINTMENTS" | "DOCTOR_PATIENT_CHANGES" | "DOCTOR_RATINGS" | "DOCTOR_MESSAGES" | "DOCTOR_ACCOUNT" | "DOCTOR_OPERATIONS";
         /** @description `enabled` is `null` where the account decides nothing: the doctor of the visit sets it (D-132). */
         NotificationPreferenceCellView: {
             channel: components["schemas"]["NotificationChannel"];
@@ -3933,6 +4605,7 @@ export interface components {
             state: string;
             floor: number | null;
             description: unknown;
+            gettingThere: string | null;
         };
         OfficeImageView: {
             id: string;
@@ -6241,6 +6914,11 @@ export interface operations {
             query?: {
                 lang?: "el" | "en";
                 language?: "el" | "en";
+                limit?: string;
+                cursor?: string;
+                sort?: "newest" | "oldest" | "highest" | "lowest";
+                q?: string;
+                mention?: "COURTESY" | "EXPLANATION" | "ORGANIZATION" | "CLEANLINESS" | "PATIENCE" | "ACCESS";
             };
             header?: never;
             path: {
@@ -6250,7 +6928,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Approved public reviews for the doctor, newest first, capped at the 500 most recent. `reviews` is null for an unknown or non-visible doctor and [] when the doctor has no approved reviews. */
+            /** @description Approved public reviews on the order of `sort` (newest first by default). `limit` is 1–50; without it, the 500 first. `q` matches every word in the patient comment, without accents or case. `mention` keeps the reviews that speak about one topic (U-91.2: six), good or bad. `total` counts every match; `nextCursor` names the next page. `reviews` is null for an unknown or non-visible doctor and [] when no approved review matches. 422 on an invalid input, 429 past the shared `doctor-reviews` budget. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -6261,6 +6939,36 @@ export interface operations {
                         status: "success" | "error";
                         message: string;
                         data: components["schemas"]["DoctorPublicMarketplaceReviewsResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    getPublicMarketplaceReviewsSummary: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path: {
+                doctorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description How many reviews there are, the five star bars from 5 down (always all five), the averages of the profile header and the topics. `summary` is null for an unknown or non-visible doctor. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorPublicMarketplaceReviewsSummaryResponseView"];
                     };
                 };
             };
@@ -6281,7 +6989,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description A single public marketplace office with its availability. */
+            /** @description A single public marketplace office with its availability, and what only this page reads: at most 12 images, the weekly hours and how to get there. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -6292,6 +7000,40 @@ export interface operations {
                         status: "success" | "error";
                         message: string;
                         data: components["schemas"]["DoctorPublicMarketplaceOfficeResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    listPublicArticles: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                type?: "ARTICLE" | "HEALTH_ADVICE";
+                limit?: string;
+                cursor?: string;
+                q?: string;
+                serviceId?: string;
+                doctorId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cards of the published articles, newest publication first. The body, the sections and the SEO fields travel only with `GET /article/public/articles/{slug}`. `doctorId` keeps the articles of one doctor: an unknown or hidden doctor answers [] and a total of 0. `readingMinutes` is null when there is no time to show. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ArticlePublicCardListView"];
+                        meta: components["schemas"]["ArticlePublicListMetaView"];
                     };
                 };
             };
@@ -6642,6 +7384,169 @@ export interface operations {
             };
         };
     };
+    issueAccessAppleNonce: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantId?: string;
+                    tenantSlug?: string;
+                } | unknown | unknown;
+            };
+        };
+        responses: {
+            /** @description Pass `nonce` to the iOS sign-in as it is, and send the identity token that carries it to `POST /auth/access/apple`. It lives for 5 minutes and is spent by one successful sign-in. A deployment without Apple keys answers 401 SIGN_IN_NOT_AVAILABLE. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppleNonceResult"];
+                    };
+                };
+            };
+        };
+    };
+    verifyAccessAppleToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantId?: string;
+                    tenantSlug?: string;
+                    identityToken: string;
+                    authorizationCode: string;
+                    firstName?: string;
+                    lastName?: string;
+                    /** @enum {string} */
+                    target?: "patient";
+                    legalAcceptance: {
+                        /** @enum {string} */
+                        context: "PATIENT";
+                        acceptances: {
+                            documentCode: string;
+                            version: string;
+                            /** @constant */
+                            accepted: true;
+                        }[];
+                    };
+                } | unknown | unknown;
+            };
+        };
+        responses: {
+            /** @description Always `signed-in`, with the session cookies set, the same answer as `POST /auth/access/google`. The email comes only from the signed token, never from the body. `legalAcceptance` must carry the CURRENT published versions and is judged only for a new account: its 400 spends neither the nonce nor the `authorizationCode`, so the same token may be sent again with fresh versions. Failures: 401 EC010 for a token, audience, signature or nonce that does not pass; 403 APPLE_EMAIL_UNAVAILABLE for a new account without an email; 403 APPLE_EMAIL_NOT_VERIFIED when Apple does not confirm the email; 401 SIGN_IN_NOT_AVAILABLE for another Apple ID on a linked account, a closed channel or a backoffice role; 403 USER_LOCKED when banned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppleSignInResult"];
+                    };
+                };
+            };
+        };
+    };
+    startAccessAppleBrowser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantId?: string;
+                    tenantSlug?: string;
+                    /** @enum {string} */
+                    appVariant: "production" | "development" | "preview";
+                    /** @enum {string} */
+                    language?: "el" | "en";
+                } | unknown | unknown;
+            };
+        };
+        responses: {
+            /** @description Open `authorizationUrl` in the in-app browser and keep `flowSecret` in memory only: it never passes through a browser or an address. The way back to the app is built by the server from `appVariant`; production and stage accept `production` alone, anything else is 422. After Apple, our page offers one link that hands the app `<scheme>://auth/apple-return?handoff=<code>`, or `?error=cancelled` / `?error=apple`. Nothing is written to the database. Answered with `Cache-Control: no-store`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppleBrowserStartResult"];
+                    };
+                };
+            };
+        };
+    };
+    exchangeAccessAppleBrowser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    handoffCode: string;
+                    flowSecret: string;
+                    /** @enum {string} */
+                    target?: "patient";
+                    legalAcceptance: {
+                        /** @enum {string} */
+                        context: "PATIENT";
+                        acceptances: {
+                            documentCode: string;
+                            version: string;
+                            /** @constant */
+                            accepted: true;
+                        }[];
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Always `signed-in`, with the session cookies set, the same answer as `POST /auth/access/apple`, with the same failures and the same consent rule: a 400 leaves the code whole for one retry. The code lives for 240 seconds and is spent once; a wrong `flowSecret` burns it, so even the right one is then 401 EC010, and the person presses the Apple button again. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppleSignInResult"];
+                    };
+                };
+            };
+        };
+    };
     completeAccessRegistration: {
         parameters: {
             query?: never;
@@ -6858,7 +7763,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Nothing is changed or sent. `allowed` is false with `refusal` BACKOFFICE_ACCOUNT for an account that holds a backoffice role (another administrator deletes it) or NO_VERIFIED_CHANNEL when neither the email nor the phone is verified and allowed to sign in. `codeChannel` is where the code will go (the verified email first, otherwise the verified phone) and `codeDestinationMasked` shows it masked only. `removed` counts what the deletion removes, by item: legalAcceptances, legalNotices (who was told of a new terms version), trackingConsents, appointmentsCanceled (the appointments, relatives included, that have not started), ratings (deleted whole), ratingInvitationsRevoked, questions, notificationsCanceled, notificationPreferences (the switches of the notification centre), pushDevices (the phones registered for push notifications), patientProfiles (anonymized), relatives, profiles; a doctor account adds doctorAppointmentsCanceled (in every office, the patients are told), receivedRatings, doctorRatingInvitationsRevoked, doctorAnswers, articleAuthorships (an article left with no author is unpublished), calendarConnections, offices, doctorProfiles (the public profile goes at once), pendingTransmissions (still sent to the tax authority for at most one month), erpTraders, erpItems, providerMessageTemplates and operationsAlerts. `warnings` holds codes: APPOINTMENTS_IN_PROGRESS when a started or checked-in visit stays with its doctor; for a doctor also FAILED_TRANSMISSIONS (documents the tax authority never accepted), SMS_UNITS_LOST, LICENSE_LOST (a running licence ends with the account) and RECORD_COPY_ON_REQUEST (a copy of the appointment book is given on request, before or after the deletion). `retained` lists what stays, why, and for at most how many years: in the locked archive the accepted terms versions, an abuse measure when the account is banned, rating moderation decisions without text, and the deletion trace (no name, email, phone or health data); DOCTOR_PATIENT_RECORD when past appointments stay in the doctors' records, never shown to the deleted account or publicly; for a doctor DOCTOR_APPOINTMENT_BOOK, DOCTOR_TAX_RECORDS (the issued documents) and PLATFORM_ACCOUNTING (licences and SMS packages). */
+            /** @description Nothing is changed or sent. `allowed` is false with `refusal` BACKOFFICE_ACCOUNT for an account that holds a backoffice role (another administrator deletes it) or NO_VERIFIED_CHANNEL when neither the email nor the phone is verified and allowed to sign in. `codeChannel` is where the code will go (the verified email first, otherwise the verified phone) and `codeDestinationMasked` shows it masked only. `removed` counts what the deletion removes, by item: legalAcceptances, legalNotices (who was told of a new terms version), trackingConsents, appointmentsCanceled (the appointments, relatives included, that have not started), ratings (deleted whole), ratingInvitationsRevoked, questions, notificationsCanceled, notificationPreferences (the switches of the notification centre), pushDevices (the phones registered for push notifications), patientProfiles (anonymized), relatives, favoriteDoctors, profiles; a doctor account adds doctorAppointmentsCanceled (in every office, the patients are told), receivedRatings, doctorRatingInvitationsRevoked, doctorAnswers, articleAuthorships (an article left with no author is unpublished), calendarConnections, offices, doctorProfiles (the public profile goes at once), pendingTransmissions (still sent to the tax authority for at most one month), erpTraders, erpItems, providerMessageTemplates and operationsAlerts. `warnings` holds codes: APPOINTMENTS_IN_PROGRESS when a started or checked-in visit stays with its doctor; for a doctor also FAILED_TRANSMISSIONS (documents the tax authority never accepted), SMS_UNITS_LOST, LICENSE_LOST (a running licence ends with the account) and RECORD_COPY_ON_REQUEST (a copy of the appointment book is given on request, before or after the deletion). `retained` lists what stays, why, and for at most how many years: in the locked archive the accepted terms versions, an abuse measure when the account is banned, rating moderation decisions without text, and the deletion trace (no name, email, phone or health data); DOCTOR_PATIENT_RECORD when past appointments stay in the doctors' records, never shown to the deleted account or publicly; for a doctor DOCTOR_APPOINTMENT_BOOK, DOCTOR_TAX_RECORDS (the issued documents) and PLATFORM_ACCOUNTING (licences and SMS packages). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -7002,7 +7907,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The patient profile of the signed-in tenant user, or null when registration completed but the patient profile does not exist yet. */
+            /** @description The patient profile of the signed-in tenant user, with the login email of that same person, or null when registration completed but the patient profile does not exist yet. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -7266,6 +8171,688 @@ export interface operations {
             };
         };
     };
+    listMyFavoriteDoctors: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One flat list, the most recently saved first, at most 100, each item with `savedAt` and the very card of the doctor search, prices included. There is no grouping and no search here: the device filters the list itself. A doctor no longer listed in the marketplace is not in `items` nor in `total`, and comes back if listed again. 403 `EC017` for an account with no patient profile. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["FavoriteDoctorListResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    listMyFavoriteDoctorIds: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The doctor ids alone, the most recently saved first, at most 100, a doctor no longer listed included. The search and the profile do not say whether a doctor is a favorite: a client reads this once and matches on `doctorId`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["FavoriteDoctorIdsResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    saveMyFavoriteDoctor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doctorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The saved doctor and when; saving again answers the first `savedAt`. The route takes no body and no query (422). 404 `DOCTOR_NOT_FOUND`, one answer for a doctor that does not exist and one no longer listed in the marketplace. 409 `FAVORITES_LIMIT_REACHED` at 100 favorites. Rate limited per IP under the `favorites` class. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["FavoriteDoctorSavedView"];
+                    };
+                };
+            };
+        };
+    };
+    removeMyFavoriteDoctor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doctorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed, or never saved: the same answer, no body. The route takes no body and no query (422). Rate limited per IP under the `favorites` class. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    castHelpfulVote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    target: string;
+                    /** @enum {string} */
+                    value: "up" | "down" | "none";
+                    /** @enum {string} */
+                    reason?: "not-answered" | "unclear" | "outdated";
+                    /** @enum {string} */
+                    lang: "el" | "en";
+                };
+            };
+        };
+        responses: {
+            /** @description The vote as stored. The device key travels in the `X-Helpful-Voter` header, a UUID v4 (422 otherwise). With no header the first vote mints one and answers it as `voterKey`, once: the device keeps it and sends it from then on. `none` takes the vote back and mints nothing. A `reason` goes only with `down`. `target` is `article:<slug>` or `faq:<anchor>`: 404 for an article that is not published and for a question that is not in the published FAQ or has no answer. Rate limited per IP under the `helpful-vote` class. There is never a count in this answer. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["HelpfulVoteCastResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    listMyHelpfulVotes: {
+        parameters: {
+            query?: {
+                target?: string;
+                kind?: "faq";
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Only the votes of the key in `X-Helpful-Voter` (a UUID v4, 422 otherwise). With no header, an unknown key or a target that no longer exists: `[]`. Exactly one of `target` and `kind`. There is never a count in this answer. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["HelpfulVoteMineResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    getHelpfulVoteSummary: {
+        parameters: {
+            query?: {
+                kind?: "article" | "faq";
+                from?: string;
+                to?: string;
+                sort?: "down" | "up" | "total";
+                limit?: number;
+                cursor?: string;
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One row per target, most `down` first unless `sort` says otherwise, default 50 and at most 100 a page; `from` and `to` bound the last change of a vote. `exists` is false, with `title` null, for an article no longer published and a question no longer in the FAQ. `meta.nextCursor` goes in `cursor` for the next page, null on the last one. Never a device hash. 401 without a session, 403 for any role outside the backoffice. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["HelpfulVoteSummaryResponseView"];
+                        meta: components["schemas"]["HelpfulVoteSummaryMetaView"];
+                    };
+                };
+            };
+        };
+    };
+    listMessagingConversations: {
+        parameters: {
+            query?: {
+                side?: "all" | "patient" | "doctor";
+                archived?: "0" | "1";
+                cursor?: string;
+                limit?: number;
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `side` (`all` by default) keeps the conversations where the reader is that side; `archived=1` reads «Προηγούμενες συνομιλίες». Up to 30 a page, `nextCursor` goes in `cursor`. `lastMessage.preview` is one line, cut on the server at 140 characters. `sideCounts` is on the first page: an account holding both sides shows its chips from it. There is never a read state of the other person. Rate limited per IP under `messaging-read`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingConversationListView"];
+                    };
+                };
+            };
+        };
+    };
+    startMessagingConversation: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    doctorId: string;
+                    /** Format: uuid */
+                    clientMessageId: string;
+                    body: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The same `clientMessageId` answers the same message, so a retry never doubles. 404 for a doctor the public search does not show; 409 `MESSAGING_CLOSED` when the doctor accepts no new conversations; 409 `MESSAGING_BLOCKED`; 409 `MESSAGING_PRE_REPLY_LIMIT` after 3 messages before the first answer; 400 `MESSAGING_SELF`, `MESSAGE_EMPTY` or `MESSAGE_TOO_LONG`; 422 for a body that fails the schema; 429 `MESSAGING_NEW_LIMIT`, `MESSAGING_SEND_LIMIT` or `MESSAGE_DUPLICATE`, with `Retry-After`. The text is plain and comes back as written: render it only as text, never as HTML, and make no link of it. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingSentMessageView"];
+                    };
+                };
+            };
+        };
+    };
+    listMessagingMessages: {
+        parameters: {
+            query?: {
+                before?: string;
+                after?: string;
+                limit?: number;
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Oldest first inside a page. `before` reads backwards, `after` polls forwards, never both; up to 50 a page. On a poll `counterpart` is null and only the new messages and `state` travel. 404 for a conversation that is not the reader's, unknown or of another tenant alike. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingThreadView"];
+                    };
+                };
+            };
+        };
+    };
+    sendMessagingMessage: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    clientMessageId: string;
+                    body: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The same `clientMessageId` answers the same message, so «Δοκιμάστε ξανά» never doubles. 404 for a conversation that is not the reader's; 409 `MESSAGING_BLOCKED` or `MESSAGING_PRE_REPLY_LIMIT`; 400 `MESSAGE_EMPTY` or `MESSAGE_TOO_LONG`; 422 for a body that fails the schema; 429 `MESSAGING_SEND_LIMIT` or `MESSAGE_DUPLICATE`, with `Retry-After`. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingSentMessageView"];
+                    };
+                };
+            };
+        };
+    };
+    markMessagingConversationRead: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    upToMessageId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Only forwards: an older message changes nothing. `unreadCount` is what stays unread after that message. The other person never learns it. 404 for a message outside the conversation. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingReadView"];
+                    };
+                };
+            };
+        };
+    };
+    getMessagingUnreadCount: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Conversations, not messages, with none of the archived ones. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingUnreadCountView"];
+                    };
+                };
+            };
+        };
+    };
+    getMessagingDoctorContact: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path: {
+                doctorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Called only when the button is pressed, so the profile carries no statement more. 404 for a doctor the public search does not show, unless a conversation with them exists. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingContactView"];
+                    };
+                };
+            };
+        };
+    };
+    archiveMessagingConversation: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A new message takes it out by itself. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingArchiveView"];
+                    };
+                };
+            };
+        };
+    };
+    unarchiveMessagingConversation: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingArchiveView"];
+                    };
+                };
+            };
+        };
+    };
+    blockMessagingConversation: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingBlockView"];
+                    };
+                };
+            };
+        };
+    };
+    unblockMessagingConversation: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingBlockView"];
+                    };
+                };
+            };
+        };
+    };
+    exportMessagingConversation: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `text/plain; charset=utf-8` as an attachment, the file itself and not the JSON envelope. Only someone who takes part; 429 `MESSAGING_EXPORT_LIMIT` past 10 a day, with `Retry-After`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": components["schemas"]["MessagingConversationExportText"];
+                };
+            };
+        };
+    };
+    reportMessagingMessage: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path: {
+                messageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    reason: "SPAM" | "ABUSE" | "INAPPROPRIATE" | "OTHER";
+                };
+            };
+        };
+        responses: {
+            /** @description The team sees only this message, not the conversation, and the sender is not told. 400 `MESSAGE_NOT_RECEIVED` for an own message; 409 `MESSAGE_ALREADY_REPORTED`; 429 `MESSAGING_REPORT_LIMIT` past 20 a day, with `Retry-After`. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingReportedView"];
+                    };
+                };
+            };
+        };
+    };
+    getMessagingSettings: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Open until the doctor closes it. 403 for an account without a doctor profile. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingDoctorSettingsView"];
+                    };
+                };
+            };
+        };
+    };
+    updateMessagingSettings: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    acceptsNewConversations: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description Closed, nobody starts a new conversation; the existing ones go on. 403 for an account without a doctor profile. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingDoctorSettingsView"];
+                    };
+                };
+            };
+        };
+    };
     getBookingReadiness: {
         parameters: {
             query?: {
@@ -7280,7 +8867,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The blockers standing between the signed-in patient and a booking (verified mobile, full name), plus whether booking is possible at all. It belongs to the patient side: a member account, and an account that is also a doctor only when it holds a patient profile (a doctor books another doctor as a patient); otherwise 403. With `doctorId` it also reports `PATIENT_PENDING_LIMIT_REACHED` when that doctor already holds an open request of the PERSON being booked (D-70, counted per person): the account itself, or the relative named by `relativeId` — each relative has a place of its own. A `relativeId` that is not a relative of this account answers like a person with no open request. With `doctorId` naming the doctor profile of this very account it also reports `PATIENT_IS_THE_DOCTOR`, with or without `relativeId`: one account is never both sides of an appointment, and the booking would be refused with 403. With the chosen slot (`officeId` and `startTime`, both together with `doctorId`) it also reports `BOOKING_NOTICE_TOO_SHORT` and `BOOKING_HORIZON_EXCEEDED` under the effective policy of that doctor and office, decided on the SERVER clock — exactly what the booking would be refused with. */
+            /** @description The blockers standing between the signed-in patient and a booking (verified mobile, full name), plus whether booking is possible at all. It belongs to the patient side: a member account, and an account that is also a doctor only when it holds a patient profile (a doctor books another doctor as a patient); otherwise 403. With `doctorId` it also reports `PATIENT_PENDING_LIMIT_REACHED` when that doctor already holds an open request of the PERSON being booked (D-70, counted per person): the account itself, or the relative named by `relativeId` — each relative has a place of its own. A `relativeId` that is not a relative of this account answers like a person with no open request. With `doctorId` naming the doctor profile of this very account it also reports `PATIENT_IS_THE_DOCTOR`, with or without `relativeId`: one account is never both sides of an appointment, and the booking would be refused with 403. With the chosen slot (`officeId` and `startTime`, both together with `doctorId`) it also reports `BOOKING_NOTICE_TOO_SHORT` and `BOOKING_HORIZON_EXCEEDED` under the effective policy of that doctor and office, decided on the SERVER clock — exactly what the booking would be refused with — and `OFFICE_PHONE_REQUIRED` when that office has no phone. `insideCancellationCutoff` says, only with the chosen slot, that the cancellation deadline of that hour has already passed on the server clock, so a patient told nothing else cannot tell that once booked it cannot be cancelled online; `false` without a slot. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -7365,7 +8952,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The created appointment. The booking is decided by the side the account takes in it: naming its own doctor profile as `doctorId` makes it a doctor booking, naming its own patient profile as `patientId` (another doctor) a patient booking, and a booking of a doctor for the patient profile of its own account — by that doctor or by the backoffice, for itself or for a relative of its own (`RELATIVE`) — is refused with 403 `PATIENT_IS_THE_DOCTOR`, the blocker code `getBookingReadiness` reports it with beforehand (one account is never both sides of an appointment; another doctor books the same person by the patient rules; judged on the accounts behind the two profiles). Every id is read in its canonical lower-case text before the side is chosen, so the letter case of an id changes nothing. A patient booking never sends `status`: the doctor confirmation mode decides it (AUTO ⇒ `booked`, MANUAL ⇒ `pending`) and the mode is snapshotted on the row. A MEMBER keeps one `pending` request per PERSON with one doctor (D-70): the account itself and each of its relatives count separately, and a second one for the same person answers 422 `PATIENT_PENDING_LIMIT_REACHED`. Rate limited per IP under the `booking` class. */
+            /** @description The created appointment. A patient booking at an office with no phone is refused with 403 `OFFICE_PHONE_REQUIRED`. The booking is decided by the side the account takes in it: naming its own doctor profile as `doctorId` makes it a doctor booking, naming its own patient profile as `patientId` (another doctor) a patient booking, and a booking of a doctor for the patient profile of its own account — by that doctor or by the backoffice, for itself or for a relative of its own (`RELATIVE`) — is refused with 403 `PATIENT_IS_THE_DOCTOR`, the blocker code `getBookingReadiness` reports it with beforehand (one account is never both sides of an appointment; another doctor books the same person by the patient rules; judged on the accounts behind the two profiles). Every id is read in its canonical lower-case text before the side is chosen, so the letter case of an id changes nothing. A patient booking never sends `status`: the doctor confirmation mode decides it (AUTO ⇒ `booked`, MANUAL ⇒ `pending`) and the mode is snapshotted on the row. A MEMBER keeps one `pending` request per PERSON with one doctor (D-70): the account itself and each of its relatives count separately, and a second one for the same person answers 422 `PATIENT_PENDING_LIMIT_REACHED`. Rate limited per IP under the `booking` class. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -7392,7 +8979,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The appointment with its service lines and audit log, `officeTimeZone`: the IANA zone its office keeps its hours in, so every hour is shown on the office clock, and `actions`: what the reader may do with it NOW, decided on the server clock by the very rules the writes check (D-118) — a member cancels until the hour (`isPastCancellationCutoff` flags a late cancel) and moves strictly before the cutoff and within the move limit, the doctor side answers a pending request, moves a pending or booked one, cancels anything not over, declares the `outcomes` due after the hour and makes the open `correction`. Booking readiness and an already rated visit are asked by the write itself. The side comes from the appointment itself: its doctor reads it as the doctor side, the holder of its patient profile as a member (a doctor who booked another doctor reads that visit as a patient), the backoffice every appointment of its tenant; everyone else gets the one 403. A member reads every audit line without the explanation of an automatic change, and every line that set the outcome of the visit (a declared outcome, or a status move to `completed`/`no_show` by anyone) without who set it, its reason or its snapshots (`actorRole` null). */
+            /** @description The appointment with its service lines and audit log, `officeTimeZone`: the IANA zone its office keeps its hours in, so every hour is shown on the office clock, and `actions`: what the reader may do with it NOW, decided on the server clock by the very rules the writes check (D-118), and `officePhone`: the current number of the office, else the one frozen at booking, null when neither exists — a member cancels a booked visit until its cancellation deadline and a request until its hour (`!canCancel && isPastCancellationCutoff` means the deadline has passed and only the phone is left) and moves strictly before the cutoff and within the move limit, the doctor side answers a pending request, moves a pending or booked one, cancels anything not over, declares the `outcomes` due after the hour and makes the open `correction`. Booking readiness and an already rated visit are asked by the write itself. The side comes from the appointment itself: its doctor reads it as the doctor side, the holder of its patient profile as a member (a doctor who booked another doctor reads that visit as a patient), the backoffice every appointment of its tenant; everyone else gets the one 403. A member reads every audit line without the explanation of an automatic change, and every line that set the outcome of the visit (a declared outcome, or a status move to `completed`/`no_show` by anyone) without who set it, its reason or its snapshots (`actorRole` null). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -7426,11 +9013,12 @@ export interface operations {
                     /** Format: date-time */
                     startTime?: string;
                     patientNote?: string | null;
+                    acknowledgeInsideCancellationCutoff?: boolean;
                 };
             };
         };
         responses: {
-            /** @description The updated appointment, with its `actions`. A member may move it only before the effective cancellation cutoff and only into a slot that still passes notice, horizon and availability; a doctor moves only a pending or booked appointment (403 otherwise), without the patient accepting, and the status does not change. A member who hands a `pending` request to another person (`relativeId`) takes that person's own D-70 place (422 `PATIENT_PENDING_LIMIT_REACHED` when it is taken). Who the visit is for (`bookedForType`, `relativeId`) and the `patientNote` change only while it is pending or booked, for every role (403 otherwise), and a new person carries its own frozen `relativeSnapshot` (null for the account holder). Only the patient of the appointment writes `patientNote` (D-39): a body from the doctor side that carries it is refused with 403. A write that finds the appointment closed in the meantime answers that same 403; one that finds it changed but still open answers 409. Rate limited per IP under the `booking` class. */
+            /** @description The updated appointment, with its `actions`. A member may move it only before the effective cancellation cutoff and only into a slot that still passes notice, horizon and availability. A member moving a BOOKED visit to an hour whose cancellation deadline has already passed gets 422 `RESCHEDULE_INSIDE_CANCELLATION_CUTOFF` and nothing is written, unless the body carries `acknowledgeInsideCancellationCutoff: true`; a request (`pending`) and the doctor side are never asked. A doctor moves only a pending or booked appointment (403 otherwise), without the patient accepting, and the status does not change. A member who hands a `pending` request to another person (`relativeId`) takes that person's own D-70 place (422 `PATIENT_PENDING_LIMIT_REACHED` when it is taken). Who the visit is for (`bookedForType`, `relativeId`) and the `patientNote` change only while it is pending or booked, for every role (403 otherwise), and a new person carries its own frozen `relativeSnapshot` (null for the account holder). Only the patient of the appointment writes `patientNote` (D-39): a body from the doctor side that carries it is refused with 403. A write that finds the appointment closed in the meantime answers that same 403; one that finds it changed but still open answers 409. Rate limited per IP under the `booking` class. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -7465,7 +9053,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The canceled appointment, with its `actions`. `reasonCode` is mandatory and must belong to the list of the caller own role. A member cancels until the appointment starts (403 from then on); cancelling past the cutoff is not refused: the row is flagged `canceledLate`. Repeating the call is idempotent. Rate limited per IP under the `booking` class. */
+            /** @description The canceled appointment, with its `actions`. `reasonCode` is mandatory and must belong to the list of the caller own role. A member cancels a booked visit until its cancellation deadline: past it the answer is 403 `CANCEL_AFTER_CANCELLATION_CUTOFF` and nothing is written, and the patient calls the office (`officePhone`), whose doctor side still cancels at any hour. A member withdraws a request (`pending`) until its hour, flagged `canceledLate` past the deadline, and cancels until its hour a visit the doctor side put inside its deadline, not flagged. From the hour on the answer is 403. Repeating the call is idempotent. Rate limited per IP under the `booking` class. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -7896,7 +9484,7 @@ export interface operations {
                 "application/json": {
                     cells: {
                         /** @enum {string} */
-                        category: "APPOINTMENT_UPDATES" | "REMINDERS" | "RATINGS" | "QUESTIONS" | "ACCOUNT" | "DOCTOR_NEW_APPOINTMENTS" | "DOCTOR_PATIENT_CHANGES" | "DOCTOR_RATINGS" | "DOCTOR_ACCOUNT" | "DOCTOR_OPERATIONS";
+                        category: "APPOINTMENT_UPDATES" | "REMINDERS" | "RATINGS" | "QUESTIONS" | "MESSAGES" | "ACCOUNT" | "DOCTOR_NEW_APPOINTMENTS" | "DOCTOR_PATIENT_CHANGES" | "DOCTOR_RATINGS" | "DOCTOR_MESSAGES" | "DOCTOR_ACCOUNT" | "DOCTOR_OPERATIONS";
                         /** @enum {string} */
                         channel: "EMAIL" | "SMS" | "PUSH";
                         enabled: boolean;

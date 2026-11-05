@@ -13,7 +13,7 @@ export type { VariantProps } from 'tailwind-variants';
 type ClassGroupIds = DefaultClassGroupIds | 'glyph-size';
 
 // The reading sizes `layout.css` defines as `@utility` (common v2 §A): text sizes, never a text colour to drop.
-const readingTextSizes = ['article-body', 'document-body'];
+const readingTextSizes = ['article-body', 'document-body', 'score-window', 'bubble', 'row-line'];
 
 // One merge config for `cn` and `tv`: tailwind-variants keeps a single merger cache for the whole app.
 // The `icon-*` utilities set width and height, so the later icon size (or `size-*`) wins over the earlier.

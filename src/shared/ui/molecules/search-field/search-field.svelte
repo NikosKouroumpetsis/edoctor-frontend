@@ -8,6 +8,8 @@
 	 */
 	export type SearchFieldVariant = 'launcher' | 'active' | 'inset';
 	export type SearchFieldReturnKey = 'search' | 'done' | 'go' | 'next';
+	/** `inset` only: `field` the corner of a sheet's field, `pill` rounded whole (U-60.2, a list's search, the words from 44). */
+	export type SearchFieldShape = 'field' | 'pill';
 
 	/**
 	 * Web only (keyboard): the field drives a list of options whose focus stays in the field (the combobox of the
@@ -52,6 +54,7 @@
 		backTestId?: never;
 		returnKeyType?: never;
 		inputClass?: never;
+		shape?: never;
 		oninput?: never;
 		onkeydown?: never;
 		listboxId?: never;
@@ -72,6 +75,7 @@
 			clearTestId?: string;
 			returnKeyType?: SearchFieldReturnKey;
 			inputClass?: never;
+			shape?: never;
 			onclick?: never;
 		} & SearchFieldListboxProps;
 	/** `inset` (default): the bordered input; its clear is named by the caller or by `common_clear_search`. */
@@ -88,6 +92,7 @@
 			returnKeyType?: SearchFieldReturnKey;
 			/** Extra classes of the input (the application's `inputClassName`). */
 			inputClass?: string;
+			shape?: SearchFieldShape;
 			onclick?: never;
 		} & SearchFieldListboxProps;
 
@@ -125,6 +130,7 @@
 		returnKeyType = 'search',
 		testId,
 		inputClass,
+		shape = 'field',
 		disabled = false,
 		ref = $bindable(null),
 		class: className,
@@ -263,7 +269,10 @@
 		data-variant="inset"
 		class={cn('relative flex w-full flex-col justify-center', className)}
 	>
-		<span class="pointer-events-none absolute left-3 z-10 flex" aria-hidden="true">
+		<span
+			class={cn('pointer-events-none absolute z-10 flex', shape === 'pill' ? 'left-4' : 'left-3')}
+			aria-hidden="true"
+		>
 			<Ionicon name="search" class="icon-md text-muted-foreground" />
 		</span>
 		<Input
@@ -277,7 +286,14 @@
 			enterkeyhint={returnKeyType}
 			oninput={handleInput}
 			onkeydown={handleKeydown}
-			class={cn('px-3.5 pl-field-inset', showClear && 'pr-touch', noNativeClear, inputClass)}
+			class={cn(
+				'px-3.5 pl-field-inset',
+				shape === 'pill' &&
+					'rounded-full pl-pill-inset focus-visible:border-foreground focus-visible:ring-1 focus-visible:ring-foreground focus-visible:ring-inset',
+				showClear && 'pr-touch',
+				noNativeClear,
+				inputClass
+			)}
 			{...comboboxProps}
 			{...restProps}
 		/>

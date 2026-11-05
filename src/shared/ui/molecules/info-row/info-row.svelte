@@ -87,7 +87,10 @@
 {#snippet inline()}
 	{@render glyph()}
 	<span class="flex-1 text-body-md text-foreground"
-		>{`${title} `}<span class="font-semibold" data-testid={valueTestId}>{value}</span></span
+		>{`${title} `}<span
+			class={cn('font-semibold', href && 'tablet:text-primary-text')}
+			data-testid={valueTestId}>{value}</span
+		></span
 	>
 {/snippet}
 

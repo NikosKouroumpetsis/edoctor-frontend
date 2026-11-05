@@ -1,4 +1,4 @@
-import { httpGet, type HttpQueryParams } from '$shared/lib/http';
+import { httpGet, httpSessionGet, type HttpQueryParams } from '$shared/lib/http';
 
 import type {
 	DoctorSuggestionsParams,
@@ -56,6 +56,12 @@ export function searchDoctors(
 	params: MarketplaceSearchParams,
 	context: MarketplaceRequestContext = {}
 ): Promise<MarketplaceSearchData> {
+	if (context.withSession) {
+		return httpSessionGet<MarketplaceSearchData>(`${DOCTOR_PREFIX}/doctors`, {
+			params: toSearchQuery(params),
+			signal: context.signal
+		});
+	}
 	return httpGet<MarketplaceSearchData>(`${DOCTOR_PREFIX}/doctors`, {
 		params: toSearchQuery(params),
 		signal: context.signal,

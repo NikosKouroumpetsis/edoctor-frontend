@@ -13,6 +13,9 @@
 		href?: string;
 		onclick?: () => void;
 		current?: boolean;
+		/** A small count on the glyph (U-84 Π5: «2», «9+»), as the application's tab; `badgeLabel` is what it says aloud. */
+		badge?: string;
+		badgeLabel?: string;
 	};
 
 	/** Where the bar hides, in full class names (Tailwind reads no built strings). */
@@ -31,7 +34,7 @@
 		desktop: 'pb-bar-bottom desktop:pb-0'
 	};
 
-	// Each tab is a 48 target filling its third of the capsule; the current one sits in the bubble (the 7 % ink,
+	// Each tab is a 48 target filling its share of the capsule; the current one sits in the bubble (the 7 % ink,
 	// flower-application's) in the primary text colour, the others in the text colour (U-16.10, U-17.1).
 	const tabClass =
 		'flex min-h-touch min-w-touch flex-1 flex-col items-center justify-center gap-0.5 rounded-full transition-colors duration-standard ease-standard outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
@@ -54,7 +57,22 @@
 	} = $props();
 </script>
 
-<!-- flower-application's floating glass capsule (U-16.10, U-17.1, U-18.1): 280 wide in the middle, 16 above the
+{#snippet tabGlyph(item: BottomNavItem, glyph: IoniconName)}
+	<span class="relative flex">
+		<Ionicon name={glyph} class="icon-lg" />
+		{#if item.badge}
+			<span
+				aria-hidden="true"
+				data-slot="bottom-nav-badge"
+				class="absolute -top-1 left-4 grid h-4.5 min-w-4.5 place-items-center rounded-full bg-danger px-1 text-label-md font-semibold text-danger-foreground ring-2 ring-card"
+				>{item.badge}</span
+			>
+			{#if item.badgeLabel}<span class="sr-only">{item.badgeLabel}</span>{/if}
+		{/if}
+	</span>
+{/snippet}
+
+<!-- flower-application's floating glass capsule (U-16.10, U-17.1, U-18.1): 336 wide (U-82.3) in the middle, 16 above the
      lower edge and the safe area, 4 inside, fully round, the page showing through the white at 50 %
      (`blur(7px) saturate(180%)`) under a 65 % white rim; always shown while its zone lasts. -->
 <nav
@@ -81,7 +99,7 @@
 						data-state={item.current ? 'on' : 'off'}
 						class={cn(tabClass, look)}
 					>
-						<Ionicon name={glyph} class="icon-lg" />
+						{@render tabGlyph(item, glyph)}
 						<span class="text-label-md font-semibold">{item.label}</span>
 					</a>
 				{:else}
@@ -92,7 +110,7 @@
 						data-state={item.current ? 'on' : 'off'}
 						class={cn(tabClass, look)}
 					>
-						<Ionicon name={glyph} class="icon-lg" />
+						{@render tabGlyph(item, glyph)}
 						<span class="text-label-md font-semibold">{item.label}</span>
 					</button>
 				{/if}

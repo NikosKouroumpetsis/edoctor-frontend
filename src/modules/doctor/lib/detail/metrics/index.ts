@@ -50,7 +50,7 @@ export function buildDoctorResponseRows(
 				{ value: RESPONSE_TIME_WORDS[id]({}, options) },
 				options
 			),
-			description: m.doctor_summary_response_time_description({}, options)
+			description: responseTimeDescription(metrics?.windowMonths, options)
 		});
 	}
 	const percent = metrics?.responseRatePercent;
@@ -61,13 +61,13 @@ export function buildDoctorResponseRows(
 				{ percent: formatDecimal(Math.floor(percent), locale, 0) },
 				options
 			),
-			description: m.doctor_summary_response_rate_description({}, options)
+			description: responseRateDescription(metrics?.windowMonths, options)
 		});
 	}
 	return rows.length > 0 ? rows : null;
 }
 
-/** U-36.1 / U-43.1: «Ολοκληρωμένες επισκέψεις (6 μήνες): 523», whatever the confirmation, or `null` without a visit. */
+/** U-36.1 / U-72.4: «Ολοκληρωμένες επισκέψεις: 523», no period, whatever the confirmation, or `null` without a visit. */
 export function buildDoctorCompletedVisits(
 	metrics: DoctorResponseMetricsFacts | undefined,
 	locale: SupportedLocale
@@ -75,4 +75,38 @@ export function buildDoctorCompletedVisits(
 	const visits = metrics?.completedVisits;
 	if (typeof visits !== 'number' || !Number.isFinite(visits) || visits <= 0) return null;
 	return m.doctor_expertise_visits({ count: formatDecimal(visits, locale, 0) }, { locale });
+}
+
+type MessageOptions = { locale: SupportedLocale };
+
+/** U-72.4: what «Χρόνος απόκρισης» is based on, over the months the SERVER says, never a number of ours. */
+function responseTimeDescription(
+	windowMonths: number | undefined,
+	options: MessageOptions
+): string {
+	if (windowMonths === undefined) return m.doctor_summary_response_time_description({}, options);
+	return windowMonths === 1
+		? m.doctor_summary_response_time_description_one({}, options)
+		: m.doctor_summary_response_time_description_other({ months: windowMonths }, options);
+}
+
+/** U-72.4: what «Ρυθμός απόκρισης» counts, over the months the SERVER says (the application's `responseRateDescription`). */
+function responseRateDescription(
+	windowMonths: number | undefined,
+	options: MessageOptions
+): string {
+	if (windowMonths === undefined) return m.doctor_summary_response_rate_description({}, options);
+	return windowMonths === 1
+		? m.doctor_summary_response_rate_description_one({}, options)
+		: m.doctor_summary_response_rate_description_other({ months: windowMonths }, options);
+}
+
+/** U-36.5: the words of the doctor's response time, or `undefined` for one this page does not know. */
+export function doctorResponseWord(
+	id: DoctorResponseTimeId | undefined,
+	locale: SupportedLocale
+): string | undefined {
+	return id && Object.hasOwn(RESPONSE_TIME_WORDS, id)
+		? RESPONSE_TIME_WORDS[id]({}, { locale })
+		: undefined;
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { SignInRequest } from '$shared/state/session';
 	import type { ResolvedPathname } from '$app/types';
 	import { m } from '$paraglide/messages.js';
 	import { cn } from '$shared/lib/utils';
@@ -54,7 +55,7 @@
 		onSelectOffice: (officeId: string) => void;
 		/** «Κράτηση» (a guest: the sign-in, S-31.4; a member without a time: the window). */
 		onBook: () => void;
-		onSignIn: () => void;
+		onSignIn: (request?: SignInRequest) => void;
 		onRetry: () => void;
 		/** The card's box: the section bar shows the fee and «Κράτηση» once it leaves the screen. */
 		ref?: HTMLElement | null;
@@ -83,7 +84,10 @@
 		class="w-full whitespace-normal"
 	>
 		{#snippet leading()}
-			<Ionicon name={doctorBookingActionGlyphs[entry.kind]} class="icon-md shrink-0" />
+			<Ionicon
+				name={doctorBookingActionGlyphs[entry.kind]}
+				class={cn('icon-md shrink-0', primary && 'text-secondary-foreground')}
+			/>
 		{/snippet}
 	</Button>
 {/snippet}
@@ -133,7 +137,7 @@
 	{:else if booking.mode === 'book'}
 		<!-- U-51 (the phone field's stacked halves): «ΥΠΗΡΕΣΙΑ» on top and «ΗΜΕΡΟΜΗΝΙΑ & ΩΡΑ» below are two joined
 		     controls with a darker line between them, so it reads that both are pressed. -->
-		<div class="mt-4 flex flex-col">
+		<div data-testid="doctor-booking-card-fields" class="mt-4 flex flex-col rounded-md">
 			{#if services.length > 1}
 				<DropdownMenu>
 					<DropdownMenuTrigger

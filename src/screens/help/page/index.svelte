@@ -1,5 +1,7 @@
 <script lang="ts">
 	import HelpCenter from '$modules/help/ui/center';
+	import HelpfulVote from '$modules/helpful/ui/vote';
+	import { helpfulFaqTarget } from '$modules/helpful/lib/vote';
 	import { useHelpScreen } from '../hooks';
 	import type { HelpScreenProps } from '../types';
 
@@ -20,5 +22,12 @@
 		onRetry={screen.onRetry}
 		canonicalUrl={screen.canonicalUrl}
 		alternateUrls={screen.alternateUrls}
-	/>
+	>
+		{#snippet helpful(anchor)}
+			{@const target = helpfulFaqTarget(anchor)}
+			{#if target}
+				<HelpfulVote {target} size="sm" locale={screen.locale} />
+			{/if}
+		{/snippet}
+	</HelpCenter>
 </main>

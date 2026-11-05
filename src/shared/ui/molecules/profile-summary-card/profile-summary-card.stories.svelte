@@ -23,6 +23,21 @@
 	{/snippet}
 </Story>
 
+<Story name="Page">
+	{#snippet template()}
+		<div class="w-full max-w-form">
+			<ProfileSummaryCard
+				layout="page"
+				name="Μαρία Παπαδοπούλου"
+				role="Καρδιολόγος"
+				initial="ΜΠ"
+				badge="Επιλογή ασθενών"
+				{stats}
+			/>
+		</div>
+	{/snippet}
+</Story>
+
 <Story name="With a photo">
 	{#snippet template()}
 		<div class="w-full max-w-form">

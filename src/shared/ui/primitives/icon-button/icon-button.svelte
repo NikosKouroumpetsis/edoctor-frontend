@@ -23,6 +23,9 @@
 		xl: 'size-control-xl'
 	};
 	const tileLook = 'rounded-md border border-border bg-card';
+	// U-96: a brand's fixed surface cannot darken, so its tile answers a press on the border, in both themes; with a
+	// pointer too, whose hover (U-28.4) would otherwise keep its dark border through the press.
+	const brandTilePressed = 'active:border-2 active:border-primary can-hover:active:border-primary';
 	const boxBase =
 		'group relative inline-flex shrink-0 items-center justify-center outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
 
@@ -62,6 +65,7 @@
 		soft: 'can-hover:group-hover:bg-foreground/10',
 		strong: 'can-hover:group-hover:bg-foreground/12'
 	};
+	const pressedRing = 'border-foreground ring-1 ring-foreground ring-inset';
 	const iconSizes: Record<IconButtonIconSize, string> = {
 		sm: 'icon-sm',
 		md: 'icon-md',
@@ -92,31 +96,42 @@
 	 * a combination the shape cannot draw does not type-check, so no look is lost in silence.
 	 */
 	export type IconButtonLook =
-		| { appearance: 'scrim'; size?: 'touch'; surface?: never; elevated?: never }
-		| { appearance: 'tile'; size?: IconButtonOwnShapeSize; surface?: never; elevated?: never }
+		| { appearance: 'scrim'; size?: 'touch'; surface?: never; elevated?: never; tileColor?: never }
+		| {
+				appearance: 'tile';
+				size?: IconButtonOwnShapeSize;
+				surface?: never;
+				elevated?: never;
+				/** U-96: a brand's fixed surface for a tile, read by no theme; a press marks it on its border. */
+				tileColor?: string;
+		  }
 		| {
 				appearance?: 'bare' | 'outline';
 				size?: IconButtonOwnShapeSize;
 				surface?: never;
 				elevated?: boolean;
+				tileColor?: never;
 		  }
 		| {
 				appearance?: 'bare' | 'outline';
 				size: IconButtonBoxedSize;
 				surface?: never;
 				elevated?: never;
+				tileColor?: never;
 		  }
 		| {
 				appearance: 'tint';
 				size: IconButtonOwnShapeSize;
 				surface?: IconButtonSurface;
 				elevated?: boolean;
+				tileColor?: never;
 		  }
 		| {
 				appearance: 'tint';
 				size?: IconButtonBoxedSize;
 				surface?: IconButtonSurface;
 				elevated?: never;
+				tileColor?: never;
 		  };
 
 	export type IconButtonProps = Omit<HTMLButtonAttributes, 'children'> &
@@ -133,6 +148,8 @@
 			count?: number;
 			/** A tile whose provider sheet is open: dimmed, presses refused. */
 			busy?: boolean;
+			/** A choice that stays: `aria-pressed` and the 2 dark ring, which moves nothing (the glyph is the caller's). */
+			pressed?: boolean;
 			/** The shape alone, without a target (a header's static arrow): no button, hidden from assistive tech. */
 			decorative?: boolean;
 			/** Places the button (`mt-0.5`, `absolute top-5 right-5`); never sizes it — the size is `size`. */
@@ -152,10 +169,12 @@
 		size,
 		surface = 'card',
 		elevated = false,
+		tileColor,
 		iconSize,
 		iconTone,
 		count = 0,
 		busy = false,
+		pressed,
 		decorative = false,
 		disabled = false,
 		href,
@@ -187,7 +206,8 @@
 			'inline-flex items-center justify-center rounded-full',
 			shapeSizes[shape],
 			look,
-			isActive && 'border-2 border-foreground'
+			isActive && 'border-2 border-foreground',
+			pressed && pressedRing
 		)
 	);
 	// U-28.4: the hover of a target that presses (a decorative shape or a blocked one has none).
@@ -203,7 +223,8 @@
 	const roundSize = $derived<IconButtonOwnShapeSize>(shape === 'xl' ? 'xl' : 'touch');
 	const boxState = $derived(
 		cn(
-			isTile && 'active:bg-muted',
+			isTile && (tileColor ? brandTilePressed : 'active:bg-muted'),
+			isTile && pressed && pressedRing,
 			// U-28.4: a tile is bordered: with a pointer its border darkens on hover.
 			isTile &&
 				!isBlocked &&
@@ -244,6 +265,7 @@
 		aria-hidden="true"
 		data-slot="icon-button"
 		data-appearance={appearance}
+		style:background-color={tileColor}
 		class={cn(
 			'inline-flex shrink-0 items-center justify-center',
 			isTile ? cn(tileBoxes[tileSize], tileLook) : circle,
@@ -263,6 +285,7 @@
 		aria-busy={busy || undefined}
 		role={isBlocked ? 'link' : undefined}
 		tabindex={isBlocked ? -1 : undefined}
+		style:background-color={tileColor}
 		class={cn(
 			boxBase,
 			isTile ? cn(tileBoxes[tileSize], tileLook) : roundBoxes[roundSize],
@@ -281,6 +304,8 @@
 		{type}
 		disabled={isBlocked}
 		aria-busy={busy || undefined}
+		aria-pressed={pressed}
+		style:background-color={tileColor}
 		class={cn(
 			boxBase,
 			isTile ? cn(tileBoxes[tileSize], tileLook) : roundBoxes[roundSize],

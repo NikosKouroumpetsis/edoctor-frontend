@@ -10,8 +10,10 @@ export { HOME_ARTICLES_LIMIT, loadHomeArticles } from './load';
 export {
 	ARTICLE_SEARCH_MAX_LENGTH,
 	ARTICLE_TYPES,
+	ARTICLES_DOCTOR_ROW_LIMIT,
 	ARTICLES_PAGE_LIMIT,
 	articleSuggestionsQuery,
+	doctorArticlesRowQuery,
 	articlesListInfiniteQuery,
 	articlesListQueryKeys,
 	fetchArticlesPage,

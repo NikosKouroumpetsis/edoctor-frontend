@@ -97,6 +97,7 @@ describe('InfoRow', () => {
 			'text-foreground'
 		);
 		expect(screen.getByTestId('parking')).toHaveClass('font-semibold');
+		expect(screen.getByTestId('parking')).not.toHaveClass('tablet:text-primary-text');
 		expect(screen.queryByRole('button')).toBeNull();
 	});
 
@@ -123,10 +124,13 @@ describe('InfoRow', () => {
 				icon: 'call-outline',
 				title: 'Τηλέφωνο',
 				value: '210 1234567',
+				valueTestId: 'phone',
 				href: 'tel:+302101234567',
 				'aria-label': 'Κλήση στο 210 1234567'
 			}
 		});
+		// Α13: from 744 the number that dials wears the primary text (the prototype's `.o-row a`); the words around it do not.
+		expect(screen.getByTestId('phone')).toHaveClass('font-semibold', 'tablet:text-primary-text');
 		expect(screen.getByRole('link', { name: 'Κλήση στο 210 1234567' })).toHaveAttribute(
 			'href',
 			'tel:+302101234567'

@@ -2,7 +2,7 @@ import { m } from '$paraglide/messages.js';
 import { formatDecimal } from '$shared/lib/format';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type {
-	DoctorBioFacts,
+	DoctorCredentialFacts,
 	DoctorOfficeFacts,
 	DoctorProfile,
 	DoctorReviewSnippet
@@ -59,13 +59,16 @@ import type {
 /** The section «Κόστος υπηρεσιών» shows the first three; the window all of them (the application's cap). */
 export const DOCTOR_SERVICE_COST_LIMIT = 3;
 
+/** U-73.1 Π1: the profile's biography shows three of each group, its page all of them. */
+export const DOCTOR_BIO_PREVIEW_LIMIT = 3;
+
 /** The section «Κριτικές ασθενών» shows the backend's preview, the first three (the application's). */
 export const DOCTOR_REVIEW_PREVIEW_LIMIT = 3;
 
 type BuildArgs = { doctor: DoctorProfile; locale: SupportedLocale; now: number };
 
 /** A doctor somebody rated (the application's rule: the count AND the score, so never «0,00 · 0 κριτικές»). */
-function visibleRating(doctor: DoctorProfile): { score: number; count: number } | null {
+export function visibleRating(doctor: DoctorProfile): { score: number; count: number } | null {
 	const count = doctor.reviewSummary?.count ?? doctor.reviewCount;
 	const score = doctor.reviewSummary?.score ?? doctor.rating;
 	return Number.isFinite(count) && count > 0 && Number.isFinite(score) && score > 0
@@ -73,7 +76,7 @@ function visibleRating(doctor: DoctorProfile): { score: number; count: number } 
 		: null;
 }
 
-function socialLinks(
+export function socialLinks(
 	doctor: DoctorProfile,
 	locale: SupportedLocale
 ): DoctorDetailProfessionalLink[] {
@@ -136,7 +139,7 @@ export function buildPhotos(doctor: DoctorProfile, locale: SupportedLocale): Doc
  * 🔴 U-35.1 (app = web): the summary «Επαγγελματίας υγείας: Χ» — the licence, «X χρόνια εμπειρίας μέσω του edoctor»
  * (from `memberSince`), the languages, the response rows (U-36.1: `null` until the backend sends them; U-43.2: «Άμεση
  * επιβεβαίωση» when the ACTIVE office's slots say `AUTO`) and, U-42.1, the FIRST paragraph of the description as its
- * introduction. No «Επικοινωνήστε» (U-35.4). `undefined` with none of these.
+ * introduction. `undefined` with none of these.
  */
 export function buildSummary(
 	doctor: DoctorProfile,
@@ -271,53 +274,61 @@ export function buildProfessionalSection(
 		stats,
 		infoRows,
 		socialLinks: links,
-		...(about ? { about } : {}),
-		hasMore: Boolean(about?.body)
+		...(about ? { about } : {})
 	};
 }
 
 /**
- * 🔴 U-36.2 (app = web): «Τομείς εξειδίκευσης» are the services the server marks `isSpecialized`; none ⇒ no section.
- * The application's mock «expertise» is no source (U-30.2: its code stays). U-36.1: the visits line waits.
+ * 🔴 U-36.2, U-72.3 Π1 (app = web): «Τομείς εξειδίκευσης» are the services the server marks `isSpecialized`; none ⇒ no
+ * section. The first three as rows, and the way to their page: «Εμφάνιση όλων των N τομέων» past three, else «Εμφάνιση
+ * λεπτομερειών», since the page always has more (the fee, the duration, «Κλείστε…»).
  */
 export function buildSpecializations(
 	doctor: DoctorProfile,
 	locale: SupportedLocale
 ): DoctorDetailSpecializations | undefined {
-	const items = (doctor.services ?? [])
-		.filter((service) => service.isSpecialized)
-		.map((service) => ({
-			id: service.id,
-			title: service.title,
-			...(service.note ? { body: service.note } : {})
-		}));
-	if (items.length === 0) return undefined;
+	const domains = (doctor.services ?? []).filter((service) => service.isSpecialized);
+	if (domains.length === 0) return undefined;
 	return {
 		title: m.doctor_section_expertise({}, { locale }),
 		completedVisits: buildDoctorCompletedVisits(doctor.responseMetrics, locale),
-		items
+		items: buildPricedServices(
+			domains.slice(0, DOCTOR_SERVICE_COST_LIMIT),
+			doctor.pricingVisible,
+			locale
+		),
+		moreLabel:
+			domains.length > DOCTOR_SERVICE_COST_LIMIT
+				? m.doctor_specializations_show_all({ count: domains.length }, { locale })
+				: m.doctor_services_show_details({}, { locale })
 	};
 }
 
-/** «Κόστος υπηρεσιών» (U-34.4, U-38.1): only with services; the support rows of the mock are no source. */
+/**
+ * 🔴 U-70.2 Ε3, Π7 (U-34.4, U-38.1): «Υπηρεσίες», only with services: the first three as rows. The button only leads
+ * somewhere new: all of them past three, «Εμφάνιση λεπτομερειών» when a shown one has a text, else none.
+ */
 export function buildServiceCost(
 	doctor: DoctorProfile,
 	locale: SupportedLocale
 ): DoctorDetailServiceCost | undefined {
 	const services = doctor.services ?? [];
 	if (services.length === 0) return undefined;
+	const moreLabel =
+		services.length > DOCTOR_SERVICE_COST_LIMIT
+			? m.doctor_services_show_all({ count: services.length }, { locale })
+			: services.some((service) => service.description)
+				? m.doctor_services_show_details({}, { locale })
+				: null;
 	return {
-		title: m.doctor_section_service_cost({}, { locale }),
+		title: m.doctor_section_services({}, { locale }),
 		notice: m.doctor_service_cost_notice({}, { locale }),
-		costLabel: m.doctor_service_cost_label({}, { locale }),
-		includesLabel: m.doctor_service_includes_label({}, { locale }),
-		descriptionLabel: m.doctor_service_description_label({}, { locale }),
 		services: buildPricedServices(
 			services.slice(0, DOCTOR_SERVICE_COST_LIMIT),
 			doctor.pricingVisible,
 			locale
 		),
-		hasMore: services.length > DOCTOR_SERVICE_COST_LIMIT
+		moreLabel
 	};
 }
 
@@ -377,27 +388,59 @@ export function buildReviews(
 	};
 }
 
-const BIO_GROUPS = [
-	['studies', 'studies', m.doctor_bio_studies],
-	['work-experience', 'workExperience', m.doctor_bio_work_experience],
-	['conferences', 'conferences', m.doctor_bio_conferences]
-] as const satisfies readonly (readonly [string, keyof DoctorBioFacts, unknown])[];
+/** The biography's groups: their ids, the backend's kind, the plain lists they were moved from, their words. */
+export const BIO_GROUPS = [
+	['studies', 'STUDY', 'studies', m.doctor_bio_studies],
+	['work-experience', 'WORK', 'workExperience', m.doctor_bio_work_experience],
+	['conferences', 'CONFERENCE', 'conferences', m.doctor_bio_conferences]
+] as const;
 
 /**
- * «Βιογραφικό σημείωμα» (as the application): its numbered groups. Hidden after wave 1 (U-35.7): «Εμφάνιση όλου του
- * βιογραφικού» and the groups' «Εμφάνιση περισσότερα» — every item shows.
+ * 🔴 U-73.1: one group's entries: the credentials, in the server's order. Only when their read failed (no credential at
+ * all) the plain texts they were moved from, which have no year (U-73.2: nothing shows less than before).
+ */
+export function bioEntries(
+	doctor: DoctorProfile,
+	[id, kind, list]: (typeof BIO_GROUPS)[number]
+): DoctorCredentialFacts[] {
+	if (doctor.credentials) return doctor.credentials.filter((entry) => entry.kind === kind);
+	return (doctor.bio?.[list] ?? []).map((title, index) => ({
+		id: `${id}-${index}`,
+		kind,
+		title,
+		isCurrent: false
+	}));
+}
+
+/**
+ * «Βιογραφικό σημείωμα» (U-73.1 Π1): up to three of each group with its count («Σπουδές (4)»), and «Εμφάνιση όλου του
+ * βιογραφικού», which leads to the doctor's page.
  */
 export function buildBio(
 	doctor: DoctorProfile,
 	locale: SupportedLocale
-): { title: string; groups: DoctorBioGroup[] } | undefined {
-	const groups = BIO_GROUPS.flatMap(([id, key, title]) => {
-		const items = doctor.bio?.[key] ?? [];
-		return items.length > 0
-			? [{ id, title: title({}, { locale }), countLabel: countLabel(items.length), items }]
+): { title: string; groups: DoctorBioGroup[]; allLabel: string } | undefined {
+	const groups = BIO_GROUPS.flatMap((group) => {
+		const entries = bioEntries(doctor, group);
+		const [id, , , title] = group;
+		return entries.length > 0
+			? [
+					{
+						id,
+						title: title({}, { locale }),
+						countLabel: countLabel(entries.length),
+						items: entries.slice(0, DOCTOR_BIO_PREVIEW_LIMIT).map((entry) => entry.title)
+					}
+				]
 			: [];
 	});
-	return groups.length > 0 ? { title: m.doctor_section_bio({}, { locale }), groups } : undefined;
+	return groups.length > 0
+		? {
+				title: m.doctor_section_bio({}, { locale }),
+				groups,
+				allLabel: m.doctor_about_bio_all({}, { locale })
+			}
+		: undefined;
 }
 
 /** Parking and wheelchair access, each only with its fact. */

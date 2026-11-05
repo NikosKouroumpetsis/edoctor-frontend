@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { SignInRequest } from '$shared/state/session';
 	import { StickyActionBar } from '$shared/ui/organisms/sticky-action-bar';
 	import { TextButton } from '$shared/ui/primitives/text-button';
 	import type { DoctorBookingContent } from '$modules/doctor/lib/detail';
@@ -21,7 +22,7 @@
 		/** The time line opens the window «Διαθεσιμότητα» (on the chosen or the next day). */
 		onOpenWhen: () => void;
 		onSelectOffice: (officeId: string) => void;
-		onSignIn: () => void;
+		onSignIn: (request?: SignInRequest) => void;
 		onRetry: () => void;
 	} = $props();
 

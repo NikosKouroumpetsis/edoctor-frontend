@@ -12,16 +12,18 @@ import {
 } from '$modules/doctor/api/availability';
 import { doctorOfficeQuery } from '$modules/doctor/api/office';
 import type { DoctorProfile } from '$modules/doctor/api/profile';
-import { doctorReviewsQuery } from '$modules/doctor/api/reviews';
 import {
 	buildDoctorAvailabilityModalContent,
 	buildDoctorAvailabilitySection,
 	buildDoctorBookingContent,
 	buildDoctorDetailContent,
+	buildDoctorKnowContent,
+	buildDoctorOfficePage,
 	buildDoctorOfficeView,
-	buildDoctorReviewsModalContent,
-	buildDoctorServicesModalContent,
+	buildDoctorServicesPage,
 	buildDoctorSimilarSearch,
+	buildDoctorSpecializationsPage,
+	doctorAboutPath,
 	doctorDetailsPath,
 	doctorProfilePath,
 	hasAnyBookableSlot,
@@ -41,7 +43,12 @@ import {
 import type { DoctorSimilarAreaQuery } from '../types';
 
 /** A window of the page: its section and the hints it opened with; `null` none. */
-export type DoctorDetailWindow = { section: DoctorDetailSection; hints: DoctorDetailHints } | null;
+export type DoctorDetailWindow = {
+	section: DoctorDetailSection;
+	hints: DoctorDetailHints;
+	/** U-72.3 Ε3: «Τομείς εξειδίκευσης» reached from the services, in the same window. */
+	fromServices?: boolean;
+} | null;
 
 export type DoctorDetailStateOptions = {
 	profile: () => DoctorProfile;
@@ -64,8 +71,8 @@ export type DoctorDetailStateOptions = {
 /**
  * The profile's page state (the application's `useDoctorDetailScreen` on the web): the reads of the browser — every
  * office's 4-week window at once (U-37.1, D-103), the active office's own facts when it is not the main one (U-39.1,
- * once, cached), the whole reviews list while its window is open — and the reader's choices: the active office, the
- * service, the chosen time, the open window. The profile's facts are the route's load, never copied here.
+ * once, cached, and any office's own page, U-68.1) — and the reader's choices: the active office, the service, the
+ * chosen time, the open window. The profile's facts are the route's load, never copied here.
  */
 export class DoctorDetailState {
 	/** The office the reader picked with a pill (U-39.2); `null` lets the nearest time choose (U-39.1). */
@@ -80,7 +87,6 @@ export class DoctorDetailState {
 	readonly #options: DoctorDetailStateOptions;
 	readonly #slots;
 	readonly #office;
-	readonly #reviews;
 	readonly #similarArea;
 
 	constructor(options: DoctorDetailStateOptions) {
@@ -104,7 +110,8 @@ export class DoctorDetailState {
 			};
 		});
 		// 🔴 U-39.1: the active office's facts — the profile's own office came with the profile (D-103: nothing more
-		// is asked for it); another office is asked ONCE, when it becomes active, and kept.
+		// is asked for it); another office is asked ONCE, when it becomes active, and kept. U-68.1 / P-B §7: the week, the
+		// photos and «Πώς θα έρθετε» come only with this read, so the main office asks it when its page opens.
 		this.#office = createQuery(() => {
 			const profile = options.profile();
 			const officeId = this.activeOfficeId ?? '';
@@ -114,14 +121,9 @@ export class DoctorDetailState {
 					browser &&
 					Boolean(profile.doctorId) &&
 					Boolean(officeId) &&
-					!isDoctorProfileOffice(profile, officeId)
+					(!isDoctorProfileOffice(profile, officeId) || this.window?.section === 'location')
 			};
 		});
-		// D-103: the whole list of reviews at the window's opening (its motion runs beside the read).
-		this.#reviews = createQuery(() => ({
-			...doctorReviewsQuery(options.profile().doctorSlug, options.locale()),
-			enabled: browser && this.window?.section === 'reviews'
-		}));
 		// 🔴 U-37.2 / D-103: the active office's city as the catalogue's area, asked in the browser the moment cases 1
 		// and 2 show («Δείτε παρόμοιους» is on screen) — never before, never for a doctor with times.
 		this.#similarArea = createQuery(() => {
@@ -186,8 +188,12 @@ export class DoctorDetailState {
 		const state = page.state?.doctorDetails;
 		if (state !== undefined) {
 			if (!state || !isDoctorDetailSection(state.section)) return null;
-			const { section, focus, office, date, service } = state;
-			return { section, hints: { focus, office, date, service } };
+			const { section, focus, office, date, service, fromServices } = state;
+			return {
+				section,
+				hints: { focus, office, date, service },
+				...(fromServices ? { fromServices } : {})
+			};
 		}
 		const section = this.#options.routeSection();
 		return section ? { section, hints: readDoctorDetailHints(page.url.searchParams) } : null;
@@ -319,24 +325,49 @@ export class DoctorDetailState {
 		});
 	}
 
-	readonly servicesModal = $derived.by(() =>
-		buildDoctorServicesModalContent(this.profile, this.locale)
+	/** 🔴 U-70 (screen 14): every service, in its groups. */
+	readonly servicesPage = $derived.by(() => buildDoctorServicesPage(this.profile, this.locale));
+
+	/** 🔴 U-72 (screen 15): the fields of expertise. */
+	readonly specializationsPage = $derived.by(() =>
+		buildDoctorSpecializationsPage({ doctor: this.profile, locale: this.locale, now: this.now })
 	);
 
-	readonly reviewsModal = $derived.by(() =>
-		buildDoctorReviewsModalContent({
+	/** 🔴 U-75 (screen 24): «Τι πρέπει να γνωρίζετε», on the ONE active office. */
+	readonly know = $derived.by(() =>
+		buildDoctorKnowContent({
 			doctor: this.profile,
-			reviews: this.#reviews.data,
+			activeOfficeId: this.activeOfficeId,
+			location: this.location,
+			phone: this.officeView.phone,
+			dialNumber: this.officeView.dialNumber,
 			locale: this.locale
 		})
 	);
 
-	/** The reviews' read: `waiting`, `failed`, `answered` (every field read). */
-	get reviewsState() {
-		return readQueryState(this.#reviews);
+	/**
+	 * 🔴 U-68.1: the page of the active office: what the page already knows of it, under what only its own read has (the
+	 * week, the photos, «Πώς θα έρθετε»).
+	 */
+	readonly officePage = $derived.by(() => {
+		const id = this.activeOfficeId;
+		const read = this.#office.data?.officeId === id ? this.#office.data : null;
+		const summary = this.profile.offices?.find((office) => office.officeId === id);
+		const own = isDoctorProfileOffice(this.profile, id) ? this.profile.office : undefined;
+		return buildDoctorOfficePage({
+			facts: { ...summary, ...own, ...read },
+			officeCount: this.profile.offices?.length ?? 0,
+			locale: this.locale,
+			now: this.now
+		});
+	});
+
+	/** The office's own read: `waiting`, `failed`, `answered` (every field read). */
+	get officePageState() {
+		return readQueryState(this.#office);
 	}
 
-	retryReviews = () => void this.#reviews.refetch();
+	retryOffice = () => void this.#office.refetch();
 
 	/** A window's address in the page's language (a link: it works without JavaScript too). */
 	detailsHref = (section: DoctorDetailSection, hints: DoctorDetailHints = {}): ResolvedPathname =>
@@ -344,6 +375,11 @@ export class DoctorDetailState {
 
 	get profileHref(): ResolvedPathname {
 		return resolve(this.#profilePath as Pathname);
+	}
+
+	/** 🔴 U-73.1 Ε1: the doctor's own page, in the page's language. */
+	get aboutHref(): ResolvedPathname {
+		return resolve(this.#options.localize(doctorAboutPath(this.profile.doctorSlug)) as Pathname);
 	}
 
 	/** A window's address in the page's language, before `resolve`. */
@@ -363,6 +399,48 @@ export class DoctorDetailState {
 	};
 
 	/**
+	 * 🔴 U-70 Π5: «Κλείστε για αυτή την υπηρεσία»: the service becomes the page's, its window gives its place to the
+	 * «Διαθεσιμότητα» for that service, and «×» of that one leaves as this one would have (the same history entry).
+	 */
+	bookService = (serviceId: string) => {
+		this.chooseService(serviceId);
+		const state = page.state?.doctorDetails;
+		const hints = { service: serviceId };
+		replaceState(resolve(this.#detailsPath('availability', hints) as Pathname), {
+			doctorDetails: {
+				section: 'availability',
+				...hints,
+				inPlace: state?.inPlace === true,
+				...(state?.fromServices
+					? { fromServices: true, servicesInPlace: state.servicesInPlace === true }
+					: {})
+			}
+		});
+	};
+
+	/**
+	 * 🔴 U-72.3 Ε3: «Τομείς εξειδίκευσης ›» of the services: the next page of the SAME window, with its own address and its
+	 * own step in the history, so that the browser's «back» is its «‹». A press in a new tab keeps the link.
+	 */
+	openSpecializations = (event?: MouseEvent) => {
+		if (event) {
+			if (event.defaultPrevented || event.button !== 0) return;
+			if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+			event.preventDefault();
+		}
+		pushState(resolve(this.#detailsPath('specializations') as Pathname), {
+			doctorDetails: {
+				section: 'specializations',
+				inPlace: true,
+				fromServices: true,
+				servicesInPlace: page.state?.doctorDetails?.inPlace === true
+			}
+		});
+	};
+
+	backToServices = () => history.back();
+
+	/**
 	 * The viewer moved to another photo (its place, from 0: the application's `focus`): its address follows in place,
 	 * the history keeps its length (a swipe is no step «back» undoes).
 	 */
@@ -379,8 +457,23 @@ export class DoctorDetailState {
 	 * loaded with (the details route) turns the address into the profile's, in place.
 	 */
 	closeWindow = () => {
-		if (page.state?.doctorDetails?.inPlace) history.back();
+		const state = page.state?.doctorDetails;
+		// U-72.3 Ε3: «×» closes the services and the fields of expertise together.
+		if (state?.fromServices && state.servicesInPlace) history.go(-2);
+		else if (state?.inPlace && !state.fromServices) history.back();
 		else replaceState(resolve(this.#profilePath as Pathname), { doctorDetails: null });
+	};
+
+	/**
+	 * U-68.1 Π3: a pill of the office's page: the one active office changes (U-39.1), and its address follows in place
+	 * (a pill is no step «back» undoes).
+	 */
+	showOffice = (officeId: string) => {
+		this.chosenOfficeId = officeId;
+		const inPlace = page.state?.doctorDetails?.inPlace === true;
+		replaceState(resolve(this.#detailsPath('location', { office: officeId }) as Pathname), {
+			doctorDetails: { section: 'location', office: officeId, inPlace }
+		});
 	};
 
 	/** Confirms a time of the window: it becomes the page's time and its office the active one (U-40.3). */

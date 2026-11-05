@@ -51,18 +51,22 @@
 			underline?: boolean;
 			/** Classes of the label: a text role only, never a colour. */
 			textClass?: string;
+			/** «›» after the label, which steps aside under a pointer (the row of a «Διαβάστε περισσότερα»). */
+			chevron?: boolean;
 			ref?: HTMLElement | null;
 		};
 </script>
 
 <script lang="ts">
 	import { cn } from '$shared/lib/utils';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
 
 	let {
 		label,
 		tone,
 		underline = false,
 		textClass,
+		chevron = false,
 		href,
 		type = 'button',
 		class: className,
@@ -75,24 +79,45 @@
 	);
 </script>
 
+{#snippet arrow()}
+	{#if chevron}
+		<Ionicon
+			name="chevron-forward"
+			class="ml-0.5 icon-sm shrink-0 text-foreground transition-transform duration-standard ease-standard can-hover:not-disabled:group-hover:translate-x-0.5"
+		/>
+	{/if}
+{/snippet}
+
 {#if href}
 	<a
 		bind:this={ref}
 		{href}
 		data-slot="text-button"
-		class={cn(textButtonBox, underline ? hoverClasses.underlined : hoverClasses.plain, className)}
+		class={cn(
+			textButtonBox,
+			chevron && 'group',
+			underline ? hoverClasses.underlined : hoverClasses.plain,
+			className
+		)}
 		{...restProps}
 	>
 		<span class={labelClasses}>{label}</span>
+		{@render arrow()}
 	</a>
 {:else}
 	<button
 		bind:this={ref}
 		{type}
 		data-slot="text-button"
-		class={cn(textButtonBox, underline ? hoverClasses.underlined : hoverClasses.plain, className)}
+		class={cn(
+			textButtonBox,
+			chevron && 'group',
+			underline ? hoverClasses.underlined : hoverClasses.plain,
+			className
+		)}
 		{...restProps}
 	>
 		<span class={labelClasses}>{label}</span>
+		{@render arrow()}
 	</button>
 {/if}

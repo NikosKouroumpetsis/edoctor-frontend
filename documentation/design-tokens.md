@@ -186,7 +186,7 @@ canonical file).
 (the top bar's «e+» square; the prototype's 26 is off the 4px grid) · `icon-tile` 48 (icon tile of a placeholder page) · `dial-code-w`
 56 (dial-code column of the inline phone field), `hover-card-w` 256 (the application's hover card width, `HoverCard`
 `md`), the frame of wave 1.0 (U-16/U-17): `bar-content` 1024 (apple.com's bar box: 980 of content and 22 a side),
-`tab-capsule-w` 280 (the phone's glass capsule), `account-menu-w` 260 (the ☰ menu), `consent-card-w` 720 (the consent
+`window-reviews-sm` 664 and `window-h` 800 (the reviews' window of one column, U-66.2 Ε1), `office-aside` 400 (the office's text column, U-68.1 Ε1), `tab-capsule-w` 336 (the phone's glass capsule: four tabs, U-82.3), `account-menu-w` 260 (the ☰ menu), `consent-card-w` 720 (the consent
 card from 744), the search of wave 1.0 (U-23.2): `search-panel-w` 424 (Airbnb's 425 panel under the bar, on the
 4px grid), `compact-search-part` 224 (each part of the top bar's small search pill before «…», NIT-7 of U-29: its
 own name, the value it had as `popover-sm`) and the corner `platform.radius.panel` 32 (`rounded-panel`, U-25.4), the blurs `platform.blur`
@@ -249,6 +249,18 @@ compile. `dialog` is the Airbnb filter dialog the modal templates become from 74
 Container queries use the same names: `@container` on the parent, `@<name>:` on
 the child (`@form:inline-flex` = parent at least 560 wide). The header uses them:
 the brand word shows from a 360 header, «Σύνδεση» from 560.
+Two more, by the box and web only (`layout.css`, their widths are `--spacing-row-wide` 520 and `--spacing-card-wide`
+340): `row-wide:` (a `ListRow` keeps its end beside it) and `card-wide:` (a `ProfileSummaryCard` `layout="page"` keeps
+its numbers beside the person, and always below 744).
+
+The messages (wave 2, screens 18 + 21, web only): `inbox-list-w` 380 and `inbox-list-w-lg` 400 (`grid-inbox`, the list from
+950 and 1128), `bubble-max-w` 560 (`max-w-bubble`: 78 %, at most 560 from 744), `bubble-avatar` 28, `composer-min-h` 44,
+`composer-send` 36, `composer-field` 156 (six lines, `max-h-composer`; the #18's field starts there), `compose-field-max`
+320, `contact-w` 288, `thread-pill-h` 36, `quote-max-h` 140, `inbox-art-w` 168; the corners `rounded-bubble` 20,
+`rounded-*-bubble-tail` 6 (U-84.1, the one corner off the 4 grid); the composer's pill is `rounded-xl` 24 at every width; the roles `text-bubble` (16 / 1.4) and `text-row-line` (15 / 1.4); `h-inbox`.
+`bubble-avatar`, `composer-min-h`, `composer-send`, `composer-field` and the two roles are the prototype's,
+from 744. Below 744 the web takes the application's numbers (U-81.2): `min-h-touch`, `size-control-xs`, `max-h-menu-max-h`,
+`size-avatar-sm`, `text-body-lg`, `text-body-md`.
 
 The page column is 1440 and, from 1920, Airbnb's 1920 in the centre (its 4K zone,
 U-04.1): `container-page` and `Container width="page"` add `wide:max-w-wide`; the

@@ -1,14 +1,73 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { consentStorageKey } from '$shared/config/env';
+import { consentRecordedStorageKey, consentStorageKey } from '$shared/config/env';
 import {
+	consentDecisionKey,
+	forgetRecordedConsent,
 	readConsentSnapshot,
+	readRecordedConsent,
 	sanitizeConsentSnapshot,
-	writeConsentSnapshot
+	writeConsentSnapshot,
+	writeRecordedConsent
 } from './consent-storage';
 
 afterEach(() => {
 	window.localStorage.clear();
 	vi.restoreAllMocks();
+});
+
+describe('the recorded decision (R-4)', () => {
+	const decision = { registryVersion: '1.1.0', choices: { 'edoctor-api': true, analytics: false } };
+
+	it('keeps the version and the choice and nothing else, under its own key; a sign-out forgets it', () => {
+		writeRecordedConsent(decision);
+		expect(consentRecordedStorageKey).toMatch(/^edoctor\.[a-z]+\.consent-recorded\.v1$/u);
+		expect(JSON.parse(window.localStorage.getItem(consentRecordedStorageKey) ?? 'null')).toEqual(
+			decision
+		);
+		expect(readRecordedConsent()).toEqual(decision);
+		forgetRecordedConsent();
+		expect(readRecordedConsent()).toBeNull();
+	});
+
+	it('(negative) a value not written here is no decision', () => {
+		for (const value of [
+			'<script>',
+			'1.1.0',
+			JSON.stringify({ registryVersion: '<script>', choices: {} })
+		]) {
+			window.localStorage.setItem(consentRecordedStorageKey, value);
+			expect(readRecordedConsent(), value).toBeNull();
+		}
+	});
+
+	it('the same version and choices are one decision, in any order; another choice or version is another', () => {
+		const key = consentDecisionKey(decision);
+		expect(
+			consentDecisionKey({
+				registryVersion: '1.1.0',
+				choices: { analytics: false, 'edoctor-api': true }
+			})
+		).toBe(key);
+		expect(
+			consentDecisionKey({ ...decision, choices: { ...decision.choices, analytics: true } })
+		).not.toBe(key);
+		expect(consentDecisionKey({ ...decision, registryVersion: '1.2.0' })).not.toBe(key);
+	});
+
+	it('(negative) a browser that blocks storage throws nothing', () => {
+		vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+			throw new Error('blocked');
+		});
+		vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+			throw new Error('blocked');
+		});
+		vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+			throw new Error('blocked');
+		});
+		expect(() => writeRecordedConsent(decision)).not.toThrow();
+		expect(() => forgetRecordedConsent()).not.toThrow();
+		expect(readRecordedConsent()).toBeNull();
+	});
 });
 
 describe('consent storage', () => {

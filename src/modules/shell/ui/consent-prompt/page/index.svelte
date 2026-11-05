@@ -7,6 +7,7 @@
 	import { m } from '$paraglide/messages.js';
 	import { localizeHref } from '$paraglide/runtime';
 	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
+	import { getSiteDialogsOptional } from '$shared/state/site-dialogs';
 	import {
 		readConsentSnapshot,
 		writeConsentSnapshot,
@@ -24,6 +25,7 @@
 	} from '$modules/shell/lib/consent';
 	import { legalPath } from '$modules/shell/lib/legal';
 	import ConsentToolsDialog from '../components/tools-dialog.svelte';
+	import { useConsentRecord } from '../hooks/use-consent-record.svelte';
 
 	const locale = $derived(getPageLocale(page.url));
 	const messageOptions = $derived({ locale });
@@ -58,6 +60,13 @@
 
 	let decided = $state(false);
 	let manageOpen = $state(false);
+	// U-82.1: «Απόρρητο» of the phone's `/profile` asks for this window, as its row does in the application.
+	const dialogs = getSiteDialogsOptional();
+	$effect(() => {
+		if (!dialogs?.consentRequested) return;
+		dialogs.consentRequested = false;
+		manageOpen = true;
+	});
 	const resolution = $derived(
 		resolveConsentPrompt({ snapshot, tools, registryVersion: registry?.registryVersion })
 	);
@@ -71,11 +80,11 @@
 		snapshot = reconciled;
 	});
 
-	/**
-	 * Keeps the decision in the browser so the card never asks again for this registry version. The backend's
-	 * record (`POST /consent/record`) takes only a signed-in session (session cookies), which the web does not have
-	 * yet: the application replays the stored decision once a session exists, and so will the web then.
-	 */
+	// 🔴 R-4: a member's decision also reaches the server's record (`POST /consent/record`); a guest's stays here until a
+	// session exists, as in the application.
+	useConsentRecord(() => snapshot);
+
+	/** Keeps the decision in the browser so the card never asks again for this registry version. */
 	function decide(choices: Record<string, boolean>) {
 		if (!registry) return;
 		const next = { registryVersion: registry.registryVersion, choices };

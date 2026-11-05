@@ -8,6 +8,11 @@ const applicationRegistry = readFileSync(
 	'utf8'
 );
 
+const backendRegistry = readFileSync(
+	join(process.cwd(), '../backend/src/modules/consent/config/index.ts'),
+	'utf8'
+);
+
 describe('shell::config::consent-fallback-registry', () => {
 	it('U-24.4 (app = web): OpenFreeMap is an essential tool of the web too, in the application’s own words', () => {
 		const tool = fallbackConsentRegistry.tools.find((entry) => entry.id === 'openfreemap');
@@ -22,12 +27,29 @@ describe('shell::config::consent-fallback-registry', () => {
 		}
 	});
 
-	it('U-24.4 (negative): the bundled catalogue keeps its version — the served registry still wins when it answers', () => {
-		expect(fallbackConsentRegistry.registryVersion).toBe('1.0.0');
+	// The version and the third tool changed by the orchestrator's decision 7 of `w2-fix-w` (`texts-notes.md` §Υλοποίηση 6).
+	it('U-24.4 (negative): the bundled catalogue keeps the backend’s version — the served registry still wins when it answers', () => {
+		expect(fallbackConsentRegistry.registryVersion).toBe('1.1.0');
+		expect(backendRegistry).toContain(
+			`CONSENT_REGISTRY_VERSION = '${fallbackConsentRegistry.registryVersion}'`
+		);
 		expect(fallbackConsentRegistry.tools.map((entry) => entry.id)).toEqual([
 			'edoctor-api',
-			'openfreemap'
+			'openfreemap',
+			'helpful-answers-storage'
 		]);
+	});
+
+	it('U-78.1: the key that remembers «Ήταν χρήσιμο;» is an essential tool of the web, in the backend’s own words', () => {
+		const tool = fallbackConsentRegistry.tools.find(
+			(entry) => entry.id === 'helpful-answers-storage'
+		);
+		expect(tool).toMatchObject({ category: 'essential', platforms: ['web'], policyUrl: null });
+		expect(backendRegistry).toContain(`id: '${tool?.id}'`);
+		for (const language of ['el', 'en'] as const) {
+			expect(backendRegistry).toContain(tool?.translations[language]?.title);
+			expect(backendRegistry).toContain(tool?.translations[language]?.description);
+		}
 	});
 
 	// NIT-6 of the architecture audit (U-29): these words are data in the server's shape, out of the Paraglide catalogs

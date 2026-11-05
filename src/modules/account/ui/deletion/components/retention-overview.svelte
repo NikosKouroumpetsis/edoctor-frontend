@@ -34,7 +34,8 @@
 			id: 'archive',
 			title: m.account_deletion_retained_archive_title({}, messageOptions),
 			body: m.account_deletion_retained_archive_body({}, messageOptions),
-			duration: m.account_deletion_retained_archive_duration({}, messageOptions)
+			duration: m.account_deletion_retained_archive_duration({}, messageOptions),
+			note: m.account_deletion_retained_archive_message_reports({}, messageOptions)
 		}
 	]);
 </script>
@@ -65,6 +66,14 @@
 					{#if duration.label}<strong class="font-semibold text-foreground">{duration.label}</strong
 						>{/if}{duration.label ? ` ${duration.rest}` : duration.rest}
 				</p>
+				{#if record.note}
+					<p
+						data-slot="account-deletion-retained-note"
+						class="mt-2 text-body-md text-foreground/85"
+					>
+						{record.note}
+					</p>
+				{/if}
 			</li>
 		{/each}
 	</ul>

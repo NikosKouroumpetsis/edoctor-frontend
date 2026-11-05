@@ -16,6 +16,39 @@ const BASE = {
 };
 
 describe('ProfileSummaryCard', () => {
+	it('U-73.1 Ε3: the `page` card: the booking card’s shadow, by its own width, the badge between laurels, a number that leads on', () => {
+		render(ProfileSummaryCard, {
+			props: {
+				...BASE,
+				layout: 'page',
+				badge: 'Επιλογή ασθενών',
+				stats: [
+					{ id: 'reviews', value: '184', label: 'Κριτικές', href: '#reviews' },
+					...STATS.slice(0, 1)
+				]
+			}
+		});
+		const card = screen.getByTestId('pro-card');
+		expect(card).toHaveClass('@container', 'rounded-xl', 'shadow-raised');
+		expect(card).toHaveAttribute('data-layout', 'page');
+		// Α13: on the page's card the star is the value's own colour (the prototype's `.b-stat b svg`).
+		const star = card.querySelector('[data-icon="star"]');
+		expect(star).toHaveClass('size-3.5');
+		expect(star).not.toHaveClass('text-rating');
+		expect(screen.getByTestId('pro-badge')).toHaveTextContent('Επιλογή ασθενών');
+		expect(screen.getByTestId('pro-stat-reviews')).toHaveAttribute('href', '#reviews');
+		expect(screen.getByTestId('pro-stats')).toHaveClass('grid-flow-col', 'card-wide:grid-flow-row');
+		expect(screen.getByText('Βαθμολογία').parentElement?.querySelector('svg')).not.toBeNull();
+	});
+
+	it('U-73.1 (negative): no stats, no column; a name is text, never markup', () => {
+		render(ProfileSummaryCard, {
+			props: { ...BASE, layout: 'page', name: '<b>Όνομα</b>', stats: [] }
+		});
+		expect(screen.queryByTestId('pro-stats')).toBeNull();
+		expect(screen.getByTestId('pro-card').querySelector('b')).toBeNull();
+	});
+
 	it('U-02.2 (K5.8): the application’s raised card, class for class — who on the left, the numbers on the right (M-24)', () => {
 		render(ProfileSummaryCard, { props: BASE });
 		expect(screen.getByTestId('pro-card')).toHaveClass(

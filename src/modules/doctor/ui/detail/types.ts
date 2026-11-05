@@ -1,6 +1,8 @@
+import type { Snippet } from 'svelte';
 import type { ResolvedPathname } from '$app/types';
 import type { DoctorProfile } from '$modules/doctor/api/profile';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
+import type { SignInRequest } from '$shared/state/session';
 import type {
 	DoctorDetailSection,
 	DoctorSimilarArea,
@@ -12,6 +14,20 @@ export type DoctorSimilarAreaQuery = (city: string) => {
 	queryKey: readonly unknown[];
 	queryFn: () => Promise<DoctorSimilarArea | null>;
 	staleTime?: number;
+};
+
+/** Where «Πώς λειτουργούν οι κριτικές» leads (U-67.1, U-69.2): pages of other modules, the screen's addresses. */
+export type DoctorReviewLinks = { helpHref: string; policyHref: string };
+
+/** U-75 Π3: where the pages of «Τι πρέπει να γνωρίζετε» lead: the Help Centre's, the screen's addresses. */
+export type DoctorKnowLinks = { cancellationHref: string; bookingHref: string };
+
+/** 🔴 U-85: the profile's hearts (the search module's one writer, composed by the screen): saved, and the press. */
+export type DoctorFavorite = {
+	saved: boolean;
+	/** The heart has just filled: its «pop» plays. */
+	pop: boolean;
+	onToggle: () => void;
 };
 
 /**
@@ -38,10 +54,40 @@ export type DoctorDetailPageProps = {
 	alternateUrls: Record<SupportedLocale, string>;
 	/** Where «‹» leads without a page of the site behind it (the results). */
 	backHref: ResolvedPathname;
-	/** The web has no session yet (U-20): every reader is a guest. */
+	/** Whether the reader is a member (U-80.1 Ε6: known in the browser, so the server's page is always a guest's). */
 	signedIn: boolean;
-	/** The guest's sign-in (U-27.4, the cards' own). */
-	onSignIn: () => void;
+	/** The sign-in over the page (U-27.4, U-80.1); what asked for it goes on after it (Ε4). */
+	onSignIn: (request?: SignInRequest) => void;
+	reviewLinks: DoctorReviewLinks;
+	knowLinks: DoctorKnowLinks;
+	/** 🔴 U-77.1: the doctor's articles, after the biography: the articles module's, composed by the screen. */
+	articles?: Snippet;
+	/**
+	 * 🔴 U-84.6: «Επικοινωνήστε με τον γιατρό», under the summary's rows: the messages module's, composed by the screen. It
+	 * asks the server nothing to be drawn (D-103).
+	 */
+	contact?: Snippet;
+	/** Without it (a doctor the read names no id for, a slice alone) a heart only asks for the sign-in. */
+	favorite?: DoctorFavorite;
+};
+
+/** 🔴 U-73 (screen 16): the doctor's own page: the route's load, the page's language, the site's addresses. */
+export type DoctorAboutPageProps = {
+	load: DoctorDetailPageProps['load'];
+	locale: SupportedLocale;
+	canonicalUrl: string;
+	alternateUrls: Record<SupportedLocale, string>;
+	doctorsHref: ResolvedPathname;
+	profileHref: ResolvedPathname;
+	reviewsHref: ResolvedPathname;
+	/** «Περισσότερα» of a review: the reviews' window, on it (U-66.1 Π11). */
+	onOpenReview: (reviewId: string) => void;
+	/** The way in names the biography (`#bio`). */
+	focusBio: boolean;
+	/** 🔴 U-77.1: the doctor's articles, the articles module's, composed by the screen; its title the page's. */
+	articles?: Snippet<[string]>;
+	/** 🔴 U-84.6: «Επικοινωνήστε με τον γιατρό», under the rows and the links, before the text (Π9). */
+	contact?: Snippet;
 };
 
 /** The profile's error page (the route's 404 or 503): its status and the ways on. */

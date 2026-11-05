@@ -16,5 +16,6 @@ export const legalIndexPath = '/legal';
 export function legalTitle(slug: LegalSlug, locale: SupportedLocale): string {
 	if (slug === 'terms-of-use') return m.footer_terms({}, { locale });
 	if (slug === 'privacy-policy') return m.legal_privacy_title({}, { locale });
+	if (slug === 'review-policy') return m.legal_review_policy_title({}, { locale });
 	return m.legal_cookies_title({}, { locale });
 }

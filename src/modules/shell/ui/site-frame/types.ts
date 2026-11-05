@@ -8,18 +8,21 @@ export type FrameMessageOptions = { locale: SupportedLocale };
 export type LocalizedHref = (path: string) => ResolvedPathname;
 
 /**
- * One entry of the guest's account menu — the ONE list the ☰ menu (from 744) and the capsule's «Προφίλ» sheet
- * (below 744) both draw (U-19.1: «Προφίλ ⇒ Ρυθμίσεις, και για επισκέπτη»). `settings` opens the «Ρυθμίσεις» dialog;
- * the others are pages. `separated`: a rule above it.
+ * One entry of the account menu from 744 (U-81.3): a page; «Σύνδεση» a page that opens the window in place, so it still
+ * goes somewhere before the page's scripts have run; `settings` the «Ρυθμίσεις» dialog; `sign-out` the way out. Below 744
+ * there is no menu: the capsule's «Προφίλ» is a page (U-81.1). `separated`: a rule above it.
  */
 export type AccountEntry =
 	| {
-			key: 'sign-in' | 'help' | 'doctor';
+			key: 'sign-in' | 'messages' | 'favorites' | 'help' | 'doctor';
 			kind: 'link';
 			label: string;
 			description?: string;
 			href: ResolvedPathname;
 			emphasis?: boolean;
 			separated?: boolean;
+			/** 🔴 U-84 Π5: the 8 dot on «Μηνύματα» while a conversation is unread, with what it says aloud. */
+			dotLabel?: string;
 	  }
-	| { key: 'settings'; kind: 'settings'; label: string; separated?: boolean };
+	| { key: 'settings'; kind: 'settings'; label: string; separated?: boolean }
+	| { key: 'sign-out'; kind: 'sign-out'; label: string; separated?: boolean };

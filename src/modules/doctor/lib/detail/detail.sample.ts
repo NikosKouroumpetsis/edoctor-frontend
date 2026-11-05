@@ -46,16 +46,24 @@ export function sampleDoctorProfile(overrides: Partial<DoctorProfile> = {}): Doc
 				id: 'svc-1',
 				title: 'Simple visit',
 				priceRange: { min: 40, max: 40 },
+				kind: 'visit',
 				isSpecialized: true
 			},
 			{
 				id: 'svc-2',
 				title: 'Chronic follow-up',
 				priceRange: { min: 60, max: 60 },
-				note: 'Παρακολούθηση χρόνιων νοσημάτων.',
+				subtitle: 'Παρακολούθηση χρόνιων νοσημάτων.',
+				kind: 'follow-up',
 				isSpecialized: true
 			},
-			{ id: 'svc-3', title: 'Vaccination', priceRange: { min: 25, max: 25 }, isSpecialized: false }
+			{
+				id: 'svc-3',
+				title: 'Vaccination',
+				priceRange: { min: 25, max: 25 },
+				kind: 'other',
+				isSpecialized: false
+			}
 		],
 		office: {
 			officeId: 'off-1',

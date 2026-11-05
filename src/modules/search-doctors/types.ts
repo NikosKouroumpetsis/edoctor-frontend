@@ -1,12 +1,7 @@
+import type { MarketplaceSearchParams } from './api/marketplace/types';
 import type { SearchDoctorsCriteria } from './lib/search-criteria';
 
-export type CategoryId =
-	| 'all'
-	| 'internal-medicine'
-	| 'pediatrics'
-	| 'cardiology'
-	| 'dermatology'
-	| 'online';
+export type CategoryId = 'all' | 'internal-medicine' | 'pediatrics' | 'cardiology' | 'dermatology';
 
 /** The application's three home sections (`homeSectionConfigs`, U-20). */
 export type SectionId = 'popular-athens' | 'popular-psychologists' | 'internal-medicine-gp';
@@ -73,7 +68,13 @@ export type HomeSection = {
  * its cards and the criteria its «→» opens, or its failure. The promise never rejects.
  */
 export type HomeRowResult =
-	| { status: 'ok'; doctors: DoctorCard[]; criteria: SearchDoctorsCriteria | null }
+	| {
+			status: 'ok';
+			doctors: DoctorCard[];
+			criteria: SearchDoctorsCriteria | null;
+			/** R-7: the search the server resolved for this row, for a member's read; `null`: there was none. */
+			params?: MarketplaceSearchParams | null;
+	  }
 	| { status: 'error' };
 
 export type StreamedHomeRow = {

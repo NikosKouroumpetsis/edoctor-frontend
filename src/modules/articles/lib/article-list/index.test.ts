@@ -4,7 +4,8 @@ import {
 	articleTypeFromParam,
 	articleTypeParam,
 	buildArticleListCard,
-	buildArticlesListView
+	buildArticlesListView,
+	doctorArticlesTitle
 } from '.';
 
 const words = (count: number) => Array.from({ length: count }, (_, n) => `λέξη${n}`).join(' ');
@@ -13,7 +14,7 @@ const article = (overrides: Partial<ArticlePublicView> & { slug: string }): Arti
 	id: overrides.slug,
 	title: `Τίτλος ${overrides.slug}`,
 	type: 'ARTICLE',
-	content: { content: [{ type: 'paragraph', text: words(760) }] },
+	readingMinutes: 4,
 	shortDescription: { content: [{ type: 'paragraph', text: 'Η σύντομη περιγραφή.' }] },
 	authors: [{ name: 'Dr. Eva Kalogeropoulou', isPrimary: true, slug: 'eva' }],
 	image: null,
@@ -117,5 +118,43 @@ describe('articles::lib::article-list', () => {
 			hasMore: true
 		});
 		expect(unknown.countLabel).toBeNull();
+	});
+
+	it('U-92: the list’s card reads the server’s `readingMinutes`: `null` shows no time, a body is never counted', () => {
+		const silent = buildArticleListCard(
+			article({
+				slug: 'n',
+				readingMinutes: null,
+				content: { content: [{ type: 'paragraph', text: words(760) }] }
+			}),
+			'el'
+		);
+		expect(silent.meta).toBe('Dr. Eva Kalogeropoulou');
+		expect(silent.featuredMeta).not.toContain('ανάγνωσης');
+	});
+
+	it('U-77: the list of ONE doctor names no author, and its featured no «Από …»', () => {
+		const card = buildArticleListCard(article({ slug: 'a' }), 'el', { withoutAuthor: true });
+		expect(card.meta).toBe('4΄\u00a0ανάγνωσης');
+		expect(card.featuredMeta).not.toContain('Από');
+		const view = buildArticlesListView({
+			pages: [page([article({ slug: 'a' }), article({ slug: 'b' })])],
+			locale: 'el',
+			query: null,
+			searching: false,
+			hasMore: false,
+			withoutAuthor: true
+		});
+		expect(view.featured?.meta).not.toContain('Eva');
+	});
+
+	it('U-77: the section and the page take their name from the kinds the doctor has', () => {
+		expect(doctorArticlesTitle({ articlesCount: 3, healthAdviceCount: 3 }, 'el')).toBe(
+			'Άρθρα · Συμβουλές υγείας'
+		);
+		expect(doctorArticlesTitle({ articlesCount: 3, healthAdviceCount: 0 }, 'el')).toBe('Άρθρα');
+		expect(doctorArticlesTitle({ articlesCount: 0, healthAdviceCount: 2 }, 'el')).toBe(
+			'Συμβουλές υγείας'
+		);
 	});
 });

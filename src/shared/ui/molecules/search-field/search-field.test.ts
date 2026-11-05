@@ -265,4 +265,16 @@ describe('SearchField', () => {
 		for (const view of views)
 			expect(view.container.innerHTML).not.toMatch(/\bdark:|#[0-9a-f]{3,8}\b|bg-white|text-black/i);
 	});
+
+	it('U-60.2: `pill` rounds the field whole, the glyph 16 in and the words from 44; `field` stays as it was', () => {
+		const { container, unmount } = render(SearchField, {
+			props: { ...words, shape: 'pill', testId: 'field' }
+		});
+		expect(screen.getByTestId('field')).toHaveClass('rounded-full', 'pl-pill-inset');
+		expect(rootOf(container).querySelector('[aria-hidden="true"]')).toHaveClass('left-4');
+		unmount();
+		const plain = render(SearchField, { props: { ...words, testId: 'field' } });
+		expect(screen.getByTestId('field')).not.toHaveClass('rounded-full');
+		expect(rootOf(plain.container).querySelector('[aria-hidden="true"]')).toHaveClass('left-3');
+	});
 });

@@ -26,6 +26,8 @@
 		bleed?: RatingDistributionBleed;
 		/** The name of the scrolling row of categories, already localized (it takes the keyboard's focus). */
 		categoriesLabel: string;
+		/** U-66.1 Π4: from 744 the round «‹ ›» over the categories, only while there is more of them to see. */
+		scrollLabels?: { previous: string; next: string };
 		testId?: string;
 		/** `<prefix>-bar-<star>`, `-bar-count-<star>`, `-categories`, `-category-<id>`, `-category-separator`. */
 		testIdPrefix?: string;
@@ -33,9 +35,10 @@
 </script>
 
 <script lang="ts">
-	import { useId } from '$shared/lib/headless';
+	import { keepArrowFocus, useId } from '$shared/lib/headless';
 	import { cn } from '$shared/lib/utils';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
+	import { IconButton } from '$shared/ui/primitives/icon-button';
 	import { Progress } from '$shared/ui/primitives/progress';
 	import { Separator } from '$shared/ui/primitives/separator';
 	import { Text } from '$shared/ui/primitives/text';
@@ -46,6 +49,7 @@
 		categories,
 		bleed = 'none',
 		categoriesLabel,
+		scrollLabels,
 		testId,
 		testIdPrefix,
 		class: className,
@@ -56,6 +60,34 @@
 	// Each bar is named by its star (a progress bar needs a name), its count read after it.
 	const baseId = useId(undefined, 'rating-distribution');
 	const starIdOf = (star: number | string) => `${baseId}-star-${star}`;
+
+	// U-66.1 Π4: the arrows only measure and move the row; the browser's own smooth scroll draws the motion.
+	let row = $state<HTMLElement | null>(null);
+	let canPrevious = $state(false);
+	let canNext = $state(false);
+	let previousArrow = $state<HTMLElement | null>(null);
+	let nextArrow = $state<HTMLElement | null>(null);
+	function measure() {
+		if (!row) return;
+		canPrevious = row.scrollLeft > 1;
+		canNext = row.scrollLeft < row.scrollWidth - row.clientWidth - 1;
+	}
+	$effect(() => {
+		const target = row;
+		if (!target || !scrollLabels) return;
+		measure();
+		const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+		observer?.observe(target);
+		return () => observer?.disconnect();
+	});
+	$effect.pre(() => {
+		keepArrowFocus(
+			{ previous: previousArrow, next: nextArrow },
+			{ previous: canPrevious, next: canNext }
+		);
+	});
+	const scrollBy = (direction: -1 | 1) =>
+		row?.scrollBy?.({ left: (direction * row.clientWidth) / 2, behavior: 'smooth' });
 </script>
 
 <!-- The application's ratings band (M-16): one accent bar per star beside its star and count, then the categories
@@ -95,39 +127,73 @@
 	</div>
 
 	{#if categories.length > 0}
-		<!-- The row scrolls, so it takes the keyboard's focus (axe `scrollable-region-focusable`): no item of it does. -->
-		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-		<div
-			role="group"
-			aria-label={categoriesLabel}
-			tabindex="0"
-			data-slot="rating-distribution-categories"
-			data-testid={testIdOf('categories')}
-			class="scrollbar-none min-w-0 flex-1 overflow-x-auto overscroll-x-contain rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-		>
-			<div class="flex w-max flex-row items-stretch pr-3">
-				{#each categories as category (category.id)}
-					<div class="flex flex-row items-stretch">
-						<div class="flex items-center justify-center self-stretch px-4">
-							<Separator
-								orientation="vertical"
-								spacing="none"
-								data-testid={testIdOf('category-separator')}
-							/>
-						</div>
-						<div
-							data-testid={testIdOf(`category-${category.id}`)}
-							class="flex w-ratings-col-sm shrink-0 flex-col gap-1"
-						>
-							<p class="text-body-sm font-semibold text-muted-foreground">{category.title}</p>
-							<p class="text-body-md font-semibold text-foreground">{category.score}</p>
-							<div class="pt-3">
-								<Ionicon name={category.icon} class="icon-lg text-foreground" />
+		<div class="relative flex min-w-0 flex-1 flex-row">
+			<!-- The row scrolls, so it takes the keyboard's focus (axe `scrollable-region-focusable`): no item of it does. -->
+			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+			<div
+				bind:this={row}
+				onscroll={measure}
+				role="group"
+				aria-label={categoriesLabel}
+				tabindex="0"
+				data-slot="rating-distribution-categories"
+				data-testid={testIdOf('categories')}
+				class="scrollbar-none min-w-0 flex-1 overflow-x-auto overscroll-x-contain scroll-smooth rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+			>
+				<div class="flex w-max flex-row items-stretch pr-3">
+					{#each categories as category (category.id)}
+						<div class="flex flex-row items-stretch">
+							<div class="flex items-center justify-center self-stretch px-4">
+								<Separator
+									orientation="vertical"
+									spacing="none"
+									data-testid={testIdOf('category-separator')}
+								/>
+							</div>
+							<div
+								data-testid={testIdOf(`category-${category.id}`)}
+								class="flex w-ratings-col-sm shrink-0 flex-col gap-1"
+							>
+								<p class="text-body-sm font-semibold text-muted-foreground">{category.title}</p>
+								<p class="text-body-md font-semibold text-foreground">{category.score}</p>
+								<div class="pt-3">
+									<Ionicon name={category.icon} class="icon-lg text-foreground" />
+								</div>
 							</div>
 						</div>
-					</div>
-				{/each}
+					{/each}
+				</div>
 			</div>
+			{#if scrollLabels}
+				<IconButton
+					icon="chevron-back"
+					appearance="outline"
+					size="xs"
+					iconSize="sm"
+					aria-label={scrollLabels.previous}
+					bind:ref={previousArrow}
+					disabled={!canPrevious}
+					onclick={() => scrollBy(-1)}
+					class={cn(
+						'absolute top-1/2 -left-3 hidden -translate-y-1/2 transition-opacity duration-label ease-standard tablet:inline-flex',
+						!canPrevious && 'pointer-events-none opacity-0'
+					)}
+				/>
+				<IconButton
+					icon="chevron-forward"
+					appearance="outline"
+					size="xs"
+					iconSize="sm"
+					aria-label={scrollLabels.next}
+					bind:ref={nextArrow}
+					disabled={!canNext}
+					onclick={() => scrollBy(1)}
+					class={cn(
+						'absolute top-1/2 -right-3 hidden -translate-y-1/2 transition-opacity duration-label ease-standard tablet:inline-flex',
+						!canNext && 'pointer-events-none opacity-0'
+					)}
+				/>
+			{/if}
 		</div>
 	{/if}
 </div>

@@ -5,7 +5,6 @@
 	import BabyIcon from '~icons/lucide/baby';
 	import HeartPulseIcon from '~icons/lucide/heart-pulse';
 	import SparklesIcon from '~icons/lucide/sparkles';
-	import VideoIcon from '~icons/lucide/video';
 	import type { CategoryId } from '$modules/search-doctors/types';
 
 	let {
@@ -23,8 +22,7 @@
 		'internal-medicine': StethoscopeIcon,
 		pediatrics: BabyIcon,
 		cardiology: HeartPulseIcon,
-		dermatology: SparklesIcon,
-		online: VideoIcon
+		dermatology: SparklesIcon
 	};
 </script>
 

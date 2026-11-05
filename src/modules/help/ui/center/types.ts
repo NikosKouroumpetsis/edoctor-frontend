@@ -1,3 +1,4 @@
+import type { Snippet } from 'svelte';
 import type { ResolvedPathname } from '$app/types';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type { HelpFaqSource } from '$modules/help/types';
@@ -23,4 +24,6 @@ export type HelpCenterProps = {
 	onRetry: () => void;
 	canonicalUrl: string;
 	alternateUrls: Record<SupportedLocale, string>;
+	/** U-78: «Ήταν χρήσιμο;» of a question, by its anchor (the helpful module's, composed by the screen). */
+	helpful?: Snippet<[string]>;
 };

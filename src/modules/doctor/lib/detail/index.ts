@@ -13,6 +13,8 @@ export {
 	buildDoctorSimilarSearch,
 	type DoctorAvailabilityReadState
 } from './booking';
+export { buildDoctorAboutContent } from './about';
+export { buildDoctorContactFacts } from './contact';
 export {
 	buildBio,
 	buildDoctorDetailContent,
@@ -29,14 +31,22 @@ export {
 	DOCTOR_SERVICE_COST_LIMIT
 } from './build-content';
 export {
+	buildDoctorOfficePage,
+	buildDoctorReviewListCard,
 	buildDoctorReviewsModalContent,
-	buildDoctorServicesModalContent
+	buildDoctorServicesPage,
+	buildDoctorSpecializationsPage,
+	doctorOfficePageTitle
 } from './build-modal-content';
+export { buildDoctorKnowContent, isDoctorKnowPageId } from './know';
+export { buildDoctorWeeklyHours, type DoctorWeeklyHoursRow } from './weekly-hours';
 export {
 	availabilitySlotSummaryLabel,
 	doctorNameLabel,
+	doctorSentenceName,
 	emphasizedSegments,
 	feeView,
+	reviewCountLabel,
 	formatFee,
 	officeAddressLine,
 	officeDialNumber
@@ -53,20 +63,23 @@ export {
 	resolveDoctorNearestOfficeId,
 	type DoctorSlotPoint
 } from './office';
-export { buildPricedServices } from './priced-services';
+export { buildPricedService, buildPricedServices } from './priced-services';
 export { resolvePrimaryDoctorService } from './primary-service';
 export {
+	buildDoctorReviewBuckets,
 	buildDoctorReviewRatingDistribution,
 	toDoctorReviewRatingStar
 } from './review-rating-distribution';
 export {
 	buildDoctorReviewSortOptions,
 	DEFAULT_DOCTOR_REVIEW_SORT_ID,
+	doctorReviewsOrderOf,
 	isDoctorReviewSortId,
 	sortDoctorReviewCards
 } from './review-sorting';
 export {
 	DOCTOR_DETAIL_SECTIONS,
+	doctorAboutPath,
 	doctorDetailsPath,
 	doctorProfilePath,
 	isDoctorDetailSection,
@@ -85,6 +98,9 @@ export type {
 	DoctorAvailabilityOfficeTab,
 	DoctorAvailabilitySectionContent,
 	DoctorAvailabilityTimeOption,
+	DoctorAboutContent,
+	DoctorAboutRow,
+	DoctorAboutRowId,
 	DoctorBioGroup,
 	DoctorBookingAction,
 	DoctorBookingContent,
@@ -99,17 +115,34 @@ export type {
 	DoctorDetailServiceCost,
 	DoctorDetailSpecializations,
 	DoctorDetailSummary,
+	DoctorKnowBlock,
+	DoctorKnowContent,
+	DoctorKnowGroup,
+	DoctorKnowLinkId,
+	DoctorKnowPage,
+	DoctorKnowPageId,
+	DoctorKnowRow,
+	DoctorKnowRowId,
 	DoctorLocation,
 	DoctorOfficeInfoRow,
+	DoctorOfficePage,
 	DoctorOfficeView,
+	DoctorReviewListCard,
 	DoctorPhoto,
 	DoctorPricedService,
 	DoctorReviewSortId,
 	DoctorReviewsModalContent,
 	DoctorSelectedSlot,
+	DoctorServicesGroup,
+	DoctorServicesPage,
 	DoctorShareContent,
 	DoctorSimilarArea,
 	DoctorSimilarSearch,
+	DoctorSpecializationDomain,
+	DoctorSpecializationsPage,
+	DoctorSpecializationStat,
 	DoctorSummaryRow,
+	DoctorTimelineEntry,
+	DoctorTimelineGroup,
 	DoctorTextSegment
 } from './types';

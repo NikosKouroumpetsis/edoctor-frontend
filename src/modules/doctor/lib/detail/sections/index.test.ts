@@ -11,8 +11,9 @@ import {
 describe('lib/detail sections (the windows’ addresses)', () => {
 	it('Π7 (app = web): the windows are the application’s `details/*` plus the photos, each its own address with its hints', () => {
 		expect(DOCTOR_DETAIL_SECTIONS).toEqual([
-			'description',
 			'services',
+			'specializations',
+			'know',
 			'location',
 			'reviews',
 			'availability',
@@ -37,6 +38,25 @@ describe('lib/detail sections (the windows’ addresses)', () => {
 		expect(readDoctorDetailHints(new URLSearchParams('date=02/11/2026'))).toEqual({});
 		expect(isDoctorDetailSection('reviews')).toBe(true);
 		expect(isDoctorDetailSection('articles')).toBe(false);
+	});
+
+	it('U-65.6: a link’s `mention` passes only by the list of the six, anything else is ignored', () => {
+		const read = (query: string) => readDoctorDetailHints(new URLSearchParams(query)).mention;
+		expect(read('mention=COURTESY')).toBe('COURTESY');
+		expect(read('mention=ACCESS')).toBe('ACCESS');
+		for (const query of [
+			'',
+			'mention=',
+			'mention=WAIT',
+			'mention=PUNCTUALITY',
+			'mention=courtesy',
+			'mention=COURTESY%20',
+			'mention=%3Cscript%3Ealert(1)%3C/script%3E',
+			"mention=COURTESY'%20OR%201=1",
+			`mention=${'A'.repeat(5000)}`
+		]) {
+			expect(read(query), query).toBeUndefined();
+		}
 	});
 
 	it('U-14.6 (app = web): the photos window takes the application’s `focus` — a photo’s place from 0, digits only (≤ 3); anything else is the tour', () => {

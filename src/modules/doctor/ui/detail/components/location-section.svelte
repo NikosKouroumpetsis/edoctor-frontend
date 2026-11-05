@@ -2,6 +2,7 @@
 	import type { ResolvedPathname } from '$app/types';
 	import { m } from '$paraglide/messages.js';
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { BadgeGroup } from '$shared/ui/molecules/badge-group';
 	import type { DoctorAvailabilityOfficeTab, DoctorLocation } from '$modules/doctor/lib/detail';
 	import OfficeInfoRows from './office-info-rows.svelte';
@@ -67,6 +68,16 @@
 				class="h-office-map tablet:h-office-map-md laptop:h-office-map-lg"
 			/>
 		{/if}
+		<!-- U-68.1 Π8: the way to the office's page, always, also without a map. -->
+		<a
+			href={openHref}
+			onclick={(event) => onOpen(event)}
+			data-testid="doctor-detail-location-more"
+			class="-my-3 inline-flex min-h-touch w-fit min-w-touch flex-row items-center gap-1 text-body-lg font-semibold text-foreground underline outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+		>
+			{m.doctor_expand({}, { locale })}
+			<Ionicon name="chevron-forward" class="icon-sm no-underline" />
+		</a>
 		<div class="flex flex-col gap-5 tablet:grid tablet:grid-cols-2 tablet:gap-x-profile-columns">
 			<div class="flex flex-col gap-5">
 				{#if location.paymentMethods}

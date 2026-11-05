@@ -29,11 +29,14 @@
 	export function buildHighlightSegments(
 		text: string,
 		query: string,
-		match: HighlightTextMatch = 'anywhere'
+		match: HighlightTextMatch = 'anywhere',
+		eachWord = false
 	): HighlightSegment[] {
 		const plain: HighlightSegment[] = [{ highlighted: false, text }];
-		const needle = foldSearchText(query.trim());
-		if (!needle || !text) return plain;
+		const whole = foldSearchText(query.trim());
+		if (!whole || !text) return plain;
+		// U-66.1 Π6: a search of several words marks each one wherever it stands.
+		const needles = eachWord ? whole.split(/\s+/u).filter(Boolean) : [whole];
 
 		let folded = '';
 		const originalIndexOf: number[] = [];
@@ -45,18 +48,20 @@
 
 		const highlighted = new Array<boolean>(text.length).fill(false);
 		let matched = false;
-		let from = 0;
-		for (;;) {
-			const at = folded.indexOf(needle, from);
-			if (at === -1) break;
-			if (match === 'word-start' && at > 0 && WORD_CHARACTER.test(folded[at - 1])) {
-				from = at + 1;
-				continue;
+		for (const needle of needles) {
+			let from = 0;
+			for (;;) {
+				const at = folded.indexOf(needle, from);
+				if (at === -1) break;
+				if (match === 'word-start' && at > 0 && WORD_CHARACTER.test(folded[at - 1])) {
+					from = at + 1;
+					continue;
+				}
+				matched = true;
+				for (let position = at; position < at + needle.length; position += 1)
+					highlighted[originalIndexOf[position]] = true;
+				from = at + needle.length;
 			}
-			matched = true;
-			for (let position = at; position < at + needle.length; position += 1)
-				highlighted[originalIndexOf[position]] = true;
-			from = at + needle.length;
 		}
 		if (!matched) return plain;
 
@@ -82,6 +87,7 @@
 		query,
 		highlightClass = 'font-bold',
 		match = 'anywhere',
+		eachWord = false,
 		lines,
 		testId,
 		class: className,
@@ -95,11 +101,13 @@
 		highlightClass?: string;
 		/** Where the query counts: anywhere (default) or only at the start of a word. */
 		match?: HighlightTextMatch;
+		/** Mark each word of the query on its own, not the whole phrase. */
+		eachWord?: boolean;
 		lines?: HighlightTextLines;
 		testId?: string;
 	} = $props();
 
-	const segments = $derived(buildHighlightSegments(text, query, match));
+	const segments = $derived(buildHighlightSegments(text, query, match, eachWord));
 </script>
 
 <!-- The application's `HighlightText`: one run of words, the matched part in its own weight; the words read once. -->

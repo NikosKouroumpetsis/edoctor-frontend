@@ -31,6 +31,11 @@ const step = (text: string) => (_: string, element: Element | null) =>
 const GREEK_SUBJECT = 'Αίτημα διαγραφής λογαριασμού';
 const ENGLISH_SUBJECT = 'Account deletion request';
 
+const GREEK_MESSAGE_REPORTS =
+	'Οι αναφορές μηνυμάτων (ποιος ανέφερε ποιον, ο λόγος και η απόφασή μας), χωρίς το κείμενο του μηνύματος, κρατούνται 3 χρόνια από τη διαγραφή και μετά σβήνονται.';
+const ENGLISH_MESSAGE_REPORTS =
+	'Message reports (who reported whom, the reason and our decision), without the text of the message, are kept for 3 years from the deletion and then deleted.';
+
 const GREEK_PERIODS = [
 	/10 χρόνια από την τελευταία σας επίσκεψη στον ίδιο γιατρό/,
 	/10 χρόνια από την τελευταία επίσκεψη κάθε ασθενή/,
@@ -181,6 +186,26 @@ describe('Account deletion page', () => {
 		expect(
 			container.querySelector('[data-slot="account-deletion-app"]')?.closest('[class*="rounded"]')
 		).toBeNull();
+	});
+
+	it('U-94 rule 6: the page says what the Privacy Policy says of message reports, under the locked archive', () => {
+		const { container, unmount } = render(AccountDeletion, { props });
+		const notes = [...container.querySelectorAll('[data-slot="account-deletion-retained-note"]')];
+		expect(notes.map((node) => node.textContent?.trim())).toEqual([GREEK_MESSAGE_REPORTS]);
+		expect(notes[0].closest('li')?.querySelector('h3')).toHaveTextContent(
+			'Το κλειδωμένο αρχείο της διαγραφής'
+		);
+		// U-62.1: still five records, and the note is no sixth.
+		expect(
+			container.querySelectorAll('[data-slot="account-deletion-retained"] li h3')
+		).toHaveLength(5);
+		unmount();
+		visit('/en/account-deletion');
+		expect(
+			render(AccountDeletion, { props }).container.querySelector(
+				'[data-slot="account-deletion-retained-note"]'
+			)?.textContent
+		).toContain(ENGLISH_MESSAGE_REPORTS);
 	});
 
 	it('MINOR-7 of r1 (U-28.4): the head names the page on the site’s origin — canonical, both languages and the OG', () => {

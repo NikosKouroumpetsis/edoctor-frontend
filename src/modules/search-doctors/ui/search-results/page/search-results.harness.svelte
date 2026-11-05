@@ -2,6 +2,7 @@
 	import { QueryClientProvider, type QueryClient } from '@tanstack/svelte-query';
 	import { createQueryClient } from '$shared/query';
 	import { setSearchDock, type SearchDock } from '$shared/state/search-dock';
+	import { setSession, type Session } from '$shared/state/session';
 	import type { ResultsPageData } from '$modules/search-doctors/api/results';
 	import SearchResults from './index.svelte';
 
@@ -13,10 +14,18 @@
 	let {
 		data,
 		client: given,
-		dock
-	}: { data: ResultsPageData; client?: QueryClient; dock?: SearchDock } = $props();
+		dock,
+		session
+	}: {
+		data: ResultsPageData;
+		client?: QueryClient;
+		dock?: SearchDock;
+		session?: Session;
+	} = $props();
 	// svelte-ignore state_referenced_locally
 	if (dock) setSearchDock(dock);
+	// svelte-ignore state_referenced_locally
+	if (session) setSession(session);
 	// svelte-ignore state_referenced_locally
 	const client = given ?? createQueryClient();
 </script>

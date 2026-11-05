@@ -11,10 +11,8 @@
 		POPULAR_INITIAL_COUNT,
 		popularAreaSearches,
 		popularAreaTerms,
-		popularOnlineSearches,
 		popularSpecialtySearches,
 		popularSpecialtyTerms,
-		videoConsultationTerm,
 		type PopularArea,
 		type PopularSpecialty
 	} from '$modules/search-doctors/config/popular-searches';
@@ -87,18 +85,6 @@
 				label: areaLabels[area],
 				description: m.footer_popular_all_specialties({}, messageOptions),
 				href: hrefOf('', termFor(popularAreaTerms[area], locale))
-			}))
-		},
-		{
-			id: 'online',
-			label: m.footer_popular_online({}, messageOptions),
-			links: popularOnlineSearches.map((area) => ({
-				label: m.footer_popular_video({}, messageOptions),
-				description: areaLabels[area],
-				href: hrefOf(
-					termFor(videoConsultationTerm, locale),
-					termFor(popularAreaTerms[area], locale)
-				)
 			}))
 		}
 	]);

@@ -4,6 +4,7 @@
 </script>
 
 <script lang="ts">
+	import type { SignInRequest } from '$shared/state/session';
 	import { m } from '$paraglide/messages.js';
 	import { cn } from '$shared/lib/utils';
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
@@ -32,7 +33,7 @@
 		booking: DoctorBookingContent;
 		locale: SupportedLocale;
 		onBook: () => void;
-		onSignIn: () => void;
+		onSignIn: (request?: SignInRequest) => void;
 	} = $props();
 
 	const hiddenClasses = 'pointer-events-none -translate-y-2 opacity-0';

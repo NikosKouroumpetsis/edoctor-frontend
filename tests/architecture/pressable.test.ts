@@ -19,7 +19,8 @@ import { projectRoot, readSourceFiles, stripComments } from './source-scan';
  * - the kit: a sample of its pressable components (chip, selectable card, segmented control, button) carries a hover
  *   class behind `can-hover:` (a pointer that hovers), and the chosen look carries none;
  * - (γ) no element of `src/` takes a press without being a control: a `div` / `span` / `li` with a click or key
- *   handler has a role, or is a backdrop hidden from assistive tech (its keyboard way is Escape), or is listed.
+ *   handler has a role, or is a backdrop hidden from assistive tech (its keyboard way is Escape), or is listed. A handler
+ *   is one however it is written: `onclick={go}` or the shorthand `{onclick}`.
  */
 
 const layoutCss = () => readFileSync(join(projectRoot, 'src/routes/layout.css'), 'utf8');
@@ -51,6 +52,35 @@ function selectorsOf(block: string, declaration: string): string {
 		.replace(/\s\)/g, ')')
 		.trim();
 }
+
+type ListedPress = { path: string; marker: string };
+
+/** What takes a pointer without being a target of its own, each with its keyboard way: one tag, by its marker. */
+const LISTED_PRESSES: ListedPress[] = [
+	// The slider's track: a press moves the nearest thumb; the thumbs are the `slider`s the keyboard moves.
+	{ path: 'src/shared/ui/primitives/slider/slider.svelte', marker: 'data-slot="slider-track"' },
+	// A finger resting on a message (`w2-w5` §Φ2): its one action has a real button beside the message (`more`) and the
+	// conversation's ⋯ menu for the keyboard (`messages/ui/inbox/page/index.test.ts`, «a report with the keyboard alone»).
+	{
+		path: 'src/shared/ui/molecules/message-bubble/message-bubble.svelte',
+		marker: 'data-slot="message-bubble"'
+	},
+	// Its `mousedown` only keeps a double press from selecting the words; the press is the control's it labels.
+	{ path: 'src/shared/ui/primitives/label/label.svelte', marker: 'data-slot="label"' },
+	// The bar a sheet is dragged down by, to close: the same closing is the bar's × and Escape.
+	{
+		path: 'src/shared/ui/templates/action-dialog/action-dialog.svelte',
+		marker: 'data-slot="action-dialog-bar"'
+	},
+	{
+		path: 'src/shared/ui/templates/info-dialog/info-dialog.svelte',
+		marker: 'data-slot="info-dialog-bar"'
+	}
+];
+
+/** A press or a key on an element, in either form Svelte takes. */
+const PRESS_HANDLER =
+	/\s(?:(?:onclick|onmousedown|onpointerdown|onpointerup|onkeydown|onkeyup)\s*=|\{(?:onclick|onmousedown|onpointerdown|onpointerup|onkeydown|onkeyup)\})/;
 
 const ROLES = [
 	'button',
@@ -161,13 +191,8 @@ describe('U-28.4: what presses looks pressable', () => {
 	});
 
 	it('U-28.4 (γ): nothing of `src/` takes a press or a key without being a control — a `div` / `span` / `li` with a handler has a role, or is an `aria-hidden` backdrop, or is listed', () => {
-		const handler = /\s(onclick|onmousedown|onpointerdown|onpointerup|onkeydown|onkeyup)\s*=/;
 		const tag = /<(div|span|li|p|section|article|img|td|tr|ul|label)\b((?:[^>{]|\{[^}]*\})*)>/g;
-		// What takes a pointer without being a target of its own, each with its keyboard way.
-		const listed = [
-			// The slider's track: a press moves the nearest thumb; the thumbs are the `slider`s the keyboard moves.
-			'src/shared/ui/primitives/slider/slider.svelte'
-		];
+		const used = new Set<ListedPress>();
 		const found: string[] = [];
 		let scanned = 0;
 		for (const file of readSourceFiles()) {
@@ -175,26 +200,34 @@ describe('U-28.4: what presses looks pressable', () => {
 			scanned++;
 			for (const match of stripComments(file.text).matchAll(tag)) {
 				const attributes = match[2];
-				if (!handler.test(attributes)) continue;
+				if (!PRESS_HANDLER.test(attributes)) continue;
 				if (/\srole=/.test(attributes)) continue;
 				if (/aria-hidden="true"/.test(attributes)) continue;
-				if (listed.includes(file.path)) continue;
+				const entry = LISTED_PRESSES.find(
+					({ path, marker }) => path === file.path && attributes.includes(marker)
+				);
+				if (entry) {
+					used.add(entry);
+					continue;
+				}
 				found.push(`${file.path} <${match[1]}>`);
 			}
 		}
 		expect(scanned).toBeGreaterThan(200);
 		expect(found).toEqual([]);
+		// N-3: an entry names one tag, so a new press in the same file shows; one that no longer matches goes.
+		expect(LISTED_PRESSES.filter((entry) => !used.has(entry))).toEqual([]);
 	});
 
 	it('U-28.4 (γ, negative): the scan reads a `div` with a press and no role, and lets a role, a hidden backdrop and a `button` pass', () => {
 		const tag = /<(div|span|li)\b((?:[^>{]|\{[^}]*\})*)>/g;
-		const handler = /\s(onclick|onkeydown)\s*=/;
 		const text = `<div class="a" onclick={go}></div><div role="option" onclick={go}></div>
-			<div aria-hidden="true" onclick={close}></div><button onclick={go}></button><span onkeydown={(e) => e}>`;
+			<div aria-hidden="true" onclick={close}></div><button onclick={go}></button><span onkeydown={(e) => e}>
+			<li class="b" {onpointerdown}></li><li role="option" {onclick}></li><li {other}></li>`;
 		const flagged = [...text.matchAll(tag)]
-			.filter((match) => handler.test(match[2]))
+			.filter((match) => PRESS_HANDLER.test(match[2]))
 			.filter((match) => !/\srole=/.test(match[2]) && !/aria-hidden="true"/.test(match[2]))
 			.map((match) => match[1]);
-		expect(flagged).toEqual(['div', 'span']);
+		expect(flagged).toEqual(['div', 'span', 'li']);
 	});
 });

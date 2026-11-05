@@ -89,4 +89,14 @@ describe('Rating', () => {
 		expect(stars(root).every((star) => star.getAttribute('aria-hidden') === 'true')).toBe(true);
 		expect(root).toHaveTextContent('3,7');
 	});
+
+	it('U-49, U-66.1 Π7: half a star is drawn, the rest whole or empty', () => {
+		const { container } = render(Rating, {
+			props: { variant: 'stars', value: 3.5, starSize: 'xs' }
+		});
+		const marks = [...container.querySelectorAll('[data-filled]')].map((node) =>
+			node.getAttribute('data-filled')
+		);
+		expect(marks).toEqual(['true', 'true', 'true', 'half', 'false']);
+	});
 });

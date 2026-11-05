@@ -4,7 +4,8 @@ import {
 	highlightSearch,
 	matchesSearch,
 	searchWords,
-	toGreekUpperCase
+	toGreekUpperCase,
+	withDoctorTitle
 } from './index';
 
 describe('toGreekUpperCase', () => {
@@ -38,6 +39,33 @@ describe('toGreekUpperCase', () => {
 	it('U-03.9: takes the tonos off Greek beside Latin and capitalises the final sigma', () => {
 		expect(toGreekUpperCase('Café Παπαδόπουλος')).toBe('CAFÉ ΠΑΠΑΔΟΠΟΥΛΟΣ');
 		expect(toGreekUpperCase('είδους')).toBe('ΕΙΔΟΥΣ');
+	});
+});
+
+describe('withDoctorTitle (U-99.1)', () => {
+	it('«Dr.» before a bare name, in Greek or Latin letters', () => {
+		expect(withDoctorTitle('Σοφία Ρηγοπούλου')).toBe('Dr. Σοφία Ρηγοπούλου');
+		expect(withDoctorTitle('  Athena Papadopoulou ')).toBe('Dr. Athena Papadopoulou');
+	});
+
+	it('(negative) a name that already wears its title is not given a second one', () => {
+		for (const name of [
+			'Dr. Athena',
+			'dr. athena',
+			'DR Athena',
+			'Dr.Athena',
+			'Δρ. Μαρία',
+			'ΔΡ. ΜΑΡΙΑ',
+			'δρ Μαρία'
+		]) {
+			expect(withDoctorTitle(name)).toBe(name);
+		}
+	});
+
+	it('(negative) a surname that merely starts with those letters is a name like any other; no name stays no name', () => {
+		expect(withDoctorTitle('Drakos Nikos')).toBe('Dr. Drakos Nikos');
+		expect(withDoctorTitle('Δρόσος Νίκος')).toBe('Dr. Δρόσος Νίκος');
+		expect(withDoctorTitle('   ')).toBe('');
 	});
 });
 

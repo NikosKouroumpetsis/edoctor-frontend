@@ -49,7 +49,11 @@ export function buildHomeSection(section: SearchDoctorsSection, lang: string): H
 /** A streamed row's answer as the page shows it: its cards and its «→» criteria, or its failure as it was. */
 export function buildHomeRowResult(result: StreamedSectionResult, lang: string): HomeRowResult {
 	if (result.status === 'error') return result;
-	return { status: 'ok', ...rowOf(result.items, result.link, lang) };
+	return {
+		status: 'ok',
+		...rowOf(result.items, result.link, lang),
+		...(result.params === undefined ? {} : { params: result.params })
+	};
 }
 
 /**

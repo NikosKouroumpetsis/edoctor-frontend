@@ -169,11 +169,12 @@
 	--spacing-drawer-inset: 96px;
 	--spacing-cta-inline: 32px;
 	--spacing-bar-content: 1024px;
-	--spacing-tab-capsule-w: 280px;
+	--spacing-tab-capsule-w: 336px;
 	--spacing-account-menu-w: 260px;
 	--spacing-consent-card-w: 720px;
 	--spacing-search-panel-w: 424px;
 	--spacing-compact-search-part: 224px;
+	--spacing-pill-inset: 44px;
 	--spacing-results-row-gap: 28px;
 	--spacing-map-pin: 28px;
 	--spacing-map-card-media: 128px;
@@ -204,6 +205,24 @@
 	--spacing-reading-row: 52px;
 	--spacing-reading-more: 56px;
 	--spacing-status-art: 440px;
+	--spacing-window-reviews-sm: 664px;
+	--spacing-window-h: 800px;
+	--spacing-office-aside: 400px;
+	--spacing-window-md: 780px;
+	--spacing-row-wide: 520px;
+	--spacing-card-wide: 340px;
+	--spacing-inbox-list-w: 380px;
+	--spacing-inbox-list-w-lg: 400px;
+	--spacing-inbox-art-w: 168px;
+	--spacing-bubble-max-w: 560px;
+	--spacing-bubble-avatar: 28px;
+	--spacing-composer-min-h: 44px;
+	--spacing-composer-send: 36px;
+	--spacing-composer-field: 156px;
+	--spacing-compose-field-max: 320px;
+	--spacing-contact-w: 288px;
+	--spacing-thread-pill-h: 36px;
+	--spacing-quote-max-h: 140px;
 	--spacing-sheet-sm: 60dvh;
 	--spacing-sheet-md: 70dvh;
 	--spacing-sheet-lg: 85dvh;
@@ -214,6 +233,8 @@
 	--radius-lg: 16px;
 	--radius-xl: 24px;
 	--radius-panel: 32px;
+	--radius-bubble: 20px;
+	--radius-bubble-tail: 6px;
 	--shadow-raised: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.1);
 	--shadow-overlay: 0 8px 24px rgba(15, 23, 42, 0.12);
 	--shadow-floating: 0 6px 20px rgba(15, 23, 42, 0.18);
@@ -269,6 +290,10 @@
 @utility icon-lg {
 	width: 24px;
 	height: 24px;
+}
+@utility icon-card-heart {
+	width: 28px;
+	height: 28px;
 }
 @utility icon-xl {
 	width: 32px;

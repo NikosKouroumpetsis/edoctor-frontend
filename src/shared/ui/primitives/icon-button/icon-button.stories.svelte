@@ -2,6 +2,7 @@
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { BrandApple } from '$shared/ui/icons/brand-apple';
 	import { BrandGoogle } from '$shared/ui/icons/brand-google';
+	import { SIGN_IN_PROVIDER_COLORS } from '$shared/preferences/theme/sign-in-provider-colors';
 	import { IconButton } from '$shared/ui/primitives/icon-button';
 
 	// The application's meta (`atoms/icon-button`): its `accessibilityLabel` / `name` are the web's `aria-label` / `icon`.
@@ -178,13 +179,24 @@
 				<span class="text-body-sm text-muted-foreground">#12 bare · md · muted</span>
 			</div>
 			<div class="flex flex-row items-center gap-3">
-				<IconButton aria-label="Google" appearance="tile" size="xl">
+				<IconButton
+					aria-label="Google"
+					appearance="tile"
+					size="xl"
+					tileColor={SIGN_IN_PROVIDER_COLORS.surface}
+				>
 					<BrandGoogle class="icon-lg" />
 				</IconButton>
-				<IconButton aria-label="Apple" appearance="tile" size="xl" busy>
-					<BrandApple class="icon-lg" />
+				<IconButton
+					aria-label="Apple"
+					appearance="tile"
+					size="xl"
+					tileColor={SIGN_IN_PROVIDER_COLORS.surface}
+					busy
+				>
+					<BrandApple />
 				</IconButton>
-				<span class="text-body-sm text-muted-foreground">#13 tile · xl (and busy)</span>
+				<span class="text-body-sm text-muted-foreground">#13 tile · xl · white (and busy)</span>
 			</div>
 		</div>
 	{/snippet}
@@ -236,14 +248,36 @@
 </Story>
 
 <!-- The scrim is 48 only, the tile 48 or 64, and the lift falls only from a 48 / 64 shape. -->
+<!-- U-78: a choice that stays: `aria-pressed` and the 2 dark ring, which moves nothing. -->
+<Story name="Pressed">
+	{#snippet template()}
+		<div class="flex flex-row flex-wrap items-center gap-4 rounded-md bg-muted p-4">
+			<IconButton aria-label="Ναι" appearance="tile" size="touch" icon="thumbs-up" pressed />
+			<IconButton aria-label="Όχι" appearance="tile" size="touch" icon="thumbs-down-outline" />
+			<IconButton aria-label="Ναι" appearance="outline" size="sm" icon="thumbs-up" pressed />
+			<IconButton aria-label="Όχι" appearance="outline" size="sm" icon="thumbs-down-outline" />
+		</div>
+	{/snippet}
+</Story>
+
 <Story name="Own Shape Sizes">
 	{#snippet template()}
 		<div class="flex flex-row flex-wrap items-center gap-4 rounded-md bg-muted p-4">
-			<IconButton aria-label="Apple" appearance="tile" size="touch">
-				<BrandApple class="icon-lg" />
+			<IconButton
+				aria-label="Apple"
+				appearance="tile"
+				size="touch"
+				tileColor={SIGN_IN_PROVIDER_COLORS.surface}
+			>
+				<BrandApple class="size-touch" />
 			</IconButton>
-			<IconButton aria-label="Apple" appearance="tile" size="xl">
-				<BrandApple class="icon-lg" />
+			<IconButton
+				aria-label="Apple"
+				appearance="tile"
+				size="xl"
+				tileColor={SIGN_IN_PROVIDER_COLORS.surface}
+			>
+				<BrandApple />
 			</IconButton>
 			<IconButton aria-label="Κλείσιμο" appearance="outline" icon="close" elevated />
 			<IconButton

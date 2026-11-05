@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { createQuery, keepPreviousData, useQueryClient } from '@tanstack/svelte-query';
+import { createQuery, useQueryClient, type Query, type QueryKey } from '@tanstack/svelte-query';
 
 import { searchDoctorsQueryKeys } from '$modules/search-doctors/api/home/query-keys';
 import { fetchHomeSection } from '$modules/search-doctors/api/marketplace/build-section-query';
@@ -10,6 +10,7 @@ import {
 } from '$modules/search-doctors/api/marketplace/category-scope';
 import { homeSectionConfigs } from '$modules/search-doctors/api/marketplace/sections';
 import { buildHomeSection } from '$modules/search-doctors/lib/section-link';
+import { personalQueryMeta } from '$shared/query';
 import type { CategoryId, HomeSection } from '$modules/search-doctors/types';
 
 export type HomeSectionsController = {
@@ -33,7 +34,9 @@ export type HomeSectionsController = {
  */
 export function useHomeSections(
 	getCategoryId: () => CategoryId,
-	getLang: () => string
+	getLang: () => string,
+	/** 🔴 U-34.4: the reader is a member: these reads are the browser's alone, so they carry the cookies at once. */
+	isMember: () => boolean = () => false
 ): HomeSectionsController {
 	const queryClient = useQueryClient();
 
@@ -66,16 +69,26 @@ export function useHomeSections(
 			// category's scope is known (and on `all`) these stay off on a key of their own, so the rows fading out keep
 			// the previous category's cards (`keepPreviousData`), never the `all` view's.
 			const keyScope = isScopeReady() ? scope : null;
+			const withSession = isMember();
 
 			return {
-				queryKey: searchDoctorsQueryKeys.homeSection(config.id, lang, keyScope),
+				queryKey: [
+					...searchDoctorsQueryKeys.homeSection(config.id, lang, keyScope),
+					withSession ? 'member' : 'guest'
+				] as const,
 				// U-32.1: the read answers facts; the row keeps its words, built in the page's language (`lib/section-link`).
 				queryFn: ({ signal }: { signal: AbortSignal }) =>
-					fetchHomeSection(queryClient, config, scope, lang, { signal }).then((section) =>
-						buildHomeSection(section, lang)
+					fetchHomeSection(queryClient, config, scope, lang, { signal, withSession }).then(
+						(section) => buildHomeSection(section, lang)
 					),
 				enabled: isScopeReady(),
-				placeholderData: keepPreviousData
+				meta: withSession ? personalQueryMeta : undefined,
+				// The previous category's cards stay while the next one loads, but what a member read never stands in for a
+				// guest's (U-34.4: a sign-out takes the amounts at once).
+				placeholderData: (
+					previous: HomeSection | undefined,
+					previousQuery: Query<HomeSection, Error, HomeSection, QueryKey> | undefined
+				) => (!withSession && previousQuery?.queryKey.at(-1) === 'member' ? undefined : previous)
 			};
 		})
 	);

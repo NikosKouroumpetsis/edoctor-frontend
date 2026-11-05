@@ -1,10 +1,20 @@
-import { createInfiniteQuery, hashKey, useQueryClient } from '@tanstack/svelte-query';
+import {
+	createInfiniteQuery,
+	createQuery,
+	hashKey,
+	useQueryClient,
+	type InfiniteData
+} from '@tanstack/svelte-query';
 import { untrack } from 'svelte';
 import { browser } from '$app/environment';
-import { searchResultsInfiniteQuery } from '$modules/search-doctors/api/marketplace/search-results';
+import {
+	memberFirstPageQuery,
+	searchResultsInfiniteQuery
+} from '$modules/search-doctors/api/marketplace/search-results';
 import type { ResultsFirstPage } from '$modules/search-doctors/api/results';
+import type { SearchDoctorsSearchResults } from '$modules/search-doctors/api/marketplace/search-source';
 import { criteriaWithDeviceLocation } from '$modules/search-doctors/lib/device-location';
-import { buildSearchResultCard } from '$modules/search-doctors/lib/doctor-card';
+import { buildSearchResultCard, overlayMemberFees } from '$modules/search-doctors/lib/doctor-card';
 import { readSearchResultsTotal } from '$modules/search-doctors/lib/results-count';
 import {
 	readSearchDoctorsCriteria,
@@ -44,6 +54,8 @@ export type SearchResultsOptions = {
 	/** The server's «now» when it drew the first page (the cache's age of it). */
 	serverNow: () => number | null;
 	locale: () => SupportedLocale;
+	/** 🔴 U-34.4: the reader is a member (known only in the browser, U-80.1 Ε6). */
+	member?: () => boolean;
 };
 
 /**
@@ -77,6 +89,7 @@ export class SearchResultsState {
 	);
 
 	readonly #query;
+	readonly #memberFirst;
 	#locateToken = 0;
 
 	constructor(options: SearchResultsOptions) {
@@ -88,7 +101,16 @@ export class SearchResultsState {
 			const scope = this.scope;
 			// While «Κοντά μου» waits the read is OFF; its key is the criteria's own (never shown: `view` waits).
 			const keyScope = scope ?? buildSearchDoctorsScope(this.criteria, this.filters);
-			const base = searchResultsInfiniteQuery(queryClient, keyScope, lang);
+			// U-34.4: a member's next pages come with the cookies, so they need no second read.
+			const member = options.member?.() ?? false;
+			const base = searchResultsInfiniteQuery(queryClient, keyScope, lang, member);
+			// A guest who signs in keeps the pages open: they hold no amount, so they may start a member's read (read again
+			// below, once). Never the other way round: a member's pages stay with the member (U-34.4).
+			const guestPages = member
+				? queryClient.getQueryState<InfiniteData<SearchDoctorsSearchResults, string | undefined>>(
+						searchResultsInfiniteQuery(queryClient, keyScope, lang).queryKey
+					)
+				: undefined;
 			const ssr = options.firstPage();
 			const serverNow = options.serverNow();
 			// NIT-r2-6: the server's page stays the route's data for the whole visit (its query is read untracked), so
@@ -114,13 +136,44 @@ export class SearchResultsState {
 						items: page.items.map((card) => buildSearchResultCard(card, lang))
 					}))
 				}),
-				...(seeded
-					? {
-							initialData: { pages: [ssr.page], pageParams: [undefined] },
-							initialDataUpdatedAt: serverNow ?? undefined
-						}
-					: {})
+				...(guestPages?.data
+					? { initialData: guestPages.data, initialDataUpdatedAt: guestPages.dataUpdatedAt }
+					: seeded
+						? {
+								initialData: { pages: [ssr.page], pageParams: [undefined] },
+								initialDataUpdatedAt: serverNow ?? undefined
+							}
+						: {})
 			};
+		});
+
+		// 🔴 U-34.4: the first page the server (or the press's prefetch) drew for a guest, read ONCE more for a member. A
+		// guest asks nothing, and a page that came with the cookies already shows its amounts.
+		this.#memberFirst = createQuery(() => {
+			const lang = options.locale();
+			const scope = this.scope;
+			const keyScope = scope ?? buildSearchDoctorsScope(this.criteria, this.filters);
+			const first = this.#query.data?.pages[0]?.items ?? [];
+			return {
+				...memberFirstPageQuery(queryClient, keyScope, lang),
+				enabled:
+					browser &&
+					scope !== null &&
+					(options.member?.() ?? false) &&
+					first.some((card) => card.fee.kind === 'login'),
+				select: (page: { items: Parameters<typeof buildSearchResultCard>[0][] }) =>
+					page.items.map((card) => buildSearchResultCard(card, lang))
+			};
+		});
+
+		// U-34.4: a guest who signs in with more pages open: those were read without the cookies. Once, at the sign-in.
+		$effect(() => {
+			if (!(options.member?.() ?? false)) return;
+			untrack(() => {
+				const pages = this.#query.data?.pages ?? [];
+				if (pages.slice(1).some((page) => page.items.some((card) => card.fee.kind === 'login')))
+					void this.#query.refetch();
+			});
 		});
 
 		// «Κοντά μου» without a position: the device is asked in the browser (never on the server), once per search.
@@ -159,7 +212,11 @@ export class SearchResultsState {
 	/** Every card loaded so far, page after page — none while «Κοντά μου» waits. */
 	get items(): SearchResultCard[] {
 		if (this.scope === null) return [];
-		return (this.#query.data?.pages ?? []).flatMap((page) => page.items);
+		// 🔴 U-34.4: a sign-out takes the amounts at once, whatever a read still holds.
+		const member = this.#options.member?.() ? this.#memberFirst.data : undefined;
+		return (this.#query.data?.pages ?? []).flatMap((page, index) =>
+			index === 0 ? overlayMemberFees(page.items, member) : page.items
+		);
 	}
 
 	/** The count the list states (S-32.10), «N+» on a lower bound; `null` while unknown. */

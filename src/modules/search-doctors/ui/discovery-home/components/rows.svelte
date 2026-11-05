@@ -10,6 +10,7 @@
 		type SearchDoctorsCriteria
 	} from '$modules/search-doctors/lib/search-criteria';
 	import type { HomeRowResult, SectionId, StreamedHomeRow } from '$modules/search-doctors/types';
+	import { useFavoriteToggle } from '$modules/search-doctors/ui/search-doctor-card';
 	import type { HomeSectionsController } from '../hooks/use-sections.svelte';
 	import type { DiscoveryState } from '../hooks/use-state.svelte';
 	import type { StreamedSectionsController } from '../hooks/use-streamed-sections.svelte';
@@ -36,10 +37,11 @@
 		messageOptions: HomeMessageOptions;
 		/** The localized `/doctors`. */
 		resultsPath: string;
-		/** A guest's heart and «Συνδεθείτε για κόστος»: the sign-in page. */
+		/** «Συνδεθείτε για κόστος»: the sign-in over the page. */
 		onSignIn: () => void;
 	} = $props();
 
+	const favorites = useFavoriteToggle(() => messageOptions.locale);
 	const sectionTitles = $derived<Record<SectionId, string>>({
 		'popular-athens': m.section_popular_athens_title({}, messageOptions),
 		'popular-psychologists': m.section_popular_psychologists_title({}, messageOptions),
@@ -140,7 +142,8 @@
 		{profileHref}
 		profileLabel={m.card_profile_link({}, messageOptions)}
 		favoriteLabel={m.favorite_toggle({}, messageOptions)}
-		onFavorite={onSignIn}
+		{favorites}
+		feeRoomLabel={m.card_login_for_fee({}, messageOptions)}
 		{onSignIn}
 	/>
 {/snippet}

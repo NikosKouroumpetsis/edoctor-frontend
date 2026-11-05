@@ -9,7 +9,11 @@ import type {
 	ArticleTypeDto,
 	ArticlesPage
 } from '$modules/articles/api/types';
-import { authorName, readingMinutes, type HomeArticle } from '$modules/articles/lib/article-card';
+import {
+	authorName,
+	cardReadingMinutes,
+	type HomeArticle
+} from '$modules/articles/lib/article-card';
 
 /** The kind in the address (U-57.2, the prototype's `?type=article|advice`); «Όλα» has none. */
 export type ArticleTypeParam = 'article' | 'advice';
@@ -68,6 +72,25 @@ export function formatArticleDate(iso: string | null | undefined, locale: Suppor
 			});
 }
 
+/** The kind an address asks (`?type=`): the one reader for a doctor's articles page (S-07.3: a route reads no parameter). */
+export function readArticleType(params: URLSearchParams): ArticleTypeDto | null {
+	return articleTypeFromParam(params.get('type'));
+}
+
+/** How many articles of each kind a doctor has (the profile's `articlesSummary`: counts only, U-92.2). */
+export type DoctorArticlesCounts = { articlesCount: number; healthAdviceCount: number };
+
+/** U-77: a doctor's articles by name: both kinds, or the one the doctor has (the section's and the page's). */
+export function doctorArticlesTitle(
+	{ articlesCount, healthAdviceCount }: DoctorArticlesCounts,
+	locale: SupportedLocale
+): string {
+	if (articlesCount > 0 && healthAdviceCount > 0) return m.articles_doctor_title({}, { locale });
+	return healthAdviceCount > 0
+		? m.articles_filter_health_advice({}, { locale })
+		: m.articles_filter_article({}, { locale });
+}
+
 /** «N΄ ανάγνωσης» (U-57.5 Ε3) for minutes that are known, else `null`. */
 export function readingLabel(minutes: number, locale: SupportedLocale): string | null {
 	return minutes > 0 ? m.article_reading_time({ minutes }, { locale }) : null;
@@ -95,19 +118,16 @@ const photoOf = (article: ArticlePublicView) =>
 /**
  * 🔴 U-57.2 (app = web): an article of the list — «<συγγραφέας> · N΄ ανάγνωσης» under the title (a doctor the
  * marketplace hides has no name: only the time, Ε4), the kind for the badge, the short description's words, and the
- * featured line with «Από …» and the day.
+ * featured line with «Από …» and the day. U-77: a list of ONE doctor names no author (`withoutAuthor`): it is the
+ * doctor's own. 🔴 U-92: the card has no body, the time is the server's.
  */
 export function buildArticleListCard(
 	article: ArticlePublicView,
-	locale: SupportedLocale
+	locale: SupportedLocale,
+	options: { withoutAuthor?: boolean } = {}
 ): ArticleListCard {
-	const reading = readingLabel(
-		readingMinutes(
-			article.sections?.length ? article.sections.map((s) => s?.content) : article.content
-		),
-		locale
-	);
-	const author = authorName(article.authors);
+	const reading = readingLabel(cardReadingMinutes(article), locale);
+	const author = options.withoutAuthor ? null : authorName(article.authors);
 	const date = formatArticleDate(article.publishedAt, locale);
 	const photo = photoOf(article);
 	const type = article.type === 'HEALTH_ADVICE' || article.type === 'ARTICLE' ? article.type : null;
@@ -159,7 +179,8 @@ export function buildArticlesListView({
 	locale,
 	query,
 	searching,
-	hasMore
+	hasMore,
+	withoutAuthor = false
 }: {
 	pages: readonly ArticlesPage[];
 	locale: SupportedLocale;
@@ -167,9 +188,11 @@ export function buildArticlesListView({
 	query: string | null;
 	searching: boolean;
 	hasMore: boolean;
+	/** U-77: the list of one doctor. */
+	withoutAuthor?: boolean;
 }): ArticlesListView {
 	const cards = pages.flatMap((page) =>
-		page.articles.map((article) => buildArticleListCard(article, locale))
+		page.articles.map((article) => buildArticleListCard(article, locale, { withoutAuthor }))
 	);
 	const appliedService = pages[0]?.appliedService ?? null;
 	const total = pages[0]?.total ?? (hasMore ? null : cards.length);

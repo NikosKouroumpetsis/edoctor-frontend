@@ -1,16 +1,24 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { InfoRow } from '$shared/ui/molecules/info-row';
 	import type { DoctorDetailSummary } from '$modules/doctor/lib/detail';
 	import { doctorSummaryGlyphs } from './icons';
 	import ProfileSection from './profile-section.svelte';
 
-	let { summary }: { summary: DoctorDetailSummary } = $props();
+	let {
+		summary,
+		contact
+	}: {
+		summary: DoctorDetailSummary;
+		/** 🔴 U-84.6: «Επικοινωνήστε με τον γιατρό», after the response rows and before the intro. */
+		contact?: Snippet;
+	} = $props();
 </script>
 
 <!-- 🔴 U-35.1 (app = web, the application's `SummarySection`): «Επαγγελματίας υγείας: …» — the initial, the licence,
      «X χρόνια εμπειρίας μέσω του edoctor», the languages (and the response rows once the backend sends them, U-36.1)
-     and the intro, the description's first paragraph (U-42.1). No «Επικοινωνήστε» (U-35.4). Each line only with its
-     fact. -->
+     «Επικοινωνήστε με τον γιατρό» (U-84.6, which replaces U-35.4) and the intro, the description's first paragraph
+     (U-42.1). Each line only with its fact. -->
 <ProfileSection id="summary">
 	<div class="flex flex-col gap-6">
 		<div class="flex flex-row items-start gap-4">
@@ -52,6 +60,7 @@
 				{/each}
 			</div>
 		{/if}
+		{@render contact?.()}
 		{#if summary.intro}
 			<p data-testid="doctor-detail-summary-intro" class="text-body-md text-foreground/88">
 				{summary.intro}

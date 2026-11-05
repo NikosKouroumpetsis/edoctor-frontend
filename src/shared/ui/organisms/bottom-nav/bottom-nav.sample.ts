@@ -11,5 +11,6 @@ export const sampleBottomNavItems: BottomNavItem[] = [
 		current: true
 	},
 	{ key: 'favorites', label: 'Αγαπημένα', icon: 'heart-outline', activeIcon: 'heart' },
+	{ key: 'messages', label: 'Μηνύματα', icon: 'chatbubble-outline', activeIcon: 'chatbubble' },
 	{ key: 'profile', label: 'Προφίλ', icon: 'person-outline', activeIcon: 'person' }
 ];

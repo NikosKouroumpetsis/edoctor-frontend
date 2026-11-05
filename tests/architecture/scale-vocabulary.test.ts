@@ -237,17 +237,42 @@ const STYLE_CODE =
 	/<style[\s\S]*?<\/style>|\bstyle(:[\w-]+)?=("[^"]*"|'[^']*'|\{`[^`]*`\}|\{[^}]*\})|\.style\.\w+\s*=\s*('[^'\n]*'|"[^"\n]*"|`[^`]*`)|\.style\.setProperty\([^)]*\)/g;
 const CSS_LENGTH = /(?<![\w-])-?\d+(\.\d+)?(px|rem|em)\b/g;
 
+/** A number of the code that is not a size of ours: each entry names its file and what it writes, and why. */
+type SizeLiteralException = { path: string; found: string[]; reason: string };
+
+const SIZE_LITERAL_EXCEPTIONS: SizeLiteralException[] = [
+	{
+		path: 'src/shared/ui/icons/brand-apple/brand-apple.svelte',
+		found: ['x 6', 'y 6', 'width 44', 'height 44', 'width 1'],
+		reason: 'U-95: τιμές του επίσημου αρχείου: Apple’s logo-only file, whole and unmodified'
+	},
+	{
+		path: 'src/shared/ui/icons/brand-apple/brand-apple-left-aligned.svelte',
+		found: ['width 31', 'height 44', 'width 1'],
+		reason:
+			'U-95: τιμές του επίσημου αρχείου: Apple’s left-aligned Medium file, whole and unmodified'
+	}
+];
+
 /**
  * Sizes written as numbers in code or CSS: props and keys (`sideOffset={8}`, `{ margin: 8 }`), constants
  * (`MIN_THUMB = 20`, `FALLBACK_DISTANCE = 80`), `step(n)` above the scale and lengths in styles (`<style>`,
- * `style=`, `style:width`, `el.style.width`). Mock data (`mocks.ts`) is skipped: sample image pixel sizes.
+ * `style=`, `style:width`, `el.style.width`). Mock data (`mocks.ts`) is skipped: sample image pixel sizes. A listed
+ * number of a listed file passes, and is recorded as `used`, so an entry that matches nothing fails the project test.
  */
-function findSizeLiterals(files: SourceFile[]): string[] {
+function findSizeLiterals(
+	files: SourceFile[],
+	exceptions: SizeLiteralException[] = [],
+	used: Set<string> = new Set()
+): string[] {
 	const issues: string[] = [];
 	for (const { path, text } of files) {
 		if (path.endsWith('/mocks.ts')) continue;
-		const report = (offset: number, found: string) =>
-			issues.push(`${path}:${text.slice(0, offset).split('\n').length} ${found}`);
+		const listed = exceptions.find((entry) => entry.path === path)?.found ?? [];
+		const report = (offset: number, found: string) => {
+			if (listed.includes(found)) used.add(`${path} ${found}`);
+			else issues.push(`${path}:${text.slice(0, offset).split('\n').length} ${found}`);
+		};
 		const isCss = path.endsWith('.css');
 		const styles = isCss
 			? [{ offset: 0, body: text }]
@@ -418,6 +443,30 @@ describe('size scale of the project', () => {
 	});
 
 	it('writes no size as a number in code or CSS', () => {
-		expect(findSizeLiterals(files)).toEqual([]);
+		expect(findSizeLiterals(files, SIZE_LITERAL_EXCEPTIONS)).toEqual([]);
+	});
+
+	it('U-95: every number of Apple’s files is declared, each entry still matches, and nothing else passes by them', () => {
+		const used = new Set<string>();
+		findSizeLiterals(files, SIZE_LITERAL_EXCEPTIONS, used);
+		const declared = SIZE_LITERAL_EXCEPTIONS.flatMap((entry) =>
+			entry.found.map((found) => `${entry.path} ${found}`)
+		);
+		expect(declared.filter((entry) => !used.has(entry))).toEqual([]);
+		for (const entry of SIZE_LITERAL_EXCEPTIONS) expect(entry.reason).toContain('U-95');
+		expect(
+			findSizeLiterals(
+				[{ path: SIZE_LITERAL_EXCEPTIONS[0].path, text: '<rect width="45" />' }],
+				SIZE_LITERAL_EXCEPTIONS
+			)
+		).toEqual([`${SIZE_LITERAL_EXCEPTIONS[0].path}:1 width 45`]);
+	});
+
+	it('R-14: Apple’s files write their numbers as attributes of the SVG, in the open', () => {
+		for (const { path } of SIZE_LITERAL_EXCEPTIONS) {
+			const file = files.find((entry) => entry.path === path);
+			expect(file?.text, path).toMatch(/<rect [^>]*\bx="\d+" y="\d+" width="\d+" height="\d+"/u);
+			expect(file?.text, path).not.toMatch(/\bconst \[?file/u);
+		}
 	});
 });

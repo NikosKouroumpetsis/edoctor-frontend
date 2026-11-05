@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
-import { queryOptions } from '@tanstack/svelte-query';
+import {
+	focusManager,
+	infiniteQueryOptions,
+	onlineManager,
+	queryOptions
+} from '@tanstack/svelte-query';
 import { pushState, replaceState } from '$app/navigation';
 import type { ResolvedPathname } from '$app/types';
 import { page } from '$app/state';
@@ -9,6 +14,7 @@ import { mapDoctorProfile, type DoctorProfile } from '$modules/doctor/api/profil
 import { SAMPLE_NOW, sampleDoctorProfile } from '$modules/doctor/lib/detail/detail.sample';
 import type { DoctorDetailPageProps } from '../types';
 import ErrorPage from './error.svelte';
+import { createRawSnippet } from 'svelte';
 import Harness from './doctor-detail.harness.svelte';
 import WindowPhotos from '../components/window-photos.svelte';
 
@@ -37,8 +43,18 @@ vi.mock('$modules/doctor/api/reviews', async (importOriginal) => {
 	const original = await importOriginal<typeof import('$modules/doctor/api/reviews')>();
 	return {
 		...original,
-		doctorReviewsQuery: (doctorSlug: string) =>
-			queryOptions({ queryKey: ['test-reviews', doctorSlug], queryFn: async () => [] })
+		doctorReviewsSummaryQuery: (doctorSlug: string) =>
+			queryOptions({
+				queryKey: ['test-reviews-summary', doctorSlug],
+				queryFn: async () => ({ count: 0, average: null, buckets: [], chips: [], topics: [] })
+			}),
+		doctorReviewsInfiniteQuery: (doctorSlug: string) =>
+			infiniteQueryOptions({
+				queryKey: ['test-reviews', doctorSlug],
+				queryFn: async () => ({ reviews: [], nextCursor: null, total: 0 }),
+				initialPageParam: undefined as string | undefined,
+				getNextPageParam: () => undefined
+			})
 	};
 });
 vi.mock('$modules/doctor/api/office', async (importOriginal) => {
@@ -93,6 +109,8 @@ function props(
 		backHref: '/doctors',
 		signedIn: false,
 		onSignIn,
+		reviewLinks: { helpHref: '/help#what-are-reviews', policyHref: '/legal/review-policy' },
+		knowLinks: { cancellationHref: '/help#cancellation', bookingHref: '/help#booking' },
 		...overrides
 	};
 }
@@ -110,6 +128,34 @@ describe('the doctor’s profile page', () => {
 		vi.useRealTimers();
 		page.url.href = 'http://localhost/';
 		document.head.innerHTML = '';
+	});
+
+	it('🔴 U-84.6: «Επικοινωνήστε με τον γιατρό» in the summary, after its rows and before its text', () => {
+		const contact = createRawSnippet(() => ({
+			render: () => `<button data-testid="contact">x</button>`
+		}));
+		render(Harness, { props: { ...props(sampleDoctorProfile()), contact } });
+		const button = screen.getByTestId('contact');
+		const rows = screen.getByTestId('doctor-detail-summary-rows');
+		const intro = screen.getByTestId('doctor-detail-summary-intro');
+		expect(rows.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+		expect(button.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+	});
+
+	it('🔴 U-84.6: always drawn: a doctor with no summary at all has the button too', () => {
+		const contact = createRawSnippet(() => ({
+			render: () => `<button data-testid="contact">x</button>`
+		}));
+		const doctor = sampleDoctorProfile({
+			licenseNumber: undefined,
+			memberSince: undefined,
+			languages: undefined,
+			description: undefined,
+			responseMetrics: undefined
+		});
+		render(Harness, { props: { ...props(doctor), contact } });
+		expect(screen.queryByTestId('doctor-detail-summary-title')).toBeNull();
+		expect(screen.getByTestId('contact')).toBeInTheDocument();
 	});
 
 	it('U-41.1 / U-28.4 (app = web): ONE h1 — the name — with «Ειδικότητα · Περιοχή» and the rating line; the head speaks for the page (title, description, canonical, Open Graph, JSON-LD `Physician`)', async () => {
@@ -149,7 +195,8 @@ describe('the doctor’s profile page', () => {
 			'service-cost',
 			'location',
 			'reviews',
-			'bio'
+			'bio',
+			'know'
 		]);
 	});
 
@@ -164,6 +211,84 @@ describe('the doctor’s profile page', () => {
 		expect(within(bar).getByText('Αύριο · 10:00 · Νίκης 12')).toBeInTheDocument();
 	});
 
+	it('U-80.1 Ε4: «Κράτηση» of a guest asks for the sign-in with its action, and goes on to the «Διαθεσιμότητα» after it', async () => {
+		render(Harness, { props: props(sampleDoctorProfile()) });
+		await waitFor(() => expect(screen.getByTestId('doctor-booking-cta')).toBeInTheDocument());
+		await fireEvent.click(screen.getByTestId('doctor-booking-cta'));
+		const request = onSignIn.mock.calls.at(-1)?.[0];
+		expect(request.action).toBe('book');
+		expect(pushState).not.toHaveBeenCalled();
+		request.onSignedIn();
+		expect(vi.mocked(pushState).mock.calls.at(-1)?.[0]).toContain('/details/availability');
+	});
+
+	it('U-80.1 Ε4: «Συνδεθείτε για κόστος» and the heart name what asked', async () => {
+		render(Harness, { props: props(sampleDoctorProfile()) });
+		await waitFor(() => expect(screen.getByTestId('doctor-booking-sign-in')).toBeInTheDocument());
+		await fireEvent.click(screen.getByTestId('doctor-booking-sign-in'));
+		expect(onSignIn.mock.calls.at(-1)?.[0]).toEqual({ action: 'fee' });
+		await fireEvent.click(screen.getByTestId('doctor-detail-favorite'));
+		expect(onSignIn.mock.calls.at(-1)?.[0]).toEqual({ action: 'fav' });
+	});
+
+	it('U-34.4 / U-80.1 Ε6: a guest’s page sends the API no cookies; a member’s prices come with one read in the browser, and a failed one leaves the page as it was', async () => {
+		const spy = vi.fn(async () => new Response('{}', { status: 503 }));
+		vi.stubGlobal('fetch', spy);
+		const withCookies = () =>
+			(spy.mock.calls as unknown as [string, RequestInit?][]).filter(
+				([, init]) => init?.credentials === 'include'
+			);
+		const guest = render(Harness, { props: props(sampleDoctorProfile()) });
+		await waitFor(() => expect(screen.getByTestId('doctor-booking-cta')).toBeInTheDocument());
+		expect(withCookies()).toEqual([]);
+		guest.unmount();
+		render(Harness, { props: { ...props(sampleDoctorProfile()), signedIn: true } });
+		await waitFor(() => expect(withCookies().length).toBeGreaterThan(0));
+		expect(withCookies()[0][0]).toContain('/doctor/public/doctors/dr-athena-papadopoulou');
+		expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+		vi.unstubAllGlobals();
+	});
+
+	it('R-6: a member who still reads «Συνδεθείτε για κόστος» (the read failed): the press asks again, and nobody is sent to sign in', async () => {
+		const spy = vi.fn(async () => new Response('{}', { status: 503 }));
+		vi.stubGlobal('fetch', spy);
+		const withCookies = () =>
+			(spy.mock.calls as unknown as [string, RequestInit?][]).filter(
+				([, init]) => init?.credentials === 'include'
+			);
+		render(Harness, { props: { ...props(sampleDoctorProfile()), signedIn: true } });
+		const button = await screen.findByTestId('doctor-booking-sign-in');
+		await waitFor(() => expect(withCookies()).toHaveLength(2), { timeout: 4000 });
+		await fireEvent.click(button);
+		await waitFor(() => expect(withCookies().length).toBeGreaterThan(2));
+		expect(onSignIn).not.toHaveBeenCalled();
+		vi.unstubAllGlobals();
+	});
+
+	it('🔴 R-7: the member’s read of the profile is ONE: coming back to the tab or to the network past its minute asks nothing', async () => {
+		const spy = vi.fn(async () => new Response('{}', { status: 503 }));
+		vi.stubGlobal('fetch', spy);
+		const withCookies = () =>
+			(spy.mock.calls as unknown as [string, RequestInit?][]).filter(
+				([, init]) => init?.credentials === 'include'
+			);
+		render(Harness, { props: { ...props(sampleDoctorProfile()), signedIn: true } });
+		// The read and the client's one retry: settled, and past its time a focus would ask again if it were allowed to.
+		await waitFor(() => expect(withCookies()).toHaveLength(2), { timeout: 4000 });
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		const reads = withCookies().length;
+		const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 61_000);
+		focusManager.setFocused(false);
+		focusManager.setFocused(true);
+		onlineManager.setOnline(false);
+		onlineManager.setOnline(true);
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		focusManager.setFocused(undefined);
+		clock.mockRestore();
+		expect(withCookies()).toHaveLength(reads);
+		vi.unstubAllGlobals();
+	});
+
 	it('U-34.4 / U-27.4 (app = web): a guest reads «Συνδεθείτε για κόστος» — a press signs in; «Κράτηση» and the heart sign in too', async () => {
 		render(Harness, { props: props(sampleDoctorProfile()) });
 		await waitFor(() => expect(screen.getByTestId('doctor-booking-sign-in')).toBeInTheDocument());
@@ -171,7 +296,7 @@ describe('the doctor’s profile page', () => {
 		await fireEvent.click(screen.getByTestId('doctor-booking-cta'));
 		await fireEvent.click(screen.getByTestId('doctor-detail-favorite'));
 		expect(onSignIn).toHaveBeenCalledTimes(3);
-		expect(screen.getByTestId('doctor-detail-priced-service-sign-in-svc-1')).toHaveTextContent(
+		expect(screen.getByTestId('doctor-detail-priced-service-fee-svc-1')).toHaveTextContent(
 			'Συνδεθείτε για κόστος'
 		);
 	});
@@ -254,32 +379,31 @@ describe('the doctor’s profile page', () => {
 		expect(document.body.textContent).not.toMatch(/Ειδοποίησ/u);
 	});
 
-	it('Π7 (app = web): «Εμφάνιση περισσότερα» is a link to `details/description`, opened in place in its own history entry', async () => {
+	it('U-73.1 Ε1 ⇒ Π7: «Εμφάνιση περισσότερων» and «Εμφάνιση όλου του βιογραφικού» are links to the doctor’s page, never a window', async () => {
 		render(Harness, { props: props(sampleDoctorProfile()) });
 		const more = screen.getByTestId('doctor-detail-professional-more');
-		expect(more).toHaveAttribute('href', '/doctors/dr-athena-papadopoulou/details/description');
+		expect(more).toHaveAttribute('href', '/doctors/dr-athena-papadopoulou/about');
+		expect(screen.getByTestId('doctor-detail-bio-all')).toHaveAttribute(
+			'href',
+			'/doctors/dr-athena-papadopoulou/about#bio'
+		);
 		await fireEvent.click(more);
-		expect(pushState).toHaveBeenCalledWith('/doctors/dr-athena-papadopoulou/details/description', {
-			doctorDetails: { section: 'description', inPlace: true }
-		});
+		expect(pushState).not.toHaveBeenCalled();
 	});
 
-	it('Π7 (app = web): a window’s own address opens the profile with its window — the whole description, «×» named', () => {
-		render(Harness, { props: props(sampleDoctorProfile(), { routeSection: 'description' }) });
+	it('Π7 (app = web): a window’s own address opens the profile with its window, «×» named', () => {
+		render(Harness, { props: props(sampleDoctorProfile(), { routeSection: 'services' }) });
 		const window = screen.getByTestId('doctor-detail-modal');
-		expect(window).toHaveAttribute('data-section', 'description');
-		expect(within(window).getByTestId('doctor-detail-modal-professional-body')).toHaveTextContent(
-			'Συνεργάζεται με το νοσοκομείο Ευαγγελισμός.'
-		);
+		expect(window).toHaveAttribute('data-section', 'services');
 		expect(within(window).getByTestId('doctor-detail-modal-close')).toHaveAccessibleName(
 			'Κλείσιμο'
 		);
 	});
 
-	it('U-35.7 (app = web): «Πώς λειτουργούν οι κριτικές», «Εμφάνιση όλου του βιογραφικού» and the profile’s «Άρθρα» are not drawn', () => {
+	it('U-35.7 ⇒ U-73.1 Π1 (app = web): «Πώς λειτουργούν οι κριτικές» of the profile stays hidden, and without the articles’ slot no «Άρθρα»', () => {
 		render(Harness, { props: props(sampleDoctorProfile()) });
 		const text = document.body.textContent ?? '';
-		expect(text).not.toMatch(/Πώς λειτουργούν οι κριτικές|Εμφάνιση όλου του βιογραφικού|Άρθρα/u);
+		expect(text).not.toMatch(/Πώς λειτουργούν οι κριτικές|Άρθρα/u);
 	});
 
 	it('U-34.3 (app = web): a doctor with nothing to show keeps the identity and «Το αναλυτικό προφίλ έρχεται σύντομα» alone', () => {
@@ -374,7 +498,7 @@ describe('the doctor’s profile page', () => {
 
 	it('Π7 (app = web): «×» of a window opened in place goes back one step in the history (its own entry) — no new address', async () => {
 		const back = vi.spyOn(history, 'back').mockImplementation(() => undefined);
-		page.state = { doctorDetails: { section: 'description', inPlace: true } };
+		page.state = { doctorDetails: { section: 'services', inPlace: true } };
 		render(Harness, { props: props(sampleDoctorProfile()) });
 		await fireEvent.click(screen.getByTestId('doctor-detail-modal-close'));
 		expect(back).toHaveBeenCalledTimes(1);
@@ -384,8 +508,8 @@ describe('the doctor’s profile page', () => {
 
 	it('Π7 (app = web): «×» of a window the page was loaded with (its own address) turns the address into the profile’s, in place — never a step back out of the site', async () => {
 		const back = vi.spyOn(history, 'back').mockImplementation(() => undefined);
-		page.url.href = 'http://localhost/doctors/dr-athena-papadopoulou/details/description';
-		render(Harness, { props: props(sampleDoctorProfile(), { routeSection: 'description' }) });
+		page.url.href = 'http://localhost/doctors/dr-athena-papadopoulou/details/services';
+		render(Harness, { props: props(sampleDoctorProfile(), { routeSection: 'services' }) });
 		await fireEvent.click(screen.getByTestId('doctor-detail-modal-close'));
 		expect(replaceState).toHaveBeenCalledWith('/doctors/dr-athena-papadopoulou', {
 			doctorDetails: null
@@ -489,9 +613,13 @@ describe('the doctor’s profile page', () => {
 		render(Harness, { props: props(sampleDoctorProfile(), { routeSection: 'availability' }) });
 		const none = await screen.findByTestId('doctor-detail-modal-availability-none');
 		expect(none).toHaveTextContent('Δεν υπάρχουν διαθέσιμες ώρες τις επόμενες 4 εβδομάδες');
+		const similar = within(none).getByTestId('doctor-detail-modal-availability-action-similar');
+		expect(similar).toBeInTheDocument();
+		// Δ1: on the accent fill the glyph wears the words' colour; left to inherit it stays dark.
+		expect(similar.querySelector('[data-icon]')).toHaveClass('text-secondary-foreground');
 		expect(
-			within(none).getByTestId('doctor-detail-modal-availability-action-similar')
-		).toBeInTheDocument();
+			screen.getByTestId('doctor-booking-card-action-similar').querySelector('[data-icon]')
+		).toHaveClass('text-secondary-foreground');
 		expect(
 			within(none).getByTestId('doctor-detail-modal-availability-action-call')
 		).toHaveAttribute('href', 'tel:2101234567');
@@ -545,10 +673,12 @@ describe('the doctor’s profile page', () => {
 		expect(screen.queryByTestId('doctor-booking-card-when')).toBeNull();
 	});
 
-	it('NIT-3 of r1: the reviews window of a list that answered empty says so in one line', async () => {
+	it('NIT-3 of r1 ⇒ U-66.1 Π10, U-67.2 Ε3: the reviews window of a list that answered empty says so, and who writes one', async () => {
 		render(Harness, { props: props(sampleDoctorProfile(), { routeSection: 'reviews' }) });
-		expect(await screen.findByTestId('doctor-detail-modal-reviews-empty')).toHaveTextContent(
-			'Δεν υπάρχουν ακόμα κριτικές.'
+		const empty = await screen.findByTestId('doctor-detail-modal-reviews-empty');
+		expect(empty).toHaveTextContent('Δεν υπάρχουν ακόμα κριτικές');
+		expect(empty).toHaveTextContent(
+			'Κριτικές γράφουν μόνο ασθενείς, αφού ολοκληρωθεί το ραντεβού τους στο eDoctor.'
 		);
 	});
 
@@ -573,7 +703,7 @@ describe('the doctor’s profile page', () => {
 			'Ρυθμός απόκρισης: 85%'
 		);
 		expect(screen.getByTestId('doctor-detail-specializations-visits')).toHaveTextContent(
-			'Ολοκληρωμένες επισκέψεις (6 μήνες): 6'
+			'Ολοκληρωμένες επισκέψεις: 6'
 		);
 	});
 

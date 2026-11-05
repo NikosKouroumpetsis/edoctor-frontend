@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
 	import type { ResolvedPathname } from '$app/types';
 	import { m } from '$paraglide/messages.js';
 	import { msUntilNextPlatformDay } from '$shared/lib/format-day-time';
 	import { readServerNow, recordServerNow } from '$shared/lib/server-clock';
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
+	import { getSessionOptional, type SignInRequest } from '$shared/state/session';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { TwoColumnDetail } from '$shared/ui/templates/two-column-detail';
 	import type { DoctorProfile } from '$modules/doctor/api/profile';
@@ -18,13 +19,19 @@
 		type DoctorSimilarSearch
 	} from '$modules/doctor/lib/detail';
 	import { DoctorDetailState } from '../hooks/use-state.svelte';
-	import type { DoctorSimilarAreaQuery } from '../types';
+	import type {
+		DoctorFavorite,
+		DoctorKnowLinks,
+		DoctorReviewLinks,
+		DoctorSimilarAreaQuery
+	} from '../types';
 	import AvailabilitySection from './availability-section.svelte';
 	import BioSection from './bio-section.svelte';
 	import BookingBar from './booking-bar.svelte';
 	import BookingCard from './booking-card.svelte';
 	import DetailWindow from './detail-window.svelte';
 	import Identity from './identity.svelte';
+	import KnowSection from './know-section.svelte';
 	import LocationSection from './location-section.svelte';
 	import Professional from './professional.svelte';
 	import ReviewsSection from './reviews-section.svelte';
@@ -50,7 +57,12 @@
 		backHref,
 		signedIn,
 		onSignIn,
-		onBack
+		onBack,
+		reviewLinks,
+		knowLinks,
+		articles,
+		contact,
+		favorite
 	}: {
 		profile: DoctorProfile;
 		serverNow: number;
@@ -63,8 +75,16 @@
 		alternateUrls: Record<SupportedLocale, string>;
 		backHref: ResolvedPathname;
 		signedIn: boolean;
-		onSignIn: () => void;
+		onSignIn: (request?: SignInRequest) => void;
 		onBack: (event: MouseEvent) => void;
+		reviewLinks: DoctorReviewLinks;
+		knowLinks: DoctorKnowLinks;
+		/** U-77.1: the doctor's articles, after the biography (the articles module's, the screen's). */
+		articles?: Snippet;
+		/** U-84.6: «Επικοινωνήστε με τον γιατρό» (the messages module's, the screen's). */
+		contact?: Snippet;
+		/** U-85: the profile's hearts, composed by the screen. */
+		favorite?: DoctorFavorite;
 	} = $props();
 
 	// 🔴 D-118 / S-34.1: «Σήμερα / Αύριο» on the server's clock; the page draws itself again at Greek midnight.
@@ -140,16 +160,25 @@
 		}
 		detail.shareOpen = true;
 	}
-	// 🔴 U-34.2 / U-20: the heart of a guest asks for the sign-in first, as the cards' (the web has no favourites yet).
-	const save = () => onSignIn();
-	// S-31.4 / U-40.3: «Κράτηση» — a guest signs in; a member without a time picks one in the window.
+	// 🔴 U-85 (`20-favorites` Π4): one rule for every heart of the page, the cards' too: a guest signs in, then it saves.
+	const save = () => (favorite ? favorite.onToggle() : onSignIn({ action: 'fav' }));
+	const saved = $derived(favorite?.saved ?? false);
+	const pop = $derived(favorite?.pop ?? false);
+	// S-31.4 / U-40.3: «Κράτηση» — a guest signs in and it goes on after it (U-80.1 Ε4); a member without a time picks one
+	// in the window.
+	const openAvailability = () => detail.openWindow('availability', officeHint);
 	function book() {
 		if (!signedIn) {
-			onSignIn();
+			onSignIn({ action: 'book', onSignedIn: openAvailability });
 			return;
 		}
-		detail.openWindow('availability', officeHint);
+		openAvailability();
 	}
+	// U-80.1 Ε4: «Κράτηση» that went through the `/login` page or a provider's redirect goes on here, once.
+	const session = getSessionOptional();
+	$effect(() => {
+		if (signedIn && session?.takeResumed('book')) openAvailability();
+	});
 
 	// Π5: the section bar from 744 once the photos have gone, its «Κράτηση» once the card has.
 	let identityNode = $state<HTMLElement | null>(null);
@@ -182,7 +211,7 @@
 		if (detail.availabilitySection)
 			list.push({ id: 'availability', label: m.doctor_nav_availability({}, options) });
 		if (content.serviceCost)
-			list.push({ id: 'service-cost', label: m.doctor_nav_cost({}, options) });
+			list.push({ id: 'service-cost', label: m.doctor_nav_services({}, options) });
 		if (detail.location) list.push({ id: 'location', label: m.doctor_nav_location({}, options) });
 		if (content.reviews) list.push({ id: 'reviews', label: m.doctor_nav_reviews({}, options) });
 		return list;
@@ -208,7 +237,7 @@
 
 <SeoHead {seo} />
 
-<TopBar {locale} {backHref} {onBack} saved={false} onShare={share} onSave={save} />
+<TopBar {locale} {backHref} {onBack} {saved} {pop} onShare={share} onSave={save} />
 
 <div
 	data-testid="doctor-detail-profile-page"
@@ -230,7 +259,8 @@
 				onOpenAllPhotos={(event) => open('photos', {}, event)}
 				reviewsHref={detail.detailsHref('reviews')}
 				onOpenReviews={(event) => open('reviews', {}, event)}
-				saved={false}
+				{saved}
+				{pop}
 				onShare={share}
 				onSave={save}
 			/>
@@ -239,18 +269,27 @@
 		<TwoColumnDetail from="tablet" stickyAside={false} data-testid="doctor-detail-columns">
 			<div class="flex flex-col gap-section">
 				{#if content.summary}
-					<Summary summary={content.summary} />
+					<Summary summary={content.summary} {contact} />
+				{:else}
+					<!-- U-84.6: the button is always there, for a doctor with no summary too. -->
+					{@render contact?.()}
 				{/if}
 				{#if content.professional}
 					<Professional
 						content={content.professional}
 						moreLabel={m.doctor_show_more({}, options)}
-						moreHref={detail.detailsHref('description')}
-						onOpenMore={(event) => open('description', {}, event)}
+						moreHref={detail.aboutHref}
 					/>
 				{/if}
 				{#if content.specializations}
-					<Specializations content={content.specializations} />
+					<Specializations
+						content={content.specializations}
+						moreHref={detail.detailsHref('specializations')}
+						rowHref={(focus) => detail.detailsHref('specializations', { focus })}
+						onOpenMore={(event) => open('specializations', {}, event)}
+						onOpenRow={(focus, event) => open('specializations', { focus }, event)}
+						{onSignIn}
+					/>
 				{/if}
 				{#if detail.availabilitySection}
 					<AvailabilitySection
@@ -265,9 +304,10 @@
 				{#if content.serviceCost}
 					<ServiceCost
 						content={content.serviceCost}
-						moreLabel={m.doctor_show_more({}, options)}
 						moreHref={detail.detailsHref('services')}
+						rowHref={(focus) => detail.detailsHref('services', { focus })}
 						onOpenMore={(event) => open('services', {}, event)}
+						onOpenRow={(focus, event) => open('services', { focus }, event)}
 						{onSignIn}
 					/>
 				{/if}
@@ -334,7 +374,19 @@
 			/>
 		{/if}
 		{#if content.bio}
-			<BioSection content={content.bio} />
+			<BioSection content={content.bio} allHref={`${detail.aboutHref}#bio`} />
+		{/if}
+		{@render articles?.()}
+		{#if detail.know}
+			<KnowSection
+				content={detail.know}
+				tabs={detail.officeTabs}
+				activeOfficeId={detail.activeOfficeId}
+				{locale}
+				pageHref={(focus) => detail.detailsHref('know', { focus })}
+				onOpenPage={(focus, event) => open('know', { focus }, event)}
+				onSelectOffice={detail.chooseOffice}
+			/>
 		{/if}
 	</div>
 </div>
@@ -364,14 +416,24 @@
 	{onSignIn}
 />
 
-<DetailWindow {detail} {onSignIn} />
+<DetailWindow
+	{detail}
+	{reviewLinks}
+	{knowLinks}
+	{onSignIn}
+	{saved}
+	{pop}
+	onShare={share}
+	onSave={save}
+/>
 
 <WindowPhotos
 	open={detail.window?.section === 'photos'}
 	photos={content.photos}
 	focus={readDoctorPhotoFocus(detail.window?.hints.focus)}
 	{locale}
-	saved={false}
+	{saved}
+	{pop}
 	photoHref={(index) => detail.detailsHref('photos', { focus: String(index) })}
 	onOpenPhoto={(index, event) => open('photos', { focus: String(index) }, event)}
 	onPhotoChange={(index) => detail.showPhoto(index)}

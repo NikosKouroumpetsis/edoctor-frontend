@@ -12,7 +12,8 @@ export const doctorOfficeQueryKeys = {
 
 /**
  * 🔴 U-39.1: a non-main office's facts, asked ONCE the page makes it active (TanStack's cache keeps it: switching
- * back asks nothing), never for the main office, whose facts came with the profile (D-103).
+ * back asks nothing); the main office's only when its page opens (U-68.1: the week, the photos and «Πώς θα έρθετε»
+ * come only with this read; the rest of its facts came with the profile, D-103).
  */
 export function doctorOfficeQuery(doctorId: string, officeId: string, lang: string) {
 	return queryOptions({

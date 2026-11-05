@@ -7,6 +7,7 @@ import { EMPTY_CATEGORY_SCOPE } from '$modules/search-doctors/api/marketplace/ca
 import { searchDoctors } from '$modules/search-doctors/api/marketplace/endpoints';
 import { homeSectionConfigs } from '$modules/search-doctors/api/marketplace/sections';
 import type {
+	MarketplaceSearchParams,
 	SearchDoctorsCardFacts,
 	SearchDoctorsSectionLink
 } from '$modules/search-doctors/api/marketplace/types';
@@ -15,10 +16,16 @@ import type {
  * Resolved value of one streamed home section, as FACTS (U-32.1: the row's cards and words are the page's, built by
  * `lib/section-link`). The promise NEVER rejects: a failed section degrades to `{ status: 'error' }` so one backend
  * hiccup cannot crash the streamed SSR response. `link` is what the row's «→» opens; a section whose location does
- * not resolve is `ok` with no cards (hidden).
+ * not resolve is `ok` with no cards (hidden). `params` is the search the server has already resolved (R-7): a member's
+ * browser asks the same one with the cookies, and resolves nothing again; `null`: there was no search.
  */
 export type StreamedSectionResult =
-	| { status: 'ok'; items: SearchDoctorsCardFacts[]; link: SearchDoctorsSectionLink | null }
+	| {
+			status: 'ok';
+			items: SearchDoctorsCardFacts[];
+			link: SearchDoctorsSectionLink | null;
+			params?: MarketplaceSearchParams | null;
+	  }
 	| { status: 'error' };
 
 export type StreamedHomeSection = {
@@ -57,7 +64,7 @@ export function loadHomeSections(
 			if (query === null) {
 				return {
 					id: config.id,
-					result: Promise.resolve({ status: 'ok' as const, items: [], link: null })
+					result: Promise.resolve({ status: 'ok' as const, items: [], link: null, params: null })
 				};
 			}
 
@@ -70,7 +77,8 @@ export function loadHomeSections(
 						items: data.items.map((card) =>
 							mapCardToFacts(card, { pricingVisible: data.pricingVisible })
 						),
-						link: query.link
+						link: query.link,
+						params: query.params
 					})
 				)
 				.catch((): StreamedSectionResult => ({ status: 'error' }));

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages.js';
+	import { cn } from '$shared/lib/utils';
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 	import { DateStrip } from '$shared/ui/molecules/date-strip';
 	import { InlineNotice } from '$shared/ui/molecules/inline-notice';
@@ -155,7 +156,10 @@
 							class="w-full whitespace-normal"
 						>
 							{#snippet leading()}
-								<Ionicon name={doctorBookingActionGlyphs[entry.kind]} class="icon-md shrink-0" />
+								<Ionicon
+									name={doctorBookingActionGlyphs[entry.kind]}
+									class={cn('icon-md shrink-0', position === 0 && 'text-secondary-foreground')}
+								/>
 							{/snippet}
 						</Button>
 					{/if}

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ResolvedPathname } from '$app/types';
 	import { m } from '$paraglide/messages.js';
+	import { cn } from '$shared/lib/utils';
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 	import { HugeiconsLaurelWreathLeft01 } from '$shared/ui/icons/hugeicons-laurel-wreath-left-01';
 	import { HugeiconsLaurelWreathRight01 } from '$shared/ui/icons/hugeicons-laurel-wreath-right-01';
@@ -20,6 +21,7 @@
 		reviewsHref,
 		onOpenReviews,
 		saved,
+		pop = false,
 		onShare,
 		onSave
 	}: {
@@ -34,6 +36,8 @@
 		reviewsHref: ResolvedPathname;
 		onOpenReviews: (event: MouseEvent) => void;
 		saved: boolean;
+		/** The heart has just filled: its «pop» plays. */
+		pop?: boolean;
 		onShare: () => void;
 		onSave: () => void;
 	} = $props();
@@ -134,7 +138,7 @@
 			>
 				<Ionicon
 					name={saved ? 'heart' : 'heart-outline'}
-					class={saved ? 'icon-sm text-accent' : 'icon-sm'}
+					class={cn(saved ? 'icon-sm text-accent' : 'icon-sm', pop && 'animate-heart-pop')}
 				/>
 				<span class="underline">{m.doctor_save({}, options)}</span>
 			</button>

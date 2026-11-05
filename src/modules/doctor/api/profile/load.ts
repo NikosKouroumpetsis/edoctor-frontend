@@ -1,5 +1,5 @@
 import { ApiError } from '$shared/lib/http';
-import { getDoctorPublicProfile } from './endpoints';
+import { getDoctorMemberAnswer, getDoctorPublicProfile } from './endpoints';
 import { DoctorProfileNotFoundError, mapDoctorProfile } from './map';
 import type { DoctorProfile } from './types';
 
@@ -43,4 +43,16 @@ export async function loadDoctorProfile(
 		if (error instanceof ApiError && error.status === 404) return { state: 'not-found' };
 		return { state: 'failed', slug, serverNow };
 	}
+}
+
+/**
+ * The same profile as a member sees it (🔴 U-34.4, U-80.1 Ε6): the cookies live on the API, so the server's page is a
+ * guest's and the amounts come with this read in the browser, one request, for a member only.
+ */
+export async function getDoctorMemberProfile(
+	slug: string,
+	lang: string,
+	signal?: AbortSignal
+): Promise<DoctorProfile> {
+	return mapDoctorProfile(await getDoctorMemberAnswer(slug, lang, signal), { slug, lang });
 }

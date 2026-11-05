@@ -125,4 +125,27 @@ describe('articles::api::list', () => {
 		});
 		expect(mapArticleSuggestions(undefined)).toEqual({ services: [], articles: [] });
 	});
+
+	it('U-77.1, U-92.3: one doctor’s row asks three cards with `doctorId`, and a full row says there is more', async () => {
+		const fetchImpl = vi.fn(async () => envelope(slugs(3), { total: 6, appliedService: null }));
+		const page = await fetchArticlesPage(
+			{ lang: 'el', type: null, q: null, serviceId: null, doctorId: 'doc-1', limit: 3 },
+			{ fetch: fetchImpl as unknown as typeof fetch }
+		);
+		const asked = new URL(String((fetchImpl.mock.calls[0] as unknown[])[0]));
+		expect(asked.searchParams.get('doctorId')).toBe('doc-1');
+		expect(asked.searchParams.get('limit')).toBe('3');
+		expect(page.total).toBe(6);
+		expect(page.nextCursor).toBe('arthro-2');
+	});
+
+	it('U-77.1 (negative): the site’s list never sends a `doctorId`', async () => {
+		const fetchImpl = vi.fn(async () => envelope(slugs(1)));
+		await fetchArticlesPage(
+			{ lang: 'el', type: null, q: null, serviceId: null },
+			{ fetch: fetchImpl as unknown as typeof fetch }
+		);
+		const asked = new URL(String((fetchImpl.mock.calls[0] as unknown[])[0]));
+		expect(asked.searchParams.has('doctorId')).toBe(false);
+	});
 });

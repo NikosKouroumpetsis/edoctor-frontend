@@ -18,6 +18,9 @@ import type {
 /** How many articles one page of the list reads (U-57.2: 12, then «Εμφάνιση περισσότερων»). */
 export const ARTICLES_PAGE_LIMIT = 12;
 
+/** U-92.3: the cards of a doctor's row on the profile, asked only when it nears the screen. */
+export const ARTICLES_DOCTOR_ROW_LIMIT = 3;
+
 /** The backend's kinds, the ONE list a `?type=` of the address is checked against. */
 export const ARTICLE_TYPES: readonly ArticleTypeDto[] = ['ARTICLE', 'HEALTH_ADVICE'];
 
@@ -69,17 +72,19 @@ function readListMeta(meta: unknown): Pick<ArticlesPage, 'total' | 'appliedServi
  * cursor when this one came full (a full last page answers one more empty read, then the list ends), and the `meta`.
  */
 export async function fetchArticlesPage(
-	scope: ArticlesListScope & { cursor?: string },
+	scope: ArticlesListScope & { cursor?: string; limit?: number },
 	context: ArticlesRequestContext = {}
 ): Promise<ArticlesPage> {
+	const limit = scope.limit ?? ARTICLES_PAGE_LIMIT;
 	const { data, meta } = await getPublicArticlesWithMeta(
 		{
 			lang: langOf(scope.lang),
-			limit: ARTICLES_PAGE_LIMIT,
+			limit,
 			...(scope.type ? { type: scope.type } : {}),
 			...(scope.cursor ? { cursor: scope.cursor } : {}),
 			...(scope.q ? { q: scope.q } : {}),
-			...(scope.serviceId ? { serviceId: scope.serviceId } : {})
+			...(scope.serviceId ? { serviceId: scope.serviceId } : {}),
+			...(scope.doctorId ? { doctorId: scope.doctorId } : {})
 		},
 		context
 	);
@@ -87,12 +92,12 @@ export async function fetchArticlesPage(
 	const last = list.at(-1);
 	return {
 		articles: list,
-		nextCursor: list.length >= ARTICLES_PAGE_LIMIT && last?.slug ? last.slug : null,
+		nextCursor: list.length >= limit && last?.slug ? last.slug : null,
 		...readListMeta(meta)
 	};
 }
 
-/** The list's query keys: language, kind, words and service, so each has its own cache entry. */
+/** The list's query keys: language, kind, words, service and doctor, so each has its own cache entry. */
 export const articlesListQueryKeys = {
 	all: ['articles'] as const,
 	list: (scope: ArticlesListScope) =>
@@ -102,8 +107,11 @@ export const articlesListQueryKeys = {
 			langOf(scope.lang),
 			scope.type ?? 'all',
 			scope.q ?? '',
-			scope.serviceId ?? ''
+			scope.serviceId ?? '',
+			scope.doctorId ?? ''
 		] as const,
+	doctorRow: (doctorId: string, lang: string) =>
+		[...articlesListQueryKeys.all, 'doctor-row', langOf(lang), doctorId] as const,
 	suggestions: (lang: string, type: ArticleTypeDto | null, q: string) =>
 		[...articlesListQueryKeys.all, 'suggestions', langOf(lang), type ?? 'all', q] as const
 };
@@ -116,6 +124,29 @@ export function articlesListInfiniteQuery(scope: ArticlesListScope) {
 			fetchArticlesPage({ ...scope, cursor: pageParam }, { signal }),
 		initialPageParam: undefined as string | undefined,
 		getNextPageParam: (lastPage: ArticlesPage) => lastPage.nextCursor ?? undefined
+	});
+}
+
+/**
+ * 🔴 U-92.3: the three newest cards of one doctor (the profile's row): the page asks them only when the row nears the
+ * screen, never for a doctor without articles; kept while the page lives, as the office's facts.
+ */
+export function doctorArticlesRowQuery(doctorId: string, lang: string) {
+	return queryOptions({
+		queryKey: articlesListQueryKeys.doctorRow(doctorId, lang),
+		queryFn: ({ signal }) =>
+			fetchArticlesPage(
+				{
+					lang,
+					type: null,
+					q: null,
+					serviceId: null,
+					doctorId,
+					limit: ARTICLES_DOCTOR_ROW_LIMIT
+				},
+				{ signal }
+			),
+		staleTime: Infinity
 	});
 }
 

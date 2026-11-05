@@ -3,10 +3,16 @@ import { fireEvent, render, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { searchDoctorsCategories } from '$modules/search-doctors/api/home/categories';
 import type { CategoryId } from '$modules/search-doctors/types';
+import { projectRoot } from '../../../../../../tests/architecture/source-scan';
 import DiscoveryHeader from './index.svelte';
 
-const categories: { id: CategoryId }[] = [{ id: 'all' }, { id: 'cardiology' }, { id: 'online' }];
+const categories: { id: CategoryId }[] = [
+	{ id: 'all' },
+	{ id: 'cardiology' },
+	{ id: 'pediatrics' }
+];
 
 function renderHeader(overrides: Record<string, unknown> = {}) {
 	const props = {
@@ -49,7 +55,7 @@ describe('search-doctors::ui::discovery-header', () => {
 		expect(names).toEqual([
 			['Όλοι', 'false'],
 			['Καρδιολόγος', 'true'],
-			['Online', 'false']
+			['Παιδίατρος', 'false']
 		]);
 		await userEvent.setup().click(within(top).getByRole('button', { name: 'Όλοι' }));
 		expect(props.onSelectCategory).toHaveBeenCalledWith('all');
@@ -80,5 +86,29 @@ describe('search-doctors::ui::discovery-header', () => {
 				"import { layoutOf, SearchTrigger } from '$shared/ui/molecules/search-trigger';\nimport CategoryRail from '../components/category-rail.svelte';"
 			)
 		).toBe(true);
+	});
+
+	// Rewrites the sample's «Online» of this file: U-89.1 takes the home's tab out of the product (its key stays, U-30.2).
+	it('U-89.1: καμία βιντεοκλήση στις αναζητήσεις — the home’s categories have no «Online», and no camera is drawn', () => {
+		expect(searchDoctorsCategories.map((category) => category.id)).toEqual([
+			'all',
+			'internal-medicine',
+			'pediatrics',
+			'cardiology',
+			'dermatology'
+		]);
+		const rail = readFileSync(
+			join(
+				projectRoot,
+				'src/modules/search-doctors/ui/discovery-header/components/category-rail.svelte'
+			),
+			'utf8'
+		);
+		expect(rail).not.toMatch(/VideoIcon|lucide\/video|online/u);
+		const scope = readFileSync(
+			join(projectRoot, 'src/modules/search-doctors/api/marketplace/category-scope.ts'),
+			'utf8'
+		);
+		expect(scope).not.toMatch(/video-consultation|'online'/u);
 	});
 });

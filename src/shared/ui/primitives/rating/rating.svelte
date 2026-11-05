@@ -58,9 +58,11 @@
 		  }
 		| {
 				variant: 'stars';
-				/** How many of the stars are filled. */
+				/** How many of the stars are filled; a half counts (U-49, ½…5). */
 				value: number;
 				max?: number;
+				/** The stars' size: `sm` 16 (the default), `xs` 12 (a review's line in the window, U-66.1 Π7). */
+				starSize?: 'xs' | 'sm';
 				label?: undefined;
 				size?: undefined;
 				labelTone?: undefined;
@@ -84,10 +86,13 @@
 		max = 5,
 		size = 'md',
 		labelTone = 'primary',
+		starSize = 'sm',
 		'aria-label': ariaLabel,
 		class: className,
 		...restProps
-	}: RatingProps = $props();
+	}: RatingProps & { starSize?: 'xs' | 'sm' } = $props();
+
+	const starClass = $derived(starSize === 'xs' ? 'icon-xs' : 'icon-sm');
 
 	const stars = $derived(Array.from({ length: Math.max(0, Math.round(max)) }, (_, index) => index));
 	const named = $derived(Boolean(ariaLabel));
@@ -130,11 +135,22 @@
 		<Ionicon name="star" class="icon-sm text-rating" />
 	{:else}
 		{#each stars as index (index)}
-			<Ionicon
-				name="star"
-				data-filled={index < (value ?? 0) ? 'true' : 'false'}
-				class={cn('icon-sm', index < (value ?? 0) ? 'text-rating' : 'text-muted-foreground/24')}
-			/>
+			{@const half = (value ?? 0) >= index + 0.5 && (value ?? 0) < index + 1}
+			{#if half}
+				<!-- U-49: half a star — the empty star, and the coloured one cut in the middle over it. -->
+				<span data-filled="half" class={cn('relative inline-flex', starClass)}>
+					<Ionicon name="star" class={cn(starClass, 'text-muted-foreground/24')} />
+					<span class="absolute inset-y-0 left-0 w-1/2 overflow-hidden">
+						<Ionicon name="star" class={cn(starClass, 'text-rating')} />
+					</span>
+				</span>
+			{:else}
+				<Ionicon
+					name="star"
+					data-filled={index < (value ?? 0) ? 'true' : 'false'}
+					class={cn(starClass, index < (value ?? 0) ? 'text-rating' : 'text-muted-foreground/24')}
+				/>
+			{/if}
 		{/each}
 	{/if}
 </div>

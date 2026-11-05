@@ -5,9 +5,9 @@ import type { LocalizedTerm } from '$modules/search-doctors/api/marketplace/sect
  * language. Sources, nothing invented: the specialties are the backend's professionals (`backend/__seeds__/src/
  * datasets/specialties.ts`, the same names in `backend/src/shared/config/professionals.json`), the areas the
  * backend's demo municipalities (`backend/__seeds__/src/datasets/locations.ts`, `DEMO_LOCATION_CLUSTERS`) with the
- * English transliteration the location matcher accepts (as `homeSectionConfigs`: `Athina`), and «Βιντεοκλήση» the
- * application's service (`searchDoctors.criteria.options.videoConsultation`). No professional id is known without
- * the database, so every link searches by words (the application's `text` selection).
+ * English transliteration the location matcher accepts (as `homeSectionConfigs`: `Athina`). No professional id is
+ * known without the database, so every link searches by words (the application's `text` selection). U-89.1: no video
+ * consultation in the product, so no «Online» column.
  */
 export type PopularArea =
 	| 'athens'
@@ -95,17 +95,6 @@ export const popularAreaSearches: PopularArea[] = [
 	'heraklion',
 	'larisa'
 ];
-
-/** «Online»: the video consultation in an area. */
-export const popularOnlineSearches: PopularArea[] = [
-	'athens',
-	'thessaloniki',
-	'patra',
-	'heraklion'
-];
-
-/** The video consultation as the search writes it (the application's service label). */
-export const videoConsultationTerm: LocalizedTerm = { el: 'Βιντεοκλήση', en: 'Video consultation' };
 
 /** The links shown per tab before «Εμφάνιση περισσότερων» (Airbnb's two rows of six, less the button's place). */
 export const POPULAR_INITIAL_COUNT = 11;

@@ -302,6 +302,8 @@ In place:
 - `tests/architecture/raw-html.test.ts` (common v2 §B) — no `{@html}` in `src/` but the page's JSON-LD: inside
   `<svelte:head>`, in a file that builds it with `jsonLdScript` (its `<` `>` `&` escaped); a CMS text is drawn by
   `RichText` from its allowlist, never as markup.
+- `tests/architecture/review-topics.test.ts` («U-91.2: …») — the six topics of «Οι ασθενείς αναφέρουν»: no label, key, glyph or
+  value of the code speaks of the wait, in either language.
 - Each checker ships with negative fixtures next to the project scan, plus a
   proof that the scan read the code (file, token and tag counts).
 

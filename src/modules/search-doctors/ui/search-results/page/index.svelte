@@ -51,6 +51,7 @@
 	import MapSwitch from '../components/map-switch.svelte';
 	import MapToggle from '../components/map-toggle.svelte';
 	import { ResultsStage } from '../hooks/use-stage.svelte';
+	import { getSessionOptional } from '$shared/state/session';
 	import { SearchResultsState } from '../hooks/use-state.svelte';
 	import type { SearchResultsProps } from '../types';
 
@@ -71,7 +72,9 @@
 		if (data.serverNow !== null) recordServerNow(data.serverNow);
 	});
 
+	const session = getSessionOptional();
 	const results = new SearchResultsState({
+		member: () => session?.isMember ?? false,
 		url: () => page.url,
 		firstPage: () => data.firstPage,
 		serverNow: () => data.serverNow,

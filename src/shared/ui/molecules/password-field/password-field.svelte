@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { HTMLInputAttributes } from 'svelte/elements';
 	import { TextField, type TextFieldSize } from '$shared/ui/molecules/text-field';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import type { FieldApi } from '$shared/lib/form';
@@ -17,8 +18,10 @@
 		placeholder = '',
 		disabled = false,
 		required = false,
-		autocomplete = 'current-password'
-	}: {
+		invalid = false,
+		autocomplete = 'current-password',
+		...restProps
+	}: Pick<HTMLInputAttributes, 'maxlength' | 'oninput'> & {
 		label: string;
 		/** Names of the reveal control, already localized (the application requires both). */
 		hideLabel: string;
@@ -34,7 +37,10 @@
 		placeholder?: string;
 		disabled?: boolean;
 		required?: boolean;
+		/** The error look without a message (the message lives elsewhere). */
+		invalid?: boolean;
 		autocomplete?: 'current-password' | 'new-password';
+		'data-testid'?: string;
 	} = $props();
 
 	let revealed = $state(false);
@@ -51,8 +57,10 @@
 	{placeholder}
 	{disabled}
 	{required}
+	{invalid}
 	{autocomplete}
 	type={revealed ? 'text' : 'password'}
+	{...restProps}
 >
 	{#snippet trailing()}
 		<button

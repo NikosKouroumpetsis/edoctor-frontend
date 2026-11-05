@@ -117,6 +117,31 @@ describe('MapView', () => {
 		expect(screen.getByRole('region', { name: 'Χάρτης' })).toHaveAttribute('data-loaded', 'false');
 	});
 
+	it('Α6: MapLibre’s compact credit starts folded, by its own press; what a person opened afterwards stays open', async () => {
+		laidOut(320);
+		render(Harness, { props: { styleUrl: 'https://tiles.example/styles/light', points } });
+		const map = await created();
+		map.emit('styledata');
+		const node = map.options.container as HTMLElement;
+		const box = document.createElement('details');
+		box.className = 'maplibregl-ctrl-attrib maplibregl-compact maplibregl-compact-show';
+		const press = document.createElement('summary');
+		press.className = 'maplibregl-ctrl-attrib-button';
+		const onPress = vi.fn();
+		const onBubble = vi.fn();
+		press.addEventListener('click', onPress);
+		node.addEventListener('click', onBubble);
+		box.append(press);
+		node.append(box);
+		map.emit('sourcedata');
+		expect(onPress).toHaveBeenCalledOnce();
+		// The press stays on the control: a page around the map hears nothing.
+		expect(onBubble).not.toHaveBeenCalled();
+		map.emit('sourcedata');
+		map.emit('styledata');
+		expect(onPress).toHaveBeenCalledOnce();
+	});
+
 	it('U-24.4: Greek place names — `name:el` first on the symbol layers that write a name, road numbers left alone', async () => {
 		laidOut(320);
 		render(Harness, { props: { labelLanguage: 'el' } });

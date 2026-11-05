@@ -23,7 +23,8 @@
 		internalHref,
 		onAnchor,
 		canonicalUrl,
-		alternateUrls
+		alternateUrls,
+		helpful
 	}: ArticleDetailProps = $props();
 
 	const options = $derived({ locale });
@@ -105,7 +106,18 @@
 {/snippet}
 
 {#snippet footer()}
-	<Related articles={view.related} {locale} {articleHref} />
+	{#if helpful}
+		<!-- U-78 (`23-helpful` Π1): in the text's column, 40 under what comes before it; «Περισσότερα άρθρα» stays as it is. -->
+		<div
+			data-testid="article-helpful"
+			class="mt-reading-gap tablet:mx-auto tablet:max-w-dialog laptop:mx-0 laptop:max-w-document-column"
+		>
+			{@render helpful()}
+		</div>
+	{/if}
+	{#if view.related.length > 0}
+		<Related articles={view.related} {locale} {articleHref} />
+	{/if}
 {/snippet}
 
 <DocumentPage
@@ -124,7 +136,7 @@
 	{end}
 	cards={view.author ? cards : undefined}
 	asideLabel={m.article_written_by({}, options)}
-	footer={view.related.length > 0 ? footer : undefined}
+	footer={helpful || view.related.length > 0 ? footer : undefined}
 	backHref={listHref}
 	backLabel={m.document_back({}, options)}
 	barActions={barShare}

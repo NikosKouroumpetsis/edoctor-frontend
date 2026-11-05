@@ -7,7 +7,9 @@
 	import { StateGlyph } from '$shared/ui/molecules/state-glyph';
 	import { Button } from '$shared/ui/primitives/button';
 	import type { SearchResultsEmptyState } from '$modules/search-doctors/lib/results-empty';
-	import SearchDoctorCard from '$modules/search-doctors/ui/search-doctor-card';
+	import SearchDoctorCard, {
+		useFavoriteToggle
+	} from '$modules/search-doctors/ui/search-doctor-card';
 	import type { ResultsStage } from '../hooks/use-stage.svelte';
 	import type { SearchResultsState } from '../hooks/use-state.svelte';
 	import type { ResultsMessageOptions } from '../types';
@@ -31,7 +33,7 @@
 		emptyState: SearchResultsEmptyState | null;
 		messageOptions: ResultsMessageOptions;
 		profileHref: (doctorSlug: string) => string;
-		/** A guest's heart and «Συνδεθείτε για κόστος»: the sign-in page. */
+		/** «Συνδεθείτε για κόστος»: the sign-in over the page. */
 		onSignIn: () => void;
 		/** The empty state's one button (S-31.9). */
 		onEmptyAction: () => void;
@@ -42,6 +44,7 @@
 	} = $props();
 
 	const view = $derived(results.view);
+	const favorites = useFavoriteToggle(() => messageOptions.locale);
 
 	// ---- the list's end (the application's `onEndReached`): the next page while it is in view ----
 	// 🔴 MAJOR-2 (r1): an observer tells only when the end CROSSES its edge; an end still in view after a page (a tall
@@ -156,7 +159,9 @@
 					href={profileHref(card.doctorSlug)}
 					profileLabel={m.card_profile_link({}, messageOptions)}
 					favoriteLabel={m.favorite_toggle({}, messageOptions)}
-					onFavorite={onSignIn}
+					saved={favorites.isSaved(card.id)}
+					pop={favorites.isPopping(card.id)}
+					onFavorite={() => favorites.toggle(card)}
 					{onSignIn}
 					onHover={(hovering) => stage.hover(card.id, hovering)}
 					loading={index < 2 ? 'eager' : 'lazy'}

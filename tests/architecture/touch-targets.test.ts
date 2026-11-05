@@ -60,6 +60,18 @@ type TouchException = { path: string; marker: string; reason: string };
 
 const EXCEPTIONS: TouchException[] = [
 	{
+		path: 'src/modules/auth/ui/flow/components/step-entry.svelte',
+		marker: 'data-slot="auth-legal-link"',
+		reason:
+			'WCAG 2.5.8 inline: «Πολιτική Απορρήτου» is a word of the sign-in’s legal sentence (U-80.1 Π1)'
+	},
+	{
+		path: 'src/modules/auth/ui/flow/components/step-register.svelte',
+		marker: 'data-slot="auth-legal-link"',
+		reason:
+			'WCAG 2.5.8 inline: «Όρους Χρήσης», «Πολιτική Απορρήτου» are words of the legal sentence (U-80.1 Π1)'
+	},
+	{
 		path: 'src/shared/ui/primitives/inline-link-text/inline-link-text.svelte',
 		marker: 'data-slot="inline-link-text-link"',
 		reason: 'WCAG 2.5.8 inline: the link is part of the sentence'

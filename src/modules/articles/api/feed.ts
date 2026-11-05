@@ -6,7 +6,7 @@ const ARTICLES_PATH = '/article/public/articles';
 /** SvelteKit's `fetch` on the server (the answer is inlined into the page), the global one in the browser. */
 export type ArticlesRequestContext = { fetch?: typeof fetch; signal?: AbortSignal };
 
-/** The list's query: the backend's strict one (`lang`, `type`, `limit`, `cursor`, and since U-57.3 `q`, `serviceId`). */
+/** The list's query: the backend's strict one (`lang`, `type`, `limit`, `cursor`, since U-57.3 `q`, `serviceId`, since U-77 `doctorId`). */
 export type ArticlesQuery = {
 	lang: string;
 	limit: number;
@@ -14,6 +14,7 @@ export type ArticlesQuery = {
 	cursor?: string;
 	q?: string;
 	serviceId?: string;
+	doctorId?: string;
 };
 
 const paramsOf = (query: ArticlesQuery) => ({
@@ -22,7 +23,8 @@ const paramsOf = (query: ArticlesQuery) => ({
 	type: query.type,
 	cursor: query.cursor,
 	q: query.q,
-	serviceId: query.serviceId
+	serviceId: query.serviceId,
+	doctorId: query.doctorId
 });
 
 /**

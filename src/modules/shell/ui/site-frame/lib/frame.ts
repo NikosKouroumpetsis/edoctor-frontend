@@ -7,21 +7,17 @@ import { legalPath } from '$modules/shell/lib/legal';
 import type { AccountEntry, FrameMessageOptions, LocalizedHref } from '../types';
 
 /**
- * The guest's account menu (U-17.2, U-17.5, U-19.1), the same four everywhere: «Σύνδεση ή εγγραφή» (bold) · —
- * · «Ρυθμίσεις» · «Κέντρο βοήθειας» · — · «Είστε γιατρός;» with its line. The ☰ menu and the «Προφίλ» sheet draw it.
+ * The account menu from 744 (U-81.3), Airbnb's. A guest's four (U-17.2, U-17.5, U-19.1): «Σύνδεση ή εγγραφή» (bold) ·
+ * — · «Ρυθμίσεις» · «Κέντρο βοήθειας» · — · «Είστε γιατρός;» with its line. 🔴 U-80.1 Ε3: a member's has no «Λογαριασμός»:
+ * «Μηνύματα» · «Αγαπημένα» (bold) · — · «Ρυθμίσεις» · «Κέντρο βοήθειας» · — · «Είστε γιατρός;» · — · «Αποσύνδεση».
  */
 export function buildAccountEntries(
 	messageOptions: FrameMessageOptions,
-	href: LocalizedHref
+	href: LocalizedHref,
+	isMember = false,
+	hasUnread = false
 ): AccountEntry[] {
-	return [
-		{
-			key: 'sign-in',
-			kind: 'link',
-			label: m.account_menu_sign_in({}, messageOptions),
-			href: href('/login'),
-			emphasis: true
-		},
+	const shared: AccountEntry[] = [
 		{
 			key: 'settings',
 			kind: 'settings',
@@ -38,31 +34,74 @@ export function buildAccountEntries(
 			separated: true
 		}
 	];
+	if (!isMember) {
+		return [
+			{
+				key: 'sign-in',
+				kind: 'link',
+				label: m.account_menu_sign_in({}, messageOptions),
+				href: href('/login'),
+				emphasis: true
+			},
+			...shared
+		];
+	}
+	return [
+		{
+			key: 'messages',
+			kind: 'link',
+			label: m.account_menu_messages({}, messageOptions),
+			href: href('/messages'),
+			emphasis: true,
+			...(hasUnread ? { dotLabel: m.account_menu_new_messages({}, messageOptions) } : {})
+		},
+		{
+			key: 'favorites',
+			kind: 'link',
+			label: m.account_menu_favorites({}, messageOptions),
+			href: href('/favorites'),
+			emphasis: true
+		},
+		...shared,
+		{
+			key: 'sign-out',
+			kind: 'sign-out',
+			label: m.account_menu_sign_out({}, messageOptions),
+			separated: true
+		}
+	];
 }
+
+const trimmed = (basePath: string) =>
+	basePath.length > 1 ? basePath.replace(/\/+$/, '') : basePath;
 
 /** The search's own pages: the home and its results (U-25.2, the approved prototype's `s4-375`). */
 const exploreFlowPages = ['/', '/doctors'];
+
+/** U-84: the messages' list, and what is pushed over it below 744 (a conversation, «Προηγούμενες συνομιλίες»). */
+const MESSAGES_PAGES = /^\/messages(?:\/[^/]+)?$/u;
 
 /**
  * 🔴 MINOR-4 (r1, U-25.2): whether `basePath` (the path without the language) belongs to the search, so the capsule
  * marks «Εξερευνήστε» there: the home and the results — never a profile or any other page (U-26.1's rule).
  */
 export function isExploreFlow(basePath: string): boolean {
-	const path = basePath.length > 1 ? basePath.replace(/\/+$/, '') : basePath;
-	return exploreFlowPages.includes(path);
+	return exploreFlowPages.includes(trimmed(basePath));
 }
 
 /**
- * The phone's capsule (U-16.6, U-26.1: the web keeps three): «Εξερευνήστε» is the search (the home and its results,
- * U-25.2); «Αγαπημένα» asks a guest to sign in first; «Προφίλ» opens the guest's account menu from below (U-19.1:
- * the settings, for a guest too) — the web has no session yet (U-20: every tab goes somewhere).
+ * 🔴 U-81.2 / U-82.3: below 744 the web is the application, navigation too — the capsule's four tabs, the same for a
+ * guest and a member, each its page: «Εξερευνήστε» the search (the home and its results, U-25.2), «Αγαπημένα», «Μηνύματα»
+ * and «Προφίλ» (U-81.1: a page as the application's tab, no sheet of a menu).
  */
 export function buildBottomNavItems(
 	messageOptions: FrameMessageOptions,
 	href: LocalizedHref,
-	isExplore: boolean,
-	onProfile: () => void
+	basePath: string,
+	/** 🔴 U-84 Π5: the unread badge of «Μηνύματα» (`9+` past nine), as the application's tab; none for a guest. */
+	unread?: { badge: string; label: string } | null
 ): BottomNavItem[] {
+	const path = trimmed(basePath);
 	return [
 		{
 			key: 'explore',
@@ -70,21 +109,32 @@ export function buildBottomNavItems(
 			icon: 'search-outline',
 			activeIcon: 'search',
 			href: href('/'),
-			current: isExplore
+			current: isExploreFlow(basePath)
 		},
 		{
 			key: 'favorites',
 			label: m.tab_favorites({}, messageOptions),
 			icon: 'heart-outline',
 			activeIcon: 'heart',
-			href: href('/login')
+			href: href('/favorites'),
+			current: path === '/favorites'
+		},
+		{
+			key: 'messages',
+			label: m.tab_messages({}, messageOptions),
+			icon: 'chatbubble-outline',
+			activeIcon: 'chatbubble',
+			href: href('/messages'),
+			current: MESSAGES_PAGES.test(path),
+			...(unread ? { badge: unread.badge, badgeLabel: unread.label } : {})
 		},
 		{
 			key: 'profile',
 			label: m.tab_profile({}, messageOptions),
 			icon: 'person-outline',
 			activeIcon: 'person',
-			onclick: onProfile
+			href: href('/profile'),
+			current: path === '/profile'
 		}
 	];
 }
@@ -151,8 +201,9 @@ const pagesWithoutFooter = ['/doctors'];
  * which end their list with the thin legal line instead («© 2026 eDoctor · Απόρρητο · Όροι · Cookies · 🌐»).
  */
 export function showsSiteFooter(basePath: string): boolean {
-	const path = basePath.length > 1 ? basePath.replace(/\/+$/, '') : basePath;
-	return !pagesWithoutFooter.includes(path);
+	const path = trimmed(basePath);
+	// U-84 Π1: the messages end without it at every width (Airbnb).
+	return !pagesWithoutFooter.includes(path) && !MESSAGES_PAGES.test(path);
 }
 
 /**
@@ -163,8 +214,24 @@ export function showsSiteFooter(basePath: string): boolean {
  */
 export function showsBottomNav(basePath: string, status = 200): boolean {
 	if (status >= 400) return true;
-	const path = basePath.length > 1 ? basePath.replace(/\/+$/, '') : basePath;
-	return !/^\/doctors\/[^/]+(?:\/details\/[^/]+)?$/u.test(path);
+	const path = trimmed(basePath);
+	if (path === '/login') return false;
+	// U-84 Π2: a conversation and «Προηγούμενες συνομιλίες» are pushed over the tabs, as in the application.
+	if (/^\/messages\/[^/]+$/u.test(path)) return false;
+	// U-77, U-73.1: a doctor's articles and page are over the tabs too, as the profile (the application has none there).
+	return !/^\/doctors\/[^/]+(?:\/details\/[^/]+|\/articles|\/about)?$/u.test(path);
+}
+
+/** The pages that are the application's own below 744 (U-81.1, Ε2): no footer there, the site's footer from 744. */
+const pagesWithoutPhoneFooter = ['/login', '/profile', '/favorites'];
+
+/**
+ * Whether the footer waits for 744 on `basePath`: the tabs of `/profile` and `/favorites`, the sheet of `/login` and,
+ * U-73.1 Π2, of a doctor's page.
+ */
+export function hidesFooterOnPhone(basePath: string): boolean {
+	const path = trimmed(basePath);
+	return pagesWithoutPhoneFooter.includes(path) || /^\/doctors\/[^/]+\/about$/u.test(path);
 }
 
 /** One option per language, each pointing at the same page in that language. */

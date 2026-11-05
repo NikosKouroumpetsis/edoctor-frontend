@@ -176,6 +176,23 @@ beforeEach(() => {
 });
 
 describe('DiscoveryHome (the web’s home, screen 2)', () => {
+	it('🔴 U-99.2: the home’s cards keep the room of the guest’s line', async () => {
+		render(Harness, { props: { data: homeData([ok([doctor('1')])]) } });
+		expect(
+			(await screen.findAllByTestId('home-doctor-card'))[0].querySelector(
+				'[data-slot="home-doctor-card-price-room"]'
+			)
+		).not.toBeNull();
+	});
+
+	it('a11y: the page’s one `h1`, for a reader alone, in the words of the document’s title', async () => {
+		render(Harness, { props: { data: homeData([ok([doctor('1')])]) } });
+		const headings = screen.getAllByRole('heading', { level: 1 });
+		expect(headings).toHaveLength(1);
+		expect(headings[0]).toHaveTextContent('eDoctor | Ραντεβού με γιατρό');
+		expect(headings[0]).toHaveClass('sr-only');
+	});
+
 	// The superseded `search-header.svelte` drew a sliders glyph in a 32 circle inside the phone's pill.
 	it('U-16.4: the phone’s pill is the search alone (one glyph, no filter control); from 744 the big SearchBar', async () => {
 		render(Harness, { props: { data: homeData([ok([doctor('1')])]) } });
@@ -337,7 +354,7 @@ describe('DiscoveryHome (the web’s home, screen 2)', () => {
 		expect(links).toHaveLength(1);
 		expect(links[0]).toHaveAccessibleName('Προφίλ γιατρού Μαρία Αλεξίου');
 		expect(links[0]).toHaveAttribute('href', '/doctors/dr-1');
-		const heart = within(card).getByRole('button', { name: 'Αποθήκευσε γιατρό Μαρία Αλεξίου' });
+		const heart = within(card).getByRole('button', { name: 'Αποθήκευση γιατρού Μαρία Αλεξίου' });
 		expect(links[0]).not.toContainElement(heart);
 		expect(heart.querySelector('[data-slot="favorite-button-outline"]')).not.toBeNull();
 		await user().click(heart);

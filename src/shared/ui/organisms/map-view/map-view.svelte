@@ -127,6 +127,7 @@
 		fitPadding,
 		onMapPress,
 		zoomControls,
+		zoomControlsClass,
 		expandControl,
 		hideControl,
 		scrollZoom = true,
@@ -161,6 +162,8 @@
 		 * each steps the zoom on MapLibre's own motion and is disabled at its limit. None without it.
 		 */
 		zoomControls?: MapViewZoomControls;
+		/** Where the zoom sits when the caller lays a control of its own over the map's corner. */
+		zoomControlsClass?: string;
 		/**
 		 * U-28.2: the round «⤢» over the zoom, from 1128 only (where a map sits beside other content; the zoom then
 		 * steps 16 below it, at 72): the caller's state and words. None without it.
@@ -273,7 +276,7 @@
 				style: untrack(() => styleUrl),
 				center: initial.center,
 				zoom: initial.zoom,
-				// The data's credit stays (OpenStreetMap / OpenFreeMap), folded to its «i» on a narrow map.
+				// The data's credit stays (OpenStreetMap / OpenFreeMap), folded to its «i» (`foldCredit`).
 				attributionControl: { compact: true },
 				// MapLibre names its canvas itself («Map»): it takes the caller's name, in the page's language.
 				locale: { 'Map.Title': untrack(() => ariaLabel) },
@@ -283,6 +286,18 @@
 				scrollZoom: untrack(() => scrollZoom)
 			});
 			instance = created;
+			// MapLibre opens its compact credit by itself until the first drag; here it starts folded, one press away
+			// (the prototype, A6). Only the first time: what a person opened stays open while more tiles arrive.
+			let creditFolded = false;
+			const foldCredit = () => {
+				if (creditFolded) return;
+				const press = node.querySelector('.maplibregl-compact-show .maplibregl-ctrl-attrib-button');
+				if (!press) return;
+				creditFolded = true;
+				press.dispatchEvent(new MouseEvent('click'));
+			};
+			created.on('styledata', foldCredit);
+			created.on('sourcedata', foldCredit);
 			created.on('style.load', () => relabel(created));
 			created.on('move', () =>
 				project(
@@ -400,7 +415,8 @@
 		data-slot="map-view-zoom"
 		class={cn(
 			'absolute top-2 right-3 z-30 hidden flex-col gap-2',
-			zoomControls ? 'tablet:flex' : 'laptop:flex'
+			zoomControls ? 'tablet:flex' : 'laptop:flex',
+			zoomControlsClass
 		)}
 	>
 		{#if expandControl}

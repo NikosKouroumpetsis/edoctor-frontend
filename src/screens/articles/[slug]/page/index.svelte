@@ -1,5 +1,7 @@
 <script lang="ts">
 	import ArticleDetail from '$modules/articles/ui/detail';
+	import HelpfulVote from '$modules/helpful/ui/vote';
+	import { helpfulArticleTarget } from '$modules/helpful/lib/vote';
 	import { useArticleScreen } from '../hooks';
 	import type { ArticleScreenProps } from '../types';
 
@@ -26,5 +28,9 @@
 		onAnchor={screen.onAnchor}
 		canonicalUrl={screen.canonicalUrl}
 		alternateUrls={screen.alternateUrls}
-	/>
+	>
+		{#snippet helpful()}
+			<HelpfulVote target={helpfulArticleTarget(data.article.slug)} locale={screen.locale} />
+		{/snippet}
+	</ArticleDetail>
 </main>

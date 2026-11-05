@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/svelte-query';
 
 import type { CategoryId } from '$modules/search-doctors/types';
-import { resolveServiceSlug, resolveSpecialtyScope, type ResolvedProfessional } from './resolvers';
+import { resolveSpecialtyScope, type ResolvedProfessional } from './resolvers';
 import type { MarketplaceSearchParams } from './types';
 
 /**
@@ -59,20 +59,6 @@ export async function resolveCategoryScope(
 ): Promise<CategoryScope> {
 	if (categoryId === 'all') {
 		return EMPTY_CATEGORY_SCOPE;
-	}
-
-	if (categoryId === 'online') {
-		const service = await resolveServiceSlug(queryClient, 'video-consultation', {
-			lang,
-			fallbackText: 'online',
-			fetch: fetchImpl
-		});
-
-		if (service.serviceSlug) {
-			return { serviceSlugs: [service.serviceSlug] };
-		}
-
-		return service.textFallback ? { text: service.textFallback } : EMPTY_CATEGORY_SCOPE;
 	}
 
 	if (SPECIALTY_CATEGORIES.includes(categoryId)) {

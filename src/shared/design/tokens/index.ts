@@ -67,9 +67,9 @@ export const platform = {
 		// The application's platform name for the pill CTA's inline padding (`StickyActionBar`), same name, same value.
 		'cta-inline': 32,
 		// Wave 1.0 frame (U-16 ⇒ U-19, the approved prototype): apple.com's top bar box (980 + 22 a side), the glass
-		// tab capsule below 744, the account menu and the floating consent card from 744.
+		// tab capsule below 744 (U-82.3: four tabs, 4 × 84), the account menu and the floating consent card from 744.
 		'bar-content': 1024,
-		'tab-capsule-w': 280,
+		'tab-capsule-w': 336,
 		'account-menu-w': 260,
 		'consent-card-w': 720,
 		// Wave 1.0 search (U-23.2): Airbnb's panel under the bar from 744, 425 wide — 424 on the 4px grid.
@@ -81,6 +81,7 @@ export const platform = {
 		// card's 128 photo, the pin card over the phone's sheet (184) and over the 744 map switch (96), the phone
 		// sheet's top strip when only «Βρέθηκαν N» shows (168), the phone list's end clearing the capsule (150 ⇒ 152)
 		// and the results grid's row gap (Airbnb's 28 × 24, §7.4).
+		'pill-inset': 44,
 		'results-row-gap': 28,
 		'map-pin': 28,
 		'map-card-media': 128,
@@ -125,12 +126,42 @@ export const platform = {
 		'reading-row': 52,
 		'reading-more': 56,
 		// The status page's picture from 1128 (U-61.1, the prototype 09: 440 beside the words; 320 below 1128).
-		'status-art': 440
+		'status-art': 440,
+		// Wave 2 · screen 11 (U-66.2 Ε1): the reviews' window of one column, 664 at 744–1127 (720 = `document-wide` from
+		// 1128) and 800 high at most. Screen 13 (U-68.1 Ε1): the office's text column from 1128 (320 = `document-aside`).
+		'window-reviews-sm': 664,
+		'window-h': 800,
+		'office-aside': 400,
+		// Screens 14, 15 (U-70, U-72): the window of the services and the fields of expertise, Airbnb's 780.
+		'window-md': 780,
+		// U-70 Π5 / U-73 Π3: the widths of the box at which a row keeps its fee beside it and a card its numbers.
+		'row-wide': 520,
+		'card-wide': 340,
+		// Screens 18 + 21 (U-84): the inbox's list from 950 and from 1128; a bubble's most from 744 and the avatar beside
+		// it, the composer's pill and its «↑», all from 744 (below it the application's, U-81.2); its six lines, which are
+		// also where the #18's field starts, and that field's
+		// most; «Επικοινωνήστε με τον γιατρό» from 744; the pill «Προφίλ» of a conversation's bar.
+		'inbox-list-w': 380,
+		'inbox-list-w-lg': 400,
+		'inbox-art-w': 168,
+		'bubble-max-w': 560,
+		'bubble-avatar': 28,
+		'composer-min-h': 44,
+		'composer-send': 36,
+		'composer-field': 156,
+		'compose-field-max': 320,
+		'contact-w': 288,
+		'thread-pill-h': 36,
+		// The message in quote of a report: past it, it scrolls.
+		'quote-max-h': 140
 	},
 	// The sixth corner (U-25.4): 32, ONLY for the web's panels and windows from 744 (`rounded-panel`: the search
 	// panel 425, the filters window 568). The shared five (`radius`) stay the application's.
 	radius: {
-		panel: 32
+		panel: 32,
+		// Screen 21 (U-84.1, the approved prototype): a message's corner and the one that joins it to the next of its group.
+		bubble: 20,
+		'bubble-tail': 6
 	},
 	// The frosted surfaces of the frame (U-16.8, U-16.10): `backdrop-blur-bar` (apple.com's 20) and
 	// `backdrop-blur-glass` (the capsule's 7), emitted as the theme's `--blur-*`; `backdrop-blur-search` the

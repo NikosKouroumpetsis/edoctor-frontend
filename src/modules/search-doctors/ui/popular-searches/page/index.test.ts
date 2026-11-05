@@ -48,7 +48,7 @@ describe('PopularSearches (the footer’s «Δημοφιλείς αναζητή�
 				whereLabel: 'Αθήνα'
 			}
 		});
-		for (const tab of ['specialties', 'areas', 'online']) {
+		for (const tab of ['specialties', 'areas']) {
 			await user.click(screen.getByTestId(`footer-popular-tab-${tab}`));
 			const more = screen.queryByTestId('footer-popular-more');
 			if (more) await user.click(more);
@@ -63,15 +63,38 @@ describe('PopularSearches (the footer’s «Δημοφιλείς αναζητή�
 		}
 	});
 
-	it('U-16.9: «Online» is the video consultation in an area; «Περιοχές» every specialty of an area', async () => {
+	// Rewrites «U-16.9: «Online» is the video consultation in an area»: U-89.1 takes the column out of the product.
+	it('U-89.1: καμία βιντεοκλήση στις αναζητήσεις — no «Online» column and no link searches a video call, in Greek or English', async () => {
+		const user = userEvent.setup({ delay: null });
+		const view = render(PopularSearches);
+		const read = async () => {
+			expect(screen.queryByTestId('footer-popular-tab-online')).not.toBeInTheDocument();
+			expect(screen.getAllByRole('tab').map((tab) => tab.getAttribute('data-testid'))).toEqual([
+				'footer-popular-tab-specialties',
+				'footer-popular-tab-areas'
+			]);
+			for (const tab of ['specialties', 'areas']) {
+				await user.click(screen.getByTestId(`footer-popular-tab-${tab}`));
+				const more = screen.queryByTestId('footer-popular-more');
+				if (more) await user.click(more);
+				for (const link of within(screen.getByTestId('footer-popular-panel')).getAllByRole(
+					'link'
+				)) {
+					const text = `${link.textContent} ${decodeURIComponent(link.getAttribute('href') ?? '')}`;
+					expect(text).not.toMatch(/βιντεο|video|online/iu);
+				}
+			}
+		};
+		await read();
+		view.unmount();
+		(page as { url: URL }).url = new URL('http://localhost/en/doctors');
+		render(PopularSearches);
+		await read();
+	});
+
+	it('U-16.9: «Περιοχές» is every specialty of an area', async () => {
 		const user = userEvent.setup({ delay: null });
 		render(PopularSearches);
-		await user.click(screen.getByTestId('footer-popular-tab-online'));
-		const video = within(screen.getByTestId('footer-popular-panel')).getAllByRole('link')[0];
-		expect(paramsOf(video.getAttribute('href')).query).toMatchObject({
-			what: 'Βιντεοκλήση',
-			whatKind: 'text'
-		});
 		await user.click(screen.getByTestId('footer-popular-tab-areas'));
 		const area = within(screen.getByTestId('footer-popular-panel')).getAllByRole('link')[0];
 		expect(area).toHaveTextContent('Γιατροί όλων των ειδικοτήτων');

@@ -1,7 +1,11 @@
 export {
+	consentDecisionKey,
+	forgetRecordedConsent,
 	readConsentSnapshot,
+	readRecordedConsent,
 	sanitizeConsentSnapshot,
-	writeConsentSnapshot
+	writeConsentSnapshot,
+	writeRecordedConsent
 } from './consent-storage';
 export type { ConsentSnapshot } from './consent-storage';
 export {

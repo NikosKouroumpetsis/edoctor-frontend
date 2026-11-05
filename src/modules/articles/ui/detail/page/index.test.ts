@@ -1,3 +1,4 @@
+import { createRawSnippet } from 'svelte';
 import { afterEach, describe, expect, it } from 'vitest';
 import { render, screen, within } from '@testing-library/svelte';
 import type { ResolvedPathname } from '$app/types';
@@ -126,5 +127,31 @@ describe('articles::ui::detail', () => {
 		const share = screen.getByTestId('article-share-phone');
 		expect(share).toHaveAttribute('data-appearance', 'tint');
 		expect(share.innerHTML).toContain('size-control-sm');
+	});
+
+	it('U-78 (`23-helpful` Π1): «Ήταν χρήσιμο;» in the text’s column, last before «Περισσότερα άρθρα»', () => {
+		const helpful = createRawSnippet(() => ({ render: () => '<div data-testid="widget"></div>' }));
+		const { container } = render(ArticleDetail, {
+			props: props({ helpful, related: [article({ slug: 'allo' })] })
+		});
+		const box = screen.getByTestId('article-helpful');
+		expect(box).toContainElement(screen.getByTestId('widget'));
+		expect(box).toHaveClass(
+			'mt-reading-gap',
+			'tablet:max-w-dialog',
+			'laptop:max-w-document-column'
+		);
+		const more = container.querySelector('[data-slot="document-page-footer"] section');
+		expect(more).not.toBeNull();
+		expect(box.compareDocumentPosition(more as Element)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+	});
+
+	it('U-78: it stays with no «Περισσότερα άρθρα» to come before; without it the page is as it was', () => {
+		const helpful = createRawSnippet(() => ({ render: () => '<div data-testid="widget"></div>' }));
+		const { unmount, container } = render(ArticleDetail, { props: props({ helpful }) });
+		expect(screen.getByTestId('widget')).toBeInTheDocument();
+		unmount();
+		render(ArticleDetail, { props: props() });
+		expect(container.querySelector('[data-slot="document-page-footer"]')).toBeNull();
 	});
 });

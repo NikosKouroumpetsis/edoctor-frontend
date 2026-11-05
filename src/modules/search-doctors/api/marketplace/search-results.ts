@@ -4,6 +4,7 @@ import {
 	queryOptions,
 	type QueryClient
 } from '@tanstack/svelte-query';
+import { personalQueryMeta } from '$shared/query';
 import type { SearchDoctorsScope } from './build-search-query';
 import { mapFacetsToFilterFacts } from './facets-adapter';
 import { fetchFilterFacets } from './facets-source';
@@ -30,26 +31,61 @@ const FILTER_FACETS_STALE_TIME = 5 * 60 * 1000;
 
 /**
  * 🔴 A submitted search as an INFINITE (cursor) read: each page five cards, the next by the page's `nextCursor`
- * while `hasNextPage` holds; the scope hashed into the key, so a new search starts at page one.
+ * while `hasNextPage` holds; the scope hashed into the key, so a new search starts at page one. 🔴 U-34.4: a member's
+ * pages come with the cookies and hold amounts: they live on a key of their own, and go at a sign-out; a guest's never
+ * show them.
  */
 export function searchResultsInfiniteQuery(
 	queryClient: QueryClient,
 	scope: SearchDoctorsScope,
-	lang: string
+	lang: string,
+	withSession = false
 ) {
 	return infiniteQueryOptions({
-		queryKey: marketplaceQueryKeys.searchResultsInfinite(scope, lang),
+		queryKey: [
+			...marketplaceQueryKeys.searchResultsInfinite(scope, lang),
+			withSession ? 'member' : 'guest'
+		] as const,
+		meta: withSession ? personalQueryMeta : undefined,
 		queryFn: ({ pageParam, signal }) =>
 			fetchSearchResults(
 				queryClient,
 				scope,
 				lang,
 				{ cursor: pageParam, limit: SEARCH_RESULTS_PAGE_LIMIT },
-				{ signal }
+				withSession ? { signal, withSession } : { signal }
 			),
 		initialPageParam: undefined as string | undefined,
 		getNextPageParam: (lastPage) =>
 			lastPage.hasNextPage ? (lastPage.nextCursor ?? undefined) : undefined
+	});
+}
+
+/**
+ * 🔴 U-34.4: the first page once more, for a member, with the session's cookies: the server drew it for a guest, so this
+ * ONE read brings the amounts: never again by itself (no focus, no reconnect). Never for a guest, and nothing else
+ * depends on it: a failure leaves the words as they are.
+ */
+export function memberFirstPageQuery(
+	queryClient: QueryClient,
+	scope: SearchDoctorsScope,
+	lang: string
+) {
+	return queryOptions({
+		queryKey: [...marketplaceQueryKeys.searchResultsInfinite(scope, lang), 'member-first'] as const,
+		meta: personalQueryMeta,
+		queryFn: ({ signal }) =>
+			fetchSearchResults(
+				queryClient,
+				scope,
+				lang,
+				{ limit: SEARCH_RESULTS_PAGE_LIMIT },
+				{ signal, withSession: true }
+			),
+		staleTime: 60_000,
+		retry: false,
+		refetchOnWindowFocus: false,
+		refetchOnReconnect: false
 	});
 }
 

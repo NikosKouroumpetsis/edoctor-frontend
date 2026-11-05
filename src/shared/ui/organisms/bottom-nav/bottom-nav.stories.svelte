@@ -26,6 +26,21 @@
 </Story>
 
 <!-- The same capsule on the dark theme: the dark card at 50 % with its own rim. -->
+<Story
+	name="With a badge"
+	args={{
+		items: sampleBottomNavItems.map((item) =>
+			item.key === 'messages' ? { ...item, badge: '2', badgeLabel: '2 αδιάβαστες' } : item
+		)
+	}}
+>
+	{#snippet template(args)}
+		<div class="relative flex min-h-sheet-sm w-full flex-col gap-3 bg-background p-6">
+			<BottomNav {...args} />
+		</div>
+	{/snippet}
+</Story>
+
 <Story name="In the dark theme" globals={{ theme: 'dark' }}>
 	{#snippet template(args)}
 		<div class="relative flex min-h-sheet-sm w-full flex-col gap-3 bg-background p-6">

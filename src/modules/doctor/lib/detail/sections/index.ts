@@ -1,12 +1,17 @@
 /**
  * The profile's windows (`details/*`, the application's `details/[section]`): their ids, their addresses and the
  * hints a link carries — the application's `focus` (a review's id; in `photos` a photo's place, from 0), `office`,
- * `date`, `service`. Read from untrusted addresses: only plain ids and a `YYYY-MM-DD` day survive.
+ * `date`, `service`, and the reviews' `mention`. Read from untrusted addresses: only plain ids, a `YYYY-MM-DD` day and
+ * a topic of the list survive.
  */
 
+import { isDoctorReviewTopic } from '$modules/doctor/api/reviews';
+import type { DoctorReviewTopic } from '$modules/doctor/config/review-topics';
+
 export const DOCTOR_DETAIL_SECTIONS = [
-	'description',
 	'services',
+	'specializations',
+	'know',
 	'location',
 	'reviews',
 	'availability',
@@ -25,6 +30,8 @@ export type DoctorDetailHints = {
 	office?: string;
 	date?: string;
 	service?: string;
+	/** U-66.2: the reviews' window opens on this topic. */
+	mention?: DoctorReviewTopic;
 };
 
 const HINT_ID = /^[A-Za-z0-9_-]{1,80}$/u;
@@ -40,7 +47,7 @@ export function readDoctorPhotoFocus(focus: string | undefined): number | undefi
 	return focus && PHOTO_FOCUS.test(focus) ? Number(focus) : undefined;
 }
 
-/** The hints of an address's query: ids by their pattern, the day as `YYYY-MM-DD`. */
+/** The hints of an address's query: ids by their pattern, the day as `YYYY-MM-DD`, the topic by the list (U-65.6). */
 export function readDoctorDetailHints(params: URLSearchParams): DoctorDetailHints {
 	const hints: DoctorDetailHints = {};
 	for (const key of ['focus', 'office', 'service'] as const) {
@@ -49,12 +56,19 @@ export function readDoctorDetailHints(params: URLSearchParams): DoctorDetailHint
 	}
 	const date = params.get('date');
 	if (date && HINT_DATE.test(date)) hints.date = date;
+	const mention = params.get('mention');
+	if (isDoctorReviewTopic(mention)) hints.mention = mention;
 	return hints;
 }
 
 /** The profile's address, before its language: `/doctors/<slug>`. */
 export function doctorProfilePath(slug: string): string {
 	return `/doctors/${encodeURIComponent(slug)}`;
+}
+
+/** 🔴 U-73.1 Ε1: the doctor's own page, before its language: `/doctors/<slug>/about` (and its old `details/description`). */
+export function doctorAboutPath(slug: string): string {
+	return `${doctorProfilePath(slug)}/about`;
 }
 
 /** A window's address, before its language: `/doctors/<slug>/details/<section>?<hints>`. */

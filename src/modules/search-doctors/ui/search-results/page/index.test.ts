@@ -1,14 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createRawSnippet } from 'svelte';
+import { SvelteMap } from 'svelte/reactivity';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
-import { onlineManager } from '@tanstack/svelte-query';
+import { focusManager, onlineManager } from '@tanstack/svelte-query';
 import { goto } from '$app/navigation';
 import { page } from '$app/state';
 import { resetServerClock } from '$shared/lib/server-clock';
-import { createQueryClient } from '$shared/query';
+import { createQueryClient, removePersonalQueries } from '$shared/query';
 import QueryHarness from '$shared/query/query.harness.svelte';
 import { SearchDock } from '$shared/state/search-dock';
+import { Session } from '$shared/state/session';
 import { prefetchSearchResults, type ResultsPageData } from '$modules/search-doctors/api/results';
 import type { SearchDoctorsSearchResults } from '$modules/search-doctors/api/marketplace/search-source';
 import type { SearchDoctorsCardFacts } from '$modules/search-doctors/api/marketplace/types';
@@ -163,6 +165,175 @@ afterEach(() => {
 });
 
 describe('search-doctors::ui::search-results', () => {
+	const memberSession = () =>
+		new Session({
+			status: () => 'member',
+			member: () => ({ firstName: null }),
+			signOut: async () => {}
+		});
+	const firstPageOf = (cards: SearchDoctorsCardFacts[]) => ({
+		firstPage: { scope: scopeOf(CARDIOLOGY), lang: 'el', page: pageOf(cards, { total: 2 }) },
+		serverNow: Date.now()
+	});
+
+	it('🔴 U-34.4: a guest keeps the server’s anonymous page, with NO second read', async () => {
+		visit(CARDIOLOGY);
+		render(AppClientHarness, { props: { data: firstPageOf([card('a')]) } });
+		expect(await screen.findByTestId('results-card')).toHaveTextContent('Συνδεθείτε για κόστος');
+		// U-99.2 (negative): the room is the home's alone.
+		expect(document.querySelector('[data-slot$="-price-room"]')).toBeNull();
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		expect(fetchSearchResults).not.toHaveBeenCalled();
+	});
+
+	it('🔴 U-34.4: a member reads the first page ONCE with the session, and only the fee changes', async () => {
+		visit(CARDIOLOGY);
+		fetchSearchResults.mockResolvedValue(
+			pageOf([card('a', { pricingVisible: true, primaryServicePrice: 60 })], { total: 2 })
+		);
+		render(AppClientHarness, {
+			props: { data: firstPageOf([card('a'), card('b')]), session: memberSession() }
+		});
+		await waitFor(() => expect(fetchSearchResults).toHaveBeenCalledTimes(1));
+		const [, , , request, context] = fetchSearchResults.mock.calls[0];
+		expect(request).toEqual({ limit: 5 });
+		expect(context).toMatchObject({ withSession: true });
+		const cards = () => screen.getAllByTestId('results-card');
+		await waitFor(() => expect(cards()[0]).toHaveTextContent('60'));
+		// A card the read did not bring keeps its words; the page's cards stay where they were.
+		expect(cards()).toHaveLength(2);
+		expect(cards()[1]).toHaveTextContent('Συνδεθείτε για κόστος');
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		expect(fetchSearchResults).toHaveBeenCalledTimes(1);
+	});
+
+	/** A session the test can end or start while the page is on the screen. */
+	const liveSession = (start: 'guest' | 'member') => {
+		const state = new SvelteMap([['status', start]]);
+		return {
+			session: new Session({
+				status: () => state.get('status') as 'guest' | 'member',
+				member: () => (state.get('status') === 'member' ? { firstName: null } : null),
+				signOut: async () => {}
+			}),
+			become: (status: 'guest' | 'member') => state.set('status', status)
+		};
+	};
+	const priced = { pricingVisible: true, primaryServicePrice: 60 };
+	const reachEnd = () =>
+		observed
+			.filter(({ node }) => node.getAttribute('data-slot') === 'results-next')
+			.at(-1)
+			?.callback(
+				[{ isIntersecting: true } as IntersectionObserverEntry],
+				{} as IntersectionObserver
+			);
+
+	it('🔴 U-34.4: a sign-out takes the amount of the first page at once, and asks nothing with the cookies', async () => {
+		visit(CARDIOLOGY);
+		fetchSearchResults.mockResolvedValue(pageOf([card('a', priced)]));
+		const { session, become } = liveSession('member');
+		render(AppClientHarness, { props: { data: firstPageOf([card('a')]), session } });
+		await waitFor(() => expect(screen.getByTestId('results-card')).toHaveTextContent('60'));
+		fetchSearchResults.mockClear();
+		become('guest');
+		await waitFor(() =>
+			expect(screen.getByTestId('results-card')).toHaveTextContent('Συνδεθείτε για κόστος')
+		);
+		expect(screen.getByTestId('results-card')).not.toHaveTextContent('60');
+		for (const [, , , , context] of fetchSearchResults.mock.calls) {
+			expect(context?.withSession).toBeUndefined();
+		}
+	});
+
+	it('🔴 U-34.4: the next pages a member read with the cookies do not stay either: their key is the member’s, and it goes', async () => {
+		visit(CARDIOLOGY);
+		const client = createQueryClient();
+		fetchSearchResults.mockImplementation(async (_client, _scope, _lang, request, context) => {
+			const amounts = context?.withSession ? priced : {};
+			return request.cursor
+				? pageOf([card('b', amounts)], { total: 2 })
+				: pageOf([card('a', amounts)], { total: 2, hasNextPage: true, nextCursor: 'c2' });
+		});
+		const { session, become } = liveSession('member');
+		render(AppClientHarness, {
+			props: { data: { firstPage: null, serverNow: null }, session, client }
+		});
+		await waitFor(() => expect(screen.getAllByTestId('results-card')[0]).toHaveTextContent('60'));
+		reachEnd();
+		await waitFor(() => expect(screen.getAllByTestId('results-card')).toHaveLength(2));
+		expect(screen.getAllByTestId('results-card')[1]).toHaveTextContent('60');
+		become('guest');
+		removePersonalQueries(client);
+		await waitFor(() =>
+			expect(screen.getAllByTestId('results-card')[0]).toHaveTextContent('Συνδεθείτε για κόστος')
+		);
+		for (const result of screen.getAllByTestId('results-card')) {
+			expect(result).not.toHaveTextContent('60');
+		}
+		const heldForMember = client
+			.getQueryCache()
+			.getAll()
+			.filter((query) => String(query.queryKey.at(-1)).startsWith('member'))
+			.filter((query) => query.state.data !== undefined);
+		expect(heldForMember).toEqual([]);
+	});
+
+	it('🔴 U-34.4: a guest who signs in with more pages open keeps them, each read once more with the cookies', async () => {
+		visit(CARDIOLOGY);
+		fetchSearchResults.mockImplementation(async (_client, _scope, _lang, request, context) => {
+			const amounts = context?.withSession ? priced : {};
+			return request.cursor
+				? pageOf([card('b', amounts)], { total: 2 })
+				: pageOf([card('a', amounts)], { total: 2, hasNextPage: true, nextCursor: 'c2' });
+		});
+		const { session, become } = liveSession('guest');
+		render(AppClientHarness, { props: { data: { firstPage: null, serverNow: null }, session } });
+		await screen.findByTestId('results-card');
+		reachEnd();
+		await waitFor(() => expect(screen.getAllByTestId('results-card')).toHaveLength(2));
+		become('member');
+		// The list never falls back to one page on the way.
+		await waitFor(() => expect(screen.getAllByTestId('results-card')[1]).toHaveTextContent('60'));
+		expect(screen.getAllByTestId('results-card')).toHaveLength(2);
+		expect(screen.getAllByTestId('results-card')[0]).toHaveTextContent('60');
+	});
+
+	it('🔴 R-7: the first page’s read for the amounts (`member-first`) is ONE: coming back to the tab or to the network past its minute does not ask it again', async () => {
+		visit(CARDIOLOGY);
+		fetchSearchResults.mockResolvedValue(pageOf([card('a', priced)]));
+		render(AppClientHarness, {
+			props: { data: firstPageOf([card('a')]), session: memberSession() }
+		});
+		await waitFor(() => expect(fetchSearchResults).toHaveBeenCalledTimes(1));
+		await waitFor(() => expect(screen.getByTestId('results-card')).toHaveTextContent('60'));
+		const reads = () =>
+			fetchSearchResults.mock.calls.filter(
+				([, , , request, context]) => context?.withSession && !('cursor' in request)
+			);
+		expect(reads()).toHaveLength(1);
+		const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 61_000);
+		focusManager.setFocused(false);
+		focusManager.setFocused(true);
+		onlineManager.setOnline(false);
+		onlineManager.setOnline(true);
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		focusManager.setFocused(undefined);
+		clock.mockRestore();
+		expect(reads()).toHaveLength(1);
+	});
+
+	it('U-34.4: a member’s failed read leaves the page’s words, never an error', async () => {
+		visit(CARDIOLOGY);
+		fetchSearchResults.mockRejectedValue(new Error('down'));
+		render(AppClientHarness, {
+			props: { data: firstPageOf([card('a')]), session: memberSession() }
+		});
+		await waitFor(() => expect(fetchSearchResults).toHaveBeenCalled());
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		expect(screen.getByTestId('results-card')).toHaveTextContent('Συνδεθείτε για κόστος');
+	});
+
 	it('§7.3 / S-32.10: the server’s first page shows at once — «Βρέθηκαν N γιατροί» on top, nothing under it, the list cards; no second read', async () => {
 		visit(CARDIOLOGY);
 		render(AppClientHarness, {

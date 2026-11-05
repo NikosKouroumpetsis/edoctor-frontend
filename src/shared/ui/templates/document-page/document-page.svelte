@@ -91,6 +91,7 @@
 	import { cn } from '$shared/lib/utils';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { BottomSheet, BottomSheetTitle } from '$shared/ui/molecules/bottom-sheet';
+	import { Breadcrumbs } from '$shared/ui/molecules/breadcrumbs';
 	import { PageBar } from '$shared/ui/organisms/page-bar';
 
 	let {
@@ -211,35 +212,7 @@
 	<div class="px-gutter-sm pb-section-lg tablet:px-profile-gutter laptop:px-profile-gutter-lg">
 		<div class="mx-auto w-full max-w-listing">
 			{#if breadcrumbs.length > 0}
-				<nav
-					aria-label={breadcrumbsLabel}
-					data-slot="document-page-breadcrumbs"
-					class="hidden pt-reading-crumbs tablet:block"
-				>
-					<ol class="flex flex-row flex-wrap items-center gap-x-2 text-label-md font-normal">
-						{#each breadcrumbs as crumb, index (index)}
-							{@const last = index === breadcrumbs.length - 1}
-							<li class="inline-flex flex-row items-center gap-2">
-								{#if index > 0}
-									<Ionicon name="chevron-forward" class="icon-xs shrink-0 text-muted-foreground" />
-								{/if}
-								{#if crumb.href}
-									<a
-										href={crumb.href}
-										class={cn(
-											'-my-4 inline-flex min-h-touch min-w-touch items-center text-foreground can-hover:hover:underline',
-											focusRing
-										)}>{crumb.label}</a
-									>
-								{:else}
-									<span aria-current={last ? 'page' : undefined} class="text-muted-foreground"
-										>{crumb.label}</span
-									>
-								{/if}
-							</li>
-						{/each}
-					</ol>
-				</nav>
+				<Breadcrumbs crumbs={breadcrumbs} label={breadcrumbsLabel ?? ''} />
 			{/if}
 
 			<div

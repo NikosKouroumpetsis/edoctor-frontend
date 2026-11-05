@@ -203,7 +203,9 @@ Every motion of the web is CSS of Tailwind on the `motion` tokens (`duration-<na
 `ease-<name>`, `design-tokens.md`), never a JS library, a Svelte transition or a class
 of `tw-animate-css` (U-12.2), and none of it reads the device's motion setting: no
 `motion-reduce:` / `motion-safe:`, no `prefers-reduced-motion` (U-12.1, the owner's Mac
-has «Reduce motion» on and must see them, as on flowbite). `tests/architecture/motion.test.ts`
+has «Reduce motion» on and must see them, as on flowbite). No coloured flash on what a link
+or a choice lands on: it scrolls and opens, and nothing lights up (U-100,
+`tests/architecture/no-focus-flash.test.ts`). `tests/architecture/motion.test.ts`
 guards both.
 
 - **A layer** (`Dialog`, `Sheet`, `Drawer` / `BottomSheet`, `ModalScreenSurface`,
@@ -666,7 +668,8 @@ words; the web's own idiom only where the platform needs it, e.g. an `aria-label
   play there (U-12.2 allows a theme keyframe).
 - `FavoriteButton` — `appearance="overlay"`: Airbnb's white outline over a dark see-through fill (the accent when
   saved), for a heart over a photo; the default stays the application's bare heart. The web adds no text shadow
-  (shadows are the elevation scale only).
+  (shadows are the elevation scale only). The doctor card draws it at `size="card-heart"`, 28, which draws Airbnb's
+  22,5 wide, 12 off the corner of the home's card and 16 off the results' (U-100).
 - `IconButton` — `iconSize="sm"` (the 16 glyph of the rails' 32 circle). `ErrorState` — an `icon` snippet above the
   words (the application's).
 
@@ -707,7 +710,16 @@ with the application's names:
 
 `Ionicon` is `aria-hidden` unless it gets a `label`, fills with `currentColor`
 and sizes with the `icon-*` scale. Brand marks are components of the same
-bucket (`BrandApple`, `BrandGoogle`, the laurel halves). A new glyph is added to
+bucket (`BrandApple`, `BrandAppleLeftAligned`, `BrandGoogle`, the laurel halves).
+Apple's two marks are its official files, unmodified (U-95, under the Developer
+Artwork License Agreement for Sign in with Apple): whole, at the height of their
+button, never `currentColor`, and white with a black mark on both themes (U-96).
+The two colours live in one place,
+`shared/preferences/theme/sign-in-provider-colors.ts`; the sign-in tiles pass the
+surface as `tileColor`, which a press marks on the border instead of darkening it.
+«Συνέχεια με Google» and «Συνέχεια με Apple» centre the mark and the title together,
+48 high at 16/500, as Airbnb's buttons (U-100).
+A new glyph is added to
 `glyphs.ts` from the application's font, never downloaded. Older screens still
 use Icones virtual imports (`~icons/lucide/*`, no new package); they move to
 `Ionicon` as their units are rebuilt. Do not import icon component packages such

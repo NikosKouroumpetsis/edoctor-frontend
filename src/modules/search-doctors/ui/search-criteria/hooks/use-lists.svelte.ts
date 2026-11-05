@@ -214,7 +214,7 @@ export class CriteriaLists {
 			key: `${option.kind}-${option.value}`,
 			label: option.label,
 			supportingLabel: option.supportingLabel,
-			icon: whatIcon(option.kind, option.label, option.slug),
+			icon: whatIcon(option.kind, option.label),
 			tileTone: 'neutral',
 			isSelected: isWhatSelected(option, state.criteria.whatSelection),
 			isBusy: false,

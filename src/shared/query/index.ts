@@ -1,1 +1,6 @@
-export { createQueryClient } from './query-client';
+export {
+	createQueryClient,
+	personalQueryMeta,
+	removePersonalQueries,
+	resetPersonalQueries
+} from './query-client';

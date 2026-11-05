@@ -4,6 +4,7 @@ import {
 	authorName,
 	buildHomeArticle,
 	buildStreamedHomeArticles,
+	cardReadingMinutes,
 	extractPlainText,
 	readingMinutes
 } from '.';
@@ -48,7 +49,7 @@ describe('articles::lib::article-card', () => {
 				id: 'a1',
 				slug: 'kardia',
 				title: 'Η υγεία της καρδιάς',
-				content: { content: [{ text: words(400) }] },
+				readingMinutes: 2,
 				authors: [{ name: 'Δρ. Μαρία Παπαδοπούλου', isPrimary: true }],
 				image: { mediumSizeUrl: 'https://cdn.example.com/a.jpg' }
 			},
@@ -106,5 +107,28 @@ describe('articles::lib::article-card (the streamed row, U-32.9)', () => {
 		await expect(
 			buildStreamedHomeArticles(Promise.resolve({ status: 'error' }), 'el')
 		).resolves.toEqual({ status: 'error' });
+	});
+
+	it('U-92: a card’s time is the server’s `readingMinutes`, `null` shows none, and a body is never counted', () => {
+		const base = {
+			id: 'a',
+			slug: 'a',
+			title: 'Τίτλος',
+			authors: [{ name: 'Δρ. Α', isPrimary: true }]
+		};
+		expect(buildHomeArticle({ ...base, readingMinutes: 7 }, 'el').meta).toBe(
+			'Δρ. Α · 7΄\u00a0ανάγνωσης'
+		);
+		expect(buildHomeArticle({ ...base, readingMinutes: null }, 'el').meta).toBe('Δρ. Α');
+		expect(buildHomeArticle(base, 'el').meta).toBe('Δρ. Α');
+		// A body that somehow travelled changes nothing: the card reads only the server's number.
+		expect(
+			buildHomeArticle(
+				{ ...base, readingMinutes: null, content: { content: [{ text: words(400) }] } },
+				'el'
+			).meta
+		).toBe('Δρ. Α');
+		expect(cardReadingMinutes({ readingMinutes: -1 })).toBe(0);
+		expect(cardReadingMinutes({ readingMinutes: Number.NaN })).toBe(0);
 	});
 });

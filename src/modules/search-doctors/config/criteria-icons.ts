@@ -2,7 +2,7 @@ import type { IoniconName } from '$shared/ui/icons/ionicon';
 
 /**
  * 🔴 The ONE place of the search rows' glyphs (U-21 / U-23.2, the wave record §6.2): a specialty has its own
- * (until then they all wore the same heart), a service the document (a video call the camera), a doctor the person,
+ * (until then they all wore the same heart), a service the document (U-89.1: no camera), a doctor the person,
  * an area the pin, «Κοντά μου» the arrow (drawn blue on a blue tile), a «Πότε;» row the calendar. A specialty is
  * found by the start of a word of its name, in Greek or English (a server label, a popular specialty or a static
  * fallback alike); one not listed wears `specialty`. U-29.1: the static maps only; the lookups are
@@ -11,7 +11,6 @@ import type { IoniconName } from '$shared/ui/icons/ionicon';
 export const criteriaIcons = {
 	specialty: 'medical-outline',
 	service: 'document-text-outline',
-	videoService: 'videocam-outline',
 	doctor: 'person-outline',
 	location: 'location-outline',
 	currentLocation: 'navigate-outline',

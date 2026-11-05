@@ -1,7 +1,8 @@
 import type { QueryClient } from '@tanstack/svelte-query';
 
+import type { SectionId } from '$modules/search-doctors/types';
 import { mapCardToFacts } from './card-adapter';
-import type { CategoryScope } from './category-scope';
+import { EMPTY_CATEGORY_SCOPE, type CategoryScope } from './category-scope';
 import { searchDoctors } from './endpoints';
 import { resolveLocationSlug, resolveSpecialtyScope, type ResolvedProfessional } from './resolvers';
 import { HOME_SECTION_LIMIT, termFor, type HomeSectionConfig } from './sections';
@@ -126,6 +127,22 @@ export async function buildSectionQuery(
 	};
 }
 
+/** One section's search as it stands, its scope already resolved: the cards as facts (U-32.1), and no link to build. */
+export async function searchHomeSection(
+	id: SectionId,
+	params: MarketplaceSearchParams,
+	context: MarketplaceRequestContext = {}
+): Promise<SearchDoctorsSection> {
+	const result = await searchDoctors(params, context);
+	return {
+		id,
+		items: result.items.map((card) =>
+			mapCardToFacts(card, { pricingVisible: result.pricingVisible })
+		),
+		link: null
+	};
+}
+
 /**
  * Runs one home section: resolves the scope, searches, adapts the cards to their facts (U-32.1). A section whose
  * location does not resolve comes back empty (no search), and the page hides it.
@@ -143,13 +160,25 @@ export async function fetchHomeSection(
 		return { id: config.id, items: [], link: null };
 	}
 
-	const result = await searchDoctors(query.params, context);
+	return { ...(await searchHomeSection(config.id, query.params, context)), link: query.link };
+}
 
-	return {
-		id: config.id,
-		items: result.items.map((card) =>
-			mapCardToFacts(card, { pricingVisible: result.pricingVisible })
-		),
-		link: query.link
-	};
+/**
+ * 🔴 R-7: a member's row, with the session's cookies: the search the server has already resolved, so nothing is resolved
+ * again; `null`: the server had no search for it (hidden), and nothing is asked. A row whose answer holds no search (a
+ * failed one) resolves it here.
+ */
+export async function fetchMemberHomeSection(
+	queryClient: QueryClient,
+	config: HomeSectionConfig,
+	serverParams: Promise<MarketplaceSearchParams | null | undefined>,
+	lang: string,
+	signal: AbortSignal
+): Promise<SearchDoctorsSection> {
+	const params = await serverParams;
+	if (params === null) return { id: config.id, items: [], link: null };
+	const context = { signal, withSession: true };
+	return params
+		? searchHomeSection(config.id, params, context)
+		: fetchHomeSection(queryClient, config, EMPTY_CATEGORY_SCOPE, lang, context);
 }

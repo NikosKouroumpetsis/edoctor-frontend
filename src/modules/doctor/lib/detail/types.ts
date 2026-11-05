@@ -1,8 +1,11 @@
+import type { DoctorWeeklyHoursRow } from './weekly-hours';
 import type {
 	DoctorOfficePaymentOptionId,
 	DoctorReviewChipId,
+	DoctorServiceKind,
 	DoctorSocialLinkId
 } from '$modules/doctor/api/profile';
+import type { DoctorReviewTopic } from '$modules/doctor/config/review-topics';
 
 /**
  * The profile's view model (the application's `lib/detail/types`, S-01.6, with the owner's U-34…U-42): every word,
@@ -103,39 +106,88 @@ export type DoctorDetailProfessionalSection = {
 	infoRows: DoctorDetailProfessionalInfoRow[];
 	socialLinks: DoctorDetailProfessionalLink[];
 	about?: DoctorDetailProfessionalAbout;
-	/** Whether the description has a body beyond its lead (the window «Εμφάνιση περισσότερα» opens). */
-	hasMore: boolean;
 };
 
 /**
- * «Τομείς εξειδίκευσης» (U-36.2, the application's `DoctorDetailSpecializations`): the services marked as
- * specializations; the visits line waits for the backend.
+ * U-70, U-71.2 (screen 14): one service as a row: its short line, its kind (the icon), the fee, «30΄» and the text
+ * under «Περιγραφή» (each only with data, U-34.3).
  */
-export type DoctorDetailSpecializations = {
-	title: string;
-	/** U-36.1 / U-43.1: «Ολοκληρωμένες επισκέψεις (6 μήνες): 523» — `null` until the backend sends the count. */
-	completedVisits: string | null;
-	items: { id: string; title: string; body?: string }[];
-};
-
-/** One priced service (the application's `DoctorPricedService`). */
 export type DoctorPricedService = {
 	id: string;
 	title: string;
+	subtitle?: string;
+	kind: DoctorServiceKind;
 	price: DoctorDetailFee;
-	includesBody: string;
+	/** «30΄», and how a screen reader says it («30 λεπτά»). */
+	durationLabel?: string;
+	durationAccessibleLabel?: string;
 	descriptionBody?: string;
 };
 
+/**
+ * «Τομείς εξειδίκευσης» of the profile (U-36.2, U-72.3 Π1): the first three as rows and the way to their page; the
+ * visits line only once the backend sends it.
+ */
+export type DoctorDetailSpecializations = {
+	title: string;
+	/** U-36.1 / U-72.4: «Ολοκληρωμένες επισκέψεις: 523» — `null` until the backend sends the count. */
+	completedVisits: string | null;
+	items: DoctorPricedService[];
+	moreLabel: string;
+};
+
+/** «Υπηρεσίες» of the profile (U-70.2 Ε3, Π7): the first three as rows; `moreLabel` only when the page has more to say. */
 export type DoctorDetailServiceCost = {
 	title: string;
 	notice: string;
-	costLabel: string;
-	includesLabel: string;
-	descriptionLabel: string;
-	/** The section's first three (the window has them all). */
 	services: DoctorPricedService[];
-	hasMore: boolean;
+	moreLabel: string | null;
+};
+
+/** One group of the page «Υπηρεσίες» (Π4): only with a field of expertise do they have titles. */
+export type DoctorServicesGroup = {
+	id: 'specializations' | 'other' | 'all';
+	title?: string;
+	services: DoctorPricedService[];
+};
+
+/** 🔴 U-70 (screen 14): the page of every service. */
+export type DoctorServicesPage = {
+	title: string;
+	notice: string;
+	descriptionLabel: string;
+	readMoreLabel: string;
+	bookLabel: string;
+	groups: DoctorServicesGroup[];
+	/** Π8: a single service is already open, there is no choice to make. */
+	soloId?: string;
+};
+
+/** One figure of the page's card (U-72.3 Π3): its number, its words, what a screen reader says. */
+export type DoctorSpecializationStat = {
+	id: 'domains' | 'visits' | 'years';
+	value: string;
+	label: string;
+	accessibleLabel: string;
+};
+
+/** A field of expertise (Π4): a service with its years and its visits, each only with a number above zero. */
+export type DoctorSpecializationDomain = DoctorPricedService & {
+	years?: { value: string; label: string };
+	visits?: { value: string; label: string };
+};
+
+/** 🔴 U-72 (screen 15): the page of the fields of expertise. */
+export type DoctorSpecializationsPage = {
+	title: string;
+	statsLabel: string;
+	/** Never one cell alone: the list already says how many there are. */
+	stats: DoctorSpecializationStat[];
+	domains: DoctorSpecializationDomain[];
+	readMoreLabel: string;
+	bookLabel: string;
+	backLabel: string;
+	footnote?: string;
 };
 
 /** One review card (the application's `DoctorDetailReviewCardContent`). */
@@ -157,6 +209,15 @@ export type DoctorDetailReviewCardContent = {
 	aspectsLabel?: string;
 };
 
+/**
+ * 🔴 U-66.1 Π7, Π8: a review of the window's list: the day in words («Πριν από 3 ημέρες»), half stars (U-49), the
+ * doctor's reply when there is an approved one.
+ */
+export type DoctorReviewListCard = DoctorDetailReviewCardContent & {
+	relativeLabel: string;
+	reply?: { lead: string; author: string; dateLabel: string; body: string };
+};
+
 export type DoctorDetailReviewChip = { id: DoctorReviewChipId; title: string; score: string };
 
 export type DoctorDetailReviews = {
@@ -172,6 +233,119 @@ export type DoctorDetailReviews = {
 };
 
 export type DoctorBioGroup = { id: string; title: string; countLabel: string; items: string[] };
+
+/** U-73.1 Ε2: one entry of the biography's timeline; without a year, the words alone. */
+export type DoctorTimelineEntry = {
+	id: string;
+	title: string;
+	organization?: string;
+	/** «2014 – 2016», «2016 – σήμερα», «2025», and how a screen reader says it. */
+	whenLabel?: string;
+	whenAccessibleLabel?: string;
+};
+
+/** One group of the timeline (Σπουδές · Εμπειρία · Συνέδρια), the newest first. */
+export type DoctorTimelineGroup = {
+	id: 'studies' | 'work-experience' | 'conferences';
+	title: string;
+	entries: DoctorTimelineEntry[];
+	moreLabel: string;
+	fewerLabel: string;
+};
+
+/** One icon row of the page (Π4): its glyph's id, its name and its value. */
+export type DoctorAboutRowId =
+	| 'specialty'
+	| 'member-since'
+	| 'languages'
+	| 'license'
+	| 'response-time'
+	| 'instant'
+	| 'response-rate';
+export type DoctorAboutRow = { id: DoctorAboutRowId; label: string; value: string };
+
+/** 🔴 U-73 (screen 16): the page «Γνωρίστε τον επαγγελματία υγείας»: every part only with data (U-34.3). */
+export type DoctorAboutContent = {
+	title: string;
+	name: string;
+	role: string;
+	initial: string;
+	imageUrl?: string;
+	/** 🔴 U-45.2: only when the backend says `isPatientsChoice`. */
+	badgeLabel?: string;
+	stats: { id: 'reviews' | 'rating' | 'experience'; value: string; label: string }[];
+	rows: DoctorAboutRow[];
+	socialLinks: DoctorDetailProfessionalLink[];
+	/** The whole description (U-42.1), its paragraphs apart. */
+	description?: string;
+	descriptionMoreLabel: string;
+	bio?: { title: string; groups: DoctorTimelineGroup[] };
+	reviews?: {
+		title: string;
+		cards: DoctorDetailReviewCardContent[];
+		moreLabel: string;
+		showAllLabel: string;
+	};
+	articlesTitle: string;
+};
+
+/** 🔴 U-75 (screen 24): the three blocks of «Τι πρέπει να γνωρίζετε», and the page each opens. */
+export type DoctorKnowPageId = 'cancel' | 'booking' | 'before';
+
+export type DoctorKnowBlock = { id: DoctorKnowPageId; title: string; lines: string[] };
+
+/** One row of a page: `id` its glyph (a UI decision), the label and the line under it; `phone` a `tel:` to press. */
+export type DoctorKnowRowId =
+	| 'cancel-until'
+	| 'cancel-after'
+	| 'cancel-request'
+	| 'cancel-moved'
+	| 'change-until'
+	| 'doctor-cancels'
+	| 'other-office'
+	| 'auto'
+	| 'manual'
+	| 'expiry'
+	| 'notice'
+	| 'who'
+	| 'account'
+	| 'free'
+	| 'reminder'
+	| 'note'
+	| 'payment'
+	| 'bring-id'
+	| 'bring-amka'
+	| 'bring-tests'
+	| 'bring-medicines'
+	| 'bring-referral';
+export type DoctorKnowRow = {
+	id: DoctorKnowRowId;
+	/** A row of the same glyph may appear more than once («Στα άλλα ιατρεία»). */
+	key: string;
+	label: string;
+	sub?: string;
+	phone?: { label: string; dialNumber: string };
+};
+export type DoctorKnowGroup = { heading?: string; intro?: string; rows: DoctorKnowRow[] };
+
+/** Where a page's link leads (the addresses are the screen's). */
+export type DoctorKnowLinkId = 'help-cancellation' | 'help-booking' | 'offices';
+
+export type DoctorKnowPage = {
+	id: DoctorKnowPageId;
+	title: string;
+	intro: DoctorTextSegment[];
+	groups: DoctorKnowGroup[];
+	link: { id: DoctorKnowLinkId; label: string };
+};
+
+export type DoctorKnowContent = {
+	title: string;
+	/** U-75.1 Ε4: only when the offices' rules differ: the pills, and «Ισχύει για το ιατρείο **Χ**.». */
+	officeLine?: DoctorTextSegment[];
+	blocks: DoctorKnowBlock[];
+	pages: Partial<Record<DoctorKnowPageId, DoctorKnowPage>>;
+};
 
 /** One office row of the location (glyph id, label, value; the phone's dial number for `tel:`). */
 export type DoctorOfficeInfoRowId = 'phone' | 'floor' | 'parking' | 'disability-access';
@@ -204,6 +378,20 @@ export type DoctorLocation = {
 	dialNumber?: string;
 };
 
+/**
+ * 🔴 U-68.1 (screen 13): the page «Τα ιατρεία» / «Το ιατρείο» of the active office: the name, the way there (the map's
+ * directions and «Πώς θα έρθετε»), the week and the photos, which only the office's own read has.
+ */
+export type DoctorOfficePage = {
+	title: string;
+	location: DoctorLocation | undefined;
+	directionsUrl: string | null;
+	directionsLabel: string;
+	gettingThere?: string;
+	hours: DoctorWeeklyHoursRow[];
+	photos: DoctorPhoto[];
+};
+
 /** The page's sections, each present only with data (U-34.3); `soon` only when every one is absent. */
 export type DoctorDetailContent = {
 	identity: DoctorDetailIdentity;
@@ -213,7 +401,7 @@ export type DoctorDetailContent = {
 	specializations?: DoctorDetailSpecializations;
 	serviceCost?: DoctorDetailServiceCost;
 	reviews?: DoctorDetailReviews;
-	bio?: { title: string; groups: DoctorBioGroup[] };
+	bio?: { title: string; groups: DoctorBioGroup[]; allLabel: string };
 	/** U-34.3: «Το αναλυτικό προφίλ έρχεται σύντομα», alone, when the doctor has nothing at all to show. */
 	soonTitle: string | null;
 };
@@ -291,20 +479,29 @@ export type DoctorAvailabilityModalContent = {
 export type DoctorReviewSortId = 'newest' | 'oldest' | 'rating-high' | 'rating-low';
 export type DoctorDetailReviewSortOption = { id: DoctorReviewSortId; label: string };
 export type DoctorDetailReviewRatingBucket = { star: number; count: number; share: number };
+/**
+ * U-66.1 (the window's head, the list is its own read): the score over the badge's explanation; the spread and the
+ * aspects only once the server's totals are in (`ratings`).
+ */
 export type DoctorReviewsModalContent = {
 	title: string;
 	/** 🔴 U-45.2: the laurels' `badgeTitle` and its `description` only when the backend says `isPatientsChoice`. */
-	header?: { scoreLabel: string; badgeTitle?: string; description?: string; countLabel: string };
-	countLabel: string;
+	header?: { scoreLabel: string; badgeTitle?: string; description?: string };
+	howLabel: string;
 	ratings: {
 		title: string;
 		categoriesLabel: string;
 		buckets: DoctorDetailReviewRatingBucket[];
 		chips: DoctorDetailReviewChip[];
-	};
+	} | null;
+	/** U-66.2 «Οι ασθενείς αναφέρουν»: `null` without a topic. */
+	mentions: {
+		title: string;
+		clearLabel: string;
+		chips: { id: DoctorReviewTopic; label: string; count: string; ariaLabel: string }[];
+	} | null;
 	sortLabel: string;
 	sortOptions: DoctorDetailReviewSortOption[];
-	cards: DoctorDetailReviewCardContent[];
 };
 
 /**

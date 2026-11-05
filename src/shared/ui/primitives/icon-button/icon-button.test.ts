@@ -84,6 +84,31 @@ describe('IconButton', () => {
 		expect(onclick).not.toHaveBeenCalled();
 	});
 
+	it('U-96: a tile with a brand’s surface keeps it at rest, and a press marks its border instead of darkening it', () => {
+		render(IconButton, {
+			props: {
+				appearance: 'tile',
+				size: 'xl',
+				tileColor: '#FFFFFF',
+				icon: 'close',
+				'aria-label': 'Brand'
+			}
+		});
+		const tile = screen.getByRole('button', { name: 'Brand' });
+		expect(tile).toHaveStyle({ backgroundColor: '#FFFFFF' });
+		expect(tile).toHaveClass('active:border-2', 'active:border-primary', 'border-border');
+		expect(tile).not.toHaveClass('active:bg-muted');
+	});
+
+	it('U-96: a tile without one stays the theme’s, with its grey press', () => {
+		render(IconButton, {
+			props: { appearance: 'tile', size: 'xl', icon: 'close', 'aria-label': 'Plain' }
+		});
+		const tile = screen.getByRole('button', { name: 'Plain' });
+		expect(tile.getAttribute('style') ?? '').not.toContain('background');
+		expect(tile).toHaveClass('active:bg-muted', 'bg-card');
+	});
+
 	it('U-03.1: decorative draws the look without a target; href makes it a link', () => {
 		const still = render(IconButton, {
 			props: { icon: 'arrow-forward', decorative: true, 'aria-label': 'x' }
@@ -182,5 +207,27 @@ describe('IconButton', () => {
 			{ appearance: 'outline', surface: 'card' }
 		];
 		expect(looks).toHaveLength(10);
+	});
+
+	it('U-78: `pressed` says so aloud and wears the 2 dark ring, inset, so nothing moves', () => {
+		const { unmount } = render(IconButton, {
+			props: { 'aria-label': 'Ναι', appearance: 'tile', size: 'touch', icon: 'add', pressed: true }
+		});
+		const tile = screen.getByRole('button', { name: 'Ναι' });
+		expect(tile).toHaveAttribute('aria-pressed', 'true');
+		expect(tile).toHaveClass('border-foreground', 'ring-1', 'ring-foreground', 'ring-inset');
+		unmount();
+		render(IconButton, {
+			props: { 'aria-label': 'Ναι', appearance: 'outline', size: 'sm', icon: 'add', pressed: true }
+		});
+		const circle = screen.getByRole('button', { name: 'Ναι' });
+		expect(shapeOf(circle)).toHaveClass('border-foreground', 'ring-1', 'ring-inset');
+	});
+
+	it('U-78 (negative): without `pressed` no state is announced and no ring is drawn', () => {
+		render(IconButton, { props: { 'aria-label': 'Ναι', icon: 'add' } });
+		const button = screen.getByRole('button', { name: 'Ναι' });
+		expect(button).not.toHaveAttribute('aria-pressed');
+		expect(shapeOf(button)).not.toHaveClass('ring-1');
 	});
 });

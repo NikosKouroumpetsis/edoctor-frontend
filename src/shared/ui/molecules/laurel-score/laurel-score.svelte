@@ -2,7 +2,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 
 	/** A distinction (`normal`, `large`) or a review score (`score`) between two laurels (M-05 ε/στ). */
-	export type LaurelScoreSize = 'normal' | 'large' | 'score';
+	export type LaurelScoreSize = 'normal' | 'large' | 'score' | 'score-window';
 
 	type LaurelLook = { row: string; glyph: string; label: string };
 
@@ -22,6 +22,12 @@
 			row: 'flex-row items-center justify-center gap-2.5',
 			glyph: 'icon-xl',
 			label: 'text-display-xl font-semibold text-foreground'
+		},
+		// U-66.1 Π3: the score of the reviews' window from 744 (64 between laurels of 56); as `score` on the phone.
+		'score-window': {
+			row: 'flex-row items-center justify-center gap-2.5 tablet:gap-3.5',
+			glyph: 'icon-xl tablet:size-control-lg',
+			label: 'text-display-xl font-semibold text-foreground tabular-nums tablet:text-score-window'
 		}
 	};
 

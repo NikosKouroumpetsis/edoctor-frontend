@@ -3,6 +3,7 @@ import { PLATFORM_TIME_ZONE } from '$shared/config/time-zone';
 import { formatCalendarDay } from '$shared/lib/calendar-day';
 import { formatClock, formatDecimal, formatEuro, readZonedParts } from '$shared/lib/format';
 import { formatDayTime, formatInstantDayTime } from '$shared/lib/format-day-time';
+import { withDoctorTitle } from '$shared/lib/text';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type {
 	DoctorAvailabilityFacts,
@@ -15,6 +16,7 @@ import type {
 	DoctorReviewChipId,
 	DoctorSocialLinkId
 } from '$modules/doctor/api/profile';
+import type { DoctorReviewTopic } from '$modules/doctor/config/review-topics';
 import type { DoctorDetailFee, DoctorOfficeInfoRowId, DoctorTextSegment } from '../types';
 
 /**
@@ -68,6 +70,11 @@ export function feeView(
 
 export function doctorNameLabel(name: string | undefined, locale: SupportedLocale): string {
 	return name?.trim() || m.doctor_name_unknown({}, options(locale));
+}
+
+/** 🔴 U-99.1: the doctor's name inside a sentence; the words for a doctor with no name stay words, with no title. */
+export function doctorSentenceName(name: string | undefined, locale: SupportedLocale): string {
+	return name?.trim() ? withDoctorTitle(name) : doctorNameLabel(name, locale);
 }
 
 export function specialtyLabel(
@@ -203,6 +210,20 @@ export function reviewChipTitle(id: DoctorReviewChipId, locale: SupportedLocale)
 	return REVIEW_CHIP_TITLES[id]({}, options(locale));
 }
 
+// 🔴 U-91.2: six topics, the labels of P-TH §3.1 (neutral nouns: a topic counts praise and complaint alike, U-66.2).
+const REVIEW_TOPIC_LABELS = {
+	COURTESY: m.doctor_reviews_mentions_topic_courtesy,
+	EXPLANATION: m.doctor_reviews_mentions_topic_explanation,
+	ORGANIZATION: m.doctor_reviews_mentions_topic_organization,
+	CLEANLINESS: m.doctor_reviews_mentions_topic_cleanliness,
+	PATIENCE: m.doctor_reviews_mentions_topic_patience,
+	ACCESS: m.doctor_reviews_mentions_topic_access
+} as const satisfies Record<DoctorReviewTopic, unknown>;
+
+export function reviewTopicLabel(topic: DoctorReviewTopic, locale: SupportedLocale): string {
+	return REVIEW_TOPIC_LABELS[topic]({}, options(locale));
+}
+
 /**
  * One review's own aspects in a line, on the 5 stars in half stars (U-49): «Εμπιστοσύνη 4,5 · Εξειδίκευση 5 …» ('' without
  * any), the page's decimal mark.
@@ -239,6 +260,32 @@ export function reviewPublishedLabel(publishedAt: string, locale: SupportedLocal
 		timeZone: PLATFORM_TIME_ZONE,
 		year: 'numeric'
 	});
+}
+
+const DAY_MS = 86_400_000;
+const DAYS_IN_WEEK = 7;
+/** U-66.1 Π7: from four weeks on, the month and the year. */
+const RELATIVE_DAYS_LIMIT = 28;
+
+/**
+ * 🔴 U-66.1 Π7 (app = web): a review's day in the window: «Σήμερα», «Πριν από N ημέρες / εβδομάδες», and from four weeks
+ * on «Νοέμβριος 2025» (D-118: `now` is the server's clock).
+ */
+export function reviewRelativeDateLabel(at: string, locale: SupportedLocale, now: number): string {
+	const parsed = Date.parse(at);
+	if (Number.isNaN(parsed)) return '';
+	const days = Math.floor((now - parsed) / DAY_MS);
+	if (days < 1) return m.doctor_reviews_today({}, { locale });
+	if (days === 1) return m.doctor_reviews_day_one({}, { locale });
+	if (days < DAYS_IN_WEEK) return m.doctor_reviews_days({ count: days }, { locale });
+	if (days >= RELATIVE_DAYS_LIMIT) {
+		const label = reviewPublishedLabel(at, locale);
+		return label.charAt(0).toLocaleUpperCase(locale) + label.slice(1);
+	}
+	const weeks = Math.floor(days / DAYS_IN_WEEK);
+	return weeks === 1
+		? m.doctor_reviews_week_one({}, { locale })
+		: m.doctor_reviews_weeks({ count: weeks }, { locale });
 }
 
 const OFFICE_ROW_LABELS = {

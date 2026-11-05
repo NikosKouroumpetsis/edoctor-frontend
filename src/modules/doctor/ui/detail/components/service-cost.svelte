@@ -1,58 +1,57 @@
 <script lang="ts">
 	import type { ResolvedPathname } from '$app/types';
-	import { InlineNotice } from '$shared/ui/molecules/inline-notice';
+	import type { SignInRequest } from '$shared/state/session';
 	import { Button } from '$shared/ui/primitives/button';
 	import type { DoctorDetailServiceCost } from '$modules/doctor/lib/detail';
-	import PricedService from './priced-service.svelte';
 	import ProfileSection from './profile-section.svelte';
+	import ServiceRow from './service-row.svelte';
 
 	let {
 		content,
-		moreLabel,
 		moreHref,
+		rowHref,
 		onOpenMore,
+		onOpenRow,
 		onSignIn
 	}: {
 		content: DoctorDetailServiceCost;
-		moreLabel: string;
 		/** `details/services`: every service. */
 		moreHref: ResolvedPathname;
+		/** `details/services?focus=…`: the page, open on this row. */
+		rowHref: (serviceId: string) => ResolvedPathname;
 		onOpenMore: (event: MouseEvent) => void;
-		onSignIn: () => void;
+		onOpenRow: (serviceId: string, event: MouseEvent) => void;
+		onSignIn: (request?: SignInRequest) => void;
 	} = $props();
 </script>
 
-<!-- 🔴 U-34.4 / U-38.1 (app = web, the application's `ServiceCostSection`): «Κόστος υπηρεσιών» — the notice and the
-     first three services, each with its fee (the amount for a member, the guest's «🔒 Συνδεθείτε για κόστος»), and
-     «Εμφάνιση περισσότερα» only past three. The mock's support rows are not drawn (U-30.2: their data stays). -->
+<!-- 🔴 U-70.2 Ε3, Π7 / U-34.4 / U-38.1 (app = web): «Υπηρεσίες» — the notice in one muted line and the first three as
+     rows (a guest's «🔒 Συνδεθείτε για κόστος», a press opens the page on that row), then the way to all of them when
+     the page has more to say. -->
 <ProfileSection id="service-cost" title={content.title}>
-	<div class="flex flex-col gap-6">
-		<InlineNotice
-			message={content.notice}
-			variant="tint"
-			testId="doctor-detail-service-cost-notice"
-		/>
-		<div class="flex flex-col gap-6">
-			{#each content.services as service (service.id)}
-				<PricedService
-					{service}
-					costLabel={content.costLabel}
-					includesLabel={content.includesLabel}
-					descriptionLabel={content.descriptionLabel}
-					{onSignIn}
-				/>
-			{/each}
-		</div>
-		{#if content.hasMore}
-			<Button
-				tone="muted"
-				bordered={false}
-				label={moreLabel}
-				href={moreHref}
-				onclick={onOpenMore}
-				data-testid="doctor-detail-service-cost-show-more"
-				class="w-full tablet:w-auto tablet:self-start"
+	<p data-testid="doctor-detail-service-cost-notice" class="text-body-sm text-muted-foreground">
+		{content.notice}
+	</p>
+	<div class="mt-2 flex flex-col">
+		{#each content.services as service (service.id)}
+			<ServiceRow
+				{service}
+				href={rowHref(service.id)}
+				onclick={(event) => onOpenRow(service.id, event)}
+				{onSignIn}
+				class="border-b border-border/60 last:border-b-0"
 			/>
-		{/if}
+		{/each}
 	</div>
+	{#if content.moreLabel}
+		<Button
+			tone="muted"
+			bordered={false}
+			label={content.moreLabel}
+			href={moreHref}
+			onclick={onOpenMore}
+			data-testid="doctor-detail-service-cost-show-more"
+			class="mt-4 w-full tablet:w-auto tablet:self-start"
+		/>
+	{/if}
 </ProfileSection>

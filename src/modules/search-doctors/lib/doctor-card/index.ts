@@ -185,3 +185,25 @@ export function buildSearchResultCard(
 		pinLabel: card.pricingVisible && price !== null ? formatEuro(price, locale) : null
 	};
 }
+
+/**
+ * 🔴 U-34.4 (app = web): the page's cards with a member's fees laid over them, by doctor: only the fee's words and the
+ * pin's price change, so nothing on the page moves, and a card the member's read did not bring, or brought hidden, stays
+ * as it is.
+ */
+export function overlayMemberFees<Card extends DoctorCard & { pinLabel?: string | null }>(
+	cards: readonly Card[],
+	member: readonly (DoctorCard & { pinLabel?: string | null })[] | undefined
+): Card[] {
+	if (!member) return [...cards];
+	const byId = new Map(member.map((card) => [card.id, card]));
+	return cards.map((card) => {
+		const own = byId.get(card.id);
+		if (!own || own.fee.kind === 'login') return card;
+		return {
+			...card,
+			fee: own.fee,
+			...('pinLabel' in card && own.pinLabel !== undefined ? { pinLabel: own.pinLabel } : {})
+		};
+	});
+}

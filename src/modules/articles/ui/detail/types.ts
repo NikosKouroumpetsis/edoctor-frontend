@@ -1,3 +1,4 @@
+import type { Snippet } from 'svelte';
 import type { ResolvedPathname } from '$app/types';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type { ArticlePublicView } from '$modules/articles/api';
@@ -21,4 +22,6 @@ export type ArticleDetailProps = {
 	/** The `<head>`: the article's absolute address and its languages (the site's public origin, U-28.4). */
 	canonicalUrl: string;
 	alternateUrls: Record<SupportedLocale, string>;
+	/** U-78: «Ήταν χρήσιμο;», last before «Περισσότερα άρθρα» (the helpful module's, composed by the screen). */
+	helpful?: Snippet;
 };

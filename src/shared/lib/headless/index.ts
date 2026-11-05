@@ -13,6 +13,8 @@ export { dismissable, type DismissableOptions } from './dismissable';
 export { escapeKeydown, type EscapeKeydownOptions } from './escape';
 export { LEAVE_GRACE_MS, leaveTimeout, isMoving } from './motion';
 export { Presence, type PresenceState } from './presence.svelte';
+export { measureFlip, playFlip, type FlipPositions } from './flip';
+export { SheetDrag } from './sheet-drag.svelte';
 export { scrollLock, lockBodyScroll, __getLockCount } from './scroll-lock';
 export {
 	handleRovingKeydown,

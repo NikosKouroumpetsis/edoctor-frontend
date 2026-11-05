@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { RichText } from '$shared/ui/molecules/rich-text';
 	import { AccordionDetails } from '$shared/ui/primitives/accordion';
 	import type { FaqQuestion } from '$modules/help/lib/faq';
@@ -10,7 +11,8 @@
 		lang,
 		highlight,
 		internalHref,
-		onToggle
+		onToggle,
+		helpful
 	}: {
 		question: FaqQuestion;
 		/** A search result's topic over its question. */
@@ -22,6 +24,8 @@
 		highlight?: readonly string[];
 		internalHref: (path: string) => string;
 		onToggle: (id: string, open: boolean) => void;
+		/** U-78: «Ήταν χρήσιμο;» at the end of the answer, opening and closing with it (the helpful module's, the screen's). */
+		helpful?: Snippet<[string]>;
 	} = $props();
 </script>
 
@@ -48,4 +52,9 @@
 		{highlight}
 		class="pr-indent pb-1"
 	/>
+	{#if helpful}
+		<div data-testid="help-question-helpful" class="mt-3 pr-indent pb-1">
+			{@render helpful(question.id)}
+		</div>
+	{/if}
 </AccordionDetails>

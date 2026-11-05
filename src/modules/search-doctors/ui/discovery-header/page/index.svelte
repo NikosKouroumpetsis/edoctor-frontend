@@ -21,8 +21,7 @@
 		'internal-medicine': m.category_internal_medicine({}, messageOptions),
 		pediatrics: m.category_pediatrics({}, messageOptions),
 		cardiology: m.category_cardiology({}, messageOptions),
-		dermatology: m.category_dermatology({}, messageOptions),
-		online: m.category_online({}, messageOptions)
+		dermatology: m.category_dermatology({}, messageOptions)
 	});
 	const railCategories = $derived(
 		categories.map((category) => ({ id: category.id, label: categoryLabels[category.id] }))

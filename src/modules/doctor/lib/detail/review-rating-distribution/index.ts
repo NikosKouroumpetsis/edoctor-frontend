@@ -10,8 +10,24 @@ export function toDoctorReviewRatingStar(rating: number): number | undefined {
 }
 
 /**
+ * 🔴 U-66.3: the spread 5…1 as the server counted it, `share` of the whole: the window reads pages, so nothing it holds
+ * could count them.
+ */
+export function buildDoctorReviewBuckets(
+	buckets: readonly { star: number; count: number }[]
+): DoctorDetailReviewRatingBucket[] {
+	const total = buckets.reduce((sum, bucket) => sum + bucket.count, 0);
+	return buckets.map(({ star, count }) => ({
+		star,
+		count,
+		share: total === 0 ? 0 : count / total
+	}));
+}
+
+/**
  * The spread 5…1 of the reviews, counted in the browser from the very list the window shows (the backend
  * publishes only the average; the application's `buildDoctorReviewRatingDistribution`): `share` of the rated ones.
+ * Unused since U-66.3 (`buildDoctorReviewBuckets`), kept by U-30.2.
  */
 export function buildDoctorReviewRatingDistribution(
 	cards: Pick<DoctorDetailReviewCardContent, 'rating'>[]

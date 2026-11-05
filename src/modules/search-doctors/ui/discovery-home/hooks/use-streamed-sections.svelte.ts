@@ -3,10 +3,15 @@ import { browser } from '$app/environment';
 import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 
 import { searchDoctorsQueryKeys } from '$modules/search-doctors/api/home/query-keys';
-import { fetchHomeSection } from '$modules/search-doctors/api/marketplace/build-section-query';
+import {
+	fetchHomeSection,
+	fetchMemberHomeSection
+} from '$modules/search-doctors/api/marketplace/build-section-query';
 import { EMPTY_CATEGORY_SCOPE } from '$modules/search-doctors/api/marketplace/category-scope';
 import { homeSectionConfigs } from '$modules/search-doctors/api/marketplace/sections';
+import { overlayMemberFees } from '$modules/search-doctors/lib/doctor-card';
 import { buildHomeSection } from '$modules/search-doctors/lib/section-link';
+import { personalQueryMeta } from '$shared/query';
 import type {
 	HomeRowResult,
 	HomeSection,
@@ -42,7 +47,9 @@ function sectionOf(id: SectionId, result: HomeRowResult): HomeSection {
  */
 export function useStreamedSections(
 	getSections: () => StreamedHomeRow[],
-	getLang: () => string
+	getLang: () => string,
+	/** 🔴 U-34.4: the reader is a member (known only in the browser, U-80.1 Ε6). */
+	isMember: () => boolean = () => false
 ): StreamedSectionsController {
 	const queryClient = useQueryClient();
 	const lang = $derived(getLang());
@@ -89,15 +96,53 @@ export function useStreamedSections(
 		})
 	);
 
+	/** R-7: the search the server resolved for a row, when its answer has come; `undefined`: it holds none. */
+	async function serverParamsOf(id: SectionId) {
+		const row = await getSections().find((section) => section.id === id)?.result;
+		return row?.status === 'ok' ? row.params : undefined;
+	}
+
+	// 🔴 U-34.4: the server drew the rows for a guest: a member reads each row ONCE more with the session's cookies, and
+	// only the fees change on the cards (`overlayMemberFees`): nothing moves, because a card keeps the room of the guest's
+	// line (U-99.2, `feeRoomLabel`), and no focus or reconnect asks it again. A
+	// guest asks nothing; a failure leaves the words as they are, never an error; a sign-out takes the amounts at once.
+	const memberQueries = homeSectionConfigs.map((config) =>
+		createQuery(() => {
+			const current = lang;
+			return {
+				queryKey: [...sectionKey(config.id, current), 'member'] as const,
+				queryFn: ({ signal }: { signal: AbortSignal }) =>
+					fetchMemberHomeSection(
+						queryClient,
+						config,
+						serverParamsOf(config.id),
+						current,
+						signal
+					).then((section) => buildHomeSection(section, current)),
+				enabled: browser && isMember() && getSections().some((section) => section.id === config.id),
+				meta: personalQueryMeta,
+				staleTime: 60_000,
+				retry: false,
+				refetchOnWindowFocus: false,
+				refetchOnReconnect: false
+			};
+		})
+	);
+
 	/**
 	 * Every row's state, each field read on EVERY query (a query result tells its changes only for the fields that
 	 * were read, D1 lesson 9). A failed row asked again stays the error until the answer (NIT-1 of r2).
 	 */
 	const rowStates = (): (HomeRowResult | undefined)[] =>
-		sectionQueries.map((query) => {
+		sectionQueries.map((query, index) => {
 			const { data, status, fetchStatus, errorUpdateCount } = query;
+			const member = isMember() ? memberQueries[index].data : undefined;
 			if (status === 'success' && data) {
-				return { status: 'ok', doctors: data.doctors, criteria: data.criteria };
+				return {
+					status: 'ok',
+					doctors: overlayMemberFees(data.doctors, member?.doctors),
+					criteria: data.criteria
+				};
 			}
 			if (status === 'error') return { status: 'error' };
 			if (fetchStatus === 'fetching' && errorUpdateCount > 0) return { status: 'error' };

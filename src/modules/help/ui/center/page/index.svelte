@@ -38,7 +38,8 @@
 		supportEmail,
 		onRetry,
 		canonicalUrl,
-		alternateUrls
+		alternateUrls,
+		helpful
 	}: HelpCenterProps = $props();
 
 	const options = $derived({ locale });
@@ -340,6 +341,7 @@
 										open={index === 0}
 										{internalHref}
 										{onToggle}
+										{helpful}
 									/>
 								{/each}
 							</div>
@@ -395,7 +397,7 @@
 								</h2>
 								<div class="mt-2">
 									{#each entry.questions as item (item.id)}
-										<Question question={item} {internalHref} {onToggle} />
+										<Question question={item} {internalHref} {onToggle} {helpful} />
 									{/each}
 								</div>
 							</section>

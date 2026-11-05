@@ -44,6 +44,15 @@ export function readingMinutes(
 	return words > 0 ? Math.max(1, Math.ceil(words / WORDS_PER_MINUTE)) : 0;
 }
 
+/**
+ * 🔴 U-92 (app = web): a list's card has no body: its reading time is the server's `readingMinutes` (`null`, or an
+ * answer without it, ⇒ `0`: no time shown), never counted here.
+ */
+export function cardReadingMinutes(article: { readingMinutes?: number | null }): number {
+	const minutes = article.readingMinutes;
+	return typeof minutes === 'number' && Number.isFinite(minutes) && minutes > 0 ? minutes : 0;
+}
+
 /** The primary author's name, else the first author with one, else none (the application's rule). */
 export function authorName(authors: ArticleAuthorView[] | null | undefined): string | null {
 	if (!authors) return null;
@@ -53,7 +62,7 @@ export function authorName(authors: ArticleAuthorView[] | null | undefined): str
 
 /** The home's article card (U-20): «συγγραφέας · χρόνος ανάγνωσης», the 4:3 photo or none. */
 export function buildHomeArticle(article: ArticlePublicView, locale: SupportedLocale): HomeArticle {
-	const minutes = readingMinutes(article.content);
+	const minutes = cardReadingMinutes(article);
 	const meta = [
 		authorName(article.authors),
 		minutes > 0 ? m.article_reading_time({ minutes }, { locale }) : null

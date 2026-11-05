@@ -2,9 +2,6 @@ import { criteriaIcons, specialtyIcons } from '$modules/search-doctors/config/cr
 import { foldSearchText } from '$shared/lib/text';
 import type { IoniconName } from '$shared/ui/icons/ionicon';
 
-/** The words that make a service a video call (the camera), folded as the labels are. */
-const VIDEO_SERVICE_WORDS = ['βιντεο', 'video', 'online'] as const;
-
 function wordsOf(label: string): string[] {
 	return foldSearchText(label)
 		.split(/[\s\-–/(),.]+/u)
@@ -23,19 +20,14 @@ export function specialtyIcon(label: string): IoniconName {
 	);
 }
 
-/** A service's glyph: the camera for a video call (by its slug or its name), else the document. */
-export function serviceIcon(label: string, slug?: string): IoniconName {
-	const video = slug === 'video-consultation' || startsAWord(label, VIDEO_SERVICE_WORDS);
-	return video ? criteriaIcons.videoService : criteriaIcons.service;
+/** A service's glyph: the document, whatever its name says (U-89.1: no video call, no camera). */
+export function serviceIcon(): IoniconName {
+	return criteriaIcons.service;
 }
 
 /** The glyph of a «Τι;» row of each kind. */
-export function whatIcon(
-	kind: 'professional' | 'service' | 'doctor',
-	label: string,
-	slug?: string
-): IoniconName {
+export function whatIcon(kind: 'professional' | 'service' | 'doctor', label: string): IoniconName {
 	if (kind === 'doctor') return criteriaIcons.doctor;
-	if (kind === 'service') return serviceIcon(label, slug);
+	if (kind === 'service') return serviceIcon();
 	return specialtyIcon(label);
 }

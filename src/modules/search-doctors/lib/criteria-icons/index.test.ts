@@ -51,11 +51,14 @@ describe('search-doctors::lib::criteria-icons', () => {
 		expect(specialtyIcon('')).toBe(criteriaIcons.specialty);
 	});
 
-	it('U-21: a service is the document, a video call the camera; a doctor the person', () => {
-		expect(serviceIcon('Προληπτικός έλεγχος')).toBe('document-text-outline');
-		expect(serviceIcon('Βιντεοκλήση')).toBe('videocam-outline');
-		expect(serviceIcon('Online συμβουλευτική')).toBe('videocam-outline');
-		expect(serviceIcon('Συμβουλευτική', 'video-consultation')).toBe('videocam-outline');
+	// Rewrites «U-21: a service is the document, a video call the camera»: U-89.1 takes the video call out of the product.
+	it('U-89.1: καμία βιντεοκλήση στις αναζητήσεις — every service wears the document, the config carries no camera; a doctor the person', () => {
+		expect(serviceIcon()).toBe('document-text-outline');
+		for (const label of ['Βιντεοκλήση', 'Online συμβουλευτική', 'Video consultation']) {
+			expect(whatIcon('service', label)).toBe('document-text-outline');
+		}
+		expect(Object.values(criteriaIcons)).not.toContain('videocam-outline');
+		expect(Object.keys(criteriaIcons)).not.toContain('videoService');
 		expect(whatIcon('doctor', 'Μαρία Καρδαμίτση')).toBe('person-outline');
 		expect(whatIcon('professional', 'Καρδιολόγος')).toBe('fitness-outline');
 	});

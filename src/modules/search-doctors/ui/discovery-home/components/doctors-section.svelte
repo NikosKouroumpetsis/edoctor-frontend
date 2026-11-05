@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { DoctorCard as DoctorCardType } from '$modules/search-doctors/types';
 	import { RAIL_CARDS_PER_VIEW, Rail, type RailScrollLabels } from '$shared/ui/organisms/rail';
-	import DoctorCard from '$modules/search-doctors/ui/search-doctor-card';
+	import DoctorCard, { type FavoriteToggle } from '$modules/search-doctors/ui/search-doctor-card';
 
 	let {
 		title,
@@ -12,7 +12,8 @@
 		profileHref,
 		profileLabel,
 		favoriteLabel,
-		onFavorite,
+		favorites,
+		feeRoomLabel,
 		onSignIn
 	}: {
 		title: string;
@@ -24,7 +25,10 @@
 		profileHref: (doctorSlug: string) => string;
 		profileLabel: string;
 		favoriteLabel: string;
-		onFavorite: () => void;
+		/** Every heart of the row (U-85). */
+		favorites: FavoriteToggle;
+		/** 🔴 U-99.2: the guest's words, whose room the cards keep: nothing moves when the amounts arrive. */
+		feeRoomLabel: string;
 		/** «Συνδεθείτε για κόστος» of a card whose fee is hidden: the sign-in (U-27.4). */
 		onSignIn: () => void;
 	} = $props();
@@ -47,7 +51,10 @@
 				href={profileHref(doctor.doctorSlug)}
 				{profileLabel}
 				{favoriteLabel}
-				{onFavorite}
+				saved={favorites.isSaved(doctor.id)}
+				pop={favorites.isPopping(doctor.id)}
+				onFavorite={() => favorites.toggle(doctor)}
+				{feeRoomLabel}
 				{onSignIn}
 			/>
 		</div>

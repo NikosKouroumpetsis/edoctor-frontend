@@ -1,12 +1,14 @@
 /**
  * The FAQ anchors other pages link to (U-60.1; the CMS page `faq` gives every topic and question its `{#anchor}`):
  * the footer's «Πώς κλείνω ραντεβού» (`#booking`, a topic) and «Ακύρωση ραντεβού» (`#cancellation`, a question), and
- * the deletion page's question (U-62.1 Π5).
+ * the deletion page's question (U-62.1 Π5), and «Πώς λειτουργούν οι κριτικές» (U-67.1: a question of the mock's FAQ,
+ * U-67.3: the production text carries the same anchor).
  */
 export const faqAnchors = {
 	booking: 'booking',
 	cancellation: 'cancellation',
-	deleteAccount: 'delete-account'
+	deleteAccount: 'delete-account',
+	reviews: 'what-are-reviews'
 } as const;
 
 /** The CMS page the help centre reads. */

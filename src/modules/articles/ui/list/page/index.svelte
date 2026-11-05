@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { m } from '$paraglide/messages.js';
 	import { resolveMediaUrl } from '$shared/lib/http';
+	import { cn } from '$shared/lib/utils';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import {
 		SearchPill,
@@ -13,12 +14,13 @@
 	import { StatePanel } from '$shared/ui/molecules/state-panel';
 	import { ListHeader } from '$shared/ui/organisms/list-header';
 	import { PageBar } from '$shared/ui/organisms/page-bar';
+	import { Avatar, AvatarFallback, AvatarImage } from '$shared/ui/primitives/avatar';
 	import { Button } from '$shared/ui/primitives/button';
 	import { Chip } from '$shared/ui/primitives/chip';
 	import { Spinner } from '$shared/ui/primitives/spinner';
 	import { articleTypeLabel, articleTypeParam } from '$modules/articles/lib/article-list';
-	import ArticleCard from '$modules/articles/ui/article-card';
-	import CardSkeleton from '../components/card-skeleton.svelte';
+	import ArticleCard, { ArticleCardSkeleton } from '$modules/articles/ui/article-card';
+	import { Breadcrumbs } from '$shared/ui/molecules/breadcrumbs';
 	import Featured from '../components/featured.svelte';
 	import { ArticlesListState } from '../hooks/use-list.svelte';
 	import type { ArticlesListProps } from '../types';
@@ -31,7 +33,8 @@
 		articleHref,
 		backHref,
 		canonicalUrl,
-		alternateUrls
+		alternateUrls,
+		author
 	}: ArticlesListProps = $props();
 
 	/** The skeleton's cards (the prototype's 8). */
@@ -50,7 +53,17 @@
 
 	const searching = $derived(Boolean(scope.q || scope.serviceId));
 	const typeParam = $derived(articleTypeParam(scope.type));
-	const title = $derived(m.nav_articles({}, options));
+	const title = $derived(author?.title ?? m.nav_articles({}, options));
+	const metaTitle = $derived(
+		author
+			? m.articles_doctor_meta_title({ title: author.title, name: author.name }, options)
+			: m.articles_meta_title({}, options)
+	);
+	const metaDescription = $derived(
+		author
+			? m.articles_doctor_meta_description({ name: author.sentenceName }, options)
+			: m.articles_meta_description({}, options)
+	);
 	let grid = $state<HTMLElement | null>(null);
 
 	const typeChips = $derived(
@@ -132,17 +145,34 @@
 </script>
 
 <svelte:head>
-	<title>{m.articles_meta_title({}, options)}</title>
-	<meta name="description" content={m.articles_meta_description({}, options)} />
+	<title>{metaTitle}</title>
+	<meta name="description" content={metaDescription} />
 	<link rel="canonical" href={canonicalUrl} />
 	<link rel="alternate" hreflang="el" href={alternateUrls.el} />
 	<link rel="alternate" hreflang="en" href={alternateUrls.en} />
 	<link rel="alternate" hreflang="x-default" href={alternateUrls.el} />
 	<meta property="og:type" content="website" />
-	<meta property="og:title" content={m.articles_meta_title({}, options)} />
-	<meta property="og:description" content={m.articles_meta_description({}, options)} />
+	<meta property="og:title" content={metaTitle} />
+	<meta property="og:description" content={metaDescription} />
 	<meta property="og:url" content={canonicalUrl} />
 </svelte:head>
+
+<!-- U-77: a doctor with one kind has nothing to choose: no chips. -->
+{#snippet chipRow()}
+	{#each typeChips as chip (chip.key)}
+		<Chip
+			label={chip.label}
+			href={chip.href}
+			selected={chip.selected}
+			variant="tinted"
+			phoneVariant="outline"
+			textClass={chip.selected ? 'text-body-sm font-semibold' : 'text-body-sm font-normal'}
+			data-testid="articles-type-chip"
+			data-sveltekit-noscroll
+			data-sveltekit-keepfocus
+		/>
+	{/each}
+{/snippet}
 
 <!-- 🔴 U-57.2 / U-57.3 (wave 1.5, screen 6, the prototype 06 v3): from 744 the list — its head IN THE CENTRE (H1
      «Άρθρα υγείας» ⇒ the search pill with its suggestions ⇒ «Όλα · Άρθρα · Συμβουλές υγείας» ⇒ on its own line
@@ -159,7 +189,20 @@
 		look="app"
 		testId="articles-bar"
 	/>
-	<div class="container-page tablet:pt-reading-gap">
+	<div class={cn('container-page', !author && 'tablet:pt-reading-gap')}>
+		{#if author}
+			<!-- U-77 (Π2): the page of ONE doctor: «Γιατροί › Dr. … › Άρθρα», 28 under the bar, from 744. -->
+			<Breadcrumbs
+				crumbs={[
+					{ label: m.nav_doctors({}, options), href: author.doctorsHref },
+					{ label: author.name, href: author.profileHref },
+					{ label: author.title }
+				]}
+				label={m.document_breadcrumbs_label({}, options)}
+				testId="articles-breadcrumbs"
+				class="mb-section"
+			/>
+		{/if}
 		<div>
 			<ListHeader
 				{title}
@@ -167,39 +210,55 @@
 				chipsLabel={m.articles_filter_label({}, options)}
 				chosen={scope.type ?? 'all'}
 				testId="articles-header"
+				chips={!author || author.bothKinds ? chipRow : undefined}
 			>
 				{#snippet search()}
-					<SearchPill
-						bind:value={list.typed}
-						placeholder={m.articles_search_placeholder({}, options)}
-						clearLabel={m.common_clear_search({}, options)}
-						submitLabel={m.articles_search_submit({}, options)}
-						listLabel={m.articles_suggest_label({}, options)}
-						{groups}
-						ready={list.suggestionsReady}
-						suggests={!list.suggestionsFailed}
-						emptyLabel={m.articles_suggest_none({}, options)}
-						onSubmit={submit}
-						onPick={pick}
-						onClear={clearWords}
-						keep={{ type: typeParam, service: scope.serviceId }}
-						testId="articles-search"
-					/>
-				{/snippet}
-				{#snippet chips()}
-					{#each typeChips as chip (chip.key)}
-						<Chip
-							label={chip.label}
-							href={chip.href}
-							selected={chip.selected}
-							variant="tinted"
-							phoneVariant="outline"
-							textClass={chip.selected ? 'text-body-sm font-semibold' : 'text-body-sm font-normal'}
-							data-testid="articles-type-chip"
-							data-sveltekit-noscroll
-							data-sveltekit-keepfocus
+					{#if author}
+						<a
+							href={author.aboutHref}
+							data-testid="articles-author"
+							class="group flex min-h-control-xl w-full flex-row items-center gap-3 rounded-full text-left transition-colors duration-standard ease-standard outline-none focus-visible:ring-3 focus-visible:ring-ring/50 tablet:w-fit tablet:max-w-full tablet:px-2 tablet:can-hover:hover:bg-muted"
+						>
+							<Avatar size="lg" class="shrink-0">
+								{#if author.photoUrl}
+									<AvatarImage src={author.photoUrl} alt="" />
+								{/if}
+								<AvatarFallback>
+									<Ionicon name="person-outline" class="icon-md" />
+								</AvatarFallback>
+							</Avatar>
+							<span class="flex min-w-0 flex-1 flex-col text-left">
+								<span class="truncate text-body-lg font-semibold text-foreground"
+									>{author.name}</span
+								>
+								{#if author.specialty}
+									<span class="truncate text-body-sm text-muted-foreground">{author.specialty}</span
+									>
+								{/if}
+							</span>
+							<Ionicon
+								name="chevron-forward"
+								class="icon-sm shrink-0 text-foreground transition-transform duration-standard ease-standard tablet:mr-2 can-hover:group-hover:translate-x-0.5"
+							/>
+						</a>
+					{:else}
+						<SearchPill
+							bind:value={list.typed}
+							placeholder={m.articles_search_placeholder({}, options)}
+							clearLabel={m.common_clear_search({}, options)}
+							submitLabel={m.articles_search_submit({}, options)}
+							listLabel={m.articles_suggest_label({}, options)}
+							{groups}
+							ready={list.suggestionsReady}
+							suggests={!list.suggestionsFailed}
+							emptyLabel={m.articles_suggest_none({}, options)}
+							onSubmit={submit}
+							onPick={pick}
+							onClear={clearWords}
+							keep={{ type: typeParam, service: scope.serviceId }}
+							testId="articles-search"
 						/>
-					{/each}
+					{/if}
 				{/snippet}
 				{#snippet below()}
 					{#if list.view?.appliedService}
@@ -244,7 +303,7 @@
 						class="grid grid-cols-1 gap-x-rail gap-y-results-row-gap tablet:grid-cols-2 laptop:grid-cols-3 desktop:grid-cols-4"
 					>
 						{#each PLACEHOLDERS as index (index)}
-							<CardSkeleton />
+							<ArticleCardSkeleton />
 						{/each}
 					</div>
 				{:else if list.shown === 'error'}
@@ -273,6 +332,8 @@
 						<StatePanel
 							glyph="document-text-outline"
 							title={m.articles_empty_title({}, options)}
+							actionLabel={author ? m.articles_back_to_profile({}, options) : undefined}
+							actionHref={author?.profileHref}
 							testId="articles-empty"
 						/>
 					{/if}

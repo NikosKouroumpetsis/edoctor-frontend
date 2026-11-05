@@ -20,6 +20,10 @@ declare global {
 				service?: string;
 				/** Opened from the page (its own history entry): closing it goes back one step. */
 				inPlace?: boolean;
+				/** U-72.3 Ε3: in the window of the services, one step on: «‹» goes back to them, «×» closes both. */
+				fromServices?: boolean;
+				/** Whether those services were opened from the page, so «×» has two steps to go back. */
+				servicesInPlace?: boolean;
 			} | null;
 		}
 		// interface Platform {}

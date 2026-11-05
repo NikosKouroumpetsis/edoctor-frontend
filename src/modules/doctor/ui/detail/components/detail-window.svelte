@@ -1,43 +1,50 @@
 <script lang="ts">
+	import type { SignInRequest } from '$shared/state/session';
 	import { m } from '$paraglide/messages.js';
-	import { cn } from '$shared/lib/utils';
 	import { ActionBar } from '$shared/ui/molecules/action-bar';
-	import { InlineNotice } from '$shared/ui/molecules/inline-notice';
 	import { FullscreenModalTemplate } from '$shared/ui/templates/fullscreen-modal';
-	import type { DoctorSelectedSlot } from '$modules/doctor/lib/detail';
+	import { InfoDialog, type InfoDialogBlock } from '$shared/ui/templates/info-dialog';
+	import {
+		isDoctorKnowPageId,
+		type DoctorKnowLinkId,
+		type DoctorKnowPage,
+		type DoctorSelectedSlot
+	} from '$modules/doctor/lib/detail';
 	import type { DoctorDetailState } from '../hooks/use-state.svelte';
-	import PricedService from './priced-service.svelte';
+	import type { DoctorKnowLinks, DoctorReviewLinks } from '../types';
+	import { doctorKnowRowGlyphs } from './icons';
 	import WindowAvailability from './window-availability.svelte';
-	import WindowDescription from './window-description.svelte';
-	import WindowLocation from './window-location.svelte';
+	import WindowOffice from './window-office.svelte';
 	import WindowReviews from './window-reviews.svelte';
+	import WindowServices from './window-services.svelte';
 
-	let { detail, onSignIn }: { detail: DoctorDetailState; onSignIn: () => void } = $props();
+	let {
+		detail,
+		reviewLinks,
+		knowLinks,
+		onSignIn,
+		onShare,
+		onSave,
+		saved = false,
+		pop = false
+	}: {
+		detail: DoctorDetailState;
+		reviewLinks: DoctorReviewLinks;
+		knowLinks: DoctorKnowLinks;
+		onSignIn: (request?: SignInRequest) => void;
+		onShare: () => void;
+		onSave: () => void;
+		saved?: boolean;
+		pop?: boolean;
+	} = $props();
 
 	const locale = $derived(detail.locale);
 	const options = $derived({ locale });
 	const current = $derived(detail.window);
 	const section = $derived(current?.section);
-	const open = $derived(Boolean(current) && section !== 'photos');
-	const wide = $derived(section === 'reviews' || section === 'location');
-	const content = $derived(detail.content);
-
-	const title = $derived.by(() => {
-		switch (section) {
-			case 'description':
-				return content.professional?.title ?? m.doctor_section_professional({}, options);
-			case 'services':
-				return m.doctor_section_service_cost({}, options);
-			case 'location':
-				return m.doctor_section_location({}, options);
-			case 'reviews':
-				return m.doctor_section_reviews({}, options);
-			case 'availability':
-				return m.doctor_section_availability({}, options);
-			default:
-				return '';
-		}
-	});
+	// This window is the availability's; U-66, U-68, U-70, U-72, U-75: the others have shapes of their own.
+	const open = $derived(section === 'availability');
+	const title = $derived(open ? m.doctor_section_availability({}, options) : '');
 
 	// The window's chosen time, kept until «Επιβεβαίωση» (a new opening starts from the page's own).
 	let staged = $state<DoctorSelectedSlot | null>(null);
@@ -48,6 +55,40 @@
 		section === 'availability' ? detail.availabilityModal(detail.activeOfficeId) : null
 	);
 
+	// 🔴 U-75 Π3: a block's page, by its name in the address; it keeps its words through its way out.
+	const knowFocus = $derived(section === 'know' ? current?.hints.focus : undefined);
+	const knowPageNow = $derived(
+		isDoctorKnowPageId(knowFocus) ? detail.know?.pages[knowFocus] : undefined
+	);
+	let knowPage = $state<DoctorKnowPage | undefined>(undefined);
+	$effect.pre(() => {
+		if (knowPageNow) knowPage = knowPageNow;
+	});
+	const shownKnow = $derived(knowPageNow ?? knowPage);
+	const knowBlocks = $derived<InfoDialogBlock[]>(
+		(shownKnow?.groups ?? []).map((group) => ({
+			heading: group.heading,
+			intro: group.intro,
+			rows: group.rows.map((row) => ({
+				key: row.key,
+				icon: doctorKnowRowGlyphs[row.id],
+				label: row.label,
+				sub: row.sub,
+				link: row.phone
+					? { label: row.phone.label, href: `tel:${row.phone.dialNumber}` }
+					: undefined
+			}))
+		}))
+	);
+	const knowHrefs = $derived<Record<DoctorKnowLinkId, string>>({
+		'help-cancellation': knowLinks.cancellationHref,
+		'help-booking': knowLinks.bookingHref,
+		offices: detail.detailsHref(
+			'location',
+			detail.activeOfficeId ? { office: detail.activeOfficeId } : {}
+		)
+	});
+
 	function confirm() {
 		if (!staged) return;
 		detail.confirmSlot(staged);
@@ -55,8 +96,8 @@
 	}
 </script>
 
-<!-- 🔴 Π7 / U-24.3 (app = web): `details/*` — on the phone the sheet over the whole screen (12 under the top, the 24
-     corner), from 744 the centred window of the filters (568; the reviews and the location 1032, the whole height).
+<!-- 🔴 Π7 / U-24.3 (app = web): `details/availability` — on the phone the sheet over the whole screen (12 under the top,
+     the 24 corner), from 744 the centred window of the filters (568).
      Focus goes to the window (U-09.7), Escape, «×», the backdrop and the browser's «back» close it; the page under it
      keeps still (the kit's scroll lock). -->
 <FullscreenModalTemplate
@@ -67,44 +108,11 @@
 	onClose={() => detail.closeWindow()}
 	shape="sheet"
 	contentGap="loose"
-	contentWidth={wide ? 'listing' : 'form'}
+	contentWidth="form"
 	data-testid="doctor-detail-modal"
 	data-section={section}
-	class={cn(wide && 'tablet:h-full tablet:max-w-window-wide')}
 >
-	{#if section === 'description'}
-		{#if content.professional}
-			<WindowDescription content={content.professional} />
-		{/if}
-	{:else if section === 'services'}
-		{@const services = detail.servicesModal}
-		{#if services}
-			<div data-testid="doctor-detail-modal-services" class="flex flex-col gap-4">
-				<InlineNotice message={services.notice} variant="tint" />
-				{#each services.services as service (service.id)}
-					<PricedService
-						{service}
-						costLabel={services.costLabel}
-						includesLabel={services.includesLabel}
-						descriptionLabel={services.descriptionLabel}
-						{onSignIn}
-					/>
-				{/each}
-			</div>
-		{/if}
-	{:else if section === 'location'}
-		{#if detail.location}
-			<WindowLocation location={detail.location} officeId={detail.activeOfficeId} {locale} />
-		{/if}
-	{:else if section === 'reviews'}
-		<WindowReviews
-			content={detail.reviewsModal}
-			readState={detail.reviewsState}
-			focusId={current?.hints.focus}
-			{locale}
-			onRetry={detail.retryReviews}
-		/>
-	{:else if section === 'availability'}
+	{#if section === 'availability'}
 		<WindowAvailability
 			content={availability}
 			readState={detail.availabilityState}
@@ -134,3 +142,50 @@
 		{/if}
 	{/snippet}
 </FullscreenModalTemplate>
+
+<WindowReviews
+	open={section === 'reviews'}
+	doctor={detail.profile}
+	{locale}
+	now={detail.now}
+	focusId={section === 'reviews' ? current?.hints.focus : undefined}
+	linkedMention={section === 'reviews' ? current?.hints.mention : undefined}
+	links={reviewLinks}
+	onClose={() => detail.closeWindow()}
+/>
+
+<WindowOffice
+	open={section === 'location' && Boolean(detail.location)}
+	{detail}
+	{locale}
+	{saved}
+	{pop}
+	{onShare}
+	{onSave}
+/>
+
+<WindowServices {detail} {locale} {onSignIn} />
+
+<!-- 🔴 U-75 Π3: the small window of screen 12 from 744, its sheet below; «×», Escape, the backdrop and «back» close it. -->
+<InfoDialog
+	bind:open={
+		() => Boolean(knowPageNow),
+		(next) => {
+			if (!next) detail.closeWindow();
+		}
+	}
+	title={shownKnow?.title ?? ''}
+	intro={shownKnow?.intro ?? []}
+	blocks={knowBlocks}
+	links={shownKnow
+		? [
+				{
+					label: shownKnow.link.label,
+					href: knowHrefs[shownKnow.link.id],
+					testId: `doctor-know-link-${shownKnow.link.id}`
+				}
+			]
+		: []}
+	closeLabel={m.doctor_window_close({}, options)}
+	testId="doctor-know-page"
+/>

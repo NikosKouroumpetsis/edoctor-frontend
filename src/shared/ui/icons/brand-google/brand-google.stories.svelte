@@ -1,6 +1,6 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { BrandApple } from '$shared/ui/icons/brand-apple';
+	import { BrandApple, BrandAppleLeftAligned } from '$shared/ui/icons/brand-apple';
 	import { BrandGoogle } from '$shared/ui/icons/brand-google';
 	import { HugeiconsLaurelWreathLeft01 } from '$shared/ui/icons/hugeicons-laurel-wreath-left-01';
 	import { HugeiconsLaurelWreathRight01 } from '$shared/ui/icons/hugeicons-laurel-wreath-right-01';
@@ -16,9 +16,18 @@
 	{#snippet template()}
 		<div class="flex items-center gap-4 text-foreground">
 			<BrandGoogle class="icon-lg" />
-			<BrandApple class="icon-lg" />
 			<BrandGoogle class="icon-xl" />
-			<BrandApple class="icon-xl" />
+		</div>
+	{/snippet}
+</Story>
+
+<!-- U-95, U-96: Apple's whole files at the heights of their buttons, the same in both themes. -->
+<Story name="Apple artwork">
+	{#snippet template()}
+		<div class="flex items-center gap-4 rounded-md bg-muted p-4">
+			<BrandApple class="size-touch" />
+			<BrandApple />
+			<BrandAppleLeftAligned />
 		</div>
 	{/snippet}
 </Story>

@@ -25,6 +25,13 @@ export type DoctorOfficePaymentOptionId =
 	| 'student-card'
 	| 'unemployment-card';
 
+/** 🔴 U-75, U-76: an office's booking rules as the server resolves them (the page never assumes one). */
+export type DoctorBookingPolicyFacts = {
+	confirmationMode: 'AUTO' | 'MANUAL';
+	cancellationCutoffHours: number;
+	minBookingNoticeHours: number;
+};
+
 /** One office as the tabs need it: the id the slots are asked with and the address parts. */
 export type DoctorOfficeSummaryFacts = {
 	officeId: string;
@@ -33,6 +40,8 @@ export type DoctorOfficeSummaryFacts = {
 	state?: string;
 	street?: string;
 	streetNumber?: string;
+	/** 🔴 U-75: absent when the server could not read them: the section then says nothing of them. */
+	bookingPolicy?: DoctorBookingPolicyFacts;
 };
 
 /**
@@ -55,6 +64,35 @@ export type DoctorOfficeFacts = {
 	paymentOptions?: DoctorOfficePaymentOptionId[];
 	latitude?: number;
 	longitude?: number;
+	/** 🔴 P-B §7: the next three come ONLY with the office's own read (`api/office`), never with the profile (D-103). */
+	images?: DoctorOfficeImageFacts[];
+	weeklyHours?: DoctorOfficeWeeklyHoursFacts;
+	/** «Πώς θα έρθετε»: plain text, in the page's language. */
+	gettingThere?: string;
+};
+
+/** A photo of the office: its sized addresses (absolute) and its description, if any. */
+export type DoctorOfficeImageFacts = {
+	id: string;
+	url: string;
+	largeUrl: string;
+	thumbUrl: string;
+	alt?: string;
+};
+
+export type DoctorWeekday =
+	| 'monday'
+	| 'tuesday'
+	| 'wednesday'
+	| 'thursday'
+	| 'friday'
+	| 'saturday'
+	| 'sunday';
+
+/** The doctor's week at an office, as raw facts: minutes of the office's day; the page writes the words. */
+export type DoctorOfficeWeeklyHoursFacts = {
+	timezone: string;
+	days: { day: DoctorWeekday; ranges: { startMinute: number; endMinute: number }[] }[];
 };
 
 /** A fee as a range (the profile's one `price` per service is `min === max`). */
@@ -66,6 +104,9 @@ export type DoctorAvailabilityFacts = {
 	nextAvailableAt?: string | null;
 };
 
+/** U-71.2, U-89.1: what a service's icon follows, the backend's rule on its name; nobody enters it. */
+export type DoctorServiceKind = 'follow-up' | 'check-up' | 'visit' | 'other';
+
 /**
  * One bookable service. `isSpecialized` (U-36.2): the doctor marked it as a field of expertise — the
  * «Τομείς εξειδίκευσης» are these services, as the server already sends them.
@@ -74,8 +115,15 @@ export type DoctorServiceFacts = {
 	id: string;
 	title: string;
 	priceRange: DoctorFeeFacts | null;
-	includes?: string;
-	note?: string;
+	kind: DoctorServiceKind;
+	/** U-72.3: the years the doctor has given this service, absent when none is entered (never a zero). */
+	yearsOfExperience?: number;
+	/** U-72.3: this service's completed visits over the server's window, absent with none (never a zero). */
+	completedVisits?: number;
+	/** The backend's `description`: the service's text, its «Περιγραφή». */
+	description?: string;
+	/** The backend's `sub`: the short line under its title. */
+	subtitle?: string;
 	durationInMinutes?: number;
 	isSpecialized: boolean;
 };
@@ -84,6 +132,20 @@ export type DoctorBioFacts = {
 	studies?: string[];
 	workExperience?: string[];
 	conferences?: string[];
+};
+
+/** U-73.1: the groups of the biography, as the backend's `DoctorCredential.kind`. */
+export type DoctorCredentialKind = 'STUDY' | 'WORK' | 'CONFERENCE';
+
+/** One entry of the biography (U-73.1 Ε2), in the server's order: the newest first, the ones without a year last. */
+export type DoctorCredentialFacts = {
+	id: string;
+	kind: DoctorCredentialKind;
+	title: string;
+	organization?: string;
+	startYear?: number;
+	endYear?: number;
+	isCurrent: boolean;
 };
 
 /** A spoken language: its catalog slug (the app's names are keyed by it) and the backend's own name. */
@@ -106,6 +168,8 @@ export type DoctorReviewSnippet = {
 	publishedAt: string;
 	rating: number;
 	aspects?: DoctorReviewChipFacts[];
+	/** U-66.3: the doctor's reply: the server sends only an approved one. */
+	reply?: { body: string; repliedAt: string | null };
 };
 
 export type DoctorReviewSummaryFacts = { count: number; score: number };
@@ -126,7 +190,7 @@ export type DoctorImageFacts = {
 export type DoctorProfessionalFacts = { id: string; name: string; slug: string };
 
 /**
- * 🔴 U-36.1 / U-43.1 (app = web): the doctor's response and visits over the last 6 whole months (Greek time), the
+ * 🔴 U-36.1 / U-43.1 (app = web): the doctor's response and visits over the server's window (`windowMonths`, U-72.4), the
  * application's `DoctorResponseMetricsFacts`, from `doctor.responseMetrics` (`map.ts` `buildResponseMetrics`; each
  * `null` leaves its fact out). The ids are the approved design's (§A.2 / §C.1 of `s5-backend-design.md`):
  * `WITHIN_HOUR` ⇒ `within-hour`, `WITHIN_FEW_HOURS` ⇒ `within-few-hours`, `WITHIN_DAY` ⇒ `within-day`, `FEW_DAYS` ⇒
@@ -137,6 +201,8 @@ export type DoctorResponseMetricsFacts = {
 	responseTimeId?: DoctorResponseTimeId;
 	responseRatePercent?: number;
 	completedVisits?: number;
+	/** U-72.4: the months the server counts over, for the one sentence that needs them; never a fixed «6». */
+	windowMonths?: number;
 };
 
 /**
@@ -161,6 +227,8 @@ export type DoctorProfile = {
 	office?: DoctorOfficeFacts;
 	offices?: DoctorOfficeSummaryFacts[];
 	description?: DoctorDescriptionFacts;
+	/** U-73.1: the biography. A read of them that failed leaves `bio`, the plain texts they were moved from. */
+	credentials?: DoctorCredentialFacts[];
 	bio?: DoctorBioFacts;
 	languages?: DoctorLanguageFacts[];
 	socialLinks?: DoctorSocialLinkFacts[];
@@ -171,4 +239,6 @@ export type DoctorProfile = {
 	responseMetrics?: DoctorResponseMetricsFacts;
 	/** 🔴 U-45.2: «Επιλογή ασθενών», the backend's verdict; `false` when it says otherwise or nothing. */
 	isPatientsChoice?: boolean;
+	/** 🔴 U-92.2: the doctor's articles, only counts: the cards are their own read. */
+	articlesSummary?: { articlesCount: number; healthAdviceCount: number };
 };

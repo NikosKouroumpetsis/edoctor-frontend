@@ -15,6 +15,7 @@
 		locale,
 		openHref,
 		onOpen,
+		zoomControlsClass,
 		testId,
 		class: className
 	}: {
@@ -30,6 +31,8 @@
 		 */
 		openHref?: ResolvedPathname;
 		onOpen?: (event?: MouseEvent) => void;
+		/** Where the zoom sits on the office's page: under the «×» on the map (U-68.1 Π2). */
+		zoomControlsClass?: string;
 		testId: string;
 		class?: string;
 	} = $props();
@@ -59,6 +62,7 @@
 		fitKey={officeId}
 		fitAnimate
 		scrollZoom={!isPreview}
+		{zoomControlsClass}
 		zoomControls={{
 			zoomInLabel: m.doctor_map_zoom_in({}, options),
 			zoomOutLabel: m.doctor_map_zoom_out({}, options)

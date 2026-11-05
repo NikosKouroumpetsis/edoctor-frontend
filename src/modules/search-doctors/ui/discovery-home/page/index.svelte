@@ -10,6 +10,7 @@
 	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
 	import { readFreshDeviceLocation } from '$shared/state/device-location';
 	import { getSearchDockOptional } from '$shared/state/search-dock';
+	import { getSessionOptional } from '$shared/state/session';
 	import { layoutOf } from '$shared/ui/molecules/search-trigger';
 	import type { SearchBarPanelContext } from '$shared/ui/organisms/search-bar';
 	import type { ModalOrigin } from '$shared/ui/templates/modal-screen';
@@ -40,14 +41,17 @@
 	const signIn = useSignIn(() => locale);
 
 	// Category-scoped sections (client-side, TanStack Query); the `all` view is the streamed SSR `data.sections`.
+	const session = getSessionOptional();
 	const home = useHomeSections(
 		() => discovery.activeCategory,
-		() => getPageLocale(page.url)
+		() => getPageLocale(page.url),
+		() => session?.isMember ?? false
 	);
 	// The `all` view: the streamed SSR sections, «Δοκιμάστε ξανά» asking only the failed ones again.
 	const streamed = useStreamedSections(
 		() => data.sections,
-		() => getPageLocale(page.url)
+		() => getPageLocale(page.url),
+		() => session?.isMember ?? false
 	);
 
 	// The category rows write «Σήμερα / Αύριο» on the server's clock, not the device's (D-118).
@@ -97,6 +101,9 @@
 	<title>{m.home_meta_title({}, messageOptions)}</title>
 	<meta name="description" content={m.home_meta_description({}, messageOptions)} />
 </svelte:head>
+
+<!-- The home has no title of its own on the screen (the search leads): the document's name is its `h1`, for a reader. -->
+<h1 class="sr-only">{m.home_meta_title({}, messageOptions)}</h1>
 
 {#snippet barPanel(field: string, context: SearchBarPanelContext)}
 	<CriteriaPanel {field} {context} {bar} {lists} {locale} />

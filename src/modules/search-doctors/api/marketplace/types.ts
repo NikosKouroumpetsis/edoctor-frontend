@@ -71,6 +71,11 @@ export type MarketplaceLocationSuggestionsData =
 export type MarketplaceRequestContext = {
 	signal?: AbortSignal;
 	fetch?: typeof fetch;
+	/**
+	 * 🔴 U-34.4 / U-80.1 Ε6: the search with the session's cookies, for a member in the browser only: what is personal in
+	 * its answer is the prices. Every other read of the marketplace stays anonymous.
+	 */
+	withSession?: boolean;
 };
 
 /**

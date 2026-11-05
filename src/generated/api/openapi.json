@@ -1302,7 +1302,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "minLength": 1
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[^\\u0000]+$"
             }
           },
           {
@@ -1377,7 +1379,7 @@
     "/doctor/public/doctors/{doctorId}/reviews": {
       "get": {
         "operationId": "listPublicMarketplaceReviews",
-        "summary": "List every public review for a marketplace doctor.",
+        "summary": "List one page of the public reviews of a marketplace doctor.",
         "tags": [
           "doctor-public"
         ],
@@ -1388,7 +1390,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "minLength": 1
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[^\\u0000]+$"
             }
           },
           {
@@ -1414,11 +1418,72 @@
                 "en"
               ]
             }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9]\\d*$"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[^\\u0000]+$"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "newest",
+                "oldest",
+                "highest",
+                "lowest"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[^\\u0000]*[^\\s\\u0000][^\\u0000]*$"
+            }
+          },
+          {
+            "name": "mention",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "COURTESY",
+                "EXPLANATION",
+                "ORGANIZATION",
+                "CLEANLINESS",
+                "PATIENCE",
+                "ACCESS"
+              ]
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Approved public reviews for the doctor, newest first, capped at the 500 most recent. `reviews` is null for an unknown or non-visible doctor and [] when the doctor has no approved reviews.",
+            "description": "Approved public reviews on the order of `sort` (newest first by default). `limit` is 1–50; without it, the 500 first. `q` matches every word in the patient comment, without accents or case. `mention` keeps the reviews that speak about one topic (U-91.2: six), good or bad. `total` counts every match; `nextCursor` names the next page. `reviews` is null for an unknown or non-visible doctor and [] when no approved review matches. 422 on an invalid input, 429 past the shared `doctor-reviews` budget.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1451,6 +1516,85 @@
         }
       }
     },
+    "/doctor/public/doctors/{doctorId}/reviews/summary": {
+      "get": {
+        "operationId": "getPublicMarketplaceReviewsSummary",
+        "summary": "Get the totals of the public reviews of a marketplace doctor.",
+        "tags": [
+          "doctor-public"
+        ],
+        "parameters": [
+          {
+            "name": "doctorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[^\\u0000]+$"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "How many reviews there are, the five star bars from 5 down (always all five), the averages of the profile header and the topics. `summary` is null for an unknown or non-visible doctor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DoctorPublicMarketplaceReviewsSummaryResponseView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/doctor/public/doctors/{doctorId}/offices/{officeId}": {
       "get": {
         "operationId": "getPublicMarketplaceOffice",
@@ -1465,7 +1609,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "minLength": 1
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[^\\u0000]+$"
             }
           },
           {
@@ -1504,7 +1650,7 @@
         ],
         "responses": {
           "200": {
-            "description": "A single public marketplace office with its availability.",
+            "description": "A single public marketplace office with its availability, and what only this page reads: at most 12 images, the weekly hours and how to get there.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1529,6 +1675,126 @@
                     "status",
                     "message",
                     "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/article/public/articles": {
+      "get": {
+        "operationId": "listPublicArticles",
+        "summary": "List one page of the published articles as cards.",
+        "tags": [
+          "article-public"
+        ],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ARTICLE",
+                "HEALTH_ADVICE"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]+$"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "\\S"
+            }
+          },
+          {
+            "name": "serviceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "doctorId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cards of the published articles, newest publication first. The body, the sections and the SEO fields travel only with `GET /article/public/articles/{slug}`. `doctorId` keeps the articles of one doctor: an unknown or hidden doctor answers [] and a total of 0. `readingMinutes` is null when there is no time to show.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ArticlePublicCardListView"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ArticlePublicListMetaView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data",
+                    "meta"
                   ]
                 }
               }
@@ -1869,16 +2135,20 @@
                   },
                   "tenantSlug": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "email": {
                     "type": "string",
                     "format": "email",
-                    "minLength": 3
+                    "minLength": 3,
+                    "maxLength": 254
                   },
                   "password": {
                     "type": "string",
-                    "minLength": 8
+                    "minLength": 8,
+                    "maxLength": 128
                   }
                 },
                 "required": [
@@ -2028,12 +2298,15 @@
                   },
                   "tenantSlug": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "email": {
                     "type": "string",
                     "format": "email",
-                    "minLength": 3
+                    "minLength": 3,
+                    "maxLength": 254
                   },
                   "mobilePhone": {
                     "type": "string",
@@ -2126,12 +2399,15 @@
                   },
                   "tenantSlug": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "email": {
                     "type": "string",
                     "format": "email",
-                    "minLength": 3
+                    "minLength": 3,
+                    "maxLength": 254
                   },
                   "mobilePhone": {
                     "type": "string",
@@ -2224,12 +2500,15 @@
                   },
                   "tenantSlug": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "email": {
                     "type": "string",
                     "format": "email",
-                    "minLength": 3
+                    "minLength": 3,
+                    "maxLength": 254
                   },
                   "mobilePhone": {
                     "type": "string",
@@ -2330,7 +2609,9 @@
                   },
                   "tenantSlug": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "idToken": {
                     "type": "string",
@@ -2361,11 +2642,15 @@
                           "properties": {
                             "documentCode": {
                               "type": "string",
-                              "minLength": 1
+                              "minLength": 1,
+                              "maxLength": 64,
+                              "pattern": "^[^\\u0000]+$"
                             },
                             "version": {
                               "type": "string",
-                              "minLength": 1
+                              "minLength": 1,
+                              "maxLength": 64,
+                              "pattern": "^[^\\u0000]+$"
                             },
                             "accepted": {
                               "type": "boolean",
@@ -2378,7 +2663,8 @@
                             "accepted"
                           ]
                         },
-                        "minItems": 1
+                        "minItems": 1,
+                        "maxItems": 10
                       }
                     },
                     "required": [
@@ -2442,6 +2728,462 @@
         }
       }
     },
+    "/auth/access/apple/nonce": {
+      "post": {
+        "operationId": "issueAccessAppleNonce",
+        "summary": "Issue the nonce of one native Apple sign-in.",
+        "tags": [
+          "auth-access"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "tenantId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "tenantSlug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[^\\u0000]+$"
+                  }
+                },
+                "anyOf": [
+                  {
+                    "required": [
+                      "tenantId"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "tenantSlug"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pass `nonce` to the iOS sign-in as it is, and send the identity token that carries it to `POST /auth/access/apple`. It lives for 5 minutes and is spent by one successful sign-in. A deployment without Apple keys answers 401 SIGN_IN_NOT_AVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AppleNonceResult"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/access/apple": {
+      "post": {
+        "operationId": "verifyAccessAppleToken",
+        "summary": "Verify a native Apple identity token and sign in, provisioning the account when needed.",
+        "tags": [
+          "auth-access"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "tenantId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "tenantSlug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[^\\u0000]+$"
+                  },
+                  "identityToken": {
+                    "type": "string",
+                    "minLength": 20,
+                    "maxLength": 4096
+                  },
+                  "authorizationCode": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[^\\u0000]+$"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[^\\u0000]+$"
+                  },
+                  "target": {
+                    "type": "string",
+                    "enum": [
+                      "patient"
+                    ]
+                  },
+                  "legalAcceptance": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "context": {
+                        "type": "string",
+                        "enum": [
+                          "PATIENT"
+                        ]
+                      },
+                      "acceptances": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "documentCode": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 64,
+                              "pattern": "^[^\\u0000]+$"
+                            },
+                            "version": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 64,
+                              "pattern": "^[^\\u0000]+$"
+                            },
+                            "accepted": {
+                              "type": "boolean",
+                              "const": true
+                            }
+                          },
+                          "required": [
+                            "documentCode",
+                            "version",
+                            "accepted"
+                          ]
+                        },
+                        "minItems": 1,
+                        "maxItems": 10
+                      }
+                    },
+                    "required": [
+                      "context",
+                      "acceptances"
+                    ]
+                  }
+                },
+                "required": [
+                  "identityToken",
+                  "authorizationCode",
+                  "legalAcceptance"
+                ],
+                "anyOf": [
+                  {
+                    "required": [
+                      "tenantId"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "tenantSlug"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Always `signed-in`, with the session cookies set, the same answer as `POST /auth/access/google`. The email comes only from the signed token, never from the body. `legalAcceptance` must carry the CURRENT published versions and is judged only for a new account: its 400 spends neither the nonce nor the `authorizationCode`, so the same token may be sent again with fresh versions. Failures: 401 EC010 for a token, audience, signature or nonce that does not pass; 403 APPLE_EMAIL_UNAVAILABLE for a new account without an email; 403 APPLE_EMAIL_NOT_VERIFIED when Apple does not confirm the email; 401 SIGN_IN_NOT_AVAILABLE for another Apple ID on a linked account, a closed channel or a backoffice role; 403 USER_LOCKED when banned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AppleSignInResult"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/access/apple/browser": {
+      "post": {
+        "operationId": "startAccessAppleBrowser",
+        "summary": "Start the Android Apple sign-in: the address to open and the flow secret.",
+        "tags": [
+          "auth-access"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "tenantId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "tenantSlug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[^\\u0000]+$"
+                  },
+                  "appVariant": {
+                    "type": "string",
+                    "enum": [
+                      "production",
+                      "development",
+                      "preview"
+                    ]
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "el",
+                      "en"
+                    ]
+                  }
+                },
+                "required": [
+                  "appVariant"
+                ],
+                "anyOf": [
+                  {
+                    "required": [
+                      "tenantId"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "tenantSlug"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Open `authorizationUrl` in the in-app browser and keep `flowSecret` in memory only: it never passes through a browser or an address. The way back to the app is built by the server from `appVariant`; production and stage accept `production` alone, anything else is 422. After Apple, our page offers one link that hands the app `<scheme>://auth/apple-return?handoff=<code>`, or `?error=cancelled` / `?error=apple`. Nothing is written to the database. Answered with `Cache-Control: no-store`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AppleBrowserStartResult"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/access/apple/browser/exchange": {
+      "post": {
+        "operationId": "exchangeAccessAppleBrowser",
+        "summary": "Exchange the Android one-use code and the flow secret for a session.",
+        "tags": [
+          "auth-access"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "handoffCode": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{43}$"
+                  },
+                  "flowSecret": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{43}$"
+                  },
+                  "target": {
+                    "type": "string",
+                    "enum": [
+                      "patient"
+                    ]
+                  },
+                  "legalAcceptance": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "context": {
+                        "type": "string",
+                        "enum": [
+                          "PATIENT"
+                        ]
+                      },
+                      "acceptances": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "documentCode": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 64,
+                              "pattern": "^[^\\u0000]+$"
+                            },
+                            "version": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 64,
+                              "pattern": "^[^\\u0000]+$"
+                            },
+                            "accepted": {
+                              "type": "boolean",
+                              "const": true
+                            }
+                          },
+                          "required": [
+                            "documentCode",
+                            "version",
+                            "accepted"
+                          ]
+                        },
+                        "minItems": 1,
+                        "maxItems": 10
+                      }
+                    },
+                    "required": [
+                      "context",
+                      "acceptances"
+                    ]
+                  }
+                },
+                "required": [
+                  "handoffCode",
+                  "flowSecret",
+                  "legalAcceptance"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Always `signed-in`, with the session cookies set, the same answer as `POST /auth/access/apple`, with the same failures and the same consent rule: a 400 leaves the code whole for one retry. The code lives for 240 seconds and is spent once; a wrong `flowSecret` burns it, so even the right one is then 401 EC010, and the person presses the Apple button again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AppleSignInResult"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/access/complete-registration": {
       "post": {
         "operationId": "completeAccessRegistration",
@@ -2464,7 +3206,9 @@
                   },
                   "tenantSlug": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "registrationTicket": {
                     "type": "string",
@@ -2473,11 +3217,15 @@
                   },
                   "firstName": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "lastName": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "gender": {
                     "type": "string",
@@ -2494,7 +3242,8 @@
                   },
                   "password": {
                     "type": "string",
-                    "minLength": 8
+                    "minLength": 8,
+                    "maxLength": 128
                   },
                   "language": {
                     "type": "string",
@@ -2527,11 +3276,15 @@
                           "properties": {
                             "documentCode": {
                               "type": "string",
-                              "minLength": 1
+                              "minLength": 1,
+                              "maxLength": 64,
+                              "pattern": "^[^\\u0000]+$"
                             },
                             "version": {
                               "type": "string",
-                              "minLength": 1
+                              "minLength": 1,
+                              "maxLength": 64,
+                              "pattern": "^[^\\u0000]+$"
                             },
                             "accepted": {
                               "type": "boolean",
@@ -2544,7 +3297,8 @@
                             "accepted"
                           ]
                         },
-                        "minItems": 1
+                        "minItems": 1,
+                        "maxItems": 10
                       }
                     },
                     "required": [
@@ -2891,7 +3645,7 @@
                   "newPassword": {
                     "type": "string",
                     "minLength": 8,
-                    "maxLength": 200
+                    "maxLength": 128
                   }
                 },
                 "required": [
@@ -2957,7 +3711,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Nothing is changed or sent. `allowed` is false with `refusal` BACKOFFICE_ACCOUNT for an account that holds a backoffice role (another administrator deletes it) or NO_VERIFIED_CHANNEL when neither the email nor the phone is verified and allowed to sign in. `codeChannel` is where the code will go (the verified email first, otherwise the verified phone) and `codeDestinationMasked` shows it masked only. `removed` counts what the deletion removes, by item: legalAcceptances, legalNotices (who was told of a new terms version), trackingConsents, appointmentsCanceled (the appointments, relatives included, that have not started), ratings (deleted whole), ratingInvitationsRevoked, questions, notificationsCanceled, notificationPreferences (the switches of the notification centre), pushDevices (the phones registered for push notifications), patientProfiles (anonymized), relatives, profiles; a doctor account adds doctorAppointmentsCanceled (in every office, the patients are told), receivedRatings, doctorRatingInvitationsRevoked, doctorAnswers, articleAuthorships (an article left with no author is unpublished), calendarConnections, offices, doctorProfiles (the public profile goes at once), pendingTransmissions (still sent to the tax authority for at most one month), erpTraders, erpItems, providerMessageTemplates and operationsAlerts. `warnings` holds codes: APPOINTMENTS_IN_PROGRESS when a started or checked-in visit stays with its doctor; for a doctor also FAILED_TRANSMISSIONS (documents the tax authority never accepted), SMS_UNITS_LOST, LICENSE_LOST (a running licence ends with the account) and RECORD_COPY_ON_REQUEST (a copy of the appointment book is given on request, before or after the deletion). `retained` lists what stays, why, and for at most how many years: in the locked archive the accepted terms versions, an abuse measure when the account is banned, rating moderation decisions without text, and the deletion trace (no name, email, phone or health data); DOCTOR_PATIENT_RECORD when past appointments stay in the doctors' records, never shown to the deleted account or publicly; for a doctor DOCTOR_APPOINTMENT_BOOK, DOCTOR_TAX_RECORDS (the issued documents) and PLATFORM_ACCOUNTING (licences and SMS packages).",
+            "description": "Nothing is changed or sent. `allowed` is false with `refusal` BACKOFFICE_ACCOUNT for an account that holds a backoffice role (another administrator deletes it) or NO_VERIFIED_CHANNEL when neither the email nor the phone is verified and allowed to sign in. `codeChannel` is where the code will go (the verified email first, otherwise the verified phone) and `codeDestinationMasked` shows it masked only. `removed` counts what the deletion removes, by item: legalAcceptances, legalNotices (who was told of a new terms version), trackingConsents, appointmentsCanceled (the appointments, relatives included, that have not started), ratings (deleted whole), ratingInvitationsRevoked, questions, notificationsCanceled, notificationPreferences (the switches of the notification centre), pushDevices (the phones registered for push notifications), patientProfiles (anonymized), relatives, favoriteDoctors, profiles; a doctor account adds doctorAppointmentsCanceled (in every office, the patients are told), receivedRatings, doctorRatingInvitationsRevoked, doctorAnswers, articleAuthorships (an article left with no author is unpublished), calendarConnections, offices, doctorProfiles (the public profile goes at once), pendingTransmissions (still sent to the tax authority for at most one month), erpTraders, erpItems, providerMessageTemplates and operationsAlerts. `warnings` holds codes: APPOINTMENTS_IN_PROGRESS when a started or checked-in visit stays with its doctor; for a doctor also FAILED_TRANSMISSIONS (documents the tax authority never accepted), SMS_UNITS_LOST, LICENSE_LOST (a running licence ends with the account) and RECORD_COPY_ON_REQUEST (a copy of the appointment book is given on request, before or after the deletion). `retained` lists what stays, why, and for at most how many years: in the locked archive the accepted terms versions, an abuse measure when the account is banned, rating moderation decisions without text, and the deletion trace (no name, email, phone or health data); DOCTOR_PATIENT_RECORD when past appointments stay in the doctors' records, never shown to the deleted account or publicly; for a doctor DOCTOR_APPOINTMENT_BOOK, DOCTOR_TAX_RECORDS (the issued documents) and PLATFORM_ACCOUNTING (licences and SMS packages).",
             "content": {
               "application/json": {
                 "schema": {
@@ -3264,7 +4018,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The patient profile of the signed-in tenant user, or null when registration completed but the patient profile does not exist yet.",
+            "description": "The patient profile of the signed-in tenant user, with the login email of that same person, or null when registration completed but the patient profile does not exist yet.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3394,11 +4148,15 @@
                 "properties": {
                   "firstName": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "lastName": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "dateOfBirth": {
                     "type": "string",
@@ -3467,11 +4225,15 @@
                 "properties": {
                   "firstName": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "lastName": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "fullName": {
                     "type": "string",
@@ -3653,11 +4415,15 @@
                 "properties": {
                   "firstName": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "lastName": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "relationship": {
                     "type": "string",
@@ -3798,11 +4564,15 @@
                 "properties": {
                   "firstName": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "lastName": {
                     "type": "string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[^\\u0000]+$"
                   },
                   "relationship": {
                     "type": "string",
@@ -3966,6 +4736,1894 @@
         }
       }
     },
+    "/patient/me/favorites": {
+      "get": {
+        "operationId": "listMyFavoriteDoctors",
+        "summary": "List the favorite doctors of the signed-in patient (requires session cookies).",
+        "tags": [
+          "patient"
+        ],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One flat list, the most recently saved first, at most 100, each item with `savedAt` and the very card of the doctor search, prices included. There is no grouping and no search here: the device filters the list itself. A doctor no longer listed in the marketplace is not in `items` nor in `total`, and comes back if listed again. 403 `EC017` for an account with no patient profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/FavoriteDoctorListResponseView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patient/me/favorites/ids": {
+      "get": {
+        "operationId": "listMyFavoriteDoctorIds",
+        "summary": "List the ids of the favorite doctors of the signed-in patient, to draw the hearts (requires session cookies).",
+        "tags": [
+          "patient"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The doctor ids alone, the most recently saved first, at most 100, a doctor no longer listed included. The search and the profile do not say whether a doctor is a favorite: a client reads this once and matches on `doctorId`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/FavoriteDoctorIdsResponseView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patient/me/favorites/{doctorId}": {
+      "put": {
+        "operationId": "saveMyFavoriteDoctor",
+        "summary": "Save a doctor to the favorites of the signed-in patient (requires session cookies).",
+        "tags": [
+          "patient"
+        ],
+        "parameters": [
+          {
+            "name": "doctorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The saved doctor and when; saving again answers the first `savedAt`. The route takes no body and no query (422). 404 `DOCTOR_NOT_FOUND`, one answer for a doctor that does not exist and one no longer listed in the marketplace. 409 `FAVORITES_LIMIT_REACHED` at 100 favorites. Rate limited per IP under the `favorites` class.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/FavoriteDoctorSavedView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeMyFavoriteDoctor",
+        "summary": "Remove a doctor from the favorites of the signed-in patient (requires session cookies).",
+        "tags": [
+          "patient"
+        ],
+        "parameters": [
+          {
+            "name": "doctorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Removed, or never saved: the same answer, no body. The route takes no body and no query (422). Rate limited per IP under the `favorites` class."
+          }
+        }
+      }
+    },
+    "/helpful-votes/public/vote": {
+      "put": {
+        "operationId": "castHelpfulVote",
+        "summary": "Cast, change or take back the vote of this device on an article or a FAQ question.",
+        "tags": [
+          "helpful-vote"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "target",
+                  "value",
+                  "lang"
+                ],
+                "properties": {
+                  "target": {
+                    "type": "string",
+                    "maxLength": 208,
+                    "pattern": "^(?:article:[^\\s\\u0000-\\u001f\\u007f<>\"'`]{1,200}|faq:(?=.{1,80}$)[a-z0-9]+(?:-[a-z0-9]+)*)$"
+                  },
+                  "value": {
+                    "type": "string",
+                    "enum": [
+                      "up",
+                      "down",
+                      "none"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "not-answered",
+                      "unclear",
+                      "outdated"
+                    ]
+                  },
+                  "lang": {
+                    "type": "string",
+                    "enum": [
+                      "el",
+                      "en"
+                    ]
+                  }
+                },
+                "if": {
+                  "required": [
+                    "value"
+                  ],
+                  "properties": {
+                    "value": {
+                      "const": "down"
+                    }
+                  }
+                },
+                "else": {
+                  "not": {
+                    "required": [
+                      "reason"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The vote as stored. The device key travels in the `X-Helpful-Voter` header, a UUID v4 (422 otherwise). With no header the first vote mints one and answers it as `voterKey`, once: the device keeps it and sends it from then on. `none` takes the vote back and mints nothing. A `reason` goes only with `down`. `target` is `article:<slug>` or `faq:<anchor>`: 404 for an article that is not published and for a question that is not in the published FAQ or has no answer. Rate limited per IP under the `helpful-vote` class. There is never a count in this answer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/HelpfulVoteCastResponseView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/helpful-votes/public/vote/mine": {
+      "get": {
+        "operationId": "listMyHelpfulVotes",
+        "summary": "Read the votes of this device: on one target, or on every FAQ question with `kind=faq`.",
+        "tags": [
+          "helpful-vote"
+        ],
+        "parameters": [
+          {
+            "name": "target",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 208,
+              "pattern": "^(?:article:[^\\s\\u0000-\\u001f\\u007f<>\"'`]{1,200}|faq:(?=.{1,80}$)[a-z0-9]+(?:-[a-z0-9]+)*)$"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "faq"
+              ]
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Only the votes of the key in `X-Helpful-Voter` (a UUID v4, 422 otherwise). With no header, an unknown key or a target that no longer exists: `[]`. Exactly one of `target` and `kind`. There is never a count in this answer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/HelpfulVoteMineResponseView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/helpful-votes/summary": {
+      "get": {
+        "operationId": "getHelpfulVoteSummary",
+        "summary": "Read the vote totals per article and FAQ question (requires a backoffice session).",
+        "tags": [
+          "helpful-vote"
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "article",
+                "faq"
+              ]
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "down",
+                "up",
+                "total"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{1,7}$"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One row per target, most `down` first unless `sort` says otherwise, default 50 and at most 100 a page; `from` and `to` bound the last change of a vote. `exists` is false, with `title` null, for an article no longer published and a question no longer in the FAQ. `meta.nextCursor` goes in `cursor` for the next page, null on the last one. Never a device hash. 401 without a session, 403 for any role outside the backoffice.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/HelpfulVoteSummaryResponseView"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/HelpfulVoteSummaryMetaView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messaging/conversations": {
+      "get": {
+        "operationId": "listMessagingConversations",
+        "summary": "List the conversations of the signed-in account, newest first.",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "side",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "patient",
+                "doctor"
+              ]
+            }
+          },
+          {
+            "name": "archived",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^([0-9]{13})_([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "`side` (`all` by default) keeps the conversations where the reader is that side; `archived=1` reads «Προηγούμενες συνομιλίες». Up to 30 a page, `nextCursor` goes in `cursor`. `lastMessage.preview` is one line, cut on the server at 140 characters. `sideCounts` is on the first page: an account holding both sides shows its chips from it. There is never a read state of the other person. Rate limited per IP under `messaging-read`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MessagingConversationListView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "startMessagingConversation",
+        "summary": "Open the one conversation with a doctor, or continue it, with a message.",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "doctorId",
+                  "clientMessageId",
+                  "body"
+                ],
+                "properties": {
+                  "doctorId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "clientMessageId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "body": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The same `clientMessageId` answers the same message, so a retry never doubles. 404 for a doctor the public search does not show; 409 `MESSAGING_CLOSED` when the doctor accepts no new conversations; 409 `MESSAGING_BLOCKED`; 409 `MESSAGING_PRE_REPLY_LIMIT` after 3 messages before the first answer; 400 `MESSAGING_SELF`, `MESSAGE_EMPTY` or `MESSAGE_TOO_LONG`; 422 for a body that fails the schema; 429 `MESSAGING_NEW_LIMIT`, `MESSAGING_SEND_LIMIT` or `MESSAGE_DUPLICATE`, with `Retry-After`. The text is plain and comes back as written: render it only as text, never as HTML, and make no link of it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MessagingSentMessageView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messaging/conversations/{conversationId}/messages": {
+      "get": {
+        "operationId": "listMessagingMessages",
+        "summary": "Read a page of a conversation backwards, or poll its new messages.",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Oldest first inside a page. `before` reads backwards, `after` polls forwards, never both; up to 50 a page. On a poll `counterpart` is null and only the new messages and `state` travel. 404 for a conversation that is not the reader's, unknown or of another tenant alike.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MessagingThreadView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "sendMessagingMessage",
+        "summary": "Send one message in a conversation of the signed-in account.",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "clientMessageId",
+                  "body"
+                ],
+                "properties": {
+                  "clientMessageId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "body": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The same `clientMessageId` answers the same message, so «Δοκιμάστε ξανά» never doubles. 404 for a conversation that is not the reader's; 409 `MESSAGING_BLOCKED` or `MESSAGING_PRE_REPLY_LIMIT`; 400 `MESSAGE_EMPTY` or `MESSAGE_TOO_LONG`; 422 for a body that fails the schema; 429 `MESSAGING_SEND_LIMIT` or `MESSAGE_DUPLICATE`, with `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MessagingSentMessageView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messaging/conversations/{conversationId}/read": {
+      "post": {
+        "operationId": "markMessagingConversationRead",
+        "summary": "Mark a conversation read up to a message, for this side only.",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "upToMessageId"
+                ],
+                "properties": {
+                  "upToMessageId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Only forwards: an older message changes nothing. `unreadCount` is what stays unread after that message. The other person never learns it. 404 for a message outside the conversation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MessagingReadView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messaging/unread-count": {
+      "get": {
+        "operationId": "getMessagingUnreadCount",
+        "summary": "Count the conversations holding something unread, for the badge.",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conversations, not messages, with none of the archived ones.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MessagingUnreadCountView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messaging/doctors/{doctorId}/contact": {
+      "get": {
+        "operationId": "getMessagingDoctorContact",
+        "summary": "What the button of a doctor profile opens: the existing conversation, or whether a new one may start.",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "doctorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Called only when the button is pressed, so the profile carries no statement more. 404 for a doctor the public search does not show, unless a conversation with them exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MessagingContactView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messaging/conversations/{conversationId}/archive": {
+      "post": {
+        "operationId": "archiveMessagingConversation",
+        "summary": "Move a conversation to «Προηγούμενες συνομιλίες», for this side only.",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A new message takes it out by itself.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MessagingArchiveView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "unarchiveMessagingConversation",
+        "summary": "Take a conversation out of «Προηγούμενες συνομιλίες».",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MessagingArchiveView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messaging/conversations/{conversationId}/block": {
+      "post": {
+        "operationId": "blockMessagingConversation",
+        "summary": "Block a conversation: neither side writes until the one who blocked lifts it.",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MessagingBlockView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "unblockMessagingConversation",
+        "summary": "Lift a block this side placed.",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MessagingBlockView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messaging/conversations/{conversationId}/export": {
+      "get": {
+        "operationId": "exportMessagingConversation",
+        "summary": "Download a copy of a conversation as plain text.",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "`text/plain; charset=utf-8` as an attachment, the file itself and not the JSON envelope. Only someone who takes part; 429 `MESSAGING_EXPORT_LIMIT` past 10 a day, with `Retry-After`.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessagingConversationExportText"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messaging/messages/{messageId}/report": {
+      "post": {
+        "operationId": "reportMessagingMessage",
+        "summary": "Report a received message to the team, with a reason of the closed set.",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "reason"
+                ],
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "SPAM",
+                      "ABUSE",
+                      "INAPPROPRIATE",
+                      "OTHER"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The team sees only this message, not the conversation, and the sender is not told. 400 `MESSAGE_NOT_RECEIVED` for an own message; 409 `MESSAGE_ALREADY_REPORTED`; 429 `MESSAGING_REPORT_LIMIT` past 20 a day, with `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MessagingReportedView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messaging/settings/me": {
+      "get": {
+        "operationId": "getMessagingSettings",
+        "summary": "Read «Δέχομαι νέα μηνύματα» of the signed-in doctor.",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Open until the doctor closes it. 403 for an account without a doctor profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MessagingDoctorSettingsView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateMessagingSettings",
+        "summary": "Change «Δέχομαι νέα μηνύματα» of the signed-in doctor.",
+        "tags": [
+          "messaging"
+        ],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "el",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "acceptsNewConversations"
+                ],
+                "properties": {
+                  "acceptsNewConversations": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookies": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Closed, nobody starts a new conversation; the existing ones go on. 403 for an account without a doctor profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "error"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MessagingDoctorSettingsView"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/appointment/booking-readiness": {
       "get": {
         "operationId": "getBookingReadiness",
@@ -4018,7 +6676,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The blockers standing between the signed-in patient and a booking (verified mobile, full name), plus whether booking is possible at all. It belongs to the patient side: a member account, and an account that is also a doctor only when it holds a patient profile (a doctor books another doctor as a patient); otherwise 403. With `doctorId` it also reports `PATIENT_PENDING_LIMIT_REACHED` when that doctor already holds an open request of the PERSON being booked (D-70, counted per person): the account itself, or the relative named by `relativeId` — each relative has a place of its own. A `relativeId` that is not a relative of this account answers like a person with no open request. With `doctorId` naming the doctor profile of this very account it also reports `PATIENT_IS_THE_DOCTOR`, with or without `relativeId`: one account is never both sides of an appointment, and the booking would be refused with 403. With the chosen slot (`officeId` and `startTime`, both together with `doctorId`) it also reports `BOOKING_NOTICE_TOO_SHORT` and `BOOKING_HORIZON_EXCEEDED` under the effective policy of that doctor and office, decided on the SERVER clock — exactly what the booking would be refused with.",
+            "description": "The blockers standing between the signed-in patient and a booking (verified mobile, full name), plus whether booking is possible at all. It belongs to the patient side: a member account, and an account that is also a doctor only when it holds a patient profile (a doctor books another doctor as a patient); otherwise 403. With `doctorId` it also reports `PATIENT_PENDING_LIMIT_REACHED` when that doctor already holds an open request of the PERSON being booked (D-70, counted per person): the account itself, or the relative named by `relativeId` — each relative has a place of its own. A `relativeId` that is not a relative of this account answers like a person with no open request. With `doctorId` naming the doctor profile of this very account it also reports `PATIENT_IS_THE_DOCTOR`, with or without `relativeId`: one account is never both sides of an appointment, and the booking would be refused with 403. With the chosen slot (`officeId` and `startTime`, both together with `doctorId`) it also reports `BOOKING_NOTICE_TOO_SHORT` and `BOOKING_HORIZON_EXCEEDED` under the effective policy of that doctor and office, decided on the SERVER clock — exactly what the booking would be refused with — and `OFFICE_PHONE_REQUIRED` when that office has no phone. `insideCancellationCutoff` says, only with the chosen slot, that the cancellation deadline of that hour has already passed on the server clock, so a patient told nothing else cannot tell that once booked it cannot be cancelled online; `false` without a slot.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4168,7 +6826,7 @@
         ],
         "responses": {
           "201": {
-            "description": "The created appointment. The booking is decided by the side the account takes in it: naming its own doctor profile as `doctorId` makes it a doctor booking, naming its own patient profile as `patientId` (another doctor) a patient booking, and a booking of a doctor for the patient profile of its own account — by that doctor or by the backoffice, for itself or for a relative of its own (`RELATIVE`) — is refused with 403 `PATIENT_IS_THE_DOCTOR`, the blocker code `getBookingReadiness` reports it with beforehand (one account is never both sides of an appointment; another doctor books the same person by the patient rules; judged on the accounts behind the two profiles). Every id is read in its canonical lower-case text before the side is chosen, so the letter case of an id changes nothing. A patient booking never sends `status`: the doctor confirmation mode decides it (AUTO ⇒ `booked`, MANUAL ⇒ `pending`) and the mode is snapshotted on the row. A MEMBER keeps one `pending` request per PERSON with one doctor (D-70): the account itself and each of its relatives count separately, and a second one for the same person answers 422 `PATIENT_PENDING_LIMIT_REACHED`. Rate limited per IP under the `booking` class.",
+            "description": "The created appointment. A patient booking at an office with no phone is refused with 403 `OFFICE_PHONE_REQUIRED`. The booking is decided by the side the account takes in it: naming its own doctor profile as `doctorId` makes it a doctor booking, naming its own patient profile as `patientId` (another doctor) a patient booking, and a booking of a doctor for the patient profile of its own account — by that doctor or by the backoffice, for itself or for a relative of its own (`RELATIVE`) — is refused with 403 `PATIENT_IS_THE_DOCTOR`, the blocker code `getBookingReadiness` reports it with beforehand (one account is never both sides of an appointment; another doctor books the same person by the patient rules; judged on the accounts behind the two profiles). Every id is read in its canonical lower-case text before the side is chosen, so the letter case of an id changes nothing. A patient booking never sends `status`: the doctor confirmation mode decides it (AUTO ⇒ `booked`, MANUAL ⇒ `pending`) and the mode is snapshotted on the row. A MEMBER keeps one `pending` request per PERSON with one doctor (D-70): the account itself and each of its relatives count separately, and a second one for the same person answers 422 `PATIENT_PENDING_LIMIT_REACHED`. Rate limited per IP under the `booking` class.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4410,7 +7068,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The appointment with its service lines and audit log, `officeTimeZone`: the IANA zone its office keeps its hours in, so every hour is shown on the office clock, and `actions`: what the reader may do with it NOW, decided on the server clock by the very rules the writes check (D-118) — a member cancels until the hour (`isPastCancellationCutoff` flags a late cancel) and moves strictly before the cutoff and within the move limit, the doctor side answers a pending request, moves a pending or booked one, cancels anything not over, declares the `outcomes` due after the hour and makes the open `correction`. Booking readiness and an already rated visit are asked by the write itself. The side comes from the appointment itself: its doctor reads it as the doctor side, the holder of its patient profile as a member (a doctor who booked another doctor reads that visit as a patient), the backoffice every appointment of its tenant; everyone else gets the one 403. A member reads every audit line without the explanation of an automatic change, and every line that set the outcome of the visit (a declared outcome, or a status move to `completed`/`no_show` by anyone) without who set it, its reason or its snapshots (`actorRole` null).",
+            "description": "The appointment with its service lines and audit log, `officeTimeZone`: the IANA zone its office keeps its hours in, so every hour is shown on the office clock, and `actions`: what the reader may do with it NOW, decided on the server clock by the very rules the writes check (D-118), and `officePhone`: the current number of the office, else the one frozen at booking, null when neither exists — a member cancels a booked visit until its cancellation deadline and a request until its hour (`!canCancel && isPastCancellationCutoff` means the deadline has passed and only the phone is left) and moves strictly before the cutoff and within the move limit, the doctor side answers a pending request, moves a pending or booked one, cancels anything not over, declares the `outcomes` due after the hour and makes the open `correction`. Booking readiness and an already rated visit are asked by the write itself. The side comes from the appointment itself: its doctor reads it as the doctor side, the holder of its patient profile as a member (a doctor who booked another doctor reads that visit as a patient), the backoffice every appointment of its tenant; everyone else gets the one 403. A member reads every audit line without the explanation of an automatic change, and every line that set the outcome of the visit (a declared outcome, or a status move to `completed`/`no_show` by anyone) without who set it, its reason or its snapshots (`actorRole` null).",
             "content": {
               "application/json": {
                 "schema": {
@@ -4494,6 +7152,9 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "acknowledgeInsideCancellationCutoff": {
+                    "type": "boolean"
                   }
                 }
               }
@@ -4507,7 +7168,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The updated appointment, with its `actions`. A member may move it only before the effective cancellation cutoff and only into a slot that still passes notice, horizon and availability; a doctor moves only a pending or booked appointment (403 otherwise), without the patient accepting, and the status does not change. A member who hands a `pending` request to another person (`relativeId`) takes that person's own D-70 place (422 `PATIENT_PENDING_LIMIT_REACHED` when it is taken). Who the visit is for (`bookedForType`, `relativeId`) and the `patientNote` change only while it is pending or booked, for every role (403 otherwise), and a new person carries its own frozen `relativeSnapshot` (null for the account holder). Only the patient of the appointment writes `patientNote` (D-39): a body from the doctor side that carries it is refused with 403. A write that finds the appointment closed in the meantime answers that same 403; one that finds it changed but still open answers 409. Rate limited per IP under the `booking` class.",
+            "description": "The updated appointment, with its `actions`. A member may move it only before the effective cancellation cutoff and only into a slot that still passes notice, horizon and availability. A member moving a BOOKED visit to an hour whose cancellation deadline has already passed gets 422 `RESCHEDULE_INSIDE_CANCELLATION_CUTOFF` and nothing is written, unless the body carries `acknowledgeInsideCancellationCutoff: true`; a request (`pending`) and the doctor side are never asked. A doctor moves only a pending or booked appointment (403 otherwise), without the patient accepting, and the status does not change. A member who hands a `pending` request to another person (`relativeId`) takes that person's own D-70 place (422 `PATIENT_PENDING_LIMIT_REACHED` when it is taken). Who the visit is for (`bookedForType`, `relativeId`) and the `patientNote` change only while it is pending or booked, for every role (403 otherwise), and a new person carries its own frozen `relativeSnapshot` (null for the account holder). Only the patient of the appointment writes `patientNote` (D-39): a body from the doctor side that carries it is refused with 403. A write that finds the appointment closed in the meantime answers that same 403; one that finds it changed but still open answers 409. Rate limited per IP under the `booking` class.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4597,7 +7258,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The canceled appointment, with its `actions`. `reasonCode` is mandatory and must belong to the list of the caller own role. A member cancels until the appointment starts (403 from then on); cancelling past the cutoff is not refused: the row is flagged `canceledLate`. Repeating the call is idempotent. Rate limited per IP under the `booking` class.",
+            "description": "The canceled appointment, with its `actions`. `reasonCode` is mandatory and must belong to the list of the caller own role. A member cancels a booked visit until its cancellation deadline: past it the answer is 403 `CANCEL_AFTER_CANCELLATION_CUTOFF` and nothing is written, and the patient calls the office (`officePhone`), whose doctor side still cancels at any hour. A member withdraws a request (`pending`) until its hour, flagged `canceledLate` past the deadline, and cancels until its hour a visit the doctor side put inside its deadline, not flagged. From the hour on the answer is 403. Repeating the call is idempotent. Rate limited per IP under the `booking` class.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5634,7 +8295,7 @@
                   "cells": {
                     "type": "array",
                     "minItems": 1,
-                    "maxItems": 12,
+                    "maxItems": 16,
                     "items": {
                       "type": "object",
                       "additionalProperties": false,
@@ -5646,10 +8307,12 @@
                             "REMINDERS",
                             "RATINGS",
                             "QUESTIONS",
+                            "MESSAGES",
                             "ACCOUNT",
                             "DOCTOR_NEW_APPOINTMENTS",
                             "DOCTOR_PATIENT_CHANGES",
                             "DOCTOR_RATINGS",
+                            "DOCTOR_MESSAGES",
                             "DOCTOR_ACCOUNT",
                             "DOCTOR_OPERATIONS"
                           ]
@@ -18689,6 +21352,12 @@
             ],
             "additionalProperties": false
           },
+          "credentials": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorPublicMarketplaceCredentialView"
+            }
+          },
           "articlesSummary": {
             "$ref": "#/components/schemas/DoctorPublicMarketplaceArticlesSummaryView"
           },
@@ -18721,11 +21390,13 @@
           "rating",
           "reviewsPreview",
           "availability",
+          "credentials",
           "articlesSummary",
           "responseMetrics",
           "isPatientsChoice"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The public profile of a doctor. U-73: `studies`, `workExperience` and `conferences` are deprecated copies of the texts of `credentials`, which also holds the years and the organization: a client reads `credentials`."
       },
       "DoctorPublicMarketplaceProfileOfficeView": {
         "type": "object",
@@ -18846,6 +21517,16 @@
               "string",
               "null"
             ]
+          },
+          "bookingPolicy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DoctorPublicMarketplaceOfficeBookingPolicyView"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -18854,9 +21535,38 @@
           "streetNumber",
           "city",
           "state",
-          "postalCode"
+          "postalCode",
+          "bookingPolicy"
         ],
         "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceOfficeBookingPolicyView": {
+        "type": "object",
+        "properties": {
+          "confirmationMode": {
+            "$ref": "#/components/schemas/AppointmentConfirmationMode"
+          },
+          "cancellationCutoffHours": {
+            "type": "number"
+          },
+          "minBookingNoticeHours": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "confirmationMode",
+          "cancellationCutoffHours",
+          "minBookingNoticeHours"
+        ],
+        "additionalProperties": false,
+        "description": "U-75: the limits a patient reads for one office, its overrides over the doctor's values; `null` if they could not be read."
+      },
+      "AppointmentConfirmationMode": {
+        "type": "string",
+        "enum": [
+          "AUTO",
+          "MANUAL"
+        ]
       },
       "DoctorPublicMarketplaceSocialLinksView": {
         "type": "object",
@@ -18927,6 +21637,21 @@
           },
           "isSpecialized": {
             "type": "boolean"
+          },
+          "yearsOfExperience": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "kind": {
+            "$ref": "#/components/schemas/DoctorServiceKind"
+          },
+          "completedVisitCount": {
+            "type": [
+              "number",
+              "null"
+            ]
           }
         },
         "required": [
@@ -18937,9 +21662,22 @@
           "description",
           "durationInMinutes",
           "price",
-          "isSpecialized"
+          "isSpecialized",
+          "yearsOfExperience",
+          "kind",
+          "completedVisitCount"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "U-72, U-71.2: `kind` comes from the service name, so no one enters it. `completedVisitCount` is `null` for a service with none or before the first computation; a visit with two services counts once in each, so a client never sums them towards `responseMetrics.completedVisitCount`. `yearsOfExperience` is `null` when none was entered, never a zero."
+      },
+      "DoctorServiceKind": {
+        "type": "string",
+        "enum": [
+          "follow-up",
+          "check-up",
+          "visit",
+          "other"
+        ]
       },
       "DoctorImagePublicView": {
         "type": "object",
@@ -19149,6 +21887,17 @@
               "null"
             ]
           },
+          "doctorReplyAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -19195,11 +21944,66 @@
           "overallRating",
           "comment",
           "doctorReply",
+          "doctorReplyAt",
           "createdAt",
           "aspect"
         ],
         "additionalProperties": false,
-        "description": "A public review, the same in the profile `reviewsPreview` and in `/reviews`: `overallRating` and every `aspect` score on the 0–5 stars the clients draw (U-49; an aspect in half stars). The doctor module owns this type and reads the rating tables directly, an accepted in-module read-only precedent."
+        "description": "A public review, the same in the profile `reviewsPreview` and in `/reviews`: `overallRating` and every `aspect` score on the 0–5 stars the clients draw (U-49; an aspect in half stars). `doctorReplyAt` follows `doctorReply`: only an APPROVED reply, otherwise null. The doctor module owns this type and reads the rating tables directly, an accepted in-module read-only precedent."
+      },
+      "DoctorPublicMarketplaceCredentialView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/DoctorCredentialKind"
+          },
+          "startYear": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "endYear": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "isCurrent": {
+            "type": "boolean"
+          },
+          "title": {
+            "type": "string"
+          },
+          "organization": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "startYear",
+          "endYear",
+          "isCurrent",
+          "title",
+          "organization"
+        ],
+        "additionalProperties": false,
+        "description": "U-73: one line of the public biography, in the language of the profile, the newest first."
+      },
+      "DoctorCredentialKind": {
+        "type": "string",
+        "enum": [
+          "STUDY",
+          "WORK",
+          "CONFERENCE"
+        ]
       },
       "DoctorPublicMarketplaceArticlesSummaryView": {
         "type": "object",
@@ -19280,15 +22084,140 @@
               }
             ]
           },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "total": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
           "language": {
             "$ref": "#/components/schemas/ILanguage"
           }
         },
         "required": [
           "reviews",
+          "nextCursor",
+          "total",
           "language"
         ],
         "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceReviewsSummaryResponseView": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DoctorPublicMarketplaceReviewsSummaryView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "language": {
+            "$ref": "#/components/schemas/ILanguage"
+          }
+        },
+        "required": [
+          "summary",
+          "language"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceReviewsSummaryView": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number"
+          },
+          "average": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "distribution": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "star": {
+                  "type": "number",
+                  "enum": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                  ]
+                },
+                "count": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "star",
+                "count"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "aspectAverages": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DoctorPublicMarketplaceProfileRatingAspectAverages"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "topic": {
+                  "$ref": "#/components/schemas/ReviewTopic"
+                },
+                "count": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "topic",
+                "count"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "count",
+          "average",
+          "distribution",
+          "aspectAverages",
+          "topics"
+        ],
+        "additionalProperties": false
+      },
+      "ReviewTopic": {
+        "type": "string",
+        "enum": [
+          "COURTESY",
+          "EXPLANATION",
+          "ORGANIZATION",
+          "CLEANLINESS",
+          "PATIENCE",
+          "ACCESS"
+        ]
       },
       "DoctorPublicMarketplaceOfficeResponseView": {
         "type": "object",
@@ -19296,7 +22225,7 @@
           "office": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DoctorPublicMarketplaceProfileOfficeView"
+                "$ref": "#/components/schemas/DoctorPublicMarketplaceOfficeDetailView"
               },
               {
                 "type": "null"
@@ -19359,6 +22288,203 @@
         ],
         "additionalProperties": false
       },
+      "DoctorPublicMarketplaceOfficeDetailView": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorPublicMarketplaceOfficeImageView"
+            }
+          },
+          "weeklyHours": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DoctorPublicMarketplaceOfficeWeeklyHoursView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "gettingThere": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "officeId": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "street": {
+            "type": "string"
+          },
+          "streetNumber": {
+            "type": "string"
+          },
+          "floor": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "description": {},
+          "postalCode": {
+            "type": "string"
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parking": {
+            "type": "boolean"
+          },
+          "disabilityAccess": {
+            "type": "boolean"
+          },
+          "paymentOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorPublicMarketplacePaymentOption"
+            }
+          },
+          "latitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "longitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "distanceKm": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "city",
+          "description",
+          "disabilityAccess",
+          "distanceKm",
+          "floor",
+          "gettingThere",
+          "images",
+          "latitude",
+          "longitude",
+          "officeId",
+          "parking",
+          "paymentOptions",
+          "phone",
+          "postalCode",
+          "state",
+          "street",
+          "streetNumber",
+          "weeklyHours"
+        ]
+      },
+      "DoctorPublicMarketplaceOfficeImageView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "smSizeUrl": {
+            "type": "string"
+          },
+          "mediumSizeUrl": {
+            "type": "string"
+          },
+          "lgSizeUrl": {
+            "type": "string"
+          },
+          "alt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "smSizeUrl",
+          "mediumSizeUrl",
+          "lgSizeUrl",
+          "alt"
+        ],
+        "additionalProperties": false
+      },
+      "DoctorPublicMarketplaceOfficeWeeklyHoursView": {
+        "type": "object",
+        "properties": {
+          "timezone": {
+            "type": "string"
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "day": {
+                  "type": "string",
+                  "enum": [
+                    "monday",
+                    "tuesday",
+                    "wednesday",
+                    "thursday",
+                    "friday",
+                    "saturday",
+                    "sunday"
+                  ]
+                },
+                "ranges": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "startMinute": {
+                        "type": "number"
+                      },
+                      "endMinute": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "startMinute",
+                      "endMinute"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "day",
+                "ranges"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "timezone",
+          "days"
+        ],
+        "additionalProperties": false
+      },
       "BookingPolicyView": {
         "type": "object",
         "properties": {
@@ -19383,12 +22509,202 @@
         ],
         "additionalProperties": false
       },
-      "AppointmentConfirmationMode": {
+      "ArticlePublicCardListView": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ArticlePublicCardView"
+        },
+        "description": "The `data` of `GET /article/public/articles`."
+      },
+      "ArticlePublicCardView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IArticleType"
+          },
+          "publishedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "language": {
+            "$ref": "#/components/schemas/ILanguage"
+          },
+          "title": {
+            "type": "string"
+          },
+          "shortDescription": {},
+          "image": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ArticlePublicImageView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "authors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticlePublicAuthorView"
+            }
+          },
+          "readingMinutes": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "type",
+          "publishedAt",
+          "language",
+          "title",
+          "shortDescription",
+          "image",
+          "authors",
+          "readingMinutes"
+        ],
+        "additionalProperties": false,
+        "description": "U-92.1: an article of a public list, a card: the body, the sections and the SEO fields travel only by slug."
+      },
+      "IArticleType": {
         "type": "string",
         "enum": [
-          "AUTO",
-          "MANUAL"
+          "ARTICLE",
+          "HEALTH_ADVICE"
         ]
+      },
+      "ArticlePublicImageView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "smSizeUrl": {
+            "type": "string"
+          },
+          "mediumSizeUrl": {
+            "type": "string"
+          },
+          "lgSizeUrl": {
+            "type": "string"
+          },
+          "alt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metaDescription": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "smSizeUrl",
+          "mediumSizeUrl",
+          "lgSizeUrl",
+          "alt",
+          "metaDescription"
+        ],
+        "additionalProperties": false
+      },
+      "ArticlePublicAuthorView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "doctorId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "isPrimary": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "doctorId",
+          "name",
+          "slug",
+          "isPrimary"
+        ],
+        "additionalProperties": false
+      },
+      "ArticlePublicListMetaView": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "appliedService": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ArticleAppliedServiceView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "total",
+          "appliedService"
+        ],
+        "additionalProperties": false,
+        "description": "U-57.3: what `meta` of the public list says: how many articles match in all, and the service it is filtered by."
+      },
+      "ArticleAppliedServiceView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
       },
       "AvailabilityPublicSlotsView": {
         "type": "object",
@@ -20010,6 +23326,38 @@
         ],
         "additionalProperties": false
       },
+      "AppleNonceResult": {
+        "type": "object",
+        "properties": {
+          "nonce": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "nonce"
+        ],
+        "additionalProperties": false
+      },
+      "AppleSignInResult": {
+        "$ref": "#/components/schemas/AccessGoogleResult"
+      },
+      "AppleBrowserStartResult": {
+        "type": "object",
+        "properties": {
+          "authorizationUrl": {
+            "type": "string"
+          },
+          "flowSecret": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "authorizationUrl",
+          "flowSecret"
+        ],
+        "additionalProperties": false,
+        "description": "`flowSecret` stays in the app's memory: it never passes through a browser or an address (U-90.3)."
+      },
       "AccessCompleteRegistrationResult": {
         "type": "object",
         "properties": {
@@ -20173,7 +23521,8 @@
           "FAILED_TRANSMISSIONS",
           "SMS_UNITS_LOST",
           "LICENSE_LOST",
-          "RECORD_COPY_ON_REQUEST"
+          "RECORD_COPY_ON_REQUEST",
+          "MESSAGES_COPY_BEFORE_DELETION"
         ]
       },
       "AccountDeletionRetainedCategoryView": {
@@ -20204,6 +23553,7 @@
           "DELETION_TRACE",
           "RATING_MODERATION",
           "ABUSE_MEASURE",
+          "MESSAGE_REPORT",
           "DOCTOR_PATIENT_RECORD",
           "DOCTOR_APPOINTMENT_BOOK",
           "DOCTOR_TAX_RECORDS",
@@ -20403,6 +23753,12 @@
               "null"
             ]
           },
+          "loginEmail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "id": {
             "type": "string"
           },
@@ -20442,7 +23798,7 @@
           "updatedAt",
           "userId"
         ],
-        "description": "`firstName`/`lastName` and the two login-phone facts are resolved only by `GET /patient/me`; the other reads of this view omit them. The login phone is published masked (`+30 69•• ••• 678`), never in full (D-47)."
+        "description": "`firstName`/`lastName`, the two login-phone facts and `loginEmail` are resolved only by `GET /patient/me`, for the signed-in person alone; the other reads of this view omit them. The login phone is published masked (`+30 69•• ••• 678`), never in full (D-47)."
       },
       "RelativeView": {
         "type": "object",
@@ -20637,6 +23993,653 @@
           "$ref": "#/components/schemas/RelativeView"
         }
       },
+      "FavoriteDoctorListResponseView": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FavoriteDoctorItemView"
+            }
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "FavoriteDoctorItemView": {
+        "type": "object",
+        "properties": {
+          "savedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "card": {
+            "$ref": "#/components/schemas/DoctorPublicMarketplaceCardView"
+          }
+        },
+        "required": [
+          "savedAt",
+          "card"
+        ],
+        "additionalProperties": false
+      },
+      "FavoriteDoctorIdsResponseView": {
+        "type": "object",
+        "properties": {
+          "doctorIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "doctorIds"
+        ],
+        "additionalProperties": false
+      },
+      "FavoriteDoctorSavedView": {
+        "$ref": "#/components/schemas/FavoriteDoctorRecord"
+      },
+      "FavoriteDoctorRecord": {
+        "type": "object",
+        "properties": {
+          "doctorId": {
+            "type": "string"
+          },
+          "savedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "doctorId",
+          "savedAt"
+        ],
+        "additionalProperties": false
+      },
+      "HelpfulVoteCastResponseView": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "voterKey": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/HelpfulVoteChoice"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HelpfulVoteReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "reason",
+          "target",
+          "value"
+        ],
+        "description": "`voterKey` appears only when the server has just minted it: the device keeps it and sends it from then on."
+      },
+      "HelpfulVoteChoice": {
+        "type": "string",
+        "enum": [
+          "up",
+          "down",
+          "none"
+        ]
+      },
+      "HelpfulVoteReason": {
+        "type": "string",
+        "enum": [
+          "not-answered",
+          "unclear",
+          "outdated"
+        ]
+      },
+      "HelpfulVoteMineResponseView": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/HelpfulVoteView"
+        }
+      },
+      "HelpfulVoteView": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/HelpfulVoteChoice"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HelpfulVoteReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "target",
+          "value",
+          "reason"
+        ],
+        "additionalProperties": false,
+        "description": "U-78.1: one device's own vote on one target. No public answer carries a count."
+      },
+      "HelpfulVoteSummaryResponseView": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/HelpfulVoteSummaryItemView"
+        }
+      },
+      "HelpfulVoteSummaryItemView": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/HelpfulVoteKind"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "exists": {
+            "type": "boolean"
+          },
+          "up": {
+            "type": "number"
+          },
+          "down": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          },
+          "helpfulShare": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "reasons": {
+            "type": "object",
+            "properties": {
+              "notAnswered": {
+                "type": "number"
+              },
+              "unclear": {
+                "type": "number"
+              },
+              "outdated": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "notAnswered",
+              "unclear",
+              "outdated"
+            ],
+            "additionalProperties": false
+          },
+          "lastVoteAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "kind",
+          "key",
+          "title",
+          "exists",
+          "up",
+          "down",
+          "total",
+          "helpfulShare",
+          "reasons",
+          "lastVoteAt"
+        ],
+        "additionalProperties": false
+      },
+      "HelpfulVoteKind": {
+        "type": "string",
+        "enum": [
+          "article",
+          "faq"
+        ]
+      },
+      "HelpfulVoteSummaryMetaView": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "total",
+          "nextCursor"
+        ],
+        "additionalProperties": false
+      },
+      "MessagingConversationListView": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MessagingConversationView"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sideCounts": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "asPatient": {
+                    "type": "number"
+                  },
+                  "asDoctor": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "asPatient",
+                  "asDoctor"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor",
+          "sideCounts"
+        ],
+        "additionalProperties": false,
+        "description": "`sideCounts` is on the first page only: an account with both sides shows its chips from it (Π4)."
+      },
+      "MessagingConversationView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "side": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "doctor"
+            ]
+          },
+          "counterpart": {
+            "$ref": "#/components/schemas/MessagingCounterpartView"
+          },
+          "lastMessage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessagingLastMessageView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unreadCount": {
+            "type": "number"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "blockedByMe": {
+            "type": "boolean"
+          },
+          "blockedByOther": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "side",
+          "counterpart",
+          "lastMessage",
+          "unreadCount",
+          "archived",
+          "blockedByMe",
+          "blockedByOther"
+        ],
+        "additionalProperties": false,
+        "description": "One row of the list; `side` is the side of the reader. There is never a read state of the other person (U-84.2)."
+      },
+      "MessagingCounterpartView": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "doctor",
+              "patient"
+            ]
+          },
+          "fullName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "doctorId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "slug": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "specialty": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "photoUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "fullName",
+          "doctorId",
+          "slug",
+          "specialty",
+          "photoUrl"
+        ],
+        "additionalProperties": false,
+        "description": "The other person of a conversation. A patient shows only `fullName`, with `kind: 'patient'` (U-84.3)."
+      },
+      "MessagingLastMessageView": {
+        "type": "object",
+        "properties": {
+          "preview": {
+            "type": "string"
+          },
+          "mine": {
+            "type": "boolean"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "preview",
+          "mine",
+          "sentAt"
+        ],
+        "additionalProperties": false
+      },
+      "MessagingSentMessageView": {
+        "type": "object",
+        "properties": {
+          "conversationId": {
+            "type": "string"
+          },
+          "message": {
+            "$ref": "#/components/schemas/MessagingMessageView"
+          }
+        },
+        "required": [
+          "conversationId",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "MessagingMessageView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "mine": {
+            "type": "boolean"
+          },
+          "body": {
+            "type": "string"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "clientMessageId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "mine",
+          "body",
+          "sentAt",
+          "clientMessageId"
+        ],
+        "additionalProperties": false
+      },
+      "MessagingThreadView": {
+        "type": "object",
+        "properties": {
+          "conversationId": {
+            "type": "string"
+          },
+          "side": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "doctor"
+            ]
+          },
+          "counterpart": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessagingCounterpartView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/MessagingThreadStateView"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MessagingMessageView"
+            }
+          },
+          "hasMore": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "conversationId",
+          "side",
+          "counterpart",
+          "state",
+          "items",
+          "hasMore"
+        ],
+        "additionalProperties": false,
+        "description": "`counterpart` is null on a poll (`after`), which reads only the new messages and this state."
+      },
+      "MessagingThreadStateView": {
+        "type": "object",
+        "properties": {
+          "archived": {
+            "type": "boolean"
+          },
+          "blockedByMe": {
+            "type": "boolean"
+          },
+          "blockedByOther": {
+            "type": "boolean"
+          },
+          "preReplyLimitReached": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "archived",
+          "blockedByMe",
+          "blockedByOther",
+          "preReplyLimitReached"
+        ],
+        "additionalProperties": false,
+        "description": "What the composer of a conversation shows, cheap enough to travel on every poll."
+      },
+      "MessagingReadView": {
+        "type": "object",
+        "properties": {
+          "unreadCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "unreadCount"
+        ],
+        "additionalProperties": false
+      },
+      "MessagingUnreadCountView": {
+        "type": "object",
+        "properties": {
+          "conversations": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "conversations"
+        ],
+        "additionalProperties": false
+      },
+      "MessagingContactView": {
+        "type": "object",
+        "properties": {
+          "acceptsNewConversations": {
+            "type": "boolean"
+          },
+          "conversationId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "acceptsNewConversations",
+          "conversationId"
+        ],
+        "additionalProperties": false
+      },
+      "MessagingArchiveView": {
+        "type": "object",
+        "properties": {
+          "archived": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "archived"
+        ],
+        "additionalProperties": false
+      },
+      "MessagingBlockView": {
+        "type": "object",
+        "properties": {
+          "blockedByMe": {
+            "type": "boolean"
+          },
+          "blockedByOther": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "blockedByMe",
+          "blockedByOther"
+        ],
+        "additionalProperties": false
+      },
+      "MessagingConversationExportText": {
+        "type": "string",
+        "description": "`text/plain; charset=utf-8`: the copy of one conversation, a file and not an envelope."
+      },
+      "MessagingReportedView": {
+        "type": "object",
+        "properties": {
+          "reported": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "reported"
+        ],
+        "additionalProperties": false
+      },
+      "MessagingDoctorSettingsView": {
+        "type": "object",
+        "properties": {
+          "acceptsNewConversations": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "acceptsNewConversations"
+        ],
+        "additionalProperties": false
+      },
       "BookingReadinessView": {
         "type": "object",
         "properties": {
@@ -20654,16 +24657,20 @@
             "items": {
               "$ref": "#/components/schemas/BookingReadinessBlocker"
             }
+          },
+          "insideCancellationCutoff": {
+            "type": "boolean"
           }
         },
         "required": [
           "phoneVerified",
           "nameComplete",
           "dateOfBirthPresent",
-          "blockers"
+          "blockers",
+          "insideCancellationCutoff"
         ],
         "additionalProperties": false,
-        "description": "What the app needs before the last booking step (D-05): only the missing fields are asked for."
+        "description": "What the app needs before the last booking step (D-05): only the missing fields are asked for. `insideCancellationCutoff` (U-90.1 A4) says the deadline of the chosen slot has already passed, by the server clock; `false` without a slot."
       },
       "BookingReadinessBlocker": {
         "anyOf": [
@@ -20682,6 +24689,9 @@
           "PATIENT_PHONE_UNVERIFIED",
           "PATIENT_NAME_MISSING",
           "RESCHEDULE_AFTER_CANCELLATION_CUTOFF",
+          "RESCHEDULE_INSIDE_CANCELLATION_CUTOFF",
+          "CANCEL_AFTER_CANCELLATION_CUTOFF",
+          "OFFICE_PHONE_REQUIRED",
           "PATIENT_PENDING_LIMIT_REACHED",
           "PATIENT_RESCHEDULE_LIMIT_REACHED",
           "PATIENT_IS_THE_DOCTOR"
@@ -20715,6 +24725,12 @@
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/AppointmentActionsView"
+          },
+          "officePhone": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "officeTimeZone": {
             "type": "string"
@@ -21003,6 +25019,7 @@
           "finalVatAmount",
           "id",
           "officeId",
+          "officePhone",
           "officeSnapshot",
           "officeTimeZone",
           "outcomeAt",
@@ -21026,7 +25043,7 @@
           "status",
           "updatedAt"
         ],
-        "description": "One appointment as every single-appointment response carries it: the list item plus its `actions`."
+        "description": "One appointment as every single-appointment response carries it: the list item, its `actions`, and the phone a patient past the deadline calls (U-90.1 A5): the office's current number, else the number frozen at booking."
       },
       "AppointmentActionsView": {
         "type": "object",
@@ -22455,10 +26472,12 @@
           "REMINDERS",
           "RATINGS",
           "QUESTIONS",
+          "MESSAGES",
           "ACCOUNT",
           "DOCTOR_NEW_APPOINTMENTS",
           "DOCTOR_PATIENT_CHANGES",
           "DOCTOR_RATINGS",
+          "DOCTOR_MESSAGES",
           "DOCTOR_ACCOUNT",
           "DOCTOR_OPERATIONS"
         ]
@@ -24130,7 +28149,13 @@
               "null"
             ]
           },
-          "description": {}
+          "description": {},
+          "gettingThere": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
         },
         "required": [
           "id",
@@ -24140,7 +28165,8 @@
           "streetNumber",
           "state",
           "floor",
-          "description"
+          "description",
+          "gettingThere"
         ],
         "additionalProperties": false
       },

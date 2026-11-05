@@ -11,6 +11,22 @@ export function foldSearchText(value: string): string {
 		.replace(/ς/g, 'σ');
 }
 
+const DOCTOR_TITLE = /^(?:dr|δρ)(?:\.|\s)/iu;
+
+/**
+ * 🔴 U-99.1: a doctor's name inside a sentence, «Dr. Σοφία Ρηγοπούλου», in both languages. A name that already wears its
+ * title («Dr.», «Δρ.») keeps only that one; no name stays no name. The caller knows it is a doctor's: never guess it here.
+ */
+export function withDoctorTitle(name: string): string {
+	const known = name.trim();
+	return !known || DOCTOR_TITLE.test(known) ? known : `Dr. ${known}`;
+}
+
+/** How many characters a text has as a person and the server count them (code points: an emoji is one, 🩺 not two). */
+export function countCodePoints(value: string): number {
+	return [...value].length;
+}
+
 /** The folded words of a search (`foldSearchText`, split on white space, empty ones dropped). */
 export function searchWords(query: string | null | undefined): string[] {
 	return foldSearchText(query ?? '')

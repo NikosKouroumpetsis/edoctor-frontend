@@ -1,12 +1,18 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { createRawSnippet } from 'svelte';
 import { render, screen, waitFor, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { page } from '$app/state';
 import { env } from '$env/dynamic/public';
 import QueryHarness from '$shared/query/query.harness.svelte';
+import { Session } from '$shared/state/session';
+import { projectRoot } from '../../../../../../tests/architecture/source-scan';
 import { isExploreFlow } from '../lib/frame';
 import SiteFrame from './index.svelte';
+import { InboxBadge } from '$shared/state/inbox-badge';
+import SessionHarness from './session.harness.svelte';
 
 // The consent card reads the registry; an empty one never asks, so the card stays out of these frame tests.
 vi.mock('$modules/shell/api/consent', () => ({
@@ -18,6 +24,16 @@ const children = createRawSnippet(() => ({ render: () => '<main><h1>Σελίδα
 function visit(path: string) {
 	(page as { url: URL }).url = new URL(path, 'http://localhost');
 }
+
+const memberSession = () =>
+	new Session({
+		status: () => 'member',
+		member: () => ({ firstName: 'Μαρία' }),
+		signOut: async () => undefined
+	});
+
+const guestSession = () =>
+	new Session({ status: () => 'guest', member: () => null, signOut: async () => undefined });
 
 const renderFrame = () =>
 	render(QueryHarness, { props: { component: SiteFrame, props: { children } } });
@@ -138,9 +154,9 @@ describe('SiteFrame (eDoctor frame on the generic shell)', () => {
 		expect(trigger).toHaveFocus();
 	});
 
-	// Rewrites «U-03.8: marks search as the current tab … hides the bar from the laptop zone» (four buttons beside
-	// the search link): U-16.3 ends the capsule at 744, U-26.1 keeps the web’s three tabs, U-20 gives each a page.
-	it('U-26.1/U-16.3/U-20: the capsule’s three tabs, each going somewhere — «Εξερευνήστε» the home (current there), a guest’s «Αγαπημένα» signs in, «Προφίλ» opens the account menu', () => {
+	// Rewrites «U-26.1/U-16.3/U-20: the capsule's three tabs … «Προφίλ» opens the account menu» and «U-19.1: a guest's
+	// «Προφίλ» opens from below the SAME four entries»: U-81.1 / U-82.3 end the sheet of a menu, for a guest too.
+	it('U-81.2 / U-82.3: κάψουλα 4 καρτελών, κανένα φύλλο-μενού — four links, each a page; «Αγαπημένα» goes to its page, no sign-in', async () => {
 		renderFrame();
 		const bar = capsule();
 		expect(bar).toHaveClass('tablet:hidden');
@@ -148,51 +164,147 @@ describe('SiteFrame (eDoctor frame on the generic shell)', () => {
 		const tabs = within(bar).getAllByRole('link');
 		expect(tabs.map((tab) => [tab.textContent?.trim(), tab.getAttribute('href')])).toEqual([
 			['Εξερευνήστε', '/'],
-			['Αγαπημένα', '/login']
+			['Αγαπημένα', '/favorites'],
+			['Μηνύματα', '/messages'],
+			['Προφίλ', '/profile']
 		]);
 		expect(tabs[0]).toHaveAttribute('aria-current', 'page');
-		expect(
-			within(bar)
-				.getAllByRole('button')
-				.map((tab) => tab.textContent?.trim())
-		).toEqual(['Προφίλ']);
+		expect(within(bar).queryByRole('button')).not.toBeInTheDocument();
+		expect(document.querySelector('[data-testid="account-sheet"]')).toBeNull();
+		await userEvent.setup().click(tabs[3]);
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 	});
 
-	// MINOR-7 (r1, U-19.1 «Προφίλ ⇒ Ρυθμίσεις, και για επισκέπτη»): r0's «Προφίλ» went to /login, so on the phone the
-	// settings were reachable only from the footer.
-	it('U-19.1: a guest’s «Προφίλ» opens from below the SAME four entries as the ☰ menu; «Ρυθμίσεις» opens the dialog', async () => {
-		const user = userEvent.setup();
-		renderFrame();
-		const menu = await openMenu(user);
-		const menuEntries = within(menu)
-			.getAllByRole('menuitem')
-			.map((item) => [item.textContent?.replace(/\s+/gu, ' ').trim(), item.getAttribute('href')]);
-		await user.keyboard('{Escape}');
-		await waitFor(() =>
-			expect(screen.queryByTestId('header-account-menu-content')).not.toBeInTheDocument()
+	it('U-81.2 (negative): the source of the frame no longer draws a sheet of a menu', () => {
+		const source = readFileSync(
+			join(projectRoot, 'src/modules/shell/ui/site-frame/page/index.svelte'),
+			'utf8'
 		);
-
-		await user.click(within(capsule()).getByRole('button', { name: 'Προφίλ' }));
-		const sheet = await screen.findByTestId('account-sheet');
-		expect(sheet).toHaveAccessibleName('Μενού και προφίλ');
-		const rows = [...sheet.querySelectorAll('[data-slot="account-sheet-list"] > li > *')];
+		expect(source).not.toMatch(/AccountSheet|account-sheet|BottomSheet/u);
 		expect(
-			rows.map((row) => [row.textContent?.replace(/\s+/gu, ' ').trim(), row.getAttribute('href')])
-		).toEqual(menuEntries);
-		expect(menuEntries.map(([label]) => label)).toEqual([
-			'Σύνδεση ή εγγραφή',
+			existsSync(
+				join(projectRoot, 'src/modules/shell/ui/site-frame/components/account-sheet.svelte')
+			)
+		).toBe(false);
+	});
+
+	it('U-81.1: on `/profile` the tab is marked, and the footer waits for 744', () => {
+		visit('/profile');
+		renderFrame();
+		expect(within(capsule()).getByRole('link', { name: 'Προφίλ' })).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+		expect(screen.getByTestId('footer-from-tablet')).toHaveClass('hidden', 'tablet:block');
+	});
+
+	it('U-80.1 Ε3: a member’s menu has no «Λογαριασμός», its pill the initial; «Αποσύνδεση» signs out', async () => {
+		const user = userEvent.setup();
+		const session = memberSession();
+		const signOut = vi.spyOn(session, 'signOut');
+		render(SessionHarness, { props: { session, children } });
+		expect(screen.getByTestId('header-account-initial')).toHaveTextContent('Μ');
+		const menu = await openMenu(user);
+		const items = within(menu).getAllByRole('menuitem');
+		expect(items.map((item) => item.textContent?.replace(/\s+/gu, ' ').trim())).toEqual([
+			'Μηνύματα',
+			'Αγαπημένα',
 			'Ρυθμίσεις',
 			'Κέντρο βοήθειας',
-			'Είστε γιατρός; Γίνετε μέλος και δεχτείτε ραντεβού online.'
+			'Είστε γιατρός; Γίνετε μέλος και δεχτείτε ραντεβού online.',
+			'Αποσύνδεση'
 		]);
-		for (const row of rows) expect(row).toHaveClass('min-h-touch');
-		await user.click(screen.getByTestId('account-sheet-settings'));
-		const settings = await screen.findByTestId('settings-dialog');
-		await waitFor(() => expect(screen.queryByTestId('account-sheet')).not.toBeInTheDocument());
-		// The reviewer's live risk (r2): the sheet gives the focus back to «Προφίλ» as it closes, the dialog takes it
-		// as it opens — the focus must end inside the dialog, never on the capsule under it.
-		await waitFor(() => expect(settings).toContainElement(document.activeElement as HTMLElement));
-		expect(within(capsule()).getByRole('button', { name: 'Προφίλ' })).not.toHaveFocus();
+		expect(items[0]).toHaveAttribute('href', '/messages');
+		expect(items[1]).toHaveAttribute('href', '/favorites');
+		expect(items[0]).toHaveClass('font-semibold');
+		await user.click(items[5]);
+		expect(signOut).toHaveBeenCalledTimes(1);
+	});
+
+	it('🔴 R-2: a sign-out the server did not carry out: the member stays, and reads that it did not happen', async () => {
+		const user = userEvent.setup();
+		const session = new Session({
+			status: () => 'member',
+			member: () => ({ firstName: 'Μαρία' }),
+			signOut: async () => false
+		});
+		render(SessionHarness, { props: { session, children } });
+		const menu = await openMenu(user);
+		await user.click(within(menu).getByRole('menuitem', { name: 'Αποσύνδεση' }));
+		expect(await screen.findByText('Η αποσύνδεση δεν έγινε. Δοκιμάστε ξανά.')).toBeInTheDocument();
+		expect(screen.getByTestId('header-account-initial')).toHaveTextContent('Μ');
+	});
+
+	it('🔴 U-84 Π5: unread: the badge on «Μηνύματα» of the capsule, the dot on the pill and on the menu’s row', async () => {
+		const user = userEvent.setup();
+		render(SessionHarness, {
+			props: {
+				session: memberSession(),
+				inbox: new InboxBadge({ count: () => 12 }),
+				children
+			}
+		});
+		const tab = within(capsule()).getByRole('link', { name: /Μηνύματα/u });
+		expect(tab.querySelector('[data-slot="bottom-nav-badge"]')).toHaveTextContent('9+');
+		expect(tab).toHaveTextContent('12 μη αναγνωσμένες συνομιλίες');
+		expect(screen.getByTestId('header-account-dot')).toBeInTheDocument();
+		expect(screen.getByTestId('header-account-menu')).toHaveAccessibleName(
+			'Μενού και προφίλ, νέα μηνύματα'
+		);
+		const menu = await openMenu(user);
+		expect(within(menu).getByRole('img', { name: 'Νέα μηνύματα' })).toBeInTheDocument();
+	});
+
+	it('U-84 Π5: nothing unread: no mark anywhere', () => {
+		render(SessionHarness, {
+			props: { session: memberSession(), inbox: new InboxBadge({ count: () => 0 }), children }
+		});
+		expect(capsule().querySelector('[data-slot="bottom-nav-badge"]')).toBeNull();
+		expect(screen.queryByTestId('header-account-dot')).toBeNull();
+	});
+
+	it('🔴 U-84 (negative): a guest has no mark, whatever the badge says', () => {
+		render(SessionHarness, {
+			props: { session: guestSession(), inbox: new InboxBadge({ count: () => 3 }), children }
+		});
+		expect(capsule().querySelector('[data-slot="bottom-nav-badge"]')).toBeNull();
+		expect(screen.queryByTestId('header-account-dot')).toBeNull();
+	});
+
+	it('U-84 Π1, Π2: a conversation: no capsule and no footer; the list: its capsule with «Μηνύματα» current, no footer', () => {
+		visit('/messages');
+		const { unmount } = render(SessionHarness, {
+			props: { session: memberSession(), children }
+		});
+		expect(within(capsule()).getByRole('link', { name: /Μηνύματα/u })).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+		expect(footer()).toBeNull();
+		unmount();
+		visit('/messages/018f3c1e-7a2b-7c3d-8e4f-0a1b2c3d4e5f');
+		render(SessionHarness, { props: { session: memberSession(), children } });
+		expect(screen.queryByRole('navigation', { name: 'Πλοήγηση' })).toBeNull();
+		expect(footer()).toBeNull();
+	});
+
+	it('Π2: a guest’s «Σύνδεση ή εγγραφή» opens the window in place; its link stays the page', async () => {
+		const user = userEvent.setup();
+		const session = guestSession();
+		render(SessionHarness, { props: { session, children } });
+		const menu = await openMenu(user);
+		const signIn = within(menu).getByRole('menuitem', { name: 'Σύνδεση ή εγγραφή' });
+		expect(signIn).toHaveAttribute('href', '/login');
+		await user.click(signIn);
+		expect(session.flowOpen).toBe(true);
+	});
+
+	it('U-82.1: a page asks for the frame’s windows through the context', async () => {
+		const session = guestSession();
+		const view = render(SessionHarness, { props: { session, children } });
+		expect(screen.queryByTestId('settings-dialog')).not.toBeInTheDocument();
+		view.component.dialogs().openSettings();
+		expect(await screen.findByTestId('settings-dialog')).toBeInTheDocument();
 	});
 
 	// Rewritten by U-25.2 (MINOR-4 of r1, the orchestrator's decision; open for the owner, S-22): it visited `/doctors`,

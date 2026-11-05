@@ -29,6 +29,18 @@ export function isDoctorReviewSortId(value: string): value is DoctorReviewSortId
 	return (SORT_IDS as readonly string[]).includes(value);
 }
 
+/** The order as the server takes it (U-66.3: it sorts, a page could not). */
+const SERVER_ORDERS = {
+	newest: 'newest',
+	oldest: 'oldest',
+	'rating-high': 'highest',
+	'rating-low': 'lowest'
+} as const satisfies Record<DoctorReviewSortId, string>;
+
+export function doctorReviewsOrderOf(sortId: DoctorReviewSortId) {
+	return SERVER_ORDERS[sortId];
+}
+
 const timeOf = (card: DoctorDetailReviewCardContent) => {
 	const time = Date.parse(card.publishedAt);
 	return Number.isNaN(time) ? 0 : time;
@@ -46,7 +58,7 @@ const comparators: Record<
 	'rating-low': (a, b) => ratingOf(a) - ratingOf(b) || timeOf(b) - timeOf(a)
 };
 
-/** The window's cards in an order (a NEW array; ties keep the backend's order: a stable sort). */
+/** Unused since U-66.3 (the server sorts), kept by U-30.2. The window's cards in an order (a NEW array; ties keep the backend's order: a stable sort). */
 export function sortDoctorReviewCards(
 	cards: DoctorDetailReviewCardContent[],
 	sortId: DoctorReviewSortId

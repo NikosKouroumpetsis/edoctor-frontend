@@ -1,3 +1,4 @@
+import { createRawSnippet } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/svelte';
 import { goto } from '$app/navigation';
@@ -286,5 +287,19 @@ describe('help::ui::center', () => {
 		expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
 		expect(screen.queryByRole('navigation', { name: 'Θέματα' })).not.toBeInTheDocument();
 		expect(document.head.innerHTML).not.toContain('FAQPage');
+	});
+
+	it('U-78 (`23-helpful` Π1): each answer ends with its own «Ήταν χρήσιμο;», by the question’s anchor', () => {
+		const helpful = createRawSnippet((anchor: () => string) => ({
+			render: () => `<div data-testid="widget" data-anchor="${anchor()}"></div>`
+		}));
+		render(HelpCenter, { props: props({ helpful }) });
+		const widgets = screen.getAllByTestId('widget');
+		expect(widgets.length).toBeGreaterThan(0);
+		for (const widget of widgets) {
+			const question = widget.closest('details');
+			expect(question).not.toBeNull();
+			expect(widget.getAttribute('data-anchor')).toBe(question?.id);
+		}
 	});
 });

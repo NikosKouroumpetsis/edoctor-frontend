@@ -57,7 +57,8 @@ export class ArticlesListState {
 						locale,
 						query: scope.q,
 						searching,
-						hasMore: data.pages.at(-1)?.nextCursor != null
+						hasMore: data.pages.at(-1)?.nextCursor != null,
+						withoutAuthor: Boolean(scope.doctorId)
 					})
 			};
 		});
@@ -71,7 +72,8 @@ export class ArticlesListState {
 			const searched = words === (scope.q ?? '');
 			return {
 				...articleSuggestionsQuery(options.locale(), scope.type, words),
-				enabled: browser && long && !searched
+				// U-77: a doctor's page has no search, so it asks no suggestion.
+				enabled: browser && long && !searched && !scope.doctorId
 			};
 		});
 	}

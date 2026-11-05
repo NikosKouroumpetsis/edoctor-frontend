@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { DoctorPublicMarketplaceProfileResponseView } from '$shared/lib/api-client';
+import { buildPricedServices } from '$modules/doctor/lib/detail/priced-services';
 import {
 	DoctorProfileNotFoundError,
 	extractParagraphs,
@@ -108,8 +109,158 @@ describe('api/profile map', () => {
 		expect(profile.responseMetrics).toEqual({
 			responseTimeId: 'within-hour',
 			responseRatePercent: 85,
-			completedVisits: 6
+			completedVisits: 6,
+			windowMonths: 6
 		});
+	});
+
+	it('U-72.4: the window comes from the server, whatever it is; one that is no number of months is left out, not guessed', () => {
+		const windowOf = (windowMonths: number) =>
+			mapDoctorProfile(
+				answer({ ...base, responseMetrics: { windowMonths, responseRatePercent: 50 } }),
+				{ slug: 'dr-athena', lang: 'el' }
+			).responseMetrics;
+		expect(windowOf(3)).toEqual({ responseRatePercent: 50, windowMonths: 3 });
+		expect(windowOf(0)).toEqual({ responseRatePercent: 50 });
+		expect(windowOf(-1)).toEqual({ responseRatePercent: 50 });
+		expect(windowOf(Number.NaN)).toEqual({ responseRatePercent: 50 });
+	});
+
+	it('🔴 record §6.1 (app = web): a service’s `description` is its text and `sub` its short line, the right way round', () => {
+		const [service] =
+			mapDoctorProfile(
+				answer({
+					...base,
+					services: [
+						{
+							doctorServiceId: 'svc-1',
+							title: 'Επίσκεψη',
+							description: ' Το κείμενο της υπηρεσίας. ',
+							sub: ' Η σύντομη γραμμή. ',
+							price: 60
+						}
+					]
+				}),
+				{ slug: 'dr-athena', lang: 'el' }
+			).services ?? [];
+		expect(service.description).toBe('Το κείμενο της υπηρεσίας.');
+		expect(service.subtitle).toBe('Η σύντομη γραμμή.');
+		expect(service).not.toHaveProperty('includes');
+		expect(service).not.toHaveProperty('note');
+		const [priced] = buildPricedServices([service], true, 'el');
+		expect(priced.descriptionBody).toBe('Το κείμενο της υπηρεσίας.');
+		expect(priced.subtitle).toBe('Η σύντομη γραμμή.');
+		// U-70.2 Ε2: «Περιλαμβάνει» and its general phrase are gone.
+		expect(priced).not.toHaveProperty('includesBody');
+	});
+
+	it('U-71.2, U-72.3: a service’s kind, years and visits; a zero or an empty one is no fact', () => {
+		const mapped = mapDoctorProfile(
+			answer({
+				...base,
+				services: [
+					{
+						doctorServiceId: 'svc-1',
+						title: 'Επανεξέταση',
+						kind: 'follow-up',
+						yearsOfExperience: 12,
+						completedVisitCount: 9
+					},
+					{
+						doctorServiceId: 'svc-2',
+						title: 'Άλλη',
+						kind: 'other',
+						yearsOfExperience: 0,
+						completedVisitCount: 0
+					},
+					{ doctorServiceId: 'svc-3', title: 'Χωρίς', yearsOfExperience: null }
+				]
+			} as never),
+			{ slug: 'dr-athena', lang: 'el' }
+		).services;
+		expect(mapped?.[0]).toMatchObject({
+			kind: 'follow-up',
+			yearsOfExperience: 12,
+			completedVisits: 9
+		});
+		expect(mapped?.[1]).not.toHaveProperty('yearsOfExperience');
+		expect(mapped?.[1]).not.toHaveProperty('completedVisits');
+		expect(mapped?.[2]?.kind).toBe('other');
+	});
+
+	it('U-89.1: κανένα `online` στα είδη υπηρεσίας: a kind this page does not know is `other`', () => {
+		const [service] =
+			mapDoctorProfile(
+				answer({
+					...base,
+					services: [{ doctorServiceId: 'svc-1', title: 'Online', kind: 'online' }]
+				} as never),
+				{ slug: 'dr-athena', lang: 'el' }
+			).services ?? [];
+		expect(service?.kind).toBe('other');
+	});
+
+	it('U-75: each office’s rules as the server resolved them; anything else is no rule, never a default of ours', () => {
+		const offices = (bookingPolicy: unknown) =>
+			mapDoctorProfile(
+				answer({
+					...base,
+					offices: [{ officeId: 'off-1', street: 'Νίκης', bookingPolicy }]
+				} as never),
+				{ slug: 'dr-athena', lang: 'el' }
+			).offices;
+		const policy = {
+			confirmationMode: 'AUTO',
+			cancellationCutoffHours: 4,
+			minBookingNoticeHours: 1
+		};
+		expect(offices(policy)?.[0]?.bookingPolicy).toEqual(policy);
+		expect(offices(null)?.[0]).not.toHaveProperty('bookingPolicy');
+		expect(offices({ ...policy, confirmationMode: 'X' })?.[0]).not.toHaveProperty('bookingPolicy');
+		expect(offices({ ...policy, cancellationCutoffHours: -1 })?.[0]).not.toHaveProperty(
+			'bookingPolicy'
+		);
+	});
+
+	it('U-73.1 (and negative): the credentials in the server’s order; an unknown kind, an empty text or a year that is none is left out', () => {
+		const { credentials } = mapDoctorProfile(
+			answer({
+				...base,
+				credentials: [
+					{
+						id: 'a',
+						kind: 'WORK',
+						startYear: 2016,
+						endYear: null,
+						isCurrent: true,
+						title: ' Νοσοκομείο ',
+						organization: ' Αθήνα '
+					},
+					{
+						id: 'b',
+						kind: 'STUDY',
+						startYear: 1.5,
+						endYear: -1,
+						isCurrent: false,
+						title: '<b>Σχολή</b>'
+					},
+					{ id: 'c', kind: 'OTHER', isCurrent: false, title: 'Άγνωστο' },
+					{ id: 'd', kind: 'STUDY', isCurrent: false, title: '   ' }
+				]
+			} as never),
+			{ slug: 'dr-athena', lang: 'el' }
+		);
+		expect(credentials).toEqual([
+			{
+				id: 'a',
+				kind: 'WORK',
+				startYear: 2016,
+				isCurrent: true,
+				title: 'Νοσοκομείο',
+				organization: 'Αθήνα'
+			},
+			{ id: 'b', kind: 'STUDY', isCurrent: false, title: '<b>Σχολή</b>' }
+		]);
 	});
 
 	it('U-43.1 (app = web): below the sample only the visits come (answer 2); before the first computation nothing at all (answer 3)', () => {
@@ -125,7 +276,7 @@ describe('api/profile map', () => {
 			}),
 			{ slug: 'dr-athena', lang: 'el' }
 		);
-		expect(below.responseMetrics).toEqual({ completedVisits: 3 });
+		expect(below.responseMetrics).toEqual({ completedVisits: 3, windowMonths: 6 });
 		const none = mapDoctorProfile(
 			answer({
 				...base,

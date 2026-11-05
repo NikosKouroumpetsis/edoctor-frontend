@@ -108,6 +108,69 @@ a page that leaves clears it. A page whose search is part of its address gives `
 MINOR-5: the clean address of its readers' criteria and filters in each language, never the raw query); the
 frame's settings and the results' legal line use it for «English / Ελληνικά», else the same path.
 
+## The favourites (wave 2, screen 20, U-83, U-85)
+
+- `useFavoriteToggle` (`search-doctors/ui/search-doctor-card`) is the ONE writer and the rule of every heart: the card's,
+  the profile's (composed by its screen), the page's. It reads `['favorites', 'ids']` only for a member, 🔴 never for a
+  guest; a press is optimistic in the ids and the lists, and goes back with a toast when refused. Writes run one at a
+  time (`scope`) and each invalidates `['favorites', 'list', lang]`.
+- A read of one person's own facts wears `personalQueryMeta` (`$shared/query`): the auth host removes them all when the
+  session ends (`removePersonalQueries`), so it never has to know them by name.
+- The search over the favourites is a rune of the page: never the address, a storage or the server (U-65.6).
+
+## The session and the sign-in (wave 2, screen 19, U-80 – U-82)
+
+- The cookies live on the API's host (U-80.1 Ε6), so the page's server knows nobody: every page is drawn as a guest's
+  and `GET /patient/me`, from the browser, fills the header. It is the one source of who is signed in, a TanStack query
+  owned by `src/modules/auth/ui/host`; a `401` is the answer «guest», never a retried failure.
+- Only `httpSessionGet` / `httpSessionPost` / `httpSessionPut` / `httpSessionDelete` (`$shared/lib/http`) send `credentials: 'include'`, for the session and for
+  what is personal (a member's prices: the profile's `getDoctorMemberProfile`; the cards' `searchDoctors` with
+  `withSession`, U-34.4). Every other public read says `credentials: 'omit'` (`readEnvelope`), so SvelteKit's server
+  `fetch` does not forward the browser's cookies either, whatever the API's port: what the server draws is the guest's.
+- U-34.4: the home and the results are drawn as a guest's; a member reads each row and the first page ONCE more with
+  the cookies, and `overlayMemberFees` lays only the fees over the cards. Nothing moves: the results' line is one line for
+  both, and the home's card keeps the room of the guest's line under the amount (U-99.2, `feeRoomLabel`). A guest asks nothing more
+  (guarded); a member's next pages and category rows carry the cookies from the start, so they need no second read.
+  That one read never runs again by itself (no focus, no reconnect), a row asks the search the server has already resolved
+  (`params`), and a member's reads live on keys of their own, `personalQueryMeta`: a sign-out takes every amount at once.
+  What a member read never stands in for a guest's; a guest's open pages may start a member's read, never the other way.
+- `Session` (`$shared/state/session`, one per page tree, in context) is how the frame, the pages and the cards meet the
+  auth module without importing it: `status`, `member`, `requireSignIn({ action, onSignedIn })`, `signOut()`. What asked
+  for the sign-in runs once after it (Ε4); it comes back through an address only as the closed `SignInAction` (`resume`,
+  `takeResumed`), for a `/login?next=&do=` or a provider's redirect. A provider is left for without asking its start
+  first: every refusal of `GET /auth/register/{google,apple}` answers `/login?error=<provider>`, and a cancelled one a bare
+  `/login`. What the page itself must say (no API at all) is the fresh read of the legal versions that goes before it.
+- `signOut()` ends the session only if the server did: the cookies are `HttpOnly` on the API, so a logout that failed
+  (no network, a server's failure, anything but a `401`) leaves the member signed in, `signOutFailures` grows, and the frame
+  says so in a toast. A surface asked from one page closes when the route changes (`afterNavigate`), but for the owed profile.
+- `AuthFlowState` (`$modules/auth/ui/flow`) holds the flow's memory in that instance, in memory only: identifier, ticket
+  and codes never reach an address or a storage. The browser remembers only `{ firstName, maskedIdentifier, channel,
+lastMethod }` for «Καλωσορίσατε και πάλι»; the tab keeps only `{ next, action }` while a provider's redirect runs.
+- `SiteDialogs` (`$shared/state/site-dialogs`) lets a page ask for the frame's windows (settings, consent); `ToastState`
+  (`$shared/ui/molecules/toast`) is the tree's one toast. Both are created by the frame, never module singletons.
+
+## The messages (wave 2, screens 18 + 21, U-84)
+
+- TanStack Query owns every read (`$modules/messages/api`), each one `personalQueryMeta`: a sign-out leaves none in the
+  tab. They run only for a member and only while the page shows: an open conversation asks for what is new every 5 s
+  (`after`), the list and the badge every 30 s on the messages' pages, the badge every 60 s elsewhere. A guest asks nothing and
+  no timer runs (guarded). The interval stops at a `401`, `403` or `404`.
+- 🔴 What a person wrote stays in a rune of the page (`ThreadMemory`, the #18's `useContactDoctor`): never an address, a
+  storage, a log, or a persisted cache (`tests/architecture/messages-privacy.test.ts`).
+- `InboxMemory` (`$modules/messages/ui/inbox-memory`, one per page tree, in context, on the unread host) is what the
+  messages' pages keep between them, as the application's tab stays mounted: the chosen chip, and per conversation what has
+  not left, so a send that fails after the person moved on is a «Δεν στάλθηκε» back on its own conversation. The draft
+  does not outlive its page.
+- `Session.forgotten` grows at a sign-out and when another account comes into the tab (the auth host compares
+  `tenantUserId`, or `doctorId` from the doctor's read it makes anyway, for an account with no patient's profile): the
+  drafts go with it. `Session.expire(request)`, a write refused with `401`: the page learns that it
+  knows nobody, the personal reads go, the sign-in opens; the draft stays, so the same person finds it. A provider's redirect
+  reloads the page, and memory with it: there the words are lost, and that is the rule, not a slip.
+- `InboxBadge` (`$shared/state/inbox-badge`, one per page tree, in context): the messages module's `unread-host` reads, the
+  frame draws, and neither imports the other (the pattern of `Session`).
+- «Επικοινωνήστε με τον γιατρό» asks the server nothing to be drawn: only its press does (D-103). The state of the #18 lives at
+  the screen, so a member's new read of the profile beneath it touches nothing.
+
 ## The results and the filters (wave 1.0, D3)
 
 `$modules/search-doctors/ui/search-results` `SearchResultsState` is the application's
@@ -246,15 +309,32 @@ Greek is the canonical default route language at `/`; English is exposed at `/en
 ```txt
 edoctor.<appEnv>.preferences.v1
 edoctor.<appEnv>.consent.v1
+edoctor.<appEnv>.consent-recorded.v1
+edoctor.<appEnv>.helpful.v1
+edoctor.<appEnv>.favorite-pending.v1
 ```
 
 The consent key keeps the visitor's tracking decision (`$shared/storage/consent-storage`, the application's
-`ConsentSnapshot`: the registry version and one boolean per tool, sanitized on read). The web has no session yet,
-so it does not call `POST /consent/record`; the card does not show again while the stored decision covers the
-registry's web tools. The registry is checked at the boundary (`mapConsentRegistryToFacts`, the application's: a tool
+`ConsentSnapshot`: the registry version and one boolean per tool, sanitized on read). The card does not show again
+while the stored decision covers the registry's web tools. Once a session exists the decision also reaches the
+server's append-only record (`POST /consent/record`, `platform: 'web'`): one request per change of it, within a version
+too, none per load, marked done in `consent-recorded` (the version and the choice, forgotten when the account leaves),
+and never for a guest. The registry is checked at the boundary (`mapConsentRegistryToFacts`, the application's: a tool
 without an id, a known category, a platform or both languages is dropped; no usable version ⇒ the bundled
 registry), and a version that changed only essential tools is reconciled into the stored decision silently
 (`resolveConsentPrompt`).
+
+The helpful key (U-78.1 Ε2) keeps the device's random voter UUID the server gave at its first vote, sent in the
+`X-Helpful-Voter` header and never in an address; it names no person. The favorite-pending key lives in the tab's
+`sessionStorage`: the doctor id a guest's heart asked for, while a provider's redirect runs, and it runs once (U-80.1 Ε4).
+It goes when the visitor leaves the sign-in unfinished: `Session.cancelSignIn` tells the auth host, whose
+`onSignInAbandoned` the site's composition (`src/routes/+layout.svelte`) points at the favourites, so the auth module never
+names them. The words of the favourites' search are never stored (U-65.6).
+
+The known-account key (`edoctor.<appEnv>.known-account.v1`, «Καλωσορίσατε και πάλι») holds a first name, a mask and the
+door used, never an address. After a provider's redirect the browser has seen no answer of its own: the way back carries
+the door (`/login?via=google|apple`, a closed list) and the confirming read `GET /patient/me` the rest; `getPatientSelf`
+keeps only the mask of its `loginEmail`, and a `null` read (no patient's profile yet) writes nothing.
 
 - Sanitize payloads during hydration.
 - When the browser blocks storage (all cookies blocked, storage disabled), reads fall back to the system preferences and writes are skipped without an error, so the theme still switches and stays until the next full page load.

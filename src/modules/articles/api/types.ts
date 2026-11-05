@@ -49,6 +49,11 @@ export type ArticlePublicView = {
 	canonicalUrl?: string | null;
 	/** When the backoffice published it (`authorizedAt`), ISO; `null` when unknown. */
 	publishedAt?: string | null;
+	/**
+	 * 🔴 U-92: the server's reading time, in whole minutes: the lists' cards carry no body (`null` ⇒ no time shown). An
+	 * article opened by its slug still counts its own text.
+	 */
+	readingMinutes?: number | null;
 	image?: {
 		smSizeUrl?: string | null;
 		mediumSizeUrl?: string | null;
@@ -79,6 +84,8 @@ export type ArticlesListScope = {
 	type: ArticleTypeDto | null;
 	q: string | null;
 	serviceId: string | null;
+	/** U-77.1: one doctor's articles (the backend's uuid, from the profile); absent or `null` on the site's list. */
+	doctorId?: string | null;
 };
 
 /**

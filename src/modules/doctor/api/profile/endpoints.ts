@@ -1,4 +1,4 @@
-import { httpGet } from '$shared/lib/http';
+import { httpGet, httpSessionGet } from '$shared/lib/http';
 import type { DoctorPublicMarketplaceProfileResponseView } from '$shared/lib/api-client';
 
 const DOCTOR_PREFIX = '/doctor/public';
@@ -21,5 +21,17 @@ export function getDoctorPublicProfile(
 	return httpGet<DoctorPublicMarketplaceProfileResponseView>(
 		`${DOCTOR_PREFIX}/doctors/${encodeURIComponent(doctorSlug)}`,
 		{ params: { lang }, signal: context.signal, fetch: context.fetch }
+	);
+}
+
+/** The same read with the session's cookies (U-80.1 Ε6): what is personal in it is the prices (`pricingVisible`). */
+export function getDoctorMemberAnswer(
+	doctorSlug: string,
+	lang: string,
+	signal?: AbortSignal
+): Promise<DoctorPublicMarketplaceProfileResponseView> {
+	return httpSessionGet<DoctorPublicMarketplaceProfileResponseView>(
+		`${DOCTOR_PREFIX}/doctors/${encodeURIComponent(doctorSlug)}`,
+		{ params: { lang }, signal }
 	);
 }

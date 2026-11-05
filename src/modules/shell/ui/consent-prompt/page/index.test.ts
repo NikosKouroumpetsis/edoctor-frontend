@@ -1,13 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
-import { consentStorageKey } from '$shared/config/env';
+import type { Component } from 'svelte';
+import { SvelteMap } from 'svelte/reactivity';
+import { consentRecordedStorageKey, consentStorageKey } from '$shared/config/env';
 import QueryHarness from '$shared/query/query.harness.svelte';
+import { Session, type SessionStatus } from '$shared/state/session';
+import { SiteDialogs } from '$shared/state/site-dialogs';
 import type { ConsentRegistryFacts } from '$modules/shell/api/consent';
 import ConsentPrompt from './index.svelte';
+import SessionHarness from './session.harness.svelte';
 
-const { getConsentRegistry } = vi.hoisted(() => ({ getConsentRegistry: vi.fn() }));
-vi.mock('$modules/shell/api/consent', () => ({ getConsentRegistry }));
+const { getConsentRegistry, recordConsentDecision } = vi.hoisted(() => ({
+	getConsentRegistry: vi.fn(),
+	recordConsentDecision: vi.fn()
+}));
+vi.mock('$modules/shell/api/consent', () => ({ getConsentRegistry, recordConsentDecision }));
 
 const words = (title: string) => ({
 	el: { title, description: `${title}: περιγραφή` },
@@ -47,23 +55,237 @@ const registry: ConsentRegistryFacts = {
  * platforms), so both essentials are stored on.
  */
 const fallbackDecision = {
-	registryVersion: '1.0.0',
-	choices: { 'edoctor-api': true, openfreemap: true }
+	registryVersion: '1.1.0',
+	choices: { 'edoctor-api': true, openfreemap: true, 'helpful-answers-storage': true }
 };
 
 const stored = () => JSON.parse(window.localStorage.getItem(consentStorageKey) ?? 'null');
 const renderPrompt = () => render(QueryHarness, { props: { component: ConsentPrompt, props: {} } });
 const card = () => screen.findByRole('region', { name: 'Συναίνεση cookies' });
 
+/** The card under a session the test can start, end or give to another. */
+function renderWithSession(start: SessionStatus, dialogs?: SiteDialogs) {
+	const state = new SvelteMap([['status', start]]);
+	const session = new Session({
+		status: () => state.get('status') as SessionStatus,
+		member: () => (state.get('status') === 'member' ? { firstName: null } : null),
+		signOut: async () => {
+			state.set('status', 'guest');
+		}
+	});
+	const view = render(QueryHarness, {
+		props: {
+			component: SessionHarness as unknown as Component<never>,
+			props: { session, dialogs }
+		}
+	});
+	return { view, session, become: (status: SessionStatus) => state.set('status', status) };
+}
+
+const decision = { registryVersion: '2.0.0', choices: { 'edoctor-api': true } };
+const keep = (kept: { registryVersion: string; choices: Record<string, boolean> }) =>
+	window.localStorage.setItem(consentStorageKey, JSON.stringify(kept));
+const settled = () => new Promise((resolve) => setTimeout(resolve, 10));
+const recorded = () =>
+	JSON.parse(window.localStorage.getItem(consentRecordedStorageKey) ?? 'null') as unknown;
+
 const fetchSpy = vi.fn();
 
 beforeEach(() => {
 	vi.stubGlobal('fetch', fetchSpy);
+	recordConsentDecision.mockResolvedValue({});
 });
 
 afterEach(() => {
 	window.localStorage.clear();
 	vi.unstubAllGlobals();
+});
+
+describe('the server’s record of a member’s decision (R-4)', () => {
+	beforeEach(() => {
+		getConsentRegistry.mockResolvedValue(registry);
+	});
+
+	it('🔴 R-4 (negative): a guest asks nothing, even with a decision kept, even answering the card', async () => {
+		const user = userEvent.setup();
+		renderWithSession('guest');
+		await user.click(within(await card()).getByRole('button', { name: 'Μόνο απαραίτητα' }));
+		await settled();
+		expect(recordConsentDecision).not.toHaveBeenCalled();
+	});
+
+	it('R-4 (negative): nothing while the page does not know yet who reads it', async () => {
+		keep(decision);
+		renderWithSession('unknown');
+		await settled();
+		expect(recordConsentDecision).not.toHaveBeenCalled();
+	});
+
+	it('🔴 R-4: a member answering the card: its decision reaches the record at once', async () => {
+		const user = userEvent.setup();
+		renderWithSession('member');
+		await user.click(within(await card()).getByRole('button', { name: 'Αποδοχή όλων' }));
+		await waitFor(() => expect(recordConsentDecision).toHaveBeenCalledTimes(1));
+		expect(recordConsentDecision).toHaveBeenCalledWith({
+			registryVersion: '2.0.0',
+			choices: { 'edoctor-api': true, 'web-analytics': true }
+		});
+	});
+
+	it('🔴 R-4: what a guest decided reaches the record when the session comes, once, and never again on a new load', async () => {
+		keep(decision);
+		const { view, become } = renderWithSession('guest');
+		await settled();
+		become('member');
+		await waitFor(() => expect(recordConsentDecision).toHaveBeenCalledTimes(1));
+		await waitFor(() => expect(recorded()).toEqual(decision));
+		view.unmount();
+		recordConsentDecision.mockClear();
+		renderWithSession('member');
+		await settled();
+		expect(recordConsentDecision).not.toHaveBeenCalled();
+	});
+
+	it('R-4: a new version of the catalogue is a new record', async () => {
+		keep({ registryVersion: '1.9.0', choices: { 'edoctor-api': true, 'web-analytics': false } });
+		window.localStorage.setItem(
+			consentRecordedStorageKey,
+			JSON.stringify({ registryVersion: '1.9.0', choices: { 'edoctor-api': true } })
+		);
+		renderWithSession('member');
+		await waitFor(() =>
+			expect(recordConsentDecision).toHaveBeenCalledWith(
+				expect.objectContaining({ registryVersion: '2.0.0' })
+			)
+		);
+	});
+
+	it('🔴 R-4: another choice within the same version is written: ONE request for the change, none on the next load', async () => {
+		const user = userEvent.setup();
+		keep({ registryVersion: '2.0.0', choices: { 'edoctor-api': true, 'web-analytics': false } });
+		const dialogs = new SiteDialogs();
+		const { view } = renderWithSession('member', dialogs);
+		await waitFor(() => expect(recordConsentDecision).toHaveBeenCalledTimes(1));
+		await waitFor(() => expect(recorded()).not.toBeNull());
+		dialogs.openConsent();
+		const panel = await screen.findByTestId('consent-tools');
+		await user.click(within(panel).getByRole('switch', { name: 'Στατιστικά ιστότοπου' }));
+		await user.click(within(panel).getByRole('button', { name: 'Αποθήκευση' }));
+		const changed = {
+			registryVersion: '2.0.0',
+			choices: { 'edoctor-api': true, 'web-analytics': true }
+		};
+		await waitFor(() => expect(recordConsentDecision).toHaveBeenCalledTimes(2));
+		expect(recordConsentDecision).toHaveBeenLastCalledWith(changed);
+		await waitFor(() => expect(recorded()).toEqual(changed));
+		view.unmount();
+		recordConsentDecision.mockClear();
+		renderWithSession('member');
+		await settled();
+		expect(recordConsentDecision).not.toHaveBeenCalled();
+	});
+
+	it('R-4: back to the recorded choice while the other is on its way: the record hears it at once, and it is what stays', async () => {
+		const user = userEvent.setup();
+		const first = {
+			registryVersion: '2.0.0',
+			choices: { 'edoctor-api': true, 'web-analytics': false }
+		};
+		const other = {
+			registryVersion: '2.0.0',
+			choices: { 'edoctor-api': true, 'web-analytics': true }
+		};
+		keep(first);
+		window.localStorage.setItem(consentRecordedStorageKey, JSON.stringify(first));
+		const answers: (() => void)[] = [];
+		recordConsentDecision.mockImplementation(
+			() => new Promise((resolve) => answers.push(() => resolve({})))
+		);
+		const dialogs = new SiteDialogs();
+		renderWithSession('member', dialogs);
+		const flip = async () => {
+			dialogs.openConsent();
+			const panel = await screen.findByTestId('consent-tools');
+			await user.click(within(panel).getByRole('switch', { name: 'Στατιστικά ιστότοπου' }));
+			await user.click(within(panel).getByRole('button', { name: 'Αποθήκευση' }));
+			await waitFor(() => expect(screen.queryByTestId('consent-tools')).not.toBeInTheDocument());
+		};
+		await flip();
+		await waitFor(() => expect(recordConsentDecision).toHaveBeenCalledTimes(1));
+		expect(recordConsentDecision).toHaveBeenLastCalledWith(other);
+		await flip();
+		await waitFor(() => expect(recordConsentDecision).toHaveBeenCalledTimes(2));
+		expect(recordConsentDecision).toHaveBeenLastCalledWith(first);
+		answers.forEach((answer) => answer());
+		await waitFor(() => expect(recorded()).toEqual(first));
+	});
+
+	it('R-4: a choice changed where the record could not hear it (signed out meanwhile) reaches it on the next load, once', async () => {
+		keep({ registryVersion: '2.0.0', choices: { 'edoctor-api': true, 'web-analytics': true } });
+		window.localStorage.setItem(
+			consentRecordedStorageKey,
+			JSON.stringify({
+				registryVersion: '2.0.0',
+				choices: { 'edoctor-api': true, 'web-analytics': false }
+			})
+		);
+		renderWithSession('member');
+		await waitFor(() => expect(recordConsentDecision).toHaveBeenCalledTimes(1));
+		await settled();
+		expect(recordConsentDecision).toHaveBeenCalledTimes(1);
+	});
+
+	it('R-4 (negative): saving the same choices again asks nothing', async () => {
+		const user = userEvent.setup();
+		const same = {
+			registryVersion: '2.0.0',
+			choices: { 'edoctor-api': true, 'web-analytics': false }
+		};
+		keep(same);
+		window.localStorage.setItem(consentRecordedStorageKey, JSON.stringify(same));
+		const dialogs = new SiteDialogs();
+		renderWithSession('member', dialogs);
+		dialogs.openConsent();
+		const panel = await screen.findByTestId('consent-tools');
+		await user.click(within(panel).getByRole('button', { name: 'Αποθήκευση' }));
+		await settled();
+		expect(recordConsentDecision).not.toHaveBeenCalled();
+	});
+
+	it('🔴 R-4 (negative): a failure is not marked done: no loop on this load, and the next load asks again', async () => {
+		keep(decision);
+		recordConsentDecision.mockRejectedValue(new Error('down'));
+		const { view } = renderWithSession('member');
+		await waitFor(() => expect(recordConsentDecision).toHaveBeenCalledTimes(1));
+		await settled();
+		expect(recordConsentDecision).toHaveBeenCalledTimes(1);
+		expect(recorded()).toBeNull();
+		view.unmount();
+		recordConsentDecision.mockResolvedValue({});
+		renderWithSession('member');
+		await waitFor(() => expect(recordConsentDecision).toHaveBeenCalledTimes(2));
+	});
+
+	it('🔴 R-4: a sign-out or another account starts over: each account has its own record', async () => {
+		keep(decision);
+		const { session, become } = renderWithSession('member');
+		await waitFor(() => expect(recorded()).toEqual(decision));
+		await session.signOut();
+		await waitFor(() => expect(recorded()).toBeNull());
+		become('member');
+		await waitFor(() => expect(recordConsentDecision).toHaveBeenCalledTimes(2));
+		await waitFor(() => expect(recorded()).toEqual(decision));
+		session.accountChanged();
+		await waitFor(() => expect(recordConsentDecision).toHaveBeenCalledTimes(3));
+	});
+
+	it('R-4 (negative): a decision with nothing in it (the schema asks at least one) is not sent', async () => {
+		keep({ registryVersion: '2.0.0', choices: {} });
+		getConsentRegistry.mockReturnValue(new Promise(() => {}));
+		renderWithSession('member');
+		await settled();
+		expect(recordConsentDecision).not.toHaveBeenCalled();
+	});
 });
 
 describe('ConsentPrompt (the web’s consent card)', () => {

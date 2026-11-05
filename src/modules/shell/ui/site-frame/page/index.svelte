@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, type Snippet } from 'svelte';
+	import { onMount, untrack, type Snippet } from 'svelte';
 	import type { Pathname } from '$app/types';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -9,15 +9,18 @@
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
 	import { theme } from '$shared/preferences/theme';
+	import { getInboxBadgeOptional } from '$shared/state/inbox-badge';
 	import { SearchDock, setSearchDock } from '$shared/state/search-dock';
+	import { getSessionOptional } from '$shared/state/session';
+	import { setSiteDialogs, SiteDialogs } from '$shared/state/site-dialogs';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import AppShell from '$shared/ui/organisms/app-shell';
 	import { AppHeader } from '$shared/ui/organisms/app-header';
 	import { BottomNav } from '$shared/ui/organisms/bottom-nav';
 	import { SiteFooter } from '$shared/ui/organisms/site-footer';
+	import { setToasts, Toaster, ToastState } from '$shared/ui/molecules/toast';
 	import ConsentPrompt from '$modules/shell/ui/consent-prompt';
 	import AccountMenu from '../components/account-menu.svelte';
-	import AccountSheet from '../components/account-sheet.svelte';
 	import BrandLink from '../components/brand-link.svelte';
 	import CompactSearch from '../components/compact-search.svelte';
 	import PrimaryNav from '../components/primary-nav.svelte';
@@ -29,7 +32,7 @@
 		buildFooterColumns,
 		buildLanguageOptions,
 		buildLegalLinks,
-		isExploreFlow,
+		hidesFooterOnPhone,
 		showsBottomNav,
 		showsSiteFooter
 	} from '../lib/frame';
@@ -58,10 +61,37 @@
 		resolve((dock.languageHref?.(locale) ?? localizeHref(basePath, { locale })) as Pathname);
 
 	const languageOptions = $derived(buildLanguageOptions(currentLocale, samePageIn));
-	let settingsOpen = $state(false);
-	let accountSheetOpen = $state(false);
-	// The guest's account menu: ONE list for the ☰ menu (from 744) and the «Προφίλ» sheet (below it, U-19.1).
-	const accountEntries = $derived(buildAccountEntries(messageOptions, localizedHref));
+	// The frame's windows and the toast, one per page tree (context, SSR-safe): a page asks, the frame draws.
+	const dialogs = setSiteDialogs(new SiteDialogs());
+	const toasts = setToasts(new ToastState());
+	// The session lives on the layout's auth host (U-80.1); without it (a test of the frame alone) a guest.
+	const session = getSessionOptional();
+	const isMember = $derived(session?.isMember ?? false);
+	// 🔴 R-2: a sign-out the server did not carry out: the member is still signed in here, and must know it.
+	let signOutFailures = untrack(() => session?.signOutFailures ?? 0);
+	$effect(() => {
+		const failures = session?.signOutFailures ?? 0;
+		if (failures === signOutFailures) return;
+		signOutFailures = failures;
+		untrack(() =>
+			toasts.show({ tone: 'danger', message: m.auth_sign_out_failed({}, messageOptions) })
+		);
+	});
+	const initial = $derived(session?.member?.firstName?.trim().slice(0, 1).toUpperCase() ?? null);
+	// 🔴 U-84 Π5: the messages module's one read; the frame only draws it. A guest's is always none.
+	const inbox = getInboxBadgeOptional();
+	const hasUnread = $derived(isMember && (inbox?.hasUnread ?? false));
+	const accountEntries = $derived(
+		buildAccountEntries(messageOptions, localizedHref, isMember, hasUnread)
+	);
+	const capsuleBadge = $derived(
+		hasUnread && inbox
+			? {
+					badge: inbox.label,
+					label: m.bottom_nav_unread({ count: inbox.count }, messageOptions)
+				}
+			: null
+	);
 
 	// The theme follows the system live while its preference is `system` (the toggle now lives in the settings).
 	onMount(() => theme.init());
@@ -85,7 +115,11 @@
 				<AccountMenu
 					entries={accountEntries}
 					{messageOptions}
-					onSettings={() => (settingsOpen = true)}
+					{initial}
+					{hasUnread}
+					onSettings={() => dialogs.openSettings()}
+					onSignIn={session ? () => session.requireSignIn() : undefined}
+					onSignOut={() => session?.signOut()}
 				/>
 			{/snippet}
 		</AppHeader>
@@ -96,7 +130,14 @@
 	{#snippet footer()}
 		<!-- §7.2: the results end with their own thin legal line, no footer. -->
 		{#if showsSiteFooter(basePath)}
-			{@render siteFooter()}
+			{#if hidesFooterOnPhone(basePath)}
+				<!-- U-81.1, Ε2: the application's own pages below 744 end without it. -->
+				<div data-testid="footer-from-tablet" class="hidden tablet:block">
+					{@render siteFooter()}
+				</div>
+			{:else}
+				{@render siteFooter()}
+			{/if}
 		{/if}
 	{/snippet}
 
@@ -104,12 +145,7 @@
 		{#if showsBottomNav(basePath, page.status)}
 			<BottomNav
 				aria-label={m.bottom_navigation({}, messageOptions)}
-				items={buildBottomNavItems(
-					messageOptions,
-					localizedHref,
-					isExploreFlow(basePath),
-					() => (accountSheetOpen = true)
-				)}
+				items={buildBottomNavItems(messageOptions, localizedHref, basePath, capsuleBadge)}
 				hideFrom="tablet"
 			/>
 		{/if}
@@ -129,7 +165,7 @@
 			<button
 				type="button"
 				data-testid="footer-language"
-				onclick={() => (settingsOpen = true)}
+				onclick={() => dialogs.openSettings()}
 				class="inline-flex min-h-touch min-w-touch flex-row items-center gap-2.5 rounded-sm text-body-sm font-semibold text-foreground outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
 			>
 				<Ionicon name="globe-outline" class="icon-md" />
@@ -140,14 +176,9 @@
 	</SiteFooter>
 {/snippet}
 
-<AccountSheet
-	bind:open={accountSheetOpen}
-	entries={accountEntries}
-	{messageOptions}
-	onSettings={() => (settingsOpen = true)}
-/>
-<SettingsDialog bind:open={settingsOpen} {languageOptions} {messageOptions} />
+<SettingsDialog bind:open={dialogs.settingsOpen} {languageOptions} {messageOptions} />
 <ConsentPrompt />
+<Toaster {toasts} />
 
 <!-- Every language version of this page, for crawlers (hidden from people and assistive tech). -->
 <div style="display:none">

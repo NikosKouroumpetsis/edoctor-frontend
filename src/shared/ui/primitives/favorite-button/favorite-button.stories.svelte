@@ -15,9 +15,9 @@
 			size: 'lg'
 		},
 		argTypes: {
-			inset: { control: 'radio', options: ['sm', 'md'] },
+			inset: { control: 'radio', options: ['none', 'xs', 'sm', 'md'] },
 			selected: { control: 'boolean' },
-			size: { control: 'radio', options: ['md', 'lg'] },
+			size: { control: 'radio', options: ['md', 'lg', 'card-heart'] },
 			appearance: { control: 'radio', options: ['bare', 'overlay'] }
 		}
 	});
@@ -58,7 +58,7 @@
 </Story>
 
 <!-- U-20 (Airbnb's, as the application's `overlay`): the white outline over the dark see-through fill, on a photo. -->
-<Story name="Overlay" args={{ appearance: 'overlay', inset: 'sm', size: 'md' }}>
+<Story name="Overlay" args={{ appearance: 'overlay', inset: 'none', size: 'card-heart' }}>
 	{#snippet template(args)}
 		<div class="relative h-card-rail-media w-card-rail-w rounded-xl bg-primary">
 			<FavoriteButton {...args} />
@@ -68,7 +68,7 @@
 
 <Story
 	name="Overlay Selected"
-	args={{ appearance: 'overlay', inset: 'sm', selected: true, size: 'md' }}
+	args={{ appearance: 'overlay', inset: 'none', selected: true, size: 'card-heart' }}
 >
 	{#snippet template(args)}
 		<div class="relative h-card-rail-media w-card-rail-w rounded-xl bg-primary">

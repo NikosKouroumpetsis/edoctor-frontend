@@ -2,6 +2,7 @@ import { resolveMediaUrl } from '$shared/lib/http';
 import { toStarScore } from '$shared/lib/rating-stars';
 import type {
 	DoctorImagePublicView,
+	DoctorPublicMarketplaceCredentialView,
 	DoctorPublicMarketplaceProfileOfficeSummaryView,
 	DoctorPublicMarketplaceProfileOfficeView,
 	DoctorPublicMarketplaceProfileRatingView,
@@ -14,6 +15,9 @@ import type {
 } from '$shared/lib/api-client';
 import type {
 	DoctorBioFacts,
+	DoctorBookingPolicyFacts,
+	DoctorCredentialFacts,
+	DoctorCredentialKind,
 	DoctorFeeFacts,
 	DoctorImageFacts,
 	DoctorLanguageFacts,
@@ -27,6 +31,7 @@ import type {
 	DoctorResponseTimeId,
 	DoctorReviewSnippet,
 	DoctorServiceFacts,
+	DoctorServiceKind,
 	DoctorSocialLinkFacts,
 	DoctorSocialLinkId
 } from './types';
@@ -87,7 +92,7 @@ export const REVIEW_ASPECT_FIELDS = [
 type AspectScores = Partial<Record<(typeof REVIEW_ASPECT_FIELDS)[number][1], number | null>>;
 
 /** 🔴 U-49: the aspects on the 5 stars (`toStarScore`): a score off the scale (the old 1–10) is left out. */
-function aspectChips(scores: AspectScores | null | undefined): DoctorReviewChipFacts[] {
+export function aspectChips(scores: AspectScores | null | undefined): DoctorReviewChipFacts[] {
 	if (!scores) return [];
 	return REVIEW_ASPECT_FIELDS.flatMap(([id, field]) => {
 		const score = toStarScore(scores[field]);
@@ -105,6 +110,7 @@ export function mapDoctorReview(
 	const rating = toStarScore(review.overallRating);
 	if (rating === null) return null;
 	const aspects = aspectChips(review.aspect);
+	const reply = review.doctorReply?.trim();
 	return {
 		id: review.id,
 		body: review.comment ?? '',
@@ -112,7 +118,8 @@ export function mapDoctorReview(
 		patientInitial: review.patientInitial ?? '',
 		publishedAt: review.createdAt,
 		rating,
-		...(aspects.length > 0 ? { aspects } : {})
+		...(aspects.length > 0 ? { aspects } : {}),
+		...(reply ? { reply: { body: reply, repliedAt: review.doctorReplyAt ?? null } } : {})
 	};
 }
 
@@ -182,8 +189,25 @@ export function mapDoctorOfficeFacts(
 	return Object.keys(facts).length > 0 ? facts : undefined;
 }
 
+/** 🔴 U-75, U-76: the office's rules as the server resolved them; anything else is no rule (never a default of ours). */
+function bookingPolicy(
+	policy: DoctorPublicMarketplaceProfileOfficeSummaryView['bookingPolicy'] | undefined
+): DoctorBookingPolicyFacts | undefined {
+	if (!policy) return undefined;
+	const { confirmationMode, cancellationCutoffHours, minBookingNoticeHours } = policy;
+	if (confirmationMode !== 'AUTO' && confirmationMode !== 'MANUAL') return undefined;
+	if (!isCount(cancellationCutoffHours) || !isCount(minBookingNoticeHours)) return undefined;
+	return { confirmationMode, cancellationCutoffHours, minBookingNoticeHours };
+}
+
 function officeSummary(
-	office: DoctorPublicMarketplaceProfileOfficeSummaryView | null | undefined
+	office:
+		| (Omit<DoctorPublicMarketplaceProfileOfficeSummaryView, 'bookingPolicy'> & {
+				/** The roster's offices have it; the profile's own (`selectedOffice`) does not. */
+				bookingPolicy?: DoctorPublicMarketplaceProfileOfficeSummaryView['bookingPolicy'];
+		  })
+		| null
+		| undefined
 ): DoctorOfficeSummaryFacts | undefined {
 	const officeId = filled(office?.officeId);
 	if (!office || !officeId) return undefined;
@@ -192,6 +216,8 @@ function officeSummary(
 		const value = filled(office[key]);
 		if (value) summary[key] = value;
 	}
+	const policy = bookingPolicy(office.bookingPolicy);
+	if (policy) summary.bookingPolicy = policy;
 	return summary;
 }
 
@@ -211,6 +237,17 @@ function officeSummaries(doctor: DoctorPublicMarketplaceProfileView): DoctorOffi
 const feeOf = (price: number | null | undefined): DoctorFeeFacts | null =>
 	typeof price === 'number' && Number.isFinite(price) ? { min: price, max: price } : null;
 
+const SERVICE_KINDS: readonly DoctorServiceKind[] = ['follow-up', 'check-up', 'visit', 'other'];
+
+/** 🔴 U-71.2, U-89.1: the backend's kind; anything this page does not know (`online` of an old server) is `other`. */
+function serviceKind(kind: string | null | undefined): DoctorServiceKind {
+	return SERVICE_KINDS.find((known) => known === kind) ?? 'other';
+}
+
+/** U-72.3: a positive whole number, or nothing: the page never draws a «0». */
+const positive = (value: number | null | undefined): number | undefined =>
+	typeof value === 'number' && Number.isInteger(value) && value > 0 ? value : undefined;
+
 function services(
 	list: DoctorPublicMarketplaceProfileServiceView[] | undefined
 ): DoctorServiceFacts[] {
@@ -219,17 +256,52 @@ function services(
 			id: service.doctorServiceId || service.serviceId || `service-${index}`,
 			title: service.title,
 			priceRange: feeOf(service.price),
+			kind: serviceKind(service.kind),
 			// U-36.2: the server's own mark (the application did not read it before wave 1.5).
 			isSpecialized: service.isSpecialized === true
 		};
-		const includes = typeof service.description === 'string' ? service.description.trim() : '';
-		if (includes) facts.includes = includes;
-		const note = filled(service.sub);
-		if (note) facts.note = note;
+		const years = positive(service.yearsOfExperience);
+		if (years) facts.yearsOfExperience = years;
+		const visits = positive(service.completedVisitCount);
+		if (visits) facts.completedVisits = visits;
+		// 🔴 Record §6.1 (as the application's): `description` is the text, `sub` the short line; they were the wrong way round.
+		const description = typeof service.description === 'string' ? service.description.trim() : '';
+		if (description) facts.description = description;
+		const subtitle = filled(service.sub);
+		if (subtitle) facts.subtitle = subtitle;
 		if (typeof service.durationInMinutes === 'number' && service.durationInMinutes > 0) {
 			facts.durationInMinutes = service.durationInMinutes;
 		}
 		return facts;
+	});
+}
+
+const CREDENTIAL_KINDS: readonly DoctorCredentialKind[] = ['STUDY', 'WORK', 'CONFERENCE'];
+
+/**
+ * 🔴 U-73.1 Ε2: the biography's entries, in the server's order; an entry of a kind this page does not know or with no
+ * text is left out, and a year is a year only as a whole number. Their words are drawn as text (U-65.6).
+ */
+function credentials(
+	list: DoctorPublicMarketplaceCredentialView[] | undefined
+): DoctorCredentialFacts[] {
+	return (list ?? []).flatMap((entry) => {
+		const title = filled(entry.title);
+		const kind = CREDENTIAL_KINDS.find((known) => known === entry.kind);
+		if (!title || !kind) return [];
+		const facts: DoctorCredentialFacts = {
+			id: entry.id,
+			kind,
+			title,
+			isCurrent: entry.isCurrent === true
+		};
+		const organization = filled(entry.organization);
+		if (organization) facts.organization = organization;
+		const startYear = positive(entry.startYear);
+		if (startYear) facts.startYear = startYear;
+		const endYear = positive(entry.endYear);
+		if (endYear) facts.endYear = endYear;
+		return [facts];
 	});
 }
 
@@ -338,7 +410,11 @@ function buildResponseMetrics(
 	if (metrics && isCount(metrics.completedVisitCount)) {
 		facts.completedVisits = metrics.completedVisitCount;
 	}
-	return Object.keys(facts).length > 0 ? facts : undefined;
+	if (Object.keys(facts).length === 0) return undefined;
+	// U-72.4: the months as the server says them; one that is no number of months is left out, not guessed.
+	return metrics && isCount(metrics.windowMonths) && metrics.windowMonths > 0
+		? { ...facts, windowMonths: metrics.windowMonths }
+		: facts;
 }
 
 /**
@@ -394,6 +470,8 @@ export function mapDoctorProfile(
 	if (offices.length > 0) profile.offices = offices;
 	const paragraphs = extractParagraphs(doctor.description);
 	if (paragraphs.length > 0) profile.description = { paragraphs };
+	const entries = credentials(doctor.credentials);
+	if (entries.length > 0) profile.credentials = entries;
 	const bioFacts = bio(doctor);
 	if (bioFacts) profile.bio = bioFacts;
 	const spoken = languages(doctor);
@@ -406,5 +484,12 @@ export function mapDoctorProfile(
 	if (doctor.memberSince) profile.memberSince = doctor.memberSince;
 	const responseMetrics = buildResponseMetrics(doctor.responseMetrics);
 	if (responseMetrics) profile.responseMetrics = responseMetrics;
+	const articles = doctor.articlesSummary;
+	if (articles && (isCount(articles.articlesCount) || isCount(articles.healthAdviceCount))) {
+		profile.articlesSummary = {
+			articlesCount: isCount(articles.articlesCount) ? articles.articlesCount : 0,
+			healthAdviceCount: isCount(articles.healthAdviceCount) ? articles.healthAdviceCount : 0
+		};
+	}
 	return profile;
 }

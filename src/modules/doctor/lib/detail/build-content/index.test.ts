@@ -10,6 +10,7 @@ import {
 	buildReviewCard,
 	buildReviews,
 	buildServiceCost,
+	buildBio,
 	buildSpecializations,
 	buildSummary
 } from './index';
@@ -28,7 +29,9 @@ describe('lib/detail build-content', () => {
 		expect(summary?.initial).toBe('Α');
 	});
 
-	it('U-35.4 / U-36.1 (app = web): no «Επικοινωνήστε» in the summary, and no response row without the backend’s metrics', () => {
+	// Rewrites «U-35.4: no «Επικοινωνήστε» in the summary»: U-84.6 puts the button there, and it is the screen's (a snippet,
+	// the messages module's), so the summary's own words still hold none of it.
+	it('U-84.6 / U-36.1 (app = web): the summary’s words hold no «Επικοινωνήστε», the screen draws it; and no response row without the backend’s metrics', () => {
 		const summary = buildSummary(sampleDoctorProfile(), 'el', SAMPLE_NOW);
 		const words = JSON.stringify(summary);
 		expect(words).not.toMatch(/Επικοινωνήστε/u);
@@ -75,30 +78,99 @@ describe('lib/detail build-content', () => {
 		]);
 		expect(section?.about?.leadBody).toBe('Παθολόγος με έμφαση στην πρόληψη.');
 		expect(section?.about?.body).toBe('Συνεργάζεται με το νοσοκομείο Ευαγγελισμός.');
-		expect(section?.hasMore).toBe(true);
 	});
 
-	it('U-40.4 (app = web): a single paragraph is the lead alone — no body, no «Εμφάνιση περισσότερα»', () => {
+	it('U-40.4 (app = web): a single paragraph is the lead alone, no body', () => {
 		const section = buildProfessionalSection(
 			sampleDoctorProfile({ description: { paragraphs: ['Μόνο ένα.'] } }),
 			'el',
 			SAMPLE_NOW
 		);
 		expect(section?.about).toEqual({ leadTitle: 'Σχετικά με τον γιατρό', leadBody: 'Μόνο ένα.' });
-		expect(section?.hasMore).toBe(false);
 	});
 
-	it('U-36.2 (app = web): «Τομείς εξειδίκευσης» are the services marked `isSpecialized`, with their own line; the visits line waits for the backend (U-36.1)', () => {
+	it('U-36.2, U-72.3 Π1 (app = web): «Τομείς εξειδίκευσης» are the services marked `isSpecialized`, with their own line and the way to their page; the visits line waits for the backend (U-36.1)', () => {
 		const specializations = buildSpecializations(sampleDoctorProfile(), 'el');
-		expect(specializations?.items).toEqual([
-			{ id: 'svc-1', title: 'Simple visit' },
-			{ id: 'svc-2', title: 'Chronic follow-up', body: 'Παρακολούθηση χρόνιων νοσημάτων.' }
+		expect(
+			specializations?.items.map(({ id, title, subtitle }) => ({ id, title, subtitle }))
+		).toEqual([
+			{ id: 'svc-1', title: 'Simple visit', subtitle: undefined },
+			{ id: 'svc-2', title: 'Chronic follow-up', subtitle: 'Παρακολούθηση χρόνιων νοσημάτων.' }
 		]);
+		expect(specializations?.moreLabel).toBe('Εμφάνιση λεπτομερειών');
 		expect(specializations?.completedVisits).toBeNull();
 		expect(
 			buildSpecializations(sampleDoctorProfile({ responseMetrics: { completedVisits: 523 } }), 'el')
 				?.completedVisits
-		).toBe('Ολοκληρωμένες επισκέψεις (6 μήνες): 523');
+		).toBe('Ολοκληρωμένες επισκέψεις: 523');
+	});
+
+	it('U-72.3 Π1: past three fields, three rows and «Εμφάνιση όλων των N τομέων»', () => {
+		const special = ['a', 'b', 'c', 'd'].map((id) => ({
+			id,
+			title: id,
+			priceRange: null,
+			kind: 'other' as const,
+			isSpecialized: true
+		}));
+		const content = buildSpecializations(sampleDoctorProfile({ services: special }), 'el');
+		expect(content?.items).toHaveLength(3);
+		expect(content?.moreLabel).toBe('Εμφάνιση όλων των 4 τομέων');
+	});
+
+	it('U-70.2 Ε3, Π7: the section is «Υπηρεσίες», three rows, and its button only leads somewhere new', () => {
+		const plain = ['a', 'b', 'c'].map((id) => ({
+			id,
+			title: id,
+			priceRange: null,
+			kind: 'other' as const,
+			isSpecialized: false
+		}));
+		const none = buildServiceCost(sampleDoctorProfile({ services: plain }), 'el');
+		expect(none?.title).toBe('Υπηρεσίες');
+		expect(none?.services).toHaveLength(3);
+		expect(none?.moreLabel).toBeNull();
+		expect(
+			buildServiceCost(
+				sampleDoctorProfile({
+					services: plain.map((service) => ({ ...service, description: 'Κείμενο' }))
+				}),
+				'el'
+			)?.moreLabel
+		).toBe('Εμφάνιση λεπτομερειών');
+		expect(
+			buildServiceCost(
+				sampleDoctorProfile({ services: [...plain, { ...plain[0], id: 'd' }] }),
+				'el'
+			)?.moreLabel
+		).toBe('Εμφάνιση όλων των 4 υπηρεσιών');
+	});
+
+	it('U-73.1 Π1: three of each group by their count, the whole biography one press away; the credentials before the plain lists', () => {
+		const credentials = ['a', 'b', 'c', 'd'].map((id) => ({
+			id,
+			kind: 'STUDY' as const,
+			title: `Σπουδές ${id}`,
+			isCurrent: false
+		}));
+		const content = buildBio(sampleDoctorProfile({ credentials }), 'el');
+		expect(content?.groups).toEqual([
+			{
+				id: 'studies',
+				title: 'Σπουδές',
+				countLabel: '(4)',
+				items: ['Σπουδές a', 'Σπουδές b', 'Σπουδές c']
+			}
+		]);
+		expect(content?.allLabel).toBe('Εμφάνιση όλου του βιογραφικού');
+	});
+
+	it('U-73.2: a read of the credentials that failed leaves the plain lists, nothing shows less', () => {
+		const content = buildBio(sampleDoctorProfile(), 'el');
+		expect(content?.groups.map((group) => group.items)).toEqual([
+			['Ιατρική Σχολή ΕΚΠΑ'],
+			['Ευαγγελισμός', 'Ιδιωτικό ιατρείο']
+		]);
 	});
 
 	it('U-36.2 (app = web): no service marked — no section', () => {

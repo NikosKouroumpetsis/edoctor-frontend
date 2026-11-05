@@ -81,4 +81,20 @@ describe('FavoriteButton', () => {
 		expect(heart.querySelectorAll('[data-slot="ionicon"]')).toHaveLength(1);
 		expect(heart.querySelector('[data-slot="favorite-button-fill"]')).toBeNull();
 	});
+
+	it('U-85 (`20-favorites` Π4): its «pop» plays only when asked, on every glyph of the heart, CSS only (U-12)', async () => {
+		const props = {
+			selected: true,
+			onToggle: () => {},
+			'aria-label': 'Αποθήκευση',
+			appearance: 'overlay' as const
+		};
+		const { rerender } = render(FavoriteButton, { props });
+		const glyphs = () =>
+			screen.getByRole('button').querySelectorAll('[data-slot^="favorite-button-"]');
+		expect(glyphs()).toHaveLength(2);
+		glyphs().forEach((glyph) => expect(glyph).not.toHaveClass('animate-heart-pop'));
+		await rerender({ ...props, pop: true });
+		glyphs().forEach((glyph) => expect(glyph).toHaveClass('animate-heart-pop'));
+	});
 });

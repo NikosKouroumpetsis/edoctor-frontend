@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ResolvedPathname } from '$app/types';
 	import { m } from '$paraglide/messages.js';
+	import { cn } from '$shared/lib/utils';
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { IconButton } from '$shared/ui/primitives/icon-button';
@@ -11,6 +12,7 @@
 		backHref,
 		onBack,
 		saved,
+		pop = false,
 		onShare,
 		onSave,
 		showActions = true
@@ -21,6 +23,8 @@
 		/** «‹» with a page of the site behind it goes back to it (the results with their search). */
 		onBack: (event: MouseEvent) => void;
 		saved: boolean;
+		/** The heart has just filled: its «pop» plays. */
+		pop?: boolean;
 		onShare: () => void;
 		onSave: () => void;
 		/** No share or heart on a page that failed (only «‹»). */
@@ -64,7 +68,10 @@
 				>
 					<Ionicon
 						name={saved ? 'heart' : 'heart-outline'}
-						class={saved ? 'icon-md text-accent' : 'icon-md text-foreground'}
+						class={cn(
+							saved ? 'icon-md text-accent' : 'icon-md text-foreground',
+							pop && 'animate-heart-pop'
+						)}
 					/>
 				</IconButton>
 			{/if}

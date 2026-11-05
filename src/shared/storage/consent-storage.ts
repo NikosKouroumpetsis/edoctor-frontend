@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { consentStorageKey } from '$shared/config/env';
+import { consentRecordedStorageKey, consentStorageKey } from '$shared/config/env';
 
 /** The tracking decision this browser keeps (the application's `ConsentSnapshot`): no personal data, no date. */
 export type ConsentSnapshot = {
@@ -59,4 +59,48 @@ export function writeConsentSnapshot(snapshot: ConsentSnapshot) {
 	} catch {
 		return;
 	}
+}
+
+const REGISTRY_VERSION_PATTERN = /^\d{1,6}\.\d{1,6}\.\d{1,6}$/u;
+
+/**
+ * The decision the server already has on record for this account (the version and the choice, no personal data), so a
+ * decision goes out once: one request per change, none per load. `null` when none, or when it was not written here.
+ */
+export function readRecordedConsent(): ConsentSnapshot | null {
+	if (!browser) return null;
+	try {
+		const stored = window.localStorage.getItem(consentRecordedStorageKey);
+		const recorded = stored ? sanitizeConsentSnapshot(JSON.parse(stored)) : null;
+		return recorded && REGISTRY_VERSION_PATTERN.test(recorded.registryVersion) ? recorded : null;
+	} catch {
+		return null;
+	}
+}
+
+export function writeRecordedConsent(snapshot: ConsentSnapshot) {
+	if (!browser) return;
+	const sanitized = sanitizeConsentSnapshot(snapshot);
+	if (!sanitized) return;
+	try {
+		window.localStorage.setItem(consentRecordedStorageKey, JSON.stringify(sanitized));
+	} catch {
+		return;
+	}
+}
+
+/** The account has left this browser: the next one has its own record to make. */
+export function forgetRecordedConsent() {
+	if (!browser) return;
+	try {
+		window.localStorage.removeItem(consentRecordedStorageKey);
+	} catch {
+		return;
+	}
+}
+
+/** A decision as one value: the same version and the same choices are the same decision, in whatever order. */
+export function consentDecisionKey({ registryVersion, choices }: ConsentSnapshot): string {
+	const sorted = Object.entries(choices).sort(([left], [right]) => left.localeCompare(right));
+	return JSON.stringify([registryVersion, sorted]);
 }

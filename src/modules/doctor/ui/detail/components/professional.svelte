@@ -11,20 +11,18 @@
 	let {
 		content,
 		moreLabel,
-		moreHref,
-		onOpenMore
+		moreHref
 	}: {
 		content: DoctorDetailProfessionalSection;
 		moreLabel: string;
-		/** `details/description` (the application's historical, shareable id). */
+		/** 🔴 U-73.1 Ε1: `/doctors/<slug>/about`, the doctor's own page. */
 		moreHref: ResolvedPathname;
-		onOpenMore: (event: MouseEvent) => void;
 	} = $props();
 </script>
 
 <!-- 🔴 U-40.4 (app = web, the application's `ProfessionalSection`): «Γνωρίστε τον επαγγελματία υγείας» with no card
      and no shadow — the one line of figures, the icon rows (Μέλος από, Γλώσσες, Αρ. αδείας), the links, and the
-     description cut at two lines with «Εμφάνιση περισσότερα», which opens `details/description`. -->
+     description cut at two lines; «Εμφάνιση περισσότερων» leads to the doctor's page (U-73.1 Ε1). -->
 <ProfileSection id="professional" title={content.title}>
 	<div class="flex flex-col gap-6">
 		{#if content.stats.length > 0}
@@ -81,16 +79,13 @@
 				{/if}
 			</div>
 		{/if}
-		{#if content.hasMore}
-			<Button
-				tone="muted"
-				bordered={false}
-				label={moreLabel}
-				href={moreHref}
-				onclick={onOpenMore}
-				data-testid="doctor-detail-professional-more"
-				class="w-full tablet:w-auto tablet:self-start"
-			/>
-		{/if}
+		<Button
+			tone="muted"
+			bordered={false}
+			label={moreLabel}
+			href={moreHref}
+			data-testid="doctor-detail-professional-more"
+			class="w-full tablet:w-auto tablet:self-start"
+		/>
 	</div>
 </ProfileSection>

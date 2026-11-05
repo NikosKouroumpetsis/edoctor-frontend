@@ -16,6 +16,7 @@
 		focus,
 		locale,
 		saved,
+		pop = false,
 		photoHref,
 		onOpenPhoto,
 		onPhotoChange,
@@ -32,6 +33,8 @@
 		focus: number | undefined;
 		locale: SupportedLocale;
 		saved: boolean;
+		/** The heart has just filled: its «pop» plays. */
+		pop?: boolean;
 		/** A photo's own address (`details/photos?focus=2`). */
 		photoHref: (index: number) => ResolvedPathname;
 		/** The tour's press: the viewer on that photo (in place, its own history entry). */
@@ -156,7 +159,7 @@
 				>
 					<Ionicon
 						name={saved ? 'heart' : 'heart-outline'}
-						class={saved ? 'icon-md text-accent' : 'icon-md'}
+						class={cn(saved ? 'icon-md text-accent' : 'icon-md', pop && 'animate-heart-pop')}
 					/>
 				</button>
 			</div>
@@ -239,7 +242,7 @@
 				>
 					<Ionicon
 						name={saved ? 'heart' : 'heart-outline'}
-						class={saved ? 'icon-sm text-accent' : 'icon-sm'}
+						class={cn(saved ? 'icon-sm text-accent' : 'icon-sm', pop && 'animate-heart-pop')}
 					/>
 					<span class="hidden underline tablet:inline">{m.doctor_save({}, options)}</span>
 				</button>

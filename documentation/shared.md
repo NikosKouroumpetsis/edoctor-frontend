@@ -33,7 +33,8 @@ src/shared/
   providers/   root and subtree providers
   query/       TanStack Svelte Query setup
   state/       app-wide local state: a tab's module state written only in the browser (`device-location`, the
-                visit's position of «Κοντά μου»), or a context scoped to the page tree (`search-dock`)
+                visit's position of «Κοντά μου»), or a context scoped to the page tree (`search-dock`, `session`:
+                who is signed in and `requireSignIn`, `site-dialogs`: the frame's windows a page may ask for)
   storage/     browser/server-safe storage adapters (`consent-storage`)
   ui/          reusable UI hierarchy
 ```
@@ -66,6 +67,25 @@ below 744 the application's `SearchField` `inset` pill), `molecules/rich-text` (
 `molecules/state-panel`, the `Chip`'s `phoneVariant` (the application's outline below 744), `AccordionDetails`'s
 `highlight` and `Banner`'s `actionLabel`/`actionHref` and `inline`.
 
+The windows of wave 2 (screens 11–13) share: `templates/info-dialog` (`InfoDialog`: a title, its blocks and links, a
+second level over another window; the 568 window from 744, the draggable sheet below it, one element by CSS),
+`molecules/expandable-text` (four lines and «Εμφάνιση περισσότερων», opening in place), `molecules/review-toolbar` (the
+count, the order, the round search that grows over the row), `molecules/mention-chips` (`MentionChips`: a heading, «×
+Καθαρισμός», one row of toggles with a glyph, words and a count, the «‹ ›» from 744), `molecules/weekly-hours`, `molecules/breadcrumbs` (the text
+pages' own), `lib/directions` (`buildDirectionsUrl`) and `RatingDistribution`'s `scrollLabels` (the «‹ ›» from 744).
+
+Screens 14–16 and 24 add: `molecules/list-row` (`ListRow`: a row that opens, or goes on with «›», its end beside it from a
+520 box and its `meta` under the title below that), `molecules/timeline` (`Timeline`: a life's work in time, then
+«Εμφάνιση όλων (N)» in place), `molecules/stat-card`, `ProfileSummaryCard`'s `layout="page"`, `InfoDialog`'s `intro` runs
+and rows, `ExpandableText`'s `lines`/`chevron` and `TextButton`'s `chevron`.
+
+Screens 18 + 21 add: `molecules/conversation-row` (`ConversationRow`: a row of an inbox), `molecules/message-bubble`
+(`MessageBubble`: a message, its words only ever a text node, never a link), `molecules/composer` (`Composer`: the pill
+that grows, the application's numbers below 744 and the prototype's six lines from 744, its counter in code points), `templates/action-dialog` (`ActionDialog`: a small title with its rows or
+buttons; the 480 window from 744, the draggable sheet below it), `BottomNavItem`'s `badge`, `$shared/lib/headless`
+`SheetDrag` (what `InfoDialog` and `ActionDialog` share), `$shared/lib/http` `httpSessionFile` and `$shared/lib/text`
+`countCodePoints`, `withDoctorTitle` (U-99.1: «Dr. …» inside a sentence, never doubled).
+
 Everything under `src/shared/ui` is generic (U-02.1, guarded by
 `tests/architecture/shared-ui-generic.test.ts`): words, hrefs and the locale
 come from the caller as props, a Paraglide key is only `common_*` or the
@@ -86,6 +106,9 @@ Persist only small, sanitized preference snapshots. The shared storage keys are 
 ```txt
 edoctor.<appEnv>.preferences.v1
 edoctor.<appEnv>.consent.v1
+edoctor.<appEnv>.consent-recorded.v1
+edoctor.<appEnv>.helpful.v1
+edoctor.<appEnv>.favorite-pending.v1
 ```
 
 Do not persist TanStack Query caches, auth sessions, or large business payloads in the preferences store.

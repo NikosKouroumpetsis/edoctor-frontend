@@ -1,6 +1,12 @@
 export { getDoctorPublicProfile, type DoctorRequestContext } from './endpoints';
-export { isDoctorSlug, loadDoctorProfile, type DoctorProfileLoad } from './load';
 export {
+	getDoctorMemberProfile,
+	isDoctorSlug,
+	loadDoctorProfile,
+	type DoctorProfileLoad
+} from './load';
+export {
+	aspectChips,
 	DoctorProfileNotFoundError,
 	extractParagraphs,
 	mapDoctorOfficeFacts,
@@ -12,13 +18,18 @@ export { doctorQueryKeys } from './query-keys';
 export type {
 	DoctorAvailabilityFacts,
 	DoctorBioFacts,
+	DoctorBookingPolicyFacts,
+	DoctorCredentialFacts,
+	DoctorCredentialKind,
 	DoctorDescriptionFacts,
 	DoctorFeeFacts,
 	DoctorImageFacts,
 	DoctorLanguageFacts,
 	DoctorOfficeFacts,
+	DoctorOfficeImageFacts,
 	DoctorOfficePaymentOptionId,
 	DoctorOfficeSummaryFacts,
+	DoctorOfficeWeeklyHoursFacts,
 	DoctorProfessionalFacts,
 	DoctorProfile,
 	DoctorReviewChipFacts,
@@ -28,6 +39,8 @@ export type {
 	DoctorResponseMetricsFacts,
 	DoctorResponseTimeId,
 	DoctorServiceFacts,
+	DoctorServiceKind,
 	DoctorSocialLinkFacts,
-	DoctorSocialLinkId
+	DoctorSocialLinkId,
+	DoctorWeekday
 } from './types';

@@ -63,6 +63,7 @@ Client-visible values must use SvelteKit's public prefix, normally `PUBLIC_`. Pr
 
 Public runtime settings (all read through `$env/dynamic/public`, so a deployed value is picked up at runtime by the server and serialized to the browser without a rebuild; `import.meta.env` only exposes Vite's own values such as `MODE`, never `PUBLIC_*`):
 
+- `PUBLIC_TENANT_SLUG` — the tenant every sign-in request names (default `edoctor-seed-main`, the seeded server's).
 - `PUBLIC_API_BASE_URL` — the marketplace API base (`{origin}/api/v1`) used by both the SSR load and the browser, resolved by `getApiBaseUrl()` in `src/shared/config/api.ts`. A trailing slash is dropped; a missing or blank value falls back to `http://localhost:8080/api/v1` (the local seed-mock backend). Every deployed environment must set it, and the backend's `CORS_ALLOWED_ORIGINS` must include the web origin for the browser requests.
 - `PUBLIC_APP_ENV` — `development | test | preview | production`, resolved once at startup by `src/shared/config/env.ts`. A missing or unknown value falls back to the Vite mode, then `development`. It scopes the preferences key `edoctor.<appEnv>.preferences.v1`, which `src/hooks.server.ts` also writes into the theme pre-paint script of `src/app.html`.
 - `PUBLIC_APP_VARIANT` — `development | preview | production`. A missing or unknown value is derived from `appEnv`.

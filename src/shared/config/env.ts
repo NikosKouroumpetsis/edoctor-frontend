@@ -32,3 +32,8 @@ export const appVariant: AppVariant = isAppVariant(configuredAppVariant)
 
 export const preferencesStorageKey = `edoctor.${appEnv}.preferences.v1`;
 export const consentStorageKey = `edoctor.${appEnv}.consent.v1`;
+export const consentRecordedStorageKey = `edoctor.${appEnv}.consent-recorded.v1`;
+export const knownAccountStorageKey = `edoctor.${appEnv}.known-account.v1`;
+export const authReturnStorageKey = `edoctor.${appEnv}.auth-return.v1`;
+export const favoritePendingStorageKey = `edoctor.${appEnv}.favorite-pending.v1`;
+export const helpfulStorageKey = `edoctor.${appEnv}.helpful.v1`;

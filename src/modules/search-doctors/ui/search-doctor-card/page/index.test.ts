@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import { goto } from '$app/navigation';
 import type { SearchResultCard } from '$modules/search-doctors/types';
+import SessionHarness from './session.harness.svelte';
 import SearchDoctorCard from './index.svelte';
 
 const card = (overrides: Partial<SearchResultCard> = {}): SearchResultCard => ({
@@ -184,6 +186,67 @@ describe('search-doctors::ui::search-doctor-card (f1)', () => {
 		expect(line).toHaveClass('line-clamp-2', 'text-label-lg', 'leading-tight');
 	});
 
+	describe('🔴 U-99.2: the home’s card keeps the room of the guest’s line', () => {
+		const room = () => document.querySelector('[data-slot="home-doctor-card-price-room"]');
+		const spacer = () => document.querySelector('[data-slot="home-doctor-card-price-spacer"]');
+
+		it('a member’s amount lies over the guest’s line, drawn unseen in the same cell, out of reach', () => {
+			render(SearchDoctorCard, {
+				props: { ...base, doctor: card(), feeRoomLabel: 'Συνδεθείτε για κόστος' }
+			});
+			expect(room()).toHaveClass('grid');
+			const line = room()?.querySelector('[data-slot="home-doctor-card-price"]') as HTMLElement;
+			// The same box as the guest's line: not even its outline moves when the words change.
+			expect(line).toHaveClass('col-start-1', 'row-start-1', '-m-1', 'p-1');
+			expect(line.textContent?.replace(/\s+/gu, ' ')).toContain('Από 60 €');
+			expect(spacer()).toHaveClass(
+				'invisible',
+				'col-start-1',
+				'row-start-1',
+				'line-clamp-2',
+				'-m-1',
+				'p-1'
+			);
+			expect(spacer()).toHaveAttribute('aria-hidden', 'true');
+			expect(spacer()?.textContent?.replace(/\s+/gu, ' ').trim()).toBe(
+				'Συνδεθείτε για κόστος · ★ 4,9'
+			);
+			// Unseen and unnamed: the only action of the card that is not the card's link stays the heart.
+			expect(screen.queryByRole('button', { name: 'Συνδεθείτε για κόστος' })).toBeNull();
+		});
+
+		it('a guest has one line, the action’s, as before: no second copy of it', () => {
+			render(SearchDoctorCard, {
+				props: { ...base, doctor: signInCard, feeRoomLabel: 'Συνδεθείτε για κόστος' }
+			});
+			expect(spacer()).toBeNull();
+			const line = room()?.querySelector('[data-slot="home-doctor-card-price"]') as HTMLElement;
+			expect(line.textContent?.replace(/\s+/gu, ' ').trim()).toBe('Συνδεθείτε για κόστος · ★ 4,9');
+			expect(screen.getByRole('button', { name: 'Συνδεθείτε για κόστος' }).parentElement).toBe(
+				line
+			);
+		});
+
+		it('the dot lives in a box the line takes back, so a score that starts a line leaves none behind', () => {
+			render(SearchDoctorCard, {
+				props: { ...base, doctor: signInCard, feeRoomLabel: 'Συνδεθείτε για κόστος' }
+			});
+			const score = document.querySelector('[data-slot="home-doctor-card-rating"]') as HTMLElement;
+			const run = score.parentElement as HTMLElement;
+			expect(run).toHaveClass('-ml-2', 'whitespace-nowrap');
+			expect(run.firstElementChild).toHaveClass('inline-block', 'w-2');
+			expect(run.firstElementChild?.textContent?.trim()).toBe('·');
+			expect(run.previousElementSibling).toHaveClass('mr-2');
+		});
+
+		it('(negative) without the prop, every other card: no room, no copy, and the dot where it was', () => {
+			render(SearchDoctorCard, { props: { ...base, doctor: signInCard } });
+			expect(room()).toBeNull();
+			expect(spacer()).toBeNull();
+			expect(document.querySelector('.-ml-2')).toBeNull();
+		});
+	});
+
 	it('U-27.4 (app = web, f1b): the list’s line — the same inline action, the line’s 14, height and one-line clamp as before', () => {
 		render(SearchDoctorCard, {
 			props: { ...base, doctor: signInCard, variant: 'list', testId: 'results-card' }
@@ -268,6 +331,47 @@ describe('search-doctors::ui::search-doctor-card (f1)', () => {
 		expect(screen.getAllByRole('link')).toHaveLength(1);
 	});
 
+	describe('`w2-w2:116`: a member whose read of the fees failed still reads «Συνδεθείτε για κόστος»', () => {
+		const draw = (status: 'guest' | 'member' | 'unknown', onSignIn = vi.fn()) => {
+			render(SessionHarness, {
+				props: { status, card: { ...base, onSignIn, doctor: signInCard } }
+			});
+			return { onSignIn, action: screen.getByRole('button', { name: 'Συνδεθείτε για κόστος' }) };
+		};
+
+		it('the press opens the doctor’s profile, by the card’s own address, and opens no sign-in', async () => {
+			const { onSignIn, action } = draw('member');
+			await userEvent.setup({ delay: null }).click(action);
+			expect(goto).toHaveBeenCalledExactlyOnceWith('/doctors/a-pappas');
+			expect(onSignIn).not.toHaveBeenCalled();
+		});
+
+		it('with the keyboard too', async () => {
+			const { action } = draw('member');
+			await fireEvent.keyDown(action, { key: 'Enter' });
+			expect(goto).toHaveBeenCalledExactlyOnceWith('/doctors/a-pappas');
+		});
+
+		it('D-103 (negative): the card asks the server nothing for it', async () => {
+			const fetchSpy = vi.fn();
+			vi.stubGlobal('fetch', fetchSpy);
+			const { action } = draw('member');
+			await userEvent.setup({ delay: null }).click(action);
+			expect(fetchSpy).not.toHaveBeenCalled();
+			vi.unstubAllGlobals();
+		});
+
+		it.each(['guest', 'unknown'] as const)(
+			'U-27.4 (negative): a session that is %s still opens the sign-in, never the profile',
+			async (status) => {
+				const { onSignIn, action } = draw(status);
+				await userEvent.setup({ delay: null }).click(action);
+				expect(onSignIn).toHaveBeenCalledOnce();
+				expect(goto).not.toHaveBeenCalled();
+			}
+		);
+	});
+
 	it('U-27.4: the Tab order is the card’s link, the heart over the photo, then the fee’s action in the lines', async () => {
 		const user = userEvent.setup({ delay: null });
 		render(SearchDoctorCard, { props: { ...base, doctor: signInCard } });
@@ -283,6 +387,91 @@ describe('search-doctors::ui::search-doctor-card (f1)', () => {
 		expect(document.activeElement).toBe(
 			screen.getByRole('button', { name: 'Συνδεθείτε για κόστος' })
 		);
+	});
+
+	it('U-83: η κάρτα αναζήτησης και αρχικής μένει όπως εγκρίθηκε: no line over the name, «Ειδικότητα · Περιοχή» in place', () => {
+		render(SearchDoctorCard, { props: { ...base, doctor: card() } });
+		const root = screen.getByTestId('home-doctor-card');
+		expect(root.querySelector('[data-slot="home-doctor-card-specialty"]')).toBeNull();
+		const lines = [...root.querySelectorAll('p')].map((p) => p.textContent?.trim());
+		expect(lines[0]).toBe('Ανδρέας Παππάς');
+		expect(lines[1]).toBe('Καρδιολόγος · Αμπελόκηποι');
+	});
+
+	it('U-83: η κάρτα αποτελεσμάτων επίσης: the name first, its specialty line under it', () => {
+		render(SearchDoctorCard, {
+			props: { ...base, doctor: card(), variant: 'list', testId: 'results-card' }
+		});
+		const root = screen.getByTestId('results-card');
+		expect(slot('specialty')).toBeNull();
+		expect(root.textContent?.match(/Καρδιολόγος/gu)).toHaveLength(1);
+		expect(slot('name')).toHaveTextContent('Ανδρέας Παππάς');
+	});
+
+	it('U-83.2, U-100: `top`: the list’s specialty 17/700, 20/600 from 744, over the name, two lines at most, said once', () => {
+		render(SearchDoctorCard, {
+			props: {
+				...base,
+				doctor: card(),
+				variant: 'list',
+				testId: 'results-card',
+				specialtyPlacement: 'top'
+			}
+		});
+		const specialty = slot('specialty');
+		expect(specialty).toHaveTextContent('Καρδιολόγος');
+		expect(specialty).toHaveClass(
+			'text-title-xs',
+			'font-bold',
+			'tablet:text-title-lg',
+			'line-clamp-2'
+		);
+		expect(specialty?.nextElementSibling).toBe(slot('name'));
+		expect(screen.getByTestId('results-card').textContent?.match(/Καρδιολόγος/gu)).toHaveLength(1);
+	});
+
+	it.each([
+		['list', 'top-1'],
+		['rail', 'top-0']
+	] as const)(
+		'U-100: the %s card’s heart is Airbnb’s size, its own distance off the corner',
+		(variant, top) => {
+			render(SearchDoctorCard, {
+				props: { ...base, doctor: card(), variant, testId: 'results-card' }
+			});
+			const heart = screen.getByTestId('results-card-favorite');
+			expect(heart).toHaveClass(top);
+			expect(heart.querySelector('[data-slot="favorite-button-outline"]')).toHaveClass(
+				'icon-card-heart'
+			);
+		}
+	);
+
+	it('U-85: the heart shows what the card is told: saved or not, its «pop» only when asked', () => {
+		const { rerender } = render(SearchDoctorCard, { props: { ...base, doctor: card() } });
+		const heart = () => screen.getByRole('button', { name: 'Αποθήκευσε γιατρό Ανδρέας Παππάς' });
+		expect(heart()).toHaveAttribute('aria-pressed', 'false');
+		rerender({ ...base, doctor: card(), saved: true, pop: true });
+		return Promise.resolve().then(() => {
+			expect(heart()).toHaveAttribute('aria-pressed', 'true');
+			expect(heart().querySelector('[data-slot="favorite-button-fill"]')).toHaveClass(
+				'animate-heart-pop',
+				'text-accent/90'
+			);
+		});
+	});
+
+	it('U-65.6 (negative): a query with markup is compared as words: the name stays text', () => {
+		render(SearchDoctorCard, {
+			props: {
+				...base,
+				doctor: card({ name: '<b>Παππάς</b>' }),
+				highlightQuery: '<b>'
+			}
+		});
+		const name = document.querySelector('[data-slot="home-doctor-card-name"]');
+		expect(name?.textContent?.trim()).toBe('<b>Παππάς</b>');
+		expect(name?.querySelector('b')).toBeNull();
 	});
 
 	it('U-27.4 (negative): with a price («Από 60 €») nothing changes — words in the line, no button, no lock', () => {

@@ -7,7 +7,7 @@ import type {
 	ArticlesFirstPageLoad,
 	ArticlesListScope
 } from '$modules/articles/api';
-import type { ArticlesListHref, ArticlesListProps } from '../types';
+import type { ArticlesListAuthor, ArticlesListHref, ArticlesListProps } from '../types';
 import ArticlesList from './index.svelte';
 
 const article = (index: number, publishedAt: string): ArticlePublicView => ({
@@ -273,5 +273,60 @@ describe('articles::ui::list', () => {
 		renderList({ firstPage: { state: 'failed' } });
 		expect(screen.getByTestId('articles-retry')).toHaveTextContent('Δοκιμάστε ξανά');
 		expect(screen.queryByTestId('article-card')).not.toBeInTheDocument();
+	});
+
+	describe('U-77: the list of ONE doctor', () => {
+		const author = {
+			title: 'Άρθρα · Συμβουλές υγείας',
+			name: 'Athena Papadopoulou',
+			sentenceName: 'Dr. Athena Papadopoulou',
+			specialty: 'Παθολόγος',
+			bothKinds: true,
+			aboutHref: '/doctors/dr/about',
+			profileHref: '/doctors/dr',
+			doctorsHref: '/doctors'
+		} as ArticlesListAuthor;
+
+		it('🔴 U-99.1: the page’s description is a sentence, «Dr. …»; the doctor’s own line keeps the bare name', () => {
+			renderList({ author, scope: scope({ doctorId: 'doc-1' }) });
+			expect(document.head.querySelector('meta[name="description"]')).toHaveAttribute(
+				'content',
+				'Άρθρα και συμβουλές υγείας από Dr. Athena Papadopoulou.'
+			);
+			expect(screen.getByTestId('articles-author')).not.toHaveTextContent('Dr.');
+		});
+
+		it('the doctor’s line in the place of the search, the page’s name, the breadcrumbs and the chips', () => {
+			renderList({ author, scope: scope({ doctorId: 'doc-1' }) });
+			expect(screen.queryByTestId('articles-search')).not.toBeInTheDocument();
+			expect(screen.getByTestId('articles-author')).toHaveAttribute('href', '/doctors/dr/about');
+			expect(screen.getByTestId('articles-author')).toHaveTextContent('Athena Papadopoulou');
+			expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+				'Άρθρα · Συμβουλές υγείας'
+			);
+			const crumbs = screen.getByTestId('articles-breadcrumbs');
+			expect(within(crumbs).getByRole('link', { name: 'Athena Papadopoulou' })).toHaveAttribute(
+				'href',
+				'/doctors/dr'
+			);
+			expect(screen.getAllByTestId('articles-type-chip')).toHaveLength(3);
+		});
+
+		it('one kind: no chips to choose from; an empty list leads back to the profile', () => {
+			renderList({
+				author: { ...author, bothKinds: false, title: 'Άρθρα' },
+				scope: scope({ doctorId: 'doc-1' }),
+				firstPage: ready([])
+			});
+			expect(screen.queryByTestId('articles-type-chip')).not.toBeInTheDocument();
+			expect(screen.getByTestId('articles-empty')).toHaveTextContent('Πίσω στο προφίλ');
+		});
+
+		it('(negative) the site’s own list keeps its search and draws no doctor’s line', () => {
+			renderList({});
+			expect(screen.getByTestId('articles-search')).toBeInTheDocument();
+			expect(screen.queryByTestId('articles-author')).not.toBeInTheDocument();
+			expect(screen.queryByTestId('articles-breadcrumbs')).not.toBeInTheDocument();
+		});
 	});
 });
