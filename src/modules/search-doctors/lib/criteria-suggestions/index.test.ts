@@ -103,8 +103,8 @@ describe('search-doctors::criteria-suggestions', () => {
 				kind: 'professional',
 				value: 'internal-medicine',
 				slug: 'internal-medicine',
-				label: 'Internal medicine'
+				label: 'Internist'
 			})
-		).toEqual({ kind: 'text', label: 'Internal medicine' });
+		).toEqual({ kind: 'text', label: 'Internist' });
 	});
 });

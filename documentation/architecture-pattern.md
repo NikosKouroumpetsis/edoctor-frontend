@@ -701,7 +701,10 @@ Rules:
 
 - Greek is canonical at `/`.
 - English lives under `/en`.
-- `/el` and `/el/**` redirect to the Greek canonical URL without the locale prefix.
+- `/el` and `/el/**` redirect to the Greek canonical URL without the locale prefix, always on the site's own origin:
+  `hooks.server.ts` builds the target with `$shared/preferences/i18n` `canonicalGreekPath` (one leading `/`, the
+  search kept), so `/el//evil.example` is `/evil.example`, never `//evil.example` (D-W3-38, `src/hooks.server.test.ts`).
+- Every request to the API says the page's language (D-W3-39, `shared.md` `requestLanguageHeaders`).
 - Import generated messages from `$paraglide/messages.js`.
 - Import generated runtime helpers from `$paraglide/runtime`.
 - Do not hand-edit generated Paraglide output.
@@ -875,7 +878,9 @@ Wave 1.0 (D2) adds the search «Τι / Πού / Πότε», the application's lo
   with the application's names), `criteria-suggestions`, `criteria-locations`, `effective-criteria`,
   `search-query` (the scope a search sends; an empty «Πότε» asks `next3Days`), `availability-dates` (U-22's dates),
   `criteria-messages` (the catalog keys the libs carry); `config/criteria-icons.ts` the ONE glyph config of the rows
-  (its static maps; the lookups `specialtyIcon`, `serviceIcon`, `whatIcon` are `lib/criteria-icons`, U-29.1).
+  (its static maps; the lookups `specialtyIcon`, `serviceIcon`, `whatIcon` are `lib/criteria-icons`, U-29.1; U-122:
+  an English qualifier, `specialtyIconQualifiers`, is one word with the next, as Greek's «Παιδο…», so each id wears one
+  glyph in both languages).
 - `src/modules/search-doctors/api/marketplace/*` — the reads: `suggestions.ts` (TanStack query options of
   «Τι» / «Πού» / the popular specialties / the ready areas), the adapters, the application's query keys.
 - `src/modules/search-doctors/ui/search-criteria` — the slice: `page/index.svelte` the phone's window of cards
@@ -981,6 +986,11 @@ Wave 1.5 · screen 5 adds the doctor's profile `/doctors/[slug]` and its windows
   error page), `hooks/use-state.svelte.ts` `DoctorDetailState` (the reads, the ONE active office, the service, the
   confirmed time, the open window), `components/*` (one per section, the booking card from 744, the phone's bar, the
   section bar, the windows, the share window, the head).
+- `src/modules/doctor/ui/availability-picker` (wave 3, moved with `mv` out of `ui/detail`, D-W3-30) — the days and
+  hours of an office (`page/index.svelte`, `OfficeTabs`, `AvailabilityElsewhere`, `useDoctorOfficeSlots`), ONE slice
+  for the profile's section and window and the booking's «Διαθεσιμότητα» (`screens/doctors/[slug]/booking`): the
+  profile's slice and the booking's screen compose it, a module never imports another. Its hover stays the
+  profile's (D-W3-30, `styling-guidelines.md` «Pressable»).
 - 🔴 The windows are shallow routing (`pushState` / `replaceState`, `App.PageState.doctorDetails`): a link to
   `details/<section>` opens in place with its own history entry (`inPlace`), «×», Escape and «back» close it; the
   same address loaded directly draws the profile with the window open (canonical: the profile).
@@ -1029,6 +1039,35 @@ people,paths,refusals,client-id,save-file}`, `config/limits.ts`; `ui/inbox` (ONE
   `/messages/archive`, the same for a patient and a doctor; a route's `load` refuses what is no id), `ui/contact` (the button
   and the #18, composed by the doctor's screens through a snippet of `DoctorDetail` and `DoctorAbout`), `ui/unread-host` (the
   badge's one read, in the root layout).
+- Booking (`src/modules/appointments`, wave 3, screens 30 + 31, the application's module name): `api/{patient,readiness,
+appointment,relatives,phone,keys}` (the generated contract's views and bodies, `ApiRequestBody<operationId>`, mapped to
+  facts; every read `personalQueryMeta`), `lib/booking/*` (the application's rules unit for unit: `url` the closed hints,
+  `summary`, `blockers`, `submission`, `failure`, `relative`, `details`, `success` …), `config/`, `ui/booking-draft` (the
+  `BookingDraftHost` of the root layout), `ui/booking` (ONE slice for the whole flow: the 30, its seven «Αλλαγή» screens
+  and the 31). ONE route `routes/doctors/[slug]/booking/[...step]` with a closed list of steps (D-W3-28: an unknown one is
+  a 404, the site's own through `booking/+error.svelte`; `+layout.server.ts` reads the public profile once for every
+  step, its failures the profile's error page; the 30 with no hour in its address goes to «Διαθεσιμότητα» first, the
+  31 with no `?appointment=` is a 404) ⇒ `screens/doctors/[slug]/booking/[...step]`, which composes the doctor
+  module's `ui/availability-picker` and profile reads (a module never imports another).
+- Doctor's sign-up (`src/modules/doctor-onboarding`, wave 3, screens 33–42, the application's module name):
+  `api/{progress,address-search,professions,town,terms,keys}` (the generated contract's views and bodies; the Places
+  proxy's token in a hook's closure, D-W3-02), `lib/{steps,validation,values,payload,content,office,professions}`,
+  `config/`, `types.ts` (the draft's fields; the enums are the contract's, named in `api/progress`), `ui/draft-host` (the
+  `OnboardingDraftHost` of the root layout), `ui/steps` (ONE slice: a page per screen, the controller
+  `hooks/use-step.svelte.ts`, the address search's hook). ONE route `routes/doctor/onboarding/[...step]` with a closed list
+  of 21 screens (D-W3-28) ⇒ `screens/doctor/onboarding/[...step]` (the language, the addresses, the help, the home, the
+  sign-in's reading of a refused code).
+- Wire ⇒ facts (W-4, the one statement of this rule; `shared.md` «Shared API Client» points here): only `api/` of
+  these two modules imports `$shared/lib/api-client` (or any path under it, as
+  `…/wire-types`: the guard `tests/architecture/import-boundaries.test.ts` reads both); their `lib/`, `ui/`, screens and
+  routes meet facts and the bodies `api/` names (`AppointmentCreateRequest`, `DoctorOnboardingOfficeInput` …), each a
+  narrowing of the generated body, so a body the contract does not take does not compile. A read's endpoint answers
+  its view only to the `queryFn` of its `queries.ts`, which maps it (`getBookingPatient`, `getAppointment`). A write answers facts too,
+  its mapper inside the endpoint (`createAppointment`, `createBookingRelative` — an id and both names, never the
+  relative's ΑΜΚΑ or ΑΦΜ — `saveDoctorOnboardingStep` and `pickDoctorOnboardingAddress`), `null` for an answer that is
+  none, or nothing at all when no page reads it (`updateBookingPatientProfile`: the whole patient with their and the
+  relatives' ΑΜΚΑ / ΑΦΜ stays in `api/`; the page reads the person again). The address search's mappers and the
+  relative's `201` type no longer leave their barrels (review w3-w6 R1 MINOR-1, R2 MINOR-1 / NIT-2).
 - Status page: the root `routes/+error.svelte` ⇒ `src/screens/home` `SiteErrorScreen` ⇒ `modules/shell/ui/status-page`
   (`lib/status.ts`: the words and the ways on of a 404 and of a failure; `noindex`, inside the frame, the capsule shown,
   `frame.ts` `showsBottomNav(path, status)`). A doctor nobody may see draws the same `StatusPage`.

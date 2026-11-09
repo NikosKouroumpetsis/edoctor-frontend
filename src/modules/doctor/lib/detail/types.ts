@@ -347,8 +347,22 @@ export type DoctorKnowContent = {
 	pages: Partial<Record<DoctorKnowPageId, DoctorKnowPage>>;
 };
 
-/** One office row of the location (glyph id, label, value; the phone's dial number for `tel:`). */
-export type DoctorOfficeInfoRowId = 'phone' | 'floor' | 'parking' | 'disability-access';
+/**
+ * One office row of the location (glyph id, label, value; the phone's dial number for `tel:`). The last seven are the
+ * office's details, on its own page only (P-W3 §3.5, U-110.3).
+ */
+export type DoctorOfficeInfoRowId =
+	| 'phone'
+	| 'floor'
+	| 'parking'
+	| 'disability-access'
+	| 'parking-private'
+	| 'parking-public'
+	| 'parking-street'
+	| 'accessible-toilet'
+	| 'accessible-parking'
+	| 'lift'
+	| 'transit';
 export type DoctorOfficeInfoRow = {
 	id: DoctorOfficeInfoRowId;
 	label: string;

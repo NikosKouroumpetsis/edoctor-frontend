@@ -28,12 +28,20 @@ async function readPermission(): Promise<PermissionStateOrUnknown> {
 }
 
 /**
+ * `highAccuracy`: the device's best position (GPS where there is one) instead of a quick coarse one — for a place that
+ * must be right to the door (the pin of an office, P-W3 §3.3.4); «Κοντά μου» keeps the coarse one (the default).
+ */
+export type DeviceLocationOptions = { highAccuracy?: boolean };
+
+/**
  * One read of the position, racing the 10″ of S-34.3 (the application's order: the clock starts once the permission
  * is settled — here at once when it is already granted, else the browser's own `timeout`, which per the
  * Geolocation API counts only after the person answers its prompt). A position after the limit is ignored and the
  * clock is cleared on every outcome.
  */
-export async function resolveDeviceLocation(): Promise<DeviceLocationResult> {
+export async function resolveDeviceLocation(
+	options: DeviceLocationOptions = {}
+): Promise<DeviceLocationResult> {
 	const geolocation = typeof navigator === 'undefined' ? undefined : navigator.geolocation;
 	if (!geolocation) return { status: 'unavailable' };
 
@@ -58,7 +66,11 @@ export async function resolveDeviceLocation(): Promise<DeviceLocationResult> {
 							? { status: 'denied', canAskAgain: false }
 							: { status: 'unavailable' }
 					),
-				{ enableHighAccuracy: false, maximumAge: 0, timeout: DEVICE_LOCATION_TIMEOUT_MS }
+				{
+					enableHighAccuracy: options.highAccuracy === true,
+					maximumAge: 0,
+					timeout: DEVICE_LOCATION_TIMEOUT_MS
+				}
 			);
 		});
 	} catch {

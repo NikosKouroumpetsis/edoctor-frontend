@@ -44,6 +44,9 @@
 	});
 	const hideControl = { label: 'Απόκρυψη χάρτη', onHide: () => (hidden = true) };
 	const zoomControls = { zoomInLabel: 'Μεγέθυνση', zoomOutLabel: 'Σμίκρυνση' };
+	// Wave 3: the map moves under a pin fixed in the middle; the story keeps the centre and whether the person moved it.
+	let pinCenter = $state({ latitude: 37.98, longitude: 23.73 });
+	let pinMoved = $state(false);
 </script>
 
 <Story name="Pins">
@@ -149,5 +152,38 @@
 				{/snippet}
 			</MapView>
 		{/if}
+	{/snippet}
+</Story>
+
+<!-- Wave 3 (record §6.7.4): the map moves under a pin fixed in the middle — the zoom around the centre, «+» / «−» at every
+     width at the bottom left, each move's end read back. The pin is the caller's own mark over the map. -->
+<Story name="Fixed Pin">
+	{#snippet template(args)}
+		<div class="relative h-map-h w-full overflow-hidden rounded-lg">
+			<MapView
+				{...args}
+				points={[]}
+				{zoomControls}
+				zoomControlsFrom="phone"
+				zoomControlsClass="top-auto right-auto bottom-2 left-3"
+				zoomAround="center"
+				onMoveEnd={(center, move) => {
+					pinCenter = center;
+					if (move.byUser) pinMoved = true;
+				}}
+				class="size-full"
+			>
+				{#snippet pin()}{/snippet}
+			</MapView>
+			<span
+				aria-hidden="true"
+				class="pointer-events-none absolute top-1/2 left-1/2 size-touch -translate-x-1/2 -translate-y-1/2 rounded-full bg-foreground"
+			></span>
+		</div>
+		<p class="mt-2 text-body-sm text-muted-foreground">
+			{pinCenter.latitude.toFixed(5)}, {pinCenter.longitude.toFixed(5)} · {pinMoved
+				? 'μετακινήθηκε'
+				: '—'}
+		</p>
 	{/snippet}
 </Story>

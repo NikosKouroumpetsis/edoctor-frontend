@@ -91,4 +91,47 @@ describe('CheckboxRow', () => {
 		});
 		expect(container.innerHTML).not.toMatch(/\bdark:|#[0-9a-f]{3,8}\b|bg-white|text-black/i);
 	});
+	it('U-28.4: with a pointer an empty box darkens while the row is hovered (the default); U-100 / D-W3-27: `hover={false}` never, the row the same', () => {
+		const withHover = render(CheckboxRow, { props: { label: 'Τουαλέτα ΑμεΑ' } });
+		const row = () => screen.getByRole('checkbox', { name: 'Τουαλέτα ΑμεΑ' });
+		expect(boxOf(row())).toHaveClass(
+			'can-hover:group-enabled:group-hover:data-[state=unchecked]:border-foreground'
+		);
+		const rowClasses = row().className;
+		withHover.unmount();
+		render(CheckboxRow, { props: { label: 'Τουαλέτα ΑμεΑ', hover: false } });
+		expect([...boxOf(row()).classList].filter((name) => name.includes('hover:'))).toEqual([]);
+		expect(row().className).toBe(rowClasses);
+	});
+
+	it('U-129: `tone="foreground"` ticks the box dark with the page’s mark (the sign-up’s 39, `.d-box`); the default stays the primary', async () => {
+		const user = userEvent.setup({ delay: null });
+		render(CheckboxRow, { props: { label: 'Ράμπα', tone: 'foreground' } });
+		const row = screen.getByRole('checkbox', { name: 'Ράμπα' });
+		await user.click(row);
+		expect(boxOf(row)).toHaveAttribute('data-tone', 'foreground');
+		expect(boxOf(row)).toHaveClass(
+			'data-[state=checked]:border-foreground',
+			'data-[state=checked]:bg-foreground'
+		);
+		expect(boxOf(row)).not.toHaveClass('data-[state=checked]:bg-primary');
+		// The prototype's corner (6) and tick (`doctor.js` `tick`, 14 at 3.4), not the «✓».
+		expect(boxOf(row)).toHaveClass('rounded-checkbox');
+		expect(boxOf(row)).not.toHaveClass('rounded-sm');
+		expect(boxOf(row).querySelector('[data-slot="tick"]')).toHaveClass(
+			'icon-check-mark',
+			'text-card'
+		);
+		expect(boxOf(row)).not.toHaveTextContent('✓');
+	});
+
+	it('U-129 (negative): the default row keeps the 8 corner and the «✓»', async () => {
+		const user = userEvent.setup({ delay: null });
+		render(CheckboxRow, { props: { label: 'Υπέρηχος' } });
+		const row = screen.getByRole('checkbox', { name: 'Υπέρηχος' });
+		await user.click(row);
+		expect(boxOf(row)).toHaveClass('rounded-sm');
+		expect(boxOf(row).querySelector('[data-slot="tick"]')).toBeNull();
+		expect(boxOf(row)).toHaveTextContent('✓');
+	});
 });

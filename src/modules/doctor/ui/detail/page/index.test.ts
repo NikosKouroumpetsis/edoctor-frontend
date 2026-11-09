@@ -6,7 +6,7 @@ import {
 	onlineManager,
 	queryOptions
 } from '@tanstack/svelte-query';
-import { pushState, replaceState } from '$app/navigation';
+import { goto, pushState, replaceState } from '$app/navigation';
 import type { ResolvedPathname } from '$app/types';
 import { page } from '$app/state';
 import type { DoctorAvailabilitySlotsRequest } from '$modules/doctor/api/availability';
@@ -101,6 +101,8 @@ function props(
 				return city === 'Αθήνα' ? { slug: 'athina', label: 'Αθήνα' } : null;
 			}
 		}),
+		bookingHref: (slot, serviceId) =>
+			`/doctors/dr-athena-papadopoulou/booking?office=${slot.officeId}&date=${slot.date}&minute=${slot.startMinute}&service=${serviceId ?? ''}`,
 		canonicalUrl: 'https://edoctor.example/doctors/dr-athena-papadopoulou',
 		alternateUrls: {
 			el: 'https://edoctor.example/doctors/dr-athena-papadopoulou',
@@ -211,15 +213,68 @@ describe('the doctor’s profile page', () => {
 		expect(within(bar).getByText('Αύριο · 10:00 · Νίκης 12')).toBeInTheDocument();
 	});
 
-	it('U-80.1 Ε4: «Κράτηση» of a guest asks for the sign-in with its action, and goes on to the «Διαθεσιμότητα» after it', async () => {
+	it('U-80.1 Ε4 ⇒ U-104.3 (D-W3-14, D-W3-15): «Κράτηση» of a guest with no hour chosen opens «Διαθεσιμότητα» — no sign-in first', async () => {
 		render(Harness, { props: props(sampleDoctorProfile()) });
 		await waitFor(() => expect(screen.getByTestId('doctor-booking-cta')).toBeInTheDocument());
 		await fireEvent.click(screen.getByTestId('doctor-booking-cta'));
-		const request = onSignIn.mock.calls.at(-1)?.[0];
-		expect(request.action).toBe('book');
-		expect(pushState).not.toHaveBeenCalled();
-		request.onSignedIn();
+		expect(onSignIn).not.toHaveBeenCalled();
 		expect(vi.mocked(pushState).mock.calls.at(-1)?.[0]).toContain('/details/availability');
+		expect(goto).not.toHaveBeenCalled();
+	});
+
+	it('🔴 U-104.3 (Ε1 = Α, record §3.1): with an hour chosen, «Κράτηση» opens screen 30 for a guest and a member alike — no sign-in, marked as opened from this site; D-W3-31: the profile’s address is left as it is', async () => {
+		page.url.href =
+			'http://localhost/doctors/dr-athena-papadopoulou?office=off-1&date=2026-11-01&time=10:00';
+		for (const signedIn of [false, true]) {
+			const view = render(Harness, { props: { ...props(sampleDoctorProfile()), signedIn } });
+			await waitFor(() =>
+				expect(screen.getByTestId('doctor-detail-availability')).toBeInTheDocument()
+			);
+			await fireEvent.click(
+				within(screen.getByTestId('doctor-booking-bar')).getByTestId('doctor-booking-cta')
+			);
+			expect(onSignIn).not.toHaveBeenCalled();
+			expect(pushState).not.toHaveBeenCalled();
+			expect(replaceState).not.toHaveBeenCalled();
+			expect(vi.mocked(goto).mock.calls.at(-1)).toEqual([
+				'/doctors/dr-athena-papadopoulou/booking?office=off-1&date=2026-11-01&minute=600&service=svc-1',
+				{ state: { siteBack: true } }
+			]);
+			view.unmount();
+			vi.mocked(goto).mockClear();
+		}
+	});
+
+	it('record §3.2 «η ώρα μένει»: back from the booking (no hour in the address) the profile finds the hour the booking keeps, and «Κράτηση» opens it again', async () => {
+		render(Harness, {
+			props: {
+				...props(sampleDoctorProfile()),
+				kept: { slot: { officeId: 'off-1', date: '2026-11-01', startMinute: 660 }, serviceId: null }
+			}
+		});
+		await waitFor(() =>
+			expect(screen.getByTestId('doctor-detail-availability')).toBeInTheDocument()
+		);
+		const bar = screen.getByTestId('doctor-booking-bar');
+		await waitFor(() => expect(bar).toHaveTextContent('11:00'));
+		await fireEvent.click(within(bar).getByTestId('doctor-booking-cta'));
+		expect(vi.mocked(goto).mock.calls.at(-1)?.[0]).toContain('minute=660');
+	});
+
+	it('P-W3 §3.2.1 γ (negative): an hour the window does not offer, or a forged time, is no choice — «Κράτηση» opens the window', async () => {
+		for (const time of ['11:30', '25:00', '<b>']) {
+			page.url.href = `http://localhost/doctors/dr-athena-papadopoulou?office=off-1&date=2026-11-01&time=${encodeURIComponent(time)}`;
+			const view = render(Harness, { props: props(sampleDoctorProfile()) });
+			await waitFor(() =>
+				expect(screen.getByTestId('doctor-detail-availability')).toBeInTheDocument()
+			);
+			await fireEvent.click(
+				within(screen.getByTestId('doctor-booking-bar')).getByTestId('doctor-booking-cta')
+			);
+			expect(goto, time).not.toHaveBeenCalled();
+			expect(vi.mocked(pushState).mock.calls.at(-1)?.[0], time).toContain('/details/availability');
+			view.unmount();
+		}
 	});
 
 	it('U-80.1 Ε4: «Συνδεθείτε για κόστος» and the heart name what asked', async () => {
@@ -289,13 +344,13 @@ describe('the doctor’s profile page', () => {
 		vi.unstubAllGlobals();
 	});
 
-	it('U-34.4 / U-27.4 (app = web): a guest reads «Συνδεθείτε για κόστος» — a press signs in; «Κράτηση» and the heart sign in too', async () => {
+	it('U-34.4 / U-27.4 (app = web) ⇒ U-104.3: a guest reads «Συνδεθείτε για κόστος» — a press signs in, the heart too; «Κράτηση» no longer does', async () => {
 		render(Harness, { props: props(sampleDoctorProfile()) });
 		await waitFor(() => expect(screen.getByTestId('doctor-booking-sign-in')).toBeInTheDocument());
 		await fireEvent.click(screen.getByTestId('doctor-booking-sign-in'));
 		await fireEvent.click(screen.getByTestId('doctor-booking-cta'));
 		await fireEvent.click(screen.getByTestId('doctor-detail-favorite'));
-		expect(onSignIn).toHaveBeenCalledTimes(3);
+		expect(onSignIn).toHaveBeenCalledTimes(2);
 		expect(screen.getByTestId('doctor-detail-priced-service-fee-svc-1')).toHaveTextContent(
 			'Συνδεθείτε για κόστος'
 		);

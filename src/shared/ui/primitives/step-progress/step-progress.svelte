@@ -49,7 +49,8 @@
 
 <!--
 	The application's `atoms/step-progress` (the wizard chrome of Airbnb's «add photos»): finished segments full, the
-	current one by `progress`, the rest the muted track; the row stretches to its container.
+	current one by `progress`, the rest the `line-2` track (U-129, `33-doctor/doctor.css:21`, as the application's); the
+	row stretches to its container.
 -->
 <div
 	role="progressbar"
@@ -63,7 +64,10 @@
 	{#each fills as fill, index (index)}
 		<div
 			data-slot="step-progress-segment"
-			class={cn('flex-1 overflow-hidden rounded-full bg-muted', stepProgressThicknesses[thickness])}
+			class={cn(
+				'flex-1 overflow-hidden rounded-full bg-line-2',
+				stepProgressThicknesses[thickness]
+			)}
 		>
 			<div
 				data-slot="step-progress-fill"

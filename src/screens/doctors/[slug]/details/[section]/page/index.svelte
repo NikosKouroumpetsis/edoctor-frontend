@@ -40,6 +40,8 @@
 		localize={screen.localize}
 		similarHref={screen.similarHref}
 		similarAreaQuery={screen.similarAreaQuery}
+		bookingHref={screen.bookingHref}
+		kept={screen.kept}
 		canonicalUrl={screen.canonicalUrl}
 		alternateUrls={screen.alternateUrls}
 		backHref={screen.backHref}

@@ -3,6 +3,7 @@
 	import HouseIcon from '~icons/lucide/house';
 	import DoorOpenIcon from '~icons/lucide/door-open';
 	import BedDoubleIcon from '~icons/lucide/bed-double';
+	import { CheckboxRow } from '$shared/ui/molecules/checkbox-row';
 	import {
 		SelectableCards,
 		type SelectableCardsValue
@@ -20,6 +21,8 @@
 	let space = $state<SelectableCardsValue>('entire');
 	let sort = $state<SelectableCardsValue>('popularity');
 	let many = $state<SelectableCardsValue>(['entire']);
+	let withDetails = $state<SelectableCardsValue>(['entire']);
+	let extras = $state({ wifi: true, desk: false });
 </script>
 
 {#snippet house()}<HouseIcon class="icon-lg text-foreground" />{/snippet}
@@ -28,6 +31,12 @@
 {#snippet houseSm()}<HouseIcon class="icon-md text-foreground" />{/snippet}
 {#snippet doorSm()}<DoorOpenIcon class="icon-md text-foreground" />{/snippet}
 {#snippet bedSm()}<BedDoubleIcon class="icon-md text-foreground" />{/snippet}
+{#snippet entireDetails()}
+	<div role="group" aria-label="Τι άλλο υπάρχει;" class="flex flex-col">
+		<CheckboxRow label="Wi-Fi" hover={false} bind:checked={extras.wifi} />
+		<CheckboxRow label="Γραφείο εργασίας" hover={false} bind:checked={extras.desk} />
+	</div>
+{/snippet}
 
 <Story name="Booking Space Image">
 	{#snippet template()}
@@ -176,6 +185,34 @@
 				options={[
 					{ value: 'entire', title: 'Ολόκληρο κατάλυμα', description: 'Όλος ο χώρος δικός σου.' },
 					{ value: 'room', title: 'Ένα δωμάτιο', description: 'Ιδιωτικό δωμάτιο.' }
+				]}
+			/>
+		</div>
+	{/snippet}
+</Story>
+
+<Story name="Multiple With Details">
+	{#snippet template()}
+		<div class="w-full max-w-form p-4">
+			<SelectableCards
+				type="multiple"
+				hover={false}
+				bind:value={withDetails}
+				label="Τι θα βρουν οι επισκέπτες;"
+				options={[
+					{
+						value: 'entire',
+						title: 'Ολόκληρο κατάλυμα',
+						description: 'Όλος ο χώρος δικός σου.',
+						icon: house,
+						details: entireDetails
+					},
+					{
+						value: 'room',
+						title: 'Ένα δωμάτιο',
+						description: 'Ιδιωτικό δωμάτιο με κοινόχρηστους χώρους.',
+						icon: door
+					}
 				]}
 			/>
 		</div>

@@ -223,6 +223,19 @@
 	--spacing-contact-w: 288px;
 	--spacing-thread-pill-h: 36px;
 	--spacing-quote-max-h: 140px;
+	--spacing-wizard-column: 628px;
+	--spacing-wizard-top: 80px;
+	--spacing-wizard-pill: 36px;
+	--spacing-checkout-main: 384px;
+	--spacing-checkout-main-lg: 440px;
+	--spacing-checkout-main-xl: 524px;
+	--spacing-checkout-aside: 332px;
+	--spacing-checkout-aside-lg: 368px;
+	--spacing-checkout-aside-xl: 372px;
+	--spacing-checkout-gap: 64px;
+	--spacing-checkout-gap-lg: 80px;
+	--spacing-checkout-photo: 80px;
+	--spacing-checkout-note: 104px;
 	--spacing-sheet-sm: 60dvh;
 	--spacing-sheet-md: 70dvh;
 	--spacing-sheet-lg: 85dvh;
@@ -232,6 +245,7 @@
 	--radius-md: 12px;
 	--radius-lg: 16px;
 	--radius-xl: 24px;
+	--radius-checkbox: 6px;
 	--radius-panel: 32px;
 	--radius-bubble: 20px;
 	--radius-bubble-tail: 6px;
@@ -298,4 +312,8 @@
 @utility icon-xl {
 	width: 32px;
 	height: 32px;
+}
+@utility icon-check-mark {
+	width: 14px;
+	height: 14px;
 }

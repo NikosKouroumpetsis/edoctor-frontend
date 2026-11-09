@@ -169,4 +169,22 @@ describe('Chip', () => {
 		expect(pill).toHaveClass('border-border', 'bg-card');
 		expect(pill.className).not.toMatch(/tablet:/u);
 	});
+	it('U-28.4: a chip not chosen darkens under the pointer (the default, a link too); U-100 / D-W3-27: `hover={false}` never — the pill otherwise the same', () => {
+		const hovers = (node: HTMLElement) =>
+			[...node.classList].filter((name) => name.includes('hover:'));
+		const withHover = render(Chip, { props: { label: '30 λεπτά', variant: 'outline' } });
+		const pill = () => pillOf(screen.getByRole('button', { name: '30 λεπτά' }));
+		expect(hovers(pill())).toEqual(['can-hover:group-enabled:group-hover:border-foreground']);
+		const kept = [...pill().classList].filter((name) => !name.includes('hover:'));
+		withHover.unmount();
+		const without = render(Chip, {
+			props: { label: '30 λεπτά', variant: 'outline', hover: false }
+		});
+		expect(hovers(pill())).toEqual([]);
+		expect([...pill().classList]).toEqual(kept);
+		without.unmount();
+		render(Chip, { props: { label: 'Άρθρα', href: '/articles', hover: false } });
+		const link = screen.getByRole('link', { name: 'Άρθρα' });
+		expect(hovers(link.querySelector('[data-slot="chip-pill"]') as HTMLElement)).toEqual([]);
+	});
 });

@@ -104,4 +104,19 @@ describe('Button', () => {
 			expect.arrayContaining(['border-foreground', 'rounded-md', 'text-foreground'])
 		);
 	});
+
+	it('D-W3-27 / U-100: `hover={false}` keeps the fill under the pointer, as a button and as a link; the default keeps U-28.4', () => {
+		const hovers = (node: Element) =>
+			[...node.classList].filter((name) => name.startsWith('can-hover:'));
+		render(Button, { props: { label: 'Επιβεβαίωση κράτησης', tone: 'accent', hover: false } });
+		const quiet = screen.getByRole('button', { name: 'Επιβεβαίωση κράτησης' });
+		expect(hovers(quiet)).toEqual([]);
+		expect(quiet).toHaveClass('bg-accent');
+		render(Button, { props: { label: 'Σύνδεσμος', tone: 'accent', hover: false, href: '/x' } });
+		expect(hovers(screen.getByRole('link', { name: 'Σύνδεσμος' }))).toEqual([]);
+		render(Button, { props: { label: 'Κανονικό', tone: 'accent' } });
+		expect(hovers(screen.getByRole('button', { name: 'Κανονικό' }))).toEqual([
+			'can-hover:not-disabled:hover:bg-accent/90'
+		]);
+	});
 });

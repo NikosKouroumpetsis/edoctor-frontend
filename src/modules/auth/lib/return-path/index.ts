@@ -32,6 +32,23 @@ export function readSignInAction(value: string | null | undefined): SignInAction
 	return signInActions.find((action) => action === value) ?? null;
 }
 
+// The actions that WRITE when they go on: the doctor's «Ξεκινήστε» starts a sign-up (`POST /doctor/onboarding/start`).
+const WRITING_ACTIONS: readonly SignInAction[] = ['doctor'];
+
+/**
+ * 🔴 D-W3-37 (security web MAJOR-1): the action the `/login` page hands on, from the address (`do=`) and from what THIS
+ * tab wrote before it left for a provider (`takePendingReturn`). One that writes goes on only from the tab's own return —
+ * never from an address alone, which anyone can send; the others only show again what was asked (a toast, a window).
+ */
+export function readResumedAction(
+	fromAddress: SignInAction | null,
+	fromTab: SignInAction | null
+): SignInAction | null {
+	const action = fromAddress ?? fromTab;
+	if (action && WRITING_ACTIONS.includes(action) && fromTab !== action) return null;
+	return action;
+}
+
 /** `error` and `via` name a provider from a closed list, never free text. */
 export function readProvider(value: string | null | undefined): AuthProvider | null {
 	return providers.find((provider) => provider === value) ?? null;

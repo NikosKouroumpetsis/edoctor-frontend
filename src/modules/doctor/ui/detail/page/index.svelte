@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { createQuery } from '@tanstack/svelte-query';
-	import { personalQueryMeta } from '$shared/query';
 	import type { SignInRequest } from '$shared/state/session';
-	import { doctorQueryKeys, getDoctorMemberProfile } from '$modules/doctor/api/profile';
+	import { doctorMemberProfileQuery } from '$modules/doctor/api/profile';
 	import ProfilePage from '../components/profile-page.svelte';
-	import { useSiteBack } from '../hooks/use-site-back.svelte';
+	import { useSiteBack } from '$shared/lib/navigation';
 	import type { DoctorDetailPageProps } from '../types';
 
 	let {
@@ -14,6 +13,8 @@
 		localize,
 		similarHref,
 		similarAreaQuery,
+		bookingHref,
+		kept,
 		canonicalUrl,
 		alternateUrls,
 		backHref,
@@ -31,14 +32,8 @@
 	// 🔴 U-34.4 / U-80.1 Ε6: the server's page is a guest's; a member's prices come with ONE read in the browser, never
 	// again by itself (no focus, no reconnect: the reader's 31 statements, D-103), and they go at a sign-out.
 	const memberProfile = createQuery(() => ({
-		queryKey: doctorQueryKeys.memberProfile(load.profile.doctorSlug, locale),
-		queryFn: ({ signal }: { signal: AbortSignal }) =>
-			getDoctorMemberProfile(load.profile.doctorSlug, locale, signal),
-		enabled: signedIn,
-		meta: personalQueryMeta,
-		staleTime: 60_000,
-		refetchOnWindowFocus: false,
-		refetchOnReconnect: false
+		...doctorMemberProfileQuery(load.profile.doctorSlug, locale),
+		enabled: signedIn
 	}));
 	const profile = $derived(signedIn ? (memberProfile.data ?? load.profile) : load.profile);
 
@@ -61,10 +56,11 @@
 		{localize}
 		{similarHref}
 		{similarAreaQuery}
+		{bookingHref}
+		{kept}
 		{canonicalUrl}
 		{alternateUrls}
 		{backHref}
-		{signedIn}
 		onSignIn={askSignIn}
 		{onBack}
 		{reviewLinks}

@@ -39,19 +39,19 @@ const subtitleIn = (locale: SupportedLocale) => (parts: { where: string; when: s
 	m.criteria_nav_pill_subtitle(parts, { locale });
 
 describe('search-doctors::effective-criteria', () => {
-	it('shows the shared default TERMS when what/where were defaulted (empty submit)', () => {
+	it('Κ-1: shows the shared default TERMS when what/where were defaulted (empty submit) — the catalogue’s names', () => {
 		const scope: SearchDoctorsScope = {
 			what: { kind: 'default' },
 			where: { kind: 'default' },
 			availability: 'next3Days'
 		};
 		expect(summary(defaultSearchDoctorsCriteria, scope, 'en')).toEqual({
-			what: 'General Practitioner',
+			what: 'General practitioner',
 			where: 'Attica',
 			availability: 'criteria_option_availability_next3_days'
 		});
 		expect(summary(defaultSearchDoctorsCriteria, scope, 'el')).toMatchObject({
-			what: 'Γενικός Ιατρός',
+			what: 'Γενικός Γιατρός',
 			where: 'Αττική'
 		});
 	});
@@ -148,7 +148,7 @@ describe('search-doctors::buildSearchResultsNavPill', () => {
 		};
 		const items = buildEffectiveSearchCriteriaSummary(defaultSearchDoctorsCriteria, scope, t, 'en');
 		expect(buildSearchResultsNavPill(items, subtitleIn('en'))).toMatchObject({
-			title: 'General Practitioner',
+			title: 'General practitioner',
 			subtitle: 'Attica · criteria_option_availability_next3_days'
 		});
 	});

@@ -16,13 +16,18 @@
 		base: 'inline-flex min-w-touch shrink-0 items-center justify-center transition-colors duration-standard ease-standard outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50',
 		variants: {
 			tone: {
-				primary: 'bg-primary can-hover:not-disabled:hover:bg-primary/90',
-				secondary: 'bg-secondary/5 can-hover:not-disabled:hover:bg-secondary/10',
-				accent: 'bg-accent can-hover:not-disabled:hover:bg-accent/90',
-				contrast: 'bg-secondary can-hover:not-disabled:hover:bg-secondary/90',
-				ghost: 'bg-card/40 can-hover:not-disabled:hover:bg-foreground/5',
-				muted: 'bg-foreground/5 can-hover:not-disabled:hover:bg-foreground/10',
-				outline: 'bg-transparent can-hover:not-disabled:hover:bg-foreground/5'
+				primary: 'bg-primary',
+				secondary: 'bg-secondary/5',
+				accent: 'bg-accent',
+				contrast: 'bg-secondary',
+				ghost: 'bg-card/40',
+				muted: 'bg-foreground/5',
+				outline: 'bg-transparent'
+			},
+			// U-28.4 (`true`, the default): the fill changes on hover; `false` (U-100: a caller with no hover) never.
+			hover: {
+				true: '',
+				false: ''
 			},
 			size: {
 				default: 'min-h-control-md min-w-touch px-5 py-3',
@@ -40,6 +45,13 @@
 			}
 		},
 		compoundVariants: [
+			{ hover: true, tone: 'primary', class: 'can-hover:not-disabled:hover:bg-primary/90' },
+			{ hover: true, tone: 'secondary', class: 'can-hover:not-disabled:hover:bg-secondary/10' },
+			{ hover: true, tone: 'accent', class: 'can-hover:not-disabled:hover:bg-accent/90' },
+			{ hover: true, tone: 'contrast', class: 'can-hover:not-disabled:hover:bg-secondary/90' },
+			{ hover: true, tone: 'ghost', class: 'can-hover:not-disabled:hover:bg-foreground/5' },
+			{ hover: true, tone: 'muted', class: 'can-hover:not-disabled:hover:bg-foreground/10' },
+			{ hover: true, tone: 'outline', class: 'can-hover:not-disabled:hover:bg-foreground/5' },
 			{ bordered: true, tone: 'primary', class: 'border-primary' },
 			{ bordered: true, tone: 'secondary', class: 'border-secondary/10' },
 			{ bordered: true, tone: 'accent', class: 'border-accent' },
@@ -52,7 +64,8 @@
 			tone: 'primary',
 			size: 'default',
 			radius: 'md',
-			bordered: true
+			bordered: true,
+			hover: true
 		}
 	});
 
@@ -141,6 +154,8 @@
 		loading?: boolean;
 		/** Classes of the label: a text role only, never a colour (S-32.18). */
 		textClass?: string;
+		/** U-28.4 (`true`): the fill changes on hover; `false` (D-W3-27): it never does. */
+		hover?: boolean;
 	};
 
 	export type ButtonProps = SharedProps &
@@ -163,6 +178,7 @@
 		leading,
 		loading = false,
 		textClass,
+		hover = true,
 		class: className,
 		ref = $bindable(null),
 		href = undefined,
@@ -197,7 +213,7 @@
 		bind:this={ref}
 		data-slot="button"
 		data-tone={tone}
-		class={cn(buttonVariants({ tone, size, radius, bordered }), className)}
+		class={cn(buttonVariants({ tone, size, radius, bordered, hover }), className)}
 		href={isBlocked ? undefined : href}
 		aria-label={name}
 		aria-disabled={isBlocked || undefined}
@@ -213,7 +229,7 @@
 		bind:this={ref}
 		data-slot="button"
 		data-tone={tone}
-		class={cn(buttonVariants({ tone, size, radius, bordered }), className)}
+		class={cn(buttonVariants({ tone, size, radius, bordered, hover }), className)}
 		{type}
 		disabled={isBlocked}
 		aria-label={name}

@@ -15,7 +15,7 @@ import {
 	writesPlaceName
 } from './index';
 
-type Handler = () => void;
+type Handler = (event?: unknown) => void;
 
 const { FakeMap, setWorkerUrl } = vi.hoisted(() => {
 	class FakeMap {
@@ -33,6 +33,8 @@ const { FakeMap, setWorkerUrl } = vi.hoisted(() => {
 		maxZoom = 22;
 		zoomIn = vi.fn();
 		zoomOut = vi.fn();
+		// The camera's centre (MapLibre's `LngLat`), moved by a test before it fires a move.
+		center = { lng: 23.73, lat: 37.98 };
 		constructor(public options: Record<string, unknown>) {
 			FakeMap.instances.push(this);
 		}
@@ -55,8 +57,11 @@ const { FakeMap, setWorkerUrl } = vi.hoisted(() => {
 			this.handlers.set(event, [...(this.handlers.get(event) ?? []), handler]);
 			return this;
 		}
-		emit(event: string) {
-			for (const handler of this.handlers.get(event) ?? []) handler();
+		emit(event: string, payload?: unknown) {
+			for (const handler of this.handlers.get(event) ?? []) handler(payload);
+		}
+		getCenter() {
+			return this.center;
 		}
 		getStyle() {
 			return {
@@ -115,6 +120,19 @@ describe('MapView', () => {
 		expect(map.options.container).toBe(document.querySelector('[data-slot="map-view-canvas"]'));
 		expect(setWorkerUrl).toHaveBeenCalledWith('/assets/worker.mjs');
 		expect(screen.getByRole('region', { name: 'Χάρτης' })).toHaveAttribute('data-loaded', 'false');
+	});
+
+	it('review w3-w4 R1 MINOR-5 (U-81.2): the credit’s «i» takes the caller’s name in the page’s language; (negative) without one nothing else is named', async () => {
+		laidOut(320);
+		const named = render(Harness, { props: { points, attributionLabel: 'Πηγές του χάρτη' } });
+		expect((await created()).options.locale).toEqual({
+			'Map.Title': 'Χάρτης',
+			'AttributionControl.ToggleAttribution': 'Πηγές του χάρτη'
+		});
+		named.unmount();
+		FakeMap.instances = [];
+		render(Harness, { props: { points } });
+		expect((await created()).options.locale).toEqual({ 'Map.Title': 'Χάρτης' });
 	});
 
 	it('Α6: MapLibre’s compact credit starts folded, by its own press; what a person opened afterwards stays open', async () => {
@@ -810,5 +828,100 @@ describe('MapView: the layout controls (U-28.2)', () => {
 			);
 			expect([...button.classList].filter((item) => item.includes('cursor-'))).toEqual([]);
 		}
+	});
+});
+
+describe('MapView: a pin fixed in the middle (wave 3, the doctor’s sign-up, record §6.7.4)', () => {
+	beforeEach(() => {
+		FakeMap.instances = [];
+	});
+	afterEach(() => vi.restoreAllMocks());
+
+	const zoomControls = { zoomInLabel: 'Μεγέθυνση', zoomOutLabel: 'Σμίκρυνση' };
+	const drag = new MouseEvent('mousemove');
+
+	it('P-W3 §3.3.4: `zoomAround="center"` — the wheel and two fingers zoom around the centre, the double click (which zooms where it lands) is off', async () => {
+		laidOut(320);
+		render(Harness, { props: { zoomAround: 'center' } });
+		expect((await created()).options).toMatchObject({
+			scrollZoom: { around: 'center' },
+			touchZoomRotate: { around: 'center' },
+			doubleClickZoom: false
+		});
+	});
+
+	it('P-W3 §3.3.4 (negative): by default MapLibre’s own zoom stays — around the pointer, the double click on; the profile’s wheel stays off', async () => {
+		laidOut(320);
+		const plain = render(Harness, {});
+		expect((await created()).options).toMatchObject({
+			scrollZoom: true,
+			touchZoomRotate: true,
+			doubleClickZoom: true
+		});
+		plain.unmount();
+		FakeMap.instances = [];
+		render(Harness, { props: { zoomAround: 'center', scrollZoom: false } });
+		expect((await created()).options).toMatchObject({ scrollZoom: false, doubleClickZoom: false });
+	});
+
+	it('record §6.7.4: every move tells its centre; only the person’s own drag (or arrows) counts as a move by them — a fit, the kit’s «+» / «−» do not', async () => {
+		laidOut(320);
+		const onMoveStart = vi.fn();
+		const onMoveEnd = vi.fn();
+		render(Harness, { props: { onMoveStart, onMoveEnd } });
+		const map = await created();
+
+		map.emit('movestart', { originalEvent: drag });
+		map.center = { lng: 23.7351, lat: 37.9812 };
+		map.emit('moveend', { originalEvent: drag });
+		expect(onMoveStart).toHaveBeenLastCalledWith({ byUser: true });
+		expect(onMoveEnd).toHaveBeenLastCalledWith(
+			{ latitude: 37.9812, longitude: 23.7351 },
+			{ byUser: true }
+		);
+
+		// A move of the code (a fit, `zoomIn`): no event of the person.
+		map.emit('movestart', {});
+		map.center = { lng: 23.74, lat: 37.99 };
+		map.emit('moveend', {});
+		expect(onMoveStart).toHaveBeenLastCalledWith({ byUser: false });
+		expect(onMoveEnd).toHaveBeenLastCalledWith(
+			{ latitude: 37.99, longitude: 23.74 },
+			{ byUser: false }
+		);
+	});
+
+	it('record §6.7.4 (negative): the person’s zoom around the centre leaves the point where it was — no move by them', async () => {
+		laidOut(320);
+		const onMoveEnd = vi.fn();
+		render(Harness, { props: { zoomAround: 'center', onMoveEnd } });
+		const map = await created();
+		const wheel = new WheelEvent('wheel');
+		map.emit('movestart', { originalEvent: wheel });
+		map.emit('moveend', { originalEvent: wheel });
+		expect(onMoveEnd).toHaveBeenLastCalledWith(
+			{ latitude: 37.98, longitude: 23.73 },
+			{ byUser: false }
+		);
+	});
+
+	it('record §6.7.4: `zoomControlsFrom="phone"` draws «+» / «−» at every width, where the caller puts them (bottom left); the default waits for 744', () => {
+		const phone = render(Harness, {
+			props: {
+				zoomControls,
+				zoomControlsFrom: 'phone',
+				zoomControlsClass: 'top-auto right-auto bottom-2 left-3'
+			}
+		});
+		const group = document.querySelector('[data-slot="map-view-zoom"]') as HTMLElement;
+		expect(group).toHaveClass('flex', 'bottom-2', 'left-3', 'top-auto', 'right-auto');
+		expect(group).not.toHaveClass('hidden', 'tablet:flex', 'top-2', 'right-3');
+		expect(screen.getByRole('button', { name: 'Μεγέθυνση' })).toBeInTheDocument();
+		phone.unmount();
+		render(Harness, { props: { zoomControls } });
+		expect(document.querySelector('[data-slot="map-view-zoom"]')).toHaveClass(
+			'hidden',
+			'tablet:flex'
+		);
 	});
 });

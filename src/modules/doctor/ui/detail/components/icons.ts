@@ -7,7 +7,6 @@ import type {
 import type { DoctorReviewTopic } from '$modules/doctor/config/review-topics';
 import type {
 	DoctorAboutRowId,
-	DoctorBookingAction,
 	DoctorKnowPageId,
 	DoctorKnowRowId,
 	DoctorOfficeInfoRow,
@@ -31,7 +30,15 @@ export const doctorOfficeInfoGlyphs: Record<DoctorOfficeInfoRow['id'], IoniconNa
 	parking: 'car-outline',
 	'disability-access': 'accessibility-outline',
 	phone: 'call-outline',
-	floor: 'business-outline'
+	floor: 'business-outline',
+	// P-W3 §3.5 (the application's `getDoctorOfficeInfoIconName`): a detail takes its parent's glyph.
+	'parking-private': 'car-outline',
+	'parking-public': 'car-outline',
+	'parking-street': 'car-outline',
+	'accessible-toilet': 'accessibility-outline',
+	'accessible-parking': 'accessibility-outline',
+	lift: 'swap-vertical-outline',
+	transit: 'bus-outline'
 };
 
 export const doctorProfessionalInfoGlyphs: Record<
@@ -122,10 +129,4 @@ export const doctorKnowRowGlyphs: Record<DoctorKnowRowId, IoniconName> = {
 	'bring-tests': 'document-text-outline',
 	'bring-medicines': 'medkit-outline',
 	'bring-referral': 'list-outline'
-};
-
-/** U-37 (the application's `ACTION_ICONS`): «📞 Κλήση ιατρείου» and «Δείτε παρόμοιους γιατρούς». */
-export const doctorBookingActionGlyphs: Record<DoctorBookingAction['kind'], IoniconName> = {
-	call: 'call-outline',
-	similar: 'people-outline'
 };

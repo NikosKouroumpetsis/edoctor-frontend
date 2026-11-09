@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { DoctorReviewsSummary } from '$modules/doctor/api/reviews';
+import { buildDoctorLocation } from '../build-content';
 import { sampleDoctorProfile } from '../detail.sample';
 import {
 	buildDoctorOfficePage,
@@ -166,5 +167,87 @@ describe('lib/detail build-modal-content (the reviews window)', () => {
 		expect(full.title).toBe('Τα ιατρεία');
 		expect(new URL(full.directionsUrl ?? '').searchParams.get('destination')).toBe('37.9,23.7');
 		expect(full.photos[0].alt).toBe('Φωτογραφία 1 από 1');
+	});
+
+	it('🔴 P-W3 §3.5 / D-W3-19 (U-110.3): the office’s page carries its details under their parents — the kinds under «Parking», the toilet and the space under «Πρόσβαση ΑμεΑ», then the elevator and the transport — and the profile’s «Τοποθεσία» none', () => {
+		const facts = {
+			street: 'Καραΐσκου',
+			streetNumber: '74',
+			city: 'Πειραιάς',
+			floor: 3,
+			parking: true,
+			disabilityAccess: true,
+			amenities: {
+				parkingKinds: ['private', 'street'] as const,
+				accessibleToilet: true,
+				accessibleParking: false,
+				elevator: true,
+				nearPublicTransport: true
+			}
+		};
+		const rows = (list: { label: string; value: string }[] | undefined) =>
+			(list ?? []).map(({ label, value }) => `${label}: ${value}`);
+		const page = buildDoctorOfficePage({
+			facts: {
+				...facts,
+				amenities: { ...facts.amenities, parkingKinds: [...facts.amenities.parkingKinds] }
+			},
+			officeCount: 1,
+			locale: 'el',
+			now: 0
+		});
+		expect(rows(page.location?.facilityRows)).toEqual([
+			'Parking: Ναι',
+			'Ιδιωτικό parking: Ναι',
+			'Στάθμευση στον δρόμο: Ναι',
+			'Πρόσβαση ΑμεΑ: Ναι',
+			'Τουαλέτα ΑμεΑ: Ναι',
+			'Ανελκυστήρας: Ναι',
+			'Κοντά σε μέσα μεταφοράς: Ναι'
+		]);
+		const english = buildDoctorOfficePage({
+			facts: { ...facts, amenities: { ...facts.amenities, parkingKinds: ['public-nearby'] } },
+			officeCount: 1,
+			locale: 'en',
+			now: 0
+		});
+		expect(rows(english.location?.facilityRows)).toContain('Public parking nearby: Yes');
+		expect(rows(english.location?.facilityRows)).toContain('Elevator: Yes');
+		// U-110.3: the profile's own section, from the very same facts, shows the two parents only.
+		const section = buildDoctorLocation(
+			{
+				...facts,
+				amenities: { ...facts.amenities, parkingKinds: [...facts.amenities.parkingKinds] }
+			},
+			'el'
+		);
+		expect(rows(section?.facilityRows)).toEqual(['Parking: Ναι', 'Πρόσβαση ΑμεΑ: Ναι']);
+	});
+
+	it('(negative) a detail whose parent row is absent stays absent; an office without details is as before', () => {
+		const page = buildDoctorOfficePage({
+			facts: {
+				street: 'Νίκης',
+				city: 'Αθήνα',
+				amenities: {
+					parkingKinds: ['private'],
+					accessibleToilet: true,
+					accessibleParking: true,
+					elevator: false,
+					nearPublicTransport: false
+				}
+			},
+			officeCount: 1,
+			locale: 'el',
+			now: 0
+		});
+		expect(page.location?.facilityRows).toEqual([]);
+		const plain = buildDoctorOfficePage({
+			facts: { street: 'Νίκης', city: 'Αθήνα', parking: false },
+			officeCount: 1,
+			locale: 'el',
+			now: 0
+		});
+		expect(plain.location?.facilityRows.map((row) => row.id)).toEqual(['parking']);
 	});
 });

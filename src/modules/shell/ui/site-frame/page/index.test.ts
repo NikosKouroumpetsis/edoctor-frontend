@@ -52,6 +52,27 @@ afterEach(() => {
 });
 
 describe('SiteFrame (eDoctor frame on the generic shell)', () => {
+	it('🔴 U-81.2 / record §3.4 (wave 3): the booking’s bar from 744 is the mark alone over a thin line; the sign-up has no bar of the frame — neither has the capsule nor the footer', () => {
+		visit('/doctors/dr-athena/booking/time');
+		const booking = renderFrame();
+		const banner = screen.getByRole('banner');
+		expect(banner).toHaveClass('hidden', 'tablet:block', 'border-border');
+		expect(banner).not.toHaveClass('border-transparent');
+		expect(within(banner).getByRole('link', { name: 'eDoctor' })).toHaveAttribute('href', '/');
+		expect(screen.queryByTestId('header-account-menu')).toBeNull();
+		// Neither the bar's links nor the capsule.
+		expect(screen.queryAllByRole('navigation')).toEqual([]);
+		expect(footer()).toBeNull();
+		booking.unmount();
+
+		visit('/en/doctor/onboarding/location/pin');
+		renderFrame();
+		expect(screen.queryByRole('banner')).toBeNull();
+		expect(screen.queryAllByRole('navigation')).toEqual([]);
+		expect(footer()).toBeNull();
+		expect(screen.getByRole('heading', { level: 1, name: 'Σελίδα' })).toBeInTheDocument();
+	});
+
 	// Rewrites «renders the page inside the header, footer and bottom bar» (a «Σύνδεση» link and the theme button in
 	// the bar): U-17.2/U-17.5 put sign-in in the ☰ menu, U-16.1/U-17.4 the theme and the language in «Ρυθμίσεις».
 	it('U-16.8: renders the page inside apple.com’s bar (from 744), the footer and the capsule of the Greek site', () => {
@@ -68,7 +89,7 @@ describe('SiteFrame (eDoctor frame on the generic shell)', () => {
 			['Κλινικές', '/clinics'],
 			['Άρθρα υγείας', '/articles'],
 			['Κέντρο βοήθειας', '/help'],
-			['Για γιατρούς', '/plans']
+			['Για γιατρούς', '/doctor/onboarding']
 		]);
 		const [help, forDoctors] = within(primary).getAllByRole('link').slice(3);
 		expect(help).toHaveClass('hidden', 'laptop:inline-flex');
@@ -145,7 +166,7 @@ describe('SiteFrame (eDoctor frame on the generic shell)', () => {
 		expect(items[0]).toHaveAttribute('href', '/login');
 		expect(items[0]).toHaveClass('font-semibold');
 		expect(items[2]).toHaveAttribute('href', '/help');
-		expect(items[3]).toHaveAttribute('href', '/plans');
+		expect(items[3]).toHaveAttribute('href', '/doctor/onboarding');
 		expect(menu.querySelectorAll('[data-slot="dropdown-menu-separator"]')).toHaveLength(2);
 		await user.keyboard('{Escape}');
 		await waitFor(() =>
@@ -377,7 +398,7 @@ describe('SiteFrame (eDoctor frame on the generic shell)', () => {
 			['Ακύρωση ραντεβού', '/help#cancellation'],
 			['Επικοινωνία', 'mailto:support@edoctor.test'],
 			['Διαγραφή λογαριασμού', '/account-deletion'],
-			['Γίνετε μέλος του eDoctor', '/plans'],
+			['Γίνετε μέλος του eDoctor', '/doctor/onboarding'],
 			['Πλάνα συνδρομής', '/plans'],
 			['Κλινικές', '/clinics'],
 			['Γιατροί', '/doctors'],

@@ -19,6 +19,7 @@ export {
 	buildBio,
 	buildDoctorDetailContent,
 	buildDoctorLocation,
+	withDoctorOfficeAmenityRows,
 	buildIdentity,
 	buildPhotos,
 	buildProfessionalSection,

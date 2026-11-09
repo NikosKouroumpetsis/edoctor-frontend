@@ -8,6 +8,11 @@
 		title: string;
 		description?: string;
 		icon?: Snippet;
+		/**
+		 * What opens under the card while it is chosen, 24 in (the application's `details`, record §6.8: «Τι parking
+		 * υπάρχει;» under Parking); gone again when it is let go. The caller's own controls, never a card's.
+		 */
+		details?: Snippet;
 	};
 
 	/** A single choice is one value (or none), a multiple one a list (the application's two `onChange`). */
@@ -24,6 +29,8 @@
 		iconPlacement?: SelectableCardIconPlacement;
 		/** U-28.3: `md` (default, the application's cards 12 apart) or `sm` (the smaller cards, 8 apart). */
 		size?: SelectableCardSize;
+		/** `false`: no card changes under the pointer (U-100, a caller with no hover); the default keeps U-28.4's hover. */
+		hover?: boolean;
 		/** The question over the cards, also the group's name. */
 		label?: string;
 		/**
@@ -50,6 +57,7 @@
 		disabled = false,
 		iconPlacement = 'trailing',
 		size = 'md',
+		hover = true,
 		label,
 		labelledBy,
 		testId,
@@ -80,15 +88,38 @@
 		onChange?.(next);
 	}
 
-	// Single: the arrows move the focus AND choose; multiple: they only move (Space toggles).
+	// Single: the arrows move the focus AND choose; multiple: they only move (Space toggles). A key pressed on a control
+	// of an option's details is that control's own: it moves no card (as `ChipGroup` ignores what is not one of its).
 	function onkeydown(event: KeyboardEvent) {
 		if (!group) return;
+		if (!(event.target instanceof HTMLElement) || !event.target.hasAttribute('data-roving-item'))
+			return;
 		const moved = handleRovingKeydown(event, group, { orientation: 'vertical' });
 		if (!isMultiple && moved?.dataset.value) toggle(moved.dataset.value);
 	}
 </script>
 
-<!-- The application's `SelectableCards`: the optional question (heading 24), then the cards 12 apart (`sm` 8). -->
+{#snippet card(option: SelectableCardsOption)}
+	<SelectableCard
+		role={isMultiple ? 'checkbox' : 'radio'}
+		title={option.title}
+		description={option.description}
+		icon={option.icon}
+		{iconPlacement}
+		{size}
+		{hover}
+		selected={chosen.includes(option.value)}
+		{disabled}
+		data-roving-item
+		data-value={option.value}
+		tabindex={(tabStop ?? options[0]?.value) === option.value ? 0 : -1}
+		testId={testId ? `${testId}-${option.value}` : undefined}
+		onclick={() => toggle(option.value)}
+	/>
+{/snippet}
+
+<!-- The application's `SelectableCards`: the optional question (heading 24), then the cards 12 apart (`sm` 8). A chosen
+     option with `details` opens them right under its card, 24 in (the application's `pt-3.5 pl-6`). -->
 <div data-slot="selectable-cards" data-testid={testId} class={cn('w-full', className)}>
 	{#if label}
 		<p id={labelId} class="mb-4 text-heading-md font-semibold text-foreground">{label}</p>
@@ -101,21 +132,22 @@
 		{onkeydown}
 	>
 		{#each options as option (option.value)}
-			<SelectableCard
-				role={isMultiple ? 'checkbox' : 'radio'}
-				title={option.title}
-				description={option.description}
-				icon={option.icon}
-				{iconPlacement}
-				{size}
-				selected={chosen.includes(option.value)}
-				{disabled}
-				data-roving-item
-				data-value={option.value}
-				tabindex={(tabStop ?? options[0]?.value) === option.value ? 0 : -1}
-				testId={testId ? `${testId}-${option.value}` : undefined}
-				onclick={() => toggle(option.value)}
-			/>
+			{#if option.details}
+				<div data-slot="selectable-cards-option" class="flex w-full flex-col">
+					{@render card(option)}
+					{#if chosen.includes(option.value)}
+						<div
+							data-slot="selectable-cards-details"
+							data-testid={testId ? `${testId}-${option.value}-details` : undefined}
+							class="pt-3.5 pl-6"
+						>
+							{@render option.details()}
+						</div>
+					{/if}
+				</div>
+			{:else}
+				{@render card(option)}
+			{/if}
 		{/each}
 	</div>
 </div>

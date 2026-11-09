@@ -18,7 +18,7 @@
 	import ReviewCard from '../components/review-card.svelte';
 	import SeoHead from '../components/seo-head.svelte';
 	import SocialLinks from '../components/social-links.svelte';
-	import { useSiteBack } from '../hooks/use-site-back.svelte';
+	import { useSiteBack } from '$shared/lib/navigation';
 	import type { DoctorAboutPageProps } from '../types';
 
 	let {

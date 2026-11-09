@@ -3,10 +3,10 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
-import { focusManager, onlineManager } from '@tanstack/svelte-query';
+import { focusManager, onlineManager, QueryClient } from '@tanstack/svelte-query';
 import { afterNavigate } from '$app/navigation';
 import { page } from '$app/state';
-import { knownAccountStorageKey } from '$shared/config/env';
+import { knownAccountStorageKey, sessionChannelName } from '$shared/config/env';
 import { SIGN_IN_PROVIDER_COLORS } from '$shared/preferences/theme/sign-in-provider-colors';
 import { leaveFor } from '$modules/auth/api/provider';
 import { readSourceFiles, projectRoot } from '../../../../../../tests/architecture/source-scan';
@@ -27,7 +27,13 @@ const refuse = (status: number, errorCode?: string, errorMessage?: string): Repl
 });
 
 let routes: Record<string, Route>;
-let calls: { method: string; path: string; body: Record<string, unknown>; init: RequestInit }[];
+let calls: {
+	method: string;
+	path: string;
+	body: Record<string, unknown>;
+	init: RequestInit;
+	lang: string | null;
+}[];
 let signedIn: boolean;
 let patient: Record<string, unknown> | null;
 
@@ -70,7 +76,7 @@ function serve() {
 			const path = url.pathname.replace(/^\/api\/v1/u, '');
 			const method = init.method ?? 'GET';
 			const body = init.body ? (JSON.parse(String(init.body)) as Record<string, unknown>) : {};
-			calls.push({ method, path, body, init });
+			calls.push({ method, path, body, init, lang: url.searchParams.get('lang') });
 			const route = routes[`${method} ${path}`];
 			const reply = route ? route(body, url) : refuse(404);
 			return new Response(JSON.stringify(reply.body ?? {}), { status: reply.status });
@@ -226,6 +232,89 @@ describe('the session (U-80.1 Ε6)', () => {
 		await waitFor(() => expect(screen.getByTestId('forgotten')).toHaveTextContent('1'));
 	});
 
+	it('🔴 D-W3-37 (security web MINOR-2, NIT-1): a sign-out in ANOTHER tab of the browser ends this one too — a guest here, the drafts forgotten, no personal read and no write’s body left; only the event travels', async () => {
+		signedIn = true;
+		const clientOf = () =>
+			new QueryClient({
+				defaultOptions: { queries: { retry: false, gcTime: Infinity }, mutations: { retry: 0 } }
+			});
+		const here = clientOf();
+		const there = clientOf();
+		const posted: unknown[] = [];
+		const listen = new BroadcastChannel(sessionChannelName);
+		listen.onmessage = (event) => posted.push(event.data);
+		const tabHere = render(Harness, { props: { client: here } });
+		const tabThere = render(Harness, { props: { client: there } });
+		const inTab = (tab: typeof tabHere, id: string) => within(tab.container).getByTestId(id);
+		await waitFor(() => expect(inTab(tabHere, 'status')).toHaveTextContent('member'));
+		await waitFor(() => expect(inTab(tabThere, 'status')).toHaveTextContent('member'));
+		// What this tab's person wrote: a personal read and a write's body (a mobile), kept by TanStack.
+		here.setQueryDefaults(['appointments'], { meta: { personal: true } });
+		here.setQueryData(['appointments', 'patient'], { id: 'p' });
+		await here
+			.getMutationCache()
+			.build(here, { mutationFn: async () => 'sent' })
+			.execute({ mobilePhone: '+306912345678' });
+		expect(here.getMutationCache().getAll()).toHaveLength(1);
+
+		await user().click(inTab(tabThere, 'sign-out'));
+		await waitFor(() => expect(inTab(tabThere, 'status')).toHaveTextContent('guest'));
+		await waitFor(() => expect(inTab(tabHere, 'forgotten')).toHaveTextContent('1'));
+		expect(inTab(tabHere, 'status')).toHaveTextContent('guest');
+		expect(here.getQueryData(['appointments', 'patient'])).toBeUndefined();
+		expect(here.getMutationCache().getAll()).toEqual([]);
+		expect(inTab(tabThere, 'forgotten')).toHaveTextContent('1');
+		// One sign-out, one word on the channel: no fact of the person.
+		await waitFor(() => expect(posted).toEqual(['signed-out']));
+		listen.close();
+	});
+
+	it('🔴 D-W3-37 (negative): anything else on the channel is no sign-out; a logout the server did not carry out tells no tab', async () => {
+		signedIn = true;
+		const posted: unknown[] = [];
+		const listen = new BroadcastChannel(sessionChannelName);
+		listen.onmessage = (event) => posted.push(event.data);
+		render(Harness);
+		await waitFor(() => expect(screen.getByTestId('status')).toHaveTextContent('member'));
+		const other = new BroadcastChannel(sessionChannelName);
+		other.postMessage({ type: 'signed-out', email: 'x@example.test' });
+		other.postMessage('signed-out ');
+		await new Promise((settle) => setTimeout(settle, 30));
+		expect(screen.getByTestId('status')).toHaveTextContent('member');
+		expect(screen.getByTestId('forgotten')).toHaveTextContent('0');
+		routes['POST /auth/logout'] = () => refuse(503);
+		await user().click(screen.getByTestId('sign-out'));
+		await waitFor(() => expect(screen.getByTestId('sign-out-failures')).toHaveTextContent('1'));
+		await new Promise((settle) => setTimeout(settle, 30));
+		expect(posted.filter((data) => data === 'signed-out')).toEqual([]);
+		other.close();
+		listen.close();
+	});
+
+	it('🔴 D-W3-37 (NIT-1): a sign-out here, or another account in this tab, takes every write’s body from the client’s memory', async () => {
+		signedIn = true;
+		patient = { id: 'p', firstName: 'Μαρία', tenantUserId: 'account-a' };
+		const client = new QueryClient({
+			defaultOptions: { queries: { retry: false, gcTime: Infinity }, mutations: { retry: 0 } }
+		});
+		const remember = () =>
+			client
+				.getMutationCache()
+				.build(client, { mutationFn: async () => 'sent' })
+				.execute({ amka: '01019012345', patientNote: 'Πόνος στο στήθος' });
+		render(Harness, { props: { client } });
+		await waitFor(() => expect(screen.getByTestId('status')).toHaveTextContent('member'));
+		await remember();
+		patient = { id: 'q', firstName: 'Νίκος', tenantUserId: 'account-b' };
+		await user().click(screen.getByTestId('reread'));
+		await waitFor(() => expect(screen.getByTestId('forgotten')).toHaveTextContent('1'));
+		expect(client.getMutationCache().getAll()).toEqual([]);
+		await remember();
+		await user().click(screen.getByTestId('sign-out'));
+		await waitFor(() => expect(screen.getByTestId('forgotten')).toHaveTextContent('2'));
+		expect(client.getMutationCache().getAll()).toEqual([]);
+	});
+
 	it('🔴 U-65.6: another account in this tab forgets it too; the same one, read again, does not', async () => {
 		signedIn = true;
 		patient = { id: 'p', firstName: 'Μαρία', tenantUserId: 'account-a' };
@@ -338,6 +427,29 @@ describe('the flow: the application’s steps (U-64.3, Π1)', () => {
 		await waitFor(() => expect(action).toHaveBeenCalledTimes(1));
 		await waitFor(() => expect(screen.getByTestId('status')).toHaveTextContent('member'));
 		expect(callsTo('/auth/access/verify')[0].body).toMatchObject({ code: '123456' });
+	});
+
+	it('🔴 D-W3-39 (review w3-w6 R1 MAJOR-N1, R2 NIT-3): the code goes out in the page’s language — `?lang=el` on a Greek page, `?lang=en` on an English one, its «Αποστολή νέου» too', async () => {
+		const first = await openFlow();
+		await submitIdentifier('a@b.gr');
+		await screen.findByTestId('auth-step-otp');
+		expect(callsTo('/auth/access/start').map((call) => call.lang)).toEqual(['el']);
+		first.unmount();
+		(page as { url: URL }).url = new URL('http://localhost/en/');
+		await openFlow();
+		await submitIdentifier('a@b.gr');
+		await screen.findByTestId('auth-step-otp');
+		expect(callsTo('/auth/access/start').map((call) => call.lang)).toEqual(['el', 'en']);
+		// Review w3-w6 R2 NIT-3: «Αποστολή νέου» once the 60″ are over says the same language.
+		const later = Date.now() + 61_000;
+		const clock = vi.spyOn(Date, 'now').mockImplementation(() => later);
+		try {
+			await user().click(screen.getByTestId('auth-resend'));
+			await waitFor(() => expect(callsTo('/auth/access/resend')).toHaveLength(1));
+		} finally {
+			clock.mockRestore();
+		}
+		expect(callsTo('/auth/access/resend')[0].lang).toBe('en');
 	});
 
 	it('Π1: «Συνέχεια» stays off until the sixth digit', async () => {
@@ -554,6 +666,12 @@ describe('the flow: the application’s steps (U-64.3, Π1)', () => {
 		await typeCode();
 		await user().click(screen.getByTestId('auth-verify'));
 		await user().click(await screen.findByTestId('auth-set-password-send'));
+		// 🔴 D-W3-39: the code's email in the page's language.
+		await waitFor(() =>
+			expect(
+				callsTo('/auth/password-credentials/me/set-password/init').map((call) => call.lang)
+			).toEqual(['el'])
+		);
 		await fireEvent.input(
 			within(await screen.findByTestId('auth-step-set-password-code')).getByTestId('auth-code'),
 			{ target: { value: '654321' } }

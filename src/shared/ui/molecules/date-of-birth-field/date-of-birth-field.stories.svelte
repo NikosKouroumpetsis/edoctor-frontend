@@ -25,6 +25,7 @@
 	let prefilled = $state('1990-05-15');
 	let invalid = $state('');
 	let disabled = $state('1990-05-15');
+	let single = $state('1985-04-12');
 </script>
 
 <Story name="Playground">
@@ -51,5 +52,12 @@
 <Story name="Disabled" args={{ disabled: true }}>
 	{#snippet template(args)}
 		<div class="w-full max-w-narrow"><DateOfBirthField {...args} bind:value={disabled} /></div>
+	{/snippet}
+</Story>
+
+<!-- U-129: one date field, the browser's own control and calendar (the sign-up's and the booking's prototypes). -->
+<Story name="Single" args={{ variant: 'single', size: 'lg' }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><DateOfBirthField {...args} bind:value={single} /></div>
 	{/snippet}
 </Story>

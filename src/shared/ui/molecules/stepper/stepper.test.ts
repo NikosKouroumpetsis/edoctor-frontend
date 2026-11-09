@@ -189,4 +189,164 @@ describe('Stepper', () => {
 		expect(await screen.findByText('Value is too large')).toBeInTheDocument();
 		expect(spinbutton()).toHaveAttribute('aria-invalid', 'true');
 	});
+
+	// The office's floor (record §6.8 «Πώς θα σας βρουν»): −1…20, «Υπόγειο / Ισόγειο / 1ος … 20ος», the bound's button off.
+	const floorName = (n: number) => (n < 0 ? 'Υπόγειο' : n === 0 ? 'Ισόγειο' : `${n}ος`);
+
+	it('P-A3 Σ14 / U-81.2: `valueLabel` shows and says the words, not the number — read-only, moved by «−» / «+» and the arrows', async () => {
+		const user = userEvent.setup({ delay: null });
+		renderStepper({
+			label: 'Όροφος',
+			helperText: undefined,
+			min: -1,
+			max: 20,
+			value: '0',
+			valueLabel: floorName
+		});
+
+		expect(spinbutton()).toHaveValue('Ισόγειο');
+		expect(spinbutton()).toHaveAttribute('readonly');
+		expect(spinbutton()).toHaveAttribute('aria-valuetext', 'Ισόγειο');
+		expect(spinbutton()).toHaveAttribute('aria-valuenow', '0');
+		await user.click(increase());
+		await user.click(increase());
+		await user.click(increase());
+		expect(spinbutton()).toHaveValue('3ος');
+		expect(spinbutton()).toHaveAttribute('aria-valuetext', '3ος');
+		expect(spinbutton()).toHaveAttribute('aria-valuenow', '3');
+		spinbutton().focus();
+		await user.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}{ArrowDown}');
+		expect(spinbutton()).toHaveValue('Υπόγειο');
+		expect(decrease()).toBeDisabled();
+		expect(increase()).toBeEnabled();
+	});
+
+	it('P-A3 Σ14 (negative): with `valueLabel` typing changes nothing — not letters, not digits, not a pasted script', async () => {
+		const user = userEvent.setup({ delay: null });
+		const form = createForm({ initialValues: { floor: '2' } });
+		renderStepper({
+			label: 'Όροφος',
+			min: -1,
+			max: 20,
+			field: form.field('floor'),
+			value: undefined,
+			valueLabel: floorName
+		});
+
+		await user.type(spinbutton(), '15<script>');
+		expect(form.values.floor).toBe('2');
+		expect(spinbutton()).toHaveValue('2ος');
+		await user.click(increase());
+		expect(form.values.floor).toBe('3');
+		// At the top bound «+» is off and the number stays inside it.
+		form.field('floor').setValue('20');
+		await user.click(increase());
+		expect(form.values.floor).toBe('20');
+		expect(increase()).toBeDisabled();
+	});
+
+	it('P-A3 Σ14 (negative): without `valueLabel` the stepper is as before — the number shown and typed', async () => {
+		const user = userEvent.setup({ delay: null });
+		renderStepper({ value: '' });
+		expect(spinbutton()).not.toHaveAttribute('readonly');
+		expect(spinbutton()).toHaveAttribute('aria-valuetext', 'Κενό');
+		await user.type(spinbutton(), '7');
+		expect(spinbutton()).toHaveValue('7');
+	});
+	it('U-28.4: «−» / «+» take the light fill under the pointer (the default); U-100 / D-W3-27: `hover={false}` never — the buttons otherwise the same', () => {
+		const buttons = () => [screen.getByLabelText('Μείωση'), screen.getByLabelText('Αύξηση')];
+		const withHover = renderStepper({ value: '3' });
+		for (const button of buttons())
+			expect(button).toHaveClass('can-hover:enabled:hover:bg-foreground/5');
+		const kept = buttons().map((button) =>
+			[...button.classList].filter((name) => !name.includes('hover:'))
+		);
+		withHover.unmount();
+		renderStepper({ value: '3', hover: false });
+		expect(buttons().map((button) => [...button.classList])).toEqual(kept);
+	});
+
+	it('W8-Δ4: `counter` (Airbnb’s counters) — ONE 64 box with the title inside on the left (16), «−» value «+» on the right: circles of 36 on a muted line inside their 48 targets, the value 16/500 at least 64 wide', () => {
+		renderStepper({
+			label: 'Όροφος',
+			helperText: undefined,
+			min: -1,
+			max: 20,
+			value: '3',
+			valueLabel: floorName,
+			variant: 'counter',
+			hover: false
+		});
+		const root = document.querySelector('[data-slot="stepper"]') as HTMLElement;
+		const box = document.querySelector('[data-slot="stepper-box"]') as HTMLElement;
+		const title = screen.getByText('Όροφος');
+		expect(root).toHaveAttribute('data-variant', 'counter');
+		expect(box).toHaveClass(
+			'min-h-control-xl',
+			'rounded-md',
+			'border',
+			'border-input',
+			'pl-3.5',
+			'pr-1'
+		);
+		// W8 Delta 3 (N2): 64 WITH the border, as `doctor.css` (border-box): 48 + 2 × 6 + 2 × 1 = 62 stays under the
+		// 64, so the box is 64 and a circle sits 7 + 6 = 13 inside it, as the prototype's 36 in its 64 ((64 − 2 − 36) / 2).
+		expect(box).toHaveClass('py-1.5');
+		expect(box).not.toHaveClass('py-2');
+		expect(box.firstElementChild).toBe(title);
+		expect(title.tagName).toBe('LABEL');
+		expect(title).toHaveClass('flex-1', 'text-body-lg', 'text-foreground');
+		expect(screen.getByLabelText('Όροφος')).toBe(spinbutton());
+		const controls = document.querySelector('[data-slot="stepper-controls"]') as HTMLElement;
+		expect(Array.from(controls.children)).toEqual([decrease(), spinbutton(), increase()]);
+		// W8 Delta 2 (NIT-5): a value too long for the box shrinks the title, then itself to 64 — never past the box.
+		expect(controls).toHaveClass('min-w-0');
+		expect(controls).not.toHaveClass('shrink-0');
+		expect(spinbutton()).toHaveClass(
+			'min-w-control-xl',
+			'text-body-lg',
+			'font-medium',
+			'text-center'
+		);
+		expect(spinbutton()).toHaveValue('3ος');
+		for (const button of [decrease(), increase()]) {
+			expect(button).toHaveClass('size-touch', 'rounded-full', 'disabled:opacity-30');
+			const round = button.querySelector('[data-slot="stepper-round"]');
+			expect(round).toHaveClass('absolute', 'inset-1.5', 'rounded-full', 'border-muted-foreground');
+			expect(round).toHaveAttribute('aria-hidden', 'true');
+			expect([...button.classList].filter((name) => name.includes('hover:'))).toEqual([]);
+		}
+	});
+
+	it('W8-Δ4 (negative): `counter` keeps the stepper’s behaviour — the bounds lock their circle, the arrows move it, typing changes nothing; the default stays S-26.4’s, with no circle', async () => {
+		const user = userEvent.setup({ delay: null });
+		const counter = renderStepper({
+			label: 'Όροφος',
+			helperText: undefined,
+			min: -1,
+			max: 20,
+			value: '19',
+			valueLabel: floorName,
+			variant: 'counter'
+		});
+		await user.click(increase());
+		expect(spinbutton()).toHaveValue('20ος');
+		expect(increase()).toBeDisabled();
+		await user.type(spinbutton(), '5<b>');
+		expect(spinbutton()).toHaveValue('20ος');
+		spinbutton().focus();
+		for (let step = 0; step < 21; step += 1) await user.keyboard('{ArrowDown}');
+		expect(spinbutton()).toHaveValue('Υπόγειο');
+		expect(decrease()).toBeDisabled();
+		counter.unmount();
+
+		renderStepper();
+		expect(document.querySelector('[data-slot="stepper-round"]')).toBeNull();
+		expect(document.querySelector('[data-slot="stepper-controls"]')).toBeNull();
+		expect(document.querySelector('[data-slot="stepper"]')).toHaveAttribute(
+			'data-variant',
+			'default'
+		);
+		expect(decrease()).not.toHaveClass('rounded-full');
+	});
 });

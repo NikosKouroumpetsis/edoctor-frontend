@@ -120,7 +120,8 @@
 		<p class="text-muted-foreground">{m.auth_register_marketing_info({}, options)}</p>
 		<label class="flex min-h-touch cursor-pointer flex-row items-center gap-3">
 			<span class="min-w-0 flex-1">{m.auth_register_marketing_opt_out({}, options)}</span>
-			<Checkbox bind:checked={optedOut} data-testid="auth-marketing-opt-out" />
+			<!-- 🔴 U-129.2: ticked as the register form's prototype (wave 2 `19-login/login.css:275`, `--dark`). -->
+			<Checkbox bind:checked={optedOut} tone="secondary" data-testid="auth-marketing-opt-out" />
 		</label>
 	</div>
 </form>

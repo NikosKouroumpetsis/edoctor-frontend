@@ -1,8 +1,10 @@
 <script lang="ts">
 	import {
 		MapView,
+		type MapViewCenter,
 		type MapViewExpandControl,
 		type MapViewHideControl,
+		type MapViewMove,
 		type MapViewPadding,
 		type MapViewPoint,
 		type MapViewZoomControls
@@ -21,6 +23,12 @@
 		hideControl,
 		scrollZoom,
 		fitAnimate,
+		zoomControlsFrom,
+		zoomControlsClass,
+		zoomAround,
+		onMoveStart,
+		onMoveEnd,
+		attributionLabel,
 		ariaLabel = 'Χάρτης'
 	}: {
 		styleUrl?: string;
@@ -35,6 +43,12 @@
 		hideControl?: MapViewHideControl;
 		scrollZoom?: boolean;
 		fitAnimate?: boolean;
+		zoomControlsFrom?: 'phone' | 'tablet';
+		zoomControlsClass?: string;
+		zoomAround?: 'pointer' | 'center';
+		onMoveStart?: (move: MapViewMove) => void;
+		onMoveEnd?: (center: MapViewCenter, move: MapViewMove) => void;
+		attributionLabel?: string;
 		ariaLabel?: string;
 	} = $props();
 </script>
@@ -52,6 +66,12 @@
 	{hideControl}
 	{scrollZoom}
 	{fitAnimate}
+	{zoomControlsFrom}
+	{zoomControlsClass}
+	{zoomAround}
+	{onMoveStart}
+	{onMoveEnd}
+	{attributionLabel}
 	camera={{ center: [23.73, 37.98], zoom: 10 }}
 	aria-label={ariaLabel}
 	testId="map"

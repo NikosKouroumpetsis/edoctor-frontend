@@ -55,4 +55,12 @@ describe('PhoneField', () => {
 		expect(country).toHaveClass('border-danger', 'bg-danger/10');
 		expect(screen.getByLabelText('Κινητό τηλέφωνο')).toHaveAttribute('aria-invalid', 'true');
 	});
+
+	it('U-65.6 (review w3-w3 R1 MINOR-3): the caller’s `maxlength` caps the number; none is set without it', () => {
+		const { unmount } = render(PhoneField, { props: { ...copy, maxlength: 16 } });
+		expect(screen.getByLabelText('Κινητό τηλέφωνο')).toHaveAttribute('maxlength', '16');
+		unmount();
+		render(PhoneField, { props: copy });
+		expect(screen.getByLabelText('Κινητό τηλέφωνο')).not.toHaveAttribute('maxlength');
+	});
 });

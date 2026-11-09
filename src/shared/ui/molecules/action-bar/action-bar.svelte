@@ -83,6 +83,7 @@
 		separated,
 		singleLine = false,
 		contentWidthClass,
+		hover = true,
 		class: className
 	}: {
 		preset?: ActionBarPreset;
@@ -116,6 +117,11 @@
 		singleLine?: boolean;
 		/** The row's width (the application's `contentWidthClassName`), e.g. `tablet:max-w-form`. */
 		contentWidthClass?: string;
+		/**
+		 * U-28.4 (`true`, the default): with a pointer each action changes its fill on hover. `false` (U-100: a caller with
+		 * no hover): no colour changes under the pointer.
+		 */
+		hover?: boolean;
 		class?: string;
 	} = $props();
 
@@ -162,7 +168,8 @@
 				// U-28.4: with a pointer, the light fill on hover (Airbnb's «Εκκαθάριση όλων»), never while disabled.
 				secondaryDisabled
 					? 'opacity-40'
-					: 'transition-colors duration-standard ease-standard can-hover:hover:bg-foreground/5'
+					: hover &&
+							'transition-colors duration-standard ease-standard can-hover:hover:bg-foreground/5'
 			)}
 			onclick={() => onSecondaryClick()}
 		>
@@ -194,10 +201,11 @@
 				// U-28.4: with a pointer, the fill a shade lighter on hover (as the kit's `Button`), never while blocked.
 				isPrimaryBlocked
 					? 'opacity-50'
-					: cn(
-							'transition-colors duration-standard ease-standard',
-							primaryHoverClasses[primaryTone]
-						)
+					: hover &&
+							cn(
+								'transition-colors duration-standard ease-standard',
+								primaryHoverClasses[primaryTone]
+							)
 			)}
 			onclick={() => onPrimaryClick()}
 		>

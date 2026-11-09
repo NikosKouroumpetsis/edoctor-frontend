@@ -21,6 +21,7 @@
 		required,
 		onCheckedChange,
 		showCheck = true,
+		hover = true,
 		...restProps
 	}: WithElementRef<HTMLButtonAttributes, HTMLButtonElement> & {
 		checked?: boolean;
@@ -31,6 +32,8 @@
 		onCheckedChange?: (checked: boolean) => void;
 		/** Show the in-thumb checkmark in the ON state. Default true. */
 		showCheck?: boolean;
+		/** U-28.4 (`true`, the default): an off track darkens under the pointer; `false` (U-100, D-W3-27) never. */
+		hover?: boolean;
 	} = $props();
 
 	// The application's track, thumb and travel from the ONE `switchGeometry` (38×22 · 48×28 · 56×32, 2 inset):
@@ -71,7 +74,7 @@
 			'group-focus-visible:border-ring group-focus-visible:ring-3 group-focus-visible:ring-ring/50',
 			'data-[state=checked]:bg-primary data-[state=unchecked]:bg-input',
 			// U-28.4: with a pointer, an off track darkens on hover (an on or a disabled one stays).
-			'can-hover:group-enabled:group-hover:data-[state=unchecked]:bg-muted-foreground/50'
+			hover && 'can-hover:group-enabled:group-hover:data-[state=unchecked]:bg-muted-foreground/50'
 		)}
 		style:width={`${geometry.trackWidth}px`}
 		style:height={`${geometry.trackHeight}px`}

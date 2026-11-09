@@ -13,8 +13,15 @@ const backendRegistry = readFileSync(
 	'utf8'
 );
 
+/** C-1 (`texts/legal/changes.md`): the approved words of OpenFreeMap, the same in the backend and the application. */
+const openFreeMapWords = {
+	el: 'Φορτώνει τους χάρτες της εφαρμογής και του ιστότοπου, όπως τον χάρτη που δείχνει πού βρίσκεται το ιατρείο. Ο πάροχος του χάρτη λαμβάνει τη διεύθυνση IP σας και την περιοχή του χάρτη που βλέπετε. Δεν ορίζει cookies.',
+	en: 'Loads the maps of the app and the website, such as the map that shows where a practice is located. The map provider receives your IP address and the map area you are viewing. It sets no cookies.'
+} as const;
+
 describe('shell::config::consent-fallback-registry', () => {
-	it('U-24.4 (app = web): OpenFreeMap is an essential tool of the web too, in the application’s own words', () => {
+	// Rewritten by C-1: it guarded the application's old words («Φορτώνει τον χάρτη…», `app` only in the backend).
+	it('C-1 (U-24.4, app = web): OpenFreeMap is an essential tool of the app and the website, in the approved words of the backend and the application', () => {
 		const tool = fallbackConsentRegistry.tools.find((entry) => entry.id === 'openfreemap');
 		expect(tool).toMatchObject({
 			category: 'essential',
@@ -22,16 +29,22 @@ describe('shell::config::consent-fallback-registry', () => {
 			policyUrl: null
 		});
 		for (const language of ['el', 'en'] as const) {
-			expect(applicationRegistry).toContain(tool?.translations[language]?.description);
+			expect(tool?.translations[language]?.description).toBe(openFreeMapWords[language]);
+			expect(backendRegistry).toContain(openFreeMapWords[language]);
+			expect(applicationRegistry).toContain(openFreeMapWords[language]);
 			expect(tool?.translations[language]?.title).toBe('OpenFreeMap');
 		}
 	});
 
-	// The version and the third tool changed by the orchestrator's decision 7 of `w2-fix-w` (`texts-notes.md` §Υλοποίηση 6).
-	it('U-24.4 (negative): the bundled catalogue keeps the backend’s version — the served registry still wins when it answers', () => {
-		expect(fallbackConsentRegistry.registryVersion).toBe('1.1.0');
+	// The version and the third tool changed by the orchestrator's decision 7 of `w2-fix-w` (`texts-notes.md` §Υλοποίηση 6);
+	// the version again by C-1 (1.1.0 ⇒ 1.2.0: OpenFreeMap a web tool, as `c32abfc5` did for a web tool, 1.0.0 ⇒ 1.1.0).
+	it('C-1 (U-24.4, negative): the bundled catalogue keeps the backend’s and the application’s version — the served registry still wins when it answers', () => {
+		expect(fallbackConsentRegistry.registryVersion).toBe('1.2.0');
 		expect(backendRegistry).toContain(
 			`CONSENT_REGISTRY_VERSION = '${fallbackConsentRegistry.registryVersion}'`
+		);
+		expect(applicationRegistry).toContain(
+			`registryVersion: '${fallbackConsentRegistry.registryVersion}'`
 		);
 		expect(fallbackConsentRegistry.tools.map((entry) => entry.id)).toEqual([
 			'edoctor-api',

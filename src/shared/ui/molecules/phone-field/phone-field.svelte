@@ -21,6 +21,7 @@
 		helperText,
 		size = 'default',
 		disabled = false,
+		maxlength,
 		class: className
 	}: {
 		/** The number's floating label. */
@@ -41,6 +42,8 @@
 		helperText?: string;
 		size?: TextFieldSize;
 		disabled?: boolean;
+		/** U-65.6: the most characters the number takes (the caller's limit, the server's); none by default. */
+		maxlength?: number;
 		class?: string;
 	} = $props();
 
@@ -104,6 +107,7 @@
 		type="tel"
 		inputmode="tel"
 		autocomplete="tel-national"
+		{maxlength}
 		inputClass="rounded-t-none border-t-0"
 	/>
 </div>

@@ -56,6 +56,63 @@ const EXCEPTIONS: {
 		reason: 'the Google «G» palette is fixed by Google'
 	},
 	{
+		path: 'src/shared/ui/icons/brand-google-calendar/brand-google-calendar.svelte',
+		rule: '5',
+		token: '#FFFFFF',
+		exact: true,
+		reason:
+			'🔴 U-111.1: Google Calendar’s own file, unmodified — its colours are Google’s (its brand rules let none change)'
+	},
+	{
+		path: 'src/shared/ui/icons/brand-google-calendar/brand-google-calendar.svelte',
+		rule: '5',
+		token: '#1A73E8',
+		exact: true,
+		reason: 'U-111.1: Google Calendar’s own file, unmodified'
+	},
+	{
+		path: 'src/shared/ui/icons/brand-google-calendar/brand-google-calendar.svelte',
+		rule: '5',
+		token: '#EA4335',
+		exact: true,
+		reason: 'U-111.1: Google Calendar’s own file, unmodified'
+	},
+	{
+		path: 'src/shared/ui/icons/brand-google-calendar/brand-google-calendar.svelte',
+		rule: '5',
+		token: '#34A853',
+		exact: true,
+		reason: 'U-111.1: Google Calendar’s own file, unmodified'
+	},
+	{
+		path: 'src/shared/ui/icons/brand-google-calendar/brand-google-calendar.svelte',
+		rule: '5',
+		token: '#4285F4',
+		exact: true,
+		reason: 'U-111.1: Google Calendar’s own file, unmodified'
+	},
+	{
+		path: 'src/shared/ui/icons/brand-google-calendar/brand-google-calendar.svelte',
+		rule: '5',
+		token: '#188038',
+		exact: true,
+		reason: 'U-111.1: Google Calendar’s own file, unmodified'
+	},
+	{
+		path: 'src/shared/ui/icons/brand-google-calendar/brand-google-calendar.svelte',
+		rule: '5',
+		token: '#FBBC04',
+		exact: true,
+		reason: 'U-111.1: Google Calendar’s own file, unmodified'
+	},
+	{
+		path: 'src/shared/ui/icons/brand-google-calendar/brand-google-calendar.svelte',
+		rule: '5',
+		token: '#1967D2',
+		exact: true,
+		reason: 'U-111.1: Google Calendar’s own file, unmodified'
+	},
+	{
 		path: 'src/shared/ui/molecules/phone-field/countries.ts',
 		rule: '3',
 		token: 'name',

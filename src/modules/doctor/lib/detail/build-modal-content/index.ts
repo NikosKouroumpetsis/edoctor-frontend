@@ -8,7 +8,11 @@ import type {
 	DoctorReviewSnippet
 } from '$modules/doctor/api/profile';
 import type { DoctorReviewsSummary } from '$modules/doctor/api/reviews';
-import { buildDoctorLocation, buildReviewCard } from '../build-content';
+import {
+	buildDoctorLocation,
+	buildReviewCard,
+	withDoctorOfficeAmenityRows
+} from '../build-content';
 import {
 	reviewCountLabel,
 	reviewChipScoreLabel,
@@ -292,7 +296,9 @@ export function buildDoctorOfficePage({
 	locale: SupportedLocale;
 	now: number;
 }): DoctorOfficePage {
-	const location = buildDoctorLocation(facts, locale);
+	// P-W3 §3.5: the office's details only on its own page (its own read), never on the profile's «Τοποθεσία» (U-110.3).
+	const section = buildDoctorLocation(facts, locale);
+	const location = section && withDoctorOfficeAmenityRows(section, facts?.amenities, locale);
 	const images = facts?.images ?? [];
 	const address = [location?.streetLine, location?.cityLine].filter(Boolean).join(', ');
 	return {

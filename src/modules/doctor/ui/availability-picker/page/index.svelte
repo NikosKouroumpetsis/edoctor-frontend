@@ -1,22 +1,16 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages.js';
 	import { cn } from '$shared/lib/utils';
-	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 	import { DateStrip } from '$shared/ui/molecules/date-strip';
 	import { InlineNotice } from '$shared/ui/molecules/inline-notice';
 	import { SkeletonLines } from '$shared/ui/molecules/skeleton-lines';
 	import { TimeSlotGrid } from '$shared/ui/molecules/time-slot-grid';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { Button } from '$shared/ui/primitives/button';
-	import type {
-		DoctorAvailabilityModalContent,
-		DoctorAvailabilityReadState,
-		DoctorBookingContent,
-		DoctorSelectedSlot
-	} from '$modules/doctor/lib/detail';
-	import Elsewhere from './elsewhere.svelte';
-	import { doctorBookingActionGlyphs } from './icons';
-	import OfficeTabs from './office-tabs.svelte';
+	import Elsewhere from '../components/elsewhere.svelte';
+	import { doctorBookingActionGlyphs } from '../components/icons';
+	import OfficeTabs from '../components/office-tabs.svelte';
+	import type { AvailabilityPickerProps } from '../types';
 
 	let {
 		content,
@@ -25,23 +19,15 @@
 		initialDate,
 		staged = $bindable(null),
 		locale,
+		slotVariant = 'solid',
 		onSelectOffice,
 		onRetry
-	}: {
-		content: DoctorAvailabilityModalContent | null;
-		readState: DoctorAvailabilityReadState;
-		/** MINOR-1 of r1: with no time anywhere (cases 1, 2), the page's own statement and ways stand in the window. */
-		booking: DoctorBookingContent;
-		/** U-37 `date`: the day the window opens on, when it is a bookable day of the office. */
-		initialDate: string | undefined;
-		/** The time chosen in the window, not yet confirmed (the footer's «Επιβεβαίωση» makes it the page's). */
-		staged?: DoctorSelectedSlot | null;
-		locale: SupportedLocale;
-		/** U-39.2: the window's pills change the page's ONE active office. */
-		onSelectOffice: (officeId: string) => void;
-		onRetry: () => void;
-	} = $props();
+	}: AvailabilityPickerProps = $props();
 
+	// P-W3 Σ-12: the booking's screen has no ways of its own with no time anywhere: it only says that none is free.
+	const statement = $derived(
+		booking ? booking.statement : m.doctor_booking_no_slots({}, { locale })
+	);
 	let chosenDay = $state<{ officeId: string; date: string } | null>(null);
 	const days = $derived(content?.days ?? []);
 	const selectedDate = $derived.by(() => {
@@ -58,7 +44,8 @@
 	);
 </script>
 
-<!-- `details/availability` (S-26, U-37, U-40.3; the application's `DoctorAvailabilityModalBody`): «Επιλέξτε ιατρείο»
+<!-- `details/availability` and the booking's «Αλλαγή» of the hour (S-26, U-37, U-40.3, P-W3 Σ-12; the application's
+     `DoctorAvailabilityModalBody`): «Επιλέξτε ιατρείο»
      and its pills, the address, the 28 days (the empty ones dimmed, S-26.1), the day's times in 4 columns; a press
      only chooses (the footer confirms). An office with no time points to the nearest one that has (case 3). -->
 <div data-testid="doctor-detail-modal-availability" class="flex flex-col gap-6">
@@ -121,6 +108,7 @@
 				}
 			}}
 			columns={4}
+			variant={slotVariant}
 			emptyText={content.emptyText}
 			testIdPrefix="doctor-detail-availability"
 			aria-label={content.timesLabel}
@@ -137,14 +125,14 @@
 		<!-- MINOR-1 of r1 (U-37.2 cases 1, 2): no time in the window — the page's statement and its two ways, the phone
 		     under them; never a skeleton that waits for nothing. -->
 		<div data-testid="doctor-detail-modal-availability-none" class="flex flex-col gap-4">
-			{#if booking.statement}
+			{#if statement}
 				<p class="flex flex-row items-start gap-2.5 text-body-lg font-semibold text-foreground">
 					<Ionicon name="calendar-outline" class="mt-0.5 icon-md shrink-0 text-muted-foreground" />
-					<span>{booking.statement}</span>
+					<span>{statement}</span>
 				</p>
 			{/if}
 			<div class="flex flex-col gap-2.5">
-				{#each [booking.primary, booking.secondary] as entry, position (position)}
+				{#each booking ? [booking.primary, booking.secondary] : [] as entry, position (position)}
 					{#if entry}
 						<Button
 							tone={position === 0 ? 'accent' : 'outline'}
@@ -165,7 +153,7 @@
 					{/if}
 				{/each}
 			</div>
-			{#if booking.phoneLabel}
+			{#if booking?.phoneLabel}
 				<p class="text-center text-label-lg text-muted-foreground">{booking.phoneLabel}</p>
 			{/if}
 		</div>

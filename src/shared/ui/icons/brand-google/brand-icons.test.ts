@@ -5,6 +5,8 @@ import { SIGN_IN_PROVIDER_COLORS } from '$shared/preferences/theme/sign-in-provi
 import BrandAppleLeftAligned from '../brand-apple/brand-apple-left-aligned.svelte';
 import BrandApple from '../brand-apple/brand-apple.svelte';
 import BrandGoogle from './brand-google.svelte';
+import BrandGoogleCalendar from '../brand-google-calendar/brand-google-calendar.svelte';
+import BrandMicrosoftOutlook from '../brand-microsoft-outlook/brand-microsoft-outlook.svelte';
 import LaurelLeft from '../hugeicons-laurel-wreath-left-01/hugeicons-laurel-wreath-left-01.svelte';
 import LaurelRight from '../hugeicons-laurel-wreath-right-01/hugeicons-laurel-wreath-right-01.svelte';
 
@@ -12,6 +14,11 @@ import LaurelRight from '../hugeicons-laurel-wreath-right-01/hugeicons-laurel-wr
 // the same two the application pins.
 const LOGO_ONLY_SHA256 = 'b0e8caf989d8d4cea8636983f987d9f0c713cbf1732001b9ff2262f880fa7445';
 const LEFT_ALIGNED_SHA256 = '870e7f7ff994651ec0d878cd0dd6007c2b99089332e65efb656a4862d3cabf74';
+// U-111.1: the sha-256 of Google's `calendar_2020q4/v13/192px.svg` shapes, each `d` / `points` in the file's order, joined
+// by «|» (`review/wave3/33-doctor/brand/google-calendar.svg`); and of Simple Icons 16.36.0's Outlook path (`doctor.js` `B`).
+const GOOGLE_CALENDAR_SHA256 = 'b1454959e687aaa68e523f350409780e4d5a2adf551f48b7db8b4178e05407b8';
+const OUTLOOK_SHA256 = '8f76cad4592d67f6baf99d2230fd3e26a8b5ecbab9479e9165febd16fa0cc938';
+const sha256 = (text: string) => createHash('sha256').update(text).digest('hex');
 
 /** The file's own shape: its one rectangle in white, its one path in black, nothing following the text colour. */
 function expectBlackFile(svg: SVGElement, sha256: string) {
@@ -79,5 +86,43 @@ describe('brand and laurel marks', () => {
 
 		const right = render(LaurelRight, { props: { strokeWidth: 1.8 } });
 		expect(right.container.querySelector('path')).toHaveAttribute('stroke-width', '1.8');
+	});
+
+	it('🔴 U-111.1: Google Calendar with its own colours — Google’s file whole: its view box, its nine shapes, their fills, never the text colour', () => {
+		const { container } = render(BrandGoogleCalendar);
+		const svg = container.querySelector('svg') as SVGElement;
+		expect(svg).toHaveAttribute('viewBox', '0 0 192 192');
+		expect(svg).toHaveAttribute('aria-hidden', 'true');
+		expect(svg).toHaveClass('icon-xl');
+		const shapes = [...svg.querySelectorAll('path, polygon')];
+		expect(shapes.map((shape) => shape.getAttribute('fill'))).toEqual([
+			'#FFFFFF',
+			'#1A73E8',
+			'#1A73E8',
+			'#EA4335',
+			'#34A853',
+			'#4285F4',
+			'#188038',
+			'#FBBC04',
+			'#1967D2'
+		]);
+		const geometry = shapes
+			.map((shape) => shape.getAttribute('d') ?? shape.getAttribute('points'))
+			.join('|');
+		expect(sha256(geometry)).toBe(GOOGLE_CALENDAR_SHA256);
+		expect(svg.outerHTML).not.toContain('currentColor');
+	});
+
+	it('🔴 U-110.1 / U-111.1: Microsoft Outlook in one colour — its one path in the text colour (white on the dark theme), as large as the line icons', () => {
+		const { container } = render(BrandMicrosoftOutlook, { props: { class: 'text-foreground' } });
+		const svg = container.querySelector('svg') as SVGElement;
+		expect(svg).toHaveAttribute('viewBox', '-2.5 -2.5 29 29');
+		expect(svg).toHaveAttribute('fill', 'currentColor');
+		expect(svg).toHaveClass('icon-xl', 'text-foreground');
+		const paths = svg.querySelectorAll('path');
+		expect(paths).toHaveLength(1);
+		expect(paths[0].getAttribute('fill')).toBeNull();
+		expect(sha256(paths[0].getAttribute('d') ?? '')).toBe(OUTLOOK_SHA256);
+		expect(svg.outerHTML).not.toMatch(/#[0-9a-f]{3,8}\b/i);
 	});
 });

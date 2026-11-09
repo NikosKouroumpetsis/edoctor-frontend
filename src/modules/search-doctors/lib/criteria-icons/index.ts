@@ -1,11 +1,28 @@
-import { criteriaIcons, specialtyIcons } from '$modules/search-doctors/config/criteria-icons';
+import {
+	criteriaIcons,
+	specialtyIconQualifiers,
+	specialtyIcons
+} from '$modules/search-doctors/config/criteria-icons';
 import { foldSearchText } from '$shared/lib/text';
 import type { IoniconName } from '$shared/ui/icons/ionicon';
 
+/**
+ * A label's folded words; a qualifier (`specialtyIconQualifiers`) is one word with the word after it, joined by «+» so
+ * no stem reads across the seam (U-122: «pediatric+surgeon», never «pediatricsurgeon», which starts as «pediatrics»).
+ */
 function wordsOf(label: string): string[] {
-	return foldSearchText(label)
+	const words = foldSearchText(label)
 		.split(/[\s\-–/(),.]+/u)
 		.filter(Boolean);
+	const joined: string[] = [];
+	for (let index = 0; index < words.length; index += 1) {
+		const next = words[index + 1];
+		if (next && specialtyIconQualifiers.includes(words[index])) {
+			joined.push(`${words[index]}+${next}`);
+			index += 1;
+		} else joined.push(words[index]);
+	}
+	return joined;
 }
 
 function startsAWord(label: string, starts: readonly string[]): boolean {

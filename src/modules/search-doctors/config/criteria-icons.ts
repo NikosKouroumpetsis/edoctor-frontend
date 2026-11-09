@@ -23,18 +23,30 @@ export const specialtyIcons: readonly { icon: IoniconName; words: readonly strin
 	{ icon: 'fitness-outline', words: ['καρδιολογ', 'καρδιοχειρουργ', 'cardiolog', 'cardiac'] },
 	// the doctor's bag (Παθολόγος)
 	{ icon: 'medkit-outline', words: ['παθολογ', 'internal', 'internist'] },
-	// a smile (Παιδίατρος)
-	{ icon: 'happy-outline', words: ['παιδιατρ', 'pediatric', 'paediatric'] },
+	// a smile (Παιδίατρος); the English words of the pediatrician alone (U-122: «Pediatric …» is a compound, below)
+	{
+		icon: 'happy-outline',
+		words: ['παιδιατρ', 'pediatrician', 'pediatrics', 'paediatrician', 'paediatrics']
+	},
 	// a spark (Δερματολόγος)
 	{ icon: 'sparkles-outline', words: ['δερματολογ', 'dermatolog'] },
 	// a woman (Γυναικολόγος)
 	{ icon: 'woman-outline', words: ['γυναικολογ', 'gynecolog', 'gynaecolog'] },
 	// a bone (Ορθοπαιδικός)
 	{ icon: 'bone', words: ['ορθοπαιδ', 'orthoped', 'orthopaed'] },
-	// a brain (Ψυχολόγος)
-	{ icon: 'brain', words: ['ψυχολογ', 'psycholog'] },
+	// a brain (Ψυχολόγος; U-122: Παιδοψυχολόγος too, as «Child psychologist» in English)
+	{ icon: 'brain', words: ['ψυχολογ', 'παιδοψυχολογ', 'psycholog'] },
+	// the same brain (Σύμβουλος Ψυχικής Υγείας, U-122.1: its own specialty, PR091, beside the psychologist)
+	{ icon: 'brain', words: ['ψυχικ', 'mental'] },
 	// an eye (Οφθαλμίατρος)
 	{ icon: 'eye-outline', words: ['οφθαλμ', 'ophthalm'] },
 	// a tooth (Οδοντίατρος)
 	{ icon: 'tooth-outline', words: ['οδοντιατρ', 'dentist', 'dental'] }
 ];
+
+/**
+ * 🔴 U-122 · the English qualifiers that make ONE specialty with the word after them, as Greek writes «Παιδο…» as one
+ * word: «Pediatric cardiologist» is Παιδοκαρδιολόγος, not Καρδιολόγος (U-21), so each id wears one glyph in both
+ * languages (`tests/architecture/specialty-terms.test.ts`).
+ */
+export const specialtyIconQualifiers: readonly string[] = ['pediatric', 'paediatric'];

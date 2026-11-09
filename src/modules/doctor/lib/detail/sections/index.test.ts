@@ -67,4 +67,24 @@ describe('lib/detail sections (the windows’ addresses)', () => {
 			expect(readDoctorPhotoFocus(value)).toBeUndefined();
 		}
 	});
+
+	it('Wave 3 (P-W3 §3.2.1 γ / ε): the profile keeps a chosen hour — `time` as `HH:MM` only, and the profile’s address carries the booking’s own hints in a fixed order', () => {
+		expect(
+			readDoctorDetailHints(new URLSearchParams('office=off-1&date=2026-11-08&time=09:30'))
+		).toEqual({ office: 'off-1', date: '2026-11-08', time: '09:30' });
+		expect(
+			doctorProfilePath('dr-athena', {
+				service: 'svc-1',
+				time: '09:30',
+				date: '2026-11-08',
+				office: 'off-1'
+			})
+		).toBe('/doctors/dr-athena?office=off-1&date=2026-11-08&time=09%3A30&service=svc-1');
+	});
+
+	it('U-65.6 (negative): a forged `time` is absent — out of the day, one digit, a script, a second', () => {
+		for (const time of ['25:00', '9:3', '09:60', '<script>', '09:30:00', '0930']) {
+			expect(readDoctorDetailHints(new URLSearchParams({ time })), time).toEqual({});
+		}
+	});
 });

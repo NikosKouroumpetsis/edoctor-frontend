@@ -1590,6 +1590,176 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/doctor/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the saved doctor registration of the session (requires a session; the backoffice names the account). */
+        get: operations["getDoctorOnboardingProgress"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/onboarding/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start the doctor registration of a patient account (requires a session). */
+        post: operations["startDoctorOnboarding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/onboarding/basic-info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Save the name, gender and date of birth of the registration (requires a session). */
+        post: operations["saveDoctorOnboardingBasicInfo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/onboarding/notification-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set the contact email of the registration (requires a DOCTOR session). */
+        put: operations["setDoctorOnboardingNotificationEmail"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/onboarding/notification-email/verification-code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send the 6-digit code that verifies the contact email (requires a DOCTOR session). */
+        post: operations["sendDoctorOnboardingNotificationEmailCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/onboarding/notification-email/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify the contact email with its code (requires a DOCTOR session). */
+        post: operations["verifyDoctorOnboardingNotificationEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/onboarding/professional": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Save the specialty of the registration (requires a session). */
+        post: operations["saveDoctorOnboardingProfessional"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/onboarding/license": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Save the optional licence number and date of the registration (requires a session). */
+        post: operations["saveDoctorOnboardingLicense"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/onboarding/office": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Save one or more screen groups of the registration office (requires a session). */
+        post: operations["saveDoctorOnboardingOffice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/onboarding/service-pricing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Save the price and length of the simple visit (requires a DOCTOR session). */
+        post: operations["saveDoctorOnboardingServicePricing"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/doctor/onboarding/calendar": {
         parameters: {
             query?: never;
@@ -1601,6 +1771,108 @@ export interface paths {
         put?: never;
         /** Set the calendar category of a doctor (requires a session; works after onboarding too). */
         post: operations["setDoctorOnboardingCalendar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/onboarding/liability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Save the liability insurance answer and accept the doctor terms (requires a session). */
+        post: operations["saveDoctorOnboardingLiability"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/onboarding/activation-intent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Save what the doctor wants activated (requires a DOCTOR session). */
+        post: operations["saveDoctorOnboardingActivationIntent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/onboarding/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete the doctor registration (requires a session). */
+        post: operations["completeDoctorOnboarding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/location/address-search/suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Suggest Greek addresses for the typed text (requires a DOCTOR session). */
+        post: operations["listAddressSearchSuggestions"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/location/address-search/details": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Read the picked address for the confirmation screen (requires a DOCTOR session). */
+        post: operations["getAddressSearchDetails"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/professional/professionals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List every specialty with its names in each language (requires a session). */
+        get: operations["listProfessionals"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3391,6 +3663,7 @@ export interface components {
             images: components["schemas"]["DoctorPublicMarketplaceOfficeImageView"][];
             weeklyHours: components["schemas"]["DoctorPublicMarketplaceOfficeWeeklyHoursView"] | null;
             gettingThere: string | null;
+            amenities: components["schemas"]["DoctorPublicMarketplaceOfficeAmenitiesView"];
             officeId: string;
             city: string;
             state: string;
@@ -3425,6 +3698,16 @@ export interface components {
                 }[];
             }[];
         };
+        /** @description Σ-22: the office details only the office page shows; `parking` and `disabilityAccess` stay on the office itself. */
+        DoctorPublicMarketplaceOfficeAmenitiesView: {
+            parkingKinds: components["schemas"]["OfficeParkingKind"][];
+            accessibleToilet: boolean;
+            accessibleParking: boolean;
+            elevator: boolean;
+            nearPublicTransport: boolean;
+        };
+        /** @enum {string} */
+        OfficeParkingKind: "PRIVATE" | "PUBLIC_NEARBY" | "STREET";
         BookingPolicyView: {
             confirmationMode: components["schemas"]["AppointmentConfirmationMode"];
             cancellationCutoffHours: number;
@@ -3907,13 +4190,15 @@ export interface components {
         MessagingDoctorSettingsView: {
             acceptsNewConversations: boolean;
         };
-        /** @description What the app needs before the last booking step (D-05): only the missing fields are asked for. `insideCancellationCutoff` (U-90.1 A4) says the deadline of the chosen slot has already passed, by the server clock; `false` without a slot. */
+        /** @description What the app needs before the last booking step (D-05). `insideCancellationCutoff` (U-90.1 A4): the deadline of the slot has passed; `false` without a slot. `firstVisitKnown` (A-1): the person has seen the doctor, `null` without a doctor. `patientSmsExpected` (A-3, U-103.3): the doctor's answer also leaves by SMS; `null` without a slot or a doctor of the tenant. */
         BookingReadinessView: {
             phoneVerified: boolean;
             nameComplete: boolean;
             dateOfBirthPresent: boolean;
             blockers: components["schemas"]["BookingReadinessBlocker"][];
             insideCancellationCutoff: boolean;
+            firstVisitKnown: boolean | null;
+            patientSmsExpected: boolean | null;
         };
         /** @description Union of the two blocker vocabularies (D-47): the patient/appointment codes this module owns and the slot codes the availability module owns. */
         BookingReadinessBlocker: components["schemas"]["AppointmentBookingBlocker"] | components["schemas"]["PublicSlotEligibilityBlockerCode"];
@@ -3950,6 +4235,7 @@ export interface components {
             officeSnapshot: components["schemas"]["AppointmentOfficeSnapshotView"] | null;
             relativeSnapshot: components["schemas"]["AppointmentRelativeSnapshotView"] | null;
             patientNote: string | null;
+            firstVisit: boolean | null;
             confirmationModeSnapshot: components["schemas"]["AppointmentConfirmationMode"] | null;
             confirmedAt: string | null;
             confirmedBy: components["schemas"]["AppointmentActorKind"] | null;
@@ -4111,6 +4397,7 @@ export interface components {
             officeSnapshot: components["schemas"]["AppointmentOfficeSnapshotView"] | null;
             relativeSnapshot: components["schemas"]["AppointmentRelativeSnapshotView"] | null;
             patientNote: string | null;
+            firstVisit: boolean | null;
             confirmationModeSnapshot: components["schemas"]["AppointmentConfirmationMode"] | null;
             confirmedAt: string | null;
             confirmedBy: components["schemas"]["AppointmentActorKind"] | null;
@@ -4595,6 +4882,14 @@ export interface components {
             parking: boolean;
             disabilityAccess: boolean;
             paymentOptions: components["schemas"]["IPaymentOptions"][];
+            parkingKinds: components["schemas"]["OfficeParkingKind"][];
+            accessibleToilet: boolean;
+            accessibleParking: boolean;
+            elevator: boolean;
+            nearPublicTransport: boolean;
+            googlePlaceId: string | null;
+            pointSource: components["schemas"]["OfficePointSource"];
+            googlePointFetchedAt: string | null;
         };
         OfficeTranslationView: {
             id: string;
@@ -4624,31 +4919,124 @@ export interface components {
         };
         /** @enum {string} */
         IPaymentOptions: "CASH" | "CARD" | "ONLINE_DOCTOR_PAY" | "ONLINE_OFFICE_PAY" | "IRIS" | "STUDENT_CARD" | "UNEMPLOYMENT_CARD";
-        DoctorView: {
+        /** @enum {string} */
+        OfficePointSource: "DOCTOR" | "GOOGLE" | "CATALOGUE";
+        /** @description U-112.2 (§5.1, MAJOR 3.6): the saved registration, as `GET /doctor/onboarding` and every step write return it. The names are the names of the write bodies, so a client fills each screen from it 1:1. */
+        DoctorOnboardingProgressView: {
+            state: components["schemas"]["DoctorOnboardingState"];
+            startedAt: string | null;
+            deleteAfter: string | null;
+            completedAt: string | null;
+            missing: components["schemas"]["DoctorOnboardingSection"][];
+            basicInfo: {
+                firstName: string | null;
+                lastName: string | null;
+                dateOfBirth: string | null;
+                /** @enum {string|null} */
+                gender: "MALE" | "FEMALE" | null;
+            };
+            contactEmail: {
+                notificationEmail: string | null;
+                verified: boolean;
+            };
+            professional: {
+                professionalId: string | null;
+                licenseNumber: string | null;
+                licenseObtainedDate: string | null;
+            };
+            office: components["schemas"]["DoctorOnboardingProgressOfficeView"] | null;
+            servicePricing: {
+                price: number | null;
+                customDurationInMinutes: number | null;
+            };
+            calendar: {
+                category: components["schemas"]["ICalendar"] | null;
+            };
+            liability: {
+                liabilityInsurance: boolean | null;
+                liabilityCompany: string | null;
+                liabilityInsuranceExpiresAt: string | null;
+            };
+            terms: {
+                accepted: boolean;
+                version: string | null;
+            };
+            activationIntent: {
+                wantsMarketplace: boolean;
+                wantsAppointments: boolean;
+                wantsPayments: boolean;
+            } | null;
+            salesContact: {
+                salesContactRequested: boolean | null;
+                salesContactPhone: string | null;
+            } | null;
+        };
+        /**
+         * @description U-112.2 (§5.1): where a registration stands; a signed-in account that never started reads NOT_STARTED.
+         * @enum {string}
+         */
+        DoctorOnboardingState: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "LOCKED";
+        /** @enum {string} */
+        DoctorOnboardingSection: "BASIC_INFO" | "CONTACT_EMAIL" | "PROFESSIONAL" | "OFFICE_ADDRESS" | "OFFICE_PHONE" | "OFFICE_PAYMENTS" | "SERVICE_PRICING" | "CALENDAR" | "LIABILITY" | "TERMS" | "ACTIVATION_INTENT";
+        DoctorOnboardingProgressOfficeView: {
+            streetLine: string;
+            postalCode: string;
+            city: string;
+            latitude: number;
+            longitude: number;
+            placeId: string | null;
+            pinMoved: boolean;
+            phone: string | null;
+            floor: number | null;
+            gettingThere: string | null;
+            parking: boolean;
+            parkingKinds: components["schemas"]["OfficeParkingKind"][];
+            disabilityAccess: boolean;
+            accessibleToilet: boolean;
+            accessibleParking: boolean;
+            elevator: boolean;
+            nearPublicTransport: boolean;
+            paymentOptions: components["schemas"]["IPaymentOptions"][];
+        };
+        /** @description The answer of the email code request, the one registration write that does not return the progress (cooldown). */
+        DoctorNotificationEmailCodeSentView: {
+            success: boolean;
+        };
+        /** @description The suggestions of one typed text, at most five, and the session token (UUIDv4) every next call of the same search sends back; a new search starts without one and receives a new token. */
+        AddressSearchSuggestionsResponseView: {
+            sessionToken: string;
+            suggestions: components["schemas"]["AddressSearchSuggestionView"][];
+        };
+        /** @description One line of the address list: its place id and the two texts of the list, never stored. */
+        AddressSearchSuggestionView: {
+            placeId: string;
+            mainText: string;
+            secondaryText: string;
+        };
+        /** @description The picked place as the confirmation screen fills it: one street line (empty for a place without a street), a postal code of five digits or `null`, the city or `null`, the point, and `pointProof` — the server's signature over this point for the session account, which the office address sends back so the server keeps it as a Google point. */
+        AddressSearchDetailsResponseView: {
+            placeId: string;
+            streetLine: string;
+            postalCode: string | null;
+            city: string | null;
+            latitude: number;
+            longitude: number;
+            pointProof: string;
+        };
+        /** @description Screen 35 (P-B3-review §5 B-6): every specialty with its names in each language; the client picks the language it shows. */
+        ProfessionalListResponseView: components["schemas"]["ProfessionalViewExt"][];
+        ProfessionalViewExt: {
+            translations?: components["schemas"]["ProfessionalTranslationView"][];
             id: string;
-            userId: string;
-            tenantUserId: string;
-            mobileNumber: string | null;
-            notificationEmail: string | null;
-            notificationEmailVerifiedAt: string | null;
-            facebook: string | null;
-            website: string | null;
-            instagram: string | null;
-            linkedin: string | null;
-            isVerified: boolean;
-            signupProfileCompletedAt: string | null;
-            licenseNumber: string | null;
-            licenseObtainedDate: string | null;
-            calendarCategory: components["schemas"]["ICalendar"];
-            appointmentsEnabled: boolean;
-            appointmentConfirmationMode: components["schemas"]["AppointmentConfirmationMode"];
-            cancellationCutoffHours: number;
-            minBookingNoticeHours: number;
-            maxBookingHorizonDays: number;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
+            key: string;
+        };
+        ProfessionalTranslationView: {
+            id: string;
+            language: components["schemas"]["ILanguage"];
+            name: string;
+            slug: string;
+            transliteration: string;
+            normalizedName: string;
         };
         ErpCartView: {
             id: string;
@@ -7586,7 +7974,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The created tenant user, with the session cookies set. `password` is required for an email ticket and rejected for a phone ticket; `legalAcceptance` must carry the CURRENT published document versions; `target` selects the created profile and defaults to `patient`. A `dateOfBirth` after today, or further back than 120 years, is refused with 422 before the ticket is spent (a baby born today passes). */
+            /** @description The created tenant user, with the session cookies set. `password` is required for an email ticket and rejected for a phone ticket; `legalAcceptance` must carry the CURRENT published document versions; `target` selects the created profile and defaults to `patient`. The new account's `locale` is `language`, else the language of the request (`?lang`, then `Accept-Language`), else `el`. A `dateOfBirth` after today, or further back than 120 years, is refused with 422 before the ticket is spent (a baby born today passes). */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -8084,8 +8472,8 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The created relative. */
-            200: {
+            /** @description The created relative. A patient keeps at most 20 relatives: the 21st answers 422 with `PATIENT_RELATIVES_LIMIT_REACHED` in the message, and the count is taken under a lock of the account, so two adds at the same instant never pass 20. Rate limited per account under the `relatives-write` class, one budget with changing and deleting a relative (429 past it). */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8112,7 +8500,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The deleted relative, as it was before deletion. */
+            /** @description The deleted relative, as it was before deletion. Rate limited per account under the `relatives-write` class, one budget with adding and changing a relative (429 past it). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8155,7 +8543,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The updated relative. The relative must belong to the patient in the path. */
+            /** @description The updated relative. The relative must belong to the patient in the path. Rate limited per account under the `relatives-write` class, one budget with adding and deleting a relative (429 past it). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8867,7 +9255,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The blockers standing between the signed-in patient and a booking (verified mobile, full name), plus whether booking is possible at all. It belongs to the patient side: a member account, and an account that is also a doctor only when it holds a patient profile (a doctor books another doctor as a patient); otherwise 403. With `doctorId` it also reports `PATIENT_PENDING_LIMIT_REACHED` when that doctor already holds an open request of the PERSON being booked (D-70, counted per person): the account itself, or the relative named by `relativeId` — each relative has a place of its own. A `relativeId` that is not a relative of this account answers like a person with no open request. With `doctorId` naming the doctor profile of this very account it also reports `PATIENT_IS_THE_DOCTOR`, with or without `relativeId`: one account is never both sides of an appointment, and the booking would be refused with 403. With the chosen slot (`officeId` and `startTime`, both together with `doctorId`) it also reports `BOOKING_NOTICE_TOO_SHORT` and `BOOKING_HORIZON_EXCEEDED` under the effective policy of that doctor and office, decided on the SERVER clock — exactly what the booking would be refused with — and `OFFICE_PHONE_REQUIRED` when that office has no phone. `insideCancellationCutoff` says, only with the chosen slot, that the cancellation deadline of that hour has already passed on the server clock, so a patient told nothing else cannot tell that once booked it cannot be cancelled online; `false` without a slot. */
+            /** @description The blockers standing between the signed-in patient and a booking (verified mobile, full name), plus whether booking is possible at all. It belongs to the patient side: a member account, and an account that is also a doctor only when it holds a patient profile (a doctor books another doctor as a patient); otherwise 403. With `doctorId` it also reports `PATIENT_PENDING_LIMIT_REACHED` when that doctor already holds an open request of the PERSON being booked (D-70, counted per person): the account itself, or the relative named by `relativeId` — each relative has a place of its own. A `relativeId` that is not a relative of this account answers like a person with no open request. With `doctorId` naming the doctor profile of this very account it also reports `PATIENT_IS_THE_DOCTOR`, with or without `relativeId`: one account is never both sides of an appointment, and the booking would be refused with 403. With the chosen slot (`officeId` and `startTime`, both together with `doctorId`) it also reports `BOOKING_NOTICE_TOO_SHORT` and `BOOKING_HORIZON_EXCEEDED` under the effective policy of that doctor and office, decided on the SERVER clock — exactly what the booking would be refused with — and `OFFICE_PHONE_REQUIRED` when that office has no phone. `insideCancellationCutoff` says, only with the chosen slot, that the cancellation deadline of that hour has already passed on the server clock, so a patient told nothing else cannot tell that once booked it cannot be cancelled online; `false` without a slot. `firstVisitKnown` (with `doctorId`) is true when that same PERSON — the account itself, or the relative named by `relativeId` — already holds an appointment this doctor accepted (`booked`, `checked_in` or `completed`); the app asks «first visit?» only when it is false. It is null without `doctorId`, and an unknown doctor, a doctor of another tenant or a relative that is not this account's answer false. `patientSmsExpected` (only with the chosen slot, whatever the blockers) says the answer of the doctor will reach the patient by SMS as well as by email: the doctor switched on the patient SMS of every answer of the confirmation mode of that office (MANUAL: confirmed, and rejected or expired; AUTO: confirmed) and has SMS units left now. It is null without a slot, and for an unknown doctor or a doctor of another tenant, which is never asked about. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8943,6 +9331,7 @@ export interface operations {
                     /** @enum {string} */
                     status?: "pending" | "checked_in" | "completed" | "canceled" | "booked" | "rejected" | "unavailable" | "expired" | "no_show";
                     patientNote?: string | null;
+                    firstVisit?: boolean;
                     services: {
                         doctorServiceId: string;
                         quantity?: number;
@@ -8952,7 +9341,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The created appointment. A patient booking at an office with no phone is refused with 403 `OFFICE_PHONE_REQUIRED`. The booking is decided by the side the account takes in it: naming its own doctor profile as `doctorId` makes it a doctor booking, naming its own patient profile as `patientId` (another doctor) a patient booking, and a booking of a doctor for the patient profile of its own account — by that doctor or by the backoffice, for itself or for a relative of its own (`RELATIVE`) — is refused with 403 `PATIENT_IS_THE_DOCTOR`, the blocker code `getBookingReadiness` reports it with beforehand (one account is never both sides of an appointment; another doctor books the same person by the patient rules; judged on the accounts behind the two profiles). Every id is read in its canonical lower-case text before the side is chosen, so the letter case of an id changes nothing. A patient booking never sends `status`: the doctor confirmation mode decides it (AUTO ⇒ `booked`, MANUAL ⇒ `pending`) and the mode is snapshotted on the row. A MEMBER keeps one `pending` request per PERSON with one doctor (D-70): the account itself and each of its relatives count separately, and a second one for the same person answers 422 `PATIENT_PENDING_LIMIT_REACHED`. Rate limited per IP under the `booking` class. */
+            /** @description The created appointment. A patient booking at an office with no phone is refused with 403 `OFFICE_PHONE_REQUIRED`. The booking is decided by the side the account takes in it: naming its own doctor profile as `doctorId` makes it a doctor booking, naming its own patient profile as `patientId` (another doctor) a patient booking, and a booking of a doctor for the patient profile of its own account — by that doctor or by the backoffice, for itself or for a relative of its own (`RELATIVE`) — is refused with 403 `PATIENT_IS_THE_DOCTOR`, the blocker code `getBookingReadiness` reports it with beforehand (one account is never both sides of an appointment; another doctor books the same person by the patient rules; judged on the accounts behind the two profiles). Every id is read in its canonical lower-case text before the side is chosen, so the letter case of an id changes nothing. A patient booking never sends `status`: the doctor confirmation mode decides it (AUTO ⇒ `booked`, MANUAL ⇒ `pending`) and the mode is snapshotted on the row. A MEMBER keeps one `pending` request per PERSON with one doctor (D-70): the account itself and each of its relatives count separately, and a second one for the same person answers 422 `PATIENT_PENDING_LIMIT_REACHED`. `firstVisit` (optional boolean) is the patient's answer to «first visit with this doctor?» and is read back on the appointment: when that person already holds an appointment this doctor accepted (`firstVisitKnown: true` of the readiness) the server stores false whatever is sent; with no answer it stores null, and a booking by the doctor side always stores null. Anything but a boolean, `null` included, answers 422. `services` holds 1 to 10 lines and `patientNote` at most 500 characters (the configured limit may be lower); past either the booking answers 422 and nothing is written. Rate limited per IP under the `booking` class. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -9013,12 +9402,13 @@ export interface operations {
                     /** Format: date-time */
                     startTime?: string;
                     patientNote?: string | null;
+                    firstVisit?: boolean;
                     acknowledgeInsideCancellationCutoff?: boolean;
                 };
             };
         };
         responses: {
-            /** @description The updated appointment, with its `actions`. A member may move it only before the effective cancellation cutoff and only into a slot that still passes notice, horizon and availability. A member moving a BOOKED visit to an hour whose cancellation deadline has already passed gets 422 `RESCHEDULE_INSIDE_CANCELLATION_CUTOFF` and nothing is written, unless the body carries `acknowledgeInsideCancellationCutoff: true`; a request (`pending`) and the doctor side are never asked. A doctor moves only a pending or booked appointment (403 otherwise), without the patient accepting, and the status does not change. A member who hands a `pending` request to another person (`relativeId`) takes that person's own D-70 place (422 `PATIENT_PENDING_LIMIT_REACHED` when it is taken). Who the visit is for (`bookedForType`, `relativeId`) and the `patientNote` change only while it is pending or booked, for every role (403 otherwise), and a new person carries its own frozen `relativeSnapshot` (null for the account holder). Only the patient of the appointment writes `patientNote` (D-39): a body from the doctor side that carries it is refused with 403. A write that finds the appointment closed in the meantime answers that same 403; one that finds it changed but still open answers 409. Rate limited per IP under the `booking` class. */
+            /** @description The updated appointment, with its `actions`. A member may move it only before the effective cancellation cutoff and only into a slot that still passes notice, horizon and availability. A member moving a BOOKED visit to an hour whose cancellation deadline has already passed gets 422 `RESCHEDULE_INSIDE_CANCELLATION_CUTOFF` and nothing is written, unless the body carries `acknowledgeInsideCancellationCutoff: true`; a request (`pending`) and the doctor side are never asked. A doctor moves only a pending or booked appointment (403 otherwise), without the patient accepting, and the status does not change. A member who hands a `pending` request to another person (`relativeId`) takes that person's own D-70 place (422 `PATIENT_PENDING_LIMIT_REACHED` when it is taken). Who the visit is for (`bookedForType`, `relativeId`) and the `patientNote` change only while it is pending or booked, for every role (403 otherwise), and a new person carries its own frozen `relativeSnapshot` (null for the account holder). Only the patient of the appointment writes `patientNote` (D-39): a body from the doctor side that carries it is refused with 403. A new person is asked «first visit?» again (D-W3-22): a visit of that person this doctor already accepted stores `firstVisit` false, otherwise the `firstVisit` of the body, or null without it; `firstVisit` comes only from the patient (403 from the doctor side) and only together with a change of the person (422 otherwise). A write that finds the appointment closed in the meantime answers that same 403; one that finds it changed but still open answers 409. `patientNote` holds at most 500 characters (422 past it; the configured limit may be lower). Rate limited per IP under the `booking` class. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9586,7 +9976,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The profile of the signed-in account with its name translations: `locale` (`el` or `en`; without one the messages use the platform default language), `gender`, `dateOfBirth`, `avatarUrl`, `headline` and `bio`. It names no id but the account's own. `data` is `null` for an account that has no profile yet (a sign-up without names, for one): its first `updateMyProfile` creates the profile, with `locale` `en` unless that body names one. */
+            /** @description The profile of the signed-in account with its name translations: `locale` (`el` or `en`; without one the messages use the platform default language), `gender`, `dateOfBirth`, `avatarUrl`, `headline` and `bio`. It names no id but the account's own. `data` is `null` for an account that has no profile yet (a sign-up without names, for one): its first `updateMyProfile` creates the profile, with `locale` `el` unless that body names one. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9625,7 +10015,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The stored profile. For an account with no profile yet the call creates it, with every field the body names and `locale` `en` unless it names one — an empty body included. Once the profile exists the body is a patch: an absent field keeps its value, and a body that changes nothing answers 422. `locale` sets the language of every message the account receives from then on. `avatarUrl` must be an absolute `https` URL (anything else answers 422). The target is always the account of the session. */
+            /** @description The stored profile. For an account with no profile yet the call creates it, with every field the body names and `locale` `el` unless it names one — an empty body included. Once the profile exists the body is a patch: an absent field keeps its value, and a body that changes nothing answers 422. `locale` sets the language of every message the account receives from then on. `avatarUrl` must be an absolute `https` URL (anything else answers 422). The target is always the account of the session. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10445,6 +10835,7 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    /** Format: uuid */
                     tenantUserId?: string;
                     facebook?: string | null;
                     website?: string | null;
@@ -10532,6 +10923,368 @@ export interface operations {
             };
         };
     };
+    getDoctorOnboardingProgress: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Where the registration stands (`NOT_STARTED` for an account that never started, `LOCKED` after three deletions), what it still lacks in screen order (`missing`), every saved answer under the name of its write body, and `deleteAfter` while it is in progress. Never cached (`no-store`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorOnboardingProgressView"];
+                    };
+                };
+            };
+        };
+    };
+    startDoctorOnboarding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. No terms are accepted here; when the session did not carry the doctor role yet, the answer sets new session cookies that carry it. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorOnboardingProgressView"];
+                    };
+                };
+            };
+        };
+    };
+    saveDoctorOnboardingBasicInfo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    firstName?: string;
+                    lastName?: string;
+                    fullName?: string;
+                    /** @enum {string} */
+                    gender?: "MALE" | "FEMALE";
+                    /** Format: date-time */
+                    dateOfBirth?: string;
+                    /** @enum {string} */
+                    language?: "el" | "en";
+                    /** Format: email */
+                    email?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. The names are stored in `language`, else in the language of the stored names, else in the language of the request (`?lang`, then `Accept-Language`), else `el`; the account's `locale` follows it. `DOCTOR_UNDER_MINIMUM_AGE` refuses a date of birth under 18, `DOCTOR_ONBOARDING_NOT_STARTED` a registration that never started. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorOnboardingProgressView"];
+                    };
+                };
+            };
+        };
+    };
+    setDoctorOnboardingNotificationEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: email */
+                    notificationEmail: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. A changed address is unverified until its code is confirmed. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorOnboardingProgressView"];
+                    };
+                };
+            };
+        };
+    };
+    sendDoctorOnboardingNotificationEmailCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    notificationEmail?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Whether the code left. A resend inside the cooldown answers 429; a refused delivery answers 403 (`EC015`) with `DOCTOR_NOTIFICATION_EMAIL_SEND_FAILED` in the message, and the code can be asked again. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorNotificationEmailCodeSentView"];
+                    };
+                };
+            };
+        };
+    };
+    verifyDoctorOnboardingNotificationEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: email */
+                    notificationEmail: string;
+                    code: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorOnboardingProgressView"];
+                    };
+                };
+            };
+        };
+    };
+    saveDoctorOnboardingProfessional: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    professionalId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorOnboardingProgressView"];
+                    };
+                };
+            };
+        };
+    };
+    saveDoctorOnboardingLicense: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    licenseNumber?: string | null;
+                    /** Format: date-time */
+                    licenseObtainedDate?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. A licence date is a day between 1950-01-01 and today. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorOnboardingProgressView"];
+                    };
+                };
+            };
+        };
+    };
+    saveDoctorOnboardingOffice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    address?: {
+                        streetLine: string;
+                        postalCode: string;
+                        city: string;
+                        latitude: number;
+                        longitude: number;
+                        externalPlace: {
+                            /** @enum {string} */
+                            provider: "GOOGLE_MAPS";
+                            placeId: string;
+                            pinMoved?: boolean;
+                            pointProof?: string;
+                        } | null;
+                    };
+                    details?: {
+                        phone: string | null;
+                        floor: number | null;
+                        gettingThere: string | null;
+                    };
+                    amenities?: {
+                        parking: boolean;
+                        parkingKinds: ("PRIVATE" | "PUBLIC_NEARBY" | "STREET")[];
+                        disabilityAccess: boolean;
+                        accessibleToilet: boolean;
+                        accessibleParking: boolean;
+                        elevator: boolean;
+                        nearPublicTransport: boolean;
+                    };
+                    paymentOptions?: ("CASH" | "CARD" | "IRIS" | "STUDENT_CARD" | "UNEMPLOYMENT_CARD")[];
+                };
+            };
+        };
+        responses: {
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. Each group (`address`, `details`, `amenities`, `paymentOptions`) replaces only its own fields; the server splits `streetLine` into street and number. A first save without `address` answers 409 with `DOCTOR_ONBOARDING_OFFICE_ADDRESS_REQUIRED`, a point outside Greece 422 with `OFFICE_POINT_OUTSIDE_GREECE`, and a detail without its parent (a parking kind without parking, an accessible toilet or parking space without step-free access, an elevator on the ground floor) 422 with `OFFICE_AMENITY_PARENT_MISSING`; to move a stored elevator office to the ground floor, send `details` with `floor: 0` and `amenities` with `elevator: false` in the same POST. `paymentOptions`, when sent, holds 1 to 5 options. A Google address sends `externalPlace.pointProof` exactly as the address search details answered it: only with a valid proof of this account and place is the point kept as Google's, with the time of those details, and the server alone judges a pin moved more than 1 m (D-W3-33); without one the point is the doctor's. The same Google place and point saved again without a new proof keep their stored time. `pinMoved` is accepted and never read. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorOnboardingProgressView"];
+                    };
+                };
+            };
+        };
+    };
+    saveDoctorOnboardingServicePricing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    price: number;
+                    customDurationInMinutes?: (15 | 20 | 30 | 45 | 60) | null;
+                    language?: ("el" | "en") | null;
+                    subtitle?: string | null;
+                    description?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. The price is a whole number of euros from 1 to 9999; the length is one of 15, 20, 30, 45 or 60 minutes, or `null` for the default. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorOnboardingProgressView"];
+                    };
+                };
+            };
+        };
+    };
     setDoctorOnboardingCalendar: {
         parameters: {
             query?: never;
@@ -10542,6 +11295,7 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    /** Format: uuid */
                     tenantUserId?: string;
                     /** @enum {string} */
                     calendarCategory: "NONE" | "GOOGLE" | "DIRECT" | "MICROSOFT";
@@ -10549,7 +11303,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The updated doctor. `DIRECT` keeps appointments inside eDoctor; `GOOGLE` or `MICROSOFT` is the category the calendar-sync connect flow then requires. */
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. The answer is recorded, so `NONE` chosen differs from never answered. `DIRECT` keeps appointments inside eDoctor; `GOOGLE` or `MICROSOFT` is the category the calendar-sync connect flow then requires. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10559,7 +11313,214 @@ export interface operations {
                         /** @enum {string} */
                         status: "success" | "error";
                         message: string;
-                        data: components["schemas"]["DoctorView"];
+                        data: components["schemas"]["DoctorOnboardingProgressView"];
+                    };
+                };
+            };
+        };
+    };
+    saveDoctorOnboardingLiability: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    liabilityInsurance: boolean;
+                    /** Format: date-time */
+                    liabilityInsuranceExpiresAt?: string | null;
+                    liabilityCompany?: string | null;
+                    legalAcceptance?: {
+                        /** @enum {string} */
+                        context: "DOCTOR";
+                        acceptances: {
+                            /** @enum {string} */
+                            documentCode: "DOCTOR_MARKETPLACE_TERMS";
+                            version: string;
+                            /** @constant */
+                            accepted: true;
+                        }[];
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. The doctor sends `legalAcceptance` with the doctor terms at their version in force, recorded with the time; without it the doctor is refused with `DOCTOR_TERMS_NOT_ACCEPTED`, and the backoffice saving for an account may not send it. A version that is no longer in force answers 400: read the terms page again and send its current version. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorOnboardingProgressView"];
+                    };
+                };
+            };
+        };
+    };
+    saveDoctorOnboardingActivationIntent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    wantsMarketplace: boolean;
+                    wantsPayments: boolean;
+                    wantsAppointments: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorOnboardingProgressView"];
+                    };
+                };
+            };
+        };
+    };
+    completeDoctorOnboarding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    salesContactRequested?: boolean | null;
+                    salesContactPhone?: string | null;
+                    contractReference?: string | null;
+                    sellerShouldContact?: boolean | null;
+                    contractNumber?: string | null;
+                    phoneNumber?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. A registration that still lacks a section is refused before any write with `DOCTOR_ONBOARDING_INCOMPLETE` (and `DOCTOR_UNDER_MINIMUM_AGE` or `DOCTOR_TERMS_NOT_ACCEPTED` where they apply); read the progress again and open `missing[0]`. The older checks run first and answer 422 with their own marker: `DOCTOR_NOTIFICATION_EMAIL_MISSING` or `DOCTOR_NOTIFICATION_EMAIL_UNVERIFIED`, `DEFAULT_DOCTOR_SERVICE_MISSING`, `DEFAULT_DOCTOR_SERVICE_PRICE_INVALID` or `DEFAULT_DOCTOR_SERVICE_DURATION_INVALID`, and `DOCTOR_ONBOARDING_OFFICE_MISSING`, `DOCTOR_ONBOARDING_OFFICE_PHONE_MISSING` or `DOCTOR_ONBOARDING_OFFICE_ADDRESS_MISSING`; a registration without the liability answer is refused with 400, and one without its activation intent with 422 (`activation intent info is required before completion`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorOnboardingProgressView"];
+                    };
+                };
+            };
+        };
+    };
+    listAddressSearchSuggestions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    input: string;
+                    sessionToken?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description At most five suggestions and the `sessionToken` of the search: a first call without one receives a new UUIDv4, every next call of the same search sends it back, and a new search after a pick starts without it. `input` is 2 to 120 characters once trimmed (the body itself takes at most 200); a control, zero-width or bidi character, a line or paragraph break or a tab answers 422, and so does a token that is not a UUIDv4. A session that is not a doctor (primary or secondary role) answers 403, an invalid body 422 (an unknown field too). Rate limited per IP under `address-search-address`, per account under `address-search` (an hour) and under `address-search-suggestions-daily` or `address-search-details-daily` (a day: 100 suggestions, 20 details), and for the whole API under `address-search-suggestions-project` or `address-search-details-project` (the quota day of Google: 250 and 200), each answering 429 past it (D-W3-35). A provider that cannot answer gives 503 with `ADDRESS_SEARCH_UNAVAILABLE` in the message, and the manual address entry stays. Nothing is stored, the provider never learns who searches, and the answer is never cached (`no-store`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AddressSearchSuggestionsResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    getAddressSearchDetails: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    placeId: string;
+                    sessionToken?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The place as one `streetLine` (street and number, empty for a place without a street), a five-digit `postalCode` or null, the `city` or null and the point, with `pointProof`: the server's signature of this point for the session account, valid for a day. The office address of the registration sends it back in `externalPlace.pointProof`, and only then is the point kept as Google's (D-W3-33). Sending the `sessionToken` of the search closes its session. A place outside Greece answers 422 with `ADDRESS_OUTSIDE_GREECE` in the message. A session that is not a doctor (primary or secondary role) answers 403, an invalid body 422 (an unknown field too). Rate limited per IP under `address-search-address`, per account under `address-search` (an hour) and under `address-search-suggestions-daily` or `address-search-details-daily` (a day: 100 suggestions, 20 details), and for the whole API under `address-search-suggestions-project` or `address-search-details-project` (the quota day of Google: 250 and 200), each answering 429 past it (D-W3-35). A provider that cannot answer gives 503 with `ADDRESS_SEARCH_UNAVAILABLE` in the message, and the manual address entry stays. Nothing is stored, the provider never learns who searches, and the answer is never cached (`no-store`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AddressSearchDetailsResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    listProfessionals: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every specialty with its `key` and its names in each language (`translations`); the client shows the name of its own language and searches it without accents or case. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ProfessionalListResponseView"];
                     };
                 };
             };

@@ -52,10 +52,10 @@ const registry: ConsentRegistryFacts = {
 /**
  * «Μόνο απαραίτητα» on the bundled catalogue. Rewritten by U-24.4 (D3): it was `{ 'edoctor-api': true }`; the
  * results' map makes OpenFreeMap an essential tool of the web too (the application's entry, `web` among its
- * platforms), so both essentials are stored on.
+ * platforms), so both essentials are stored on. C-1: the bundled catalogue's version, 1.1.0 ⇒ 1.2.0.
  */
 const fallbackDecision = {
-	registryVersion: '1.1.0',
+	registryVersion: '1.2.0',
 	choices: { 'edoctor-api': true, openfreemap: true, 'helpful-answers-storage': true }
 };
 
@@ -398,6 +398,19 @@ describe('ConsentPrompt (the web’s consent card)', () => {
 				choices: { 'edoctor-api': true, 'web-analytics': false }
 			})
 		);
+		expect(screen.queryByRole('region', { name: 'Συναίνεση cookies' })).not.toBeInTheDocument();
+	});
+	it('C-1: the 1.1.0 ⇒ 1.2.0 bump asks nothing — a kept 1.1.0 decision becomes 1.2.0 with OpenFreeMap on, silently', async () => {
+		window.localStorage.setItem(
+			consentStorageKey,
+			JSON.stringify({
+				registryVersion: '1.1.0',
+				choices: { 'edoctor-api': true, 'helpful-answers-storage': true }
+			})
+		);
+		getConsentRegistry.mockRejectedValue(new Error('offline'));
+		renderPrompt();
+		await waitFor(() => expect(stored()).toEqual(fallbackDecision));
 		expect(screen.queryByRole('region', { name: 'Συναίνεση cookies' })).not.toBeInTheDocument();
 	});
 	// MINOR-2 (r2): r1 kept a served registry whose tools were all dropped at the boundary — an empty catalogue never

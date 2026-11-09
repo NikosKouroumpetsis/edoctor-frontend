@@ -38,6 +38,7 @@
 		helperText,
 		size = 'default',
 		disabled = false,
+		maxlength,
 		id,
 		inputTestId,
 		class: className
@@ -59,6 +60,8 @@
 		helperText?: string;
 		size?: TextFieldSize;
 		disabled?: boolean;
+		/** U-65.6: the most characters the number takes (the caller's limit, the server's); none by default. */
+		maxlength?: number;
 		id?: string;
 		inputTestId?: string;
 		class?: string;
@@ -139,6 +142,7 @@
 				inputmode="tel"
 				autocomplete="tel-national"
 				{disabled}
+				{maxlength}
 				value={currentNumber}
 				placeholder={placeholderText}
 				aria-invalid={currentError ? 'true' : undefined}

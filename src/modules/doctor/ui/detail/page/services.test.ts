@@ -69,6 +69,7 @@ function props(
 		localize: (path) => path,
 		similarHref: () => '/doctors' as ResolvedPathname,
 		similarAreaQuery: (city) => ({ queryKey: ['area', city], queryFn: async () => null }),
+		bookingHref: (slot) => `/doctors/dr/booking?office=${slot.officeId}`,
 		canonicalUrl: 'https://edoctor.example/doctors/dr',
 		alternateUrls: { el: 'https://edoctor.example/x', en: 'https://edoctor.example/en/x' },
 		backHref: '/doctors',

@@ -20,10 +20,12 @@
 		DoctorBookingAction,
 		DoctorBookingContent
 	} from '$modules/doctor/lib/detail';
-	import Elsewhere from './elsewhere.svelte';
-	import { doctorBookingActionGlyphs } from './icons';
+	import {
+		AvailabilityElsewhere as Elsewhere,
+		doctorBookingActionGlyphs,
+		OfficeTabs
+	} from '$modules/doctor/ui/availability-picker';
 	import Fee from './fee.svelte';
-	import OfficeTabs from './office-tabs.svelte';
 
 	let {
 		booking,

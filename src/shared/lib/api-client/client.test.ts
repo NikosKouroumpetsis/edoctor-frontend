@@ -46,6 +46,26 @@ describe('api client request paths', () => {
 	});
 });
 
+describe('🔴 D-W3-39: the page’s language (review w3-w6 R1 MAJOR-N1)', () => {
+	it('every request says the page’s language at its own moment: `el` on a Greek page, `en` after `/en/…`', async () => {
+		const languages: (string | null)[] = [];
+		const fetchImpl: typeof fetch = (input) => {
+			languages.push(input instanceof Request ? input.headers.get('Accept-Language') : null);
+			return Promise.resolve(envelopeResponse({ items: [] }));
+		};
+		const client = createApiClient(fetchImpl);
+		try {
+			window.history.replaceState(null, '', '/doctors');
+			await client.GET('/doctor/public/doctors');
+			window.history.replaceState(null, '', '/en/doctors');
+			await client.GET('/doctor/public/doctors');
+		} finally {
+			window.history.replaceState(null, '', '/');
+		}
+		expect(languages).toEqual(['el', 'en']);
+	});
+});
+
 describe('unwrapEnvelope', () => {
 	it('returns the inner data payload on success', async () => {
 		const { fetchImpl } = recordingFetch({ items: ['a'] });

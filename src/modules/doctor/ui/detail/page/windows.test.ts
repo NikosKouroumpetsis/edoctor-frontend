@@ -131,6 +131,7 @@ function props(
 		localize: (path) => path,
 		similarHref: () => '/doctors' as ResolvedPathname,
 		similarAreaQuery: (city) => ({ queryKey: ['area', city], queryFn: async () => null }),
+		bookingHref: (slot) => `/doctors/dr/booking?office=${slot.officeId}`,
 		canonicalUrl: 'https://edoctor.example/doctors/dr',
 		alternateUrls: { el: 'https://edoctor.example/x', en: 'https://edoctor.example/en/x' },
 		backHref: '/doctors',
@@ -567,6 +568,66 @@ describe('the reviews’ window and the office’s page', () => {
 		expect(hours).toHaveTextContent('Κλειστό');
 		expect(screen.getByTestId('doctor-detail-modal-office-photos')).toBeInTheDocument();
 		expect(calls.filter((url) => url.pathname.includes('/offices/'))).toHaveLength(1);
+	});
+
+	it('🔴 P-W3 §3.5 / D-W3-19 / U-110.3: the office’s page shows its details from its OWN read — no other request (D-103) — and the profile’s «Τοποθεσία» only Parking and «Πρόσβαση ΑμεΑ»', async () => {
+		answers.office = () => ({
+			data: {
+				office: {
+					...OFFICE,
+					amenities: {
+						parkingKinds: ['PRIVATE', 'BOAT'],
+						accessibleToilet: true,
+						accessibleParking: true,
+						elevator: true,
+						nearPublicTransport: true
+					}
+				}
+			}
+		});
+		const profile = sampleDoctorProfile({
+			offices: [{ officeId: 'off-1' }],
+			office: {
+				officeId: 'off-1',
+				street: 'Νίκης',
+				city: 'Αθήνα',
+				parking: true,
+				disabilityAccess: true
+			}
+		});
+		render(Harness, { props: props(profile, { routeSection: 'location' }) });
+		const rows = await screen.findByTestId('doctor-detail-modal-location-rows');
+		await waitFor(() =>
+			expect(within(rows).queryByTestId('doctor-detail-office-info-row-transit')).not.toBeNull()
+		);
+		expect(
+			[...rows.querySelectorAll('[data-testid^="doctor-detail-office-info-row-"]')].map((row) =>
+				row.getAttribute('data-testid')?.replace('doctor-detail-office-info-row-', '')
+			)
+		).toEqual([
+			'phone',
+			'floor',
+			'parking',
+			'parking-private',
+			'disability-access',
+			'accessible-toilet',
+			'accessible-parking',
+			'lift',
+			'transit'
+		]);
+		expect(within(rows).getByTestId('doctor-detail-office-info-row-lift')).toHaveTextContent(
+			'Ανελκυστήρας'
+		);
+		expect(calls.filter((url) => url.pathname.includes('/offices/'))).toHaveLength(1);
+		const section = screen.getByTestId('doctor-detail-location-facilities');
+		expect(
+			[...section.querySelectorAll('[data-testid^="doctor-detail-office-info-row-"]')].map((row) =>
+				row.getAttribute('data-testid')
+			)
+		).toEqual([
+			'doctor-detail-office-info-row-parking',
+			'doctor-detail-office-info-row-disability-access'
+		]);
 	});
 
 	it('U-65.6 (negative): «Πώς θα έρθετε» with markup stays words; «Οδηγίες» opens the map’s directions in a new tab', async () => {

@@ -7,11 +7,34 @@
  * stays intact. Never import `$generated/api` from a module — import from here.
  *
  * These are the response ("View") types and shared enums for the public doctor
- * marketplace and consent endpoints the frontend consumes today.
+ * marketplace and consent endpoints the frontend consumes today, and — for the
+ * writes of wave 3 — the JSON body and the answer of an operation by its id
+ * (`ApiRequestBody`, `ApiResponseData`), so a module's write stays the contract's.
  */
-import type { components } from '$generated/api/schema';
+import type { components, operations } from '$generated/api/schema';
 
 type Schemas = components['schemas'];
+
+/** An operation of the contract, by its `operationId` (`createAppointment`, `saveDoctorOnboardingOffice` …). */
+export type ApiOperationId = keyof operations;
+
+/** The JSON body an operation takes (`never` for one that takes none). */
+export type ApiRequestBody<O extends ApiOperationId> =
+	NonNullable<operations[O]['requestBody']> extends {
+		content: { 'application/json': infer Body };
+	}
+		? Body
+		: never;
+
+/** The `data` of the envelope an operation answers with the given status (`never` when it has no such answer). */
+export type ApiResponseData<
+	O extends ApiOperationId,
+	S extends keyof operations[O]['responses']
+> = operations[O]['responses'][S] extends {
+	content: { 'application/json': { data: infer Data } };
+}
+	? Data
+	: never;
 
 export type DoctorPublicMarketplaceSearchResponseView =
 	Schemas['DoctorPublicMarketplaceSearchResponseView'];
@@ -115,3 +138,30 @@ export type HelpfulVoteChoice = Schemas['HelpfulVoteChoice'];
 export type HelpfulVoteReason = Schemas['HelpfulVoteReason'];
 export type HelpfulVoteMineResponseView = Schemas['HelpfulVoteMineResponseView'];
 export type HelpfulVoteView = Schemas['HelpfulVoteView'];
+// Wave 3 · screens 30, 31 (`modules/appointments`): the booking's reads (with `firstVisitKnown`, `patientSmsExpected`,
+// `firstVisit`, A-1…A-3); its writes take `ApiRequestBody<…>` and a new relative's `201` (D-W3-23) `ApiResponseData`.
+export type BookingReadinessView = Schemas['BookingReadinessView'];
+export type BookingReadinessBlocker = Schemas['BookingReadinessBlocker'];
+export type AppointmentDetailResponseView = Schemas['AppointmentDetailResponseView'];
+export type AppointmentStatus = Schemas['AppointmentStatus'];
+export type AppointmentConfirmationMode = Schemas['AppointmentConfirmationMode'];
+export type PatientSelfUpsertResponseView = Schemas['PatientSelfUpsertResponseView'];
+export type RelativeView = Schemas['RelativeView'];
+export type LoginPhoneAttachStartResult = Schemas['LoginPhoneAttachStartResult'];
+export type LoginPhoneAttachVerifyResult = Schemas['LoginPhoneAttachVerifyResult'];
+// Wave 3 · screens 33–42 (`modules/doctor-onboarding`): the progress every step write answers, the address search our
+// server proxies to Google Places (D-W3-33 `pointProof`) and the specialties' catalogue; the writes' bodies by operation.
+export type DoctorOnboardingProgressView = Schemas['DoctorOnboardingProgressView'];
+export type DoctorOnboardingProgressOfficeView = Schemas['DoctorOnboardingProgressOfficeView'];
+export type DoctorOnboardingStateView = Schemas['DoctorOnboardingState'];
+export type DoctorOnboardingSectionView = Schemas['DoctorOnboardingSection'];
+export type DoctorNotificationEmailCodeSentView = Schemas['DoctorNotificationEmailCodeSentView'];
+export type AddressSearchSuggestionsResponseView = Schemas['AddressSearchSuggestionsResponseView'];
+export type AddressSearchSuggestionView = Schemas['AddressSearchSuggestionView'];
+export type AddressSearchDetailsResponseView = Schemas['AddressSearchDetailsResponseView'];
+export type ProfessionalListResponseView = Schemas['ProfessionalListResponseView'];
+export type ProfessionalViewExt = Schemas['ProfessionalViewExt'];
+// Wave 3 · the office page of the profile (P-W3 §3.5, Σ-22): the details only the office's own read carries.
+export type DoctorPublicMarketplaceOfficeAmenitiesView =
+	Schemas['DoctorPublicMarketplaceOfficeAmenitiesView'];
+export type OfficeParkingKind = Schemas['OfficeParkingKind'];

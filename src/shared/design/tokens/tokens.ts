@@ -182,7 +182,9 @@ export const icon = {
 	lg: 24,
 	// U-100: draws as wide as Airbnb's heart (22,5, measured); Ionicons' heart fills 81% of its box.
 	'card-heart': 28,
-	xl: 32
+	xl: 32,
+	// U-129: the doctor sign-up prototype's tick in its checked box (`33-doctor/doctor.js:158`, `ico('tick', 14, 3.4)`).
+	'check-mark': 14
 } as const satisfies Record<string, number>;
 
 export const radius = {
@@ -190,7 +192,9 @@ export const radius = {
 	sm: 8,
 	md: 12,
 	lg: 16,
-	xl: 24
+	xl: 24,
+	// U-129: the doctor sign-up prototype's check box corner (`33-doctor/doctor.css:66`, `.d-box`).
+	checkbox: 6
 } as const satisfies Record<string, number>;
 
 export const elevation = {

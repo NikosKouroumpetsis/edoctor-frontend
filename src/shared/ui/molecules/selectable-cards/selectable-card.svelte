@@ -33,6 +33,11 @@
 		iconPlacement?: SelectableCardIconPlacement;
 		/** U-28.3: `md` (default, the application's) or the smaller `sm`. */
 		size?: SelectableCardSize;
+		/**
+		 * U-28.4: with a pointer a card not chosen darkens its border on hover (the default, the filters'); `false` keeps
+		 * every card as it is under the pointer (U-100: a caller with no hover colour).
+		 */
+		hover?: boolean;
 		selected: boolean;
 		/** `radio` in a single choice, `checkbox` in a multiple one; `aria-checked` follows `selected`. */
 		role?: 'radio' | 'checkbox';
@@ -50,6 +55,7 @@
 		icon,
 		iconPlacement = 'trailing',
 		size = 'md',
+		hover = true,
 		selected,
 		role = 'radio',
 		testId,
@@ -65,7 +71,7 @@
 <!-- The application's `SelectableCard`: the 1px border (constant, so a choice never reflows the row), the selected
      card dark-bordered on muted with the raised shadow — 2 dark (U-24.3: the inset ring inside the 1 border) — the
      others transparent on a light border. U-28.4: with a pointer, a card not chosen darkens its border on hover
-     (Airbnb's); the chosen and the disabled card stay as they are. -->
+     (Airbnb's); the chosen and the disabled card stay as they are, and so does every card with `hover={false}` (U-100). -->
 <button
 	bind:this={ref}
 	type="button"
@@ -80,7 +86,8 @@
 		sized.box,
 		selected
 			? 'border-foreground bg-muted shadow-raised ring-1 ring-foreground ring-inset'
-			: 'border-border bg-transparent shadow-none transition-colors duration-standard ease-standard can-hover:enabled:hover:border-foreground',
+			: 'border-border bg-transparent shadow-none transition-colors duration-standard ease-standard',
+		!selected && hover && 'can-hover:enabled:hover:border-foreground',
 		disabled && 'opacity-50',
 		className
 	)}

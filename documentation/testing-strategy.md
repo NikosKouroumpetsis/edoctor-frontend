@@ -291,6 +291,19 @@ In place:
   against the direction (shared → feature, module → module, module or screen → page layer, screen → screen), no
   private file of a slice or a screen from outside it, no relative import out of its unit (MINOR-3), no `$lib`, no
   `export *`, `$generated/api` only in the api client, no atomic layer of the shared UI importing one above it (Π2).
+  Wave 3 («W-4: …»): no `lib/`, `ui/`, screen or route of `appointments` or `doctor-onboarding` imports
+  `$shared/lib/api-client` or any path under it (`architecture-pattern.md` «Wire ⇒ facts»).
+- `tests/architecture/drafts-privacy.test.ts` (wave 3, «U-112.2: …», U-65.6, D-W3-37) — the booking's and the
+  sign-up's drafts live in the root layout's hosts and go nowhere (`state-management.md`): over the two modules,
+  their screens and routes, `shared/lib/navigation` and the profile's two screens that read the booking's draft, no
+  storage, cookie, log, analytics, persisted cache, raw HTML, history entry (`pushState` / `replaceState`), other
+  window (`postMessage`, `BroadcastChannel`, `window.name`) or browser cache; no address search written outside
+  `lib/booking/url`; no rune state, draft or mutable binding at a module's top level or in a `<script module>`; as
+  many `meta: personalQueryMeta` as `queryFn` in a file of the two flows, and a `setQueryData` only in a file that
+  marks its key first (`setQueryDefaults(…, personalQueryMeta)`); and the root layout composes both hosts inside
+  the session, around the frame. One planted negative per branch (`BRANCHES`). Not caught (residual): an
+  `export const x = {}` at the top, a query built by `+`, and a `setQueryDefaults(…, { meta: personalQueryMeta })`
+  counting as the read's mark.
 - `tests/architecture/module-segments.test.ts` («U-29.1: …», «U-29.3: …») — the modules' segments, rune-free `lib/`
   and `config/`, a static `config/`, type-only `types.ts`, «`api/` never imports `lib/`» with no exception (U-32.1:
   the list is empty, a type import counts, and the former shapes are its negative),
@@ -302,6 +315,23 @@ In place:
 - `tests/architecture/raw-html.test.ts` (common v2 §B) — no `{@html}` in `src/` but the page's JSON-LD: inside
   `<svelte:head>`, in a file that builds it with `jsonLdScript` (its `<` `>` `&` escaped); a CMS text is drawn by
   `RichText` from its allowlist, never as markup.
+- `tests/architecture/server-rules.test.ts` («U-121.2 / U-121.3: …») — what the client checks before a relative is
+  written is the server's own rule, read from the backend's files: the names' WHOLE rule — `onlyCharactersSchema`'s
+  chain exactly `Joi.string().pattern().required()`, `NamePolicy.validateSingle` exactly trim ⇒ `exists` ⇒
+  `validateCharactersOnly` — its pattern equal to `LETTERS_ONLY_PATTERN` character for character and agreeing on every
+  name vector; `GreekIdPolicy`'s reading of the digits, date and check digit run from the policy's own text beside
+  `greekIdDigits`, `Validators.amkaDate` / `afmCheckDigit` on the same synthetic vectors (every DDMM, 3000 ΑΦΜ).
+  🔴 Test data (w3-w9 r1 MINOR-2): every ΑΜΚΑ a spec, sample, harness or story writes ends with a digit that FAILS Luhn
+  (no person's number has it; the server checks no Luhn), and the guard scans every file of `src/` and `tests/` that
+  speaks of the ΑΜΚΑ for an 11-digit number that passes; an ΑΦΜ is computed by the rule, tied to no name, and never
+  leaves localhost. Its neighbours: `server-words.test.ts` (W8 Delta 2, U-121.3: the server's refusal words each
+  reader knows) and `specialty-terms.test.ts` (Κ-1, U-122: the web's specialty terms are the catalogue's names, and
+  every id of the catalogue wears ONE glyph in el and en). One planted negative per rule.
+- `tests/architecture/prototype-looks.test.ts` («U-129: …») — which screen asks a shared component for which look, each
+  its own prototype: the booking's outlined time and the profile's filled one, one date field on 34 / 35 / 43 and the
+  booking's birth date, the doctor sign-up's and the register form's ticks (the search filters, with no checkbox in
+  their prototype, none), stage 2's `HouseCross`; the components' specs hold each variant's classes. One planted
+  negative per kind.
 - `tests/architecture/review-topics.test.ts` («U-91.2: …») — the six topics of «Οι ασθενείς αναφέρουν»: no label, key, glyph or
   value of the code speaks of the wait, in either language.
 - Each checker ships with negative fixtures next to the project scan, plus a

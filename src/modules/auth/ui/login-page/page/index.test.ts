@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from '@testing-library/svelte';
 import { QueryClient } from '@tanstack/svelte-query';
 import { goto } from '$app/navigation';
 import { authReturnStorageKey, knownAccountStorageKey } from '$shared/config/env';
+import type { Session } from '$shared/state/session';
 import { authQueryKeys } from '$modules/auth/api/session';
 import Harness from './login.harness.svelte';
 
@@ -60,6 +61,55 @@ describe('the `/login` page (Ε2)', () => {
 		await waitFor(() =>
 			expect(goto).toHaveBeenCalledWith('/doctors/a-pappas', { replaceState: true })
 		);
+	});
+
+	it('🔴 D-W3-37 (security web MAJOR-1, negative): a member opening a link `/login?next=/doctor/onboarding&do=doctor` goes to `next` with NOTHING to go on — the sign-up never starts from an address', async () => {
+		signedIn = true;
+		let session: Session | null = null;
+		render(Harness, {
+			props: {
+				params: { ...params, next: '/doctor/onboarding', action: 'doctor' },
+				onSession: (each: Session) => (session = each)
+			}
+		});
+		await waitFor(() =>
+			expect(goto).toHaveBeenCalledWith('/doctor/onboarding', { replaceState: true })
+		);
+		expect(session!.resumedAction).toBeNull();
+		expect(session!.takeResumed('doctor')).toBe(false);
+	});
+
+	it('🔴 D-W3-37: «Ξεκινήστε» that went to a provider comes back and goes on, once — the tab wrote it before it left', async () => {
+		window.sessionStorage.setItem(
+			authReturnStorageKey,
+			JSON.stringify({ next: '/doctor/onboarding', action: 'doctor' })
+		);
+		signedIn = true;
+		let session: Session | null = null;
+		render(Harness, {
+			props: {
+				params: { ...params, next: '/doctor/onboarding', action: 'doctor', via: 'google' },
+				onSession: (each: Session) => (session = each)
+			}
+		});
+		await waitFor(() =>
+			expect(goto).toHaveBeenCalledWith('/doctor/onboarding', { replaceState: true })
+		);
+		expect(session!.takeResumed('doctor')).toBe(true);
+		expect(session!.takeResumed('doctor')).toBe(false);
+	});
+
+	it('D-W3-37: an action that only shows again (`do=book`, a toast on the page) still goes on from the address', async () => {
+		signedIn = true;
+		let session: Session | null = null;
+		render(Harness, {
+			props: {
+				params: { ...params, next: '/doctors/a-pappas/booking', action: 'book' },
+				onSession: (each: Session) => (session = each)
+			}
+		});
+		await waitFor(() => expect(goto).toHaveBeenCalled());
+		expect(session!.resumedAction).toBe('book');
 	});
 
 	it('Π3: without a `next`, the home', async () => {

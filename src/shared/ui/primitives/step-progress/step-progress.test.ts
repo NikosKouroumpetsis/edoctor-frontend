@@ -20,12 +20,14 @@ describe('StepProgress', () => {
 		expect(bar).toHaveAttribute('aria-valuenow', '1.6');
 		expect(bar).toHaveClass('flex', 'w-full', 'items-center', 'gap-1.5');
 		expect(fills(container)).toEqual(['100%', '60%', '0%']);
+		// U-129.1: the empty track is the prototype's `--line-2` (`33-doctor/doctor.css:21`), no longer `muted`.
 		expect(segments(container)[0]).toHaveClass(
 			'flex-1',
 			'overflow-hidden',
 			'rounded-full',
-			'bg-muted'
+			'bg-line-2'
 		);
+		expect(segments(container)[0]).not.toHaveClass('bg-muted');
 	});
 
 	it('U-06.8: progress is clamped to 0..1 (NaN is 0) and the value never passes the steps', () => {

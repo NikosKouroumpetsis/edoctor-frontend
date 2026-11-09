@@ -10,8 +10,10 @@
 		DoctorAvailabilityDateCard,
 		DoctorAvailabilitySectionContent
 	} from '$modules/doctor/lib/detail';
-	import Elsewhere from './elsewhere.svelte';
-	import OfficeTabs from './office-tabs.svelte';
+	import {
+		AvailabilityElsewhere as Elsewhere,
+		OfficeTabs
+	} from '$modules/doctor/ui/availability-picker';
 	import ProfileSection from './profile-section.svelte';
 
 	let {

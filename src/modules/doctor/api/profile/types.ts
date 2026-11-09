@@ -69,6 +69,23 @@ export type DoctorOfficeFacts = {
 	weeklyHours?: DoctorOfficeWeeklyHoursFacts;
 	/** «Πώς θα έρθετε»: plain text, in the page's language. */
 	gettingThere?: string;
+	/** 🔴 P-W3 §3.5 (Σ-22, U-110.3): the office's details, with its own read only — the office's page, never the profile. */
+	amenities?: DoctorOfficeAmenitiesFacts;
+};
+
+/** A kind of parking under «Parking», as the app's id (the wire enum is translated in `api/office/map.ts`). */
+export type DoctorOfficeParkingKind = 'private' | 'public-nearby' | 'street';
+
+/**
+ * The office's details (Ε6 = Α, the application's `DoctorOfficeAmenitiesFacts`): each only under its parent — the kinds
+ * under parking, the accessible toilet and space under step-free access, an elevator off the ground floor.
+ */
+export type DoctorOfficeAmenitiesFacts = {
+	parkingKinds: DoctorOfficeParkingKind[];
+	accessibleToilet: boolean;
+	accessibleParking: boolean;
+	elevator: boolean;
+	nearPublicTransport: boolean;
 };
 
 /** A photo of the office: its sized addresses (absolute) and its description, if any. */

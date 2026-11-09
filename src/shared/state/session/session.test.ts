@@ -160,4 +160,17 @@ describe('Session (U-80.1)', () => {
 		expect(signOut).toHaveBeenCalledTimes(1);
 		expect(session.resumedAction).toBeNull();
 	});
+
+	it('🔴 D-W3-37: a sign-out in another tab forgets what waited for the sign-in and what a person wrote, without asking the source', () => {
+		const { session, signOut } = makeSession('member');
+		session.resume('doctor');
+		session.requireSignIn({ action: 'book' });
+		const before = session.forgotten;
+		session.signedOutElsewhere();
+		expect(session.forgotten).toBe(before + 1);
+		expect(session.resumedAction).toBeNull();
+		expect(session.pendingAction).toBeNull();
+		expect(session.flowOpen).toBe(false);
+		expect(signOut).not.toHaveBeenCalled();
+	});
 });

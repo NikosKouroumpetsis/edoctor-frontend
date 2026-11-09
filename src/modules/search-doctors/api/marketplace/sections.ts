@@ -45,9 +45,10 @@ export const homeSectionConfigs: HomeSectionConfig[] = [
 		id: 'internal-medicine-gp',
 		sortBy: 'popularity',
 		availability: 'next7Days',
+		// Κ-1: the catalogue's names (PR021, PR005), so the server's prefix match finds both specialties.
 		specialties: [
-			{ el: 'Παθολόγος', en: 'Internal Medicine' },
-			{ el: 'Γενικός Ιατρός', en: 'General Practitioner' }
+			{ el: 'Παθολόγος', en: 'Internist' },
+			{ el: 'Γενικός Γιατρός', en: 'General practitioner' }
 		]
 	}
 ];

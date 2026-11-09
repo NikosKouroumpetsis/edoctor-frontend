@@ -2,9 +2,10 @@ import { createContext } from '$shared/lib/headless';
 
 /**
  * What asked for the sign-in, a closed list (U-80.1 Ε4): it may travel in the address (`/login?do=`) and in the
- * tab's storage, so it is never free text.
+ * tab's storage, so it is never free text. `doctor` (wave 3, P-W3 Σ-10): «Ξεκινήστε» of the doctor's sign-up goes on
+ * after a provider's redirect, once.
  */
-export const signInActions = ['fav', 'book', 'fee', 'contact'] as const;
+export const signInActions = ['fav', 'book', 'fee', 'contact', 'doctor'] as const;
 export type SignInAction = (typeof signInActions)[number];
 
 /** `unknown` until the browser has asked (the server never knows: the cookies live on the API, U-80.1 Ε6). */
@@ -132,6 +133,17 @@ export class Session {
 	/** Asks the server again after a failed read. */
 	retryRead() {
 		this.#source.retry?.();
+	}
+
+	/**
+	 * 🔴 D-W3-37 (security web MINOR-2): another tab of this browser signed out — the cookies are the API's, one jar, so
+	 * this tab's session has ended too: what waited for the sign-in goes, and what a person wrote leaves this page.
+	 */
+	signedOutElsewhere() {
+		this.#pending = null;
+		this.resumedAction = null;
+		this.flowOpen = false;
+		this.forgotten += 1;
 	}
 
 	/** 🔴 R-2: only a sign-out the server carried out takes what a person wrote and what waited for the sign-in. */

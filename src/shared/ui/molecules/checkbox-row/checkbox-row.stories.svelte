@@ -35,6 +35,13 @@
 	{/snippet}
 </Story>
 
+<!-- U-129: ticked dark, the doctor sign-up's prototype. -->
+<Story name="Checked Foreground" args={{ checked: true, tone: 'foreground' }}>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow"><CheckboxRow {...args} /></div>
+	{/snippet}
+</Story>
+
 <Story name="Without Count" args={{ count: undefined }}>
 	{#snippet template(args)}
 		<div class="w-full max-w-narrow"><CheckboxRow {...args} /></div>

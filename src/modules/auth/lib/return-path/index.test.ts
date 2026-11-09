@@ -3,6 +3,7 @@ import {
 	buildLoginHref,
 	readLoginParams,
 	readProvider,
+	readResumedAction,
 	readSafeNext,
 	readSignInAction,
 	sanitizeStoredReturn
@@ -58,6 +59,9 @@ describe('auth::lib::return-path (Π4)', () => {
 
 	it('U-65.6 (negative): `do`, `error` and `via` are closed lists, never free text', () => {
 		expect(readSignInAction('book')).toBe('book');
+		// Wave 3 (P-W3 Σ-10): «Ξεκινήστε» of the doctor's sign-up goes on after a provider's redirect.
+		expect(readSignInAction('doctor')).toBe('doctor');
+		expect(readSignInAction('Doctor')).toBeNull();
 		expect(readSignInAction('<script>')).toBeNull();
 		expect(readSignInAction(null)).toBeNull();
 		expect(readProvider('apple')).toBe('apple');
@@ -100,5 +104,20 @@ describe('auth::lib::return-path (Π4)', () => {
 		expect(sanitizeStoredReturn({ next: 'https://evil', action: 'x' })).toBeNull();
 		expect(sanitizeStoredReturn('text')).toBeNull();
 		expect(sanitizeStoredReturn(null)).toBeNull();
+	});
+
+	it('🔴 D-W3-37 (security web MAJOR-1): an action that writes («doctor» starts a sign-up) goes on only from the tab’s own return, never from the address alone', () => {
+		// A link anyone can send: `/login?do=doctor` — nothing goes on.
+		expect(readResumedAction('doctor', null)).toBeNull();
+		expect(readResumedAction('doctor', 'book')).toBeNull();
+		// The tab wrote it before it left for the provider (`writePendingReturn`): it goes on, with or without the address.
+		expect(readResumedAction('doctor', 'doctor')).toBe('doctor');
+		expect(readResumedAction(null, 'doctor')).toBe('doctor');
+		// The others only show again what was asked (a toast, a window, a heart the tab keeps): from either.
+		expect(readResumedAction('book', null)).toBe('book');
+		expect(readResumedAction('contact', null)).toBe('contact');
+		expect(readResumedAction(null, 'fav')).toBe('fav');
+		expect(readResumedAction('fee', 'doctor')).toBe('fee');
+		expect(readResumedAction(null, null)).toBeNull();
 	});
 });

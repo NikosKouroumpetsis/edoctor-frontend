@@ -45,6 +45,9 @@
 	{/snippet}
 </Story>
 
+<!-- U-129: the booking's chosen time, outlined on the warm fill. -->
+<Story name="Outline" args={{ variant: 'outline' }} />
+
 <Story name="Three Columns" args={{ columns: 3 }} />
 
 <Story name="Empty" args={{ slots: [] }} />

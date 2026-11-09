@@ -13,7 +13,8 @@ describe('search-doctors::lib::criteria-icons', () => {
 				'Δερματολόγος - Αφροδισιολόγος',
 				'Γυναικολόγος - Μαιευτήρας',
 				'Ορθοπαιδικός - Ορθοπαιδικός Χειρουργός',
-				'Ψυχολόγος - Σύμβουλος Ψυχικής Υγείας',
+				// U-122.1: PR030 is «Ψυχολόγος» alone since the counselor became a specialty of its own.
+				'Ψυχολόγος',
 				'Οφθαλμίατρος',
 				'Οδοντίατρος'
 			].map(specialtyIcon)
@@ -43,6 +44,45 @@ describe('search-doctors::lib::criteria-icons', () => {
 			'tooth-outline',
 			'eye-outline'
 		]);
+	});
+
+	it('U-122: the mental health counselor (PR091) wears the psychologist’s brain, in both languages; the psychologist keeps it', () => {
+		for (const label of [
+			'Σύμβουλος Ψυχικής Υγείας',
+			'ΣΥΜΒΟΥΛΟΣ ΨΥΧΙΚΗΣ ΥΓΕΙΑΣ',
+			'Mental health counselor',
+			'Ψυχολόγος',
+			'Psychologist'
+		]) {
+			expect(specialtyIcon(label), label).toBe('brain');
+		}
+	});
+
+	it('U-122 (negative): the brain goes by «ψυχικ…» / «mental…», never by «σύμβουλος» / «counselor» alone; the psychiatrist (PR029) is not the counselor', () => {
+		for (const label of ['Σύμβουλος', 'counselor', 'Ψυχίατρος', 'Psychiatrist']) {
+			expect(specialtyIcon(label), label).toBe(criteriaIcons.specialty);
+		}
+	});
+
+	it('U-122 (W9 Delta 1): Παιδοψυχολόγος (PR058) wears the brain, as «Child psychologist»; the pediatrician keeps the smile in both languages', () => {
+		for (const label of ['Παιδοψυχολόγος', 'Child psychologist']) {
+			expect(specialtyIcon(label), label).toBe('brain');
+		}
+		for (const label of ['Παιδίατρος', 'Pediatrician', 'Pediatrics', 'Paediatrician']) {
+			expect(specialtyIcon(label), label).toBe('happy-outline');
+		}
+	});
+
+	it('U-122 (W9 Delta 1, negative): «Pediatric …» is ONE word with what follows, as «Παιδο…» — neither the base specialty nor the pediatrician, and no stem reads across the seam', () => {
+		for (const [english, greek] of [
+			['Pediatric cardiologist', 'Παιδοκαρδιολόγος'],
+			['Pediatric dentist', 'Παιδοδοντίατρος'],
+			['Pediatric surgeon', 'Παιδοχειρουργός'],
+			['Pediatric orthopedist', 'Παιδοορθοπαιδικός']
+		]) {
+			expect(specialtyIcon(english), english).toBe(criteriaIcons.specialty);
+			expect(specialtyIcon(greek), greek).toBe(specialtyIcon(english));
+		}
 	});
 
 	it('U-21 (negative): a word that only CONTAINS a stem is not that specialty — it wears the default glyph', () => {

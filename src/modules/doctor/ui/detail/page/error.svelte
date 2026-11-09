@@ -3,7 +3,7 @@
 	import { StatusPage } from '$shared/ui/organisms/status-page';
 	import ErrorPage from '../components/error-page.svelte';
 	import TopBar from '../components/top-bar.svelte';
-	import { useSiteBack } from '../hooks/use-site-back.svelte';
+	import { useSiteBack } from '$shared/lib/navigation';
 	import type { DoctorDetailErrorProps } from '../types';
 
 	let {

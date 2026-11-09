@@ -3,8 +3,8 @@
 	import { StickyActionBar } from '$shared/ui/organisms/sticky-action-bar';
 	import { TextButton } from '$shared/ui/primitives/text-button';
 	import type { DoctorBookingContent } from '$modules/doctor/lib/detail';
+	import { doctorBookingActionGlyphs } from '$modules/doctor/ui/availability-picker';
 	import Fee from './fee.svelte';
-	import { doctorBookingActionGlyphs } from './icons';
 
 	let {
 		booking,

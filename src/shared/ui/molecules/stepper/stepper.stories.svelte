@@ -19,6 +19,7 @@
 			step: 1
 		},
 		argTypes: {
+			variant: { control: 'inline-radio', options: ['default', 'counter'] },
 			disabled: { control: 'boolean' },
 			error: { control: 'text' },
 			helperText: { control: 'text' },
@@ -35,6 +36,9 @@
 	let invalid = $state('2');
 	let minimum = $state('2');
 	let disabled = $state('2');
+	let counter = $state('3');
+	// A sample `valueLabel` (the caller's words): a floor, «Υπόγειο / Ισόγειο / 1ος …».
+	const floorWords = (n: number) => (n < 0 ? 'Υπόγειο' : n === 0 ? 'Ισόγειο' : `${n}ος`);
 </script>
 
 <Story name="Playground">
@@ -58,5 +62,17 @@
 <Story name="Disabled" args={{ disabled: true }}>
 	{#snippet template(args)}
 		<div class="w-full max-w-narrow"><Stepper {...args} bind:value={disabled} /></div>
+	{/snippet}
+</Story>
+
+<!-- `counter` (Airbnb's counters): one 64 box, the title inside on the left, «−» value «+» in 36 circles. -->
+<Story
+	name="Counter"
+	args={{ variant: 'counter', label: 'Όροφος', helperText: '', min: -1, max: 20, hover: false }}
+>
+	{#snippet template(args)}
+		<div class="w-full max-w-narrow">
+			<Stepper {...args} valueLabel={floorWords} bind:value={counter} />
+		</div>
 	{/snippet}
 </Story>

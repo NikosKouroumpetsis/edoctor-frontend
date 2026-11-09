@@ -2,8 +2,8 @@ import type { LocalizedTerm } from '$modules/search-doctors/api/marketplace/sect
 
 /**
  * The footer's popular searches (U-16.9, Airbnb's «Δημοφιλείς αναζητήσεις»): the words a link searches, per
- * language. Sources, nothing invented: the specialties are the backend's professionals (`backend/__seeds__/src/
- * datasets/specialties.ts`, the same names in `backend/src/shared/config/professionals.json`), the areas the
+ * language. Sources, nothing invented: the specialties are the catalogue's names or their first words (Κ-1,
+ * `backend/src/shared/config/professionals/languages/{el,en}.json`, the seed's too), the areas the
  * backend's demo municipalities (`backend/__seeds__/src/datasets/locations.ts`, `DEMO_LOCATION_CLUSTERS`) with the
  * English transliteration the location matcher accepts (as `homeSectionConfigs`: `Athina`). No professional id is
  * known without the database, so every link searches by words (the application's `text` selection). U-89.1: no video
@@ -55,14 +55,14 @@ export const popularSpecialtyTerms: Record<PopularSpecialty, LocalizedTerm> = {
 	gynecology: { el: 'Γυναικολόγος', en: 'Gynecologist' },
 	orthopedics: { el: 'Ορθοπαιδικός', en: 'Orthopedist' },
 	ophthalmology: { el: 'Οφθαλμίατρος', en: 'Ophthalmologist' },
-	'internal-medicine': { el: 'Παθολόγος', en: 'Internal Medicine' },
+	'internal-medicine': { el: 'Παθολόγος', en: 'Internist' },
 	endocrinology: { el: 'Ενδοκρινολόγος', en: 'Endocrinologist' },
 	neurology: { el: 'Νευρολόγος', en: 'Neurologist' },
 	psychiatry: { el: 'Ψυχίατρος', en: 'Psychiatrist' },
 	urology: { el: 'Ουρολόγος', en: 'Urologist' },
 	allergy: { el: 'Αλλεργιολόγος', en: 'Allergist' },
-	'general-practice': { el: 'Γενικός Ιατρός', en: 'General Practitioner' },
-	nutrition: { el: 'Διατροφολόγος', en: 'Nutritionist' }
+	'general-practice': { el: 'Γενικός Γιατρός', en: 'General practitioner' },
+	nutrition: { el: 'Διαιτολόγος - Διατροφολόγος', en: 'Dietitian - Nutritionist' }
 };
 
 /** «Ειδικότητες»: a specialty in an area each («Καρδιολόγοι / Αθήνα»), the order the footer shows them. */

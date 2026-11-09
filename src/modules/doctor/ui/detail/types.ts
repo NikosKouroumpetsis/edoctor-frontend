@@ -1,10 +1,12 @@
 import type { Snippet } from 'svelte';
 import type { ResolvedPathname } from '$app/types';
 import type { DoctorProfile } from '$modules/doctor/api/profile';
+import type { DoctorKeptBooking } from './hooks/use-state.svelte';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type { SignInRequest } from '$shared/state/session';
 import type {
 	DoctorDetailSection,
+	DoctorSelectedSlot,
 	DoctorSimilarArea,
 	DoctorSimilarSearch
 } from '$modules/doctor/lib/detail';
@@ -48,6 +50,16 @@ export type DoctorDetailPageProps = {
 	 */
 	similarHref: (search: DoctorSimilarSearch, area: DoctorSimilarArea | null) => ResolvedPathname;
 	similarAreaQuery: DoctorSimilarAreaQuery;
+	/**
+	 * 🔴 Wave 3 (P-W3 §3.2.1 δ): «Κράτηση» with a chosen hour — the booking's screen 30 for that hour and service (the
+	 * appointments module's address, composed by the screen), in the page's language and resolved.
+	 */
+	bookingHref: (slot: DoctorSelectedSlot, serviceId: string | undefined) => string;
+	/**
+	 * The hour and service the booking keeps for this doctor (the appointments module's draft, composed by the screen):
+	 * a «back» from the booking finds the hour on the profile (record §3.2), with no change of address (D-W3-31).
+	 */
+	kept?: DoctorKeptBooking | null;
 	/** The profile's absolute address on the site's public origin (canonical, Open Graph, the shared link). */
 	canonicalUrl: string;
 	/** The profile's absolute address in each language (`hreflang`). */

@@ -5,9 +5,12 @@ import {
 	httpGetWithMeta,
 	httpPublicPut,
 	httpSessionDelete,
+	httpSessionFile,
 	httpSessionGet,
+	httpSessionPatch,
 	httpSessionPost,
-	httpSessionPut
+	httpSessionPut,
+	requestLanguageHeaders
 } from '.';
 
 const answer = (status: number, body: unknown) =>
@@ -110,6 +113,31 @@ describe('the writes that name everything in their address (U-85)', () => {
 	});
 });
 
+describe('a partial write of the person’s own facts (wave 3, the booking)', () => {
+	it('a `PATCH` sends its JSON body with the cookies and reads the answer', async () => {
+		const spy = stubFetch(answer(200, { status: 'ok', data: { id: 'p' } }));
+		await expect(
+			httpSessionPatch('/patient/me/profile', { body: { firstName: 'Ελένη' } })
+		).resolves.toEqual({ id: 'p' });
+		const init = (spy.mock.calls[0] as unknown as [string, RequestInit])[1];
+		expect(init).toMatchObject({
+			method: 'PATCH',
+			credentials: 'include',
+			body: JSON.stringify({ firstName: 'Ελένη' })
+		});
+		expect(init.headers).toHaveProperty('Content-Type', 'application/json');
+	});
+
+	it('(negative) a refused `PATCH` keeps its status and the server’s code', async () => {
+		stubFetch(answer(422, { errorCode: 'EC010', errorMessage: 'dateOfBirth' }));
+		const error: unknown = await httpSessionPatch('/patient/me/profile', {
+			body: { dateOfBirth: 'x' }
+		}).catch((failure) => failure);
+		expect(error).toBeInstanceOf(ApiError);
+		expect(error).toMatchObject({ status: 422, errorCode: 'EC010' });
+	});
+});
+
 describe('a public write (U-78)', () => {
 	it('U-78.1 Ε2: it never carries the cookies; the device’s key goes in a header, never in the address', async () => {
 		const spy = stubFetch(answer(200, { status: 'ok', data: { value: 'up' } }));
@@ -143,5 +171,44 @@ describe('a public write (U-78)', () => {
 		const init = (spy.mock.calls[0] as unknown as [string, RequestInit])[1];
 		expect(init.credentials).toBe('omit');
 		expect(init.headers).toMatchObject({ 'X-Helpful-Voter': 'key' });
+	});
+});
+
+describe('🔴 D-W3-39: every request says the PAGE’s language (review w3-w6 R1 MAJOR-N1)', () => {
+	afterEach(() => {
+		window.history.replaceState(null, '', '/');
+	});
+
+	/** Every kind of call once: a public read, a session read and write, a session file, a public write. */
+	async function languagesSent(): Promise<(string | null)[]> {
+		const spy = vi.fn<typeof fetch>(
+			async () =>
+				new Response(JSON.stringify({ status: 'ok', data: {} }), {
+					status: 200,
+					headers: { 'Content-Type': 'application/json' }
+				})
+		);
+		vi.stubGlobal('fetch', spy);
+		await httpGet('/doctor/public/doctors');
+		await httpSessionGet('/patient/me');
+		await httpSessionPost('/auth/access/start', { body: { email: 'a@b.gr' } });
+		await httpSessionFile('/messages/conversations/c/export');
+		await httpPublicPut('/helpful-votes/public/vote', { body: { up: true } });
+		return spy.mock.calls.map(([, init]) => new Headers(init?.headers).get('Accept-Language'));
+	}
+
+	it('a Greek page (`/…`) says `el` on all of them, an English one (`/en/…`) `en` — one word, never the browser’s list', async () => {
+		window.history.replaceState(null, '', '/doctors');
+		expect(await languagesSent()).toEqual(['el', 'el', 'el', 'el', 'el']);
+		window.history.replaceState(null, '', '/en/doctors');
+		expect(await languagesSent()).toEqual(['en', 'en', 'en', 'en', 'en']);
+		expect(requestLanguageHeaders()).toEqual({ 'Accept-Language': 'en' });
+	});
+
+	it('(negative) the query never names the language — `/doctors?lang=en` stays Greek; an unknown prefix (`/fr/…`) is the base, Greek', async () => {
+		window.history.replaceState(null, '', '/doctors?lang=en');
+		expect(requestLanguageHeaders()).toEqual({ 'Accept-Language': 'el' });
+		window.history.replaceState(null, '', '/fr/doctors');
+		expect(requestLanguageHeaders()).toEqual({ 'Accept-Language': 'el' });
 	});
 });

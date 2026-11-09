@@ -237,3 +237,63 @@ describe('import boundaries (U-29.3)', () => {
 		]);
 	});
 });
+
+/**
+ * W-4 (card w3-w6: «τα wire types μένουν στο `api/`· στα modules φτάνουν μόνο facts»): in the two modules of wave 3 and
+ * their screens and routes, only `api/` imports the generated contract (`$shared/lib/api-client`); everything else meets
+ * the facts and the bodies `api/` names.
+ */
+const WAVE_3 =
+	/^src\/(modules\/(appointments|doctor-onboarding)|screens\/doctor\/onboarding|screens\/doctors\/\[slug\]\/booking|routes\/doctor\/onboarding|routes\/doctors\/\[slug\]\/booking)\//u;
+/** The generated contract's door, and every path under it (review w3-w6 R1 MINOR-1: `…/api-client/wire-types` too). */
+const API_CLIENT = /^\$shared\/lib\/api-client(?:\/|$)/u;
+function wireFindings(files: SourceFile[]): string[] {
+	return files.flatMap((file) =>
+		WAVE_3.test(file.path) && !/^src\/modules\/[^/]+\/api\//u.test(file.path)
+			? importsOf(file)
+					.filter((entry) => API_CLIENT.test(entry.spec))
+					.map((entry) => `${file.path}:${entry.line} wire type outside api/`)
+			: []
+	);
+}
+
+describe('W-4: the wire types stay in `api/` (appointments, doctor-onboarding)', () => {
+	it('W-4: no `lib/`, `ui/`, screen or route of the booking or the sign-up imports the generated contract', () => {
+		const files = readSourceFiles().filter((file) => WAVE_3.test(file.path));
+		expect(files.filter((file) => file.path.includes('/api/')).length).toBeGreaterThan(40);
+		expect(wireFindings(files)).toEqual([]);
+	});
+
+	it('W-4 (negative): a wire type planted in a lib or a page is reported; in `api/` it is the rule', () => {
+		expect(
+			wireFindings([
+				planted(
+					'src/modules/appointments/lib/booking/relative/index.ts',
+					"import type { RelativeView } from '$shared/lib/api-client';"
+				),
+				planted(
+					'src/modules/doctor-onboarding/ui/steps/page/office.svelte',
+					'<script lang="ts">import type { ApiRequestBody } from \'$shared/lib/api-client\';</script>'
+				),
+				planted(
+					'src/modules/doctor-onboarding/api/progress/endpoints.ts',
+					"import type { DoctorOnboardingProgressView } from '$shared/lib/api-client';"
+				),
+				// Review w3-w6 R1 MINOR-1: the deep path is the same door.
+				planted(
+					'src/modules/appointments/ui/booking/page/relative.svelte',
+					'<script lang="ts">import type { RelativeView } from \'$shared/lib/api-client/wire-types\';</script>'
+				),
+				// … and a name that only starts the same is another module.
+				planted(
+					'src/modules/appointments/lib/booking/url/index.ts',
+					"import { x } from '$shared/lib/api-clients';"
+				)
+			])
+		).toEqual([
+			'src/modules/appointments/lib/booking/relative/index.ts:1 wire type outside api/',
+			'src/modules/doctor-onboarding/ui/steps/page/office.svelte:1 wire type outside api/',
+			'src/modules/appointments/ui/booking/page/relative.svelte:1 wire type outside api/'
+		]);
+	});
+});

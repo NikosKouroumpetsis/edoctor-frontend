@@ -41,6 +41,28 @@ describe('shared::lib::location', () => {
 		});
 	});
 
+	it('P-W3 §3.3.4: `highAccuracy` asks the device’s best position (an office’s pin), the same coordinates alone and the same 10″; «Κοντά μου» keeps the coarse one', async () => {
+		const { getCurrentPosition } = stubBrowser({
+			permission: 'granted',
+			position: (success) =>
+				success({ coords: { latitude: 37.9421, longitude: 23.6465, accuracy: 4 } as never })
+		});
+		await expect(resolveDeviceLocation({ highAccuracy: true })).resolves.toEqual({
+			status: 'granted',
+			coords: { latitude: 37.9421, longitude: 23.6465 }
+		});
+		expect(getCurrentPosition.mock.calls[0][2]).toEqual({
+			enableHighAccuracy: true,
+			maximumAge: 0,
+			timeout: DEVICE_LOCATION_TIMEOUT_MS
+		});
+		await resolveDeviceLocation({});
+		await resolveDeviceLocation({ highAccuracy: false });
+		expect(
+			getCurrentPosition.mock.calls.slice(1).map((call) => call[2].enableHighAccuracy)
+		).toEqual([false, false]);
+	});
+
 	it('S-07.3 (negative): a refusal is `denied`, before asking or at the prompt, never a position', async () => {
 		const blocked = stubBrowser({ permission: 'denied', position: () => undefined });
 		await expect(resolveDeviceLocation()).resolves.toEqual({

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import Harness from './date-of-birth-field.harness.svelte';
@@ -100,5 +100,123 @@ describe('DateOfBirthField', () => {
 		});
 		expect(screen.queryByText('Πρέπει να είναι στο παρελθόν.')).toBeNull();
 		expect(screen.getByText('Απαιτείται ημερομηνία γέννησης.')).toBeInTheDocument();
+	});
+
+	it('P-W3 Σ-8: a date in the future is refused by default with its own line — a birth date never lies ahead', async () => {
+		const user = userEvent.setup();
+		render(Harness);
+		const [day, month, year] = screen.getAllByRole('textbox');
+		await user.type(day, '1');
+		await user.type(month, '1');
+		await user.type(year, String(new Date().getFullYear() + 2));
+		expect(screen.getByTestId('dob-value')).toHaveTextContent('empty');
+		expect(screen.getByText('Η ημερομηνία δεν μπορεί να είναι μελλοντική')).toBeInTheDocument();
+	});
+
+	it('P-W3 Σ-8: with `allowFuture` a date ahead is kept (a policy’s expiry); an impossible one is still refused', async () => {
+		const user = userEvent.setup();
+		render(Harness, { props: { allowFuture: true } });
+		const [day, month, year] = screen.getAllByRole('textbox');
+		const ahead = new Date().getFullYear() + 2;
+		await user.type(day, '15');
+		await user.type(month, '6');
+		await user.type(year, String(ahead));
+		expect(screen.getByTestId('dob-value')).toHaveTextContent(`${ahead}-06-15`);
+		await user.clear(day);
+		await user.type(day, '31');
+		await user.clear(month);
+		await user.type(month, '2');
+		expect(screen.getByTestId('dob-value')).toHaveTextContent('empty');
+		expect(screen.getByText('Δώστε μια έγκυρη ημερομηνία')).toBeInTheDocument();
+	});
+
+	it('review w3-w3 R1 MINOR-4: `typed` tells a date left half (no value yet) from no date at all', async () => {
+		const user = userEvent.setup();
+		render(Harness);
+		expect(screen.getByTestId('dob-typed')).toHaveTextContent('blank');
+		const [day, month, year] = screen.getAllByRole('textbox');
+		await user.type(day, '12');
+		await user.type(month, '3');
+		await user.type(year, '198');
+		expect(screen.getByTestId('dob-value')).toHaveTextContent('empty');
+		expect(screen.getByTestId('dob-typed')).toHaveTextContent('typed');
+		await user.clear(year);
+		await user.clear(month);
+		await user.clear(day);
+		expect(screen.getByTestId('dob-typed')).toHaveTextContent('blank');
+	});
+
+	describe('U-129: `variant="single"`, one date field (the sign-up’s and the booking’s prototypes, `type="date"`)', () => {
+		const dateInput = () => screen.getByLabelText('Date of birth') as HTMLInputElement;
+		/** What a browser does with a day left half or impossible: no value, and `validity.badInput`. */
+		function leaveHalf(input: HTMLInputElement) {
+			Object.defineProperty(input, 'validity', {
+				configurable: true,
+				get: () => ({ badInput: true })
+			});
+			input.value = '';
+			input.dispatchEvent(new Event('input', { bubbles: true }));
+		}
+
+		it('U-129: ONE labelled `date` control in the text field’s box, its label always up; a whole date is its ISO, typed', async () => {
+			const user = userEvent.setup();
+			const { container } = render(Harness, { props: { variant: 'single' } });
+			expect(container.querySelectorAll('input')).toHaveLength(1);
+			expect(screen.queryAllByRole('textbox')).toHaveLength(0);
+			expect(dateInput()).toHaveAttribute('type', 'date');
+			expect(dateInput()).toHaveClass(
+				'rounded-md',
+				'border',
+				'border-input',
+				'bg-card',
+				'text-foreground'
+			);
+			const label = container.querySelector(
+				'[data-slot="date-of-birth-field-label"]'
+			) as HTMLElement;
+			expect(label).toHaveAttribute('data-floated');
+			expect(container.querySelector('[data-variant="single"]')).not.toBeNull();
+			await user.type(dateInput(), '1985-04-12');
+			expect(screen.getByTestId('dob-value')).toHaveTextContent('1985-04-12');
+			expect(screen.getByTestId('dob-typed')).toHaveTextContent('typed');
+		});
+
+		it('U-129 (negative): a day ahead is refused with its own line, unless `allowFuture`', async () => {
+			const user = userEvent.setup();
+			const ahead = `${new Date().getFullYear() + 2}-06-15`;
+			const refused = render(Harness, { props: { variant: 'single' } });
+			await user.type(dateInput(), ahead);
+			expect(screen.getByTestId('dob-value')).toHaveTextContent('empty');
+			expect(screen.getByText('Η ημερομηνία δεν μπορεί να είναι μελλοντική')).toBeInTheDocument();
+			expect(dateInput()).toHaveAttribute('aria-invalid', 'true');
+			expect(dateInput()).toHaveValue(ahead);
+			refused.unmount();
+			render(Harness, { props: { variant: 'single', allowFuture: true } });
+			await user.type(dateInput(), ahead);
+			expect(screen.getByTestId('dob-value')).toHaveTextContent(ahead);
+		});
+
+		it('U-129 (negative): a day left half or impossible is «typed» with no value — never «no date»', async () => {
+			render(Harness, { props: { variant: 'single' } });
+			leaveHalf(dateInput());
+			await vi.waitFor(() => expect(screen.getByTestId('dob-typed')).toHaveTextContent('typed'));
+			expect(screen.getByTestId('dob-value')).toHaveTextContent('empty');
+		});
+
+		it('U-129: a value from outside fills the control; cleared from outside, the control and `typed` empty too', async () => {
+			const user = userEvent.setup();
+			render(Harness, { props: { variant: 'single', initial: '2010-05-12' } });
+			await vi.waitFor(() => expect(dateInput()).toHaveValue('2010-05-12'));
+			expect(screen.getByTestId('dob-typed')).toHaveTextContent('typed');
+			await user.click(screen.getByTestId('dob-clear'));
+			expect(dateInput()).toHaveValue('');
+			expect(screen.getByTestId('dob-typed')).toHaveTextContent('blank');
+		});
+
+		it('U-129 (negative): the boxes stay the default — no `date` control without the variant', () => {
+			const { container } = render(Harness);
+			expect(container.querySelector('input[type="date"]')).toBeNull();
+			expect(screen.getAllByRole('textbox')).toHaveLength(3);
+		});
 	});
 });

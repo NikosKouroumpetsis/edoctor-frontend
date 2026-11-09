@@ -5,12 +5,11 @@
 
 	let {
 		onSignedIn,
-		onSignInAbandoned
-	}: { onSignedIn?: () => void; onSignInAbandoned?: () => void } = $props();
-
-	const client = new QueryClient({
-		defaultOptions: { queries: { retry: false, gcTime: Infinity }, mutations: { retry: 0 } }
-	});
+		onSignInAbandoned,
+		client = new QueryClient({
+			defaultOptions: { queries: { retry: false, gcTime: Infinity }, mutations: { retry: 0 } }
+		})
+	}: { onSignedIn?: () => void; onSignInAbandoned?: () => void; client?: QueryClient } = $props();
 </script>
 
 <QueryClientProvider {client}>

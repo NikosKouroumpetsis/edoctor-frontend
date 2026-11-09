@@ -137,8 +137,13 @@ export class AuthFlowState {
 	/** Past the sign-in itself (a password to set, a profile to complete): the surface stays for a member. */
 	readonly isAfterSignIn = $derived(STEPS_AFTER_SIGN_IN.includes(this.currentStep));
 
-	#start = createMutation(() => ({ mutationFn: startAccess }));
-	#resend = createMutation(() => ({ mutationFn: resendAccessCode }));
+	// D-W3-39: a code's email in the page's language.
+	#start = createMutation(() => ({
+		mutationFn: (identifier: AuthIdentifier) => startAccess(identifier, this.#context.locale())
+	}));
+	#resend = createMutation(() => ({
+		mutationFn: (identifier: AuthIdentifier) => resendAccessCode(identifier, this.#context.locale())
+	}));
 	#verify = createMutation(() => ({
 		mutationFn: (input: { identifier: AuthIdentifier; code: string }) =>
 			verifyAccessCode(input.identifier, input.code)
@@ -149,7 +154,9 @@ export class AuthFlowState {
 	}));
 	#complete = createMutation(() => ({ mutationFn: completeAccessRegistration }));
 	#onboard = createMutation(() => ({ mutationFn: completePatientOnboarding }));
-	#initPassword = createMutation(() => ({ mutationFn: initSetPassword }));
+	#initPassword = createMutation(() => ({
+		mutationFn: () => initSetPassword(this.#context.locale())
+	}));
 	#setPassword = createMutation(() => ({
 		mutationFn: (input: { code: string; password: string }) =>
 			setPassword(input.code, input.password)

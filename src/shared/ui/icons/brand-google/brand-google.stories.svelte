@@ -2,6 +2,8 @@
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { BrandApple, BrandAppleLeftAligned } from '$shared/ui/icons/brand-apple';
 	import { BrandGoogle } from '$shared/ui/icons/brand-google';
+	import { BrandGoogleCalendar } from '$shared/ui/icons/brand-google-calendar';
+	import { BrandMicrosoftOutlook } from '$shared/ui/icons/brand-microsoft-outlook';
 	import { HugeiconsLaurelWreathLeft01 } from '$shared/ui/icons/hugeicons-laurel-wreath-left-01';
 	import { HugeiconsLaurelWreathRight01 } from '$shared/ui/icons/hugeicons-laurel-wreath-right-01';
 
@@ -17,6 +19,16 @@
 		<div class="flex items-center gap-4 text-foreground">
 			<BrandGoogle class="icon-lg" />
 			<BrandGoogle class="icon-xl" />
+		</div>
+	{/snippet}
+</Story>
+
+<!-- U-111.1: Google Calendar's own file in its colours, Outlook's mark in the text colour (U-110.1), at the cards' 32. -->
+<Story name="Calendars">
+	{#snippet template()}
+		<div class="flex items-center gap-4 text-foreground">
+			<BrandGoogleCalendar />
+			<BrandMicrosoftOutlook />
 		</div>
 	{/snippet}
 </Story>

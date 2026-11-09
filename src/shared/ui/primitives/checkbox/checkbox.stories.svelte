@@ -61,3 +61,14 @@
 		/>
 	{/snippet}
 </Story>
+
+<!-- U-129: the ticked box of each prototype — primary (default), foreground, secondary. -->
+<Story name="Tones">
+	{#snippet template(args)}
+		<div class="flex flex-row items-center gap-4">
+			<Checkbox {...args} checked />
+			<Checkbox {...args} tone="foreground" checked />
+			<Checkbox {...args} tone="secondary" checked />
+		</div>
+	{/snippet}
+</Story>

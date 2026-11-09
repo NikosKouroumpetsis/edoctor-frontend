@@ -7,18 +7,19 @@
 	export type ChipVariant = 'filled' | 'tinted' | 'outline';
 
 	// The drawn pill per variant: its idle and its active look (the ring is inset, so a choice never reflows the row).
-	// U-28.4 (Airbnb's): with a pointer, a chip not chosen darkens its border on hover; a chosen or disabled one does not.
+	// U-28.4 (Airbnb's): with a pointer, a chip not chosen darkens its border on hover; a chosen or disabled one does not
+	// (`idleHover`, a link's `linkHover`). `hover={false}` (U-100: a caller with no hover) leaves both out.
 	const pillLooks: Record<ChipVariant, { idle: string; active: string }> = {
 		filled: {
-			idle: 'border-border bg-card transition-colors duration-standard ease-standard can-hover:group-enabled:group-hover:border-foreground',
+			idle: 'border-border bg-card transition-colors duration-standard ease-standard',
 			active: 'border-primary bg-primary'
 		},
 		tinted: {
-			idle: 'border-border bg-card transition-colors duration-standard ease-standard can-hover:group-enabled:group-hover:border-foreground',
+			idle: 'border-border bg-card transition-colors duration-standard ease-standard',
 			active: 'border-primary bg-primary/10'
 		},
 		outline: {
-			idle: 'border-border bg-card transition-colors duration-standard ease-standard can-hover:group-enabled:group-hover:border-foreground',
+			idle: 'border-border bg-card transition-colors duration-standard ease-standard',
 			active: 'border-foreground bg-background ring-1 ring-foreground ring-inset'
 		}
 	};
@@ -106,9 +107,12 @@
 		 * address (`?type=`), a jump to an anchor. `selected` is then `aria-current`; no group, no ✕.
 		 */
 		href?: string;
+		/** U-28.4 (`true`, the default): a chip not chosen darkens under the pointer; `false` (U-100, D-W3-27) never. */
+		hover?: boolean;
 		ref?: HTMLButtonElement | null;
 	};
 
+	const idleHover = 'can-hover:group-enabled:group-hover:border-foreground';
 	// A link is never `:enabled`: its hover darkens the border without that state (U-28.4).
 	const linkHover = 'can-hover:group-hover:border-foreground';
 </script>
@@ -136,6 +140,7 @@
 		class: className,
 		onclick,
 		href,
+		hover = true,
 		ref = $bindable(null),
 		...restProps
 	}: ChipProps = $props();
@@ -185,7 +190,8 @@
 		class={cn(
 			'inline-flex flex-row items-center justify-center gap-1.5 rounded-full border',
 			active ? activePill : pillLooks[variant].idle,
-			!active && href && linkHover,
+			!active && hover && idleHover,
+			!active && hover && href && linkHover,
 			pillSizes[size]
 		)}
 	>

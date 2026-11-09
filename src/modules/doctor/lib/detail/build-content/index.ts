@@ -3,7 +3,9 @@ import { formatDecimal } from '$shared/lib/format';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type {
 	DoctorCredentialFacts,
+	DoctorOfficeAmenitiesFacts,
 	DoctorOfficeFacts,
+	DoctorOfficeParkingKind,
 	DoctorProfile,
 	DoctorReviewSnippet
 } from '$modules/doctor/api/profile';
@@ -52,6 +54,7 @@ import type {
 	DoctorDetailSummary,
 	DoctorLocation,
 	DoctorOfficeInfoRow,
+	DoctorOfficeInfoRowId,
 	DoctorPhoto,
 	DoctorSummaryRow
 } from '../types';
@@ -455,6 +458,49 @@ function facilityRows(office: DoctorOfficeFacts, locale: SupportedLocale): Docto
 			? []
 			: [{ id, label: officeInfoRowLabel(id, locale), value: officeFacilityValue(value, locale) }]
 	);
+}
+
+const PARKING_KIND_ROWS = {
+	private: 'parking-private',
+	'public-nearby': 'parking-public',
+	street: 'parking-street'
+} as const satisfies Record<DoctorOfficeParkingKind, DoctorOfficeInfoRowId>;
+
+/**
+ * 🔴 P-W3 §3.5 / D-W3-19 (the application's `withDoctorOfficeAmenityRows`): the office page's rows with the details only
+ * its own read carries — each kind of parking under «Parking», the accessible toilet and space under «Πρόσβαση ΑμεΑ»,
+ * then the elevator and the transport, each «Ναι». A detail whose parent row is absent stays absent. 🔴 U-110.3: the
+ * profile's own «Τοποθεσία» never calls this.
+ */
+export function withDoctorOfficeAmenityRows(
+	location: DoctorLocation,
+	amenities: DoctorOfficeAmenitiesFacts | undefined,
+	locale: SupportedLocale
+): DoctorLocation {
+	if (!amenities) return location;
+	const row = (id: DoctorOfficeInfoRowId): DoctorOfficeInfoRow => ({
+		id,
+		label: officeInfoRowLabel(id, locale),
+		value: officeFacilityValue(true, locale)
+	});
+	const details: Partial<Record<DoctorOfficeInfoRowId, DoctorOfficeInfoRow[]>> = {
+		parking: amenities.parkingKinds.map((kind) => row(PARKING_KIND_ROWS[kind])),
+		'disability-access': [
+			...(amenities.accessibleToilet ? [row('accessible-toilet')] : []),
+			...(amenities.accessibleParking ? [row('accessible-parking')] : [])
+		]
+	};
+	const trailing = [
+		...(amenities.elevator ? [row('lift')] : []),
+		...(amenities.nearPublicTransport ? [row('transit')] : [])
+	];
+	return {
+		...location,
+		facilityRows: [
+			...location.facilityRows.flatMap((each) => [each, ...(details[each.id] ?? [])]),
+			...trailing
+		]
+	};
 }
 
 /** The phone (with its dial number) and the floor. */

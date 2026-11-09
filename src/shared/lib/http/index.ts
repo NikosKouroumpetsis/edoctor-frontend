@@ -1,4 +1,7 @@
+import { browser } from '$app/environment';
+import { getLocale } from '$paraglide/runtime';
 import { getApiBaseUrl } from '$shared/config';
+import { getPathnameLocale } from '$shared/preferences/i18n/page-locale';
 
 // Local, dependency-free placeholder served from `static/`. Used when the backend card
 // has no image (every seeded doctor currently lacks one) so cards never render broken.
@@ -47,6 +50,21 @@ export class ApiError extends Error {
 		this.status = status;
 		this.url = url;
 		this.errorCode = errorCode;
+	}
+}
+
+/**
+ * 🔴 D-W3-39 (w3-b5 finding 7, review w3-w6 R1 MAJOR-N1): every request says the PAGE's language, never the browser's
+ * own list — a Greek browser on `/en/…` reads English, and so is its code's email. In the browser the address's
+ * (`/en/…` English, else Greek), on the server the request's (Paraglide's middleware). A call that also names `?lang=`
+ * (the public reads, the code-sending writes) says the same.
+ */
+export function requestLanguageHeaders(): Record<string, string> {
+	try {
+		const locale = browser ? getPathnameLocale(window.location) : getLocale();
+		return locale ? { 'Accept-Language': locale } : {};
+	} catch {
+		return {};
 	}
 }
 
@@ -140,6 +158,7 @@ async function readEnvelope<T>(
 			method: 'GET',
 			headers: {
 				Accept: 'application/json',
+				...requestLanguageHeaders(),
 				...getAuthHeader(),
 				...options.headers
 			},
@@ -205,7 +224,7 @@ async function readRefusal(response: Response): Promise<{ code?: string; message
  * anonymous, on the page's server too (`readEnvelope`, `credentials: 'omit'`). So these calls are made from the browser.
  */
 async function sessionRequest<T>(
-	method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+	method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
 	path: string,
 	options: HttpSessionOptions
 ): Promise<T> {
@@ -220,6 +239,7 @@ async function sessionRequest<T>(
 			credentials: 'include',
 			headers: {
 				Accept: 'application/json',
+				...requestLanguageHeaders(),
 				...(sendsBody ? { 'Content-Type': 'application/json' } : {})
 			},
 			...(sendsBody ? { body: JSON.stringify(options.body ?? {}) } : {}),
@@ -262,6 +282,11 @@ export function httpSessionPut<T>(path: string, options: HttpSessionOptions = {}
 	return sessionRequest<T>('PUT', path, options);
 }
 
+/** Wave 3 (the booking's name and date of birth): a partial write of the person's own facts, with the cookies. */
+export function httpSessionPatch<T>(path: string, options: HttpSessionOptions = {}): Promise<T> {
+	return sessionRequest<T>('PATCH', path, options);
+}
+
 export function httpSessionDelete<T = void>(
 	path: string,
 	options: HttpSessionOptions = {}
@@ -278,7 +303,12 @@ export async function httpSessionFile(path: string, signal?: AbortSignal): Promi
 	let response: Response;
 
 	try {
-		response = await fetch(url, { method: 'GET', credentials: 'include', signal });
+		response = await fetch(url, {
+			method: 'GET',
+			credentials: 'include',
+			headers: requestLanguageHeaders(),
+			signal
+		});
 	} catch (error) {
 		const reason = error instanceof Error ? error.message : 'Network request failed';
 		throw new ApiError(reason, 0, url);
@@ -315,6 +345,7 @@ export async function httpPublicPut<T>(
 			headers: {
 				Accept: 'application/json',
 				'Content-Type': 'application/json',
+				...requestLanguageHeaders(),
 				...options.headers
 			},
 			body: JSON.stringify(options.body),

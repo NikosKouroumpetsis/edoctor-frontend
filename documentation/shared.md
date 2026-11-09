@@ -31,10 +31,13 @@ src/shared/
                 (`form`, `headless`, `debounce`)
   preferences/ theme, language, and preferences resolution
   providers/   root and subtree providers
-  query/       TanStack Svelte Query setup
+  query/       TanStack Svelte Query setup (`personalQueryMeta`, `removePersonalQueries`, `resetPersonalQueries`,
+                `removeMutations`: a sign-out or another account takes every write's body too, D-W3-37)
   state/       app-wide local state: a tab's module state written only in the browser (`device-location`, the
                 visit's position of «Κοντά μου»), or a context scoped to the page tree (`search-dock`, `session`:
-                who is signed in and `requireSignIn`, `site-dialogs`: the frame's windows a page may ask for)
+                who is signed in and `requireSignIn`, `site-dialogs`: the frame's windows a page may ask for);
+                `session`'s `openSignOutChannel`: a sign-out reaches the browser's other tabs, the event only
+                (`BroadcastChannel` `edoctor.<appEnv>.session.v1`, the one word `signed-out`, D-W3-37)
   storage/     browser/server-safe storage adapters (`consent-storage`)
   ui/          reusable UI hierarchy
 ```
@@ -85,6 +88,48 @@ that grows, the application's numbers below 744 and the prototype's six lines fr
 buttons; the 480 window from 744, the draggable sheet below it), `BottomNavItem`'s `badge`, `$shared/lib/headless`
 `SheetDrag` (what `InfoDialog` and `ActionDialog` share), `$shared/lib/http` `httpSessionFile` and `$shared/lib/text`
 `countCodePoints`, `withDoctorTitle` (U-99.1: «Dr. …» inside a sentence, never doubled).
+
+Wave 3 (the booking 30–31, the doctor's sign-up 33–42) adds, each generic and optional (the default is what was there):
+
+- `templates/wizard-screen` (`WizardScreen`: the steps' frame — the header with the caller's mark and pills, a column of
+  628, the fixed bar with `StepProgress` and `ActionBar`, or a `footer` snippet; the page and its bar on `bg-card`, the
+  prototype's `--page`, W8-Δ3); the web-only tokens `wizard-column`,
+  `wizard-top`, `wizard-pill` and the booking's `checkout-*` (`design-tokens.md`), `layout.css` `grid-checkout`.
+- `hover` (default `true`) on `Button`, `ActionBar`, `SelectableCard` / `SelectableCards`, `Checkbox`, `CheckboxRow`,
+  `Switch`, `Chip` and `Stepper`; the rule (`hover={false}`, U-100, D-W3-27) is `styling-guidelines.md` «Pressable»,
+  and each component's spec guards both values.
+- `SelectableCards`' `details` (a snippet under a chosen card, the application's), `Stepper`'s `valueLabel` (words for
+  the number, read-only: «Ισόγειο», «3ος») and `variant="counter"` (one 64 box, the title inside, 36 circles: W8-Δ4),
+  `DateOfBirthField`'s `allowFuture` and `bind:typed` (a date typed half),
+  `phone-field` / `phone-field-inline`'s `maxlength`.
+- `MapView`'s `zoomAround="center"`, `zoomControlsFrom="phone"`, `onMoveStart` / `onMoveEnd(center, { byUser })` (a fixed
+  pin over a moving map) and `attributionLabel` (the «i»'s name).
+- `icons/brand-google-calendar` (Google's official mark, its own colours, U-111.1) and `icons/brand-microsoft-outlook`
+  (one colour, `currentColor`); the Ionicons `swap-vertical-outline` and `bus-outline` (the office page's elevator and
+  transport, extracted from the application's font by the task's tooling, as every glyph of `glyphs.ts`).
+- `lib/navigation`: `useSiteBack` (moved from the doctor module), `readHistoryDepth` / `HistoryDepthFlow` (how many steps
+  of a flow lie behind an entry of the history, also after a reload, from `history.state['sveltekit:states']`).
+- `lib/location`'s `resolveDeviceLocation({ highAccuracy })`, `lib/http`'s `httpSessionPatch`.
+- U-129 (each screen as its own prototype, through a variant): `TimeSlotGrid`'s `variant` (`solid`, the default, the
+  profile's filled time; `outline`, the booking's: a 2 px `foreground` border on `muted`, its words `foreground` 600),
+  passed by `AvailabilityPicker`'s `slotVariant`; `DateOfBirthField`'s `variant="single"` (one `type="date"` field in
+  the text field's box, its label always up; `typed` is also the browser's `badInput`); `Checkbox` / `CheckboxRow`'s
+  `tone` (`primary` default, `foreground`: the doctor sign-up's tick, `secondary`: the register form's);
+  `icons/house-cross` (the doctor sign-up prototype's own «clinic», path for path); the application's `chip` and
+  `line-2` colours.
+- `lib/form`'s `Validators.lettersOnly` (one word of Latin or Greek letters once trimmed, `LETTERS_ONLY_PATTERN`: the
+  server's `onlyCharactersSchema`, U-121.2), `Validators.amkaDate` and `Validators.afmCheckDigit` (after a `pattern` of
+  11 / 9 digits, the date and the check digit of the server's `GreekIdPolicy`, U-121.3), over `greekIdDigits` (the id
+  as the server reads it: trimmed, its digits 0–9 alone) and the ONE `AMKA_LENGTH` / `AFM_LENGTH`. Each leaves an empty
+  value to `required` and another length to `pattern`; `tests/architecture/server-rules.test.ts` holds them to the
+  backend's files.
+- `preferences/i18n`'s `canonicalGreekPath` (the `/el/…` redirect's target, D-W3-38: `architecture-pattern.md` i18n).
+- `lib/api-client`'s `ApiRequestBody<operationId>` / `ApiResponseData<operationId, status>`: a write's body and answer
+  as the generated contract has them (W-4).
+- `lib/http`'s `requestLanguageHeaders()` (🔴 D-W3-39): every request of `lib/http` and of the `api-client` (at each
+  request's own moment) says the PAGE's language in `Accept-Language` — the address's (`/en/…` English, else Greek) in
+  the browser, Paraglide's on the server — never the browser's own list. A call that mails a code names it in
+  `?lang=` as well (`startAccess`, `resendAccessCode`, `initSetPassword`, `sendDoctorOnboardingEmailCode`).
 
 Everything under `src/shared/ui` is generic (U-02.1, guarded by
 `tests/architecture/shared-ui-generic.test.ts`): words, hrefs and the locale
@@ -153,4 +198,8 @@ through the shared client layer at `src/shared/lib/api-client` and consumed via
 - the SSR `fetch` injection seam,
 - the response envelope/error guard (`unwrapEnvelope`, reusing `ApiError` from
   `src/shared/lib/http`), since `openapi-fetch` does no runtime validation,
-- the `$shared` re-export of the generated wire types.
+- the `$shared` re-export of the generated wire types: the views by name, and since wave 3 a write's JSON body and an
+  answer's `data` by the operation's id (`ApiRequestBody<'createAppointment'>`,
+  `ApiResponseData<'addPatientRelative', 201>`). Only a feature's own `api/` narrows them, and only facts leave it
+  (`architecture-pattern.md` «Wire ⇒ facts (W-4)», the rule and its guard),
+- the page's language on every request (`requestLanguageHeaders`, D-W3-39), as `$shared/lib/http` says it.

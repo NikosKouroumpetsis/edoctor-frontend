@@ -38,6 +38,19 @@
 	/** U-28.2: the «Απόκρυψη χάρτη» pill at the map's top left (from 1128; none while the map is expanded). */
 	export type MapViewHideControl = { label: string; onHide: () => void };
 
+	/** The camera's centre where a move ended. */
+	export type MapViewCenter = { latitude: number; longitude: number };
+
+	/**
+	 * Whether a move is the person's own: MapLibre's gestures (a drag, a pinch, the wheel, the arrow keys) carry the
+	 * event that made them, a move of the code (a fit, the kit's «+» / «−») none. At its end it also asks that the centre
+	 * moved: a zoom around the centre leaves the point under it where it was.
+	 */
+	export type MapViewMove = { byUser: boolean };
+
+	/** How far the centre must go to count as moved (in degrees, about a centimetre): a zoom's rounding is no move. */
+	const CENTER_MOVE_EPSILON = 1e-7;
+
 	/** How close to its limit the zoom counts as there (the limit a step clamps to, read back as a float). */
 	const ZOOM_LIMIT_EPSILON = 0.001;
 
@@ -131,7 +144,12 @@
 		expandControl,
 		hideControl,
 		scrollZoom = true,
+		zoomAround = 'pointer',
+		zoomControlsFrom = 'tablet',
+		onMoveStart,
+		onMoveEnd,
 		fitAnimate = false,
+		attributionLabel,
 		'aria-label': ariaLabel,
 		testId,
 		class: className
@@ -164,6 +182,26 @@
 		zoomControls?: MapViewZoomControls;
 		/** Where the zoom sits when the caller lays a control of its own over the map's corner. */
 		zoomControlsClass?: string;
+		/**
+		 * The zone the «+» / «−» show from: `tablet` (744, the default: below it the phone pinches, U-27.2) or `phone`
+		 * (every width: a map under a fixed pin, which the fingers move and the buttons zoom).
+		 */
+		zoomControlsFrom?: 'phone' | 'tablet';
+		/**
+		 * Where a zoom by the wheel or by two fingers happens: around the `pointer` (MapLibre's own, the default) or the
+		 * map's `center`, so the point under a pin fixed in the middle stays under it (the double click, which zooms where
+		 * it lands, is then off).
+		 */
+		zoomAround?: 'pointer' | 'center';
+		/** A move of the camera starts (the hint over a fixed pin goes at the person's first one). */
+		onMoveStart?: (move: MapViewMove) => void;
+		/** A move of the camera ended: its centre, and whether the person moved it. */
+		onMoveEnd?: (center: MapViewCenter, move: MapViewMove) => void;
+		/**
+		 * The name of the folded credit's «i», in the page's language («Πηγές του χάρτη», the application's
+		 * `attributionLabel`); without it MapLibre's own English «Toggle attribution».
+		 */
+		attributionLabel?: string;
 		/**
 		 * U-28.2: the round «⤢» over the zoom, from 1128 only (where a map sits beside other content; the zoom then
 		 * steps 16 below it, at 72): the caller's state and words. None without it.
@@ -271,6 +309,8 @@
 			// The worker is its own file of the build (its address is resolved here, not by MapLibre's guess).
 			maplibre.setWorkerUrl(worker.default);
 			const initial = untrack(() => camera);
+			const aroundCenter = untrack(() => zoomAround) === 'center';
+			const wheel = untrack(() => scrollZoom);
 			const created = new maplibre.Map({
 				container: node,
 				style: untrack(() => styleUrl),
@@ -278,12 +318,18 @@
 				zoom: initial.zoom,
 				// The data's credit stays (OpenStreetMap / OpenFreeMap), folded to its «i» (`foldCredit`).
 				attributionControl: { compact: true },
-				// MapLibre names its canvas itself («Map»): it takes the caller's name, in the page's language.
-				locale: { 'Map.Title': untrack(() => ariaLabel) },
+				// MapLibre names its canvas itself («Map») and the credit's «i» («Toggle attribution»): both take the
+				// caller's names, in the page's language (review w3-w4 R1 MINOR-5).
+				locale: untrack(() => ({
+					'Map.Title': ariaLabel,
+					...(attributionLabel ? { 'AttributionControl.ToggleAttribution': attributionLabel } : {})
+				})),
 				dragRotate: false,
 				pitchWithRotate: false,
 				touchPitch: false,
-				scrollZoom: untrack(() => scrollZoom)
+				scrollZoom: wheel && aroundCenter ? { around: 'center' } : wheel,
+				touchZoomRotate: aroundCenter ? { around: 'center' } : true,
+				doubleClickZoom: !aroundCenter
 			});
 			instance = created;
 			// MapLibre opens its compact credit by itself until the first drag; here it starts folded, one press away
@@ -314,6 +360,26 @@
 			});
 			created.on('zoom', () => readZoomLimits(created));
 			created.on('click', () => untrack(() => onMapPress)?.());
+			// Where a move began, so its end can tell a move of the centre from a zoom around it.
+			let movedFrom: { lng: number; lat: number } | null = null;
+			created.on('movestart', (event) => {
+				const { lng, lat } = created.getCenter();
+				movedFrom = { lng, lat };
+				untrack(() => onMoveStart)?.({ byUser: Boolean(event?.originalEvent) });
+			});
+			created.on('moveend', (event) => {
+				const { lng, lat } = created.getCenter();
+				const from = movedFrom;
+				movedFrom = null;
+				const moved =
+					!from ||
+					Math.abs(from.lng - lng) > CENTER_MOVE_EPSILON ||
+					Math.abs(from.lat - lat) > CENTER_MOVE_EPSILON;
+				untrack(() => onMoveEnd)?.(
+					{ latitude: lat, longitude: lng },
+					{ byUser: Boolean(event?.originalEvent) && moved }
+				);
+			});
 			created.on('load', () => {
 				loaded = true;
 				project(
@@ -415,7 +481,7 @@
 		data-slot="map-view-zoom"
 		class={cn(
 			'absolute top-2 right-3 z-30 hidden flex-col gap-2',
-			zoomControls ? 'tablet:flex' : 'laptop:flex',
+			zoomControls ? (zoomControlsFrom === 'phone' ? 'flex' : 'tablet:flex') : 'laptop:flex',
 			zoomControlsClass
 		)}
 	>

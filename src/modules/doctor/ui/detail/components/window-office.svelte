@@ -15,9 +15,9 @@
 	import { Skeleton } from '$shared/ui/primitives/skeleton';
 	import { ModalScreenSurface } from '$shared/ui/templates/modal-screen';
 	import type { DoctorDetailState } from '../hooks/use-state.svelte';
+	import { OfficeTabs } from '$modules/doctor/ui/availability-picker';
 	import OfficeInfoRows from './office-info-rows.svelte';
 	import OfficeMap from './office-map.svelte';
-	import OfficeTabs from './office-tabs.svelte';
 	import WindowPhotos from './window-photos.svelte';
 
 	const THUMB_PLACEHOLDERS = [0, 1, 2];

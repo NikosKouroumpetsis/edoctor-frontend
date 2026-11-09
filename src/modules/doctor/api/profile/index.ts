@@ -14,6 +14,7 @@ export {
 	mapDoctorReview,
 	REVIEW_ASPECT_FIELDS
 } from './map';
+export { doctorMemberProfileQuery } from './queries';
 export { doctorQueryKeys } from './query-keys';
 export type {
 	DoctorAvailabilityFacts,
@@ -25,8 +26,10 @@ export type {
 	DoctorFeeFacts,
 	DoctorImageFacts,
 	DoctorLanguageFacts,
+	DoctorOfficeAmenitiesFacts,
 	DoctorOfficeFacts,
 	DoctorOfficeImageFacts,
+	DoctorOfficeParkingKind,
 	DoctorOfficePaymentOptionId,
 	DoctorOfficeSummaryFacts,
 	DoctorOfficeWeeklyHoursFacts,

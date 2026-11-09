@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { untrack, type Snippet } from 'svelte';
 	import type { ResolvedPathname } from '$app/types';
+	import { goto } from '$app/navigation';
 	import { m } from '$paraglide/messages.js';
 	import { msUntilNextPlatformDay } from '$shared/lib/format-day-time';
 	import { readServerNow, recordServerNow } from '$shared/lib/server-clock';
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
-	import { getSessionOptional, type SignInRequest } from '$shared/state/session';
+	import type { SignInRequest } from '$shared/state/session';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { TwoColumnDetail } from '$shared/ui/templates/two-column-detail';
 	import type { DoctorProfile } from '$modules/doctor/api/profile';
@@ -15,10 +16,11 @@
 		readDoctorPhotoFocus,
 		type DoctorDetailHints,
 		type DoctorDetailSection,
+		type DoctorSelectedSlot,
 		type DoctorSimilarArea,
 		type DoctorSimilarSearch
 	} from '$modules/doctor/lib/detail';
-	import { DoctorDetailState } from '../hooks/use-state.svelte';
+	import { DoctorDetailState, type DoctorKeptBooking } from '../hooks/use-state.svelte';
 	import type {
 		DoctorFavorite,
 		DoctorKnowLinks,
@@ -52,10 +54,11 @@
 		localize,
 		similarHref,
 		similarAreaQuery,
+		bookingHref,
+		kept = null,
 		canonicalUrl,
 		alternateUrls,
 		backHref,
-		signedIn,
 		onSignIn,
 		onBack,
 		reviewLinks,
@@ -71,10 +74,11 @@
 		localize: (path: string) => string;
 		similarHref: (search: DoctorSimilarSearch, area: DoctorSimilarArea | null) => ResolvedPathname;
 		similarAreaQuery: DoctorSimilarAreaQuery;
+		bookingHref: (slot: DoctorSelectedSlot, serviceId: string | undefined) => string;
+		kept?: DoctorKeptBooking | null;
 		canonicalUrl: string;
 		alternateUrls: Record<SupportedLocale, string>;
 		backHref: ResolvedPathname;
-		signedIn: boolean;
 		onSignIn: (request?: SignInRequest) => void;
 		onBack: (event: MouseEvent) => void;
 		reviewLinks: DoctorReviewLinks;
@@ -108,6 +112,7 @@
 		locale: () => locale,
 		now: () => now,
 		routeSection: () => routeSection,
+		kept: () => kept,
 		localize: (path) => localize(path),
 		similarHref: (search, area) => similarHref(search, area),
 		similarAreaQuery: (city) => similarAreaQuery(city)
@@ -164,21 +169,21 @@
 	const save = () => (favorite ? favorite.onToggle() : onSignIn({ action: 'fav' }));
 	const saved = $derived(favorite?.saved ?? false);
 	const pop = $derived(favorite?.pop ?? false);
-	// S-31.4 / U-40.3: «Κράτηση» — a guest signs in and it goes on after it (U-80.1 Ε4); a member without a time picks one
-	// in the window.
+	// 🔴 Wave 3 (P-W3 §3.2.1 α–δ, U-104.3 Ε1 = Α, record §3.1): «Κράτηση» with a chosen hour opens the booking — screen 30
+	// — for a member AND a guest, no sign-in first (its own button asks for it), marked as opened from this site (its «×»
+	// may go back, R1 MINOR-1). Without a chosen hour (or one of another office) «Διαθεσιμότητα» picks one first. The
+	// address is left as it is (D-W3-31): a «back» finds the hour through the booking's draft (`kept`).
 	const openAvailability = () => detail.openWindow('availability', officeHint);
 	function book() {
-		if (!signedIn) {
-			onSignIn({ action: 'book', onSignedIn: openAvailability });
+		const slot = detail.selectedSlot;
+		if (!slot || slot.officeId !== detail.activeOfficeId) {
+			openAvailability();
 			return;
 		}
-		openAvailability();
+		// The booking's address, resolved by the screen (a module knows no other module's route).
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		void goto(bookingHref(slot, detail.serviceId), { state: { siteBack: true } });
 	}
-	// U-80.1 Ε4: «Κράτηση» that went through the `/login` page or a provider's redirect goes on here, once.
-	const session = getSessionOptional();
-	$effect(() => {
-		if (signedIn && session?.takeResumed('book')) openAvailability();
-	});
 
 	// Π5: the section bar from 744 once the photos have gone, its «Κράτηση» once the card has.
 	let identityNode = $state<HTMLElement | null>(null);

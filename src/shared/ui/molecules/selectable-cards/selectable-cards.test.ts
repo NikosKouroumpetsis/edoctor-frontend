@@ -200,4 +200,83 @@ describe('SelectableCards', () => {
 		);
 		expect([...alpha.classList].filter((name) => name.includes('hover:'))).toEqual([]);
 	});
+
+	it('U-100 / record §6.2: `hover={false}` — no card changes under the pointer, chosen or not, single or multiple; the rest of the look is the same', () => {
+		const hovers = (node: Element) => [...node.classList].filter((name) => name.includes('hover:'));
+		const single = render(Harness, { props: { value: 'alpha', hover: false } });
+		for (const card of screen.getAllByRole('radio')) expect(hovers(card)).toEqual([]);
+		const beta = screen.getByRole('radio', { name: /Beta/ });
+		expect(beta).toHaveClass('border-border', 'bg-transparent', 'shadow-none', 'p-6', 'rounded-md');
+		expect(screen.getByRole('radio', { name: /Alpha/ })).toHaveClass(
+			'border-foreground',
+			'bg-muted',
+			'shadow-raised',
+			'ring-1',
+			'ring-inset'
+		);
+		single.unmount();
+		render(Harness, { props: { type: 'multiple', value: ['alpha'], hover: false } });
+		for (const card of screen.getAllByRole('checkbox')) expect(hovers(card)).toEqual([]);
+	});
+
+	it('U-28.4 (negative): without `hover` the filters keep their hover — the default is unchanged', () => {
+		render(Harness, { props: { value: 'alpha' } });
+		expect(screen.getByRole('radio', { name: /Beta/ })).toHaveClass(
+			'can-hover:enabled:hover:border-foreground'
+		);
+	});
+
+	it('U-110.2 / U-112.1: several choices sit in a row, one under the other, all the width — a `group` of checkboxes in one column, never side by side', async () => {
+		const user = userEvent.setup({ delay: null });
+		render(Harness, { props: { type: 'multiple', hover: false } });
+		const group = screen.getByRole('group', { name: 'Choose spaces' });
+		expect(group).toHaveClass('flex', 'w-full', 'flex-col', 'gap-3');
+		expect(
+			[...group.classList].filter((name) => /grid|cols|flex-row|flex-wrap/u.test(name))
+		).toEqual([]);
+		const cards = screen.getAllByRole('checkbox');
+		expect(cards).toHaveLength(3);
+		for (const card of cards) {
+			expect(card.parentElement).toBe(group);
+			expect(card).toHaveClass('w-full');
+		}
+		// Record §6.8.2: after a choice the focus stays on the same card (keyboard, screen reader).
+		await user.click(cards[1]);
+		expect(cards[1]).toHaveFocus();
+		expect(cards[1]).toHaveAttribute('aria-checked', 'true');
+	});
+	it('record §6.8 (the application’s `details`): a chosen option opens its details right under its card, 24 in, inside the group; letting it go takes them away', async () => {
+		const user = userEvent.setup({ delay: null });
+		render(Harness, { props: { type: 'multiple', withDetails: true } });
+		const group = screen.getByRole('group', { name: 'Choose spaces' });
+		expect(screen.queryByTestId('spaces-alpha-details')).toBeNull();
+		const alpha = screen.getByRole('checkbox', { name: /Alpha/ });
+		await user.click(alpha);
+		const details = screen.getByTestId('spaces-alpha-details');
+		expect(details).toHaveClass('pt-3.5', 'pl-6');
+		expect(group).toContainElement(details);
+		expect(details.previousElementSibling).toBe(alpha);
+		expect(screen.getByRole('checkbox', { name: 'Extra' })).toBeInTheDocument();
+		await user.click(alpha);
+		expect(screen.queryByTestId('spaces-alpha-details')).toBeNull();
+	});
+
+	it('(negative) an option without `details` draws its card as before — no wrapper, no space under it', () => {
+		render(Harness, { props: { type: 'multiple', value: ['alpha', 'beta'] } });
+		const group = screen.getByRole('group', { name: 'Choose spaces' });
+		for (const card of screen.getAllByRole('checkbox')) expect(card.parentElement).toBe(group);
+		expect(document.querySelector('[data-slot="selectable-cards-details"]')).toBeNull();
+	});
+
+	it('(a11y, negative) a key on a control of the details is that control’s: the arrows move no card, Space toggles the detail only', async () => {
+		const user = userEvent.setup({ delay: null });
+		render(Harness, { props: { type: 'multiple', value: ['alpha'], withDetails: true } });
+		const extra = screen.getByTestId('alpha-extra');
+		extra.focus();
+		await user.keyboard('{ArrowDown}');
+		expect(extra).toHaveFocus();
+		await user.keyboard(' ');
+		expect(extra).toHaveAttribute('aria-checked', 'true');
+		expect(screen.getByRole('checkbox', { name: /Alpha/ })).toHaveAttribute('aria-checked', 'true');
+	});
 });

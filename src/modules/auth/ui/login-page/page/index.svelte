@@ -10,6 +10,7 @@
 	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
 	import { getSession } from '$shared/state/session';
 	import { takePendingReturn } from '$modules/auth/lib/known-account';
+	import { readResumedAction } from '$modules/auth/lib/return-path';
 	import AuthFlow, { getAuthFlow } from '$modules/auth/ui/flow';
 	import type { AuthLoginPageProps } from '../types';
 
@@ -24,10 +25,11 @@
 	let windowHeight = $state(0);
 
 	// Π4: a provider's return may carry the way back in the address; a failed one comes back without it (`?error=`),
-	// so it waits in the tab too. Both are checked before use (`readSafeNext`, the closed `do`).
+	// so it waits in the tab too. Both are checked before use (`readSafeNext`, the closed `do`). 🔴 D-W3-37: an action
+	// that writes goes on only from the tab's own return, never from the address alone.
 	let stored = $state<{ next: string | null; action: typeof params.action } | null>(null);
 	const next = $derived(params.next ?? stored?.next ?? null);
-	const action = $derived(params.action ?? stored?.action ?? null);
+	const action = $derived(readResumedAction(params.action, stored?.action ?? null));
 
 	onMount(() => {
 		stored = takePendingReturn();

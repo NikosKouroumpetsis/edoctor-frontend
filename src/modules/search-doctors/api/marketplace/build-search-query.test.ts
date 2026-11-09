@@ -93,21 +93,21 @@ describe('marketplace::build-search-query', () => {
 		expect(params.text).toBe('knee pain');
 	});
 
-	it('resolves the default what-scope to the general-practitioner professionalIds (locale-aware)', async () => {
+	it('Κ-1: resolves the default what-scope to the general-practitioner professionalIds, by the catalogue’s name (locale-aware)', async () => {
 		resolveSpecialtyScope.mockResolvedValue({ professionalIds: ['prof-gp-1', 'prof-gp-2'] });
 
 		const paramsEn = await buildSearchDoctorsParams(queryClient, scope(), 'en');
-		expect(resolveSpecialtyScope).toHaveBeenCalledWith(queryClient, 'General Practitioner', {
+		expect(resolveSpecialtyScope).toHaveBeenCalledWith(queryClient, 'General practitioner', {
 			lang: 'en',
-			queryTerm: 'General Practitioner',
+			queryTerm: 'General practitioner',
 			fetch: undefined
 		});
 		expect(paramsEn.professionalIds).toEqual(['prof-gp-1', 'prof-gp-2']);
 
 		await buildSearchDoctorsParams(queryClient, scope(), 'el');
-		expect(resolveSpecialtyScope).toHaveBeenCalledWith(queryClient, 'Γενικός Ιατρός', {
+		expect(resolveSpecialtyScope).toHaveBeenCalledWith(queryClient, 'Γενικός Γιατρός', {
 			lang: 'el',
-			queryTerm: 'Γενικός Ιατρός',
+			queryTerm: 'Γενικός Γιατρός',
 			fetch: undefined
 		});
 	});
@@ -137,12 +137,12 @@ describe('marketplace::build-search-query', () => {
 	});
 
 	it('degrades the default what-scope to a text term when no professional resolves', async () => {
-		resolveSpecialtyScope.mockResolvedValue({ textFallback: 'General Practitioner' });
+		resolveSpecialtyScope.mockResolvedValue({ textFallback: 'General practitioner' });
 
 		const params = await buildSearchDoctorsParams(queryClient, scope(), 'en');
 
 		expect(params.professionalIds).toBeUndefined();
-		expect(params.text).toBe('General Practitioner');
+		expect(params.text).toBe('General practitioner');
 	});
 
 	it('maps a location where-scope to locationSlug without resolving a location', async () => {

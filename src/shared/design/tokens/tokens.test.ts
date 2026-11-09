@@ -46,11 +46,12 @@ describe('shared size scale', () => {
 			platform: platform.spacing,
 			'platform.radius': platform.radius
 		};
-		// U-84.1, the one off the grid: the approved prototype's corner where a message joins the next (21 Π2).
-		const offGrid = 'platform.radius.bubble-tail';
+		// U-84.1, off the grid: the approved prototype's corner where a message joins the next (21 Π2). U-129 (the
+		// application's, canonical): the doctor sign-up prototype's check box, its 6 corner and its 14 tick.
+		const offGrid = ['platform.radius.bubble-tail', 'radius.checkbox', 'icon.check-mark'];
 		for (const [family, values] of Object.entries(families)) {
 			for (const [name, value] of Object.entries(values)) {
-				if (`${family}.${name}` === offGrid) continue;
+				if (offGrid.includes(`${family}.${name}`)) continue;
 				expect(onGrid(value), `${family}.${name} = ${value}`).toBe(true);
 			}
 		}
@@ -73,7 +74,8 @@ describe('shared size scale', () => {
 	});
 
 	it('U-25.4, U-84.1: the web’s own corners — `panel` 32 for the panels from 744, `bubble` 20 and `bubble-tail` 6 of a message; the shared five unchanged', () => {
-		expect(radius).toEqual({ xs: 4, sm: 8, md: 12, lg: 16, xl: 24 });
+		// U-129: the application's sixth shared corner, the check box's 6 (`33-doctor/doctor.css:66`).
+		expect(radius).toEqual({ xs: 4, sm: 8, md: 12, lg: 16, xl: 24, checkbox: 6 });
 		expect(platform.radius).toEqual({ panel: 32, bubble: 20, 'bubble-tail': 6 });
 		expect(radiusScale).toEqual({ ...radius, panel: 32, bubble: 20, 'bubble-tail': 6 });
 		expect(Object.keys(radius)).not.toContain('panel');

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages.js';
+	import { doctorOnboardingPath } from '../lib/frame';
 	import type { FrameMessageOptions, LocalizedHref } from '../types';
 
 	let { href, messageOptions }: { href: LocalizedHref; messageOptions: FrameMessageOptions } =
@@ -30,7 +31,7 @@
 	<a href={href('/help')} class={[linkClass, 'hidden laptop:inline-flex']}
 		>{m.nav_help({}, messageOptions)}</a
 	>
-	<a href={href('/plans')} class={[linkClass, 'hidden laptop:inline-flex']}
+	<a href={href(doctorOnboardingPath)} class={[linkClass, 'hidden laptop:inline-flex']}
 		>{m.nav_for_doctors({}, messageOptions)}</a
 	>
 </nav>

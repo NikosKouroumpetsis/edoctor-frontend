@@ -2,7 +2,7 @@ import createClient from 'openapi-fetch';
 
 import type { paths } from '$generated/api/schema';
 import { getApiBaseUrl } from '$shared/config';
-import { ApiError } from '$shared/lib/http';
+import { ApiError, requestLanguageHeaders } from '$shared/lib/http';
 
 /**
  * Typed `openapi-fetch` client for the backend's OpenAPI contract.
@@ -22,11 +22,20 @@ import { ApiError } from '$shared/lib/http';
  * omit it in the browser to fall back to the global `fetch`.
  */
 export function createApiClient(fetchImpl?: typeof fetch) {
-	return createClient<paths>({
+	const client = createClient<paths>({
 		baseUrl: getApiBaseUrl(),
 		fetch: fetchImpl,
 		headers: { Accept: 'application/json' }
 	});
+	// D-W3-39: the page's language at each request's own moment, as every request of `$shared/lib/http` says it.
+	client.use({
+		onRequest: ({ request }) => {
+			for (const [name, value] of Object.entries(requestLanguageHeaders())) {
+				request.headers.set(name, value);
+			}
+		}
+	});
+	return client;
 }
 
 /**

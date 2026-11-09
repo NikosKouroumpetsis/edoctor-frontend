@@ -26,3 +26,9 @@ export type AccountEntry =
 	  }
 	| { key: 'settings'; kind: 'settings'; label: string; separated?: boolean }
 	| { key: 'sign-out'; kind: 'sign-out'; label: string; separated?: boolean };
+
+/**
+ * The frame's top bar on a page (P-W3 §3.1): `site` the whole bar (from 744), `brand` only the mark over a thin line (the
+ * booking), `none` no bar of the frame (the doctor's sign-up draws its own).
+ */
+export type FrameHeader = 'site' | 'brand' | 'none';

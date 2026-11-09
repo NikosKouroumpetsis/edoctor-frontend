@@ -15,17 +15,23 @@ const ACCESS_PATH = '/auth/access';
 
 /**
  * Sends a code to an address or a number. The answer is the same whether or not an account exists, so nothing may
- * branch on it to learn that an identifier is registered.
+ * branch on it to learn that an identifier is registered. 🔴 D-W3-39: `?lang=` the page's, so the code's email is
+ * written in it (the precedent of the public reads).
  */
-export function startAccess(identifier: AuthIdentifier): Promise<AccessStartResult> {
+export function startAccess(identifier: AuthIdentifier, lang: string): Promise<AccessStartResult> {
 	return httpSessionPost<AccessStartResult>(`${ACCESS_PATH}/start`, {
+		params: { lang },
 		body: { tenantSlug: getTenantSlug(), ...identifier }
 	});
 }
 
-/** Sends the pending code again; refused with `429` while the spacing or the hourly cap lasts. */
-export function resendAccessCode(identifier: AuthIdentifier): Promise<AccessStartResult> {
+/** Sends the pending code again (in the page's language, D-W3-39); `429` while the spacing or the hourly cap lasts. */
+export function resendAccessCode(
+	identifier: AuthIdentifier,
+	lang: string
+): Promise<AccessStartResult> {
 	return httpSessionPost<AccessStartResult>(`${ACCESS_PATH}/resend`, {
+		params: { lang },
 		body: { tenantSlug: getTenantSlug(), ...identifier }
 	});
 }

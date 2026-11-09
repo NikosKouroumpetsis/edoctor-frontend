@@ -2,6 +2,18 @@
 	/** One time: the caller's words («10:30», S-32.9) and its value. */
 	export type TimeSlot = { label: string; value: string };
 
+	/**
+	 * The chosen time's look (U-129.2: each screen as its own prototype). `solid`: filled with the primary, its words
+	 * light (wave 1 `05-profile/profile.css:475`, the default). `outline`: a 2 px border and words in the foreground on
+	 * the warm fill (`30-booking/booking.css:106`: `--fg`, `--warm`, 600).
+	 */
+	export type TimeSlotGridVariant = 'solid' | 'outline';
+
+	const selectedClasses: Record<TimeSlotGridVariant, { chip: string; label: string }> = {
+		solid: { chip: 'border-primary bg-primary', label: 'font-medium text-primary-foreground' },
+		outline: { chip: 'border-2 border-foreground bg-muted', label: 'font-semibold text-foreground' }
+	};
+
 	/** 🔴 U-02.2: the application's time chip (M-09), class for class; the focus ring is the web's own state. */
 	const chipClasses =
 		'flex min-h-touch w-full items-center justify-center rounded-md border px-2 py-2 outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
@@ -23,6 +35,7 @@
 		onChange,
 		columns = 4,
 		emptyText,
+		variant = 'solid',
 		testIdPrefix,
 		'aria-label': ariaLabel,
 		class: className,
@@ -36,6 +49,8 @@
 		columns?: GridColumns | GridColumnsByZone;
 		/** The line shown when the day has no time, already localized. */
 		emptyText: string;
+		/** How the chosen time looks: `solid` (default) or `outline`. */
+		variant?: TimeSlotGridVariant;
 		/** `<prefix>-times`, `<prefix>-slot-<value>`, `<prefix>-empty` (the application's test ids). */
 		testIdPrefix?: string;
 		/** The name of the group of times, already localized (a radio group needs one, ARIA 1.2). */
@@ -90,19 +105,20 @@
 				data-roving-item
 				data-value={slot.value}
 				data-testid={testIdOf(`slot-${slot.value}`)}
+				data-variant={variant}
 				onclick={() => choose(slot.value)}
 				class={cn(
 					chipClasses,
 					// U-28.4: with a pointer, a time not chosen darkens its border on hover.
 					selected
-						? 'border-primary bg-primary'
+						? selectedClasses[variant].chip
 						: 'border-border/70 bg-card transition-colors duration-standard ease-standard can-hover:hover:border-foreground'
 				)}
 			>
 				<span
 					class={cn(
-						'truncate text-label-lg font-medium',
-						selected ? 'text-primary-foreground' : 'text-primary-text'
+						'truncate text-label-lg',
+						selected ? selectedClasses[variant].label : 'font-medium text-primary-text'
 					)}>{slot.label}</span
 				>
 			</button>

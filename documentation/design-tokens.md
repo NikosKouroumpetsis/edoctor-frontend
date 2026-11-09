@@ -251,7 +251,8 @@ the child (`@form:inline-flex` = parent at least 560 wide). The header uses them
 the brand word shows from a 360 header, «Σύνδεση» from 560.
 Two more, by the box and web only (`layout.css`, their widths are `--spacing-row-wide` 520 and `--spacing-card-wide`
 340): `row-wide:` (a `ListRow` keeps its end beside it) and `card-wide:` (a `ProfileSummaryCard` `layout="page"` keeps
-its numbers beside the person, and always below 744).
+its numbers beside the person, and always below 744). One by the viewport (wave 3, `layout.css`): `narrow-phone:` is a
+phone narrower than the `narrow` container's 360.
 
 The messages (wave 2, screens 18 + 21, web only): `inbox-list-w` 380 and `inbox-list-w-lg` 400 (`grid-inbox`, the list from
 950 and 1128), `bubble-max-w` 560 (`max-w-bubble`: 78 %, at most 560 from 744), `bubble-avatar` 28, `composer-min-h` 44,
@@ -261,6 +262,19 @@ The messages (wave 2, screens 18 + 21, web only): `inbox-list-w` 380 and `inbox-
 `bubble-avatar`, `composer-min-h`, `composer-send`, `composer-field` and the two roles are the prototype's,
 from 744. Below 744 the web takes the application's numbers (U-81.2): `min-h-touch`, `size-control-xs`, `max-h-menu-max-h`,
 `size-avatar-sm`, `text-body-lg`, `text-body-md`.
+
+The doctor's sign-up (wave 3, screens 33–42, web only, the `WizardScreen` template): `wizard-column` 628 (Airbnb's 630
+on the 4 grid, `max-w-wizard-column`), `wizard-top` 80 (the steps' own bar from 744; 64 = `bar-top` below it) and
+`wizard-pill` 36 (its pills below 744; `control-sm` 40 from 744). The bar pinned under the steps keeps its room with
+`pb-page-bar`. Below 360 `narrow-phone:` (above) gives the pills the prototype's narrower padding (`33-doctor/doctor.css`)
+and leaves a pill with a glyph only the glyph (review w3-w1 MINOR-2).
+
+The booking (wave 3, screen 30, web only, record §3.4; Airbnb's checkout, named without the product's word, U-02.1):
+`checkout-main-lg` 440 is the one column from 744; from 950
+`grid-checkout` sets the two columns, the panel `checkout-main` 384 (Airbnb's 386 on the 4 grid) / `checkout-main-lg`
+440 from 1128 / `checkout-main-xl` 524 from 1440 beside the card `checkout-aside` 332 / `checkout-aside-lg` 368 /
+`checkout-aside-xl` 372, `checkout-gap` 64 apart (`checkout-gap-lg` 80 from 1128). The card's photo is `checkout-photo` 80
+below 744 (`avatar-2xl` 96 from it) and the note is at least `checkout-note` 104 high.
 
 The page column is 1440 and, from 1920, Airbnb's 1920 in the centre (its 4K zone,
 U-04.1): `container-page` and `Container width="page"` add `wide:max-w-wide`; the

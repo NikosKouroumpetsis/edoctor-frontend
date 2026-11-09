@@ -108,7 +108,7 @@ const whatOptions: SearchCriteriaOption[] = [
 		field: 'what',
 		id: 'what-internal-medicine',
 		kind: 'specialty',
-		keywords: ['internal', 'medicine', 'pathologos', 'παθολόγος', 'παθολογος', 'παθ'],
+		keywords: ['internist', 'internal', 'medicine', 'pathologos', 'παθολόγος', 'παθολογος', 'παθ'],
 		labelKey: 'criteria_option_internal_medicine',
 		supportingLabelKey: 'criteria_option_specialty_supporting',
 		value: 'internal-medicine'
@@ -117,7 +117,7 @@ const whatOptions: SearchCriteriaOption[] = [
 		field: 'what',
 		id: 'what-pediatrics',
 		kind: 'specialty',
-		keywords: ['pediatrics', 'paidiatros', 'παιδίατρος', 'παιδιατρος'],
+		keywords: ['pediatrician', 'pediatrics', 'paidiatros', 'παιδίατρος', 'παιδιατρος'],
 		labelKey: 'criteria_option_pediatrics',
 		supportingLabelKey: 'criteria_option_specialty_supporting',
 		value: 'pediatrics'

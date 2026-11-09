@@ -36,3 +36,11 @@ export function removePersonalQueries(client: QueryClient) {
 export function resetPersonalQueries(client: QueryClient) {
 	return client.resetQueries({ predicate: (query) => query.meta?.personal === true });
 }
+
+/**
+ * 🔴 D-W3-37 (security web NIT-1): what the last person's writes carried (a mobile, an ΑΜΚΑ, a note, a sign-up's body)
+ * stays in the client's memory after they ended; a sign-out or another account takes all of it.
+ */
+export function removeMutations(client: QueryClient) {
+	client.getMutationCache().clear();
+}

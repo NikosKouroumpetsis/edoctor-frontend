@@ -5,9 +5,9 @@
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { BadgeGroup } from '$shared/ui/molecules/badge-group';
 	import type { DoctorAvailabilityOfficeTab, DoctorLocation } from '$modules/doctor/lib/detail';
+	import { OfficeTabs } from '$modules/doctor/ui/availability-picker';
 	import OfficeInfoRows from './office-info-rows.svelte';
 	import OfficeMap from './office-map.svelte';
-	import OfficeTabs from './office-tabs.svelte';
 	import ProfileSection from './profile-section.svelte';
 
 	let {

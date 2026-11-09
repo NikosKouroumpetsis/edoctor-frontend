@@ -6,10 +6,10 @@ import type { LocalizedTerm } from './sections';
  * page's language picks the form through `termFor` (the application's `resolveLocalizedTerm`, the same rule).
  */
 
-/** The empty «Τι;»: the general practitioner. */
+/** The empty «Τι;»: the general practitioner, by the catalogue's name (Κ-1, PR005). */
 export const DEFAULT_SPECIALTY_TERM: LocalizedTerm = {
-	el: 'Γενικός Ιατρός',
-	en: 'General Practitioner'
+	el: 'Γενικός Γιατρός',
+	en: 'General practitioner'
 };
 
 /** The empty (or free-words) «Πού;»: Attica (S-01.3). */

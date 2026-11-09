@@ -99,7 +99,7 @@ describe('buildSectionQuery (the home rows, the application’s queries)', () =>
 				professionals: [{ id: 'p-int', slug: 'pathologos', label: 'Παθολόγος' }]
 			})
 			.mockResolvedValueOnce({
-				professionals: [{ id: 'p-gp', slug: 'genikos', label: 'Γενικός Ιατρός' }]
+				professionals: [{ id: 'p-gp', slug: 'genikos', label: 'Γενικός Γιατρός' }]
 			});
 		const two = await buildSectionQuery(client(), internalMedicine, EMPTY_CATEGORY_SCOPE, 'el');
 		expect(two?.params.professionalIds).toEqual(['p-int', 'p-gp']);

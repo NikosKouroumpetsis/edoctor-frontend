@@ -121,4 +121,27 @@ describe('TimeSlotGrid', () => {
 		renderGrid();
 		expect(chip('10:00')).toBeInTheDocument();
 	});
+
+	it('U-129: `outline` draws the chosen time as the booking’s prototype — a 2 px foreground border on the warm fill, its words foreground 600; the others as before', () => {
+		renderGrid({ variant: 'outline' });
+		expect(chip('09:30')).toHaveAttribute('data-variant', 'outline');
+		expect(chip('09:30')).toHaveClass('border-2', 'border-foreground', 'bg-muted');
+		for (const name of ['bg-primary', 'border-primary', 'border']) {
+			expect(chip('09:30')).not.toHaveClass(name);
+		}
+		expect(screen.getByText('09:30')).toHaveClass('font-semibold', 'text-foreground');
+		expect(screen.getByText('09:30')).not.toHaveClass('text-primary-foreground');
+		expect(screen.getByText('09:30')).not.toHaveClass('font-medium');
+		expect(chip('09:00')).toHaveClass('border-border/70', 'bg-card');
+		expect(screen.getByText('09:00')).toHaveClass('font-medium', 'text-primary-text');
+	});
+
+	it('U-129 (negative): the default stays the profile’s filled primary (wave 1 `profile.css:475`), never the outline', () => {
+		renderGrid();
+		expect(chip('09:30')).toHaveAttribute('data-variant', 'solid');
+		for (const name of ['border-2', 'bg-muted', 'border-foreground']) {
+			expect(chip('09:30')).not.toHaveClass(name);
+		}
+		expect(screen.getByText('09:30')).not.toHaveClass('font-semibold');
+	});
 });

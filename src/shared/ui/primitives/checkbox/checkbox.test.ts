@@ -69,4 +69,69 @@ describe('Checkbox', () => {
 		expect(hidden.value).toBe('yes');
 		expect(hidden.checked).toBe(true);
 	});
+	it('U-28.4: with a pointer an empty box darkens under its button (the default); U-100 / D-W3-27: `hover={false}` never — the rest of the box the same', () => {
+		const withHover = render(Checkbox, { props: { 'aria-label': 'Accept' } });
+		const box = () =>
+			screen.getByRole('checkbox', { name: 'Accept' }).querySelector('[data-slot="checkbox-box"]');
+		expect(box()).toHaveClass(
+			'can-hover:group-enabled:group-hover:data-[state=unchecked]:border-foreground'
+		);
+		const kept = [...(box()?.classList ?? [])].filter((name) => !name.includes('hover:'));
+		withHover.unmount();
+		render(Checkbox, { props: { 'aria-label': 'Accept', hover: false } });
+		expect([...(box()?.classList ?? [])].filter((name) => name.includes('hover:'))).toEqual([]);
+		expect([...(box()?.classList ?? [])]).toEqual(kept);
+	});
+
+	it('U-129: a screen’s own tick — `foreground` (the doctor sign-up: `--fg`, the mark `--page`) and `secondary` (the register form: `--dark`, `--dark-fg`); `primary` stays the default', () => {
+		for (const [tone, fill, mark] of [
+			[undefined, 'primary', 'text-primary-foreground'],
+			['foreground', 'foreground', 'text-card'],
+			['secondary', 'secondary', 'text-secondary-foreground']
+		] as const) {
+			const { container, unmount } = render(Checkbox, {
+				props: { 'aria-label': 'ok', checked: true, ...(tone ? { tone } : {}) }
+			});
+			const box = container.querySelector('[data-slot="checkbox-box"]') as HTMLElement;
+			expect(box).toHaveAttribute('data-tone', tone ?? 'primary');
+			expect(box).toHaveClass(
+				`data-[state=checked]:bg-${fill}`,
+				`data-[state=checked]:border-${fill}`
+			);
+			expect(box.firstElementChild).toHaveClass(mark);
+			unmount();
+		}
+	});
+
+	it('U-129: `foreground` takes the prototype’s corner (6, `.d-box`) and its tick (`doctor.js` `tick`, 14 at 3.4); the other tones keep the 8 corner and the «✓»', () => {
+		const drawn = (tone: 'primary' | 'foreground' | 'secondary') => {
+			const view = render(Checkbox, { props: { 'aria-label': tone, checked: true, tone } });
+			const box = view.container.querySelector('[data-slot="checkbox-box"]') as HTMLElement;
+			return { box, view };
+		};
+		const dark = drawn('foreground');
+		expect(dark.box).toHaveClass('size-6', 'rounded-checkbox');
+		expect(dark.box).not.toHaveClass('rounded-sm');
+		const tick = dark.box.querySelector('[data-slot="tick"]') as SVGElement;
+		expect(tick).toHaveClass('icon-check-mark', 'text-card');
+		expect(tick).toHaveAttribute('stroke-width', '3.4');
+		expect(dark.box).not.toHaveTextContent('✓');
+		dark.view.unmount();
+		for (const tone of ['primary', 'secondary'] as const) {
+			const other = drawn(tone);
+			expect(other.box).toHaveClass('rounded-sm');
+			expect(other.box).not.toHaveClass('rounded-checkbox');
+			expect(other.box.querySelector('[data-slot="tick"]')).toBeNull();
+			expect(other.box).toHaveTextContent('✓');
+			other.view.unmount();
+		}
+	});
+
+	it('U-129 (negative): a tone never brings a hex, a hover colour or another tone’s fill', () => {
+		const { container } = render(Checkbox, {
+			props: { 'aria-label': 'ok', checked: true, tone: 'foreground', hover: false }
+		});
+		const box = container.querySelector('[data-slot="checkbox-box"]') as HTMLElement;
+		expect(box.className).not.toMatch(/#[0-9a-f]{3,8}|bg-primary|bg-secondary|hover:/iu);
+	});
 });

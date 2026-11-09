@@ -292,7 +292,15 @@ const OFFICE_ROW_LABELS = {
 	phone: m.doctor_office_phone,
 	floor: m.doctor_office_floor,
 	parking: m.doctor_office_parking,
-	'disability-access': m.doctor_office_access
+	'disability-access': m.doctor_office_access,
+	// P-W3 Σ-22 (U-114, `strings.json` «profile · office»): the sign-up's own approved words.
+	'parking-private': m.doctor_detail_office_parking_private,
+	'parking-public': m.doctor_detail_office_parking_public,
+	'parking-street': m.doctor_detail_office_parking_street,
+	'accessible-toilet': m.doctor_detail_office_accessible_toilet,
+	'accessible-parking': m.doctor_detail_office_accessible_parking,
+	lift: m.doctor_detail_office_lift,
+	transit: m.doctor_detail_office_transit
 } as const satisfies Record<DoctorOfficeInfoRowId, unknown>;
 
 export function officeInfoRowLabel(id: DoctorOfficeInfoRowId, locale: SupportedLocale): string {

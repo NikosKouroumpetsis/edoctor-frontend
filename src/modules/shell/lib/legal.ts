@@ -17,5 +17,7 @@ export function legalTitle(slug: LegalSlug, locale: SupportedLocale): string {
 	if (slug === 'terms-of-use') return m.footer_terms({}, { locale });
 	if (slug === 'privacy-policy') return m.legal_privacy_title({}, { locale });
 	if (slug === 'review-policy') return m.legal_review_policy_title({}, { locale });
+	if (slug === 'doctor-marketplace-terms')
+		return m.legal_document_doctor_marketplace_terms({}, { locale });
 	return m.legal_cookies_title({}, { locale });
 }

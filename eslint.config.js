@@ -61,6 +61,7 @@ export default defineConfig(
 			'src/shared/ui/molecules/rich-text/rich-text.svelte',
 			'src/shared/ui/organisms/status-page/status-page.svelte',
 			'src/shared/ui/templates/document-page/document-page.svelte',
+			'src/shared/ui/templates/wizard-screen/wizard-screen.svelte',
 			'src/shared/ui/molecules/language-switcher/language-switcher.svelte',
 			'src/shared/ui/molecules/link-directory/link-directory.svelte',
 			'src/shared/ui/molecules/map-pin-card/map-pin-card.svelte',

@@ -32,6 +32,7 @@
 		buildFooterColumns,
 		buildLanguageOptions,
 		buildLegalLinks,
+		frameHeaderOf,
 		hidesFooterOnPhone,
 		showsBottomNav,
 		showsSiteFooter
@@ -49,6 +50,8 @@
 	const currentLocale = $derived(getPageLocale(page.url));
 	const messageOptions = $derived({ locale: currentLocale });
 	const basePath = $derived(deLocalizeHref(page.url.pathname));
+	// P-W3 §3.1: the whole bar, only the mark (the booking) or none (the sign-up draws its own).
+	const headerKind = $derived(frameHeaderOf(basePath, page.status));
 
 	// The page's search and the top bar meet here, one per page tree (context, SSR-safe).
 	const dock = setSearchDock(new SearchDock());
@@ -101,35 +104,23 @@
      below 744, Airbnb's footer, the settings (language, theme) and the consent card. -->
 <AppShell>
 	{#snippet header()}
-		<AppHeader showFrom="tablet" compactOn={dock.pillShown}>
-			{#snippet brand()}
-				<BrandLink href={localizedHref('/')} {messageOptions} />
-			{/snippet}
-			{#snippet nav()}
-				<PrimaryNav href={localizedHref} {messageOptions} />
-			{/snippet}
-			{#snippet compact()}
-				<CompactSearch {dock} {messageOptions} />
-			{/snippet}
-			{#snippet actions()}
-				<AccountMenu
-					entries={accountEntries}
-					{messageOptions}
-					{initial}
-					{hasUnread}
-					onSettings={() => dialogs.openSettings()}
-					onSignIn={session ? () => session.requireSignIn() : undefined}
-					onSignOut={() => session?.signOut()}
-				/>
-			{/snippet}
-		</AppHeader>
+		{#if headerKind === 'brand'}
+			<!-- Record §3.4: from 744 the booking's bar is the mark alone over a thin line (always drawn). -->
+			<AppHeader showFrom="tablet" class="border-border">
+				{#snippet brand()}
+					<BrandLink href={localizedHref('/')} {messageOptions} />
+				{/snippet}
+			</AppHeader>
+		{:else if headerKind === 'site'}
+			{@render siteHeader()}
+		{/if}
 	{/snippet}
 
 	{@render children()}
 
 	{#snippet footer()}
 		<!-- §7.2: the results end with their own thin legal line, no footer. -->
-		{#if showsSiteFooter(basePath)}
+		{#if showsSiteFooter(basePath, page.status)}
 			{#if hidesFooterOnPhone(basePath)}
 				<!-- U-81.1, Ε2: the application's own pages below 744 end without it. -->
 				<div data-testid="footer-from-tablet" class="hidden tablet:block">
@@ -151,6 +142,31 @@
 		{/if}
 	{/snippet}
 </AppShell>
+
+{#snippet siteHeader()}
+	<AppHeader showFrom="tablet" compactOn={dock.pillShown}>
+		{#snippet brand()}
+			<BrandLink href={localizedHref('/')} {messageOptions} />
+		{/snippet}
+		{#snippet nav()}
+			<PrimaryNav href={localizedHref} {messageOptions} />
+		{/snippet}
+		{#snippet compact()}
+			<CompactSearch {dock} {messageOptions} />
+		{/snippet}
+		{#snippet actions()}
+			<AccountMenu
+				entries={accountEntries}
+				{messageOptions}
+				{initial}
+				{hasUnread}
+				onSettings={() => dialogs.openSettings()}
+				onSignIn={session ? () => session.requireSignIn() : undefined}
+				onSignOut={() => session?.signOut()}
+			/>
+		{/snippet}
+	</AppHeader>
+{/snippet}
 
 {#snippet siteFooter()}
 	<SiteFooter

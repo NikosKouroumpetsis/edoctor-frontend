@@ -11,9 +11,13 @@ import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import {
 	doctorDetailsPath,
 	doctorProfilePath,
+	type DoctorSelectedSlot,
 	type DoctorSimilarArea,
 	type DoctorSimilarSearch
 } from '$modules/doctor/lib/detail';
+import { bookingPath, hintsOf } from '$modules/appointments/lib/booking';
+import { getBookingDraftOptional } from '$modules/appointments/ui/booking-draft';
+import type { DoctorKeptBooking } from '$modules/doctor/ui/detail';
 import { faqAnchors } from '$modules/help/config/faq';
 import { conversationPath } from '$modules/messages/lib/paths';
 import { resolveSimilarDoctorsArea } from '$modules/search-doctors/api/marketplace';
@@ -35,6 +39,7 @@ export function useDoctorDetailsScreen(slug: () => string) {
 	// 🔴 U-85: the profile's hearts are the search's writer; the toast clears the booking bar below 744.
 	const favorites = useFavoriteToggle(() => locale, { lift: 'page-bar' });
 	const session = getSessionOptional();
+	const booking = getBookingDraftOptional();
 
 	return {
 		get locale() {
@@ -55,6 +60,14 @@ export function useDoctorDetailsScreen(slug: () => string) {
 			queryFn: () => resolveSimilarDoctorsArea(queryClient, city, { lang: locale }),
 			staleTime: Infinity
 		}),
+		// 🔴 Wave 3 (P-W3 §3.2.1 δ): «Κράτηση» with a chosen hour — the booking's screen 30, its hints only (no person).
+		bookingHref: (slot: DoctorSelectedSlot, serviceId: string | undefined) =>
+			resolve(localize(bookingPath(slug(), null, hintsOf(slot, serviceId ?? null))) as Pathname),
+		// Record §3.2 «η ώρα μένει»: the booking in progress for THIS doctor (its draft), so a «back» finds the hour.
+		get kept(): DoctorKeptBooking | null {
+			const slot = booking?.doctorSlug === slug() ? booking.slot : null;
+			return slot ? { slot, serviceId: booking?.serviceId ?? null } : null;
+		},
 		get canonicalUrl() {
 			return siteUrl(localize(doctorProfilePath(slug())));
 		},

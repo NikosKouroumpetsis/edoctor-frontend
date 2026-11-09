@@ -42,8 +42,8 @@ dark) or a name `@theme inline` does not map to `--color-<name>`. The shared
 names, in the application's order: `background`, `foreground`, `card`,
 `card-foreground`, `popover`, `popover-foreground`, `primary`,
 `primary-foreground`, `primary-text`, `secondary`, `secondary-foreground`,
-`accent`, `accent-foreground`, `rating`, `muted`, `muted-foreground`, `border`,
-`input`, `ring`, `media-scrim`, `overlay`, `success`, `success-foreground`,
+`accent`, `accent-foreground`, `rating`, `muted`, `muted-foreground`, `chip`, `border`,
+`line`, `line-2`, `input`, `ring`, `media-scrim`, `overlay`, `success`, `success-foreground`,
 `success-text`, `warning`, `warning-foreground`, `warning-icon`, `danger`,
 `danger-foreground`, `danger-text`, `destructive`, `destructive-foreground`.
 The frontend stores them as hex (matching the application) so the two files can
@@ -174,7 +174,13 @@ step it; `aria-valuetext` is the number as shown and a blank box is the caller's
 and the blank value are **required props** (`decreaseLabel` / `increaseLabel` /
 `emptyValueLabel`): the shared UI reads no locale (U-02.1, U-03.5), so a page
 passes `m.stepper_*({}, { locale })`. The former `number-field` is gone (owner,
-U-06.12): the stepper is the one number control.
+U-06.12): the stepper is the one number control. Its `variant="counter"` (wave 3,
+W8-Δ4, U-110.3: Airbnb's counters, the sign-up's floor) is the same control in
+ONE 64 box (`min-h-control-xl`, its border inside the 64 as the prototype's
+border-box): the title inside on the left (16), «−» value «+»
+on the right — each «−» / «+» a 36 circle on a `muted-foreground` line drawn 6
+inside its 48 target (`inset-1.5`), a third at its bound; the value 16/500, at
+least 64 wide (`min-w-control-xl`) so the circles keep their place.
 
 Each `slider` thumb says its value as the screen shows it: `aria-valuetext`
 from `formatValue(value, thumbIndex)`, the plain number by default (search-ux
@@ -286,6 +292,12 @@ What presses looks pressable, in the components (the owner, 29/10; Airbnb measur
   «×» and the action bar's secondary; a `Button` tone a shade lighter (`/90`) or a step stronger; a text action its
   underline (an underlined one twice as thick); a card that is a button (`StepCard`, the home's search pill) lifts;
   the heart over a photo grows 8 % (the map pin's). What already had a hover keeps it.
+- **No hover, by the caller (wave 3, U-100, D-W3-27):** a component of the kit that draws a hover takes `hover`
+  (`true` by default, the hover above); `hover={false}` draws no colour under the pointer and keeps every other state
+  (the components are listed in `shared.md`, each spec guards both values). The booking's frame and buttons and the
+  doctor's sign-up pass it everywhere, «Πίσω» / «Επόμενο» included. The availability picker the booking takes from the
+  profile, the map's «+» / «−» and the search field's «×» keep their hover (D-W3-30; whether they lose it too is the
+  owner's to decide).
 - **Semantics:** every press is a `<a href>`, a `<button>`, an input or a role with its keys; a backdrop that closes
   on a press is `aria-hidden` (Escape is its key); the card's «🔒 Συνδεθείτε για κόστος» (`span role="button"`,
   U-27.4 f1b) is the known inline exception (`tests/architecture/pressable.test.ts`).

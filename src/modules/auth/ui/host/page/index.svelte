@@ -9,8 +9,13 @@
 	import { useId } from '$shared/lib/headless';
 	import { ApiError } from '$shared/lib/http';
 	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
-	import { removePersonalQueries, resetPersonalQueries } from '$shared/query';
-	import { Session, setSession } from '$shared/state/session';
+	import { removeMutations, removePersonalQueries, resetPersonalQueries } from '$shared/query';
+	import {
+		openSignOutChannel,
+		Session,
+		setSession,
+		type SignOutChannel
+	} from '$shared/state/session';
 	import { ModalScreenSurface } from '$shared/ui/templates/modal-screen';
 	import {
 		authQueryKeys,
@@ -45,6 +50,9 @@
 		if (self?.signedIn === false) ended = false;
 	});
 
+	// 🔴 D-W3-37: the other tabs of this browser learn a sign-out carried out here (opened in the browser, below).
+	let signOutChannel: SignOutChannel | null = null;
+
 	const session = setSession(
 		new Session({
 			status: () =>
@@ -71,10 +79,28 @@
 				}
 				await queryClient.cancelQueries({ queryKey: authQueryKeys.patientSelf() });
 				queryClient.setQueryData(authQueryKeys.patientSelf(), { signedIn: false });
+				removeMutations(queryClient);
+				signOutChannel?.announce();
 				return true;
 			}
 		})
 	);
+
+	// 🔴 D-W3-37 (security web MINOR-2, NIT-1): a sign-out in another tab ended this session too (one cookie jar): this tab
+	// knows nobody from now on, and keeps nothing of the person — no read, no write's body, no draft (`forgotten`).
+	$effect(() => {
+		const channel = openSignOutChannel(() => {
+			void queryClient.cancelQueries({ queryKey: authQueryKeys.patientSelf() });
+			queryClient.setQueryData(authQueryKeys.patientSelf(), { signedIn: false });
+			removeMutations(queryClient);
+			session.signedOutElsewhere();
+		});
+		signOutChannel = channel;
+		return () => {
+			channel.close();
+			signOutChannel = null;
+		};
+	});
 
 	const flow = setAuthFlow(
 		new AuthFlowState(
@@ -127,6 +153,7 @@
 		untrack(() => {
 			if (lastAccount !== undefined && lastAccount !== known) {
 				void resetPersonalQueries(queryClient);
+				removeMutations(queryClient);
 				session.accountChanged();
 			}
 			lastAccount = known;

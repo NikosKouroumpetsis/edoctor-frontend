@@ -12,8 +12,8 @@
 	} from '$modules/doctor/lib/detail';
 	import type { DoctorDetailState } from '../hooks/use-state.svelte';
 	import type { DoctorKnowLinks, DoctorReviewLinks } from '../types';
+	import WindowAvailability from '$modules/doctor/ui/availability-picker';
 	import { doctorKnowRowGlyphs } from './icons';
-	import WindowAvailability from './window-availability.svelte';
 	import WindowOffice from './window-office.svelte';
 	import WindowReviews from './window-reviews.svelte';
 	import WindowServices from './window-services.svelte';

@@ -18,6 +18,11 @@
  * wide as 340 has its numbers beside the person, a narrower one under.
  */
 @custom-variant row-wide (@container (min-width: --theme(--spacing-row-wide)));
+/*
+ * Wave 3 (the sign-up's top bar, `33-doctor/doctor.css` below 360, review w3-w1 MINOR-2): a phone narrower than the
+ * `narrow` container (360), where two pills no longer fit beside each other.
+ */
+@custom-variant narrow-phone (@media (width < --theme(--container-narrow)));
 @custom-variant card-wide {
 	@container (min-width: --theme(--spacing-card-wide)) {
 		@slot;
@@ -61,7 +66,11 @@
 	--rating: #be185d;
 	--muted: #f3ede7;
 	--muted-foreground: #5b6b80;
+	/* U-129: the prototypes' `--chip`, `--line` and `--line-2` (`30-booking/booking.css:11-12`), the application's own. */
+	--chip: #f1f5f9;
 	--border: #d7e0ea;
+	--line: #e6ebf1;
+	--line-2: #d7e0ea;
 	--input: #c7d2e0;
 	--ring: #93c5fd;
 	/* White scrim under controls that sit on a photo, the same in both themes; used with an alpha. */
@@ -113,7 +122,10 @@
 	--rating: #f472b6;
 	--muted: #1a2639;
 	--muted-foreground: #aab7c8;
+	--chip: #1a2639;
 	--border: #24324b;
+	--line: #24324b;
+	--line-2: #30405b;
 	--input: #30405b;
 	--ring: #93c5fd;
 	--media-scrim: #ffffff;
@@ -163,7 +175,10 @@
 	--color-rating: var(--rating);
 	--color-muted: var(--muted);
 	--color-muted-foreground: var(--muted-foreground);
+	--color-chip: var(--chip);
 	--color-border: var(--border);
+	--color-line: var(--line);
+	--color-line-2: var(--line-2);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
 	--color-media-scrim: var(--media-scrim);
@@ -593,6 +608,24 @@
 
 	@media (width >= --theme(--breakpoint-laptop)) {
 		grid-template-columns: var(--spacing-inbox-list-w-lg) minmax(0, 1fr);
+	}
+}
+
+/*
+ * Wave 3 · screen 30 (record §3.4): from 950 Airbnb's two columns — the panel (the first-visit question, the note, the
+ * button) and the card beside it: 384 + 332, 64 apart; 440 + 368, 80 apart from 1128; 524 + 372 from 1440.
+ */
+@utility grid-checkout {
+	grid-template-columns: var(--spacing-checkout-main) var(--spacing-checkout-aside);
+	column-gap: var(--spacing-checkout-gap);
+
+	@media (width >= --theme(--breakpoint-laptop)) {
+		grid-template-columns: var(--spacing-checkout-main-lg) var(--spacing-checkout-aside-lg);
+		column-gap: var(--spacing-checkout-gap-lg);
+	}
+
+	@media (width >= --theme(--breakpoint-desktop)) {
+		grid-template-columns: var(--spacing-checkout-main-xl) var(--spacing-checkout-aside-xl);
 	}
 }
 

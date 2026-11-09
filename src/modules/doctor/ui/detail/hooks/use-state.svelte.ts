@@ -1,4 +1,5 @@
-import { createQueries, createQuery } from '@tanstack/svelte-query';
+import { untrack } from 'svelte';
+import { createQuery } from '@tanstack/svelte-query';
 import { browser } from '$app/environment';
 import type { Pathname, ResolvedPathname } from '$app/types';
 import { pushState, replaceState } from '$app/navigation';
@@ -6,10 +7,6 @@ import { resolve } from '$app/paths';
 import { page } from '$app/state';
 import { readQueryState } from '$shared/lib/query-state';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
-import {
-	DOCTOR_AVAILABILITY_WINDOW_DAYS,
-	doctorAvailabilitySlotsQuery
-} from '$modules/doctor/api/availability';
 import { doctorOfficeQuery } from '$modules/doctor/api/office';
 import type { DoctorProfile } from '$modules/doctor/api/profile';
 import {
@@ -40,7 +37,11 @@ import {
 	type DoctorSimilarArea,
 	type DoctorSimilarSearch
 } from '$modules/doctor/lib/detail';
+import { useDoctorOfficeSlots } from '$modules/doctor/ui/availability-picker';
 import type { DoctorSimilarAreaQuery } from '../types';
+
+/** The booking in progress for this doctor: its hour and its chosen service (`null`: the default). */
+export type DoctorKeptBooking = { slot: DoctorSelectedSlot; serviceId: string | null };
 
 /** A window of the page: its section and the hints it opened with; `null` none. */
 export type DoctorDetailWindow = {
@@ -57,6 +58,11 @@ export type DoctorDetailStateOptions = {
 	now: () => number;
 	/** The details route's section (`/doctors/<slug>/details/<section>`), `null` on the profile's own route. */
 	routeSection: () => DoctorDetailSection | null;
+	/**
+	 * Wave 3 (P-W3 §3.2.1 γ, record §3.2 «η ώρα μένει»): the hour and service the booking keeps for THIS doctor (its
+	 * draft, composed by the screen), so a «back» from the booking finds them — D-W3-31 leaves the address untouched.
+	 */
+	kept?: () => DoctorKeptBooking | null;
 	/** A path in the page's language (`localizeHref`), not yet resolved: the state resolves it where it goes. */
 	localize: (path: string) => string;
 	/**
@@ -79,35 +85,28 @@ export class DoctorDetailState {
 	chosenOfficeId = $state<string | null>(null);
 	/** The service the reader picked in the card's «ΥΠΗΡΕΣΙΑ»; `null` the primary one. */
 	chosenServiceId = $state<string | null>(null);
-	/** The time confirmed in the window «Διαθεσιμότητα» (U-40.3). */
-	selectedSlot = $state<DoctorSelectedSlot | null>(null);
+	/** The time confirmed on this page (U-40.3); `undefined` while none was, so the address's hour speaks. */
+	#confirmedSlot = $state<DoctorSelectedSlot | null | undefined>(undefined);
 	/** The web's share window (desktop; a phone takes the system's share, U-34.2). */
 	shareOpen = $state(false);
 
 	readonly #options: DoctorDetailStateOptions;
+	/** The hints of the address the page was opened with (the booking's «×» / «back» bring its hour, record §3.2). */
+	readonly #arrival: DoctorDetailHints;
 	readonly #slots;
 	readonly #office;
 	readonly #similarArea;
 
 	constructor(options: DoctorDetailStateOptions) {
 		this.#options = options;
+		this.#arrival = untrack(() => readDoctorDetailHints(page.url.searchParams));
 		// 🔴 U-37.1 / D-103: every office's window of 28 days, asked the moment the page lives (never after a motion),
-		// for the service the page books; one read per office (TanStack's cache: the window reads the same keys).
-		this.#slots = createQueries(() => {
-			const profile = options.profile();
-			const doctorId = profile.doctorId;
-			const serviceId = this.serviceId;
-			return {
-				queries: (profile.offices ?? []).map((office) => ({
-					...doctorAvailabilitySlotsQuery({
-						doctorId: doctorId ?? '',
-						officeId: office.officeId,
-						doctorServiceId: serviceId ?? '',
-						days: DOCTOR_AVAILABILITY_WINDOW_DAYS
-					}),
-					enabled: browser && Boolean(doctorId) && Boolean(serviceId)
-				}))
-			};
+		// for the service the page books; one read per office (TanStack's cache: the window and the booking read the
+		// same keys, through the same hook, P-W3 Σ-12).
+		this.#slots = useDoctorOfficeSlots({
+			doctorId: () => options.profile().doctorId,
+			officeIds: () => (options.profile().offices ?? []).map((office) => office.officeId),
+			serviceId: () => this.serviceId
 		});
 		// 🔴 U-39.1: the active office's facts — the profile's own office came with the profile (D-103: nothing more
 		// is asked for it); another office is asked ONCE, when it becomes active, and kept. U-68.1 / P-B §7: the week, the
@@ -147,41 +146,25 @@ export class DoctorDetailState {
 	get serviceId(): string | undefined {
 		return resolveDoctorAvailabilityServiceId(
 			this.profile.services,
-			this.chosenServiceId ?? this.#pageHints.service
+			this.chosenServiceId ?? this.#pageHints.service ?? this.#kept?.serviceId ?? undefined
 		);
 	}
 
 	/** Every office's window that answered, by office. */
-	readonly availabilityByOffice: DoctorAvailabilityByOffice = $derived.by(() => {
-		const byOffice: DoctorAvailabilityByOffice = {};
-		const offices = this.profile.offices ?? [];
-		this.#slots.forEach((query, index) => {
-			const office = offices[index];
-			if (office && query.data) byOffice[office.officeId] = query.data;
-		});
-		return byOffice;
-	});
+	get availabilityByOffice(): DoctorAvailabilityByOffice {
+		return this.#slots.byOffice;
+	}
 
 	/**
-	 * Where the windows stand, every read's every field read (a TanStack result tells only the fields read): `idle`
-	 * when nothing is asked (no service, no id), `waiting`, `failed` (a failed or paused read), else `answered`.
+	 * Where the windows stand: `idle` when nothing is asked (no service, no id), `waiting` (the server's page asks no
+	 * time, D-103: it waits, never claims «no time»), `failed` (a failed or paused read), else `answered`.
 	 */
-	readonly availabilityState: DoctorAvailabilityReadState = $derived.by(() => {
-		const states = this.#slots.map((query) => readQueryState(query));
-		if (!this.profile.doctorId || !this.serviceId || states.length === 0) return 'idle';
-		// The server's page asks no time (they are the browser's, D-103): it waits, never claims «no time».
-		if (!browser) return 'waiting';
-		if (states.some((state) => state === 'waiting')) return 'waiting';
-		if (states.some((state) => state === 'failed' || state === 'unavailable')) return 'failed';
-		return 'answered';
-	});
+	get availabilityState(): DoctorAvailabilityReadState {
+		return this.#slots.state;
+	}
 
 	/** «Δοκιμάστε ξανά» of the times: asks again ONLY the windows that failed (lesson 7). */
-	retryAvailability = () => {
-		for (const query of this.#slots) {
-			if (query.isError || query.fetchStatus === 'paused') void query.refetch();
-		}
-	};
+	retryAvailability = () => this.#slots.retry();
 
 	/** The window open now: the page's own state (shallow routing), else the details route's section. */
 	get window(): DoctorDetailWindow {
@@ -212,8 +195,37 @@ export class DoctorDetailState {
 		return resolveDoctorActiveOfficeId({
 			availabilityByOffice: this.availabilityByOffice,
 			offices: this.profile.offices,
-			requestedOfficeId: this.chosenOfficeId ?? this.#pageHints.office
+			requestedOfficeId: this.chosenOfficeId ?? this.#pageHints.office ?? this.#kept?.slot.officeId
 		});
+	}
+
+	/**
+	 * The time chosen (U-40.3): the one confirmed in the window «Διαθεσιμότητα», else — P-W3 §3.2.1 γ — the hour the
+	 * page's address names (`office`, `date`, `time`: the booking's «×»), else the hour the booking keeps (its «back»),
+	 * once the window offers it: an hour it does not offer is no choice. Another service forgets it.
+	 */
+	get selectedSlot(): DoctorSelectedSlot | null {
+		if (this.#confirmedSlot !== undefined) return this.#confirmedSlot;
+		const { office, date, time } = this.#arrival;
+		const match = time ? /^(\d{2}):(\d{2})$/u.exec(time) : null;
+		const named =
+			office && date && match
+				? { officeId: office, date, startMinute: Number(match[1]) * 60 + Number(match[2]) }
+				: (this.#kept?.slot ?? null);
+		if (!named) return null;
+		const day = this.availabilityByOffice[named.officeId]?.days.find(
+			(entry) => entry.date === named.date
+		);
+		return day?.slots.some((slot) => slot.startMinute === named.startMinute) ? named : null;
+	}
+
+	/** The booking the screen keeps for this doctor (the address's hour, when it names one, speaks first). */
+	get #kept(): DoctorKeptBooking | null {
+		return this.#options.kept?.() ?? null;
+	}
+
+	set selectedSlot(slot: DoctorSelectedSlot | null) {
+		this.#confirmedSlot = slot;
 	}
 
 	/** U-39.2: the pill — the ONE way to change the active office, the same everywhere. */

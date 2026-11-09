@@ -86,4 +86,16 @@ describe('Switch', () => {
 		});
 		expect(container.querySelector('[data-slot="switch-thumb"] svg')).toBeNull();
 	});
+	it('U-28.4: with a pointer an off track darkens on hover (the default); U-100 / D-W3-27: `hover={false}` never — the track otherwise the same', () => {
+		const track = () => document.querySelector('[data-slot="switch-track"]') as HTMLElement;
+		const withHover = render(Switch, { props: { 'aria-label': 'Contact' } });
+		expect(track()).toHaveClass(
+			'can-hover:group-enabled:group-hover:data-[state=unchecked]:bg-muted-foreground/50'
+		);
+		const kept = [...track().classList].filter((name) => !name.includes('hover:'));
+		withHover.unmount();
+		render(Switch, { props: { 'aria-label': 'Contact', hover: false } });
+		expect([...track().classList].filter((name) => name.includes('hover:'))).toEqual([]);
+		expect([...track().classList]).toEqual(kept);
+	});
 });

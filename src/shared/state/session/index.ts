@@ -10,3 +10,4 @@ export {
 	type SignInAction,
 	type SignInRequest
 } from './session.svelte';
+export { openSignOutChannel, type SignOutChannel } from './sign-out-channel';

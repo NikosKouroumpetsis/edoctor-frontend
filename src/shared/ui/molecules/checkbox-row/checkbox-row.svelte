@@ -1,10 +1,14 @@
 <script lang="ts">
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { cn } from '$shared/lib/utils';
+	import { Tick } from '$shared/ui/icons/tick';
 	import {
+		checkboxBoxHover,
 		checkboxBoxSizes,
 		checkboxBoxStates,
-		checkboxMarkSizes
+		checkboxMarkSizes,
+		checkboxTones,
+		type CheckboxTone
 	} from '$shared/ui/primitives/checkbox';
 
 	let {
@@ -14,6 +18,8 @@
 		onToggle,
 		testId,
 		disabled = false,
+		hover = true,
+		tone = 'primary',
 		class: className,
 		...restProps
 	}: Omit<HTMLButtonAttributes, 'children' | 'onclick'> & {
@@ -25,6 +31,10 @@
 		/** The press: the new state comes along (the application's `onToggle`). */
 		onToggle?: (checked: boolean) => void;
 		testId?: string;
+		/** U-28.4 (`true`, the default): an empty box darkens under the pointer; `false` (U-100, D-W3-27) never. */
+		hover?: boolean;
+		/** The ticked box's colours (`checkboxTones`, U-129.2): the screen's own prototype. */
+		tone?: CheckboxTone;
 	} = $props();
 
 	function toggle() {
@@ -57,10 +67,19 @@
 		<span
 			data-slot="checkbox-row-box"
 			data-state={checked ? 'checked' : 'unchecked'}
-			class={cn(checkboxBoxStates, checkboxBoxSizes.md)}
+			data-tone={tone}
+			class={cn(
+				checkboxBoxStates,
+				checkboxTones[tone].box,
+				hover && checkboxBoxHover,
+				checkboxBoxSizes.md,
+				checkboxTones[tone].corner
+			)}
 		>
-			{#if checked}
-				<span class={cn('font-bold text-primary-foreground', checkboxMarkSizes.md)}>✓</span>
+			{#if checked && checkboxTones[tone].tick}
+				<Tick strokeWidth={3.4} class={cn('icon-check-mark', checkboxTones[tone].mark)} />
+			{:else if checked}
+				<span class={cn('font-bold', checkboxTones[tone].mark, checkboxMarkSizes.md)}>✓</span>
 			{/if}
 		</span>
 	</span>

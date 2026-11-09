@@ -3,6 +3,9 @@ import type { ResolvedPathname } from '$app/types';
 import {
 	buildAccountEntries,
 	buildBottomNavItems,
+	buildFooterColumns,
+	doctorOnboardingPath,
+	frameHeaderOf,
 	hidesFooterOnPhone,
 	isExploreFlow,
 	showsBottomNav,
@@ -13,6 +16,79 @@ const href = (path: string) => path as ResolvedPathname;
 const el = { locale: 'el' } as const;
 
 describe('the frame’s rules per page', () => {
+	it('🔴 U-81.2 / P-W3 §3.1 (wave 3): the booking (30, 31, every «Αλλαγή») and the doctor’s sign-up are pushed over the tabs and end without the footer', () => {
+		for (const path of [
+			'/doctors/dr-athena/booking',
+			'/doctors/dr-athena/booking/',
+			'/doctors/dr-athena/booking/time',
+			'/doctors/dr-athena/booking/details/phone',
+			'/doctors/dr-athena/booking/success',
+			'/doctor/onboarding',
+			'/doctor/onboarding/',
+			'/doctor/onboarding/stage/1',
+			'/doctor/onboarding/location/pin'
+		]) {
+			expect(showsBottomNav(path), path).toBe(false);
+			expect(showsSiteFooter(path), path).toBe(false);
+		}
+		// An error page keeps the capsule on them too (U-61.2 Ε3).
+		expect(showsBottomNav('/doctor/onboarding/stage/9', 404)).toBe(true);
+	});
+
+	it('🔴 U-61.1 (review w3-w1 MINOR-1): an error page under the booking or the sign-up is inside the whole frame — the bar and the footer', () => {
+		for (const path of [
+			'/doctor/onboarding/stage/9',
+			'/doctors/unknown/booking',
+			'/doctors/x/booking/time'
+		]) {
+			for (const status of [404, 503]) {
+				expect(frameHeaderOf(path, status), `${path} ${status}`).toBe('site');
+				expect(showsSiteFooter(path, status), `${path} ${status}`).toBe(true);
+			}
+			expect(frameHeaderOf(path, 200)).not.toBe('site');
+			expect(showsSiteFooter(path, 200)).toBe(false);
+		}
+		// The results keep their own end at an error too (unchanged).
+		expect(showsSiteFooter('/doctors', 404)).toBe(false);
+	});
+
+	it('P-W3 §3.1 / record §3.4: the bar from 744 — the whole one on the site, the mark alone on the booking, none on the sign-up (it draws its own)', () => {
+		expect(frameHeaderOf('/')).toBe('site');
+		expect(frameHeaderOf('/doctors/dr-athena')).toBe('site');
+		expect(frameHeaderOf('/doctors/dr-athena/details/location')).toBe('site');
+		expect(frameHeaderOf('/doctors/dr-athena/booking')).toBe('brand');
+		expect(frameHeaderOf('/doctors/dr-athena/booking/for-whom')).toBe('brand');
+		expect(frameHeaderOf('/doctor/onboarding')).toBe('none');
+		expect(frameHeaderOf('/doctor/onboarding/office')).toBe('none');
+	});
+
+	it('P-W3 §3.1 (negative): look-alike paths keep the site’s frame — no slug, another word, the plural', () => {
+		for (const path of [
+			'/doctors/booking',
+			'/doctors/dr-athena/bookings',
+			'/doctor/onboardings',
+			'/doctors/onboarding',
+			'/doctor',
+			'/plans'
+		]) {
+			expect(frameHeaderOf(path), path).toBe('site');
+			expect(showsSiteFooter(path), path).toBe(true);
+		}
+		expect(showsBottomNav('/doctors/booking')).toBe(false);
+		expect(showsBottomNav('/doctor/onboardings')).toBe(true);
+	});
+
+	it('record §6.4 «Είσοδος» (wave 3): «Είστε γιατρός;» and «Γίνετε μέλος του eDoctor» open the doctor’s sign-up; «Πλάνα συνδρομής» keeps the plans (P-W3 Σ-11)', () => {
+		expect(doctorOnboardingPath).toBe('/doctor/onboarding');
+		for (const isMember of [false, true]) {
+			expect(
+				buildAccountEntries(el, href, isMember).find((entry) => entry.key === 'doctor')
+			).toMatchObject({ href: '/doctor/onboarding' });
+		}
+		const doctors = buildFooterColumns(el, href, 'support@edoctor.test')[1].links;
+		expect(doctors.map((link) => link.href)).toEqual(['/doctor/onboarding', '/plans', '/clinics']);
+	});
+
 	it('U-84 Π2: a conversation and «Προηγούμενες συνομιλίες» are pushed over the tabs; the list keeps them', () => {
 		expect(showsBottomNav('/messages')).toBe(true);
 		expect(showsBottomNav('/messages/018f3c1e')).toBe(false);

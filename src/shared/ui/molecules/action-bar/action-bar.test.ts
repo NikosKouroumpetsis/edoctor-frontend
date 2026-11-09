@@ -175,4 +175,20 @@ describe('ActionBar', () => {
 		expect(screen.getByRole('button', { name: 'Αναζήτηση' })).toHaveClass('bg-accent');
 		expect(barOf()).not.toHaveAttribute('data-single-line');
 	});
+
+	it('D-W3-27 / U-100: `hover={false}` — neither action changes its colour under the pointer; the default keeps U-28.4', () => {
+		const hovers = (node: Element) =>
+			[...node.classList].filter((name) => name.startsWith('can-hover:'));
+		const { unmount } = render(ActionBar, { props: { ...base, hover: false } });
+		expect(hovers(screen.getByRole('button', { name: 'Αναζήτηση' }))).toEqual([]);
+		expect(hovers(screen.getByRole('button', { name: 'Εκκαθάριση όλων' }))).toEqual([]);
+		unmount();
+		render(ActionBar, { props: base });
+		expect(hovers(screen.getByRole('button', { name: 'Αναζήτηση' }))).toEqual([
+			'can-hover:hover:bg-accent/90'
+		]);
+		expect(hovers(screen.getByRole('button', { name: 'Εκκαθάριση όλων' }))).toEqual([
+			'can-hover:hover:bg-foreground/5'
+		]);
+	});
 });

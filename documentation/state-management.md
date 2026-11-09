@@ -137,7 +137,10 @@ frame's settings and the results' legal line use it for «English / Ελληνι
 - `Session` (`$shared/state/session`, one per page tree, in context) is how the frame, the pages and the cards meet the
   auth module without importing it: `status`, `member`, `requireSignIn({ action, onSignedIn })`, `signOut()`. What asked
   for the sign-in runs once after it (Ε4); it comes back through an address only as the closed `SignInAction` (`resume`,
-  `takeResumed`), for a `/login?next=&do=` or a provider's redirect. A provider is left for without asking its start
+  `takeResumed`), for a `/login?next=&do=` or a provider's redirect. 🔴 D-W3-37: an action that WRITES when it goes on
+  (`'doctor'`: «Ξεκινήστε» starts a sign-up) goes on only from the return this tab wrote before it left for a provider
+  (`readResumedAction`, `auth/lib/return-path`), never from an address alone, which anyone can send; the others only
+  show again what was asked (a toast, a window, a heart the tab keeps). A provider is left for without asking its start
   first: every refusal of `GET /auth/register/{google,apple}` answers `/login?error=<provider>`, and a cancelled one a bare
   `/login`. What the page itself must say (no API at all) is the fresh read of the legal versions that goes before it.
 - `signOut()` ends the session only if the server did: the cookies are `HttpOnly` on the API, so a logout that failed
@@ -161,7 +164,8 @@ lastMethod }` for «Καλωσορίσατε και πάλι»; the tab keeps on
   messages' pages keep between them, as the application's tab stays mounted: the chosen chip, and per conversation what has
   not left, so a send that fails after the person moved on is a «Δεν στάλθηκε» back on its own conversation. The draft
   does not outlive its page.
-- `Session.forgotten` grows at a sign-out and when another account comes into the tab (the auth host compares
+- `Session.forgotten` grows at a sign-out, at a sign-out in another tab of the browser (D-W3-37, below) and when another
+  account comes into the tab (the auth host compares
   `tenantUserId`, or `doctorId` from the doctor's read it makes anyway, for an account with no patient's profile): the
   drafts go with it. `Session.expire(request)`, a write refused with `401`: the page learns that it
   knows nobody, the personal reads go, the sign-in opens; the draft stays, so the same person finds it. A provider's redirect
@@ -170,6 +174,63 @@ lastMethod }` for «Καλωσορίσατε και πάλι»; the tab keeps on
   frame draws, and neither imports the other (the pattern of `Session`).
 - «Επικοινωνήστε με τον γιατρό» asks the server nothing to be drawn: only its press does (D-103). The state of the #18 lives at
   the screen, so a member's new read of the profile beneath it touches nothing.
+
+## The booking (wave 3, screens 30 + 31, U-102 – U-105)
+
+- 🔴 U-112.2: `BookingDraft` (`$modules/appointments/ui/booking-draft`, one per page tree, in context; its host is in the
+  root layout inside the `AuthHost`, around the frame) is what the person chose and wrote while the booking lasts: the
+  doctor (`doctorSlug`), the hour, the service, who the visit is for (and a relative being added), the first-visit answer,
+  the note, the mobile's MASK only (`phoneDestination`) and when the code may be asked again. Never a storage, a cookie, a
+  log or an address (`tests/architecture/drafts-privacy.test.ts`); another doctor ⇒ a new draft; `forgotten` ⇒ `forget()`;
+  `expire` (a `401`) keeps it; the 31 ⇒ `forget()`.
+- `enter(slug, hints, 'review' | 'change')`, by screen: the 30 takes the address's hints (`office`, `date`, `time`,
+  `service`, the closed list of `lib/booking/url`) only for hints it never agreed to (a new hour from the profile); a
+  change screen never lets its address speak for the same doctor (back, forward, a reload ⇒ the draft speaks).
+- 🔴 D-W3-31 (SvelteKit's shallow routing keeps `page.url` the page that was drawn): the address changes only by a real
+  navigation, `goto(…, { replaceState: true, noScroll: true, keepFocus: true, state: page.state })`, never a shallow
+  `pushState` / `replaceState`, and never before the router has started; the 30's address follows the draft that way.
+- `page.state.booking.depth`: a change screen opened from the 30 knows how many entries lie behind it and leaves by
+  `history.go(-depth)`, else `goto(30, { replaceState: true })`; after a reload `readHistoryDepth` (`$shared/lib/navigation`)
+  reads it from `history.state['sveltekit:states']`. `page.state.siteBack` is set by the profile's «Κράτηση»: the 30's «×»
+  is `history.back()` only with it, else its link.
+- `kept`: the profile's screens compose the booking's draft (a module never imports another), so the «back» from the 30
+  finds the hour, the service and the office on the profile's card — no request, no change of address.
+- Reads (`GET /patient/me`, the readiness, an appointment) are TanStack's, `personalQueryMeta`; every `setQueryData` is
+  preceded by `setQueryDefaults(…, { meta: personalQueryMeta })`. The 31 takes the 30's place in the history and reads its
+  appointment and readiness again after a reload.
+
+## The doctor's sign-up (wave 3, screens 33–42, U-107 – U-113)
+
+- 🔴 U-112.2: the server's progress (`GET /doctor/onboarding`, `no-store`) lives in TanStack (`personalQueryMeta`, the
+  browser only); `OnboardingDraft` (`$modules/doctor-onboarding/ui/draft-host`, one per page tree, in context, in the root
+  layout) holds ONLY what the doctor changed and the server does not have yet — an overlay, never a copy: a field reads
+  `draft.read(section, field, progress…)` («edits ?? progress»). Every «Επόμενο» writes its step; the write answers with
+  the progress, written into the cache (marked first), and `draft.clear(section, fields)` drops that step's edits. A
+  reload reads the progress again; only the current screen's unsaved words are lost. `forgotten` ⇒ `forget()`; `expire`
+  keeps it; `complete` ⇒ `forget()`. 🔴 D-W3-33: the Places `pointProof` lives in the draft only.
+- The controller (`ui/steps/hooks/use-step.svelte.ts`, the application's `useDoctorOnboardingStep`): one write at a time,
+  gated by the write in flight itself (`writing`), never by the mutation's `isPending`, which TanStack updates a timer
+  later (it would refuse 42's `complete` after its `activation-intent`, 41's one retry); `states` (where a page is open) may
+  be a function (42 while it completes); «Αποθήκευση και έξοδος» pressed while «Επόμενο» saves waits for that write and
+  leaves after it, and is locked while a write is out or the page's own chain runs (`next.loading`: 42's two writes,
+  41's version read between its two; review w3-w6 R1 NIT-1). The guard sends a visitor who came as a guest, a sign-out or another account here (`forgotten`) or a
+  sign-up not open to the overview, and a page beyond the progress to its first missing step; an `expire` stays.
+- D-W3-31 as in the booking: `goto(…, { replaceState?, state: { onboarding: { depth } } })` and `history.back()` only; the
+  depth survives a reload (`readHistoryDepth`).
+- The address search's session token lives in its hook's closure (D-W3-02), never the draft; the suggestions are never
+  asked again for the same words (`staleTime: Infinity`, no focus, no reconnect) and leave the cache with the screen.
+- 🔴 D-W3-37: the overview's «Ξεκινήστε» starts a sign-up on a press, or after a sign-in this tab asked for — never from an
+  address (`/login?do=doctor`, the session above).
+
+## The session across tabs (wave 3, D-W3-37)
+
+- The cookies are the API's, one jar for the browser: a sign-out in one tab ends the others too. The auth host announces a
+  sign-out the server carried out on `openSignOutChannel` (`$shared/state/session`: a `BroadcastChannel`, the one word
+  `signed-out`, never a fact of the person); every other tab answers as its own sign-out — the session read says «guest»,
+  the personal reads go, `removeMutations` takes every write's body, `Session.signedOutElsewhere()` grows `forgotten`, so
+  the drafts go.
+- `removeMutations` (`$shared/query`) also runs at a sign-out here and when another account comes into the tab: what a
+  write carried (a mobile, an ΑΜΚΑ, a note) never outlives its person in the client's memory.
 
 ## The results and the filters (wave 1.0, D3)
 

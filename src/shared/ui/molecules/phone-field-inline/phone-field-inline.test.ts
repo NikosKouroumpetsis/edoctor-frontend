@@ -84,4 +84,12 @@ describe('PhoneFieldInline', () => {
 			unmount();
 		}
 	});
+
+	it('U-65.6 (review w3-w3 R1 MINOR-3): the caller’s `maxlength` caps the number; none is set without it', () => {
+		const { unmount } = render(PhoneFieldInline, { props: { ...copy, maxlength: 16 } });
+		expect(screen.getByLabelText('Κινητό τηλέφωνο')).toHaveAttribute('maxlength', '16');
+		unmount();
+		render(PhoneFieldInline, { props: copy });
+		expect(screen.getByLabelText('Κινητό τηλέφωνο')).not.toHaveAttribute('maxlength');
+	});
 });

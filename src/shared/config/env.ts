@@ -37,3 +37,5 @@ export const knownAccountStorageKey = `edoctor.${appEnv}.known-account.v1`;
 export const authReturnStorageKey = `edoctor.${appEnv}.auth-return.v1`;
 export const favoritePendingStorageKey = `edoctor.${appEnv}.favorite-pending.v1`;
 export const helpfulStorageKey = `edoctor.${appEnv}.helpful.v1`;
+/** 🔴 D-W3-37: the tabs' channel of the session, by its name only (it carries one event, never a fact of the person). */
+export const sessionChannelName = `edoctor.${appEnv}.session.v1`;

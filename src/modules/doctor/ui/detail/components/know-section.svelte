@@ -8,8 +8,8 @@
 		DoctorKnowContent,
 		DoctorKnowPageId
 	} from '$modules/doctor/lib/detail';
+	import { OfficeTabs } from '$modules/doctor/ui/availability-picker';
 	import { doctorKnowBlockGlyphs } from './icons';
-	import OfficeTabs from './office-tabs.svelte';
 	import ProfileSection from './profile-section.svelte';
 
 	let {

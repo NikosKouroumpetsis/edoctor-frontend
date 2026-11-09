@@ -153,7 +153,25 @@ export const platform = {
 		'contact-w': 288,
 		'thread-pill-h': 36,
 		// The message in quote of a report: past it, it scrolls.
-		'quote-max-h': 140
+		'quote-max-h': 140,
+		// Wave 3 · screens 33–42 (record §6.3, the approved prototype's `doctor.css`): the steps' column (Airbnb's 630, 628
+		// on the 4 grid), the steps' own top bar from 744 (80) and the pills on it (36 below 744; 40 = `control-sm` from it).
+		'wizard-column': 628,
+		'wizard-top': 80,
+		'wizard-pill': 36,
+		// Wave 3 · screen 30 (record §3.4, Airbnb's checkout measured 05/11): the one column from 744 (440); from 950 the
+		// two (`grid-checkout`): the panel 386 ⇒ 384 on the 4 grid, 440 from 1128, 524 from 1440, beside the card 332,
+		// 368, 372, 64 apart (80 from 1128); the card's photo (80 below 744, `avatar-2xl` 96 from it) and the note's 104.
+		'checkout-main': 384,
+		'checkout-main-lg': 440,
+		'checkout-main-xl': 524,
+		'checkout-aside': 332,
+		'checkout-aside-lg': 368,
+		'checkout-aside-xl': 372,
+		'checkout-gap': 64,
+		'checkout-gap-lg': 80,
+		'checkout-photo': 80,
+		'checkout-note': 104
 	},
 	// The sixth corner (U-25.4): 32, ONLY for the web's panels and windows from 744 (`rounded-panel`: the search
 	// panel 425, the filters window 568). The shared five (`radius`) stay the application's.

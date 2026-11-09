@@ -25,6 +25,21 @@ declare global {
 				/** Whether those services were opened from the page, so «×» has two steps to go back. */
 				servicesInPlace?: boolean;
 			} | null;
+			/**
+			 * Wave 3 (U-102): a booking «Αλλαγή» screen opened from screen 30 (`depth` 1) or from another one of them
+			 * (2: «Νέος συγγενής», the code): leaving it goes back that many steps, to the page it came from.
+			 */
+			booking?: { depth: number };
+			/**
+			 * Wave 3 (review w3-w2 R1 MINOR-1): this entry was opened FORWARD from a page of this site (the doctor's page
+			 * opened the booking), so its «×» may go back through the history; without it, it follows its link.
+			 */
+			siteBack?: boolean;
+			/**
+			 * Wave 3 (D-W3-31, the doctor's sign-up): how many pages of the sign-up lie behind this one in the history —
+			 * «Πίσω» goes back through them, else to the page before it in place.
+			 */
+			onboarding?: { depth: number };
 		}
 		// interface Platform {}
 	}

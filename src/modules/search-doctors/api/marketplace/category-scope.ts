@@ -30,11 +30,11 @@ const SPECIALTY_CATEGORIES: CategoryId[] = [
  * Search term used to resolve each specialty rail category into a real `professionalId`
  * via `/doctors/suggestions`. The rail uses slug-style ids (`cardiology`), while the
  * marketplace indexes professionals by display name (`Cardiologist`); this map bridges the
- * two so the suggestion lookup resolves (and the same term is the text fallback). Update
- * here if the professional taxonomy changes.
+ * two so the suggestion lookup resolves (and the same term is the text fallback). Κ-1: the
+ * catalogue's English names or their first words (`tests/architecture/specialty-terms.test.ts`).
  */
-const SPECIALTY_SEARCH_TERMS: Record<string, string> = {
-	'internal-medicine': 'Internal Medicine',
+export const SPECIALTY_SEARCH_TERMS: Record<string, string> = {
+	'internal-medicine': 'Internist',
 	pediatrics: 'Pediatrician',
 	cardiology: 'Cardiologist',
 	dermatology: 'Dermatologist'
