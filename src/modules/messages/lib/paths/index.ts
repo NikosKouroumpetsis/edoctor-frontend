@@ -1,8 +1,8 @@
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
+import { isUuid } from '$shared/lib/ids';
 
-/** U-65.6: an address's conversation is checked at the boundary; anything but an id is no page. */
+/** U-65.6: an address's conversation is checked at the boundary; anything but an id is no page (the site's one rule). */
 export function isConversationId(value: string): boolean {
-	return UUID.test(value);
+	return isUuid(value);
 }
 
 export const messagesPath = '/messages';

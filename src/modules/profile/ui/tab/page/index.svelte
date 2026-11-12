@@ -11,7 +11,7 @@
 	const options = $derived({ locale });
 	const session = getSessionOptional();
 	const isMember = $derived(session?.isMember ?? false);
-	const sections = $derived(buildProfileMenu(options));
+	const sections = $derived(buildProfileMenu(options, { member: isMember }));
 	let signingOut = $state(false);
 
 	async function signOut() {

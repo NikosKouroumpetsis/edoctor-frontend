@@ -65,6 +65,12 @@ export class Session {
 	 * person signs in again and finds the words.
 	 */
 	forgotten = $state(0);
+	/**
+	 * 🔴 D-W4-78 (U-84): the session ended on a write (`expire`) and the sign-in that opened over the page has not closed
+	 * yet. What the page already shows may stay as it is under it, for the same person to go on from. Over once the
+	 * sign-in closes — finished or left — and at once whenever what a person wrote must leave the page (`forgotten`).
+	 */
+	expired = $state(false);
 	/** Grows each time the server did not carry out a sign-out: the member is still signed in, and the frame says so. */
 	signOutFailures = $state(0);
 
@@ -92,6 +98,7 @@ export class Session {
 		const pending = this.#pending;
 		this.#pending = null;
 		this.flowOpen = false;
+		this.expired = false;
 		pending?.onSignedIn?.();
 	}
 
@@ -102,18 +109,21 @@ export class Session {
 	expire(request: SignInRequest = {}) {
 		this.#source.expire?.();
 		this.#pending = request;
+		this.expired = true;
 		if (!this.hasPageFlow) this.flowOpen = true;
 	}
 
-	/** Another account came into this tab: what the last one wrote leaves the page. */
+	/** Another account came into this tab: what the last one wrote leaves the page, and nothing of it stays under a sign-in. */
 	accountChanged() {
+		this.expired = false;
 		this.forgotten += 1;
 	}
 
-	/** The visitor left the flow: what asked for it is forgotten. */
+	/** The visitor left the flow: what asked for it is forgotten, and the page is a guest's (D-W4-78). */
 	cancelSignIn() {
 		this.#pending = null;
 		this.flowOpen = false;
+		this.expired = false;
 		this.#source.abandoned?.();
 	}
 
@@ -143,6 +153,7 @@ export class Session {
 		this.#pending = null;
 		this.resumedAction = null;
 		this.flowOpen = false;
+		this.expired = false;
 		this.forgotten += 1;
 	}
 
@@ -154,6 +165,7 @@ export class Session {
 		}
 		this.#pending = null;
 		this.resumedAction = null;
+		this.expired = false;
 		this.forgotten += 1;
 	}
 }

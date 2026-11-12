@@ -1,6 +1,10 @@
 import { ApiError } from '$shared/lib/http';
 import type { BookingBlockerCode } from '$modules/appointments/api/readiness';
-import type { AppointmentFailureFacts, AppointmentRequestField } from './types';
+import type {
+	AppointmentChangeFailureFacts,
+	AppointmentFailureFacts,
+	AppointmentRequestField
+} from './types';
 
 /**
  * 🔴 Every blocker the contract publishes, as a table the COMPILER keeps total (the application's
@@ -78,4 +82,34 @@ export function readAppointmentFailure(error: unknown): AppointmentFailureFacts 
 	}
 	if (status === 400 || status === 422) return { kind: 'invalid', status, blockers, fields };
 	return { kind: 'unknown', status, blockers, fields };
+}
+
+// _source: backend `commands/appointment/Command.ts` `refuseConcurrentPatch` — the `409` that asks for a reload, beside
+// the `409` of a busy hour (`throwForPublicSlotBlockers`).
+const CHANGED_CONCURRENTLY = /\bchanged concurrently\b/u;
+
+/**
+ * 🔴 Why a change (`PATCH`) or a cancellation of an appointment was refused (screens 52, 53): the session (`401`), too
+ * many writes (`429`), the blockers wherever they came (`CANCEL_AFTER_CANCELLATION_CUTOFF` under `403`,
+ * `RESCHEDULE_INSIDE_CANCELLATION_CUTOFF` under `422` …), the `409` that says the appointment changed under the page,
+ * the taken hour (any other `409`, or the slot's marker), a `403` / `404` that names nothing (it closed meanwhile, or is
+ * not this account's: `closed`), a field; anything nobody decided stays `unknown`.
+ */
+export function readAppointmentChangeFailure(error: unknown): AppointmentChangeFailureFacts {
+	if (!(error instanceof ApiError)) return { kind: 'unknown', status: 0, blockers: [] };
+	const { status, message } = error;
+	if (status === 401) return { kind: 'session', status, blockers: [] };
+	if (status === 429) return { kind: 'rate-limited', status, blockers: [] };
+	if (status < 400 || status >= 500) return { kind: 'unknown', status, blockers: [] };
+	const blockers = BLOCKERS.filter((code) => named(message, code));
+	if (blockers.length > 0) return { kind: 'blocked', status, blockers };
+	if (status === 409 && CHANGED_CONCURRENTLY.test(message)) {
+		return { kind: 'changed', status, blockers };
+	}
+	if (status === 409 || message.includes(SLOT_NOT_AVAILABLE)) {
+		return { kind: 'slot-unavailable', status, blockers };
+	}
+	if (status === 403 || status === 404) return { kind: 'closed', status, blockers };
+	if (status === 400 || status === 422) return { kind: 'invalid', status, blockers };
+	return { kind: 'unknown', status, blockers };
 }

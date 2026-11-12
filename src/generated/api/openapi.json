@@ -7015,7 +7015,7 @@
         ],
         "responses": {
           "200": {
-            "description": "One page ordered by `startTime, id` in the direction of `sortDir`: `asc` (the default, oldest first) or `desc` (newest first). `limit` defaults to the configured page size and is refused past the configured maximum; `cursor` is the opaque `nextCursor` of the previous page and belongs to the `sortDir` it was issued for — a cursor of the other direction is refused (422); `total` is the whole matched set and does not change between pages. `historyBefore` (optional, an ISO date-time; a client reads its tabs with `scope` instead, whose bounds the server sets) keeps ONLY the history: every appointment in a final status (`completed`, `canceled`, `rejected`, `expired`, `no_show`, `unavailable`) whatever its time, and every open one (`pending`, `booked`, `checked_in`) whose `startTime` is before `historyBefore`; an open appointment at or after it is never returned. It combines with every other filter and the role scope, and with `sortDir` and `cursor` in both directions; without it the list is unchanged. `scope` (optional) reads the tab the server bounds by its OWN clock (D-118): for the doctor side (DOCTOR and backoffice) the day is the platform calendar day (Europe/Athens, daylight saving included) — `today` is every open appointment starting today, `upcoming` every open one after today, `history` every final one and every open one before today; for a member `upcoming` is every open appointment from now on and `history` every final one and every open one that started before now, and `today` answers 422. The scopes of one reader are disjoint and together hold every appointment. `scope` sets the time bounds itself, so it is refused (422) beside `from`, `to` or `historyBefore`; it combines with `status`, `sortDir` and `cursor`. `as` (optional, `patient` or `doctor`) names the side an account that is both a doctor and a patient reads: without it a doctor account reads the doctor side, every other app account the patient side and the backoffice its tenant; `as=patient` lists the appointments its own patient profile booked, with the member scopes; `as=doctor` from an account that is no doctor answers 403 and `as` from the backoffice 422. Every item carries `officeTimeZone`, the IANA zone of its office.",
+            "description": "One page ordered by `startTime, id` in the direction of `sortDir`: `asc` (the default, oldest first) or `desc` (newest first). `limit` defaults to the configured page size and is refused past the configured maximum; `cursor` is the opaque `nextCursor` of the previous page and belongs to the `sortDir` it was issued for — a cursor of the other direction is refused (422); `total` is the whole matched set and does not change between pages. `historyBefore` (optional, an ISO date-time; a client reads its tabs with `scope` instead, whose bounds the server sets) keeps ONLY the history: every appointment in a final status (`completed`, `canceled`, `rejected`, `expired`, `no_show`, `unavailable`) whatever its time, and every open one (`pending`, `booked`, `checked_in`) whose `startTime` is before `historyBefore`; an open appointment at or after it is never returned. It combines with every other filter and the role scope, and with `sortDir` and `cursor` in both directions; without it the list is unchanged. `scope` (optional) reads the tab the server bounds by its OWN clock (D-118): for the doctor side (DOCTOR and backoffice) the day is the platform calendar day (Europe/Athens, daylight saving included) — `today` is every open appointment starting today, `upcoming` every open one after today, `history` every final one and every open one before today; for a member `upcoming` is every open appointment from now on and `history` every final one and every open one that started before now, and `today` answers 422. The scopes of one reader are disjoint and together hold every appointment. `scope` sets the time bounds itself, so it is refused (422) beside `from`, `to` or `historyBefore`; it combines with `status`, `sortDir` and `cursor`. `as` (optional, `patient` or `doctor`) names the side an account that is both a doctor and a patient reads: without it a doctor account reads the doctor side, every other app account the patient side and the backoffice its tenant; `as=patient` lists the appointments its own patient profile booked, with the member scopes; `as=doctor` from an account that is no doctor answers 403 and `as` from the backoffice 422. Every item carries `officeTimeZone`, the IANA zone of its office. For a member every item carries `ratingInvitation` and `ratingId` too: a completed visit offers `ratingInvitation` — the `invitationId` its rating form opens (`ratings/{invitationId}`, `getRatingInvitation`) and `expiresAt`, the end of its window — exactly while the invitation itself takes a rating on the server clock (open and not past `expiresAt`, before any worker closes it, D-118) and the visit is not rated yet; whether its doctor may still be rated is answered by `getRatingInvitation`, not here. `ratingId` is the rating the member wrote of the visit, read with `getRating`; the two are never set together. Every other visit, the doctor side and the backoffice read both as `null`. A whole page costs one read of the ratings, and a page with no completed visit none.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7073,7 +7073,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The appointment with its service lines and audit log, `officeTimeZone`: the IANA zone its office keeps its hours in, so every hour is shown on the office clock, and `actions`: what the reader may do with it NOW, decided on the server clock by the very rules the writes check (D-118), and `officePhone`: the current number of the office, else the one frozen at booking, null when neither exists — a member cancels a booked visit until its cancellation deadline and a request until its hour (`!canCancel && isPastCancellationCutoff` means the deadline has passed and only the phone is left) and moves strictly before the cutoff and within the move limit, the doctor side answers a pending request, moves a pending or booked one, cancels anything not over, declares the `outcomes` due after the hour and makes the open `correction`. Booking readiness and an already rated visit are asked by the write itself. The side comes from the appointment itself: its doctor reads it as the doctor side, the holder of its patient profile as a member (a doctor who booked another doctor reads that visit as a patient), the backoffice every appointment of its tenant; everyone else gets the one 403. A member reads every audit line without the explanation of an automatic change, and every line that set the outcome of the visit (a declared outcome, or a status move to `completed`/`no_show` by anyone) without who set it, its reason or its snapshots (`actorRole` null).",
+            "description": "The appointment with its service lines and audit log, `officeTimeZone`: the IANA zone its office keeps its hours in, so every hour is shown on the office clock, and `actions`: what the reader may do with it NOW, decided on the server clock by the very rules the writes check (D-118), and `officePhone`: the current number of the office, else the one frozen at booking, null when neither exists — a member cancels a booked visit until its cancellation deadline and a request until its hour (`!canCancel && isPastCancellationCutoff` means the deadline has passed and only the phone is left) and moves strictly before the cutoff and within the move limit, the doctor side answers a pending request, moves a pending or booked one, cancels anything not over, declares the `outcomes` due after the hour and makes the open `correction`. For a member, `cancellationDeadline` is the instant until which the visit is cancelled online, the very one its messages print as «you can cancel until …», and `null` whenever `canCancel` is false: `startTime` minus `cancellationCutoffHours`, exactly on which a cancel is still on time; `startTime` itself for a visit the doctor side put inside its deadline and for a request already inside it, both cancelled until the hour; for a request still outside its deadline it is the deadline that holds once the request is confirmed, while the request itself is withdrawn until its hour. `rescheduleDenial` names why a member may not move the visit, in the order the move asks: `STATUS` (not pending or booked), `AFTER_CUTOFF` (the cutoff has passed, and from the hour on), `LIMIT_REACHED` (the member moved it as often as allowed), `null` exactly when `canReschedule` is true; `reschedulesLeft` is how many moves the member has left (0 with `LIMIT_REACHED`), `null` once the visit is no longer pending or booked ahead. A move by the doctor side or a note never spends one. The doctor side reads all three as `null`, and its `canReschedule` false carries no reason. Booking readiness and an already rated visit are asked by the write itself. `ratingInvitation` and `ratingId` follow the rules of `listAppointments`: the open rating invitation and the rating of a completed visit, for a member only, on every single-appointment answer. The side comes from the appointment itself: its doctor reads it as the doctor side, the holder of its patient profile as a member (a doctor who booked another doctor reads that visit as a patient), the backoffice every appointment of its tenant; everyone else gets the one 403. A member reads every audit line without the explanation of an automatic change, and every line that set the outcome of the visit (a declared outcome, or a status move to `completed`/`no_show` by anyone) without who set it, its reason or its snapshots (`actorRole` null).",
             "content": {
               "application/json": {
                 "schema": {
@@ -7177,7 +7177,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The updated appointment, with its `actions`. A member may move it only before the effective cancellation cutoff and only into a slot that still passes notice, horizon and availability. A member moving a BOOKED visit to an hour whose cancellation deadline has already passed gets 422 `RESCHEDULE_INSIDE_CANCELLATION_CUTOFF` and nothing is written, unless the body carries `acknowledgeInsideCancellationCutoff: true`; a request (`pending`) and the doctor side are never asked. A doctor moves only a pending or booked appointment (403 otherwise), without the patient accepting, and the status does not change. A member who hands a `pending` request to another person (`relativeId`) takes that person's own D-70 place (422 `PATIENT_PENDING_LIMIT_REACHED` when it is taken). Who the visit is for (`bookedForType`, `relativeId`) and the `patientNote` change only while it is pending or booked, for every role (403 otherwise), and a new person carries its own frozen `relativeSnapshot` (null for the account holder). Only the patient of the appointment writes `patientNote` (D-39): a body from the doctor side that carries it is refused with 403. A new person is asked «first visit?» again (D-W3-22): a visit of that person this doctor already accepted stores `firstVisit` false, otherwise the `firstVisit` of the body, or null without it; `firstVisit` comes only from the patient (403 from the doctor side) and only together with a change of the person (422 otherwise). A write that finds the appointment closed in the meantime answers that same 403; one that finds it changed but still open answers 409. `patientNote` holds at most 500 characters (422 past it; the configured limit may be lower). Rate limited per IP under the `booking` class.",
+            "description": "The updated appointment, with its `actions`. A member may move it only before the effective cancellation cutoff and only into a slot that still passes notice, horizon and availability. A member moving a BOOKED visit to an hour whose cancellation deadline has already passed gets 422 `RESCHEDULE_INSIDE_CANCELLATION_CUTOFF` and nothing is written, unless the body carries `acknowledgeInsideCancellationCutoff: true`; a request (`pending`) and the doctor side are never asked. A doctor moves only a pending or booked appointment (403 otherwise), without the patient accepting, and the status does not change. A member who hands a `pending` request to another person (`relativeId`) takes that person's own D-70 place (422 `PATIENT_PENDING_LIMIT_REACHED` when it is taken). Who the visit is for (`bookedForType`, `relativeId`) and the `patientNote` change only while it is pending or booked, for every role (403 otherwise), and a new person carries its own frozen `relativeSnapshot` (null for the account holder). Only a relative the body names in `relativeId` is checked: a relative that does not exist, or one of another account, is refused with 403 `relative does not belong to patient.` (a relative that was deleted too), while a body that names none — a new hour, a note, a move by the doctor side — goes through for a visit whose relative was deleted, which keeps its frozen `relativeSnapshot`. Only the patient of the appointment writes `patientNote` (D-39): a body from the doctor side that carries it is refused with 403. A new person is asked «first visit?» again (D-W3-22): a visit of that person this doctor already accepted stores `firstVisit` false, otherwise the `firstVisit` of the body, or null without it; `firstVisit` comes only from the patient (403 from the doctor side) and only together with a change of the person (422 otherwise). A write that finds the appointment closed in the meantime answers that same 403; one that finds it changed but still open answers 409. `patientNote` holds at most 500 characters (422 past it; the configured limit may be lower). Rate limited per IP under the `booking` class.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7569,7 +7569,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The invitation the rating email links to (the app link `ratings/{invitationId}`), as its patient reads it: `status` on the SERVER clock — an `OPEN` invitation whose `expiresAt` has passed reads `EXPIRED` before any worker closes it — `canSubmit`, whether a rating would be accepted now by the very rules the submit checks (open, inside its window, the doctor holding an active marketplace licence, the doctor not being this very account), with `submitBlocker` — the `RatingInvitationSubmitBlocker` code the submit would refuse with, `null` when `canSubmit` — and `ratingId` once rated. The doctor and the date of the visit are read from `getAppointment` with `appointmentId`. It belongs to the patient side: a member, and a doctor account that was the patient of another doctor; an invitation of another account, of another tenant or one that does not exist answers the one 403 `rating invitation is not accessible to this account.`",
+            "description": "The invitation the rating email links to (the app link `ratings/{invitationId}`), as its patient reads it: `status` on the SERVER clock — an `OPEN` invitation whose `expiresAt` has passed reads `EXPIRED` before any worker closes it — `canSubmit`, whether a rating would be accepted now by the very rules the submit checks (open, inside its window, the doctor holding an active marketplace licence, the doctor not being this very account), with `submitBlocker` — the `RatingInvitationSubmitBlocker` code the submit would refuse with, `null` when `canSubmit` — and `ratingId` once rated. `patientName` and `patientInitial` are the author name a rating would be stored and published with now — the trimmed first name and the capital initial of the last name of the account, its Greek name first, else its first one — read by the very code the submit stores them with, `null` when the account holds no name. The doctor and the date of the visit are read from `getAppointment` with `appointmentId`. It belongs to the patient side: a member, and a doctor account that was the patient of another doctor; an invitation of another account, of another tenant or one that does not exist answers the one 403 `rating invitation is not accessible to this account.`",
             "content": {
               "application/json": {
                 "schema": {
@@ -26319,6 +26319,22 @@
               "$ref": "#/components/schemas/AppointmentAuditLogResponseView"
             }
           },
+          "ratingInvitation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AppointmentRatingInvitationRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ratingId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "id": {
             "type": "string"
           },
@@ -26612,6 +26628,8 @@
           "quotedNetAmount",
           "quotedTotalAmount",
           "quotedVatAmount",
+          "ratingId",
+          "ratingInvitation",
           "rejectReasonCode",
           "rejectReasonText",
           "rejectedAt",
@@ -26663,6 +26681,33 @@
           },
           "isPastCancellationCutoff": {
             "type": "boolean"
+          },
+          "cancellationDeadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rescheduleDenial": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PatientRescheduleDenial"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reschedulesLeft": {
+            "type": [
+              "number",
+              "null"
+            ]
           }
         },
         "required": [
@@ -26673,10 +26718,13 @@
           "outcomes",
           "correction",
           "cancellationCutoffHours",
-          "isPastCancellationCutoff"
+          "isPastCancellationCutoff",
+          "cancellationDeadline",
+          "rescheduleDenial",
+          "reschedulesLeft"
         ],
         "additionalProperties": false,
-        "description": "D-118: what the reader may do with this appointment NOW, by the server clock and the rules the writes check. The cutoff pair is the patient's D-18/D-19 answer (`null`/`false` for the doctor side), and `outcomes`/`correction` are the doctor side's (`[]`/`null` for the patient, D-24/D-59)."
+        "description": "D-118: what the reader may do with this appointment NOW, by the server clock and the rules the writes check. The cutoff fields, the deadline, the reason a move is refused and the moves left are the patient's answer (U-135.6, U-136.5), `null` or `false` for the doctor side, whose refused move has no reason; `outcomes`/`correction` are the doctor side's (`[]` and `null` for the patient, D-24/D-59). For a request outside its deadline, `cancellationDeadline` is the deadline once confirmed."
       },
       "AppointmentOutcome": {
         "type": "string",
@@ -26703,6 +26751,14 @@
         ],
         "additionalProperties": false,
         "description": "D-24/D-85: the one verdict a SYSTEM outcome may still be corrected into, and until when."
+      },
+      "PatientRescheduleDenial": {
+        "type": "string",
+        "enum": [
+          "STATUS",
+          "AFTER_CUTOFF",
+          "LIMIT_REACHED"
+        ]
       },
       "AppointmentServiceLineView": {
         "type": "object",
@@ -26842,6 +26898,24 @@
           "reason"
         ],
         "description": "An audit line as a response carries it. D-55: `actorUserId` is answered only to the account that acted; every other reader gets `null` and reads `actorRole` instead. Ε-Φ4-4: `actorRole` is `null` too where the reader may not learn who acted: the patient reading a line that set the outcome."
+      },
+      "AppointmentRatingInvitationRef": {
+        "type": "object",
+        "properties": {
+          "invitationId": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "invitationId",
+          "expiresAt"
+        ],
+        "additionalProperties": false,
+        "description": "U-135.5: the open rating invitation of a completed visit, as its patient reaches the form: its public id and window end."
       },
       "AppointmentBookedForType": {
         "type": "string",
@@ -27129,6 +27203,22 @@
             "items": {
               "$ref": "#/components/schemas/AppointmentAuditLogResponseView"
             }
+          },
+          "ratingInvitation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AppointmentRatingInvitationRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ratingId": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "id": {
             "type": "string"
@@ -27421,6 +27511,8 @@
           "quotedNetAmount",
           "quotedTotalAmount",
           "quotedVatAmount",
+          "ratingId",
+          "ratingInvitation",
           "rejectReasonCode",
           "rejectReasonText",
           "rejectedAt",
@@ -27435,6 +27527,7 @@
       },
       "AppointmentRatingInvitationActorView": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "invitationId": {
             "type": "string"
@@ -27467,19 +27560,32 @@
               "string",
               "null"
             ]
+          },
+          "patientName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "patientInitial": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
-          "invitationId",
           "appointmentId",
-          "status",
-          "expiresAt",
           "canSubmit",
-          "submitBlocker",
-          "ratingId"
+          "expiresAt",
+          "invitationId",
+          "patientInitial",
+          "patientName",
+          "ratingId",
+          "status",
+          "submitBlocker"
         ],
-        "additionalProperties": false,
-        "description": "Ε-Φ7-1 (D-55): an invitation as its patient reads it — its state on the SERVER clock (an OPEN one past `expiresAt` reads `EXPIRED`, D-118), whether a rating is accepted now and the code that refuses it, and the rating it produced; never the tenant, the patient account, the mailbox or a counter."
+        "description": "Ε-Φ7-1 (D-55): an invitation as its patient reads it — its state on the SERVER clock (an OPEN one past `expiresAt` reads `EXPIRED`, D-118), whether a rating is accepted now and the code that refuses it, the rating it produced, and the author name a rating would be stored with now (D-W4-26); never the tenant, the patient account, the mailbox or a counter."
       },
       "AppointmentRatingInvitationStatus": {
         "type": "string",

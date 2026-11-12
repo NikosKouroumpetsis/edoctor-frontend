@@ -2,9 +2,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '$shared/lib/http';
 import {
 	createBookingRelative,
+	deleteRelative,
+	listRelatives,
 	readBookingRelativeFailure,
 	readBookingRelativeInvalidIds,
-	readBookingRelativeRefusedFields
+	readBookingRelativeRefusedFields,
+	readRelativeChangeFailure,
+	relativesQuery,
+	updateRelative
 } from '.';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -32,7 +37,7 @@ describe('a new relative (record §3.3)', () => {
 		expect(init).toMatchObject({ method: 'POST', credentials: 'include' });
 	});
 
-	it('🔴 review w3-w6 R1 MINOR-1 / U-65.6: the answer as the booking names it — the id and both names; the ΑΜΚΑ, ΑΦΜ, mobile and email the server sends back never leave `api/`', async () => {
+	it('🔴 review w3-w6 R1 MINOR-1 / U-65.6: the answer as the booking names it — the id, both names and (U-139.5) the relationship and gender; the ΑΜΚΑ, ΑΦΜ, mobile and email the server sends back never leave `api/`', async () => {
 		// Made-up values: no person's numbers.
 		vi.stubGlobal(
 			'fetch',
@@ -50,7 +55,9 @@ describe('a new relative (record §3.3)', () => {
 		expect(await createBookingRelative('p-1', form)).toEqual({
 			relativeId: 'r-9',
 			firstName: 'Πέτρος',
-			lastName: 'Μάρκου'
+			lastName: 'Μάρκου',
+			relationship: 'CHILD',
+			gender: ''
 		});
 	});
 
@@ -160,5 +167,87 @@ describe('a new relative (record §3.3)', () => {
 		expect(readBookingRelativeInvalidIds(refusal(words, 401))).toEqual([]);
 		expect(readBookingRelativeInvalidIds(refusal(words, 500))).toEqual([]);
 		expect(readBookingRelativeInvalidIds(new Error(words))).toEqual([]);
+	});
+});
+
+describe('screen 55 · the person’s relatives (P-W4 §4.6)', () => {
+	// Made-up values: no person's numbers.
+	const relative = {
+		id: 'r-1',
+		patientId: 'p-1',
+		firstName: ' Γιώργος ',
+		lastName: 'Παππάς',
+		relationship: 'CHILD',
+		gender: 'MALE',
+		phone: '+306900000000',
+		email: ' ',
+		amka: '00000000001',
+		afm: null
+	};
+	const answering = (data: unknown, status = 200) =>
+		vi.fn(async () => new Response(JSON.stringify({ status: 'ok', data }), { status }));
+
+	it('every relative, whole for the form (the optional fields `null` when blank), with the cookies', async () => {
+		const spy = answering([relative, { id: 'r-2', firstName: '', lastName: 'Χωρίς' }]);
+		vi.stubGlobal('fetch', spy);
+		expect(await listRelatives('p/1')).toEqual([
+			{
+				relativeId: 'r-1',
+				firstName: 'Γιώργος',
+				lastName: 'Παππάς',
+				relationship: 'CHILD',
+				gender: 'MALE',
+				phone: '+306900000000',
+				email: null,
+				amka: '00000000001',
+				afm: null
+			}
+		]);
+		const [url, init] = spy.mock.calls[0] as unknown as [string, RequestInit];
+		expect(url).toContain('/patient/p%2F1/relatives');
+		expect(init).toMatchObject({ method: 'GET', credentials: 'include' });
+		expect(relativesQuery('p-1')).toMatchObject({
+			queryKey: ['appointments', 'relatives', 'p-1'],
+			meta: { personal: true }
+		});
+	});
+
+	it('W-4 (negative): an answer that is no list is none; a relationship or gender that is no text reads empty', async () => {
+		for (const data of [null, {}, 'x', 7]) {
+			vi.stubGlobal('fetch', answering(data));
+			await expect(listRelatives('p-1')).resolves.toEqual([]);
+		}
+		vi.stubGlobal('fetch', answering([{ ...relative, relationship: 7, gender: null }]));
+		expect((await listRelatives('p-1'))[0]).toMatchObject({ relationship: '', gender: '' });
+	});
+
+	it('D-78: the change sends only what changed (a cleared field `null`), both ids encoded; the deletion sends no body', async () => {
+		const spy = answering(relative);
+		vi.stubGlobal('fetch', spy);
+		await expect(
+			updateRelative('p-1', 'r/1', { phone: null, firstName: 'Γιώργος' })
+		).resolves.toMatchObject({
+			relativeId: 'r-1'
+		});
+		const [url, init] = spy.mock.calls[0] as unknown as [string, RequestInit];
+		expect(url).toContain('/patient/p-1/relatives/r%2F1');
+		expect(init).toMatchObject({ method: 'PATCH', credentials: 'include' });
+		expect(JSON.parse(String(init.body))).toEqual({ phone: null, firstName: 'Γιώργος' });
+		const removal = answering(relative);
+		vi.stubGlobal('fetch', removal);
+		await expect(deleteRelative('p-1', 'r-1')).resolves.toBeUndefined();
+		const [, removed] = removal.mock.calls[0] as unknown as [string, RequestInit];
+		expect(removed).toMatchObject({ method: 'DELETE' });
+		expect(removed.body).toBeUndefined();
+	});
+
+	it('a change’s refusals: a relative that is not the person’s any more (403 / 404), then the create’s reasons', () => {
+		expect(readRelativeChangeFailure(new ApiError('Forbidden', 403, '/x'))).toBe('forbidden');
+		expect(readRelativeChangeFailure(new ApiError('Not found', 404, '/x'))).toBe('forbidden');
+		expect(readRelativeChangeFailure(new ApiError('slow', 429, '/x'))).toBe('rate-limited');
+		expect(readRelativeChangeFailure(new ApiError('firstName', 422, '/x'))).toBe('invalid');
+		expect(readRelativeChangeFailure(new Error('offline'))).toBe('unknown');
+		// (negative) the create keeps its own reading: its 403 means another thing.
+		expect(readBookingRelativeFailure(new ApiError('Forbidden', 403, '/x'))).toBe('unknown');
 	});
 });

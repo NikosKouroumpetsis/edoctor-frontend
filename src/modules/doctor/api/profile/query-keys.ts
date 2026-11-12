@@ -5,5 +5,8 @@
  */
 export const doctorQueryKeys = {
 	all: ['doctor'] as const,
-	memberProfile: (slug: string, lang: string) => ['doctor', 'member-profile', slug, lang] as const
+	memberProfile: (slug: string, lang: string) => ['doctor', 'member-profile', slug, lang] as const,
+	/** D-W4-29 (P-W4 Σ-5): a public profile a patient's appointments read by the doctor's id — a key of its own. */
+	publicProfile: (doctorId: string, lang: string) =>
+		['doctor', 'public-profile', doctorId, lang] as const
 };

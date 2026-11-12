@@ -53,6 +53,34 @@ describe('the session’s requests (U-80.1 Ε6)', () => {
 		expect(new Headers(serverFetch.mock.calls[0][1]?.headers).has('cookie')).toBe(false);
 	});
 
+	it('🔴 D-W4-60 (security review of the web, MINOR-1): every call with the cookies — a read, a write, a file — says `cache: no-store`, so a personal answer is never kept in the browser’s HTTP cache past the sign-out', async () => {
+		const calls: Record<string, () => Promise<unknown>> = {
+			get: () => httpSessionGet('/patient/p-1/relatives'),
+			post: () =>
+				httpSessionPost('/appointment-rating/rating-invitations/i-1/submit', { body: {} }),
+			put: () => httpSessionPut('/patient/favorites/doctors/d-1'),
+			patch: () =>
+				httpSessionPatch('/appointment/appointments/a-1', { body: { patientNote: 'x' } }),
+			delete: () => httpSessionDelete('/patient/p-1/relatives/r-1'),
+			file: () => httpSessionFile('/messages/conversations/c-1/export')
+		};
+		for (const [name, call] of Object.entries(calls)) {
+			const spy = stubFetch(answer(200, { status: 'ok', data: {} }));
+			await call();
+			const init = (spy.mock.calls[0] as unknown as [string, RequestInit])[1];
+			expect(init.cache, name).toBe('no-store');
+			expect(init.credentials, name).toBe('include');
+		}
+	});
+
+	it('D-W4-60 (negative): a public, anonymous read keeps the browser’s own caching — `no-store` is the session’s alone', async () => {
+		const spy = stubFetch(answer(200, { status: 'ok', data: 1 }));
+		await httpGet('/doctor/public/doctors');
+		const init = (spy.mock.calls[0] as unknown as [string, RequestInit])[1];
+		expect(init.cache).toBeUndefined();
+		expect(init.credentials).toBe('omit');
+	});
+
 	it('a write sends its JSON body with the cookies', async () => {
 		const spy = stubFetch(answer(200, { status: 'ok', data: { success: true } }));
 		await httpSessionPost('/auth/access/start', { body: { email: 'a@b.gr' } });

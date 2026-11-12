@@ -1,8 +1,9 @@
 import { m } from '$paraglide/messages.js';
+import { officeDialNumber } from '$shared/lib/office';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type { DoctorOfficeSummaryFacts, DoctorProfile } from '$modules/doctor/api/profile';
 import { hasAnyBookableSlot, type DoctorAvailabilityByOffice } from '../availability';
-import { availabilitySlotSummaryLabel, feeView, officeDialNumber, officeTabLabel } from '../labels';
+import { availabilitySlotSummaryLabel, feeView, officeTabLabel } from '../labels';
 import { buildDoctorAvailabilityElsewhere, findDoctorEarliestSlot } from '../office';
 import type {
 	DoctorBookingAction,

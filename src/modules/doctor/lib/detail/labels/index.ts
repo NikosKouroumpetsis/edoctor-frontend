@@ -311,30 +311,6 @@ export function officeFacilityValue(isAvailable: boolean, locale: SupportedLocal
 	return isAvailable ? m.doctor_yes({}, options(locale)) : m.doctor_no({}, options(locale));
 }
 
-/** «Ισόγειο» / «Υπόγειο» / «3ος»; `undefined` for no level. */
-export function officeFloorValue(
-	floor: number | undefined,
-	locale: SupportedLocale
-): string | undefined {
-	if (floor === undefined || !Number.isFinite(floor)) return undefined;
-	const level = Math.trunc(floor);
-	if (level === 0) return m.doctor_office_floor_ground({}, options(locale));
-	if (level < 0) return m.doctor_office_floor_basement({}, options(locale));
-	return m.doctor_office_floor_level({ floor: level }, options(locale));
-}
-
-/**
- * The office's phone as `tel:` takes it: digits and one leading `+` only (server data: nothing else reaches the
- * dialler); `undefined` when nothing is left.
- */
-export function officeDialNumber(phone: string | undefined): string | undefined {
-	const trimmed = phone?.trim();
-	if (!trimmed) return undefined;
-	const digits = trimmed.replace(/\D/gu, '');
-	if (!digits) return undefined;
-	return trimmed.startsWith('+') ? `+${digits}` : digits;
-}
-
 const PAYMENT_LABELS = {
 	card: m.doctor_payment_card,
 	cash: m.doctor_payment_cash,

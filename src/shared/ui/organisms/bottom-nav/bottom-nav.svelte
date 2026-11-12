@@ -38,6 +38,25 @@
 	// flower-application's) in the primary text colour, the others in the text colour (U-16.10, U-17.1).
 	const tabClass =
 		'flex min-h-touch min-w-touch flex-1 flex-col items-center justify-center gap-0.5 rounded-full transition-colors duration-standard ease-standard outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
+	// The tab's word: 12/600, closed up below 360 (D-W4-53).
+	const labelClass = 'text-label-md font-semibold whitespace-nowrap narrow-phone:tracking-tight';
+
+	// 🔴 D-W4-65 · D-W4-73 (live checks w4-live-web Δ2, w4-live-web-2 Γ): FIVE tabs are PACKED at every width of the
+	// capsule's zone — each tab as wide as its own word (never under the 48 target) and the room left shared out as EQUAL
+	// gaps between them, never under 4: five equal shares of the whole 384 are 74,8 and «Εξερευνήστε» is 77,1 at 12, so
+	// the words stood 3,4 apart at 400 / 402. The words are written at 11 (`tab-label`, the prototype's) only in a capsule
+	// narrower than its 384 (a screen under 400: 320, 360, 375, 393), at 12 from it. Fewer than five would keep their
+	// equal shares at 12 — nobody today: the site's bar is ALWAYS five, the same for a guest and a member (D-W4-79), so
+	// this is every page of the phone's site, not only the appointments'.
+	const PACKED_TABS = 5;
+	const packedRow = 'justify-between gap-1 px-0.5 capsule-narrow:px-0';
+	const packedLabel = 'capsule-narrow:text-tab-label';
+	// U-157 (bug #7, measured `w4-measure-web` §1): the bubble was exactly its word, so the word stood out of the round
+	// ends. A packed tab spreads OUT of its own box by the air it gains (negative margin, equal padding), so no word and no
+	// gap moves: 6 a side from 400 (the row gives 2 a side there, for the two ends), 4 under 400, none under 360.
+	const packedItem = 'flex-none min-w-touch';
+	const packedTab =
+		'-mx-1.5 px-1.5 capsule-narrow:-mx-1 capsule-narrow:px-1 capsule-narrow:narrow-phone:mx-0 capsule-narrow:narrow-phone:px-0';
 </script>
 
 <script lang="ts">
@@ -55,6 +74,9 @@
 		/** The zone from which the capsule hides (744: the top bar takes over there, U-16.3). */
 		hideFrom?: BottomNavHideFrom;
 	} = $props();
+
+	const packed = $derived(items.length >= PACKED_TABS);
+	const label = $derived(cn(labelClass, packed && packedLabel));
 </script>
 
 {#snippet tabGlyph(item: BottomNavItem, glyph: IoniconName)}
@@ -72,35 +94,37 @@
 	</span>
 {/snippet}
 
-<!-- flower-application's floating glass capsule (U-16.10, U-17.1, U-18.1): 336 wide (U-82.3) in the middle, 16 above the
-     lower edge and the safe area, 4 inside, fully round, the page showing through the white at 50 %
-     (`blur(7px) saturate(180%)`) under a 65 % white rim; always shown while its zone lasts. -->
+<!-- flower-application's floating glass capsule (U-16.10, U-17.1, U-18.1): 384 wide (U-134.6, D-W4-53: five tabs) in the
+     middle and never closer than 8 to the screen's sides, 16 above the lower edge and the safe area, 4 inside, fully
+     round, the page showing through the white at 50 % (`blur(7px) saturate(180%)`) under a 65 % white rim; always shown
+     while its zone lasts. Below 360 the words close up (D-W4-53: `tracking-tight`, the prototype's −0.02em); five tabs
+     are packed with equal gaps at every width (D-W4-65, D-W4-73). -->
 <nav
 	data-slot="bottom-nav"
 	aria-label={ariaLabel}
 	class={cn(
-		'fixed bottom-safe-area left-1/2 z-40 w-tab-capsule-w max-w-full -translate-x-1/2 rounded-full border border-card/65 bg-card/50 p-1 shadow-overlay backdrop-blur-glass backdrop-saturate-180',
+		'fixed bottom-safe-area left-1/2 z-40 w-tab-capsule-w max-w-tab-capsule -translate-x-1/2 rounded-full border border-card/65 bg-card/50 p-1 shadow-overlay backdrop-blur-glass backdrop-saturate-180',
 		bottomNavHideClasses[hideFrom]
 	)}
 >
 	<!-- U-28.4: with a pointer, a tab not current takes a lighter bubble on hover. -->
-	<ul class="flex flex-row items-stretch">
+	<ul class={cn('flex flex-row items-stretch', packed && packedRow)}>
 		{#each items as item (item.key)}
 			{@const glyph = item.current && item.activeIcon ? item.activeIcon : item.icon}
 			{@const look = item.current
 				? 'bg-foreground/7 text-primary-text'
 				: 'text-foreground can-hover:hover:bg-foreground/4'}
-			<li class="flex flex-1">
+			<li class={cn('flex', packed ? packedItem : 'flex-1')}>
 				{#if item.href}
 					<a
 						href={item.href}
 						aria-current={item.current ? 'page' : undefined}
 						data-slot="bottom-nav-tab"
 						data-state={item.current ? 'on' : 'off'}
-						class={cn(tabClass, look)}
+						class={cn(tabClass, packed && packedTab, look)}
 					>
 						{@render tabGlyph(item, glyph)}
-						<span class="text-label-md font-semibold">{item.label}</span>
+						<span class={label}>{item.label}</span>
 					</a>
 				{:else}
 					<button
@@ -108,10 +132,10 @@
 						onclick={() => item.onclick?.()}
 						data-slot="bottom-nav-tab"
 						data-state={item.current ? 'on' : 'off'}
-						class={cn(tabClass, look)}
+						class={cn(tabClass, packed && packedTab, look)}
 					>
 						{@render tabGlyph(item, glyph)}
-						<span class="text-label-md font-semibold">{item.label}</span>
+						<span class={label}>{item.label}</span>
 					</button>
 				{/if}
 			</li>

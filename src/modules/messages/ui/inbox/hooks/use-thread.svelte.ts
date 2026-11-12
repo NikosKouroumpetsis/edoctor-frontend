@@ -4,6 +4,7 @@ import { m } from '$paraglide/messages.js';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import { readServerNow } from '$shared/lib/server-clock';
 import { ApiError } from '$shared/lib/http';
+import { saveFile } from '$shared/lib/save-file';
 import { getSessionOptional } from '$shared/state/session';
 import { getToastsOptional } from '$shared/ui/molecules/toast';
 import {
@@ -24,8 +25,7 @@ import {
 } from '$modules/messages/api/conversations';
 import { newClientMessageId } from '$modules/messages/lib/client-id';
 import { readMessagingRefusal } from '$modules/messages/lib/refusals';
-import { conversationCopyName, saveTextFile } from '$modules/messages/lib/save-file';
-import { messageDay } from '$modules/messages/lib/time';
+import { conversationCopyName, messageDay } from '$modules/messages/lib/time';
 import type { ThreadEntry } from '$modules/messages/lib/thread';
 import type { MessageReportReason } from '$modules/messages/types';
 import type { LocalMessage, ThreadMemory } from '$modules/messages/ui/inbox-memory';
@@ -221,7 +221,7 @@ export function useThread(options: {
 	const copyMutation = createMutation(() => ({
 		mutationFn: () => downloadConversationCopy(conversationId),
 		onSuccess: (file) => {
-			saveTextFile(file, conversationCopyName(messageDay(readServerNow())));
+			saveFile(file, conversationCopyName(messageDay(readServerNow())));
 			toasts?.show({ message: m.messages_toast_copied({}, words) });
 		},
 		onError: (error) => {

@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { AppointmentFacts } from '$modules/appointments/api/appointment';
+import { appointmentFactsSample } from '$modules/appointments/api/appointment/appointment.sample';
 import { bookingSlotOfAppointment, buildBookingSuccess } from '.';
 
 const pending: AppointmentFacts = {
+	...appointmentFactsSample,
 	id: 'a-1',
 	doctorId: 'doc-1',
 	officeId: 'off-a',
@@ -30,10 +32,12 @@ describe('screen 31 (record §4, U-105)', () => {
 				'Αν ο γιατρός επιβεβαιώσει, θα λάβετε email με το ραντεβού για το ημερολόγιό σας.',
 				'Αν ο γιατρός δεν απαντήσει έως Παρασκευή 6 Νοεμβρίου, 19:00, το αίτημα λήγει αυτόματα.'
 			],
-			manage:
-				'Για αλλαγή ή ακύρωση, ανοίξτε την εφαρμογή eDoctor ή καλέστε το ιατρείο στο 210 123 4567.',
 			confirmed: false
 		});
+		// 🔴 D-W4-54 (record §8.4): «Για αλλαγή ή ακύρωση, ανοίξτε την εφαρμογή…» is gone — the web changes and cancels it now.
+		expect(JSON.stringify(buildBookingSuccess({ ...base, appointment: pending }))).not.toMatch(
+			/ανοίξτε την εφαρμογή|καλέστε το ιατρείο/u
+		);
 	});
 
 	it('U-103.3 / D-09: «και SMS» only when the server says one leaves', () => {
@@ -55,15 +59,23 @@ describe('screen 31 (record §4, U-105)', () => {
 		});
 		expect(buildBookingSuccess({ ...base, appointment: null })).toMatchObject({
 			title: 'Η κράτηση καταχωρήθηκε',
-			manage: null,
 			confirmed: false
 		});
-		// 🔴 D-W3-29: no state ⇒ the title alone — never «…στα ραντεβού σας» (U-103.1), on any state the web cannot claim.
+		// 🔴 D-W4-54 (P-W4 Σ-18, in place of D-W3-29): no state ⇒ the neutral title with «Δείτε την κατάστασή της στα ραντεβού
+		// σας.», as the application — the web has «Τα ραντεβού μου» now; never a status it cannot claim.
 		for (const appointment of [null, { ...pending, status: 'rejected' as const }]) {
 			const neutral = buildBookingSuccess({ ...base, appointment });
-			expect(neutral).toMatchObject({ body: null, next: [], manage: null });
-			expect(JSON.stringify(neutral)).not.toMatch(/ραντεβού σας/u);
+			expect(neutral).toEqual({
+				title: 'Η κράτηση καταχωρήθηκε',
+				body: 'Δείτε την κατάστασή της στα ραντεβού σας.',
+				nextTitle: 'Τι ακολουθεί',
+				next: [],
+				confirmed: false
+			});
 		}
+		expect(buildBookingSuccess({ ...base, appointment: null, locale: 'en' }).body).toBe(
+			'You can see where it stands in your appointments.'
+		);
 		expect(
 			buildBookingSuccess({ ...base, appointment: { ...pending, expiresAt: 'soon' } }).next
 		).toHaveLength(2);

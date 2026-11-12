@@ -102,6 +102,17 @@
 		};
 	});
 
+	// 🔴 U-153 (card w4-w12; live check w4-live-web-3 Δ5): the browser put this page back from its back/forward cache
+	// (`pageshow`, `persisted`) as it was left — a session that had ended on a write, the sign-in still open over what was
+	// written. Nobody is known to be there: it is left as by «×» (`close`), a guest's page that keeps none of it.
+	$effect(() => {
+		const shown = (event: PageTransitionEvent) => {
+			if (event.persisted && session.expired && !session.isMember) close();
+		};
+		window.addEventListener('pageshow', shown);
+		return () => window.removeEventListener('pageshow', shown);
+	});
+
 	const flow = setAuthFlow(
 		new AuthFlowState(
 			{

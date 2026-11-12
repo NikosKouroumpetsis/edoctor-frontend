@@ -16,7 +16,7 @@
 		buildBookingCard,
 		buildBookingSuccess
 	} from '$modules/appointments/lib/booking';
-	import RoundLink from '../components/round-link.svelte';
+	import { RoundLink } from '$modules/appointments/ui/change-screen';
 	import SummaryCard from '../components/summary-card.svelte';
 	import type { BookingSuccessProps } from '../types';
 
@@ -72,11 +72,13 @@
 					signedIn,
 					patient: patientRead.data,
 					readiness: undefined,
-					// Review w3-w3 R1 MINOR-2 (D-06): the reason, the visitor and the cost as the appointment froze them.
+					// Review w3-w3 R1 MINOR-2 (D-06): the reason, the visitor and the cost as the appointment froze them;
+					// U-139.5: the relative with the word of their frozen relationship and gender.
 					readOnly: {
 						confirmed: content.confirmed,
 						note: appointment.patientNote,
-						snapshot: appointment.snapshot
+						snapshot: appointment.snapshot,
+						relative: appointment.relative
 					},
 					locale: props.locale
 				})
@@ -109,7 +111,7 @@
 {/snippet}
 
 <!-- Screen 31 · «Η κράτησή σας καταχωρήθηκε» (record §4, U-105). Below 744 the application's (U-81.2): «×» at the top right,
-     the ✓ in a dark circle of 48, the title, who it waits for, «Τι ακολουθεί», the web's «Για αλλαγή ή ακύρωση…», then
+     the ✓ in a dark circle of 48, the title, who it waits for, «Τι ακολουθεί» (D-W4-54: no «Για αλλαγή ή ακύρωση…»), then
      the SAME card as screen 30 without a «Αλλαγή», its state first; the button pinned to the bottom. From 744 one column
      of 440, from 950 Airbnb's two: the words and the button on the left, the card on the right. «Back» never returns
      to screen 30: this page took its place (nothing is sent twice). White to the bottom however short (W8-Δ1). -->
@@ -152,12 +154,9 @@
 						<Skeleton class="h-6 w-2/3 rounded-sm" />
 					</div>
 				{:else}
-					<!-- 🔴 D-W3-29: a booking with no state the web can claim says its title alone. -->
-					{#if content.body}
-						<p class="mb-6 text-body-lg text-foreground" data-testid="booking-success-body">
-							{content.body}
-						</p>
-					{/if}
+					<p class="mb-6 text-body-lg text-foreground" data-testid="booking-success-body">
+						{content.body}
+					</p>
 					{#if content.next.length > 0}
 						<h2 class="mb-3 text-body-lg font-semibold text-foreground">{content.nextTitle}</h2>
 						<ul
@@ -168,14 +167,6 @@
 								<li>{line}</li>
 							{/each}
 						</ul>
-					{/if}
-					{#if content.manage}
-						<p
-							class="mb-4 text-label-lg text-muted-foreground"
-							data-testid="booking-success-manage"
-						>
-							{content.manage}
-						</p>
 					{/if}
 				{/if}
 				{#if appointmentRead.isError}

@@ -1,5 +1,5 @@
 import { ApiError } from '$shared/lib/http';
-import type { BookingRelativeField, BookingRelativeFailure } from './types';
+import type { BookingRelativeField, BookingRelativeFailure, RelativeChangeFailure } from './types';
 
 // P-B3-review A-4 / m3: the limit's code travels in the message, as every refusal of the appointment module's.
 const LIMIT_MARKER = 'PATIENT_RELATIVES_LIMIT_REACHED';
@@ -12,6 +12,18 @@ export function readBookingRelativeFailure(error: unknown): BookingRelativeFailu
 	if (error.status === 401) return 'session';
 	if (error.status === 400 || error.status === 422) return 'invalid';
 	return 'unknown';
+}
+
+/**
+ * Why changing or deleting a relative was refused (screen 55, P-W4 §4.6): a `403` / `404` is a relative that is not the
+ * person's any more («Αυτός ο συγγενής δεν είναι πια διαθέσιμος.»), else the create's reasons. The create keeps its own
+ * reading (`readBookingRelativeFailure`): its `403` means another thing.
+ */
+export function readRelativeChangeFailure(error: unknown): RelativeChangeFailure {
+	if (error instanceof ApiError && (error.status === 403 || error.status === 404)) {
+		return 'forbidden';
+	}
+	return readBookingRelativeFailure(error);
 }
 
 /** The body's fields, total over its type: a refusal names them by these words (`lastName is required.`, `"email" …`). */

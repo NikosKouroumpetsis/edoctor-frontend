@@ -92,4 +92,15 @@ describe('PhoneFieldInline', () => {
 		render(PhoneFieldInline, { props: copy });
 		expect(screen.getByLabelText('Κινητό τηλέφωνο')).not.toHaveAttribute('maxlength');
 	});
+
+	it('security review of the web (wave 4.0) NIT-1: the number offers the browser’s own (`tel-national`) unless the caller says whose it is — `autocomplete="off"` for somebody else’s number', () => {
+		const own = render(PhoneFieldInline, { props: copy });
+		expect(screen.getByLabelText('Κινητό τηλέφωνο')).toHaveAttribute(
+			'autocomplete',
+			'tel-national'
+		);
+		own.unmount();
+		render(PhoneFieldInline, { props: { ...copy, autocomplete: 'off' } });
+		expect(screen.getByLabelText('Κινητό τηλέφωνο')).toHaveAttribute('autocomplete', 'off');
+	});
 });

@@ -106,7 +106,7 @@ function draw(start: SessionStatus = 'member') {
 const row = (id: string) => document.querySelector(`[data-row="${id}"]`) as HTMLElement;
 
 describe('screen 31 · «Η κράτησή σας καταχωρήθηκε» (record §4, U-105)', () => {
-	it('a request: the ✓, the title, who it waits for, «Τι ακολουθεί» with the deadline on the office’s clock, the web’s «Για αλλαγή ή ακύρωση…», and the same card read only — its state first, the note', async () => {
+	it('a request: the ✓, the title, who it waits for, «Τι ακολουθεί» with the deadline on the office’s clock — 🔴 D-W4-54: no «Για αλλαγή ή ακύρωση…» —, and the same card read only — its state first, the note', async () => {
 		draw();
 		expect(
 			await screen.findByRole('heading', { level: 1, name: 'Η κράτησή σας καταχωρήθηκε' })
@@ -120,9 +120,8 @@ describe('screen 31 · «Η κράτησή σας καταχωρήθηκε» (re
 			'Αν ο γιατρός επιβεβαιώσει, θα λάβετε email με το ραντεβού για το ημερολόγιό σας.',
 			'Αν ο γιατρός δεν απαντήσει έως Παρασκευή 6 Νοεμβρίου, 19:00, το αίτημα λήγει αυτόματα.'
 		]);
-		expect(screen.getByTestId('booking-success-manage')).toHaveTextContent(
-			'Για αλλαγή ή ακύρωση, ανοίξτε την εφαρμογή eDoctor ή καλέστε το ιατρείο στο 210 123 4567.'
-		);
+		expect(screen.queryByTestId('booking-success-manage')).toBeNull();
+		expect(document.body).not.toHaveTextContent('ανοίξτε την εφαρμογή');
 		const card = await screen.findByTestId('booking-success-card');
 		const rows = [...card.querySelectorAll('[data-row]')].map((node) =>
 			node.getAttribute('data-row')
@@ -157,6 +156,24 @@ describe('screen 31 · «Η κράτησή σας καταχωρήθηκε» (re
 		expect(row('visitor')).toHaveTextContent('Πέτρος Μάρκου');
 		expect(row('price')).toHaveTextContent('95');
 		expect(row('price')).not.toHaveTextContent('140');
+	});
+
+	it('🔴 U-139.5 (P-W4 Σ-15): the relative as booked wears the word of their frozen relationship and gender — «Άννα Παππά (μητέρα)»', async () => {
+		appointment = {
+			...appointment,
+			bookedForType: 'RELATIVE',
+			relativeId: 'rel-2',
+			relativeSnapshot: {
+				id: 'rel-2',
+				firstName: 'Άννα',
+				lastName: 'Παππά',
+				relationship: 'PARENT',
+				gender: 'FEMALE'
+			}
+		};
+		draw();
+		await screen.findByTestId('booking-success-card');
+		expect(row('visitor')).toHaveTextContent('Άννα Παππά (μητέρα)');
 	});
 
 	it('(negative) a frozen name made of a tag is text, never markup', async () => {
@@ -241,14 +258,15 @@ describe('screen 31 · «Η κράτησή σας καταχωρήθηκε» (re
 		expect(screen.queryByRole('progressbar')).toBeNull();
 	});
 
-	it('(negative) a guest is asked nothing personal — 🔴 D-W3-29: the neutral title alone, never «…στα ραντεβού σας»', async () => {
+	it('(negative) a guest is asked nothing personal — 🔴 D-W4-54 (in place of D-W3-29): the neutral title and «Δείτε την κατάστασή της στα ραντεβού σας.», as the application', async () => {
 		draw('guest');
 		expect(
 			await screen.findByRole('heading', { level: 1, name: 'Η κράτηση καταχωρήθηκε' })
 		).toBeInTheDocument();
-		expect(screen.queryByTestId('booking-success-body')).toBeNull();
+		expect(screen.getByTestId('booking-success-body')).toHaveTextContent(
+			'Δείτε την κατάστασή της στα ραντεβού σας.'
+		);
 		expect(screen.queryByTestId('booking-success-next')).toBeNull();
-		expect(document.body).not.toHaveTextContent('ραντεβού σας');
 		expect(screen.queryByTestId('booking-success-card')).toBeNull();
 		expect(screen.getByTestId('booking-success-doctor-bar')).toHaveAttribute('href', PROFILE);
 		expect(calls).toEqual([]);

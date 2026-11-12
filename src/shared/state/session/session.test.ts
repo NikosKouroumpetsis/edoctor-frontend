@@ -99,6 +99,52 @@ describe('Session (U-80.1)', () => {
 		expect(session.forgotten).toBe(2);
 	});
 
+	it('🔴 D-W4-78 (U-84): `expired` from the write’s `401` until the sign-in it opened closes — signed in, or left', () => {
+		const { session } = makeSession('member');
+		expect(session.expired).toBe(false);
+		session.expire();
+		expect(session.expired).toBe(true);
+		expect(session.flowOpen).toBe(true);
+		session.completeSignIn();
+		expect(session.expired).toBe(false);
+		session.expire();
+		session.cancelSignIn();
+		expect(session.expired).toBe(false);
+		expect(session.forgotten).toBe(0);
+	});
+
+	it('🔴 D-W4-78 (negative): asking for the sign-in is no ended session; another account, a sign-out here or in another tab end it AT ONCE, with what was written', async () => {
+		const guest = makeSession().session;
+		guest.requireSignIn({ action: 'book' });
+		expect(guest.expired).toBe(false);
+
+		const { session } = makeSession('member');
+		session.expire();
+		session.accountChanged();
+		expect(session.expired).toBe(false);
+		expect(session.forgotten).toBe(1);
+		session.expire();
+		session.signedOutElsewhere();
+		expect(session.expired).toBe(false);
+		expect(session.forgotten).toBe(2);
+		session.expire();
+		await session.signOut();
+		expect(session.expired).toBe(false);
+		expect(session.forgotten).toBe(3);
+	});
+
+	it('🔴 D-W4-78 · R-2 (negative): a sign-out the server did not carry out ends nothing — the ended session’s sign-in stays as it was', async () => {
+		const session = new Session({
+			status: () => 'member',
+			member: () => ({ firstName: 'Μαρία' }),
+			signOut: async () => false
+		});
+		session.expire();
+		await session.signOut();
+		expect(session.expired).toBe(true);
+		expect(session.flowOpen).toBe(true);
+	});
+
 	it('🔴 R-2 (negative): a sign-out the server did not carry out changes nothing here, and says so', async () => {
 		const session = new Session({
 			status: () => 'member',

@@ -67,9 +67,10 @@ export const platform = {
 		// The application's platform name for the pill CTA's inline padding (`StickyActionBar`), same name, same value.
 		'cta-inline': 32,
 		// Wave 1.0 frame (U-16 ⇒ U-19, the approved prototype): apple.com's top bar box (980 + 22 a side), the glass
-		// tab capsule below 744 (U-82.3: four tabs, 4 × 84), the account menu and the floating consent card from 744.
+		// tab capsule below 744 (U-134.6, D-W4-53: five tabs, the prototype's `.a-tabs.web` 384), the account menu and
+		// the floating consent card from 744.
 		'bar-content': 1024,
-		'tab-capsule-w': 336,
+		'tab-capsule-w': 384,
 		'account-menu-w': 260,
 		'consent-card-w': 720,
 		// Wave 1.0 search (U-23.2): Airbnb's panel under the bar from 744, 425 wide — 424 on the 4px grid.
@@ -171,7 +172,41 @@ export const platform = {
 		'checkout-gap': 64,
 		'checkout-gap-lg': 80,
 		'checkout-photo': 80,
-		'checkout-note': 104
+		'checkout-note': 104,
+		// Wave 4 · screens 50–55 (record §6.1, §11.2, the approved prototype's `appt.css:227-333`, `55-relatives/appt.css:456-463`):
+		// the `SplitView`'s list from 950 (420, 460 from 1128) and its one centred column when nothing goes on the right
+		// (640, U-139.1); a change screen's column 744–949 (640) and in the right column from 950 (656, 688 from 1128,
+		// 704 from 1440).
+		'split-list-w': 420,
+		'split-list-w-lg': 460,
+		'split-solo': 640,
+		'pane-column': 640,
+		'split-sub': 656,
+		'split-sub-lg': 688,
+		'split-sub-xl': 704,
+		// … and the right column's inset from 950 (`appt.css:232`, `:242`, `:245`: 48 a side, 64 from 1128, 80 on the left
+		// from 1440), the 51's and its change screens' (`:323`, `:329`, `:332`).
+		'pane-inset': 48,
+		'pane-inset-lg': 64,
+		'pane-inset-xl': 80,
+		// … and the 51's wait in it: the card's box (`appt.css:205-206`, `.a-dsk .box` 320; review w4-w4 R1 NIT-2), the
+		// short one below it `placeholder-lg` 96 (`.box.s`).
+		'pane-skeleton': 320,
+		// Screen 54's words of the review, at least 136 high (`54-rating/appt.css:303` `.a-area`; card w4-w7), and screen
+		// 55's row of a relative: the initial in its 44 circle (`55-relatives/appt.css:424` `.r-av`).
+		'review-comment': 136,
+		'relative-initial': 44,
+		// Screen 50's capsules «Επερχόμενα / Ιστορικό» (`54-rating/appt.css:73` `.a-chip`, D-W4-66): the `Chip`'s `tab` pill.
+		'chip-tab': 36,
+		// 🔴 D-W4-65: the screen from which the capsule is its whole 384 (`tab-capsule-w` + 8 a side) — as at 402, where five
+		// tabs fit as equal shares at 12; narrower, the capsule shrinks with the screen and packs them (`capsule-narrow`).
+		'tab-capsule-fit': 400
+	},
+	// 🔴 D-W4-65 (the approved prototype's `.a-tabs.web button`, `54-rating/appt.css:66`): the ONE text role the web has
+	// outside the shared scale — the capsule's words when FIVE tabs share a capsule narrower than its 384, 11/600. The shared
+	// scale keeps its floor of 12 (`tokens.test.ts`); nothing else may wear this role.
+	typography: {
+		'tab-label': { size: 11, weight: 600, lineHeight: 1.4 }
 	},
 	// The sixth corner (U-25.4): 32, ONLY for the web's panels and windows from 744 (`rounded-panel`: the search
 	// panel 425, the filters window 568). The shared five (`radius`) stay the application's.
@@ -311,7 +346,7 @@ export const radiusScale: Readonly<Record<string, number>> = { ...radius, ...pla
 
 /** The theme keys `tailwind-merge` needs to tell our named sizes apart from colors and each other. */
 export const mergeTheme = {
-	text: Object.keys(typography),
+	text: [...Object.keys(typography), ...Object.keys(platform.typography)],
 	spacing: Object.keys(spacingScale),
 	radius: Object.keys(radiusScale),
 	container: Object.keys(containers),

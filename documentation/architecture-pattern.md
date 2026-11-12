@@ -1035,14 +1035,16 @@ look stay CSS (`help/ui/center/page/index.svelte`, NIT-r2-2):
   `routes/help/+page.server.ts`.
 - Account deletion (`src/modules/account/ui/deletion`, `lib/deletion`): the legal texts' template (U-62.1).
 - Messages (`src/modules/messages`, wave 2, screens 18 + 21, U-84): `api/{conversations,preferences}`, `lib/{time,thread,
-people,paths,refusals,client-id,save-file}`, `config/limits.ts`; `ui/inbox` (ONE page for `/messages`, `/messages/<id>` and
+people,paths,refusals,client-id}` (the copy's hand-over is `$shared/lib/save-file` since wave 4, its name `lib/time`'s
+  `conversationCopyName`), `config/limits.ts`; `ui/inbox` (ONE page for `/messages`, `/messages/<id>` and
   `/messages/archive`, the same for a patient and a doctor; a route's `load` refuses what is no id), `ui/contact` (the button
   and the #18, composed by the doctor's screens through a snippet of `DoctorDetail` and `DoctorAbout`), `ui/unread-host` (the
   badge's one read, in the root layout).
 - Booking (`src/modules/appointments`, wave 3, screens 30 + 31, the application's module name): `api/{patient,readiness,
 appointment,relatives,phone,keys}` (the generated contract's views and bodies, `ApiRequestBody<operationId>`, mapped to
   facts; every read `personalQueryMeta`), `lib/booking/*` (the application's rules unit for unit: `url` the closed hints,
-  `summary`, `blockers`, `submission`, `failure`, `relative`, `details`, `success` …), `config/`, `ui/booking-draft` (the
+  `summary`, `blockers`, `submission`, `failure`, `details`, `success` …; «Νέος συγγενής»'s form is `lib/relatives/form`
+  since wave 4.0), `config/`, `ui/booking-draft` (the
   `BookingDraftHost` of the root layout), `ui/booking` (ONE slice for the whole flow: the 30, its seven «Αλλαγή» screens
   and the 31). ONE route `routes/doctors/[slug]/booking/[...step]` with a closed list of steps (D-W3-28: an unknown one is
   a 404, the site's own through `booking/+error.svelte`; `+layout.server.ts` reads the public profile once for every
@@ -1057,6 +1059,104 @@ appointment,relatives,phone,keys}` (the generated contract's views and bodies, `
   `hooks/use-step.svelte.ts`, the address search's hook). ONE route `routes/doctor/onboarding/[...step]` with a closed list
   of 21 screens (D-W3-28) ⇒ `screens/doctor/onboarding/[...step]` (the language, the addresses, the help, the home, the
   sign-in's reading of a refused code).
+- The patient's pages (wave 4.0, screens 50–55, D-W4-20 / D-W4-51): three routes, each a closed list read at the
+  boundary (U-65.6) and nothing read on the server (U-80.1 Ε6) — `routes/appointments/[...path]` (`''` the list,
+  `?tab=history` its «Ιστορικό», `<id>` an appointment, `<id>/{time,for-whom,relative,note,cancel}` what it opens;
+  `modules/appointments/lib/paths` `readAppointmentsAddress`), `routes/ratings/[invitationId]` (the email's link,
+  `readRatingInvitationId`) and `routes/profile/[...path]` in the place of `/profile` (`''` the «Προφίλ» tab,
+  `relatives`, `relatives/new`, `relatives/<id>`; `modules/profile/lib/paths` `readProfileAddress`; the 4.5 comes under
+  it too) ⇒ `screens/appointments/[...path]`, `screens/ratings/[invitationId]`, `screens/profile/[...path]`. The frame
+  (`site-frame/lib/frame.ts`): the capsule's fifth tab «Ραντεβού», «Τα ραντεβού μου» and «Οι συγγενείς μου» in a
+  member's menu, the capsule kept only on the two lists, no footer on any of them (D-W4-55) but on an error page.
+  The «Προφίλ» page gives a member «Οι συγγενείς μου» first in «account» (D-W4-56, the application's place); «Ραντεβού
+  γιατρού» and «Ταμείο» stay hidden (U-82.2).
+- The patient's facts and rules (wave 4.0, P-W4 §4.7, card W4-3) in the same module: `api/appointment` (+ the list's
+  infinite read `appointmentListQuery`, the ONE scan of the upcoming `upcomingScanQuery` (D-W4-21), the change
+  `changeAppointment` and `cancelAppointment` with `readAppointmentChangeFailure`, `storeAppointmentDetail`; the facts
+  carry the office's snapshot with its languages, the relative's relationship and gender, the lines, how it ended and
+  the trail — 🔴 never `canceledLate` (U-137.5); P-B4 §13.1's new fields are read since W4-9, see screen 54's
+  paragraph below),
+  `api/rating` (the invitation, the submit, the person's own review), `api/relatives` (+ list, change, delete); `lib/`
+  `when` (the hours on the office's clock), `status` (the patient's pill, `canAmendAppointment`), `list`, `detail`,
+  `change`, `cancel`, `rating` (the server's grade), `relatives/{words,form,upcoming}` (🔴 U-139.5's ONE helper,
+  D-W4-22); `config/` the limits, the patient's cancel reasons and the rating's aspects and weights, read against the
+  backend by `tests/architecture/appointment-rules.test.ts`. The doctor of an appointment is the doctor module's
+  `doctorPublicProfileQuery(doctorId, lang)` (D-W4-29: personal, a key of its own), composed by the screen; «Πώς
+  λειτουργούν οι κριτικές» is `doctor/lib/detail` `buildDoctorReviewHowBlocks` (D-W4-24).
+- 🔴 The rules of the patient's pages live in the module, not in a screen's page (contract «Screens compose»; review
+  w4-arch-frontend L-1, card w4-w9): `ui/list/hooks/use-pages` `useAppointmentsPages({ page: 'appointments', address })`
+  for screens 50–53 and `({ page: 'rating', invitationId })` for screen 54 — who reads, the read of the appointment on
+  the right (and of the invitation), the list's tab, when the list is read, 🔴 U-139.1 `paneEmpty`, `paneKey`, the
+  doctors to read (`doctorIds`), the page's memory (`doneOf`, `justCanceled`; let go when another appointment opens or
+  the pages are left), `signIn` / `retry`. A screen's page calls it once and joins the OTHER modules to it (doctor,
+  messages), nothing else; what is the screen's own stays in its `hooks/` (`use-screen`: the addresses; `use-time`: the
+  picker of «Αλλαγή ώρας», started again by `paneKey`). The forms of screens 52 (note), 53 and 54 are the shared
+  `createForm` with `form.field(name)` (L-2, `state-management.md`).
+- A module's link is an address the SCREEN already resolved (`links.*`, `href`): a module knows no route, so its
+  `<a href>` and its `goto` carry `eslint-disable … svelte/no-navigation-without-resolve` with that one reason (the
+  booking's, the messages' and the appointments' way) — never a path built inside a module.
+- `createQueries` is read through `combine` as ONE object with a constant key, never as the library's array (🔴 Σ1,
+  live check of wave 4.0: `@tanstack/svelte-query` 6.1.27 throws «'deleteProperty' on proxy» when the array shrinks by
+  two or more at once): `doctor/ui/public-profiles` `{ byId }`, `doctor/ui/availability-picker` `use-office-slots`
+  `{ reads }` — the only two readers.
+- Screens 50 + 51 (wave 4.0, card W4-4): ONE page for `/appointments` and `/appointments/<id>` — `ui/list` (its page is
+  the `SplitView`: the column with the title, the tabs as links that keep the tab in the address, the groups and the
+  cards, the states; from 950 the first appointment opens beside it with `replaceState`; 🔴 U-139.1: ONE column in the
+  middle while nothing stands on the right; `useAppointmentsList` the infinite read), `ui/detail` (the 51: head,
+  notices, «Πώς ήταν η επίσκεψη;», the card with its «Αλλαγή» links, the doctor's terms, the rows of actions, the cancel
+  link, its own states; `useAppointmentDetail`, a `404` and a `403` alike; the place of «Η κριτική σας» is a snippet
+  the screen fills), `ui/status-pill` (the one pill of 31, 50, 51), `ui/change-screen` (the «Αλλαγή» link of the
+  booking's card and of the 51), `ui/memory` (D-W4-33: what was just saved, in the page's memory and never in the
+  address, provided by the module's root host `BookingDraftHost`), `lib/calendar` (🔴 D-W4-31: the `.ics` the browser
+  writes, byte for byte the email's — `tests/architecture/calendar-golden.test.ts` runs it on the backend's golden
+  vectors — `PUBLISH`, `SEQUENCE:0`, `DTSTAMP` the appointment's `updatedAt`, never a note or a relative's name). The
+  screen `screens/appointments/[...path]` composes what a module may not import: the doctors (the doctor module's
+  `ui/public-profiles` `useDoctorPublicProfiles`, one public profile per different doctor, shared with screen 54),
+  «Μήνυμα στον γιατρό» (the messages' `useContactDoctor` + `ContactDialog`), «Η κριτική σας» (below), the addresses
+  (`lib/paths` `buildAppointmentsLinks`, ONE set for screens 50–54, through the screen's `href`); the list is read where it shows (on its own address, and from 950 beside an appointment once that one has
+  told its tab; until then its wait, never «no appointments»; an appointment's address from 950 is two columns from the
+  first paint — the list's wait and the 51's, the shot `w-loading-1440` — one column only once the right has nothing).
+  From 950, once shown, the list stays — its cards, scroll and focus, on the tab it last showed — while the next
+  appointment is read (P-W4 §3.6), its cards open in place
+  (`data-sveltekit-noscroll` / `-keepfocus`), and the first opens in the same paint as the cards (the 51's wait on the
+  right, `pane({ opening })`). An appointment's tab is its own (`appointmentTabOf`), never the address's.
+- Screens 52 + 53 (wave 4.0, card W4-5 / W4-6; 🔴 U-102 / U-136 / U-137: screens, never windows): the steps of
+  `/appointments/<id>/{time,for-whom,relative,note,cancel}` stand in the 51's place — a page of their own below 950,
+  the right column beside the list from 950 (U-136.2) — once a member's appointment is read (its states stay the
+  51's). `ui/change` (52: its entry `page/index.svelte` picks the screen the address names — `time`, `for-whom`,
+  `relative`, `note`, also exported one by one; `useAppointmentChange` the ONE `PATCH` and what follows it) and
+  `ui/cancel` (53) stand on
+  `ui/change-screen` — the booking's «Αλλαγή» pieces moved there with `mv` (P-W4 Σ-27: `ChangeFrame` with its
+  `placement` `page` (the booking, unchanged) / `pane` (a `<section>` in the appointments' `<main>`), `RoundLink`,
+  `ChoiceList`, `FirstVisit`, `NoteField` with its `maxLength` and `height` (`note` 104, `short` 96 for the 53), `RadioRows`, `ChangeLink`, the box «Το ραντεβού σας»
+  `ChangeContext`, and `useAppointmentSteps`: open one step on, leave the steps that were opened, once) — and on
+  `ui/relative-form` (the booking's «Νέος συγγενής» moved with `mv`, ONE form for the booking and the 52; each caller
+  says where it goes back and what follows a save). The screen composes the doctor module's picker on the
+  appointment's ONE office (`hooks/use-time`: the profile's slot reads, its own hour and the taken ones left out) and
+  the auth module's rule for a mobile. Each screen gives way to the appointment when it may not open (the hour without
+  `canReschedule`, the person and the note outside pending / booked, the cancel of a closed visit; the deadline that
+  passed is screen 53's own view).
+- Screen 54 and «Η κριτική σας» (wave 4.0, cards W4-7 / W4-9 = w4-w6; 🔴 U-102 / U-138: a screen, never a window):
+  `/ratings/<invitationId>` IS the form (U-138.3, the email's link) — `screens/ratings/[invitationId]` composes the
+  same `ui/list` page as the appointments (`open`: its right column is the form's whatever the address says;
+  `autoOpen={false}`: the list never opens another appointment there), so below 950 the form is its own page and from
+  950 the right column beside the visit's «Ιστορικό», the visit selected; two columns from the first paint, one only
+  for a guest or with nothing on the right (a refusal, a failure) beside a list with nothing either (U-139.1). The list
+  is read from 950 once the visit has told its tab (D-103). `ui/rating` (its page: the states — the wait, a guest's
+  «Σύνδεση» with the sign-in over the form once, «Η πρόσκληση δεν είναι διαθέσιμη», a failure, a blocker with one way
+  back — and the form on `ChangeFrame` (`bar={false}` for the states with nothing to save): «Η επίσκεψή σας»
+  (`buildAppointmentContext`), the five aspects on the shared `StarInput`, «Βαθμός κριτικής» (`lib/rating` `gradeOf`, the
+  server's formula), the words (`clampRatingComment`, 2000 UTF-16 units, no `<` `>`), the preview, the four lines
+  (`ratingThenLines`), «Πώς λειτουργούν οι κριτικές» (D-W4-24: the profile's `InfoDialog`, information — the one window
+  the slice imports) and «Πολιτική κριτικών»; ONE submit; D-W4-23: an invitation already answered puts its visit in the
+  address's place; `useRatingInvitation` the read (`403` / `404` alike); `OwnReview` + `useOwnReview` the 51's card).
+  The screen composes what is the doctor's: the name the review carries — the server's `patientName` / `patientInitial`
+  (D-W4-26) written by the profile's `reviewAuthorName` — and the preview, the profile's own list card
+  (`buildDoctorReviewListCard`, D-W4-25: «Σήμερα»); the appointments' screen composes «Η κριτική σας» on the 51 by the
+  `ratingId` the appointment names (P-B4 §13.3.5), never a list of reviews per appointment, with the doctor's reviews at
+  this one (`doctorDetailsPath(…, 'reviews', { focus })`) and the review policy. The facts (W4-9): `ratingInvitation`
+  and `ratingId` on every appointment, the three of `actions` (`cancellationDeadline`, `rescheduleDenial`,
+  `reschedulesLeft`) on one, each read only as what the contract names (D-118: anything else is `null`).
 - Wire ⇒ facts (W-4, the one statement of this rule; `shared.md` «Shared API Client» points here): only `api/` of
   these two modules imports `$shared/lib/api-client` (or any path under it, as
   `…/wire-types`: the guard `tests/architecture/import-boundaries.test.ts` reads both); their `lib/`, `ui/`, screens and

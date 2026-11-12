@@ -8,11 +8,9 @@ export { default as BookingCode } from './page/code.svelte';
 export { default as BookingName } from './page/name.svelte';
 export { default as BookingBirthDate } from './page/birth-date.svelte';
 export { default as BookingSuccess } from './page/success.svelte';
-export { default as BookingChangeFrame } from './components/change-frame.svelte';
 export { useBookingEntry } from './hooks/use-entry.svelte';
-export { isPlainClick, useBookingNavigation } from './hooks/use-navigation.svelte';
+export { useBookingNavigation } from './hooks/use-navigation.svelte';
 export type {
-	BookingChangeFrameProps,
 	BookingChangeProps,
 	BookingMobileParser,
 	BookingMobileProps,

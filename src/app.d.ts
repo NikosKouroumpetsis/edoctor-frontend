@@ -40,6 +40,14 @@ declare global {
 			 * «Πίσω» goes back through them, else to the page before it in place.
 			 */
 			onboarding?: { depth: number };
+			/**
+			 * Wave 4 (U-136, U-137, U-138, D-W3-31): an appointment's «Αλλαγή», cancellation or rating opened from it (`depth`
+			 * 1) or from another one of them (2: «Θέλετε απλώς άλλη ώρα;», «Προσθήκη συγγενή»): «Άκυρο», «‹» and «Αποθήκευση»
+			 * go back that many steps, so the browser's «back» never opens the form again.
+			 */
+			appointment?: { depth: number };
+			/** Wave 4 (U-139): a relative's form opened from the list of relatives, with the same count of steps behind it. */
+			relatives?: { depth: number };
 		}
 		// interface Platform {}
 	}

@@ -4,6 +4,7 @@ import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import { page } from '$app/state';
 import { m } from '$paraglide/messages.js';
+import { isPlainClick } from '$shared/lib/navigation';
 import { personalQueryMeta } from '$shared/query';
 import { getSessionOptional } from '$shared/state/session';
 import { getToastsOptional } from '$shared/ui/molecules/toast';
@@ -37,7 +38,7 @@ import {
 } from '$modules/appointments/lib/booking';
 import { withDoctorTitle } from '$shared/lib/text';
 import { useBookingEntry } from './use-entry.svelte';
-import { isPlainClick, useBookingNavigation } from './use-navigation.svelte';
+import { useBookingNavigation } from './use-navigation.svelte';
 import type { BookingReviewProps } from '../types';
 
 /**

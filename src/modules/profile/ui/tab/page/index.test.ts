@@ -20,7 +20,14 @@ function renderTab(status: SessionStatus, locale: 'el' | 'en' = 'el') {
 			session: state,
 			locale,
 			onRow,
-			hrefOf: (row: string) => (row === 'help' ? '/help' : row === 'legal' ? '/legal' : null)
+			hrefOf: (row: string) =>
+				row === 'help'
+					? '/help'
+					: row === 'legal'
+						? '/legal'
+						: row === 'relatives'
+							? '/profile/relatives'
+							: null
 		}
 	});
 	return { onRow, state };
@@ -48,11 +55,12 @@ describe('the `/profile` page (U-81.1, U-82.1)', () => {
 	});
 
 	it.each(['guest', 'member'] as const)(
-		'U-82.2: γραμμές χωρίς σελίδα web κρυμμένες — %s',
+		// Rewrites U-82.2 by D-W4-56: «Οι συγγενείς μου» has its page since wave 4.0; the two without one stay hidden.
+		'U-82.2: γραμμές χωρίς σελίδα web κρυμμένες («Ραντεβού γιατρού», «Ταμείο») — %s',
 		(status) => {
 			renderTab(status);
 			const page = screen.getByTestId('profile-page');
-			for (const hidden of ['Οι συγγενείς μου', 'Ραντεβού γιατρού', 'Ταμείο']) {
+			for (const hidden of ['Ραντεβού γιατρού', 'Ταμείο']) {
 				expect(page).not.toHaveTextContent(hidden);
 			}
 			expect(screen.getByTestId('profile-section-account')).toHaveTextContent(
@@ -61,6 +69,22 @@ describe('the `/profile` page (U-81.1, U-82.1)', () => {
 			expect(screen.getByTestId('profile-section-legal')).toHaveTextContent('Νομικά');
 		}
 	);
+
+	it('D-W4-56: a member reads «Οι συγγενείς μου» first, the page of screen 55; a guest never does', () => {
+		renderTab('member');
+		const rows = screen.getByTestId('profile-section-account').querySelectorAll('a');
+		expect(rows[0]).toHaveTextContent('Οι συγγενείς μου');
+		expect(screen.getByTestId('profile-menu-relatives')).toHaveAttribute(
+			'href',
+			'/profile/relatives'
+		);
+	});
+
+	it('D-W4-56 (negative): a guest’s page has no «Οι συγγενείς μου»', () => {
+		renderTab('guest');
+		expect(screen.queryByTestId('profile-menu-relatives')).toBeNull();
+		expect(screen.getByTestId('profile-page')).not.toHaveTextContent('Οι συγγενείς μου');
+	});
 
 	it('U-82.1: a row is the site’s page or a window of the frame', async () => {
 		const { onRow } = renderTab('guest');

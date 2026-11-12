@@ -12,25 +12,13 @@ export {
 export { bookingFailureActionLabel, buildBookingFailureNotice } from './failure';
 export { asksFirstVisit, firstVisitPayload } from './first-visit';
 export { buildForWhomOptions, forWhomOptionId, type BookingForWhomOption } from './for-whom';
-export { bookingNoteCounter, clampBookingNote, toBookingNotePayload } from './note';
-export { buildBookingPolicyRow } from './policy';
 export {
-	BOOKING_GENDERS,
-	BOOKING_RELATIONSHIPS,
-	bookingGenderOptions,
-	bookingRelationshipOptions,
-	bookingRelativeFailureMessage,
-	bookingRelativeForm,
-	bookingRelativeIdMessage,
-	emptyBookingRelative,
-	keepBookingAfmInput,
-	keepBookingAmkaInput,
-	readBookingRelativePhone,
-	toBookingRelativeInput,
-	type BookingRelativeFieldName,
-	type BookingRelativePhone,
-	type BookingRelativeValues
-} from './relative';
+	bookingNoteCounter,
+	bookingNoteRule,
+	clampBookingNote,
+	toBookingNotePayload
+} from './note';
+export { buildBookingPolicyRow } from './policy';
 export { buildBookingServiceOptions, type BookingServiceOption } from './service';
 export { findOfferedSlot, resolveSlotState } from './slot';
 export { buildBookingRequest, resolveBookingSubmit } from './submission';
@@ -40,6 +28,7 @@ export {
 	type BookingSuccessContent
 } from './success';
 export {
+	bookingDoctorHead,
 	bookingDoctorName,
 	bookingFeeLabel,
 	bookingOfficeLine,

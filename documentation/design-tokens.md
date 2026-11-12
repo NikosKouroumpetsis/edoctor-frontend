@@ -186,7 +186,7 @@ canonical file).
 (the top bar's «e+» square; the prototype's 26 is off the 4px grid) · `icon-tile` 48 (icon tile of a placeholder page) · `dial-code-w`
 56 (dial-code column of the inline phone field), `hover-card-w` 256 (the application's hover card width, `HoverCard`
 `md`), the frame of wave 1.0 (U-16/U-17): `bar-content` 1024 (apple.com's bar box: 980 of content and 22 a side),
-`window-reviews-sm` 664 and `window-h` 800 (the reviews' window of one column, U-66.2 Ε1), `office-aside` 400 (the office's text column, U-68.1 Ε1), `tab-capsule-w` 336 (the phone's glass capsule: four tabs, U-82.3), `account-menu-w` 260 (the ☰ menu), `consent-card-w` 720 (the consent
+`window-reviews-sm` 664 and `window-h` 800 (the reviews' window of one column, U-66.2 Ε1), `office-aside` 400 (the office's text column, U-68.1 Ε1), `tab-capsule-w` 384 (the phone's glass capsule: five tabs, U-134.6 / D-W4-53, never closer than 8 to the screen's sides through `max-w-tab-capsule`), `account-menu-w` 260 (the ☰ menu), `consent-card-w` 720 (the consent
 card from 744), the search of wave 1.0 (U-23.2): `search-panel-w` 424 (Airbnb's 425 panel under the bar, on the
 4px grid), `compact-search-part` 224 (each part of the top bar's small search pill before «…», NIT-7 of U-29: its
 own name, the value it had as `popover-sm`) and the corner `platform.radius.panel` 32 (`rounded-panel`, U-25.4), the blurs `platform.blur`
@@ -253,12 +253,16 @@ Two more, by the box and web only (`layout.css`, their widths are `--spacing-row
 340): `row-wide:` (a `ListRow` keeps its end beside it) and `card-wide:` (a `ProfileSummaryCard` `layout="page"` keeps
 its numbers beside the person, and always below 744). One by the viewport (wave 3, `layout.css`): `narrow-phone:` is a
 phone narrower than the `narrow` container's 360.
+A zone and a box together (U-156, screen 51's band «Πώς ήταν η επίσκεψη;», `appointments/ui/detail/components/ask.svelte`):
+`tablet:row-wide:` — the button beside the words only when the screen is from 744 **and** the band (its `@container`
+wrapper) is at least 520 wide; in the narrow right column at 950–1035 it stays the phone's column. Tailwind's own
+`@lg` (512) does not compile here (`--container-*: initial`), so the nearest name of the scale carries the rule.
 
 The messages (wave 2, screens 18 + 21, web only): `inbox-list-w` 380 and `inbox-list-w-lg` 400 (`grid-inbox`, the list from
 950 and 1128), `bubble-max-w` 560 (`max-w-bubble`: 78 %, at most 560 from 744), `bubble-avatar` 28, `composer-min-h` 44,
 `composer-send` 36, `composer-field` 156 (six lines, `max-h-composer`; the #18's field starts there), `compose-field-max`
 320, `contact-w` 288, `thread-pill-h` 36, `quote-max-h` 140, `inbox-art-w` 168; the corners `rounded-bubble` 20,
-`rounded-*-bubble-tail` 6 (U-84.1, the one corner off the 4 grid); the composer's pill is `rounded-xl` 24 at every width; the roles `text-bubble` (16 / 1.4) and `text-row-line` (15 / 1.4); `h-inbox`.
+`rounded-*-bubble-tail` 6 (U-84.1, the one corner off the 4 grid); the composer's pill is `rounded-xl` 24 at every width; the roles `text-bubble` (16 / 1.4) and `text-row-line` (15 / 1.4); the height `h-split` (it was `h-inbox`: the inbox is the `SplitView`'s first reader, D-W4-52).
 `bubble-avatar`, `composer-min-h`, `composer-send`, `composer-field` and the two roles are the prototype's,
 from 744. Below 744 the web takes the application's numbers (U-81.2): `min-h-touch`, `size-control-xs`, `max-h-menu-max-h`,
 `size-avatar-sm`, `text-body-lg`, `text-body-md`.
@@ -275,6 +279,20 @@ The booking (wave 3, screen 30, web only, record §3.4; Airbnb's checkout, named
 440 from 1128 / `checkout-main-xl` 524 from 1440 beside the card `checkout-aside` 332 / `checkout-aside-lg` 368 /
 `checkout-aside-xl` 372, `checkout-gap` 64 apart (`checkout-gap-lg` 80 from 1128). The card's photo is `checkout-photo` 80
 below 744 (`avatar-2xl` 96 from it) and the note is at least `checkout-note` 104 high.
+
+The phone's capsule with five tabs (D-W4-65, D-W4-73): `tab-capsule-fit` 400 is the screen from which the capsule is its
+whole 384 (`tab-capsule-w` + 8 a side) — the variant `capsule-narrow:` reads it — and `tab-label` 11 / 600 is the words'
+role under it, a role of the web alone (`platform.typography`), outside the shared scale whose smallest text stays 12.
+Screen 50's capsules «Επερχόμενα / Ιστορικό» are `chip-tab` 36 high (D-W4-66).
+
+The patient's appointments and relatives (wave 4.0, screens 50–55, web only, the `SplitView` template; the approved
+prototype's `appt.css:227-333`, `55-relatives/appt.css:456-463`): from 950 `grid-split` sets the list `split-list-w` 420
+(`split-list-w-lg` 460 from 1128) beside what it opened, the screen's height under the bar `h-split`; with nothing for
+the right column (U-139.1) one column in the middle, `split-solo` 640. A change screen is `pane-column` 640 wide at
+744–949 and, in the right column from 950, `split-sub` 656 / `split-sub-lg` 688 from 1128 / `split-sub-xl` 704 from 1440.
+The right column's inset from 950 (the 51 and its change screens, `appt.css:232`, `:242`, `:245`) is `pane-inset` 48 a
+side, `pane-inset-lg` 64 from 1128 and `pane-inset-xl` 80 on the left from 1440. The 51's wait draws the card's box
+`pane-skeleton` 320 high (`.a-dsk .box`, `appt.css:205-206`) and the short one under it `placeholder-lg` 96 (`.box.s`).
 
 The page column is 1440 and, from 1920, Airbnb's 1920 in the centre (its 4K zone,
 U-04.1): `container-page` and `Container width="page"` add `wide:max-w-wide`; the

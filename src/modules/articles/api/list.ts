@@ -1,4 +1,5 @@
 import { infiniteQueryOptions, queryOptions } from '@tanstack/svelte-query';
+import { isUuid } from '$shared/lib/ids';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import {
 	getArticleSuggestions,
@@ -32,11 +33,9 @@ export function isArticleType(value: unknown): value is ArticleTypeDto {
 	return typeof value === 'string' && (ARTICLE_TYPES as readonly string[]).includes(value);
 }
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
-
 /** Whether a value of the address may be sent as `serviceId` (the backend's uuid; anything else is no filter). */
 export function isServiceId(value: unknown): value is string {
-	return typeof value === 'string' && UUID.test(value);
+	return typeof value === 'string' && isUuid(value);
 }
 
 /** The search words of the address as the backend takes them: trimmed, at most 100 characters, `null` when empty. */

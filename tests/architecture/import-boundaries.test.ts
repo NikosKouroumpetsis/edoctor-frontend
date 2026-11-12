@@ -241,10 +241,11 @@ describe('import boundaries (U-29.3)', () => {
 /**
  * W-4 (card w3-w6: «τα wire types μένουν στο `api/`· στα modules φτάνουν μόνο facts»): in the two modules of wave 3 and
  * their screens and routes, only `api/` imports the generated contract (`$shared/lib/api-client`); everything else meets
- * the facts and the bodies `api/` names.
+ * the facts and the bodies `api/` names. Wave 4.0 (review w4-arch-frontend N-1, card w4-w9): the patient's pages too —
+ * the screens and the routes of `/appointments`, `/ratings` and `/profile`.
  */
 const WAVE_3 =
-	/^src\/(modules\/(appointments|doctor-onboarding)|screens\/doctor\/onboarding|screens\/doctors\/\[slug\]\/booking|routes\/doctor\/onboarding|routes\/doctors\/\[slug\]\/booking)\//u;
+	/^src\/(modules\/(appointments|doctor-onboarding)|screens\/doctor\/onboarding|screens\/doctors\/\[slug\]\/booking|routes\/doctor\/onboarding|routes\/doctors\/\[slug\]\/booking|(screens|routes)\/(appointments|ratings|profile))\//u;
 /** The generated contract's door, and every path under it (review w3-w6 R1 MINOR-1: `…/api-client/wire-types` too). */
 const API_CLIENT = /^\$shared\/lib\/api-client(?:\/|$)/u;
 function wireFindings(files: SourceFile[]): string[] {
@@ -261,6 +262,19 @@ describe('W-4: the wire types stay in `api/` (appointments, doctor-onboarding)',
 	it('W-4: no `lib/`, `ui/`, screen or route of the booking or the sign-up imports the generated contract', () => {
 		const files = readSourceFiles().filter((file) => WAVE_3.test(file.path));
 		expect(files.filter((file) => file.path.includes('/api/')).length).toBeGreaterThan(40);
+		// Wave 4.0: the scan reads the patient's pages it names.
+		const paths = files.map((file) => file.path);
+		for (const path of [
+			'src/screens/appointments/[...path]/page/index.svelte',
+			'src/screens/appointments/[...path]/hooks/use-time.svelte.ts',
+			'src/screens/ratings/[invitationId]/page/index.svelte',
+			'src/screens/profile/[...path]/page/index.svelte',
+			'src/routes/appointments/[...path]/+page.ts',
+			'src/routes/ratings/[invitationId]/+page.ts',
+			'src/routes/profile/[...path]/+page.ts'
+		]) {
+			expect(paths, path).toContain(path);
+		}
 		expect(wireFindings(files)).toEqual([]);
 	});
 
@@ -268,7 +282,7 @@ describe('W-4: the wire types stay in `api/` (appointments, doctor-onboarding)',
 		expect(
 			wireFindings([
 				planted(
-					'src/modules/appointments/lib/booking/relative/index.ts',
+					'src/modules/appointments/lib/relatives/form/index.ts',
 					"import type { RelativeView } from '$shared/lib/api-client';"
 				),
 				planted(
@@ -288,12 +302,48 @@ describe('W-4: the wire types stay in `api/` (appointments, doctor-onboarding)',
 				planted(
 					'src/modules/appointments/lib/booking/url/index.ts',
 					"import { x } from '$shared/lib/api-clients';"
+				),
+				// Wave 4.0 (N-1): one per new folder of the patient's pages — a screen, its hook, a route.
+				planted(
+					'src/screens/appointments/[...path]/page/index.svelte',
+					'<script lang="ts">import type { AppointmentResponseView } from \'$shared/lib/api-client\';</script>'
+				),
+				planted(
+					'src/screens/ratings/[invitationId]/hooks/use-screen.svelte.ts',
+					"import type { RatingInvitationView } from '$shared/lib/api-client';"
+				),
+				planted(
+					'src/screens/profile/[...path]/hooks/use-screen.svelte.ts',
+					"import type { RelativeView } from '$shared/lib/api-client/wire-types';"
+				),
+				planted(
+					'src/routes/appointments/[...path]/+page.ts',
+					"import type { ApiRequestBody } from '$shared/lib/api-client';"
+				),
+				planted(
+					'src/routes/ratings/[invitationId]/+page.ts',
+					"import type { ApiRequestBody } from '$shared/lib/api-client';"
+				),
+				planted(
+					'src/routes/profile/[...path]/+page.ts',
+					"import type { ApiRequestBody } from '$shared/lib/api-client';"
+				),
+				// … and a screen of another feature is not this rule's.
+				planted(
+					'src/screens/favorites/page/index.svelte',
+					'<script lang="ts">import type { FavoriteView } from \'$shared/lib/api-client\';</script>'
 				)
 			])
 		).toEqual([
-			'src/modules/appointments/lib/booking/relative/index.ts:1 wire type outside api/',
+			'src/modules/appointments/lib/relatives/form/index.ts:1 wire type outside api/',
 			'src/modules/doctor-onboarding/ui/steps/page/office.svelte:1 wire type outside api/',
-			'src/modules/appointments/ui/booking/page/relative.svelte:1 wire type outside api/'
+			'src/modules/appointments/ui/booking/page/relative.svelte:1 wire type outside api/',
+			'src/screens/appointments/[...path]/page/index.svelte:1 wire type outside api/',
+			'src/screens/ratings/[invitationId]/hooks/use-screen.svelte.ts:1 wire type outside api/',
+			'src/screens/profile/[...path]/hooks/use-screen.svelte.ts:1 wire type outside api/',
+			'src/routes/appointments/[...path]/+page.ts:1 wire type outside api/',
+			'src/routes/ratings/[invitationId]/+page.ts:1 wire type outside api/',
+			'src/routes/profile/[...path]/+page.ts:1 wire type outside api/'
 		]);
 	});
 });

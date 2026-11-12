@@ -53,3 +53,38 @@ export type BookingSlotFacts = { startMinute: number; startTime: string };
 export type BookingAvailabilityFacts = {
 	days: { date: string; slots: BookingSlotFacts[] }[];
 };
+
+/**
+ * Wave 4.0 · the doctor of a patient's appointment as the list and the page show it (screens 50–54): a fit of the
+ * doctor module's public profile, read by the screen per different doctor (D-W4-29), handed over as these facts.
+ */
+export type AppointmentDoctorFacts = Pick<
+	BookingDoctorFacts,
+	'doctorSlug' | 'name' | 'professional' | 'images' | 'rating' | 'reviewCount'
+>;
+
+/**
+ * Wave 4.0 · the addresses the patient's pages lead to (screens 50–54), resolved and in the page's language by the screen
+ * (a module knows no route): the list's tabs, an appointment and what it opens, the rating's form, and the rest of the
+ * site the appointment points at.
+ */
+export type AppointmentsLinks = {
+	/** `/appointments` (Επερχόμενα) or `/appointments?tab=history` (Ιστορικό). */
+	list: (tab: 'upcoming' | 'history') => string;
+	appointment: (appointmentId: string) => string;
+	/** One of the screens an appointment opens (D-W4-20): `time`, `for-whom`, `note`, `cancel` … */
+	step: (
+		appointmentId: string,
+		step: 'time' | 'for-whom' | 'relative' | 'note' | 'cancel'
+	) => string;
+	/** Screen 54, the email's own address (`/ratings/<invitationId>`). */
+	rating: (invitationId: string) => string;
+	/** The doctor's profile (the card's block, «Κλείστε ξανά ραντεβού»). */
+	doctor: (slug: string) => string;
+	/** «Αναζήτηση γιατρών» under an empty «Επερχόμενα». */
+	search: string;
+	help: string;
+};
+
+/** Who reads the patient's pages, as the session tells it (the page's server knows nobody, U-80.1 Ε6). */
+export type AppointmentsViewer = 'waiting' | 'guest' | 'member' | 'failed';

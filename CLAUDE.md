@@ -118,7 +118,7 @@ Rules:
 - Create or resume the run archive with `bun run claude:pipeline -- start team-agents --slug <slug> --title "<title>"`.
 - The main Claude session is the team lead.
 - Teammates use the local `.claude/agents/*.md` definitions and their configured models/tools.
-- Use 3-5 active teammates by default.
+- Use at most one active teammate per project.
 - Avoid parallel edits to the same file/module; one writer owns a file/module at a time.
 - Use Agent Teams only when direct teammate communication and shared task coordination are worth the overhead.
 - If Agent Teams are unavailable, fall back to `/pipeline-subagents` only after making that limitation explicit.

@@ -64,7 +64,15 @@ export const bookingPatientSample: BookingPatientFacts = {
 	lastName: 'Παππά',
 	phoneVerified: true,
 	phoneMasked: '+30 69•• ••• 412',
-	relatives: [{ relativeId: 'rel-1', firstName: 'Πέτρος', lastName: 'Μάρκου' }]
+	relatives: [
+		{
+			relativeId: 'rel-1',
+			firstName: 'Πέτρος',
+			lastName: 'Μάρκου',
+			relationship: 'CHILD',
+			gender: 'MALE'
+		}
+	]
 };
 
 export const bookingReadinessSample: BookingReadinessFacts = {

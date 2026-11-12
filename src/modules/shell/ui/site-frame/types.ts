@@ -14,7 +14,7 @@ export type LocalizedHref = (path: string) => ResolvedPathname;
  */
 export type AccountEntry =
 	| {
-			key: 'sign-in' | 'messages' | 'favorites' | 'help' | 'doctor';
+			key: 'sign-in' | 'messages' | 'appointments' | 'favorites' | 'relatives' | 'help' | 'doctor';
 			kind: 'link';
 			label: string;
 			description?: string;

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages.js';
+	import { officeFloorValue } from '$shared/lib/office';
 	import { Stepper } from '$shared/ui/molecules/stepper';
 	import { TextField } from '$shared/ui/molecules/text-field';
 	import {
@@ -34,11 +35,12 @@
 	// The server refused this number (W8-Σ1): its field says so until it changes.
 	let phoneRefused = $state(false);
 
-	/** The floor in the profile's words (`doctor.detail.office.floor*`): «Υπόγειο», «Ισόγειο», «3ος». */
+	/**
+	 * The floor in the profile's words, by the ONE rule of the site (review w4-w0 R1 MINOR-2, the application's
+	 * `floorValue` of its office step): «Υπόγειο», «Ισόγειο», «3ος».
+	 */
 	function floorWords(floor: number): string {
-		if (floor < 0) return m.doctor_detail_office_floor_basement({}, options);
-		if (floor === 0) return m.doctor_detail_office_floor_ground({}, options);
-		return m.doctor_detail_office_floor_level({ floor }, options);
+		return officeFloorValue(floor, props.locale) ?? '';
 	}
 
 	/** A new floor; the ground floor lets the elevator go, which means nothing there (`doctor.js`, record §6.8). */

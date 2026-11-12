@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, render, screen, waitFor, within } from '@testing-library/svelte';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import type { Component } from 'svelte';
 import { goto, replaceState } from '$app/navigation';
@@ -518,5 +518,36 @@ describe('screen 30 · «Επιβεβαίωση ραντεβού» (record §3.2
 		first.unmount();
 		draw({ draft });
 		expect(screen.getByLabelText('Σημείωση για τον γιατρό (προαιρετικό)')).toHaveValue('Μένει');
+	});
+});
+
+describe('🔴 D-W4-68 · D-W4-74 (card w4-w9): the booking’s card wears the appointment screens’ own doctor photo', () => {
+	it('screen 30: the photo in the shared `Avatar` at the card’s sizes (80, 96 from 744) — one that does not load gives way to the silhouette, never a broken image nor its `alt`', async () => {
+		draw();
+		const card = await screen.findByTestId('booking-card');
+		const photo = card.querySelector('[data-slot="avatar"]') as HTMLElement;
+		expect(photo).toHaveClass(
+			'size-checkout-photo',
+			'rounded-sm',
+			'tablet:size-avatar-2xl',
+			'tablet:rounded-md'
+		);
+		// The card's own size wins over the `Avatar`'s default, and the corner is the box's (never the avatar's circle).
+		expect(photo).not.toHaveClass('size-avatar-md', 'rounded-full');
+		const image = photo.querySelector('img') as HTMLImageElement;
+		expect(image).toHaveAttribute('src', 'https://cdn.test/p.jpg');
+		expect(image).toHaveAttribute('alt', '');
+		await fireEvent.error(image);
+		expect(card.querySelector('img')).toBeNull();
+		expect(photo.querySelector('[data-slot="media-placeholder"]')).toBeInTheDocument();
+	});
+
+	it('(negative) a doctor without a photo: the silhouette at once, no image asked', async () => {
+		draw({ review: reviewProps({ doctor: { ...bookingDoctorSample, images: [] } }) });
+		const card = await screen.findByTestId('booking-card');
+		expect(card.querySelector('img')).toBeNull();
+		expect(
+			card.querySelector('[data-slot="avatar"] [data-slot="media-placeholder"]')
+		).toBeInTheDocument();
 	});
 });

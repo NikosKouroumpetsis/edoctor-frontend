@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+	clampTextLength,
 	foldSearchText,
 	highlightSearch,
 	matchesSearch,
@@ -66,6 +67,22 @@ describe('withDoctorTitle (U-99.1)', () => {
 		expect(withDoctorTitle('Drakos Nikos')).toBe('Dr. Drakos Nikos');
 		expect(withDoctorTitle('Δρόσος Νίκος')).toBe('Dr. Δρόσος Νίκος');
 		expect(withDoctorTitle('   ')).toBe('');
+	});
+});
+
+describe('clampTextLength (D-W4-36.8: the server counts UTF-16 code units)', () => {
+	it('keeps a text within the bound as it is; cuts a longer one to the bound in code units', () => {
+		expect(clampTextLength('Πονάει το γόνατο', 500)).toBe('Πονάει το γόνατο');
+		expect(clampTextLength('α'.repeat(10_000), 500)).toHaveLength(500);
+		expect(clampTextLength('αβγ', 0)).toBe('');
+	});
+
+	it('🔴 (negative) an emoji counts as two, as the server counts it, and is never split in half', () => {
+		const emoji = '😀'.repeat(300);
+		expect(clampTextLength(emoji, 500)).toBe('😀'.repeat(250));
+		const odd = clampTextLength(`a${'😀'.repeat(300)}`, 500);
+		expect(odd).toHaveLength(499);
+		expect(odd.endsWith('😀')).toBe(true);
 	});
 });
 

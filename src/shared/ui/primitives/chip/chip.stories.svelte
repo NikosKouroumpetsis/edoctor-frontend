@@ -2,8 +2,8 @@
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { Chip } from '$shared/ui/primitives/chip';
 
-	const sizes = ['sm', 'md'] as const;
-	const variants = ['filled', 'tinted', 'outline'] as const;
+	const sizes = ['sm', 'md', 'tab'] as const;
+	const variants = ['filled', 'tinted', 'outline', 'contrast'] as const;
 	const filters = ['Καρδιολόγος', 'Παιδίατρος', 'Δερματολόγος', 'Ορθοπαιδικός'] as const;
 
 	// The application's meta (`atoms/chip`).
@@ -74,6 +74,24 @@
 >
 	{#snippet template(args)}
 		<Chip {...args} />
+	{/snippet}
+</Story>
+
+<!-- D-W4-28: screen 50's two tabs as links, the chosen one filled dark (`.a-chip.on`), no colour under the pointer (U-100);
+     D-W4-66: in a tab's measure (`size="tab"`, a 36 pill with 14 words). -->
+<Story name="Contrast Tabs">
+	{#snippet template()}
+		<div class="flex flex-row gap-2">
+			<Chip
+				label="Επερχόμενα"
+				href="#upcoming"
+				variant="contrast"
+				size="tab"
+				selected
+				hover={false}
+			/>
+			<Chip label="Ιστορικό" href="#history" variant="contrast" size="tab" hover={false} />
+		</div>
 	{/snippet}
 </Story>
 

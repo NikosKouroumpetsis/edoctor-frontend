@@ -177,7 +177,8 @@ describe('SiteFrame (eDoctor frame on the generic shell)', () => {
 
 	// Rewrites «U-26.1/U-16.3/U-20: the capsule's three tabs … «Προφίλ» opens the account menu» and «U-19.1: a guest's
 	// «Προφίλ» opens from below the SAME four entries»: U-81.1 / U-82.3 end the sheet of a menu, for a guest too.
-	it('U-81.2 / U-82.3: κάψουλα 4 καρτελών, κανένα φύλλο-μενού — four links, each a page; «Αγαπημένα» goes to its page, no sign-in', async () => {
+	// Rewrites «U-81.2 / U-82.3: κάψουλα 4 καρτελών»: U-134.6 (wave 4.0) adds «Ραντεβού», third.
+	it('U-81.2 / U-134.6: κάψουλα 5 καρτελών, κανένα φύλλο-μενού — five links, each a page; «Αγαπημένα» goes to its page, no sign-in', async () => {
 		renderFrame();
 		const bar = capsule();
 		expect(bar).toHaveClass('tablet:hidden');
@@ -186,14 +187,32 @@ describe('SiteFrame (eDoctor frame on the generic shell)', () => {
 		expect(tabs.map((tab) => [tab.textContent?.trim(), tab.getAttribute('href')])).toEqual([
 			['Εξερευνήστε', '/'],
 			['Αγαπημένα', '/favorites'],
+			['Ραντεβού', '/appointments'],
 			['Μηνύματα', '/messages'],
 			['Προφίλ', '/profile']
 		]);
 		expect(tabs[0]).toHaveAttribute('aria-current', 'page');
 		expect(within(bar).queryByRole('button')).not.toBeInTheDocument();
 		expect(document.querySelector('[data-testid="account-sheet"]')).toBeNull();
-		await userEvent.setup().click(tabs[3]);
+		await userEvent.setup().click(tabs[4]);
 		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+	});
+
+	it('🔴 U-134.6 / D-W4-55 (wave 4.0): «Τα ραντεβού μου» has the capsule with «Ραντεβού» current and no footer; an appointment is pushed over the tabs', () => {
+		visit('/appointments');
+		const list = renderFrame();
+		expect(within(capsule()).getByRole('link', { name: 'Ραντεβού' })).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+		expect(footer()).toBeNull();
+		list.unmount();
+
+		visit('/en/appointments/0193a1b2-7c3d-7e4f-8a9b-0c1d2e3f4a5b/cancel');
+		renderFrame();
+		expect(document.querySelector('[data-slot="bottom-nav"]')).toBeNull();
+		expect(footer()).toBeNull();
+		expect(screen.getByRole('banner')).toBeInTheDocument();
 	});
 
 	it('U-81.2 (negative): the source of the frame no longer draws a sheet of a menu', () => {
@@ -229,16 +248,24 @@ describe('SiteFrame (eDoctor frame on the generic shell)', () => {
 		const items = within(menu).getAllByRole('menuitem');
 		expect(items.map((item) => item.textContent?.replace(/\s+/gu, ' ').trim())).toEqual([
 			'Μηνύματα',
+			'Τα ραντεβού μου',
 			'Αγαπημένα',
+			'Οι συγγενείς μου',
 			'Ρυθμίσεις',
 			'Κέντρο βοήθειας',
 			'Είστε γιατρός; Γίνετε μέλος και δεχτείτε ραντεβού online.',
 			'Αποσύνδεση'
 		]);
 		expect(items[0]).toHaveAttribute('href', '/messages');
-		expect(items[1]).toHaveAttribute('href', '/favorites');
+		// U-134.6 / P-W4 Σ-13 (wave 4.0): «Τα ραντεβού μου» bold beside «Μηνύματα»; «Οι συγγενείς μου» under the rule.
+		expect(items[1]).toHaveAttribute('href', '/appointments');
+		expect(items[1]).toHaveClass('font-semibold');
+		expect(items[2]).toHaveAttribute('href', '/favorites');
+		expect(items[3]).toHaveAttribute('href', '/profile/relatives');
+		expect(items[3]).not.toHaveClass('font-semibold');
 		expect(items[0]).toHaveClass('font-semibold');
-		await user.click(items[5]);
+		expect(menu.querySelectorAll('[data-slot="dropdown-menu-separator"]')).toHaveLength(3);
+		await user.click(items[7]);
 		expect(signOut).toHaveBeenCalledTimes(1);
 	});
 

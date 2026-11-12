@@ -9,6 +9,7 @@
 <!-- Tests only: what a card does — asks for the sign-in, and goes on after it. -->
 <p data-testid="status">{session.status}</p>
 <p data-testid="forgotten">{session.forgotten}</p>
+<p data-testid="expired">{String(session.expired)}</p>
 <p data-testid="sign-out-failures">{session.signOutFailures}</p>
 <p data-testid="patient-profile">{String(session.member?.hasPatientProfile)}</p>
 <button

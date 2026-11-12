@@ -27,6 +27,18 @@ export function countCodePoints(value: string): number {
 	return [...value].length;
 }
 
+/**
+ * 🔴 D-W4-36.8: a text cut to a bound the server counts in UTF-16 code units (its Joi `.max`, `value.length`; the
+ * application's `.slice`), so the page never sends what the server refuses — but never through the middle of an emoji:
+ * a pair the bound would split leaves whole. A text within the bound is returned as it is.
+ */
+export function clampTextLength(value: string, max: number): string {
+	if (value.length <= max) return value;
+	const cut = value.slice(0, Math.max(0, max));
+	const last = cut.charCodeAt(cut.length - 1);
+	return last >= 0xd800 && last <= 0xdbff ? cut.slice(0, -1) : cut;
+}
+
 /** The folded words of a search (`foldSearchText`, split on white space, empty ones dropped). */
 export function searchWords(query: string | null | undefined): string[] {
 	return foldSearchText(query ?? '')

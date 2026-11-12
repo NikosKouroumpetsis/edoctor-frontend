@@ -39,6 +39,7 @@
 		size = 'default',
 		disabled = false,
 		maxlength,
+		autocomplete = 'tel-national',
 		id,
 		inputTestId,
 		class: className
@@ -62,6 +63,11 @@
 		disabled?: boolean;
 		/** U-65.6: the most characters the number takes (the caller's limit, the server's); none by default. */
 		maxlength?: number;
+		/**
+		 * What the browser may offer and keep for the number: the reader's own mobile by default; `off` for somebody
+		 * else's (a relative's — the holder's own number is never offered for them, security review of wave 4.0, NIT-1).
+		 */
+		autocomplete?: 'tel-national' | 'off';
 		id?: string;
 		inputTestId?: string;
 		class?: string;
@@ -140,7 +146,7 @@
 				id={inputId}
 				type="tel"
 				inputmode="tel"
-				autocomplete="tel-national"
+				{autocomplete}
 				{disabled}
 				{maxlength}
 				value={currentNumber}

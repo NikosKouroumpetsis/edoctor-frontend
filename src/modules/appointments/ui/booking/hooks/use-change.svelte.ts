@@ -1,11 +1,12 @@
 import { untrack } from 'svelte';
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
+import { isPlainClick } from '$shared/lib/navigation';
 import { getSessionOptional } from '$shared/state/session';
 import { getToastsOptional } from '$shared/ui/molecules/toast';
 import { bookingPath, hintsOf, type BookingStep } from '$modules/appointments/lib/booking';
 import { useBookingEntry } from './use-entry.svelte';
-import { isPlainClick, useBookingNavigation } from './use-navigation.svelte';
+import { useBookingNavigation } from './use-navigation.svelte';
 import type { BookingChangeProps } from '../types';
 
 /**

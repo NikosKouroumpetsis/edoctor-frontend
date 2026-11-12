@@ -8,7 +8,7 @@ import {
 	LETTERS_ONLY_PATTERN,
 	Validators
 } from '$shared/lib/form';
-import { projectRoot } from './source-scan';
+import { bodyAfter, projectRoot } from './source-scan';
 
 /**
  * 🔴 U-121.2 / U-121.3: the rules the client checks before a relative is written are the server's own, read where they
@@ -41,19 +41,6 @@ function between(text: string, start: string, end: string): string {
 	const from = text.indexOf(start);
 	const to = from < 0 ? -1 : text.indexOf(end, from + start.length);
 	return from < 0 || to < 0 ? '' : text.slice(from, to);
-}
-
-/** The body of the block that opens right after `head`, braces matched (empty when `head` is gone). */
-function bodyAfter(text: string, head: string): string {
-	const at = text.indexOf(head);
-	if (at < 0) return '';
-	const open = text.indexOf('{', at + head.length);
-	let depth = 0;
-	for (let index = open; index >= 0 && index < text.length; index += 1) {
-		if (text[index] === '{') depth += 1;
-		if (text[index] === '}' && --depth === 0) return text.slice(open + 1, index);
-	}
-	return '';
 }
 
 /** A body's statements, its white space folded (so a re-indent is no change, a new step is). */

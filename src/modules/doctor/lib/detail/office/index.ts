@@ -1,4 +1,5 @@
 import { m } from '$paraglide/messages.js';
+import { officeDialNumber } from '$shared/lib/office';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type { DoctorOfficeAvailabilityFacts } from '$modules/doctor/api/availability';
 import type {
@@ -7,12 +8,7 @@ import type {
 	DoctorProfile
 } from '$modules/doctor/api/profile';
 import { buildDoctorLocation } from '../build-content';
-import {
-	availabilitySlotSummaryLabel,
-	emphasizedSegments,
-	officeDialNumber,
-	officeTabLabel
-} from '../labels';
+import { availabilitySlotSummaryLabel, emphasizedSegments, officeTabLabel } from '../labels';
 import type {
 	DoctorAvailabilityElsewhere,
 	DoctorAvailabilityOfficeTab,

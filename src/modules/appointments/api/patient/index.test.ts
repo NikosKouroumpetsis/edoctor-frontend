@@ -4,6 +4,7 @@ import { ApiError } from '$shared/lib/http';
 import {
 	bookingPatientQuery,
 	mapBookingPatient,
+	mapBookingRelative,
 	readBookingProfileFailure,
 	updateBookingPatientProfile
 } from '.';
@@ -32,7 +33,13 @@ describe('the person as the booking reads them (GET /patient/me)', () => {
 		const facts = mapBookingPatient(
 			view({
 				relatives: [
-					{ id: 'r-1', firstName: ' Πέτρος ', lastName: 'Μάρκου' },
+					{
+						id: 'r-1',
+						firstName: ' Πέτρος ',
+						lastName: 'Μάρκου',
+						relationship: 'CHILD',
+						gender: 'MALE'
+					},
 					{ id: 'r-2', firstName: '', lastName: 'Χωρίς' }
 				] as never
 			})
@@ -43,8 +50,29 @@ describe('the person as the booking reads them (GET /patient/me)', () => {
 			lastName: 'Παππά',
 			phoneVerified: true,
 			phoneMasked: '+30 69•• ••• 412',
-			relatives: [{ relativeId: 'r-1', firstName: 'Πέτρος', lastName: 'Μάρκου' }]
+			relatives: [
+				{
+					relativeId: 'r-1',
+					firstName: 'Πέτρος',
+					lastName: 'Μάρκου',
+					relationship: 'CHILD',
+					gender: 'MALE'
+				}
+			]
 		});
+	});
+
+	it('🔴 U-139.5 (negative): a relative without its relationship or gender — an old row, a number — reads empty, never a throw', () => {
+		const facts = mapBookingRelative({
+			id: 'r-1',
+			firstName: 'Άννα',
+			lastName: 'Παππά',
+			relationship: 7,
+			gender: undefined
+		} as never);
+		expect(facts).toEqual([
+			{ relativeId: 'r-1', firstName: 'Άννα', lastName: 'Παππά', relationship: '', gender: '' }
+		]);
 	});
 
 	it('(negative) a session without a patient profile is `null`; a blank name is none; an unmasked number never stays (D-47)', () => {

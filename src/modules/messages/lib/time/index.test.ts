@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { conversationTimeLabel, messageClock, messageDayLabel } from '.';
+import {
+	conversationCopyName,
+	conversationTimeLabel,
+	messageClock,
+	messageDay,
+	messageDayLabel
+} from '.';
 
 const NOW = Date.UTC(2026, 10, 3, 16, 40); // Tue 3 Nov 2026, 18:40 in Athens
 const at = (month: number, day: number, hour: number, minute = 0) =>
@@ -30,5 +36,13 @@ describe('the messages’ times (U-84 Π1, Π2)', () => {
 		expect(messageDayLabel(at(11, 2, 12), NOW, 'el')).toBe('Χθες');
 		expect(messageDayLabel(at(10, 28, 12), NOW, 'el')).toMatch(/^Τετάρτη 28 Οκτωβρίου$/u);
 		expect(messageDayLabel(Date.UTC(2025, 9, 28, 12), NOW, 'el')).toContain('2025');
+	});
+
+	it('U-84.5: the copy is named by the day it is taken, on the platform’s calendar — a date, never a person', () => {
+		const justAfter = Date.UTC(2026, 10, 2, 22, 1); // 00:01 on the 3rd in Athens
+		expect(conversationCopyName(messageDay(justAfter))).toBe('edoctor-messages-2026-11-03.txt');
+		expect(conversationCopyName(messageDay(NOW))).toMatch(
+			/^edoctor-messages-\d{4}-\d{2}-\d{2}\.txt$/u
+		);
 	});
 });

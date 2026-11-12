@@ -12,7 +12,7 @@
 		bookingResendDeadline,
 		maskBookingMobile
 	} from '$modules/appointments/lib/booking';
-	import ChangeFrame from '../components/change-frame.svelte';
+	import { ChangeFrame } from '$modules/appointments/ui/change-screen';
 	import { useBookingChange } from '../hooks/use-change.svelte';
 	import type { BookingMobileProps } from '../types';
 

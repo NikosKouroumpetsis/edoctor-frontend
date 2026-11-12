@@ -3,9 +3,7 @@
 	import { ErrorState } from '$shared/ui/molecules/error-state';
 	import { InlineNotice } from '$shared/ui/molecules/inline-notice';
 	import { Button } from '$shared/ui/primitives/button';
-	import FirstVisit from '../components/first-visit.svelte';
-	import NoteField from '../components/note-field.svelte';
-	import RoundLink from '../components/round-link.svelte';
+	import { FirstVisit, NoteField, RoundLink } from '$modules/appointments/ui/change-screen';
 	import SummaryCard from '../components/summary-card.svelte';
 	import { useBookingReview } from '../hooks/use-review.svelte';
 	import type { BookingReviewProps } from '../types';

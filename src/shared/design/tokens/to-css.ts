@@ -73,7 +73,8 @@ export function tokensToCss(): string {
 
 	for (const namespace of RESET_NAMESPACES) lines.push(`\t--${namespace}-*: initial;`);
 
-	for (const [name, role] of Object.entries(typography)) {
+	// The shared roles, then the web's own (D-W4-65: the capsule's `tab-label`).
+	for (const [name, role] of Object.entries({ ...typography, ...platform.typography })) {
 		lines.push(`\t--text-${name}: ${px(role.size)};`);
 		lines.push(`\t--text-${name}--line-height: ${role.lineHeight};`);
 		lines.push(`\t--text-${name}--font-weight: ${role.weight};`);

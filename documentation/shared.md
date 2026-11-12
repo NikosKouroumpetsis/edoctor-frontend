@@ -108,7 +108,9 @@ Wave 3 (the booking 30–31, the doctor's sign-up 33–42) adds, each generic an
   (one colour, `currentColor`); the Ionicons `swap-vertical-outline` and `bus-outline` (the office page's elevator and
   transport, extracted from the application's font by the task's tooling, as every glyph of `glyphs.ts`).
 - `lib/navigation`: `useSiteBack` (moved from the doctor module), `readHistoryDepth` / `HistoryDepthFlow` (how many steps
-  of a flow lie behind an entry of the history, also after a reload, from `history.state['sveltekit:states']`).
+  of a flow lie behind an entry of the history, also after a reload, from `history.state['sveltekit:states']`),
+  `isPlainClick` (a press the page may take over: the main button, no modifier, not already handled; moved from the
+  booking's `use-navigation`, review w4-w4 R1 NIT-1 — a rule of the click, no word of a feature's).
 - `lib/location`'s `resolveDeviceLocation({ highAccuracy })`, `lib/http`'s `httpSessionPatch`.
 - U-129 (each screen as its own prototype, through a variant): `TimeSlotGrid`'s `variant` (`solid`, the default, the
   profile's filled time; `outline`, the booking's: a 2 px `foreground` border on `muted`, its words `foreground` 600),
@@ -130,6 +132,53 @@ Wave 3 (the booking 30–31, the doctor's sign-up 33–42) adds, each generic an
   request's own moment) says the PAGE's language in `Accept-Language` — the address's (`/en/…` English, else Greek) in
   the browser, Paraglide's on the server — never the browser's own list. A call that mails a code names it in
   `?lang=` as well (`startAccess`, `resendAccessCode`, `initSetPassword`, `sendDoctorOnboardingEmailCode`).
+
+Wave 4.0 (the patient's appointments, screens 50–55) adds:
+
+- `templates/split-view` (`SplitView`, D-W4-52: the inbox's two columns made a template, the inbox its first reader):
+  below 950 the `list` snippet or what it opened (`open`), both always in the page; from 950 side by side, each
+  scrolling on its own under the bar (`h-split`), the list `widths="wide"` 420 / 460 (`grid-split`) or `"inbox"`
+  380 / 400 (`grid-inbox`); 🔴 `solo` (U-139.1) is one 640 column in the middle when nothing goes on the right;
+  optional `listLabel` / `paneLabel` make the columns regions; `bind:paneRef` is the right column's scrolling box — a
+  reader that scrolls in it is handed that box (the inbox's conversation, `scroller`), never looks it up by the
+  template's own attributes.
+- `molecules/star-input` (`StarInput`, D-W4-27, U-138.2): stars to give a rating, 0–10 (one point a half star): a
+  press whole, the same star again half; ONE `role="slider"` a row, ← ↓ / → ↑ half a star, Home / End, its words
+  (`valueText`: «4,5 στα 5») and its name (`aria-label`, required) the caller's; each star a 48 box with the 32
+  glyph; no hover colour, no tap flash, no double-tap zoom (U-100). Its rules `toggleStar` and `starInputKey` are
+  exported, and stay its own: the rating's `lib/` holds no copy (a press is the component's).
+- `lib/save-file` (`saveFile`, moved from the messages with its one reader): a file handed to the browser by a `blob:`
+  address revoked at once, named by the caller by a date, never a person (the inbox's copy, the appointment's `.ics`).
+- `lib/office` (`officeFloorValue`, `officeDialNumber`, moved from `modules/doctor/lib/detail/labels`, P-W4 Σ-26): an
+  office's floor in words and its phone for `tel:`, for the doctor's profile, a patient's appointment and the sign-up's
+  office step — ONE set of words, the application's `doctor_detail_office_floor_*` (the older `doctor_office_floor_*`,
+  left without a reader, were taken out of the catalogs at the wave's close, D-W4-74). `officePhoneLabel` (🔴 D-W4-36.3): the phone as an appointment reads it, the
+  prototype's «210 321 0101» — the national groups joined by no-break spaces, only the digits kept; a number from
+  elsewhere whole with its «+»; what is dialled stays `officeDialNumber`'s.
+- `lib/text`'s `clampTextLength` (🔴 D-W4-36.8): a text cut to a bound the server counts in UTF-16 code units (its Joi
+  `.max`, the browser's `maxlength`), never through an emoji — the booking's and screen 52's note, screen 53's words;
+  the review's 2000 is checked in the same units.
+- `lib/navigation`'s `HistoryDepthFlow` takes the new `App.PageState` flows `appointment` and `relatives`.
+- `lib/ids` (`isUuid`, U-65.6): whether an address's segment is a server id (every id of the API is a UUID), read by
+  the closed lists of `/appointments/[...path]`, `/ratings/[invitationId]` and `/profile/[...path]` before a route
+  takes it.
+- `organisms/bottom-nav`: five tabs since U-134.6 — 384 (`w-tab-capsule-w`) and never closer than 8 to the sides
+  (`max-w-tab-capsule`), the words `narrow-phone:tracking-tight` below 360 (D-W4-53). 🔴 D-W4-65 / D-W4-73 (two live
+  checks): FIVE tabs are packed at every width — each tab as wide as its own word (never under the 48 target), the room
+  left shared out as equal gaps never under 4 (`justify-between gap-1`; five equal shares of the 384 are narrower than
+  «Εξερευνήστε» at 12) — and their words are 11 (`text-tab-label`, a role of the web alone, outside the shared scale)
+  only in a capsule narrower than its 384 (`capsule-narrow:`, a screen under 400 = `tab-capsule-fit`), 12 from it. Four
+  tabs keep equal shares at 12.
+- `primitives/chip`'s `size="tab"` (D-W4-66, screen 50's «Επερχόμενα / Ιστορικό»): 36 high, 14 (`min-h-chip-tab`), the
+  web's own third size beside the application's 32 and 40.
+- `templates/split-view`'s `solo` column is white to the screen's end from 950 too (`split:min-h-page`, D-W4-66).
+- `molecules/phone-field-inline`'s `autocomplete` (default `tel-national`): a relative's mobile says `off`, as every
+  other field of a person who is not the reader (security review of the web, NIT-1).
+- `lib/http`'s `sessionRequest` and `httpSessionFile` ask with `cache: 'no-store'` (🔴 D-W4-60): a personal answer is
+  never kept in the browser's HTTP cache past the sign-out.
+- `primitives/chip`'s `variant="contrast"` (D-W4-28, screen 50's `.a-chip.on`): the chosen pill filled dark
+  (`bg-foreground`), its words `text-card`; the inbox's chips keep `outline` (U-131.4), both held by
+  `tests/architecture/prototype-looks.test.ts`.
 
 Everything under `src/shared/ui` is generic (U-02.1, guarded by
 `tests/architecture/shared-ui-generic.test.ts`): words, hrefs and the locale

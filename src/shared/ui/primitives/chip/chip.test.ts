@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import { platform } from '$shared/design/tokens';
 import Chip from './chip.svelte';
 
 const pillOf = (button: HTMLElement) =>
@@ -77,6 +78,52 @@ describe('Chip', () => {
 		const idle = screen.getByRole('button', { name: 'Μετρητά' });
 		expect(pillOf(idle)).toHaveClass('border-border', 'bg-card');
 		expect(pillOf(idle)).not.toHaveClass('ring-1');
+	});
+
+	it('D-W4-28 (screen 50’s `.a-chip.on`): `contrast` is the chosen pill filled dark with light words; at rest it is every chip’s card', () => {
+		const chosen = render(Chip, {
+			props: { label: 'Επερχόμενα', href: '/appointments', selected: true, variant: 'contrast' }
+		});
+		const link = screen.getByRole('link', { name: 'Επερχόμενα' });
+		expect(link).toHaveAttribute('aria-current', 'page');
+		expect(pillOf(link)).toHaveClass('border-foreground', 'bg-foreground');
+		expect(pillOf(link)).not.toHaveClass('ring-1', 'bg-primary', 'bg-background');
+		expect(screen.getByText('Επερχόμενα')).toHaveClass('text-card');
+		chosen.unmount();
+
+		render(Chip, {
+			props: {
+				label: 'Ιστορικό',
+				href: '/appointments?tab=history',
+				variant: 'contrast',
+				hover: false
+			}
+		});
+		const idle = screen.getByRole('link', { name: 'Ιστορικό' });
+		expect(idle).not.toHaveAttribute('aria-current');
+		expect(pillOf(idle)).toHaveClass('border-border', 'bg-card');
+		expect(pillOf(idle)).not.toHaveClass('bg-foreground');
+		expect(screen.getByText('Ιστορικό')).toHaveClass('text-foreground');
+		// U-100: no colour under the pointer when the caller asks for none.
+		expect(pillOf(idle).className).not.toMatch(/hover:/u);
+	});
+
+	it('D-W4-66 (screen 50’s `.a-chip`, `appt.css:73`): `size="tab"` is a page’s tab — a 36 pill, 14 words — inside the same 48 target', () => {
+		render(Chip, {
+			props: {
+				label: 'Ιστορικό',
+				href: '/appointments?tab=history',
+				variant: 'contrast',
+				size: 'tab'
+			}
+		});
+		const link = screen.getByRole('link', { name: 'Ιστορικό' });
+		expect(link).toHaveClass('min-h-touch', 'min-w-touch');
+		expect(pillOf(link)).toHaveClass('min-h-chip-tab', 'px-4');
+		expect(pillOf(link)).not.toHaveClass('min-h-control-sm', 'min-h-control-xs');
+		expect(screen.getByText('Ιστορικό')).toHaveClass('text-body-sm', 'font-medium');
+		expect(screen.getByText('Ιστορικό')).not.toHaveClass('text-label-lg');
+		expect(platform.spacing['chip-tab']).toBe(36);
 	});
 
 	it('U-24.3 (NIT-3 of r1): the count sits on the label’s baseline, as the prototype’s `.fchip small` — never raised', () => {

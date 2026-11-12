@@ -15,6 +15,14 @@ export function messageDay(instant: number): string {
 	return zonedDay(instant, PLATFORM_TIME_ZONE);
 }
 
+/**
+ * U-84.5: the copy's fixed name, by the day it is taken (`messageDay`): a date, never a person. It stayed with the
+ * messages when the file's hand-over moved to `$shared/lib/save-file` (D-W4-30).
+ */
+export function conversationCopyName(day: string): string {
+	return `edoctor-messages-${day}.txt`;
+}
+
 /** How many days ago `instant` was, on the platform's calendar; only 0 to 6, `null` further. */
 function daysAgo(instant: number, now: number): number | null {
 	const day = messageDay(instant);

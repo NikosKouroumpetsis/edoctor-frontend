@@ -21,7 +21,11 @@
 		isDoctorReviewTopic
 	} from '$modules/doctor/api/reviews';
 	import type { DoctorReviewTopic } from '$modules/doctor/config/review-topics';
-	import { isDoctorReviewSortId } from '$modules/doctor/lib/detail';
+	import {
+		buildDoctorReviewHowBlocks,
+		buildDoctorReviewHowLinks,
+		isDoctorReviewSortId
+	} from '$modules/doctor/lib/detail';
 	import { DoctorReviewsState } from '../hooks/use-reviews.svelte';
 	import type { DoctorReviewLinks } from '../types';
 	import { Separator } from '$shared/ui/primitives/separator';
@@ -73,40 +77,15 @@
 	let sentinel = $state<HTMLElement | null>(null);
 	let stuck = $state(false);
 
-	const howBlocks = $derived([
-		{
-			heading: m.doctor_reviews_how_who_title({}, options),
-			text: m.doctor_reviews_how_who_body({}, options)
-		},
-		{
-			heading: m.doctor_reviews_how_check_title({}, options),
-			text: m.doctor_reviews_how_check_body({}, options)
-		},
-		{
-			heading: m.doctor_reviews_how_score_title({}, options),
-			text: m.doctor_reviews_how_score_body({}, options)
-		},
-		{
-			heading: m.doctor_reviews_how_order_title({}, options),
-			text: m.doctor_reviews_how_order_body({}, options)
-		},
-		{
-			heading: m.doctor_reviews_how_choice_title({}, options),
-			text: m.doctor_reviews_how_choice_body({}, options)
-		}
-	]);
-	const howLinks = $derived([
-		{
-			label: m.doctor_reviews_how_help({}, options),
-			href: links.helpHref,
-			testId: 'doctor-reviews-how-help'
-		},
-		{
-			label: m.doctor_reviews_how_policy({}, options),
-			href: links.policyHref,
-			testId: 'doctor-reviews-how-policy'
-		}
-	]);
+	// D-W4-24: the words of «Πώς λειτουργούν οι κριτικές» are the doctor lib's, read here and by screen 54's form.
+	const howBlocks = $derived(buildDoctorReviewHowBlocks(locale));
+	const howLinks = $derived(
+		buildDoctorReviewHowLinks(locale, links).map((link) => ({
+			label: link.label,
+			href: link.href,
+			testId: `doctor-reviews-how-${link.id}`
+		}))
+	);
 
 	// U-66.1 Π9: the next page as the reader nears the end, 2 breathing cards in its place. A page that leaves the end
 	// still in reach asks the next: the observer starts again with every new card.

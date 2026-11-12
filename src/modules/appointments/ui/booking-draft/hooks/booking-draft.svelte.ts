@@ -32,7 +32,7 @@ export class BookingDraft {
 	pendingVisitor = $state<string | null>(null);
 	/** Ε2: «Ναι» preselected. */
 	firstVisit = $state<'yes' | 'no'>('yes');
-	/** ≤ 500 code points (the page clamps it); words of health maybe, so only here. */
+	/** ≤ 500 UTF-16 code units (the page clamps it, D-W4-36.8); words of health maybe, so only here. */
 	note = $state('');
 	/** The mobile a code was sent to, ONLY as its mask («+30 69•• ••• 412»), for «Στείλαμε … στο». */
 	phoneDestination = $state<string | null>(null);

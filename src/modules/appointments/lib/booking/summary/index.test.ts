@@ -133,10 +133,38 @@ describe('the card of screen 30 (record §3.2)', () => {
 		expect(buildBookingCard({ ...base, slotState: 'waiting' }).rows[0].lines).toEqual([]);
 	});
 
-	it('a relative is named; (negative) one the list cannot name keeps its row EMPTY with its «Αλλαγή» — never «Για μένα» (R1 MINOR-4 β, the application’s)', () => {
+	it('a relative is named with the word of their relationship and gender (🔴 U-139.5, P-W4 Σ-15); (negative) one the list cannot name keeps its row EMPTY with its «Αλλαγή» — never «Για μένα» (R1 MINOR-4 β, the application’s)', () => {
 		expect(
 			row(
 				buildBookingCard({ ...base, visitor: { kind: 'relative', relativeId: 'rel-1' } }),
+				'visitor'
+			)?.value
+		).toBe('Πέτρος Μάρκου (γιος)');
+		const neutral = {
+			...bookingPatientSample,
+			relatives: [{ ...bookingPatientSample.relatives[0], gender: 'NON_BINARY' }]
+		};
+		expect(
+			row(
+				buildBookingCard({
+					...base,
+					patient: neutral,
+					visitor: { kind: 'relative', relativeId: 'rel-1' }
+				}),
+				'visitor'
+			)?.value
+		).toBe('Πέτρος Μάρκου (παιδί)');
+		const unnamed = {
+			...bookingPatientSample,
+			relatives: [{ ...bookingPatientSample.relatives[0], relationship: '' }]
+		};
+		expect(
+			row(
+				buildBookingCard({
+					...base,
+					patient: unnamed,
+					visitor: { kind: 'relative', relativeId: 'rel-1' }
+				}),
 				'visitor'
 			)?.value
 		).toBe('Πέτρος Μάρκου');
@@ -190,6 +218,35 @@ describe('the card of screen 30 (record §3.2)', () => {
 		});
 		expect(row(card, 'note')?.value).toBe('Πόνος <b>');
 		expect(card.rows.every((entry) => entry.action === null)).toBe(true);
+	});
+
+	it('🔴 U-139.5 · screen 31 (D-06): the relative as the appointment froze them, with the word of their frozen relationship and gender — never today’s list', () => {
+		const snapshot = {
+			visitor: { kind: 'relative' as const, name: 'Άννα Παππά' },
+			service: null,
+			totalAmount: null
+		};
+		const card = buildBookingCard({
+			...base,
+			visitor: { kind: 'relative', relativeId: 'rel-1' },
+			readOnly: {
+				confirmed: true,
+				note: null,
+				snapshot,
+				relative: { relationship: 'PARENT', gender: 'FEMALE' }
+			}
+		});
+		expect(row(card, 'visitor')?.value).toBe('Άννα Παππά (μητέρα)');
+		const old = buildBookingCard({
+			...base,
+			readOnly: {
+				confirmed: true,
+				note: null,
+				snapshot,
+				relative: { relationship: '', gender: '' }
+			}
+		});
+		expect(row(old, 'visitor')?.value).toBe('Άννα Παππά');
 	});
 
 	it('en: the words of the English page', () => {

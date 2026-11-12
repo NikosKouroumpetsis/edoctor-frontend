@@ -36,6 +36,7 @@
 		memory,
 		enabled,
 		waiting = false,
+		scroller = null,
 		onLeave
 	}: {
 		conversationId: string;
@@ -46,6 +47,11 @@
 		enabled: boolean;
 		/** The page does not know yet who reads it. */
 		waiting?: boolean;
+		/**
+		 * The box the conversation scrolls in from 950 (the page's `SplitView` `paneRef`, review w4-w0 R1 NIT-3): handed
+		 * over, never looked up by the template's own attributes.
+		 */
+		scroller?: HTMLElement | null;
 		/** The conversation went to the archive, or came out of it: back to the list. */
 		onLeave: () => void;
 	} = $props();
@@ -108,7 +114,8 @@
 		});
 	});
 
-	// Older messages when the top nears the screen; the one the reader was looking at stays where it was.
+	// Older messages when the top nears the screen; the one the reader was looking at stays where it was. From 950 the
+	// conversation scrolls in the `SplitView`'s right column (D-W4-52), below it the page.
 	let column = $state<HTMLElement | null>(null);
 	async function loadOlder() {
 		if (!thread.hasOlder || thread.loadingOlder) return;
@@ -117,7 +124,7 @@
 		await thread.loadOlder().catch(() => undefined);
 		await tick();
 		const moved = (anchor?.getBoundingClientRect().top ?? before) - before;
-		if (split.current) column?.closest('[data-inbox-scroll]')?.scrollBy(0, moved);
+		if (split.current) scroller?.scrollBy(0, moved);
 		else window.scrollBy(0, moved);
 	}
 	const nearTop = (node: HTMLElement) => {

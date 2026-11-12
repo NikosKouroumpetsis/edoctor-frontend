@@ -9,6 +9,7 @@
 	import { getSessionOptional } from '$shared/state/session';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { Button } from '$shared/ui/primitives/button';
+	import { SplitView } from '$shared/ui/templates/split-view';
 	import { getInboxMemoryOptional, useInboxMemory } from '$modules/messages/ui/inbox-memory';
 	import ListColumn from '../components/list-column.svelte';
 	import SettingsDialog from '../components/settings-dialog.svelte';
@@ -48,6 +49,8 @@
 	});
 
 	let settingsOpen = $state(false);
+	// The right column's scrolling box from 950, handed to the conversation (review w4-w0 R1 NIT-3).
+	let pane = $state<HTMLDivElement | null>(null);
 
 	// U-84 Π1: from 950 the newest conversation opens beside the list, in place of an empty side.
 	const OPEN_IN_PLACE = { replaceState: true, noScroll: true, keepFocus: true };
@@ -130,50 +133,36 @@
 	{:else if archive}
 		{@render column()}
 	{:else}
-		<div class="split:grid split:h-inbox split:grid-inbox">
-			<div
-				class={cn(
-					'min-w-0 split:overflow-y-auto split:overscroll-contain split:border-r split:border-border/60',
-					conversationId && 'hidden split:block'
-				)}
-			>
-				{@render column()}
-			</div>
-			<div
-				data-inbox-scroll
-				class={cn(
-					'min-w-0 split:min-h-0 split:overflow-y-auto split:overscroll-contain',
-					!conversationId && 'hidden split:block'
-				)}
-			>
-				{#if conversationId}
-					{#key conversationId}
-						<Thread
-							{conversationId}
-							{locale}
-							{links}
-							{memory}
-							enabled={isMember}
-							{waiting}
-							onLeave={leaveToList}
-						/>
-					{/key}
-				{:else}
-					<div
-						data-testid="messages-choose"
-						class="grid h-full place-items-center p-section text-center text-muted-foreground"
-					>
-						<div>
-							<Ionicon name="chatbubble-outline" class="mx-auto icon-xl" />
-							<h2 class="mt-4 text-title-sm text-foreground">
-								{m.messages_choose_title({}, options)}
-							</h2>
-							<p class="mt-1.5 text-body-md">{m.messages_choose_body({}, options)}</p>
-						</div>
+		<!-- D-W4-52: the template these two columns became, the inbox's 380 / 400 (no visible change). -->
+		<SplitView list={column} widths="inbox" open={Boolean(conversationId)} bind:paneRef={pane}>
+			{#if conversationId}
+				{#key conversationId}
+					<Thread
+						{conversationId}
+						{locale}
+						{links}
+						{memory}
+						enabled={isMember}
+						{waiting}
+						scroller={pane}
+						onLeave={leaveToList}
+					/>
+				{/key}
+			{:else}
+				<div
+					data-testid="messages-choose"
+					class="grid h-full place-items-center p-section text-center text-muted-foreground"
+				>
+					<div>
+						<Ionicon name="chatbubble-outline" class="mx-auto icon-xl" />
+						<h2 class="mt-4 text-title-sm text-foreground">
+							{m.messages_choose_title({}, options)}
+						</h2>
+						<p class="mt-1.5 text-body-md">{m.messages_choose_body({}, options)}</p>
 					</div>
-				{/if}
-			</div>
-		</div>
+				</div>
+			{/if}
+		</SplitView>
 	{/if}
 </main>
 

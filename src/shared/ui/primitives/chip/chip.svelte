@@ -2,9 +2,13 @@
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import type { IoniconName } from '$shared/ui/icons/ionicon';
 
-	export type ChipSize = 'sm' | 'md';
-	/** `outline` the results' filters (U-24.3, the prototype): the chosen pill dark-ringed 2 on the band, no fill. */
-	export type ChipVariant = 'filled' | 'tinted' | 'outline';
+	/** `tab` (wave 4.0, D-W4-66): a page's tab — screen 50's «Επερχόμενα / Ιστορικό», a 36 pill with 14 words (`appt.css:73`). */
+	export type ChipSize = 'sm' | 'md' | 'tab';
+	/**
+	 * `outline` the results' filters (U-24.3, the prototype): the chosen pill dark-ringed 2 on the band, no fill.
+	 * `contrast` (wave 4.0, D-W4-28, screen 50's `.a-chip.on`): the chosen pill filled dark, its words light.
+	 */
+	export type ChipVariant = 'filled' | 'tinted' | 'outline' | 'contrast';
 
 	// The drawn pill per variant: its idle and its active look (the ring is inset, so a choice never reflows the row).
 	// U-28.4 (Airbnb's): with a pointer, a chip not chosen darkens its border on hover; a chosen or disabled one does not
@@ -21,18 +25,24 @@
 		outline: {
 			idle: 'border-border bg-card transition-colors duration-standard ease-standard',
 			active: 'border-foreground bg-background ring-1 ring-foreground ring-inset'
+		},
+		contrast: {
+			idle: 'border-border bg-card transition-colors duration-standard ease-standard',
+			active: 'border-foreground bg-foreground'
 		}
 	};
 	// The active words and glyph per variant (the idle ones are always the foreground).
 	const activeTextClasses: Record<ChipVariant, string> = {
 		filled: 'text-primary-foreground',
 		tinted: 'text-primary-text',
-		outline: 'text-foreground'
+		outline: 'text-foreground',
+		contrast: 'text-card'
 	};
 	const activeIconClasses: Record<ChipVariant, string> = {
 		filled: 'text-primary',
 		tinted: 'text-primary',
-		outline: 'text-foreground'
+		outline: 'text-foreground',
+		contrast: 'text-card'
 	};
 	// 🔴 U-58.1 (`phoneVariant`): the chosen look per width zone, written whole for the theme's scanner — below 744 one
 	// variant (the application's outline on the mobile web), from 744 another (the web's tint). The idle look is one.
@@ -52,6 +62,11 @@
 			pill: 'max-tablet:border-foreground max-tablet:bg-background max-tablet:ring-1 max-tablet:ring-foreground max-tablet:ring-inset',
 			text: 'max-tablet:text-foreground',
 			icon: 'max-tablet:text-foreground'
+		},
+		contrast: {
+			pill: 'max-tablet:border-foreground max-tablet:bg-foreground',
+			text: 'max-tablet:text-card',
+			icon: 'max-tablet:text-card'
 		}
 	};
 	const tabletActive: Record<ChipVariant, ZonedLook> = {
@@ -69,20 +84,27 @@
 			pill: 'tablet:border-foreground tablet:bg-background tablet:ring-1 tablet:ring-foreground tablet:ring-inset',
 			text: 'tablet:text-foreground',
 			icon: 'tablet:text-foreground'
+		},
+		contrast: {
+			pill: 'tablet:border-foreground tablet:bg-foreground',
+			text: 'tablet:text-card',
+			icon: 'tablet:text-card'
 		}
 	};
 
-	// The button is the 48 touch box; the drawn pill (32 or 40) sits inside it and grows with its label.
+	// The button is the 48 touch box; the drawn pill (32, 40, a tab's 36) sits inside it and grows with its label.
 	const chipBox =
 		'group inline-flex min-h-touch min-w-touch shrink-0 items-center justify-center self-start rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50';
 
 	const pillSizes: Record<ChipSize, string> = {
 		sm: 'min-h-control-xs px-3',
-		md: 'min-h-control-sm px-4'
+		md: 'min-h-control-sm px-4',
+		tab: 'min-h-chip-tab px-4'
 	};
 	const labelSizes: Record<ChipSize, string> = {
 		sm: 'text-label-md',
-		md: 'text-label-lg'
+		md: 'text-label-lg',
+		tab: 'text-body-sm'
 	};
 
 	export type ChipProps = Omit<HTMLButtonAttributes, 'children'> & {
@@ -95,7 +117,10 @@
 		/** A trailing ✕ that marks the chip active; pressing the chip then calls `onRemove`. */
 		removable?: boolean;
 		onRemove?: () => void;
-		/** `filled` solid primary when active, `tinted` the primary tint, `outline` the 2 dark ring (U-24.3). */
+		/**
+		 * `filled` solid primary when active, `tinted` the primary tint, `outline` the 2 dark ring (U-24.3), `contrast` the
+		 * dark fill (D-W4-28).
+		 */
 		variant?: ChipVariant;
 		/** Below 744 the chosen look of another variant (U-58.1: the application's outline); `variant` from 744. */
 		phoneVariant?: ChipVariant;

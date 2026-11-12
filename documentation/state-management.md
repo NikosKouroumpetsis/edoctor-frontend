@@ -170,6 +170,24 @@ lastMethod }` for «Καλωσορίσατε και πάλι»; the tab keeps on
   drafts go with it. `Session.expire(request)`, a write refused with `401`: the page learns that it
   knows nobody, the personal reads go, the sign-in opens; the draft stays, so the same person finds it. A provider's redirect
   reloads the page, and memory with it: there the words are lost, and that is the rule, not a slip.
+- 🔴 D-W4-78 · `Session.expired` is `true` from that `expire` until the sign-in it opened closes (`completeSignIn`,
+  `cancelSignIn`) and falls at once with `forgotten` (a sign-out here or in another tab, another account). A page whose
+  FORM stands on a personal read (screens 52 / 53 on the appointment, screen 55 on the relative) keeps that read through
+  it with `useKeptThroughExpiry` (`$modules/appointments/ui/memory`): the form stays mounted under the sign-in with what
+  was typed, and for the same person after it until their own read is back. It is the ONE place that KEEPS by `expired`
+  (`tests/architecture/appointment-structure.test.ts`); its limits are tested one by one: a guest who opens the address
+  (nothing kept), a sign-out by hand or another account (gone at once), the sign-in closed (a guest's page), an account
+  with no patient, another address. A page that keeps its form mounted on its own (screen 54) needs none of it.
+- 🔴 U-153 · the browser's back/forward cache puts a page back exactly as it was left (`pageshow` with `persisted`), so a
+  page left with an ended session would come back with the form under its sign-in. The auth host (`auth/ui/host`) — the
+  ONE listener, beside the other tab's — leaves it as «×» does (`close` ⇒ `cancelSignIn`): a guest's page, the kept form
+  gone. Only while nobody is signed in: a page put back with no ended session, or with the same person already signed in
+  again, does not change. It is the one other read of `expired`, and only to end it (same guard).
+- U-153 · `AppointmentsMemory.takeFresh(id)` (`$modules/appointments/ui/memory`) is true ONCE per write (`remember`,
+  `rememberCanceled`): back on the appointment the page starts at its top, so the notice is in sight on a phone
+  (`useAppointmentsPages`). A save leaves through the history (`history.go`), and the router puts the entry's old scroll
+  back; `afterNavigate` runs after that (an effect runs before it and would be undone). A later return with nothing new
+  written keeps its place. No rune: nothing is drawn from the mark.
 - `InboxBadge` (`$shared/state/inbox-badge`, one per page tree, in context): the messages module's `unread-host` reads, the
   frame draws, and neither imports the other (the pattern of `Session`).
 - «Επικοινωνήστε με τον γιατρό» asks the server nothing to be drawn: only its press does (D-103). The state of the #18 lives at
@@ -221,6 +239,58 @@ lastMethod }` for «Καλωσορίσατε και πάλι»; the tab keeps on
   asked again for the same words (`staleTime: Infinity`, no focus, no reconnect) and leave the cache with the screen.
 - 🔴 D-W3-37: the overview's «Ξεκινήστε» starts a sign-up on a press, or after a sign-in this tab asked for — never from an
   address (`/login?do=doctor`, the session above).
+
+## The patient's appointments (wave 4.0, screens 50–53)
+
+- TanStack Query owns every read of `$modules/appointments/api`, each one `personalQueryMeta`: the list's infinite read
+  per tab, one appointment (`404` and `403` read alike: not found), and the doctors of the page — ONE public profile per
+  different doctor (`doctorPublicProfileQuery`, anonymous, but personal: which doctors a person sees is a fact of their
+  health, D-W4-29). They run for a member in the browser only (U-80.1 Ε6); the list is read where it shows (its own
+  address; from 950 beside an appointment once that one told its tab), never under an appointment below 950 (D-103).
+  From 950, once shown, it stays read on the tab it last showed while the next appointment is read (P-W4 §3.6), and a
+  list shown but not yet read is its wait (`useAppointmentsList`'s `waiting`).
+- These rules have ONE home in the module, `useAppointmentsPages` (`$modules/appointments/ui/list`, contract «Screens
+  compose; feature behavior … live in modules»): who reads, the appointment on the right (`useAppointmentDetail`) or
+  the rating's invitation and its visit, the list's tab, when the list is read (`listSeen`), 🔴 U-139.1 `paneEmpty`,
+  the page's memory's lifetime, the sign-in opened once for a guest of screen 54. The two screens
+  (`appointments/[...path]`, `ratings/[invitationId]`) call it once and only join the other modules to it (the doctors'
+  profiles, the contact of screen 18, «Η κριτική σας», the picker of «Αλλαγή ώρας»): no `$state` and no `$effect` in a
+  screen's page for a rule of the feature.
+- An appointment's tab is the appointment's own (`appointmentTabOf`: closed, or begun ⇒ «Ιστορικό»), never the
+  address's; until it is read the page keeps the tab it last showed (U-137.6: after a cancellation the list moves by
+  itself).
+- 🔴 D-W4-33: what was just saved on an appointment — the old hour, the new visitor, the note, the rating, the patient's
+  own cancellation — lives in `AppointmentsMemory` (`$modules/appointments/ui/memory`, one per page tree, in context,
+  set by the module's root host `BookingDraftHost`), never in the address (the browser keeps an address in its history,
+  its links and its referrers): said in green on its own appointment, gone once another opens, when the pages are left,
+  at a reload and at a sign-out or another account (`Session.forgotten`). The application keeps it in the route's
+  parameters (P-A4 Σ10): a difference of the platform, the same look. Screen 52's «Προσθήκη συγγενή» keeps there too the
+  relative just added (`choose` / `chosenFor`: an id, never a name), chosen on «Για ποιον…» of its appointment until
+  «Αποθήκευση» or «Άκυρο» (a save or a cancellation of that appointment lets it go, review w4-w5 R1 MINOR-2).
+- Screens 52 and 53 are real navigations (D-W3-31, never shallow): opened from the 51 one step on
+  (`page.state.appointment.depth` 1, 2 from «Θέλετε απλώς άλλη ώρα;» or «Προσθήκη συγγενή»); «‹», «Άκυρο» and a save go
+  back exactly those steps (`useAppointmentSteps`, once per screen), else replace the screen with its appointment. A
+  write's answer becomes the appointment's page at once (`storeAppointmentDetail`: under the sign-out's mark, every list
+  read again). 🔴 D-W4-37: a refusal never takes the patient back in silence — one that names nothing (a `403` / `404`
+  with no code, the `409` «changed concurrently», an unknown code) keeps the screen and what was chosen or written, with
+  «Η αλλαγή δεν αποθηκεύτηκε…» (D-W4-35) or the 53's «Η ακύρωση δεν ολοκληρώθηκε…»; a refusal with its code says its own
+  words; and every answer but the session reads the appointment again (`changeRefusalRereads`, the 53's `onReread`),
+  so the 51 never offers what was refused and a screen no longer allowed gives way to it by its own guard (the 53 to
+  its deadline's view when that is why). A relative deleted meanwhile keeps «Για ποιον…» and reads the relatives again.
+  What a FORM holds while open is the shared `createForm`'s (`$shared/lib/form`, the contract's «Form state»), its
+  fields connected with `form.field(name)` and its rules in `lib/`: screen 53's reason and words (`cancelFormRules`),
+  screen 52's note (`bookingNoteRule`), screen 54's five aspects and words (`ratingFormRules`, `ratingFormMessages`).
+  The bounds stay the lib's (500 / 2000 in UTF-16 units, no `<` `>` in a review): the field cuts a paste at its bound
+  before the form sees more (`clamp…`), the rule is the form's second lock, and what travels is still the lib's body
+  (`toCancelRequest`, `toNoteChangeRequest`, `toRatingSubmitRequest`). A choice that is no form — the hour the picker
+  staged, the person of «Για ποιον…» — is a rune of its screen. All of it goes with the screen.
+- Screen 54 (`/ratings/<invitationId>`) keeps its five values and its words in that form; one press sends once (a flag
+  set before the mutation's state catches up). A submit goes back to the visit the way the 52 / 53 do
+  (`useAppointmentSteps`: the steps opened, else the visit in the form's place), says «Η αξιολόγηση υποβλήθηκε.» from
+  the page's memory (`{ kind: 'rating' }`), writes the server's review under its `ratingId` (under the sign-out's mark)
+  and reads every appointment again — the visit now names its `ratingId` and no invitation. A `401` opens the sign-in
+  over the form and keeps the stars and the words. «Η κριτική σας» on the 51 is read by that `ratingId` only
+  (`ownReviewQuery`, personal).
 
 ## The session across tabs (wave 3, D-W3-37)
 

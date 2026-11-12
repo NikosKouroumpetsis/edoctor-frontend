@@ -218,6 +218,11 @@ async function readRefusal(response: Response): Promise<{ code?: string; message
 	}
 }
 
+// 🔴 D-W4-60 (security review of the web, wave 4.0, MINOR-1): what is asked with the cookies is personal — a relative's
+// ΑΜΚΑ, a note, which doctors a person sees — and is never written to the browser's HTTP cache, where it would outlive
+// the sign-out on a shared computer. Every session call says so itself, whatever the answer's own headers.
+const PERSONAL_CACHE: RequestCache = 'no-store';
+
 /**
  * 🔴 U-80.1 Ε6: the ONE way a request of the browser carries the API's cookies (`credentials: 'include'`), only for
  * the session and for what is personal (`httpSessionGet`, `Post`, `Put`, `Delete`, `File`); every public read stays
@@ -237,6 +242,7 @@ async function sessionRequest<T>(
 		response = await fetch(url, {
 			method,
 			credentials: 'include',
+			cache: PERSONAL_CACHE,
 			headers: {
 				Accept: 'application/json',
 				...requestLanguageHeaders(),
@@ -306,6 +312,7 @@ export async function httpSessionFile(path: string, signal?: AbortSignal): Promi
 		response = await fetch(url, {
 			method: 'GET',
 			credentials: 'include',
+			cache: PERSONAL_CACHE,
 			headers: requestLanguageHeaders(),
 			signal
 		});

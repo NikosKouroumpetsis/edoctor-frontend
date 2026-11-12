@@ -12,10 +12,15 @@ import type { AccountEntry, FrameHeader, FrameMessageOptions, LocalizedHref } fr
  */
 export const doctorOnboardingPath = '/doctor/onboarding';
 
+/** Wave 4.0 · screens 50 and 55 (D-W4-20, D-W4-51): «Τα ραντεβού μου» and «Οι συγγενείς μου», the application's words. */
+const appointmentsPath = '/appointments';
+const relativesPath = '/profile/relatives';
+
 /**
  * The account menu from 744 (U-81.3), Airbnb's. A guest's four (U-17.2, U-17.5, U-19.1): «Σύνδεση ή εγγραφή» (bold) ·
- * — · «Ρυθμίσεις» · «Κέντρο βοήθειας» · — · «Είστε γιατρός;» with its line. 🔴 U-80.1 Ε3: a member's has no «Λογαριασμός»:
- * «Μηνύματα» · «Αγαπημένα» (bold) · — · «Ρυθμίσεις» · «Κέντρο βοήθειας» · — · «Είστε γιατρός;» · — · «Αποσύνδεση».
+ * — · «Ρυθμίσεις» · «Κέντρο βοήθειας» · — · «Είστε γιατρός;» with its line. 🔴 U-80.1 Ε3: a member's has no «Λογαριασμός»;
+ * 🔴 U-134.6 + P-W4 Σ-13 (wave 4.0): «Μηνύματα» · «Τα ραντεβού μου» · «Αγαπημένα» (bold) · — · «Οι συγγενείς μου» ·
+ * «Ρυθμίσεις» · «Κέντρο βοήθειας» · — · «Είστε γιατρός;» · — · «Αποσύνδεση».
  */
 export function buildAccountEntries(
 	messageOptions: FrameMessageOptions,
@@ -28,7 +33,7 @@ export function buildAccountEntries(
 			key: 'settings',
 			kind: 'settings',
 			label: m.account_menu_settings({}, messageOptions),
-			separated: true
+			separated: !isMember
 		},
 		{ key: 'help', kind: 'link', label: m.nav_help({}, messageOptions), href: href('/help') },
 		{
@@ -62,11 +67,25 @@ export function buildAccountEntries(
 			...(hasUnread ? { dotLabel: m.account_menu_new_messages({}, messageOptions) } : {})
 		},
 		{
+			key: 'appointments',
+			kind: 'link',
+			label: m.account_menu_appointments({}, messageOptions),
+			href: href(appointmentsPath),
+			emphasis: true
+		},
+		{
 			key: 'favorites',
 			kind: 'link',
 			label: m.account_menu_favorites({}, messageOptions),
 			href: href('/favorites'),
 			emphasis: true
+		},
+		{
+			key: 'relatives',
+			kind: 'link',
+			label: m.account_menu_relatives({}, messageOptions),
+			href: href(relativesPath),
+			separated: true
 		},
 		...shared,
 		{
@@ -88,6 +107,15 @@ const exploreFlowPages = ['/', '/doctors'];
 const MESSAGES_PAGES = /^\/messages(?:\/[^/]+)?$/u;
 
 /**
+ * Wave 4.0 · screens 50–54 (D-W4-51): «Τα ραντεβού μου», an appointment and every screen it opens (`/appointments/…`), and
+ * the rating of a visit (`/ratings/<id>`), which shows beside the same list from 950 (P-W4 Σ-6).
+ */
+const APPOINTMENTS_PAGES = /^\/(?:appointments(?:\/.+)?|ratings\/.+)$/u;
+
+/** Wave 4.0 · screen 55: «Οι συγγενείς μου» (`/profile/relatives`) and the form it opens (`/profile/relatives/…`). */
+const RELATIVES_PAGES = /^\/profile\/relatives(?:\/.+)?$/u;
+
+/**
  * 🔴 MINOR-4 (r1, U-25.2): whether `basePath` (the path without the language) belongs to the search, so the capsule
  * marks «Εξερευνήστε» there: the home and the results — never a profile or any other page (U-26.1's rule).
  */
@@ -96,9 +124,10 @@ export function isExploreFlow(basePath: string): boolean {
 }
 
 /**
- * 🔴 U-81.2 / U-82.3: below 744 the web is the application, navigation too — the capsule's four tabs, the same for a
- * guest and a member, each its page: «Εξερευνήστε» the search (the home and its results, U-25.2), «Αγαπημένα», «Μηνύματα»
- * and «Προφίλ» (U-81.1: a page as the application's tab, no sheet of a menu).
+ * 🔴 U-81.2 / U-134.6: below 744 the web is the application, navigation too — the capsule's five tabs in the
+ * application's order (U-81.4), the same for a guest and a member, each its page: «Εξερευνήστε» the search (the home and
+ * its results, U-25.2), «Αγαπημένα», «Ραντεβού» (wave 4.0), «Μηνύματα» and «Προφίλ» (U-81.1: a page as the
+ * application's tab, no sheet of a menu; current on «Οι συγγενείς μου» too, the prototype's `rel.js:159`).
  */
 export function buildBottomNavItems(
 	messageOptions: FrameMessageOptions,
@@ -126,6 +155,14 @@ export function buildBottomNavItems(
 			current: path === '/favorites'
 		},
 		{
+			key: 'appointments',
+			label: m.tab_appointments({}, messageOptions),
+			icon: 'calendar-outline',
+			activeIcon: 'calendar',
+			href: href(appointmentsPath),
+			current: APPOINTMENTS_PAGES.test(path)
+		},
+		{
 			key: 'messages',
 			label: m.tab_messages({}, messageOptions),
 			icon: 'chatbubble-outline',
@@ -140,7 +177,7 @@ export function buildBottomNavItems(
 			icon: 'person-outline',
 			activeIcon: 'person',
 			href: href('/profile'),
-			current: path === '/profile'
+			current: path === '/profile' || RELATIVES_PAGES.test(path)
 		}
 	];
 }
@@ -222,21 +259,25 @@ export function frameHeaderOf(basePath: string, status = 200): FrameHeader {
 	return 'site';
 }
 
+/** The pages that end without the footer at every width; an error page under them has it again (U-61.1). */
+const FOOTERLESS_PAGES = [BOOKING_PAGES, ONBOARDING_PAGES, APPOINTMENTS_PAGES, RELATIVES_PAGES];
+
 /**
  * Whether the frame draws its footer on `basePath` (the path without the language): every page but the results,
  * which end their list with the thin legal line instead («© 2026 eDoctor · Απόρρητο · Όροι · Cookies · 🌐»).
  */
 export function showsSiteFooter(basePath: string, status = 200): boolean {
 	const path = trimmed(basePath);
-	// U-61.1: an error page under the booking or the sign-up keeps the footer (the site's frame, MINOR-1 of w3-w1).
-	if (status >= 400 && (BOOKING_PAGES.test(path) || ONBOARDING_PAGES.test(path))) return true;
+	// U-61.1: an error page under the booking, the sign-up or the patient's pages keeps the footer (the site's frame,
+	// MINOR-1 of w3-w1).
+	if (status >= 400 && FOOTERLESS_PAGES.some((pages) => pages.test(path))) return true;
 	// U-84 Π1: the messages end without it at every width (Airbnb). Wave 3: neither the booking nor the sign-up has it
-	// (their bar is pinned to the bottom, the application's below 744 and Airbnb's from it).
+	// (their bar is pinned to the bottom, the application's below 744 and Airbnb's from it). 🔴 D-W4-55 (wave 4.0): nor
+	// the appointments, the rating or the relatives — from 950 their two columns fill the screen, as the messages'.
 	return (
 		!pagesWithoutFooter.includes(path) &&
 		!MESSAGES_PAGES.test(path) &&
-		!BOOKING_PAGES.test(path) &&
-		!ONBOARDING_PAGES.test(path)
+		!FOOTERLESS_PAGES.some((pages) => pages.test(path))
 	);
 }
 
@@ -254,6 +295,10 @@ export function showsBottomNav(basePath: string, status = 200): boolean {
 	if (/^\/messages\/[^/]+$/u.test(path)) return false;
 	// 🔴 U-81.2 (wave 3): the booking and the sign-up are pushed over the tabs, as in the application: their own bar.
 	if (BOOKING_PAGES.test(path) || ONBOARDING_PAGES.test(path)) return false;
+	// 🔴 U-81.2 (wave 4.0, P-W4 §3.3): an appointment and what it opens, the rating and a relative's form are pushed over
+	// the tabs (the prototype's `body.pushed`); «Τα ραντεβού μου» and «Οι συγγενείς μου» keep them (P-W4 Σ-25).
+	if (APPOINTMENTS_PAGES.test(path) && path !== appointmentsPath) return false;
+	if (RELATIVES_PAGES.test(path) && path !== relativesPath) return false;
 	// U-77, U-73.1: a doctor's articles and page are over the tabs too, as the profile (the application has none there).
 	return !/^\/doctors\/[^/]+(?:\/details\/[^/]+|\/articles|\/about)?$/u.test(path);
 }

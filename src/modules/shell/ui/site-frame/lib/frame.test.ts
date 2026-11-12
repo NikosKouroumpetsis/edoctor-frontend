@@ -167,14 +167,20 @@ describe('the frame’s rules per page', () => {
 		expect(showsSiteFooter('/profile')).toBe(true);
 	});
 
-	it('U-81.2 / U-82.3: κάψουλα 4 καρτελών, κανένα φύλλο-μενού — every tab a page, the same for everyone, the current one marked', () => {
+	// Rewrites «U-81.2 / U-82.3: κάψουλα 4 καρτελών»: U-134.6 (wave 4.0) adds «Ραντεβού», third (the application's order).
+	it('U-81.2 / U-134.6: κάψουλα 5 καρτελών, κανένα φύλλο-μενού — every tab a page, the same for everyone, the current one marked', () => {
 		const items = buildBottomNavItems(el, href, '/profile');
 		expect(items.map((item) => [item.label, item.href])).toEqual([
 			['Εξερευνήστε', '/'],
 			['Αγαπημένα', '/favorites'],
+			['Ραντεβού', '/appointments'],
 			['Μηνύματα', '/messages'],
 			['Προφίλ', '/profile']
 		]);
+		expect(items.find((item) => item.key === 'appointments')).toMatchObject({
+			icon: 'calendar-outline',
+			activeIcon: 'calendar'
+		});
 		for (const item of items) expect(item.onclick).toBeUndefined();
 		expect(items.filter((item) => item.current).map((item) => item.key)).toEqual(['profile']);
 		expect(buildBottomNavItems(el, href, '/favorites').find((item) => item.current)?.key).toBe(
@@ -187,11 +193,15 @@ describe('the frame’s rules per page', () => {
 		expect(buildBottomNavItems(el, href, '/help').some((item) => item.current)).toBe(false);
 	});
 
-	it('U-80.1 Ε3: μενού χωρίς Λογαριασμό — a member’s rows, in their order', () => {
+	// U-134.6 + P-W4 Σ-13 (wave 4.0) add «Τα ραντεβού μου» (bold, after «Μηνύματα») and «Οι συγγενείς μου» (above
+	// «Ρυθμίσεις», the rule moving up with it).
+	it('U-80.1 Ε3 · U-134.6: μενού χωρίς Λογαριασμό — a member’s rows, in their order, «Τα ραντεβού μου» and «Οι συγγενείς μου» among them', () => {
 		const entries = buildAccountEntries(el, href, true);
 		expect(entries.map((entry) => entry.label)).toEqual([
 			'Μηνύματα',
+			'Τα ραντεβού μου',
 			'Αγαπημένα',
+			'Οι συγγενείς μου',
 			'Ρυθμίσεις',
 			'Κέντρο βοήθειας',
 			'Είστε γιατρός;',
@@ -202,18 +212,111 @@ describe('the frame’s rules per page', () => {
 			'Account'
 		);
 		expect(entries.filter((entry) => entry.separated).map((entry) => entry.key)).toEqual([
-			'settings',
+			'relatives',
 			'doctor',
 			'sign-out'
 		]);
+		const bold = entries.filter((entry) => entry.kind === 'link' && entry.emphasis);
+		expect(bold.map((entry) => entry.key)).toEqual(['messages', 'appointments', 'favorites']);
+		expect(entries.find((entry) => entry.key === 'appointments')).toMatchObject({
+			href: '/appointments'
+		});
+		expect(entries.find((entry) => entry.key === 'relatives')).toMatchObject({
+			href: '/profile/relatives'
+		});
+		expect(
+			buildAccountEntries({ locale: 'en' }, href, true)
+				.filter((entry) => ['appointments', 'relatives'].includes(entry.key))
+				.map((entry) => entry.label)
+		).toEqual(['My appointments', 'My relatives']);
 	});
 
-	it('a guest’s menu stays the four of U-17.2, with no way out', () => {
-		expect(buildAccountEntries(el, href).map((entry) => entry.key)).toEqual([
-			'sign-in',
+	it('a guest’s menu stays the four of U-17.2, with no way out — (negative) neither «Τα ραντεβού μου» nor «Οι συγγενείς μου»', () => {
+		const entries = buildAccountEntries(el, href);
+		expect(entries.map((entry) => entry.key)).toEqual(['sign-in', 'settings', 'help', 'doctor']);
+		expect(entries.filter((entry) => entry.separated).map((entry) => entry.key)).toEqual([
 			'settings',
-			'help',
 			'doctor'
 		]);
+	});
+
+	it('🔴 U-81.2 / P-W4 §3.3 (wave 4.0): an appointment, every screen it opens, the rating and a relative’s form are pushed over the tabs; «Τα ραντεβού μου» and «Οι συγγενείς μου» keep them (P-W4 Σ-25)', () => {
+		const id = '0193a1b2-7c3d-7e4f-8a9b-0c1d2e3f4a5b';
+		for (const path of ['/appointments', '/appointments/', '/profile/relatives', '/profile']) {
+			expect(showsBottomNav(path), path).toBe(true);
+		}
+		for (const path of [
+			`/appointments/${id}`,
+			`/appointments/${id}/time`,
+			`/appointments/${id}/for-whom`,
+			`/appointments/${id}/relative`,
+			`/appointments/${id}/note`,
+			`/appointments/${id}/cancel`,
+			`/ratings/${id}`,
+			'/profile/relatives/new',
+			`/profile/relatives/${id}`
+		]) {
+			expect(showsBottomNav(path), path).toBe(false);
+			// U-61.2 Ε3: an error page keeps the capsule.
+			expect(showsBottomNav(path, 404), path).toBe(true);
+		}
+	});
+
+	it('🔴 D-W4-55 (wave 4.0): no footer on the appointments, the rating or the relatives, at any width; 🔴 U-61.1: an error page under them has it', () => {
+		const id = '0193a1b2-7c3d-7e4f-8a9b-0c1d2e3f4a5b';
+		for (const path of [
+			'/appointments',
+			`/appointments/${id}`,
+			`/appointments/${id}/cancel`,
+			`/ratings/${id}`,
+			'/profile/relatives',
+			'/profile/relatives/new',
+			`/profile/relatives/${id}`
+		]) {
+			expect(showsSiteFooter(path), path).toBe(false);
+			expect(showsSiteFooter(path, 404), path).toBe(true);
+			expect(frameHeaderOf(path), path).toBe('site');
+		}
+		// The profile's own page keeps it (from 744, U-81.1 Ε2).
+		expect(showsSiteFooter('/profile')).toBe(true);
+		expect(hidesFooterOnPhone('/profile')).toBe(true);
+	});
+
+	it('U-134.6: «Ραντεβού» is current on the patient’s appointment pages, «Προφίλ» on «Οι συγγενείς μου» (the prototype’s `rel.js:159`)', () => {
+		const current = (path: string) =>
+			buildBottomNavItems(el, href, path)
+				.filter((item) => item.current)
+				.map((item) => item.key);
+		expect(current('/appointments')).toEqual(['appointments']);
+		expect(current('/appointments/')).toEqual(['appointments']);
+		expect(current('/ratings/0193a1b2-7c3d-7e4f-8a9b-0c1d2e3f4a5b')).toEqual(['appointments']);
+		expect(current('/profile/relatives')).toEqual(['profile']);
+		expect(current('/profile')).toEqual(['profile']);
+	});
+
+	it('wave 4.0 (negative): look-alike paths keep the site’s own frame — another word, the plural, a prefix, the bare `/ratings`', () => {
+		for (const path of [
+			'/appointment',
+			'/appointmentsx',
+			'/ratings',
+			'/rating/x',
+			'/relatives',
+			'/profile/relative',
+			'/profile/relativesx'
+		]) {
+			expect(showsBottomNav(path), path).toBe(true);
+			expect(showsSiteFooter(path), path).toBe(true);
+			expect(
+				buildBottomNavItems(el, href, path).some(
+					(item) => item.key === 'appointments' && item.current
+				),
+				path
+			).toBe(false);
+		}
+		expect(
+			buildBottomNavItems(el, href, '/profile/relativesx').some(
+				(item) => item.key === 'profile' && item.current
+			)
+		).toBe(false);
 	});
 });

@@ -11,6 +11,10 @@ import { projectRoot, readSourceFiles, stripComments, type SourceFile } from './
  * W-5 / security web MINOR-1: the scope holds their routes (where a personal read would fall into the SSR), the
  * history's reader (`shared/lib/navigation`) and the profile's two screens that read the booking's draft; and no draft
  * goes into the history, the address (beyond the booking's closed hints), another window or a cache of the browser.
+ * Wave 4.0 (U-65.6 web · D-W4-63 · P-W4 Σ-28 · security review of the web MINOR-3 · review w4-w7 R1 NIT-4): the scope
+ * holds the patient's signed-in pages too — the screens and the routes of `/appointments`, `/ratings`, `/profile`, the
+ * doctors those pages read (`doctor/ui/public-profiles`: which doctors a person sees is a fact of their health) and the
+ * profile's addresses — so no relative's name, hour, note or review's words reaches an address, a storage or a log.
  */
 const SCOPE = new RegExp(
 	`^src/(?:${[
@@ -21,13 +25,18 @@ const SCOPE = new RegExp(
 		'screens/doctors/\\[slug\\]/details/\\[section\\]/hooks/use-screen\\.svelte\\.ts$',
 		'routes/doctor/onboarding/',
 		'routes/doctors/\\[slug\\]/booking/',
-		'shared/lib/navigation/'
+		'shared/lib/navigation/',
+		// Wave 4.0 · screens 50–55.
+		'screens/(?:appointments|ratings|profile)/',
+		'routes/(?:appointments|ratings|profile)/',
+		'modules/doctor/ui/public-profiles/',
+		'modules/profile/lib/paths/'
 	].join('|')})`,
 	'u'
 );
 /** The files whose reads are the drafts' own: each of their reads wears the sign-out's mark (MINOR-1 δ). */
 const OWN_READS =
-	/^src\/(modules\/(doctor-onboarding|appointments)|screens\/doctor\/onboarding|screens\/doctors\/\[slug\]\/booking)\//u;
+	/^src\/(modules\/(doctor-onboarding|appointments)|modules\/doctor\/ui\/public-profiles|screens\/doctor\/onboarding|screens\/doctors\/\[slug\]\/booking|screens\/(appointments|ratings|profile))\//u;
 /** The only file that writes the address's search: the booking's closed, non-personal hints (P-W3 §3.2.5). */
 const HINTS_WRITER = 'src/modules/appointments/lib/booking/url/index.ts';
 
@@ -158,7 +167,23 @@ describe('🔴 U-112.2: the drafts live in the root’s provider, and go nowhere
 			'src/routes/doctors/[slug]/booking/+layout.server.ts',
 			'src/routes/doctors/[slug]/booking/[...step]/+page.ts',
 			'src/routes/doctor/onboarding/[...step]/+page.ts',
-			'src/shared/lib/navigation/stored-page-state.ts'
+			'src/shared/lib/navigation/stored-page-state.ts',
+			// Wave 4.0 (card w4-w9): the patient's signed-in pages, their routes, their doctors and the profile's addresses.
+			'src/screens/appointments/[...path]/page/index.svelte',
+			'src/screens/appointments/[...path]/hooks/use-screen.svelte.ts',
+			'src/screens/appointments/[...path]/hooks/use-time.svelte.ts',
+			'src/screens/ratings/[invitationId]/page/index.svelte',
+			'src/screens/ratings/[invitationId]/hooks/use-screen.svelte.ts',
+			'src/screens/profile/[...path]/page/index.svelte',
+			'src/screens/profile/[...path]/hooks/use-screen.svelte.ts',
+			'src/routes/appointments/[...path]/+page.ts',
+			'src/routes/ratings/[invitationId]/+page.ts',
+			'src/routes/profile/[...path]/+page.ts',
+			'src/modules/doctor/ui/public-profiles/hooks/use-public-profiles.svelte.ts',
+			'src/modules/profile/lib/paths/index.ts',
+			'src/modules/appointments/ui/list/hooks/use-pages.svelte.ts',
+			'src/modules/appointments/ui/relatives/page/index.svelte',
+			'src/modules/appointments/ui/rating/page/index.svelte'
 		])
 			expect(paths, path).toContain(path);
 		expect(paths.every((path) => SCOPE.test(path))).toBe(true);
@@ -299,6 +324,88 @@ describe('🔴 U-112.2: the drafts live in the root’s provider, and go nowhere
 			"src/modules/doctor-onboarding/ui/steps/page/office.svelte: a read without the sign-out's mark"
 		]);
 	});
+	it('🔴 U-65.6 (web) · D-W4-63 (negative, planted — one per new folder of wave 4.0): a relative’s name in an address, an hour in a storage, a note in a log, a review’s words as HTML, an unmarked read or cache write on the patient’s pages — each is reported', () => {
+		const planted = (path: string, text: string): SourceFile => ({
+			path,
+			text: stripComments(text)
+		});
+		// Only what the SCOPE names is scanned, as the guard itself reads the tree (`scoped()`).
+		const inScope = (files: SourceFile[]) => files.filter((file) => SCOPE.test(file.path));
+		expect(
+			findings(
+				inScope([
+					planted(
+						'src/screens/appointments/[...path]/page/index.svelte',
+						'<script lang="ts">\n\tvoid goto(`/appointments/${id}?was=${oldHour}`);\n</script>'
+					),
+					planted(
+						'src/screens/appointments/[...path]/hooks/use-screen.svelte.ts',
+						"sessionStorage.setItem('note', appointment.patientNote);"
+					),
+					planted(
+						'src/screens/ratings/[invitationId]/page/index.svelte',
+						'<p>{@html draft.body}</p>'
+					),
+					planted(
+						'src/screens/ratings/[invitationId]/hooks/use-screen.svelte.ts',
+						'client.setQueryData(key, review);'
+					),
+					planted(
+						'src/screens/profile/[...path]/page/index.svelte',
+						'<script lang="ts">\n\tvoid goto(`/profile/relatives?done=del&name=${relative.firstName}`);\n</script>'
+					),
+					planted(
+						'src/screens/profile/[...path]/hooks/use-screen.svelte.ts',
+						'const read = createQuery(() => ({ queryKey: [], queryFn: readUpcoming }));'
+					),
+					planted(
+						'src/routes/appointments/[...path]/+page.ts',
+						'console.log(params.path, url.searchParams);'
+					),
+					planted(
+						'src/routes/ratings/[invitationId]/+page.ts',
+						"url.searchParams.set('name', patientName);"
+					),
+					planted('src/routes/profile/[...path]/+page.ts', "let lastRelative = '';"),
+					planted(
+						'src/modules/doctor/ui/public-profiles/hooks/use-public-profiles.svelte.ts',
+						"localStorage.setItem('doctors', ids.join());\nconst read = { queryKey: [], queryFn: readDoctor };"
+					),
+					planted(
+						'src/modules/profile/lib/paths/index.ts',
+						'export const relativeDonePath = (name: string) => `/profile/relatives?done=del&name=${name}`;'
+					),
+					// … and what the rules allow there: an id in a path, a fixed word in the search, `replaceState: true`.
+					planted(
+						'src/screens/profile/[...path]/hooks/use-screen.svelte.ts',
+						'const editHref = (id: string) => href(`/profile/relatives/${id}`);\nvoid goto(list, { replaceState: true });'
+					),
+					planted(
+						'src/modules/appointments/lib/paths/index.ts',
+						"export const APPOINTMENTS_HISTORY_SEARCH = '?tab=history';"
+					),
+					// … and a page outside the scope is not this guard's.
+					planted('src/screens/help/page/index.svelte', '<p>{@html answer}</p>')
+				])
+			)
+		).toEqual([
+			"src/screens/appointments/[...path]/page/index.svelte: an address's search written",
+			'src/screens/appointments/[...path]/hooks/use-screen.svelte.ts: a storage',
+			'src/screens/appointments/[...path]/hooks/use-screen.svelte.ts: a persisted cache',
+			'src/screens/ratings/[invitationId]/page/index.svelte: raw HTML',
+			"src/screens/ratings/[invitationId]/hooks/use-screen.svelte.ts: a cache write without the sign-out's mark",
+			"src/screens/profile/[...path]/page/index.svelte: an address's search written",
+			"src/screens/profile/[...path]/hooks/use-screen.svelte.ts: a read without the sign-out's mark",
+			'src/routes/appointments/[...path]/+page.ts: a log',
+			"src/routes/ratings/[invitationId]/+page.ts: an address's search written",
+			"src/routes/profile/[...path]/+page.ts: mutable state at the module's top level",
+			'src/modules/doctor/ui/public-profiles/hooks/use-public-profiles.svelte.ts: a storage',
+			'src/modules/doctor/ui/public-profiles/hooks/use-public-profiles.svelte.ts: a persisted cache',
+			"src/modules/doctor/ui/public-profiles/hooks/use-public-profiles.svelte.ts: a read without the sign-out's mark",
+			"src/modules/profile/lib/paths/index.ts: an address's search written"
+		]);
+	});
+
 	/**
 	 * Review w3-w6 R1 NIT-3: each branch of each rule alone, in a file of its own — one broken alternative of a pattern
 	 * turns its row red, where the planted files above (2–3 patterns in one file, compared by file and reason) would not.

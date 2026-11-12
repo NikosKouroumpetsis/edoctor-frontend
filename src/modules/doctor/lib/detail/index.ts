@@ -47,10 +47,10 @@ export {
 	doctorSentenceName,
 	emphasizedSegments,
 	feeView,
+	reviewAuthorName,
 	reviewCountLabel,
 	formatFee,
-	officeAddressLine,
-	officeDialNumber
+	officeAddressLine
 } from './labels';
 export { buildDoctorCompletedVisits, buildDoctorResponseRows } from './metrics';
 export {
@@ -65,6 +65,12 @@ export {
 	type DoctorSlotPoint
 } from './office';
 export { buildPricedService, buildPricedServices } from './priced-services';
+export {
+	buildDoctorReviewHowBlocks,
+	buildDoctorReviewHowLinks,
+	type DoctorReviewHowBlock,
+	type DoctorReviewHowLink
+} from './review-how';
 export { resolvePrimaryDoctorService } from './primary-service';
 export {
 	buildDoctorReviewBuckets,

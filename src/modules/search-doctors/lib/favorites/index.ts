@@ -1,12 +1,11 @@
 import { browser } from '$app/environment';
 import { favoritePendingStorageKey } from '$shared/config/env';
+import { isUuid } from '$shared/lib/ids';
 import { matchesSearch } from '$shared/lib/text';
 import type { DoctorCard } from '$modules/search-doctors/types';
 
 /** 🔴 U-65.6: the most the favourites' search holds. */
 export const FAVORITES_SEARCH_MAX = 100;
-
-const DOCTOR_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 
 /** The words typed, never more than the field holds (the attribute holds it too; the code never trusts only that). */
 export function clampFavoritesSearch(value: string): string {
@@ -47,7 +46,7 @@ export function takePendingFavorite(): string | null {
 	try {
 		const stored = window.sessionStorage.getItem(favoritePendingStorageKey);
 		window.sessionStorage.removeItem(favoritePendingStorageKey);
-		return stored && DOCTOR_ID.test(stored) ? stored : null;
+		return stored && isUuid(stored) ? stored : null;
 	} catch {
 		return null;
 	}

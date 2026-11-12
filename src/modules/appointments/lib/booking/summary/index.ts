@@ -2,9 +2,13 @@ import { m } from '$paraglide/messages.js';
 import { formatCalendarDay } from '$shared/lib/calendar-day';
 import { formatDecimal, formatEuro } from '$shared/lib/format';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
-import type { AppointmentSnapshotFacts } from '$modules/appointments/api/appointment';
+import type {
+	AppointmentRelativeFacts,
+	AppointmentSnapshotFacts
+} from '$modules/appointments/api/appointment';
 import type { BookingPatientFacts } from '$modules/appointments/api/patient';
 import type { BookingReadinessFacts } from '$modules/appointments/api/readiness';
+import { relativeNameWithWord } from '$modules/appointments/lib/relatives/words';
 import type {
 	BookingDoctorFacts,
 	BookingOfficeFacts,
@@ -25,7 +29,10 @@ import type {
 import { timeOfMinute } from '../url';
 
 /** The doctor's name as the card shows it, the platform's words when it has none. */
-export function bookingDoctorName(doctor: BookingDoctorFacts, locale: SupportedLocale): string {
+export function bookingDoctorName(
+	doctor: Pick<BookingDoctorFacts, 'name'>,
+	locale: SupportedLocale
+): string {
 	return doctor.name?.trim() || m.doctor_name_unknown({}, { locale });
 }
 
@@ -71,7 +78,10 @@ export function bookingFeeLabel(
 		: `${formatEuro(range.min, locale)} – ${formatEuro(range.max, locale)}`;
 }
 
-/** «Για μένα · Ελένη Παππά», «Για μένα» without a name, or the relative's name (`''` for one the list cannot name). */
+/**
+ * «Για μένα · Ελένη Παππά», «Για μένα» without a name, or the relative with their word — «Γιώργος Παππάς (γιος)» (🔴
+ * U-139.5, P-W4 Σ-15; the name alone when the relationship has none) — `''` for one the list cannot name.
+ */
 export function bookingVisitorLabel(
 	visitor: BookingVisitor,
 	patient: BookingPatientFacts | null | undefined,
@@ -79,7 +89,14 @@ export function bookingVisitorLabel(
 ): string {
 	if (visitor.kind === 'relative') {
 		const relative = patient?.relatives.find((entry) => entry.relativeId === visitor.relativeId);
-		return relative ? `${relative.firstName} ${relative.lastName}` : '';
+		return relative
+			? relativeNameWithWord(
+					`${relative.firstName} ${relative.lastName}`,
+					relative.relationship,
+					relative.gender,
+					locale
+				)
+			: '';
 	}
 	const name = [patient?.firstName, patient?.lastName].filter(Boolean).join(' ');
 	return name
@@ -87,18 +104,36 @@ export function bookingVisitorLabel(
 		: m.booking_for_whom_self({}, { locale });
 }
 
-/** Screen 31 (D-06): who the visit is for as the appointment froze it — «Για μένα · Ελένη Παππά» or the relative. */
+/**
+ * Screen 31 (D-06): who the visit is for as the appointment froze it — «Για μένα · Ελένη Παππά» or the relative with
+ * the word of their frozen relationship and gender, «Γιώργος Παππάς (γιος)» (🔴 U-139.5, P-W4 Σ-15).
+ */
 export function bookedVisitorLabel(
 	visitor: AppointmentSnapshotFacts['visitor'],
+	relative: Pick<AppointmentRelativeFacts, 'relationship' | 'gender'> | null | undefined,
 	locale: SupportedLocale
 ): string {
-	if (visitor.kind === 'relative') return visitor.name ?? '';
+	if (visitor.kind === 'relative') {
+		return relativeNameWithWord(
+			visitor.name ?? '',
+			relative?.relationship ?? '',
+			relative?.gender,
+			locale
+		);
+	}
 	return visitor.name
 		? m.booking_summary_visitor_self({ name: visitor.name }, { locale })
 		: m.booking_for_whom_self({}, { locale });
 }
 
-function head(doctor: BookingDoctorFacts, locale: SupportedLocale): BookingCardHead {
+/**
+ * The card's doctor (record §3.2): the photo, the specialty, the name, «★ 4,9 (22 αξιολογήσεις)» once reviewed — the
+ * booking's (30, 31) and, since wave 4.0, an appointment's (51, `lib/list` `appointmentDoctorHead`).
+ */
+export function bookingDoctorHead(
+	doctor: Pick<BookingDoctorFacts, 'images' | 'reviewCount' | 'rating' | 'professional' | 'name'>,
+	locale: SupportedLocale
+): BookingCardHead {
 	const photo = doctor.images[0];
 	const count = doctor.reviewCount;
 	return {
@@ -156,7 +191,13 @@ export function buildBookingCard({
 	 * Screen 31: the card read only — its state, the note, and (review w3-w3 R1 MINOR-2, D-06) what the appointment froze:
 	 * the reason, the visitor and the cost as booked, never today's names or prices.
 	 */
-	readOnly?: { confirmed: boolean; note: string | null; snapshot?: AppointmentSnapshotFacts };
+	readOnly?: {
+		confirmed: boolean;
+		note: string | null;
+		snapshot?: AppointmentSnapshotFacts;
+		/** The relative as frozen, for the word of their relationship (U-139.5). */
+		relative?: Pick<AppointmentRelativeFacts, 'relationship' | 'gender'> | null;
+	};
 	locale: SupportedLocale;
 }): BookingCard {
 	const options = { locale };
@@ -259,7 +300,7 @@ export function buildBookingCard({
 		label: visitorLabel,
 		value:
 			(readOnly?.snapshot
-				? bookedVisitorLabel(readOnly.snapshot.visitor, locale)
+				? bookedVisitorLabel(readOnly.snapshot.visitor, readOnly.relative, locale)
 				: bookingVisitorLabel(
 						signedIn ? visitor : { kind: 'self' },
 						signedIn ? patient : null,
@@ -368,7 +409,7 @@ export function buildBookingCard({
 	if (policy) rows.push(policy);
 
 	return {
-		head: head(doctor, locale),
+		head: bookingDoctorHead(doctor, locale),
 		// The visitor's row stays with its «Αλλαγή» even when the list no longer names them (MINOR-4 β, the application's).
 		rows: rows.filter(
 			(row) =>

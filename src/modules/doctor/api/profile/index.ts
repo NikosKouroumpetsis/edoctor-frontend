@@ -14,7 +14,7 @@ export {
 	mapDoctorReview,
 	REVIEW_ASPECT_FIELDS
 } from './map';
-export { doctorMemberProfileQuery } from './queries';
+export { doctorMemberProfileQuery, doctorPublicProfileQuery } from './queries';
 export { doctorQueryKeys } from './query-keys';
 export type {
 	DoctorAvailabilityFacts,

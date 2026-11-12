@@ -1,11 +1,37 @@
-export { createAppointment } from './endpoints';
-export { readAppointmentFailure } from './failure';
-export { mapAppointment } from './map';
-export { appointmentDetailQuery } from './queries';
+export { storeAppointmentDetail, storeAppointmentRated } from './cache';
+export {
+	cancelAppointment,
+	changeAppointment,
+	createAppointment,
+	listAppointments
+} from './endpoints';
+export { readAppointmentChangeFailure, readAppointmentFailure } from './failure';
+export { mapAppointment, mapAppointmentDetail, mapAppointmentPage } from './map';
+export { appointmentDetailQuery, appointmentListQuery, upcomingScanQuery } from './queries';
 export type {
-	AppointmentSnapshotFacts,
+	AppointmentActionsFacts,
+	AppointmentActorKind,
+	AppointmentAuditFacts,
+	AppointmentCancelReasonCode,
+	AppointmentCancelRequest,
+	AppointmentChangeFailureFacts,
+	AppointmentChangeRequest,
+	AppointmentConfirmationMode,
 	AppointmentCreateRequest,
+	AppointmentDetailFacts,
 	AppointmentFacts,
 	AppointmentFailureFacts,
-	AppointmentRequestField
+	AppointmentListRequest,
+	AppointmentListScope,
+	AppointmentOfficeFacts,
+	AppointmentOfficeTranslationFacts,
+	AppointmentPageFacts,
+	AppointmentScanFacts,
+	AppointmentRatingInvitationRef,
+	AppointmentRelativeFacts,
+	AppointmentRequestField,
+	AppointmentRescheduleDenial,
+	AppointmentServiceLineFacts,
+	AppointmentSnapshotFacts,
+	AppointmentStatus
 } from './types';

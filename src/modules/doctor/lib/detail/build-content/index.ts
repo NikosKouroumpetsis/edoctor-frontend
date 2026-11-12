@@ -1,5 +1,6 @@
 import { m } from '$paraglide/messages.js';
 import { formatDecimal } from '$shared/lib/format';
+import { officeDialNumber, officeFloorValue } from '$shared/lib/office';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type {
 	DoctorCredentialFacts,
@@ -16,9 +17,7 @@ import {
 	countLabel,
 	doctorNameLabel,
 	memberSinceYear,
-	officeDialNumber,
 	officeFacilityValue,
-	officeFloorValue,
 	officeInfoRowLabel,
 	paymentOptionLabel,
 	reviewAspectsLabel,

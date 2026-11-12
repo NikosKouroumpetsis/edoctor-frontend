@@ -7,8 +7,7 @@
 	import { Skeleton } from '$shared/ui/primitives/skeleton';
 	import { bookingPatientQuery } from '$modules/appointments/api/patient';
 	import { buildForWhomOptions, type BookingVisitor } from '$modules/appointments/lib/booking';
-	import ChangeFrame from '../components/change-frame.svelte';
-	import ChoiceList from '../components/choice-list.svelte';
+	import { ChangeFrame, ChoiceList } from '$modules/appointments/ui/change-screen';
 	import { useBookingChange } from '../hooks/use-change.svelte';
 	import type { BookingChangeProps } from '../types';
 
@@ -43,8 +42,10 @@
 	}
 </script>
 
-<!-- Record §3.3 «Για ποιον είναι το ραντεβού;» (U-102): «Για μένα» and every relative, a card each in one column, then
-     «Προσθήκη συγγενή» — «Νέος συγγενής» as a screen of its own, never a sheet. «Άκυρο» keeps nobody new. -->
+<!-- Record §3.3 «Για ποιον είναι το ραντεβού;» (U-102): «Για μένα» and every relative, a card each in one column — a
+     relative with the word of their relationship under the name (🔴 U-139.5, P-W4 Σ-15; «Για μένα» alone, as the
+     application's booking) — then «Προσθήκη συγγενή»: «Νέος συγγενής» as a screen of its own, never a sheet. «Άκυρο»
+     keeps nobody new. -->
 <ChangeFrame
 	{title}
 	backHref={change.backHref()}
@@ -74,7 +75,11 @@
 	{:else}
 		<ChoiceList
 			label={title}
-			choices={choices.map((choice) => ({ id: choice.id, title: choice.label }))}
+			choices={choices.map((choice) => ({
+				id: choice.id,
+				title: choice.label,
+				description: choice.visitor.kind === 'relative' ? choice.description : null
+			}))}
 			value={known ? picked : null}
 			onChange={(id) => (picked = id)}
 			testId="booking-for-whom-options"

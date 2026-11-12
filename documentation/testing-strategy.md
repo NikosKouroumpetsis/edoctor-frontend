@@ -11,6 +11,21 @@ bun run test     # Vitest run (unit + component)
 bun run build    # routing / provider / config / env / public UI changes
 ```
 
+## Test-run discipline
+
+- ONE runner at a time on the machine: check for a leftover one before and after a run (`pgrep -fl vitest`), never two
+  suites side by side (a second runner makes timeouts that are no defect).
+- Target files by PATH (`bun run test -- src/modules/appointments/ui/list tests/architecture`), never by a bare name
+  pattern; start with the specs of the files touched, then `tests/architecture` whole, then the full suite once.
+- Run from `frontend/` (from the workspace's root `bun run test` finds no test and says nothing); read the exit code
+  itself, never through a pipe.
+- A failure is a flake only with a reproduction and a measurement; otherwise it is a defect of the change or of the
+  test, and is fixed before the scope widens.
+- A guard named after a decision («U-xx: …», «D-xx: …») that turns red is a question, not a test to rewrite: its
+  expectation changes only when the decision did, and the test says which one (a «Rewrites …» line above it).
+- `bun run format` writes the whole tree: compare what it wrote (the files newer than a marker, or `git diff --stat`
+  before and after), never only the number of changed files.
+
 ## OpenAPI drift gate
 
 `bun run openapi:check` is a separate CI drift gate for the generated API types:
@@ -334,6 +349,67 @@ In place:
   negative per kind.
 - `tests/architecture/review-topics.test.ts` («U-91.2: …») — the six topics of «Οι ασθενείς αναφέρουν»: no label, key, glyph or
   value of the code speaks of the wait, in either language.
+- `tests/architecture/patient-texts.test.ts` (wave 4.0, «D-W4-12 · D-W4-13 · D-W4-14 · U-137.5 · U-138.6 · U-139.6») — the
+  patient's words a decision changed, read from `messages/{el,en}.json`: no email promised after a rating, the guest's
+  sentence of the prototype, the calendar's title and description the email's own (read from the backend's
+  `calendar-invite` template, the `server-rules` way), no «εκπρόθεσμα» and no `late` key, «αξιολόγηση» the act and
+  «κριτική» what is published, the relative's mobile helper of U-139.6 in el and en. Its neighbours: `en-parity.test.ts`
+  (D-W4-57: the same Greek says the application's English, with the frame's tabs and menu by alias) and
+  `appointment-rules.test.ts` (the rating's weights and formula, the stars of a grade (`toRatingStars`), the comment's
+  bound and symbols, the patient's five cancel reasons, the relatives' 20 and the scan's page of 100
+  (`listPageSizeMax`), read from the backend). One planted negative per rule.
+- `tests/architecture/appointment-screens.test.ts` (wave 4.0, «U-132.1 · U-135.2 · U-137.5 · U-102 / U-136 / U-137») —
+  the patient's appointment pages (`modules/appointments/ui/**`, the screens of `/appointments`, `/ratings`,
+  `/profile/[...path]`) import no map of the kit nor the map library; the 51 (`ui/detail`) fixes and sticks nothing to
+  the screen; `canceledLate` leaves no file of `src/` but the appointment's `api/`; every «Αλλαγή» and the
+  cancellation is an address of the closed list, and EVERY slice of `modules/appointments/ui/` imports no window, sheet
+  or drawer and plays no dialog, with two allowed imports: the rating's «Πώς λειτουργούν οι κριτικές» (`info-dialog`,
+  D-W4-24: information) and 🔴 U-139.3's ONE window, the shared `ActionDialog` in
+  `ui/relatives/components/delete-dialog.svelte` alone (D-W4-58) — a second window, another kind or a dialog's role in
+  the relatives' slice is reported too. Its neighbour `calendar-golden.test.ts`
+  (D-W4-31): the browser's `.ics` builder reproduces the backend's golden `PUBLISH` vectors byte for byte, read where the
+  backend keeps them, writes no method but `PUBLISH` whatever it is handed, and its place (`appointmentCalendarLocation`)
+  says every step of the backend's `formatOfficeAddress`, read from its body (P-B4-review 5 (γ); no address at all is
+  the email's «—» on both sides, `NOTIFICATION_ABSENT_VALUE` read where it lives). U-139.1 (one column in the middle
+  with nothing on the right — also an appointment not found or failed beside a list with nothing to show — and never for
+  an appointment's address from 950 while it is read: two columns of two waits from the first paint) is held by
+  the list page's own spec (`ui/list/page/index.test.ts`); the list kept beside the appointment being read (P-W4 §3.6)
+  by the screen's (`screens/appointments/[...path]/page/index.test.ts`) — the rule itself lives in the module
+  (`ui/list/hooks/use-pages`), and the two screens' specs are its net: they pass unchanged across a move of the rule.
+  The hook has its own spec too (`ui/list/hooks/use-pages.test.ts`, review w4-w9-r1 NIT-1): its two ways of working
+  and 🔴 D-W4-78. One planted negative per rule.
+- 🔴 A rule about what a session's END does to a page (U-84, D-W4-78) is tested in the COMPOSITION, with a harness whose
+  `Session` really ends (`expire` ⇒ a guest, the personal reads removed, as `auth/ui/host` does) — never with a fixed
+  `viewer` on the module's page alone, which passes while the screen above destroys the form (review w4-w9-r1
+  MAJOR-1). The harnesses of `screens/appointments/[...path]` and `screens/profile/[...path]` give `signIn` (the same
+  person) and `otherSignsIn` (another account, in the host's order) for it.
+- U-153 · what only the REAL host does to a page (a page put back from the browser's back/forward cache) is tested under
+  it: `hosted.harness.svelte` of the same two screens composes `auth/ui/host` around the screen, and the spec dispatches
+  `pageshow` on `window` with `persisted` set (`Object.defineProperty` on a plain `Event`). The server's `/patient/me` is
+  then the spec's to answer.
+- U-153 · a rule about WHERE the page stands after a navigation is asked in the page's `afterNavigate` (the router puts
+  the scroll back before it). jsdom keeps no place: the spec calls every callback given to the mocked `afterNavigate`
+  after moving the harness's address, and counts the calls of a spied `window.scrollTo`; the place itself is measured in
+  a real browser.
+- `tests/architecture/appointment-structure.test.ts` (wave 4.0, «D-W4-61 · D-W4-59 · U-139.5 · D-W4-52 · Σ1») — where
+  the rules of the patient's pages live: the pages of `screens/appointments/[...path]` and
+  `screens/ratings/[invitationId]` hold no rune state, effect, session, width or read of the appointments' own (L-1:
+  the module's `useAppointmentsPages` tells them); the forms of screens 52 (note), 53 and 54 are `createForm` with
+  `form.field`, no field in a rune (L-2); only the module's `api/` pages through the appointments (the upcoming «to
+  the end, ten pages»); a relationship's word is read only by `lib/relatives/words` (the neutral ones also by the
+  form's options); the Messages' inbox stands on the `SplitView` with its `inbox` widths and no columns of its own;
+  every `createQueries` is read through a `combine` that answers ONE object (never an array, MINOR-2 of review
+  w4-w9-r1); `Session.expired` is read by `useKeptThroughExpiry` alone (D-W4-78) — and once by the auth host, the
+  condition of its `pageshow` listener, only to end it (U-153). One planted negative per rule.
+- `drafts-privacy.test.ts` (🔴 U-65.6 web · D-W4-63, wave 4.0) also scans the patient's signed-in pages: the screens
+  and the routes of `/appointments`, `/ratings`, `/profile`, `modules/doctor/ui/public-profiles` and
+  `modules/profile/lib/paths` — no relative's name, hour, note or review's words in an address's search, a storage, a
+  log or raw HTML, every read and cache write under the sign-out's mark; `import-boundaries.test.ts` (W-4) keeps the
+  generated contract out of the same screens and routes. One planted negative per new folder.
+- 🔴 **The neighbours' files.** `server-rules`, `server-words`, `specialty-terms`, `patient-texts`,
+  `appointment-rules` and `calendar-golden` read `../backend`; `en-parity`, `scale-parity` and `color-parity` read
+  `../application`: the suite runs only in the workspace that holds all three (`modular-no-infra/`). In a clone of `frontend/` alone they fail with `ENOENT` — on purpose, never
+  passing silently — and so does `bun run test` (and the `pre-push` hook's `verify:push`).
 - Each checker ships with negative fixtures next to the project scan, plus a
   proof that the scan read the code (file, token and tag counts).
 

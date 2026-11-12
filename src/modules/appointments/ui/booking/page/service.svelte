@@ -2,8 +2,7 @@
 	import { untrack } from 'svelte';
 	import { m } from '$paraglide/messages.js';
 	import { buildBookingServiceOptions } from '$modules/appointments/lib/booking';
-	import ChangeFrame from '../components/change-frame.svelte';
-	import ChoiceList from '../components/choice-list.svelte';
+	import { ChangeFrame, ChoiceList } from '$modules/appointments/ui/change-screen';
 	import { useBookingChange } from '../hooks/use-change.svelte';
 	import type { BookingServiceProps } from '../types';
 

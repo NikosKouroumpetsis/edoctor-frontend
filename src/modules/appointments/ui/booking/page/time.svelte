@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { bookingPath, hintsOf } from '$modules/appointments/lib/booking';
-	import ChangeFrame from '../components/change-frame.svelte';
+	import { ChangeFrame } from '$modules/appointments/ui/change-screen';
 	import { useBookingEntry } from '../hooks/use-entry.svelte';
-	import { isPlainClick, useBookingNavigation } from '../hooks/use-navigation.svelte';
+	import { isPlainClick } from '$shared/lib/navigation';
+	import { useBookingNavigation } from '../hooks/use-navigation.svelte';
 	import type { BookingTimeProps } from '../types';
 
 	let props: BookingTimeProps = $props();

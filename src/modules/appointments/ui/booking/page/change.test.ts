@@ -231,6 +231,33 @@ describe('«Για ποιον είναι το ραντεβού;» (record §3.3)
 		expect(go).toHaveBeenCalledWith(-1);
 	});
 
+	it('🔴 U-139.5 (P-W4 Σ-15, the application’s booking): a relative wears the word of their relationship and gender under the name; «Για μένα» alone; (negative) a relative without a relationship has no line', async () => {
+		patient.relatives = [
+			{ id: 'rel-1', firstName: 'Πέτρος', lastName: 'Μάρκου' },
+			{
+				id: 'rel-2',
+				firstName: 'Άννα',
+				lastName: 'Παππά',
+				relationship: 'PARENT',
+				gender: 'FEMALE'
+			},
+			{
+				id: 'rel-3',
+				firstName: 'Άλεξ',
+				lastName: 'Παππά',
+				relationship: 'CHILD',
+				gender: 'NON_BINARY'
+			}
+		];
+		draw('for-whom', { depth: 1 });
+		const group = await screen.findByRole('radiogroup', { name: 'Για ποιον είναι το ραντεβού;' });
+		expect(
+			within(group)
+				.getAllByRole('radio')
+				.map((card) => card.textContent?.replace(/\s+/gu, ' ').trim())
+		).toEqual(['Για μένα', 'Πέτρος Μάρκου', 'Άννα Παππά Μητέρα', 'Άλεξ Παππά Παιδί']);
+	});
+
 	it('U-102: «Προσθήκη συγγενή» is a link to «Νέος συγγενής», opened as one more step', async () => {
 		draw('for-whom', { depth: 1 });
 		const add = await screen.findByRole('link', { name: 'Προσθήκη συγγενή' });
@@ -310,6 +337,38 @@ describe('«Νέος συγγενής» (record §3.3, P-A3 Σ5)', () => {
 		await waitFor(() => expect(draft.pendingVisitor).toBe('rel-2'));
 		expect(toasts.current?.message).toBe('Ο/Η Άννα Παππά προστέθηκε και επιλέχθηκε.');
 		expect(go).toHaveBeenCalledWith(-1);
+	});
+
+	it('🔴 U-139.5: the toast says the new relative with the article of the gender the server keeps — «Η Άννα Παππά προστέθηκε και επιλέχθηκε.»', async () => {
+		answers['POST /patient/pat-1/relatives'] = () =>
+			json(
+				{
+					id: 'rel-2',
+					patientId: 'pat-1',
+					firstName: 'Άννα',
+					lastName: 'Παππά',
+					relationship: 'CHILD',
+					gender: 'FEMALE'
+				},
+				201
+			);
+		const { toasts } = draw('relative', { depth: 2 });
+		await screen.findByTestId('booking-relative-first-name');
+		await waitFor(() => expect(calls.some((call) => call.url.includes('/patient/me'))).toBe(true));
+		await fill({ 'first-name': 'Άννα', 'last-name': 'Παππά' });
+		await choose('relationship', 'Παιδί');
+		await choose('gender', 'Γυναίκα');
+		await user().click(save());
+		await waitFor(() =>
+			expect(toasts.current?.message).toBe('Η Άννα Παππά προστέθηκε και επιλέχθηκε.')
+		);
+	});
+
+	it('🔴 U-139.6: under the mobile, who it is for — the office calls the relative, the notifications reach the account', () => {
+		draw('relative', { depth: 2 });
+		expect(screen.getByTestId('booking-relative')).toHaveTextContent(
+			'Για να μπορεί το ιατρείο να καλέσει τον συγγενή σας. Τις ειδοποιήσεις για το ραντεβού τις λαμβάνετε εσείς.'
+		);
 	});
 
 	it('🔴 U-65.6 (negative): hostile names stay text and stop at 100; a wrong ΑΜΚΑ, ΑΦΜ, email or mobile is said, nothing is sent', async () => {

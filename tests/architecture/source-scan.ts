@@ -10,6 +10,22 @@ const SKIPPED_DIRECTORIES = ['src/generated', 'src/shared/design/tokens'];
 export type SourceFile = { path: string; text: string };
 
 /**
+ * The body of the block that opens right after `head`, braces matched (empty when `head` is gone): how the guards read
+ * a function of the backend's where it lives (`server-rules`, `calendar-golden`).
+ */
+export function bodyAfter(text: string, head: string): string {
+	const at = text.indexOf(head);
+	if (at < 0) return '';
+	const open = text.indexOf('{', at + head.length);
+	let depth = 0;
+	for (let index = open; index >= 0 && index < text.length; index += 1) {
+		if (text[index] === '{') depth += 1;
+		if (text[index] === '}' && --depth === 0) return text.slice(open + 1, index);
+	}
+	return '';
+}
+
+/**
  * Every source file the size rules govern: components, stories, harnesses and demos under `src/`, but not
  * generated output, the token definitions themselves, specs or type declarations. `text` has its comments
  * blanked (same length, same line numbers) so a commented-out class is never reported.

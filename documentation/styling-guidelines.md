@@ -759,9 +759,11 @@ Breakpoints (mobile-first; base styles target the 375px phone design):
 - Content is centered with a max width of 1440 (`max-w-page` via
   `container-page`), 1920 from 1920 (`wide:max-w-wide`, U-04.1); the side margins
   grow beyond it. Gutters: 24 below 950, 32 from 950, 48 from 1440.
-- The frame (wave 1.0, U-16/U-17): **below 744 no top bar** — the glass capsule `BottomNav` (280 in the middle,
-  16 over the safe area: `bottom-safe-area`, white 50 % `backdrop-blur-glass backdrop-saturate-180`, a 65 % white
-  rim, three tabs «Εξερευνήστε · Αγαπημένα · Προφίλ», the current one in the 7 % bubble), hidden from 744
+- The frame (wave 1.0, U-16/U-17): **below 744 no top bar** — the glass capsule `BottomNav` (384 in the middle and
+  never closer than 8 to the sides, `w-tab-capsule-w max-w-tab-capsule`; 16 over the safe area: `bottom-safe-area`,
+  white 50 % `backdrop-blur-glass backdrop-saturate-180`, a 65 % white rim, five tabs «Εξερευνήστε · Αγαπημένα ·
+  Ραντεβού · Μηνύματα · Προφίλ» since wave 4.0 (U-134.6), their words `narrow-phone:tracking-tight` below 360, the
+  current one in the 7 % bubble), hidden from 744
   (`hideFrom="tablet"`, the default). **From 744** apple.com's `AppHeader` (`showFrom="tablet"`): sticky 64, white
   80 % `backdrop-blur-bar backdrop-saturate-180`, the hairline only once the page scrolls (`data-scrolled`), its
   content in the 1024 box with 22 a side (`max-w-bar-content px-5.5`). The footer reserves the capsule's room

@@ -15,7 +15,8 @@
 /*
  * U-70 (screen 14 Π5, by the box it sits in, never the screen): a list as wide as 520 keeps the fee beside its rows, a
  * narrower one writes it under the title (the phone, the profile's column at 744–949). U-73 (screen 16 Π3): a card as
- * wide as 340 has its numbers beside the person, a narrower one under.
+ * wide as 340 has its numbers beside the person, a narrower one under. U-156 (screen 51): the band «Πώς ήταν η
+ * επίσκεψη;» reads `row-wide` too, with `tablet:` — its button beside its words only in a band as wide as 520.
  */
 @custom-variant row-wide (@container (min-width: --theme(--spacing-row-wide)));
 /*
@@ -23,6 +24,12 @@
  * `narrow` container (360), where two pills no longer fit beside each other.
  */
 @custom-variant narrow-phone (@media (width < --theme(--container-narrow)));
+/*
+ * Wave 4.0 (D-W4-65, the phone's capsule): a screen under 400, where the capsule is narrower than its whole 384 and
+ * five tabs no longer fit as equal shares — their words touched (measured live at 320 / 360 / 375; at 402 it is whole).
+ * The capsule alone reads it.
+ */
+@custom-variant capsule-narrow (@media (width < --theme(--spacing-tab-capsule-fit)));
 @custom-variant card-wide {
 	@container (min-width: --theme(--spacing-card-wide)) {
 		@slot;
@@ -588,6 +595,11 @@
 	line-height: 1.4;
 }
 
+/* U-134.6, D-W4-53 (the prototype's `.a-tabs.web`): the phone's capsule never closer than 8 to the screen's sides. */
+@utility max-w-tab-capsule {
+	max-width: calc(100vw - --spacing(4));
+}
+
 /* U-84 Π2: a message takes at most 78 % of its column, and from 744 at most 560. */
 @utility max-w-bubble {
 	max-width: 78%;
@@ -597,8 +609,11 @@
 	}
 }
 
-/* U-84 Π1: from 950 the inbox fills the screen under the site's bar, each column scrolling on its own. */
-@utility h-inbox {
+/*
+ * U-84 Π1, D-W4-52: from 950 a `SplitView` (the inbox, the appointments) fills the screen under the site's bar, each
+ * column scrolling on its own. It was the inbox's `h-inbox`; the template is its one reader.
+ */
+@utility h-split {
 	height: calc(100dvh - var(--spacing-bar-top));
 }
 
@@ -608,6 +623,15 @@
 
 	@media (width >= --theme(--breakpoint-laptop)) {
 		grid-template-columns: var(--spacing-inbox-list-w-lg) minmax(0, 1fr);
+	}
+}
+
+/* Wave 4 · screens 50–55 (U-134.2, `appt.css:228`, `:241`): from 950 the list on the left (420, 460 from 1128), what it opened beside it. */
+@utility grid-split {
+	grid-template-columns: var(--spacing-split-list-w) minmax(0, 1fr);
+
+	@media (width >= --theme(--breakpoint-laptop)) {
+		grid-template-columns: var(--spacing-split-list-w-lg) minmax(0, 1fr);
 	}
 }
 

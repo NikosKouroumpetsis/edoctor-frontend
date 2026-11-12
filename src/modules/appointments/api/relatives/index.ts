@@ -1,13 +1,20 @@
-export { createBookingRelative } from './endpoints';
+export { forgetRelative } from './cache';
+export { createBookingRelative, deleteRelative, listRelatives, updateRelative } from './endpoints';
 export {
 	readBookingRelativeFailure,
 	readBookingRelativeInvalidIds,
-	readBookingRelativeRefusedFields
+	readBookingRelativeRefusedFields,
+	readRelativeChangeFailure
 } from './failure';
+export { mapRelative } from './map';
+export { relativesQuery } from './queries';
 export type {
 	BookingRelativeFailure,
 	BookingRelativeField,
 	BookingRelativeGender,
 	BookingRelativeInput,
-	BookingRelativeRelationship
+	BookingRelativeRelationship,
+	RelativeChangeFailure,
+	RelativeFacts,
+	RelativeUpdate
 } from './types';

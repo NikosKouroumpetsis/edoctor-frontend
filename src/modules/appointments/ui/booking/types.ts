@@ -2,6 +2,7 @@ import type { Snippet } from 'svelte';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type { BookingSlotChoice } from '$modules/appointments/lib/booking';
 import type { BookingAvailabilityFacts, BookingDoctorFacts } from '$modules/appointments/types';
+import type { RelativeMobileParser } from '$modules/appointments/ui/relative-form';
 
 /** Where the slots of the chosen office stand (the doctor module's read, through the screen). */
 export type BookingSlotsState = 'idle' | 'waiting' | 'failed' | 'answered';
@@ -43,27 +44,8 @@ export type BookingTimeProps = BookingScreenContext & {
 	picker: Snippet;
 };
 
-/** The frame of every «Αλλαγή» screen (record §3.3): «←», the title, the content, «Άκυρο» and «Αποθήκευση». */
-export type BookingChangeFrameProps = {
-	title: string;
-	subtitle?: string;
-	backHref: string;
-	onBack: (event: MouseEvent) => void;
-	saveLabel?: string;
-	saveDisabled?: boolean;
-	saveLoading?: boolean;
-	onCancel: () => void;
-	onSave: () => void;
-	locale: SupportedLocale;
-	testId?: string;
-	children?: Snippet;
-};
-
-/**
- * The sign-in's own rule for a mobile (the auth module's, composed by the screen: a module imports no other): what was
- * typed, with its country, as the E.164 number the server takes, or `null` for one it would refuse.
- */
-export type BookingMobileParser = (dialCode: string, typed: string) => string | null;
+/** The sign-in's own rule for a mobile: ONE type, the relatives' form's (review w4-w5 R1 NIT-5), by the booking's name. */
+export type BookingMobileParser = RelativeMobileParser;
 
 /** Every «Αλλαγή» screen of part 2 (record §3.3): the screen's context and the service screen 30 books (resolved). */
 export type BookingChangeProps = BookingScreenContext & { serviceId: string | undefined };

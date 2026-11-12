@@ -6,8 +6,17 @@ import type { ApiRequestBody } from '$shared/lib/api-client';
  * goes anywhere but the page.
  */
 
-/** A relative the visit can be for: the minimum the booking names and sends. */
-export type BookingRelativeFacts = { relativeId: string; firstName: string; lastName: string };
+/**
+ * A relative the visit can be for: the minimum the booking names and sends, and (🔴 U-139.5, D-W4-22) the relationship
+ * and gender as the server spells them (`''` when it names none), so the page can say «Γιος», «Μητέρα», «Ο / Η».
+ */
+export type BookingRelativeFacts = {
+	relativeId: string;
+	firstName: string;
+	lastName: string;
+	relationship: string;
+	gender: string;
+};
 
 export type BookingPatientFacts = {
 	patientId: string;

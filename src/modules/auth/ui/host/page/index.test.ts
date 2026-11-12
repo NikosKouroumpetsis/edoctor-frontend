@@ -395,6 +395,164 @@ describe('the session (U-80.1 Ε6)', () => {
 		expect(screen.getByTestId('forgotten')).toHaveTextContent('0');
 	});
 
+	it('🔴 D-W4-78 (U-84): the ended session is SAID (`expired`) while the sign-in it opened is open; the same person back ends it, nothing forgotten', async () => {
+		signedIn = true;
+		patient = { id: 'p', firstName: 'Μαρία', tenantUserId: 'account-a' };
+		render(Harness);
+		await waitFor(() => expect(screen.getByTestId('status')).toHaveTextContent('member'));
+		expect(screen.getByTestId('expired')).toHaveTextContent('false');
+		signedIn = false;
+		await user().click(screen.getByTestId('expire'));
+		await waitFor(() => expect(screen.getByTestId('status')).toHaveTextContent('guest'));
+		expect(screen.getByTestId('expired')).toHaveTextContent('true');
+		await submitIdentifier('patient-3@seed.edoctor.test');
+		await typeCode();
+		await user().click(screen.getByTestId('auth-verify'));
+		await waitFor(() => expect(screen.getByTestId('status')).toHaveTextContent('member'));
+		await waitFor(() => expect(screen.getByTestId('expired')).toHaveTextContent('false'));
+		expect(screen.getByTestId('forgotten')).toHaveTextContent('0');
+	});
+
+	it('🔴 D-W4-78 (negative): ANOTHER account signing in over the ended session — what was written is forgotten and the ended session is over with it', async () => {
+		signedIn = true;
+		patient = { id: 'p', firstName: 'Μαρία', tenantUserId: 'account-a' };
+		render(Harness);
+		await waitFor(() => expect(screen.getByTestId('status')).toHaveTextContent('member'));
+		signedIn = false;
+		await user().click(screen.getByTestId('expire'));
+		await waitFor(() => expect(screen.getByTestId('expired')).toHaveTextContent('true'));
+		patient = { id: 'q', firstName: 'Νίκος', tenantUserId: 'account-b' };
+		await submitIdentifier('patient-4@seed.edoctor.test');
+		await typeCode();
+		await user().click(screen.getByTestId('auth-verify'));
+		await waitFor(() => expect(screen.getByTestId('forgotten')).toHaveTextContent('1'));
+		expect(screen.getByTestId('status')).toHaveTextContent('member');
+		expect(screen.getByTestId('expired')).toHaveTextContent('false');
+	});
+
+	it('🔴 D-W4-78 (negative): «×» on the sign-in of an ended session: a guest, and the ended session is over — nothing waits under a sign-in that closed', async () => {
+		signedIn = true;
+		patient = { id: 'p', firstName: 'Μαρία', tenantUserId: 'account-a' };
+		render(Harness);
+		await waitFor(() => expect(screen.getByTestId('status')).toHaveTextContent('member'));
+		signedIn = false;
+		await user().click(screen.getByTestId('expire'));
+		await waitFor(() => expect(screen.getByTestId('expired')).toHaveTextContent('true'));
+		await user().click(await screen.findByTestId('auth-close'));
+		await waitFor(() => expect(screen.queryByTestId('auth-dialog')).not.toBeInTheDocument());
+		expect(screen.getByTestId('expired')).toHaveTextContent('false');
+		expect(screen.getByTestId('status')).toHaveTextContent('guest');
+	});
+
+	/** The browser shows the page: put back from its back/forward cache as it was left (`persisted`), or loaded. */
+	function pageShown(persisted: boolean) {
+		const event = new Event('pageshow');
+		Object.defineProperty(event, 'persisted', { value: persisted });
+		window.dispatchEvent(event);
+	}
+
+	/** A member whose session ended under a write: the sign-in open over the page, the ended session said. */
+	async function endedUnderAWrite(onSignedIn?: () => void, onSignInAbandoned?: () => void) {
+		signedIn = true;
+		patient = { id: 'p', firstName: 'Μαρία', tenantUserId: 'account-a' };
+		const view = render(Harness, { props: { onSignedIn, onSignInAbandoned } });
+		await waitFor(() => expect(screen.getByTestId('status')).toHaveTextContent('member'));
+		signedIn = false;
+		await user().click(screen.getByTestId('expire'));
+		await waitFor(() => expect(screen.getByTestId('expired')).toHaveTextContent('true'));
+		expect(await screen.findByTestId('auth-dialog')).toHaveAttribute('data-state', 'open');
+		return view;
+	}
+
+	it('🔴 U-153 (card w4-w12; live check w4-live-web-3 Δ5): a page the browser puts back from its back/forward cache with the ended session still under its sign-in is left as by «×» — a guest, the sign-in closed, the ended session over, what waited for it told gone and never run', async () => {
+		const action = vi.fn();
+		const abandoned = vi.fn();
+		await endedUnderAWrite(action, abandoned);
+		pageShown(true);
+		await waitFor(() => expect(screen.queryByTestId('auth-dialog')).not.toBeInTheDocument());
+		expect(screen.getByTestId('expired')).toHaveTextContent('false');
+		expect(screen.getByTestId('status')).toHaveTextContent('guest');
+		expect(abandoned).toHaveBeenCalledOnce();
+		expect(action).not.toHaveBeenCalled();
+		// The same way as «×»: nothing else is touched (a draft goes with a sign-out or another account, not here).
+		expect(screen.getByTestId('forgotten')).toHaveTextContent('0');
+		// Shown again: there is nothing left to leave.
+		pageShown(true);
+		expect(abandoned).toHaveBeenCalledOnce();
+	});
+
+	it('U-153 (negative): a page merely shown (a load, `persisted` false) keeps the ended session under its sign-in as it is', async () => {
+		const abandoned = vi.fn();
+		await endedUnderAWrite(undefined, abandoned);
+		pageShown(false);
+		await new Promise((done) => setTimeout(done, 0));
+		expect(screen.getByTestId('auth-dialog')).toHaveAttribute('data-state', 'open');
+		expect(screen.getByTestId('expired')).toHaveTextContent('true');
+		expect(abandoned).not.toHaveBeenCalled();
+	});
+
+	it('U-153 (negative): a page put back with NO ended session does not change — a guest’s sign-in asked by a card stays open, a member stays a member', async () => {
+		const abandoned = vi.fn();
+		const view = await openFlow(undefined, abandoned);
+		expect(screen.getByTestId('expired')).toHaveTextContent('false');
+		pageShown(true);
+		await new Promise((done) => setTimeout(done, 0));
+		expect(screen.getByTestId('auth-dialog')).toHaveAttribute('data-state', 'open');
+		expect(abandoned).not.toHaveBeenCalled();
+		view.unmount();
+
+		signedIn = true;
+		render(Harness, { props: { onSignInAbandoned: abandoned } });
+		await waitFor(() => expect(screen.getByTestId('status')).toHaveTextContent('member'));
+		pageShown(true);
+		await new Promise((done) => setTimeout(done, 0));
+		expect(screen.getByTestId('status')).toHaveTextContent('member');
+		expect(screen.queryByTestId('auth-dialog')).not.toBeInTheDocument();
+		expect(abandoned).not.toHaveBeenCalled();
+	});
+
+	it('U-153 (negative): the same person already signed in again, on «set a password» past the sign-in — the page is theirs: put back, it stays as it is, and what waited still runs once', async () => {
+		const action = vi.fn();
+		const abandoned = vi.fn();
+		await endedUnderAWrite(action, abandoned);
+		await submitIdentifier('a@b.gr');
+		await user().click(await screen.findByTestId('auth-try-another-way'));
+		await user().click(await screen.findByTestId('auth-use-password'));
+		await user().click(await screen.findByTestId('auth-password-forgot'));
+		await typeCode();
+		await user().click(screen.getByTestId('auth-verify'));
+		const step = await screen.findByTestId('auth-step-set-password');
+		await waitFor(() => expect(screen.getByTestId('status')).toHaveTextContent('member'));
+		expect(screen.getByTestId('expired')).toHaveTextContent('true');
+		pageShown(true);
+		await new Promise((done) => setTimeout(done, 0));
+		expect(screen.getByTestId('auth-step-set-password')).toBe(step);
+		expect(screen.getByTestId('status')).toHaveTextContent('member');
+		expect(abandoned).not.toHaveBeenCalled();
+		expect(action).not.toHaveBeenCalled();
+		await user().click(within(step).getByTestId('auth-set-password-later'));
+		await waitFor(() => expect(action).toHaveBeenCalledTimes(1));
+		expect(screen.getByTestId('forgotten')).toHaveTextContent('0');
+	});
+
+	it('U-153: ONE listener of the page’s showing, and it goes with the host', async () => {
+		const added = vi.spyOn(window, 'addEventListener');
+		const removed = vi.spyOn(window, 'removeEventListener');
+		const abandoned = vi.fn();
+		try {
+			const view = await endedUnderAWrite(undefined, abandoned);
+			const listeners = added.mock.calls.filter(([type]) => type === 'pageshow');
+			expect(listeners).toHaveLength(1);
+			view.unmount();
+			expect(removed).toHaveBeenCalledWith('pageshow', listeners[0][1]);
+			pageShown(true);
+			expect(abandoned).not.toHaveBeenCalled();
+		} finally {
+			added.mockRestore();
+			removed.mockRestore();
+		}
+	});
+
 	it('the session says whether the account has a patient’s profile (`null` from the server: none)', async () => {
 		signedIn = true;
 		patient = { id: 'p', firstName: 'Μαρία' };

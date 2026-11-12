@@ -1,7 +1,8 @@
 import { m } from '$paraglide/messages.js';
+import { officeDialNumber } from '$shared/lib/office';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type { DoctorProfile } from '$modules/doctor/api/profile';
-import { doctorNameLabel, doctorSentenceName, officeDialNumber, specialtyLabel } from '../labels';
+import { doctorNameLabel, doctorSentenceName, specialtyLabel } from '../labels';
 import { doctorResponseWord } from '../metrics';
 
 /**
