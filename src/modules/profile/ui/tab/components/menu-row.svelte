@@ -7,6 +7,8 @@
 		label,
 		href,
 		onclick,
+		chevron = true,
+		disabled = false,
 		testId
 	}: {
 		icon: IoniconName;
@@ -14,26 +16,33 @@
 		/** A page; without one the row is a button. */
 		href?: ResolvedPathname | null;
 		onclick?: () => void;
+		/** «›» at the end: a row that opens something. «Αποσύνδεση» opens nothing, so it has none (U-164 Ε3). */
+		chevron?: boolean;
+		/** A button row whose press is on its way (the sign-out): it takes no second one. */
+		disabled?: boolean;
 		testId: string;
 	} = $props();
 
 	const rowClass =
-		'flex min-h-touch w-full flex-row items-center gap-4 py-4 text-start text-foreground outline-none transition-opacity duration-standard ease-standard focus-visible:ring-3 focus-visible:ring-ring/50 active:opacity-70';
+		'flex min-h-row w-full flex-row items-center gap-3.5 text-start text-body-lg text-foreground outline-none transition-opacity duration-standard ease-standard focus-visible:ring-3 focus-visible:ring-ring/50 active:opacity-70 disabled:opacity-50';
 </script>
 
-<!-- The application's `ProfileMenuRow`: 48 at least, 16 over and under, the 24 glyph · 16 · the word 17 · the 20 › muted. -->
+<!-- A row of the «Προφίλ» (record §5.1, `56-profile/prof.css:32-36` `.p-row`): 56 high, the 24 glyph · 14 · the word 16 ·
+     the 20 «›» muted. A page is a link, a window of the frame or the sign-out a button. No colour under the pointer (U-100). -->
 {#snippet content()}
 	<span class="grid size-6 shrink-0 place-items-center">
 		<Ionicon name={icon} class="icon-lg" />
 	</span>
-	<span class="min-w-0 flex-1 text-title-xs">{label}</span>
-	<Ionicon name="chevron-forward" class="icon-md text-muted-foreground" />
+	<span class="min-w-0 flex-1">{label}</span>
+	{#if chevron}
+		<Ionicon name="chevron-forward" class="icon-md shrink-0 text-muted-foreground" />
+	{/if}
 {/snippet}
 
 {#if href}
 	<a {href} data-testid={testId} class={rowClass}>{@render content()}</a>
 {:else}
-	<button type="button" data-testid={testId} class={rowClass} {onclick}>
+	<button type="button" data-testid={testId} class={rowClass} {disabled} {onclick}>
 		{@render content()}
 	</button>
 {/if}

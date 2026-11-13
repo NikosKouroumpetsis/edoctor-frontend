@@ -349,15 +349,21 @@ In place:
   negative per kind.
 - `tests/architecture/review-topics.test.ts` («U-91.2: …») — the six topics of «Οι ασθενείς αναφέρουν»: no label, key, glyph or
   value of the code speaks of the wait, in either language.
-- `tests/architecture/patient-texts.test.ts` (wave 4.0, «D-W4-12 · D-W4-13 · D-W4-14 · U-137.5 · U-138.6 · U-139.6») — the
+- `tests/architecture/patient-texts.test.ts` (wave 4.0, «D-W4-12 · D-W4-13 · D-W4-14 · U-137.5 · U-173 · U-139.6») — the
   patient's words a decision changed, read from `messages/{el,en}.json`: no email promised after a rating, the guest's
   sentence of the prototype, the calendar's title and description the email's own (read from the backend's
-  `calendar-invite` template, the `server-rules` way), no «εκπρόθεσμα» and no `late` key, «αξιολόγηση» the act and
-  «κριτική» what is published, the relative's mobile helper of U-139.6 in el and en. Its neighbours: `en-parity.test.ts`
+  `calendar-invite` template, the `server-rules` way), no «εκπρόθεσμα» and no `late` key, 🔴 U-173 (wave 4.5, in
+  U-138.6's place) the act says «κριτική» as what is published does, the relative's mobile helper of U-139.6 in el and en. Its neighbours: `en-parity.test.ts`
   (D-W4-57: the same Greek says the application's English, with the frame's tabs and menu by alias) and
   `appointment-rules.test.ts` (the rating's weights and formula, the stars of a grade (`toRatingStars`), the comment's
   bound and symbols, the patient's five cancel reasons, the relatives' 20 and the scan's page of 100
   (`listPageSizeMax`), read from the backend). One planted negative per rule.
+- `tests/architecture/one-word-reviews.test.ts` (wave 4.5, «U-173: καμία "αξιολογ…" στο `messages/el.json`», D-W45-53,
+  D-W45-54) — ONE word for what a patient writes about a visit, «κριτική / κριτικές» (“review”): no key of the Greek
+  catalog and no string of `src/` (components, stories, helpers; comments are not read) says the old word, in any case
+  or form; the English never calls a review a “rating” («rating invitation», «New ratings», «Rate your visit» and the
+  rest of D-W45-53); the table's lines verbatim in both languages (the application's and the server's own words); the
+  number with the stars stays «Βαθμολογία» / “Rating”, the search's sort too. Planted negatives for both languages.
 - `tests/architecture/appointment-screens.test.ts` (wave 4.0, «U-132.1 · U-135.2 · U-137.5 · U-102 / U-136 / U-137») —
   the patient's appointment pages (`modules/appointments/ui/**`, the screens of `/appointments`, `/ratings`,
   `/profile/[...path]`) import no map of the kit nor the map library; the 51 (`ui/detail`) fixes and sticks nothing to
@@ -366,7 +372,13 @@ In place:
   or drawer and plays no dialog, with two allowed imports: the rating's «Πώς λειτουργούν οι κριτικές» (`info-dialog`,
   D-W4-24: information) and 🔴 U-139.3's ONE window, the shared `ActionDialog` in
   `ui/relatives/components/delete-dialog.svelte` alone (D-W4-58) — a second window, another kind or a dialog's role in
-  the relatives' slice is reported too. Its neighbour `calendar-golden.test.ts`
+  the relatives' slice is reported too. Wave 4.5 (card w45-w9) adds two rules to the same file: 🔴 «U-167: η δεξιά
+  στήλη των σελίδων του 4.0 κεντράρεται από 950» (D-W45-56) — no class of those slices pushes a box against the list
+  from 950 (`split:mx-0` …) nor insets one side alone with the column's inset (`desktop:pl-pane-inset-xl`), and the two
+  places that set the right column's box (`ui/detail/page`, `change-screen/components/change-frame`) are `mx-auto` at
+  their own widths; 🔴 «D-W45-57» — the screens of `/appointments`, `/ratings`, `/profile/[...path]` and
+  `/notifications` are the whole screen high below 744 (`min-h-dvh`, no site's bar there) and take `min-h-page` only
+  from 744. Its neighbour `calendar-golden.test.ts`
   (D-W4-31): the browser's `.ics` builder reproduces the backend's golden `PUBLISH` vectors byte for byte, read where the
   backend keeps them, writes no method but `PUBLISH` whatever it is handed, and its place (`appointmentCalendarLocation`)
   says every step of the backend's `formatOfficeAddress`, read from its body (P-B4-review 5 (γ); no address at all is

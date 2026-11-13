@@ -834,7 +834,7 @@ describe('🔴 review w4-w6 R1 MAJOR-1 · a visit just rated, written where ever
 		});
 	});
 
-	it('(negative) a review the answer did not name: the invitation still goes (never «Αξιολογήστε» again), the id stays as it was; nothing read is made up — an appointment not in the cache stays absent', () => {
+	it('(negative) a review the answer did not name: the invitation still goes (never «Γράψτε κριτική» again), the id stays as it was; nothing read is made up — an appointment not in the cache stays absent', () => {
 		const client = seeded();
 		storeAppointmentRated(client, ID, null);
 		expect(client.getQueryData<Row>(['appointments', 'detail', ID])).toMatchObject({

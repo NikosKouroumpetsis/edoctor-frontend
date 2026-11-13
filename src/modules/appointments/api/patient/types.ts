@@ -31,5 +31,10 @@ export type BookingPatientFacts = {
 /** The person's own name and date of birth, sent only when asked for (`PATCH /patient/me/profile`, the contract's body). */
 export type BookingProfilePatch = ApiRequestBody<'patchPatientMeProfile'>;
 
+/**
+ * The person's own ΑΜΚΑ / ΑΦΜ (`PUT /patient/me`, the contract's body): the digits, `null` to remove, absent = untouched.
+ */
+export type PatientIdentifiersPatch = ApiRequestBody<'upsertPatientMe'>;
+
 /** Why that write was refused: the date of birth (`422`), the session (`401`), a field, else. */
 export type BookingProfileFailure = 'birth-date' | 'session' | 'invalid' | 'unknown';

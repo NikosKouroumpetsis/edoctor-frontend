@@ -132,6 +132,13 @@ export type MessagingDoctorSettingsView = Schemas['MessagingDoctorSettingsView']
 export type NotificationPreferencesView = Schemas['NotificationPreferencesView'];
 export type NotificationPreferenceCategory = Schemas['NotificationPreferenceCategory'];
 export type NotificationChannel = Schemas['NotificationChannel'];
+// Wave 4.5 · screen 63 (D-W45-46): the account's list of notifications — a page of its lines (each with its words in
+// the language of the request, never an address or a template), how many are still new, and what the two writes answer.
+export type NotificationInboxPageView = Schemas['NotificationInboxPageView'];
+export type NotificationInboxItemView = Schemas['NotificationInboxItemView'];
+export type NotificationInboxUnreadCountView = Schemas['NotificationInboxUnreadCountView'];
+export type NotificationInboxReadView = Schemas['NotificationInboxReadView'];
+export type NotificationInboxReadAllView = Schemas['NotificationInboxReadAllView'];
 // Wave 2 · screen 23 (U-78): a device's own vote; no public answer holds a count (U-78.1).
 export type HelpfulVoteCastResponseView = Schemas['HelpfulVoteCastResponseView'];
 export type HelpfulVoteChoice = Schemas['HelpfulVoteChoice'];
@@ -147,8 +154,19 @@ export type AppointmentStatus = Schemas['AppointmentStatus'];
 export type AppointmentConfirmationMode = Schemas['AppointmentConfirmationMode'];
 export type PatientSelfUpsertResponseView = Schemas['PatientSelfUpsertResponseView'];
 export type RelativeView = Schemas['RelativeView'];
+// Wave 4.5 (D-W45-10): what the relatives routes answer — to the patient who owns the relative its `RelativeSelfView`
+// (ΑΜΚΑ / ΑΦΜ only as `amkaMasked` / `afmMasked`), to the backoffice the whole `RelativeView`.
+export type RelativeScopedView = Schemas['RelativeScopedView'];
 export type LoginPhoneAttachStartResult = Schemas['LoginPhoneAttachStartResult'];
 export type LoginPhoneAttachVerifyResult = Schemas['LoginPhoneAttachVerifyResult'];
+// Wave 4.5 · screen 58 (D-W45-15): the change of the sign-in email — a code to the NEW address, then the address as its
+// owner reads it (`loginEmailMasked`); the whole one never comes back.
+export type LoginEmailChangeStartResult = Schemas['LoginEmailChangeStartResult'];
+export type LoginEmailChangeVerifyResult = Schemas['LoginEmailChangeVerifyResult'];
+// Wave 4.5 · screen 59 (D-W45-35, D-W45-37): the account's own sign-in methods — two booleans about the password, never
+// the password, and the providers linked to it — and its live sessions, each device as three closed vocabularies.
+export type SignInMethodsView = Schemas['SignInMethodsView'];
+export type AccountSessionsView = Schemas['AccountSessionsView'];
 // Wave 3 · screens 33–42 (`modules/doctor-onboarding`): the progress every step write answers, the address search our
 // server proxies to Google Places (D-W3-33 `pointProof`) and the specialties' catalogue; the writes' bodies by operation.
 export type DoctorOnboardingProgressView = Schemas['DoctorOnboardingProgressView'];

@@ -51,6 +51,28 @@
 	</div>
 {/snippet}
 
+{#snippet menu()}
+	<h1 class="mb-4 text-heading-md font-semibold text-foreground">Μενού</h1>
+	<ul class="flex flex-col">
+		{#each rows as row, index (row)}
+			<li
+				class={index === 0
+					? 'flex min-h-touch items-center rounded-md bg-chip px-3.5 text-body-md font-semibold text-foreground'
+					: 'flex min-h-touch items-center rounded-md px-3.5 text-body-md text-foreground'}
+			>
+				{row}
+			</li>
+		{/each}
+	</ul>
+{/snippet}
+
+{#snippet section()}
+	<h2 class="text-heading-md font-semibold text-foreground">Πρώτη γραμμή</h2>
+	{#each rows as row (row)}
+		<p class="border-b border-line py-5 text-body-md text-foreground">{row}</p>
+	{/each}
+{/snippet}
+
 <Story name="List And Pane" globals={{ viewport: { value: 'z1440' } }}>
 	{#snippet template()}
 		<SplitView list={column}>{@render detail()}</SplitView>
@@ -80,5 +102,18 @@
 <Story name="Inbox Widths" globals={{ viewport: { value: 'z1128' } }}>
 	{#snippet template()}
 		<SplitView list={column} widths="inbox">{@render detail()}</SplitView>
+	{/snippet}
+</Story>
+
+<!-- U-167 (D-W45-08): a menu of 340 / 420 on the left, what it opened in the MIDDLE of the right column (at most 640). -->
+<Story name="Menu And Centred Pane" globals={{ viewport: { value: 'z1440' } }}>
+	{#snippet template()}
+		<SplitView list={menu} widths="menu" centred>{@render section()}</SplitView>
+	{/snippet}
+</Story>
+
+<Story name="Menu And Centred Pane At 950" globals={{ viewport: { value: 'z950' } }}>
+	{#snippet template()}
+		<SplitView list={menu} widths="menu" centred>{@render section()}</SplitView>
 	{/snippet}
 </Story>

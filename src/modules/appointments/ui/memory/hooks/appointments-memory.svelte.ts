@@ -5,7 +5,7 @@ import type { AppointmentDone } from '$modules/appointments/lib/detail';
 
 /**
  * 🔴 D-W4-33 (P-W4 Σ-29), U-65.6: what the patient's pages remember right after a write, to say it on the appointment
- * (U-136.6 «Η ώρα άλλαξε. Ήταν …», U-137.6 «Σας στείλαμε email επιβεβαίωσης.», the 54's «Η αξιολόγηση υποβλήθηκε.») —
+ * (U-136.6 «Η ώρα άλλαξε. Ήταν …», U-137.6 «Σας στείλαμε email επιβεβαίωσης.», the 54's «Η κριτική υποβλήθηκε.») —
  * in this rune only, never in the address (the browser keeps an address in its history, its links and its referrers;
  * the old hour or a relative's name must not leave the page). One per page tree (context, never a module singleton); a
  * reload, a sign-out or another account empties it.

@@ -237,13 +237,14 @@ describe('screen 55 · «Επεξεργασία συγγενή» (P-W4 §4.6, D-
 		gender: 'FEMALE',
 		phone: '+306941234567',
 		email: 'anna@example.test',
-		amka: null,
-		afm: null
+		amkaMasked: '•••••••2345',
+		afmMasked: null
 	};
 	const greek = (stored: string) =>
 		stored.startsWith('+30') ? { dialCode: '+30', national: stored.slice(3) } : null;
 
-	it('the form starts from what is on file, every optional field blank when none', () => {
+	// «U-168: τα πεδία ανοίγουν άδεια» — the mask on file («•••••••2345») is never a field's value.
+	it('🔴 U-168 · D-W45-14: the form starts from what is on file, every optional field blank when none — and the ΑΜΚΑ / ΑΦΜ EMPTY whatever is on file', () => {
 		expect(relativeFormValues(anna)).toEqual({
 			firstName: 'Άννα',
 			lastName: 'Παππά',
@@ -286,6 +287,29 @@ describe('screen 55 · «Επεξεργασία συγγενή» (P-W4 §4.6, D-
 				anna
 			)
 		).toEqual({ relationship: 'CHILD', gender: 'MALE', amka: '01019012345' });
+	});
+
+	it('🔴 D-W45-14: ΑΜΚΑ / ΑΦΜ — an empty field is UNTOUCHED (never `null`), a number typed travels, «Αφαίρεση» sends `null`; a number typed after «Αφαίρεση» wins', () => {
+		const values = relativeFormValues(anna);
+		const same = { kind: 'number' as const, value: '+306941234567' };
+		// Anna has an ΑΜΚΑ on file and the field is empty: nothing of it travels, so the server keeps it.
+		expect(toRelativeUpdate(values, same, anna)).toEqual({});
+		expect(toRelativeUpdate({ ...values, lastName: 'Γεωργίου' }, same, anna)).toEqual({
+			lastName: 'Γεωργίου'
+		});
+		expect(toRelativeUpdate({ ...values, afm: '123456783' }, same, anna)).toEqual({
+			afm: '123456783'
+		});
+		expect(toRelativeUpdate(values, same, anna, ['amka'])).toEqual({ amka: null });
+		expect(toRelativeUpdate(values, same, anna, ['amka', 'afm'])).toEqual({
+			amka: null,
+			afm: null
+		});
+		expect(toRelativeUpdate({ ...values, amka: '01019012345' }, same, anna, ['amka'])).toEqual({
+			amka: '01019012345'
+		});
+		// (negative) the mask is never sent back as a number.
+		expect(JSON.stringify(toRelativeUpdate(values, same, anna, ['afm']))).not.toContain('•');
 	});
 
 	it('🔴 U-65.6 (negative): a form that cannot be whole sends nothing — a refused mobile, an empty name, a relationship off the list', () => {

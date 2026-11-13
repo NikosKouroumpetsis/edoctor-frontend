@@ -3,13 +3,14 @@
 
 	// The box of each placement. `page`: the booking's own page (record §3.3), white to the bottom however short (W8-Δ1).
 	// `pane` (`appt.css:313-333`): one column of 560 inside the change's widths — 640 at 744–949, from 950 the right
-	// column's 656 / 688 / 704 with its insets (48, 64 from 1128, 80 on the left from 1440). `solo` (U-139.1,
-	// `55-relatives/appt.css:463`): the 640 of 744–949 at every width from it, in the middle of the screen.
+	// column's 656 / 688 / 704 with its insets (48, 64 from 1128), 🔴 U-167 (D-W45-56) in the MIDDLE of that column, the
+	// same inset on both sides. `solo` (U-139.1, `55-relatives/appt.css:463`): the 640 of 744–949 at every width from
+	// it, in the middle of the screen.
 	const paneColumn =
 		'mx-auto w-full px-gutter-sm pt-3 pb-page-bar tablet:max-w-pane-column tablet:px-reading-gap tablet:pt-6 tablet:pb-pane-inset-lg';
 	const boxClasses: Record<ChangeFramePlacement, string> = {
 		page: 'min-h-dvh bg-card px-gutter-sm pt-3 pb-page-bar tablet:min-h-page tablet:px-gutter-lg tablet:pt-section tablet:pb-section-lg',
-		pane: `${paneColumn} split:mx-0 split:max-w-split-sub split:px-pane-inset split:pt-section laptop:max-w-split-sub-lg laptop:px-pane-inset-lg laptop:pt-reading-gap desktop:max-w-split-sub-xl desktop:pl-pane-inset-xl`,
+		pane: `${paneColumn} split:max-w-split-sub split:px-pane-inset split:pt-section laptop:max-w-split-sub-lg laptop:px-pane-inset-lg laptop:pt-reading-gap desktop:max-w-split-sub-xl`,
 		solo: paneColumn
 	};
 	// «←»: beside the column from 950 on the booking's page; in the flow at every width in the right column.

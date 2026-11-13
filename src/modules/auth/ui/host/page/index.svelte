@@ -23,6 +23,7 @@
 		getPatientSelf,
 		logoutSession
 	} from '$modules/auth/api/session';
+	import { forgetKnownAccount } from '$modules/auth/lib/known-account';
 	import AuthFlow, { AuthFlowState, setAuthFlow } from '$modules/auth/ui/flow';
 	import { isOnboardingExempt } from '../lib/onboarding';
 	import { toSessionFacts } from '../lib/self';
@@ -59,14 +60,32 @@
 				ended ? 'guest' : self === undefined ? 'unknown' : self.signedIn ? 'member' : 'guest',
 			member: () =>
 				!ended && self?.signedIn
-					? { firstName: self.firstName, hasPatientProfile: self.hasPatientProfile }
+					? {
+							firstName: self.firstName,
+							lastName: self.lastName,
+							maskedLoginEmail: self.maskedLoginEmail,
+							maskedLoginPhone: self.maskedLoginPhone,
+							maskedAmka: self.maskedAmka,
+							maskedAfm: self.maskedAfm,
+							hasPatientProfile: self.hasPatientProfile
+						}
 					: null,
 			failed: () => self === undefined && selfQuery.isError,
-			retry: () => void selfQuery.refetch(),
+			retry: () => selfQuery.refetch(),
 			abandoned: () => onSignInAbandoned?.(),
 			expire: () => {
 				ended = true;
 				queryClient.setQueryData(authQueryKeys.patientSelf(), { signedIn: false });
+			},
+			// 🔴 D-W45-30 (screen 62): the account was deleted and its confirm cleared the cookies — a sign-out the server
+			// has already carried out, so nothing is asked of it: this tab knows nobody, no write of the person waits, the
+			// other tabs learn it, and the device forgets who it greeted.
+			deleted: async () => {
+				await queryClient.cancelQueries({ queryKey: authQueryKeys.patientSelf() });
+				queryClient.setQueryData(authQueryKeys.patientSelf(), { signedIn: false });
+				removeMutations(queryClient);
+				forgetKnownAccount();
+				signOutChannel?.announce();
 			},
 			// 🔴 R-2: the cookies are `HttpOnly` on the API, so only the API ends the session: if it did not, the page must not
 			// say a guest, the person walks away, and the next one finds the account. A `401` has already ended it. A read on

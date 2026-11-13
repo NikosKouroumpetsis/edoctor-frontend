@@ -2,8 +2,8 @@ import type {
 	PatientSelfResponseView,
 	PatientSelfUpsertResponseView
 } from '$shared/lib/api-client';
-import { httpSessionGet, httpSessionPatch } from '$shared/lib/http';
-import type { BookingProfilePatch } from './types';
+import { httpSessionGet, httpSessionPatch, httpSessionPut } from '$shared/lib/http';
+import type { BookingProfilePatch, PatientIdentifiersPatch } from './types';
 
 /** The signed-in person (`GET /patient/me`), with the cookies: `null` is a session without a patient profile. */
 export function getBookingPatient(signal?: AbortSignal): Promise<PatientSelfResponseView> {
@@ -17,4 +17,13 @@ export function getBookingPatient(signal?: AbortSignal): Promise<PatientSelfResp
  */
 export async function updateBookingPatientProfile(patch: BookingProfilePatch): Promise<void> {
 	await httpSessionPatch<PatientSelfUpsertResponseView>('/patient/me/profile', { body: patch });
+}
+
+/**
+ * Wave 4.5 · screen 58 (D-W45-10): the person's own ΑΜΚΑ / ΑΦΜ (`PUT /patient/me`) — a new value, `null` to remove it,
+ * a field left out untouched. 🔴 U-168: the answer (the patient with its masks) never leaves `api/`; the page reads the
+ * person again.
+ */
+export async function updatePatientIdentifiers(patch: PatientIdentifiersPatch): Promise<void> {
+	await httpSessionPut<PatientSelfUpsertResponseView>('/patient/me', { body: patch });
 }

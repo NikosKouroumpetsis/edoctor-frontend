@@ -52,6 +52,30 @@ export function writeKnownAccount(account: KnownAccount) {
 	}
 }
 
+/**
+ * Wave 4.5 · screen 58 (card w45-w5 §3): the sign-in email changed — a memory that greets the person by an EMAIL keeps
+ * the new address as the SERVER hides it (U-168: the device never held the whole one), the way a sign-in writes it; a
+ * memory by a mobile, no memory, or an answer that is no mask stay as they are.
+ */
+export function renameKnownAccountEmail(maskedEmail: string | null) {
+	const known = readKnownAccount();
+	if (!known || known.channel !== 'email' || !maskedEmail) return;
+	writeKnownAccount({ ...known, maskedIdentifier: maskedEmail });
+}
+
+/**
+ * 🔴 D-W45-30 (wave 4.5, screen 62): the account was deleted — «Καλωσορίσατε» must not greet it by name on this device
+ * again, so its memory goes (the application's `forgetAccount`).
+ */
+export function forgetKnownAccount() {
+	if (!browser) return;
+	try {
+		window.localStorage.removeItem(knownAccountStorageKey);
+	} catch {
+		return;
+	}
+}
+
 /** Π4: what waits in the tab while a provider's redirect runs — the action and the path only, nothing personal. */
 export function writePendingReturn(pending: { next: string | null; action: SignInAction | null }) {
 	if (!browser) return;

@@ -159,10 +159,10 @@ const split = () => screen.getByTestId('appointments-split');
 const user = () => userEvent.setup({ delay: null });
 
 describe('screens/ratings/[invitationId] · screen 54 composed (U-138.3)', () => {
-	it('P-W4 §7: «Αξιολόγηση επίσκεψης» in the tab, never indexed; (negative) the invitation’s id is drawn nowhere', async () => {
+	it('P-W4 §7: «Κριτική επίσκεψης» in the tab, never indexed; (negative) the invitation’s id is drawn nowhere', async () => {
 		visit(`/ratings/${INVITATION}`);
 		draw();
-		expect(document.title).toBe('Αξιολόγηση επίσκεψης | eDoctor');
+		expect(document.title).toBe('Κριτική επίσκεψης | eDoctor');
 		expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute(
 			'content',
 			'noindex'

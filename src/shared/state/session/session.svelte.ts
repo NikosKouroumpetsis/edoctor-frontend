@@ -13,9 +13,19 @@ export type SessionStatus = 'unknown' | 'guest' | 'member';
 
 /**
  * `hasPatientProfile`: `false` for an account the server knows no patient for (a doctor's): what only a patient may do
- * says so before anything is written. Absent where the source does not know.
+ * says so before anything is written. Absent where the source does not know. Wave 4.5 (screen 56, D-W45-18): the family
+ * name and the sign-in address and mobile as the SERVER hides them (U-168: never whole, never hidden by the page); screen
+ * 58: the ΑΜΚΑ and the ΑΦΜ the same way (their last four digits).
  */
-export type SessionMember = { firstName: string | null; hasPatientProfile?: boolean };
+export type SessionMember = {
+	firstName: string | null;
+	lastName?: string | null;
+	maskedLoginEmail?: string | null;
+	maskedLoginPhone?: string | null;
+	maskedAmka?: string | null;
+	maskedAfm?: string | null;
+	hasPatientProfile?: boolean;
+};
 
 /** Where the session's facts come from: the auth module's confirming read, never a copy of it. */
 export type SessionSource = {
@@ -25,12 +35,17 @@ export type SessionSource = {
 	signOut: () => Promise<boolean | void>;
 	/** The browser asked and got no answer (an outage): a page waiting on the session says so instead of waiting on. */
 	failed?: () => boolean;
-	/** Asks again. */
-	retry?: () => void;
+	/** Asks again; a source that can tell when the answer is back says so (never a rejection). */
+	retry?: () => void | Promise<unknown>;
 	/** The server refused the session on a write: from here on the page knows nobody. */
 	expire?: () => void;
 	/** The visitor left the sign-in without finishing it: whatever waited for it goes. */
 	abandoned?: () => void;
+	/**
+	 * The account itself was deleted (wave 4.5, screen 62): the server has already ended the session and cleared its
+	 * cookies, so nothing is asked of it — the page knows nobody and keeps nothing of the person, on this device too.
+	 */
+	deleted?: () => Promise<void> | void;
 };
 
 export type SignInRequest = {
@@ -140,9 +155,15 @@ export class Session {
 		return true;
 	}
 
-	/** Asks the server again after a failed read. */
-	retryRead() {
-		this.#source.retry?.();
+	/**
+	 * Asks the server again — after a failed read, or (wave 4.5, screen 58) after the person changed their own details.
+	 * Resolves once the answer is back or lost, never rejects: a caller may wait for it or not.
+	 */
+	retryRead(): Promise<void> {
+		return Promise.resolve(this.#source.retry?.()).then(
+			() => undefined,
+			() => undefined
+		);
 	}
 
 	/**
@@ -155,6 +176,17 @@ export class Session {
 		this.flowOpen = false;
 		this.expired = false;
 		this.forgotten += 1;
+	}
+
+	/**
+	 * 🔴 D-W45-30 (wave 4.5, screen 62): the account was deleted — its confirm cleared the cookies. As a sign-out the
+	 * server carried out, with no request of its own: what a person wrote and what waited for the sign-in go, and so
+	 * does what this device remembered of the account (the source's `deleted`).
+	 */
+	async accountDeleted(): Promise<void> {
+		await this.#source.deleted?.();
+		// The same end as a sign-out learnt from another tab: nothing waits, nothing written stays.
+		this.signedOutElsewhere();
 	}
 
 	/** 🔴 R-2: only a sign-out the server carried out takes what a person wrote and what waited for the sign-in. */

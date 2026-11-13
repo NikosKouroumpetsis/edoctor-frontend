@@ -6,7 +6,8 @@ import {
 	mapBookingPatient,
 	mapBookingRelative,
 	readBookingProfileFailure,
-	updateBookingPatientProfile
+	updateBookingPatientProfile,
+	updatePatientIdentifiers
 } from '.';
 
 const view = (overrides: Partial<NonNullable<PatientSelfResponseView>> = {}) =>
@@ -14,8 +15,8 @@ const view = (overrides: Partial<NonNullable<PatientSelfResponseView>> = {}) =>
 		id: 'p-1',
 		userId: 'u-1',
 		tenantUserId: 't-1',
-		amka: null,
-		afm: null,
+		amkaMasked: null,
+		afmMasked: null,
 		createdAt: '2026-01-01T00:00:00Z',
 		updatedAt: '2026-01-01T00:00:00Z',
 		firstName: 'Ελένη',
@@ -128,7 +129,10 @@ describe('the person as the booking reads them (GET /patient/me)', () => {
 					new Response(
 						JSON.stringify({
 							status: 'ok',
-							data: view({
+							// D-W45-10 (wave 4.5): the contract answers masks now; an older server's whole values, sent beside
+							// them, are still read by nobody.
+							data: {
+								...view({ amkaMasked: '•••••••0002', afmMasked: '•••••0000' }),
 								amka: '00000000002',
 								afm: '000000000',
 								loginEmail: 'patient@example.test',
@@ -140,8 +144,8 @@ describe('the person as the booking reads them (GET /patient/me)', () => {
 										amka: '00000000001',
 										afm: '000000001'
 									}
-								] as never
-							})
+								]
+							}
 						}),
 						{ status: 200 }
 					)
@@ -177,5 +181,34 @@ describe('the person as the booking reads them (GET /patient/me)', () => {
 		expect(readBookingProfileFailure(refusal(422, 'firstName too long'))).toBe('invalid');
 		expect(readBookingProfileFailure(refusal(503, 'down'))).toBe('unknown');
 		expect(readBookingProfileFailure(new Error('offline'))).toBe('unknown');
+	});
+});
+
+describe('wave 4.5 · screen 58: the person’s own ΑΜΚΑ / ΑΦΜ (`PUT /patient/me`, D-W45-10)', () => {
+	const answering = (data: unknown) =>
+		vi.fn(async () => new Response(JSON.stringify({ status: 'success', data }), { status: 200 }));
+
+	it('a new number travels alone; «Αφαίρεση» is `null`; the other number is left out (untouched)', async () => {
+		const spy = answering(view({ amkaMasked: '•••••••2345' }));
+		vi.stubGlobal('fetch', spy);
+		await expect(updatePatientIdentifiers({ amka: '01019012345' })).resolves.toBeUndefined();
+		const [url, init] = spy.mock.calls[0] as unknown as [string, RequestInit];
+		expect(new URL(url, 'https://api.test').pathname).toMatch(/\/patient\/me$/u);
+		// 🔴 U-65.6: the number travels in the body alone — never in the address.
+		expect(url).not.toContain('01019012345');
+		expect(init).toMatchObject({ method: 'PUT', credentials: 'include' });
+		expect(JSON.parse(String(init.body))).toEqual({ amka: '01019012345' });
+
+		const removal = answering(view());
+		vi.stubGlobal('fetch', removal);
+		await updatePatientIdentifiers({ afm: null });
+		expect(
+			JSON.parse(String((removal.mock.calls[0] as unknown as [string, RequestInit])[1].body))
+		).toEqual({ afm: null });
+	});
+
+	it('🔴 U-168: the answer — the patient with its masks — never leaves `api/`', async () => {
+		vi.stubGlobal('fetch', answering(view({ amkaMasked: '•••••••2345', afmMasked: '•••••6783' })));
+		expect(await updatePatientIdentifiers({ amka: '01019012345' })).toBeUndefined();
 	});
 });

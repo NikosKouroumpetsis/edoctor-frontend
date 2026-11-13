@@ -10,6 +10,9 @@ import Harness from './login.harness.svelte';
 let signedIn: boolean;
 let patient: Record<string, unknown> | null;
 const ADDRESS = 'maria.private@example.test';
+// D-W45-10 (wave 4.5): the read answers the address as the SERVER hides it (`loginEmailMasked`); a whole one that a
+// server still sent beside it (`loginEmail`) is read by nobody.
+const MASKED = 'm***e@example.test';
 
 beforeEach(() => {
 	signedIn = false;
@@ -191,7 +194,7 @@ describe('«Καλωσορίσατε» after a provider (`w2-w1` §Ανοιχτ�
 		'🔴 U-65.6: back from %s the browser writes the door and the mask, never the address',
 		async (via) => {
 			signedIn = true;
-			patient = { id: 'p', firstName: 'Μαρία', loginEmail: ADDRESS };
+			patient = { id: 'p', firstName: 'Μαρία', loginEmail: ADDRESS, loginEmailMasked: MASKED };
 			const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 			render(Harness, { props: { params: { ...params, next: '/help', via }, client } });
 			await waitFor(() => expect(memory()).not.toBeNull());
@@ -241,7 +244,7 @@ describe('«Καλωσορίσατε» after a provider (`w2-w1` §Ανοιχτ�
 			})
 		);
 		expect(memory()).toBeNull();
-		patient = { id: 'p', firstName: 'Ελένη', loginEmail: ADDRESS };
+		patient = { id: 'p', firstName: 'Ελένη', loginEmail: ADDRESS, loginEmailMasked: MASKED };
 		await client.invalidateQueries({ queryKey: authQueryKeys.patientSelf() });
 		await waitFor(() => expect(memory()).not.toBeNull());
 		expect(JSON.parse(memory() ?? '')).toMatchObject({
@@ -253,7 +256,7 @@ describe('«Καλωσορίσατε» after a provider (`w2-w1` §Ανοιχτ�
 
 	it('(negative) a member with no address to mask: nothing is written', async () => {
 		signedIn = true;
-		patient = { id: 'p', firstName: 'Μαρία', loginEmail: null };
+		patient = { id: 'p', firstName: 'Μαρία', loginEmailMasked: null };
 		render(Harness, { props: { params: { ...params, via: 'apple' } } });
 		await waitFor(() => expect(goto).toHaveBeenCalled());
 		expect(memory()).toBeNull();
@@ -268,7 +271,7 @@ describe('«Καλωσορίσατε» after a provider (`w2-w1` §Ανοιχτ�
 
 	it('(negative) without `via` a member’s visit writes nothing: the door is not guessed', async () => {
 		signedIn = true;
-		patient = { id: 'p', firstName: 'Μαρία', loginEmail: ADDRESS };
+		patient = { id: 'p', firstName: 'Μαρία', loginEmail: ADDRESS, loginEmailMasked: MASKED };
 		render(Harness, { props: { params } });
 		await waitFor(() => expect(goto).toHaveBeenCalled());
 		expect(memory()).toBeNull();

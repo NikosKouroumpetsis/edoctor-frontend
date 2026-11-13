@@ -160,14 +160,14 @@
 			const appointmentId = invitation?.appointmentId;
 			if (!appointmentId) return;
 			sent = true;
-			// D-W4-12: back on the visit, «Η αξιολόγηση υποβλήθηκε.» and its review «Σε έλεγχο» (the page's memory, D-W4-33).
+			// D-W4-12: back on the visit, «Η κριτική υποβλήθηκε.» and its review «Σε έλεγχο» (the page's memory, D-W4-33).
 			memory?.remember(appointmentId, { kind: 'rating' });
 			if (review) {
 				client.setQueryDefaults(appointmentsQueryKeys.all, { meta: personalQueryMeta });
 				client.setQueryData(appointmentsQueryKeys.review(review.ratingId), review);
 			}
 			// 🔴 Review w4-w6 R1 MAJOR-1: the visit loses its invitation and names its review BEFORE the form goes back, so
-			// the 51 never stands with «Αξιολογήστε» beside «Η αξιολόγηση υποβλήθηκε.» while (or if) the new read fails.
+			// the 51 never stands with «Γράψτε κριτική» beside «Η κριτική υποβλήθηκε.» while (or if) the new read fails.
 			storeAppointmentRated(client, appointmentId, review?.ratingId ?? null);
 			void client.invalidateQueries({ queryKey: appointmentsQueryKeys.all });
 			leave();
@@ -240,13 +240,13 @@
 	<StateGlyph name="calendar-outline" />
 {/snippet}
 
-<!-- Screen 54 «Αξιολόγηση επίσκεψης» (record §10.2, U-138; `appt.js:380-412`): a screen of its own, never a window
+<!-- Screen 54 «Κριτική επίσκεψης» (record §10.2, U-138; `appt.js:380-412`): a screen of its own, never a window
      (U-102) — below 950 its own page, from 950 the right column beside the history (U-136.2). «Η επίσκεψή σας», the five
      aspects with the shared stars (a press whole, the same star again half, U-138.2), «Βαθμός κριτικής» by the server's
      formula, the words up to 2000 (U-65.6: no `<` `>`), the review as the doctor's profile will show it (U-138.4), the
      four lines, «Πώς λειτουργούν οι κριτικές» (D-W4-24: information, the profile's window) and «Πολιτική κριτικών»;
-     «Άκυρο / Υποβολή», locked until all five are given and while it goes. 🔴 U-138.6: «αξιολόγηση» the act,
-     «κριτική» what is published. -->
+     «Άκυρο / Υποβολή», locked until all five are given and while it goes. 🔴 U-173: ONE word, «κριτική» — the
+     title, the notices and what is published alike. -->
 {#if phase === 'form' && context}
 	<ChangeFrame
 		title={m.ratings_form_title({}, options)}

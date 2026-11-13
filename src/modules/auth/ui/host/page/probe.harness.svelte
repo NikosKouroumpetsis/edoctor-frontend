@@ -12,6 +12,7 @@
 <p data-testid="expired">{String(session.expired)}</p>
 <p data-testid="sign-out-failures">{session.signOutFailures}</p>
 <p data-testid="patient-profile">{String(session.member?.hasPatientProfile)}</p>
+<p data-testid="member-facts">{JSON.stringify(session.member)}</p>
 <button
 	type="button"
 	class="min-h-touch min-w-touch"
@@ -35,4 +36,10 @@
 	class="min-h-touch min-w-touch"
 	data-testid="sign-out"
 	onclick={() => session.signOut()}>out</button
+>
+<button
+	type="button"
+	class="min-h-touch min-w-touch"
+	data-testid="account-deleted"
+	onclick={() => session.accountDeleted()}>deleted</button
 >

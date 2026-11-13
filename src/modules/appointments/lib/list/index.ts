@@ -42,7 +42,7 @@ export type AppointmentCard = {
 	address: string;
 	/** 🔴 U-139.5 · «Για: Γιώργος Παππάς (γιος)», only for a relative. */
 	forWhom: string | null;
-	/** P-B4 §13.3.4: «Αξιολογήστε την επίσκεψη» leads to this invitation, only while one is open. */
+	/** P-B4 §13.3.4: «Γράψτε κριτική για την επίσκεψη» leads to this invitation, only while one is open. */
 	rateInvitationId: string | null;
 	past: boolean;
 };

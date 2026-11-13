@@ -480,6 +480,142 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/login-email/me/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a code to the address the signed-in caller wants as its login email (requires session cookies). */
+        post: operations["startLoginEmailChange"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login-email/me/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resend the code to the address the email change was started for (requires session cookies). */
+        post: operations["resendLoginEmailChangeCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login-email/me/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify the code and make the address the account login email (requires session cookies). */
+        post: operations["verifyLoginEmailChangeCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/sessions/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the live sessions of the signed-in caller, the devices it is signed in from (requires session cookies). */
+        get: operations["listMySessions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/sessions/me/{sessionId}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign one OTHER device of the signed-in caller out (requires session cookies). */
+        post: operations["endMySession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/sign-in-methods/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read how the signed-in caller signs in: password and linked providers (requires session cookies). */
+        get: operations["getMySignInMethods"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/sign-in-methods/me/providers/{provider}/unlink": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Unlink Google or Apple from the signed-in caller account (requires session cookies). */
+        post: operations["unlinkMySignInProvider"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/password-credentials/me/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Change the password of the signed-in caller with its current password (requires session cookies). */
+        post: operations["changeMyPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/password-credentials/me/set-password/init": {
         parameters: {
             query?: never;
@@ -1269,6 +1405,74 @@ export interface paths {
         put?: never;
         /** Forget the push device of this phone for the signed-in account (requires session cookies). */
         post: operations["unregisterPushDevice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notification/inbox/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the notifications of the signed-in account, newest first (requires session cookies). */
+        get: operations["listMyNotifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notification/inbox/me/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Count the notifications the signed-in account has not opened (requires session cookies). */
+        get: operations["countMyUnreadNotifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notification/inbox/me/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark every notification of the signed-in account as read (requires session cookies). */
+        post: operations["markAllMyNotificationsRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notification/inbox/me/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark one notification of the signed-in account as read (requires session cookies). */
+        post: operations["markMyNotificationRead"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3911,13 +4115,69 @@ export interface components {
         LoginPhoneAttachVerifyResult: {
             tenantUser: components["schemas"]["AccessTenantUserView"];
         };
-        PasswordSetInitResult: {
-            /** @constant */
-            channel: "email";
+        LoginEmailChangeStartResult: {
+            channel: components["schemas"]["AuthAccessChannel"];
+            alreadyVerified: boolean;
+        };
+        /** @description U-168 / D-W45-10: the new login email as its owner reads it (`e***i@example.gr`); the whole address never leaves auth here. */
+        LoginEmailChangeVerifyResult: {
+            loginEmailMasked: string | null;
+        };
+        /** @description D-W45-40: the live sessions of the caller's account, the current one first, then the most recently active. */
+        AccountSessionsView: {
+            sessions: components["schemas"]["AccountSessionView"][];
+        };
+        /** @description D-W45-35: one live session of the caller's own account. `sessionId` stays the same for as long as the device is signed in; `current` marks the session the request came from; `lastActiveAt` is the last time the session renewed. The device is three closed vocabularies only — never a User-Agent, an address or a token. */
+        AccountSessionView: {
+            sessionId: string;
+            current: boolean;
+            /** Format: date-time */
+            lastActiveAt: string;
+            kind: components["schemas"]["SessionDeviceKind"];
+            os: components["schemas"]["SessionDeviceSystem"];
+            browser: components["schemas"]["SessionDeviceBrowser"] | null;
+        };
+        /** @enum {string} */
+        SessionDeviceKind: "APP" | "WEB";
+        /** @enum {string} */
+        SessionDeviceSystem: "IOS" | "IPADOS" | "ANDROID" | "MACOS" | "WINDOWS" | "LINUX" | "OTHER";
+        /** @enum {string} */
+        SessionDeviceBrowser: "CHROME" | "SAFARI" | "FIREFOX" | "EDGE" | "OTHER";
+        /** @description D-W45-40: the session that was ended. */
+        AccountSessionEndView: {
+            sessionId: string;
+        };
+        /** @description D-W45-37: the caller's own sign-in methods; only linked providers are listed, and nothing else of them is told. `passwordStatus` is two booleans about the password, never the password: a response property may not be named `password`. */
+        SignInMethodsView: {
+            passwordStatus: components["schemas"]["SignInPasswordView"];
+            providers: components["schemas"]["SignInProviderView"][];
+        };
+        /** @description D-W45-37: whether the account signs in with a password today, and whether it may set one (a verified sign-in email). */
+        SignInPasswordView: {
+            set: boolean;
+            canSet: boolean;
+        };
+        /** @description D-W45-37/D-W45-38: one provider linked to the account; `refusal` says why it may not be unlinked, `null` when it may. */
+        SignInProviderView: {
+            provider: components["schemas"]["SignInProvider"];
+            canUnlink: boolean;
+            refusal: components["schemas"]["SignInProviderUnlinkRefusal"] | null;
+        };
+        /** @enum {string} */
+        SignInProvider: "GOOGLE" | "APPLE";
+        /** @constant */
+        SignInProviderUnlinkRefusal: "NO_OTHER_SIGN_IN";
+        /** @description D-W45-38: the provider that was unlinked. */
+        SignInProviderUnlinkView: {
+            provider: components["schemas"]["SignInProvider"];
         };
         PasswordChangeResult: {
             tenantUserId: string;
             version: number;
+        };
+        PasswordSetInitResult: {
+            /** @constant */
+            channel: "email";
         };
         /** @description What deleting the signed-in account would do, before any code is sent. `allowed` is false with a `refusal` for a backoffice account or an account without a verified sign-in channel; the code channel is published masked only. */
         AccountDeletionPreviewView: {
@@ -3980,25 +4240,68 @@ export interface components {
             seenAt: string | null;
             dismissedAt: string | null;
         };
-        PatientSelfResponseView: components["schemas"]["PatientViewExt"] | null;
-        /** @description `firstName`/`lastName`, the two login-phone facts and `loginEmail` are resolved only by `GET /patient/me`, for the signed-in person alone; the other reads of this view omit them. The login phone is published masked (`+30 69•• ••• 678`), never in full (D-47). */
-        PatientViewExt: {
-            relatives?: components["schemas"]["RelativeView"][];
+        PatientSelfResponseView: components["schemas"]["PatientSelfView"] | null;
+        /** @description U-168 / D-W45-10: the patient profile as the signed-in person reads it. The login email, AMKA and AFM never travel whole: `loginEmailMasked` (`e***a@example.gr`), `amkaMasked` (`•••••••2345`) and `afmMasked` (`•••••6789`) are the text a screen prints, `null` when nothing is stored. `firstName`/`lastName`, the login-phone facts (masked, D-47) and `loginEmailMasked` are resolved only by `GET /patient/me`; the other answers of this view omit them. */
+        PatientSelfView: {
+            id: string;
+            userId: string;
+            tenantUserId: string;
+            amkaMasked: string | null;
+            afmMasked: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            relatives?: components["schemas"]["RelativeSelfView"][];
             firstName?: string | null;
             lastName?: string | null;
             loginPhoneVerified?: boolean;
             loginPhoneMasked?: string | null;
-            loginEmail?: string | null;
+            loginEmailMasked?: string | null;
+        };
+        /** @description U-168 / D-W45-10: a relative as its own patient reads it. AMKA / AFM never travel whole: `amkaMasked` / `afmMasked` are the text a screen prints (`•••••••2345`, `•••••6789`, the last four digits), or `null` when none is stored. */
+        RelativeSelfView: {
             id: string;
-            userId: string;
-            tenantUserId: string;
-            amka: string | null;
-            afm: string | null;
+            patientId: string;
+            firstName: string;
+            lastName: string;
+            relationship: components["schemas"]["IRelationship"];
+            phone?: string | null;
+            email?: string | null;
+            amkaMasked: string | null;
+            afmMasked: string | null;
+            gender: components["schemas"]["IGender"];
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
         };
+        /** @enum {string} */
+        IRelationship: "CHILD" | "PARENT" | "SIBLING" | "SPOUSE" | "OTHER_RELE";
+        /** @enum {string} */
+        IGender: "MALE" | "FEMALE" | "NON_BINARY" | "OTHER_GENE";
+        PatientSelfUpsertResponseView: components["schemas"]["PatientSelfView"];
+        PatientOnboardingResponseView: {
+            user: components["schemas"]["UserView"];
+            patient: components["schemas"]["PatientSelfView"];
+        };
+        UserView: {
+            id: string;
+            tenantUserId: string;
+            gender: components["schemas"]["IGender"] | null;
+            dateOfBirth: string | null;
+            avatarUrl: string | null;
+            headline: string | null;
+            bio: string | null;
+            locale: components["schemas"]["ILanguage"] | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        RelativeListResponseView: components["schemas"]["RelativeScopedView"][];
+        /** @description What the relatives routes answer: `RelativeSelfView` to the patient who owns the relative, and the whole `RelativeView` to a backoffice role acting on another account (D-W45-10: the backoffice reads do not change). */
+        RelativeScopedView: components["schemas"]["RelativeSelfView"] | components["schemas"]["RelativeView"];
         RelativeView: {
             id: string;
             patientId: string;
@@ -4015,30 +4318,7 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        /** @enum {string} */
-        IRelationship: "CHILD" | "PARENT" | "SIBLING" | "SPOUSE" | "OTHER_RELE";
-        /** @enum {string} */
-        IGender: "MALE" | "FEMALE" | "NON_BINARY" | "OTHER_GENE";
-        PatientSelfUpsertResponseView: components["schemas"]["PatientViewExt"];
-        PatientOnboardingResponseView: {
-            user: components["schemas"]["UserView"];
-            patient: components["schemas"]["PatientViewExt"];
-        };
-        UserView: {
-            id: string;
-            tenantUserId: string;
-            gender: components["schemas"]["IGender"] | null;
-            dateOfBirth: string | null;
-            avatarUrl: string | null;
-            headline: string | null;
-            bio: string | null;
-            locale: components["schemas"]["ILanguage"] | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        RelativeListResponseView: components["schemas"]["RelativeView"][];
+        RelativeResponseView: components["schemas"]["RelativeScopedView"];
         FavoriteDoctorListResponseView: {
             items: components["schemas"]["FavoriteDoctorItemView"][];
             total: number;
@@ -4328,7 +4608,7 @@ export interface components {
         AppointmentBookedForType: "SELF" | "RELATIVE";
         /** @enum {string} */
         AppointmentStatus: "pending" | "checked_in" | "completed" | "canceled" | "booked" | "rejected" | "unavailable" | "expired" | "no_show";
-        /** @description D-06: frozen at booking time; a later profile edit never rewrites it. D-55: a response carries `tenantUserId` only to that same account, every other reader gets `null`. */
+        /** @description D-06: frozen at booking time; a later profile edit never rewrites it. D-55: a response carries `tenantUserId` only to that same account, every other reader gets `null`. D-W45-11: a response carries `amka` / `afm` only to the doctor side and the backoffice, never to the patient of the appointment. */
         AppointmentPatientSnapshotView: {
             id: string;
             tenantUserId: string | null;
@@ -4361,7 +4641,7 @@ export interface components {
             floor: number | null;
             description: unknown;
         };
-        /** @description The relative the appointment was booked for, frozen the same way (D-06). */
+        /** @description The relative the appointment was booked for, frozen the same way (D-06); `amka` / `afm` under the same D-W45-11 rule. */
         AppointmentRelativeSnapshotView: {
             id: string;
             firstName: string;
@@ -4598,6 +4878,45 @@ export interface components {
         PushApnsEnvironment: "SANDBOX" | "PRODUCTION";
         PushDeviceUnregisterView: {
             removed: boolean;
+        };
+        NotificationInboxPageView: {
+            items: components["schemas"]["NotificationInboxItemView"][];
+            nextCursor: string | null;
+            unreadCount: number;
+        };
+        /** @description One line of the list as the account reads it: words in the language of the request, no account, address or template. */
+        NotificationInboxItemView: {
+            id: string;
+            kind: components["schemas"]["NotificationInboxKind"];
+            icon: components["schemas"]["NotificationInboxIcon"];
+            title: string;
+            body: string;
+            /** Format: date-time */
+            occurredAt: string;
+            read: boolean;
+            target: components["schemas"]["NotificationInboxTargetView"];
+        };
+        /** @enum {string} */
+        NotificationInboxKind: "APPOINTMENT_REQUESTED" | "APPOINTMENT_CONFIRMED" | "APPOINTMENT_REJECTED" | "APPOINTMENT_EXPIRED" | "APPOINTMENT_RESCHEDULED" | "APPOINTMENT_CANCELED_BY_PATIENT" | "APPOINTMENT_CANCELED_BY_DOCTOR" | "APPOINTMENT_NO_SHOW" | "APPOINTMENT_REMINDER" | "RATING_INVITATION" | "RATING_PUBLISHED" | "RATING_NOT_PUBLISHED" | "RATING_REPLY_PUBLISHED" | "QUESTION_ANSWERED" | "QUESTION_REJECTED";
+        /** @enum {string} */
+        NotificationInboxIcon: "CALENDAR" | "CLOCK" | "STAR" | "QUESTION";
+        NotificationInboxTargetView: {
+            kind: components["schemas"]["NotificationInboxTargetKind"];
+            id: string;
+        };
+        /** @enum {string} */
+        NotificationInboxTargetKind: "APPOINTMENT" | "RATING_INVITATION" | "QUESTION";
+        NotificationInboxUnreadCountView: {
+            unreadCount: number;
+        };
+        NotificationInboxReadAllView: {
+            marked: number;
+            unreadCount: number;
+        };
+        NotificationInboxReadView: {
+            id: string;
+            read: boolean;
+            unreadCount: number;
         };
         /** @description `GET /user/me` (Β20α delta 1): an account with no profile row yet reads `null`; its first `PUT /user/me` creates it. */
         UserGetResponseView: components["schemas"]["UserViewExt"] | null;
@@ -8098,6 +8417,242 @@ export interface operations {
             };
         };
     };
+    startLoginEmailChange: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: email */
+                    email: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Acknowledgement of the delivery channel only; the address is never echoed back. The code goes ONLY to the new address, in the language the request names (`?lang`, then `Accept-Language`), else the account's own, else `el`; the current email stays the login email until the code is verified. The target account is always the session actor, so the body carries no identifier. Sending the caller own ALREADY verified email answers `alreadyVerified: true` without an email. Refused before any code is sent or any budget is charged, in this order: an account whose email channel the backoffice disabled (verified but no longer allowed to sign in), or whose email was never loginable while it holds a role beyond MEMBER (an admin activates that channel), with 401 SIGN_IN_NOT_AVAILABLE; an account with a linked Google or Apple sign-in with 403 EC403 and the message "Forbidden: LOGIN_EMAIL_CHANGE_PROVIDER_LINKED:<providers>", where <providers> is `GOOGLE`, `APPLE` or `GOOGLE,APPLE` (the person unlinks the provider first); an address that belongs to another account of the tenant with 409 ALREADY_EXIST and the message of the register identity conflict ("Email already exists for this tenant."); the address of a deleted account under a live abuse measure with 403 USER_LOCKED. A malformed address, one over 254 characters or an extra body property is 422; the per-IP `otp-send` class, the per-account send cap and the per-address cap shared with the email sign-in and registration answer 429. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["LoginEmailChangeStartResult"];
+                    };
+                };
+            };
+        };
+    };
+    resendLoginEmailChangeCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Acknowledgement only, identical in shape to the start response. The body is empty by contract: the address is read from the live challenge, so a resend can neither retarget it nor skip a gate of start. Without a live challenge the answer is 401 TOKEN_NOT_FOUND; an email channel the backoffice disabled answers 401 SIGN_IN_NOT_AVAILABLE and a linked Google or Apple answers 403 "Forbidden: LOGIN_EMAIL_CHANGE_PROVIDER_LINKED:<providers>", both before the cooldown, the send budgets and the email; inside the resend cooldown, over a send cap or over the per-IP `otp-send` class it is 429; the uniqueness refusal of start applies here too as 409 ALREADY_EXIST with the same message ("Email already exists for this tenant."). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["LoginEmailChangeStartResult"];
+                    };
+                };
+            };
+        };
+    };
+    verifyLoginEmailChangeCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    code: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Only `loginEmailMasked`, the new login email as its owner reads it (`e***i@example.gr`); the whole address never leaves auth. The code is single use; the address becomes the verified login email, usable for the email code and for the password of the account, which stays as it was, and the old address stops signing in. A verify that REPLACES an email the account signed in with signs every OTHER session of the account out at once, access tokens included, in the same transaction as the write; only the calling session, the one the request's refresh-token cookie names, goes on, and the response sets its fresh active-token and refresh-token cookies (never a token in the body). Without a live refresh-token cookie no session is kept and no cookie is set; a FIRST email revokes nothing and sets no cookie. A notice of the change is queued to the PREVIOUS email (to the verified login phone by SMS when there was none) and never names the new address. An email channel the backoffice disabled answers 401 SIGN_IN_NOT_AVAILABLE and a Google or Apple linked since start answers 403 "Forbidden: LOGIN_EMAIL_CHANGE_PROVIDER_LINKED:<providers>"; both write nothing. A wrong, expired or already consumed code is 401; a code burned by wrong guesses, and too many wrong codes for the account or for the address, is 403 USER_LOCKED; the per-IP `otp-verify` class is 429; an address taken by another account between start and verify is 409 ALREADY_EXIST with the same message as the register identity conflict ("Email already exists for this tenant."); a malformed or extra body property is 422. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["LoginEmailChangeVerifyResult"];
+                    };
+                };
+            };
+        };
+    };
+    listMySessions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The live sessions of the caller own account, one entry per signed-in device: the session the request came from first (`current: true`, the one its refresh-token cookie belongs to), then the most recently active. `sessionId` is stable for as long as the device stays signed in and is the only identifier of a session a client ever holds; `lastActiveAt` is the last time the session renewed. The device is described by three closed vocabularies only: `kind` (`APP` for the eDoctor app, `WEB` for a browser), `os` (`IOS`, `IPADOS`, `ANDROID`, `MACOS`, `WINDOWS`, `LINUX`, `OTHER`) and `browser` (`CHROME`, `SAFARI`, `FIREFOX`, `EDGE`, `OTHER`, and `null` for the app). They are read from the `x-device` request header when it carries `iphone-app`, `ipad-app` or `android-app` (any other value is ignored), else from the User-Agent; a device that names nothing is `WEB` / `OTHER` / `OTHER`. No User-Agent, IP address, token or row id is ever part of the answer, and the wording a person reads is composed by the client. The answer is sent with `Cache-Control: no-store`. At most the 50 newest sessions are listed. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AccountSessionsView"];
+                    };
+                };
+            };
+        };
+    };
+    endMySession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description The `sessionId` that was ended. Only that session ends: every other session of the account, the calling one included, goes on untouched. The ended device is refused quietly (401, cookies cleared) the next time it renews its session, and its access token stops working when it expires on its own, within the access-token lifetime at the latest; the push devices that registered under that session are forgotten in the same transaction, so it stops receiving notifications at once. The session the request itself came from is refused with 403 EC403 and the message "Forbidden: SESSION_END_REFUSED:CURRENT_SESSION" (sign out with `logout` instead). A `sessionId` that is unknown, belongs to another account or tenant, or is already over answers the same 404 EC404, so the route cannot be used to probe for sessions. A `sessionId` that is not a UUID, or any body property, is 422; the per-IP `complete` class answers 429. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AccountSessionEndView"];
+                    };
+                };
+            };
+        };
+    };
+    getMySignInMethods: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `passwordStatus.set` is true when the account has a password it can sign in with today; `passwordStatus.canSet` is true when it may set or reset one with the emailed code, which needs a verified login email that is allowed to sign in. `providers` lists ONLY the providers linked to the account, `GOOGLE` before `APPLE`; each carries `canUnlink` and `refusal`, which is `null` when the provider may be unlinked and `NO_OTHER_SIGN_IN` when unlinking would leave the account without a way in. Nothing else about a provider leaves the server: no provider email, no subject, no token. The answer is sent with `Cache-Control: no-store`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["SignInMethodsView"];
+                    };
+                };
+            };
+        };
+    };
+    unlinkMySignInProvider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: "GOOGLE" | "APPLE";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description The provider that was unlinked. The account can no longer sign in with it; signing in with the same provider account again later links it anew, as a first sign-in with that provider does. No session is ended. Unlinking Apple also queues the revocation of the Apple token the server held. It is allowed only while another way in remains: a verified login phone that may sign in, OR a verified login email that may sign in and is not an Apple private relay address (`@privaterelay.appleid.com`, which Apple stops forwarding to once the token is revoked). Otherwise 403 EC403 with the message "Forbidden: SIGN_IN_PROVIDER_UNLINK_REFUSED:NO_OTHER_SIGN_IN" and nothing is written. A provider that is not linked to the account answers 404 EC404; a `provider` outside `GOOGLE` / `APPLE`, or any body property, is 422; the per-IP `complete` class answers 429. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["SignInProviderUnlinkView"];
+                    };
+                };
+            };
+        };
+    };
+    changeMyPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    currentPassword: string;
+                    newPassword: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The credential owner and its new version; no password material ever leaves. The target is always the session actor. Every OTHER session of the account is signed out at once, access tokens included; only the calling session, the one the request refresh-token cookie names, goes on, and the response sets its fresh active-token and refresh-token cookies (never a token in the body). Without a live refresh-token cookie no session is kept and no cookie is set. A wrong current password is 401 EC412 (USER_MISTAKE_PASSWORD_OR_EMAIL), which is NOT the end of the session: the session ends only with 401 EC401; an account without a password is 404 EC404 (set one with `set-password` instead); a current or new password shorter than 8 characters or longer than the allowed length, a missing field or an extra body property is 422. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["PasswordChangeResult"];
+                    };
+                };
+            };
+        };
+    };
     initSetPassword: {
         parameters: {
             query?: never;
@@ -8168,7 +8723,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Nothing is changed or sent. `allowed` is false with `refusal` BACKOFFICE_ACCOUNT for an account that holds a backoffice role (another administrator deletes it) or NO_VERIFIED_CHANNEL when neither the email nor the phone is verified and allowed to sign in. `codeChannel` is where the code will go (the verified email first, otherwise the verified phone) and `codeDestinationMasked` shows it masked only. `removed` counts what the deletion removes, by item: legalAcceptances, legalNotices (who was told of a new terms version), trackingConsents, appointmentsCanceled (the appointments, relatives included, that have not started), ratings (deleted whole), ratingInvitationsRevoked, questions, notificationsCanceled, notificationPreferences (the switches of the notification centre), pushDevices (the phones registered for push notifications), patientProfiles (anonymized), relatives, favoriteDoctors, profiles; a doctor account adds doctorAppointmentsCanceled (in every office, the patients are told), receivedRatings, doctorRatingInvitationsRevoked, doctorAnswers, articleAuthorships (an article left with no author is unpublished), calendarConnections, offices, doctorProfiles (the public profile goes at once), pendingTransmissions (still sent to the tax authority for at most one month), erpTraders, erpItems, providerMessageTemplates and operationsAlerts. `warnings` holds codes: APPOINTMENTS_IN_PROGRESS when a started or checked-in visit stays with its doctor; for a doctor also FAILED_TRANSMISSIONS (documents the tax authority never accepted), SMS_UNITS_LOST, LICENSE_LOST (a running licence ends with the account) and RECORD_COPY_ON_REQUEST (a copy of the appointment book is given on request, before or after the deletion). `retained` lists what stays, why, and for at most how many years: in the locked archive the accepted terms versions, an abuse measure when the account is banned, rating moderation decisions without text, and the deletion trace (no name, email, phone or health data); DOCTOR_PATIENT_RECORD when past appointments stay in the doctors' records, never shown to the deleted account or publicly; for a doctor DOCTOR_APPOINTMENT_BOOK, DOCTOR_TAX_RECORDS (the issued documents) and PLATFORM_ACCOUNTING (licences and SMS packages). */
+            /** @description Nothing is changed or sent. `allowed` is false with `refusal` BACKOFFICE_ACCOUNT for an account that holds a backoffice role (another administrator deletes it) or NO_VERIFIED_CHANNEL when neither the email nor the phone is verified and allowed to sign in. `codeChannel` is where the code will go (the verified email first, otherwise the verified phone) and `codeDestinationMasked` shows it masked only. `removed` counts what the deletion removes, by item: legalAcceptances, legalNotices (who was told of a new terms version), trackingConsents, appointmentsCanceled (the appointments, relatives included, that have not started), ratings (deleted whole), ratingInvitationsRevoked, questions, notificationsCanceled, notificationPreferences (the switches of the notification centre), pushDevices (the phones registered for push notifications), notificationInboxItems (the lines of the notification list, shown or still waiting for their hour), patientProfiles (anonymized), relatives, favoriteDoctors, profiles; a doctor account adds doctorAppointmentsCanceled (in every office, the patients are told), receivedRatings, doctorRatingInvitationsRevoked, doctorAnswers, articleAuthorships (an article left with no author is unpublished), calendarConnections, offices, doctorProfiles (the public profile goes at once), pendingTransmissions (still sent to the tax authority for at most one month), erpTraders, erpItems, providerMessageTemplates and operationsAlerts. `warnings` holds codes: APPOINTMENTS_IN_PROGRESS when a started or checked-in visit stays with its doctor; for a doctor also FAILED_TRANSMISSIONS (documents the tax authority never accepted), SMS_UNITS_LOST, LICENSE_LOST (a running licence ends with the account) and RECORD_COPY_ON_REQUEST (a copy of the appointment book is given on request, before or after the deletion). `retained` lists what stays, why, and for at most how many years: in the locked archive the accepted terms versions, an abuse measure when the account is banned, rating moderation decisions without text, and the deletion trace (no name, email, phone or health data); DOCTOR_PATIENT_RECORD when past appointments stay in the doctors' records, never shown to the deleted account or publicly; for a doctor DOCTOR_APPOINTMENT_BOOK, DOCTOR_TAX_RECORDS (the issued documents) and PLATFORM_ACCOUNTING (licences and SMS packages). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8312,7 +8867,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The patient profile of the signed-in tenant user, with the login email of that same person, or null when registration completed but the patient profile does not exist yet. */
+            /** @description The patient profile of the signed-in tenant user, or null when registration completed but the patient profile does not exist yet. U-168: the login email, the AMKA and the AFM (and those of the relatives) never travel whole. The answer carries `loginEmailMasked` (`e***a@example.gr`: first and last character before the @, whole domain), `amkaMasked` (`•••••••2345`) and `afmMasked` (`•••••6789`) — ready-to-print texts, null when nothing is stored — and has no `loginEmail`, `amka` or `afm` field. The login phone is masked the same way (`loginPhoneMasked`). A client shows these texts as they are and never keeps or sends back a whole value. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8344,7 +8899,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Patient-owned identifiers only: at least one of `amka`/`afm`, an omitted one left untouched. D-132: the legacy `consents` array is no part of the contract and is refused like every unknown field; the terms a person accepted live in the acceptances (`legalAcceptance` of the registration). Gender, date of birth and names live on the user profile and are not writable here. */
+            /** @description Patient-owned identifiers only: at least one of `amka`/`afm`, an omitted one left untouched; a value replaces the stored one and `null` erases it. An AMKA is 11 digits whose first six are a date, an AFM 9 digits with a valid check digit (separators are dropped), otherwise 422. U-168: the answer is the self view, so the value just written comes back only as `amkaMasked` / `afmMasked`. The values are stored encrypted (U-169). D-132: the legacy `consents` array is no part of the contract and is refused like every unknown field; the terms a person accepted live in the acceptances (`legalAcceptance` of the registration). Gender, date of birth and names live on the user profile and are not writable here. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8378,7 +8933,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description D-74: the booking prerequisites of D-05 that live on the user profile. Every field is optional and at least one must be sent; an omitted one is left untouched, and a name is merged with the stored one, so `firstName` alone is refused with 422 when no surname is on file. The body is the patient row, unchanged: read the effect back from GET /appointment/booking-readiness or GET /patient/me. A `dateOfBirth` after today, or further back than 120 years, is refused with 422 (a baby born today passes). A caller without a patient profile is refused with 403 EC017. */
+            /** @description D-74: the booking prerequisites of D-05 that live on the user profile. Every field is optional and at least one must be sent; an omitted one is left untouched, and a name is merged with the stored one, so `firstName` alone is refused with 422 when no surname is on file. The body is the patient row in its self view (`amkaMasked` / `afmMasked`, no whole identifier), unchanged: read the effect back from GET /appointment/booking-readiness or GET /patient/me. A `dateOfBirth` after today, or further back than 120 years, is refused with 422 (a baby born today passes). A caller without a patient profile is refused with 403 EC017. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8420,7 +8975,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Creation-only: sets the user profile (names, gender, date of birth, language) and creates the patient row, independently of how the session was obtained. A `dateOfBirth` after today, or further back than 120 years, is refused with 422 (a baby born today passes). A caller that already has a patient profile is rejected with 409 EC415; use GET /patient/me to detect that state. */
+            /** @description Creation-only: sets the user profile (names, gender, date of birth, language) and creates the patient row, independently of how the session was obtained. A `dateOfBirth` after today, or further back than 120 years, is refused with 422 (a baby born today passes). A caller that already has a patient profile is rejected with 409 EC415; use GET /patient/me to detect that state. U-168: `patient` is the self view, so an AMKA / AFM sent in the body comes back only as `amkaMasked` / `afmMasked`. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8447,7 +9002,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Every relative of the patient, or [] when there is none. */
+            /** @description Every relative of the patient, or [] when there is none. U-168 / D-W45-14: the patient who owns them reads `RelativeSelfView` — `amkaMasked` / `afmMasked` (`•••••••2345`, `•••••6789`, null when none is stored) and no `amka` / `afm` field. Only a backoffice role acting on another account reads the whole `RelativeView`. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8489,7 +9044,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The created relative. A patient keeps at most 20 relatives: the 21st answers 422 with `PATIENT_RELATIVES_LIMIT_REACHED` in the message, and the count is taken under a lock of the account, so two adds at the same instant never pass 20. Rate limited per account under the `relatives-write` class, one budget with changing and deleting a relative (429 past it). */
+            /** @description The created relative, as `RelativeSelfView` for the patient who owns it (U-168: `amkaMasked` / `afmMasked`, never the whole value that was just sent). A patient keeps at most 20 relatives: the 21st answers 422 with `PATIENT_RELATIVES_LIMIT_REACHED` in the message, and the count is taken under a lock of the account, so two adds at the same instant never pass 20. Rate limited per account under the `relatives-write` class, one budget with changing and deleting a relative (429 past it). */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -8499,7 +9054,7 @@ export interface operations {
                         /** @enum {string} */
                         status: "success" | "error";
                         message: string;
-                        data: components["schemas"]["RelativeView"];
+                        data: components["schemas"]["RelativeResponseView"];
                     };
                 };
             };
@@ -8517,7 +9072,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The deleted relative, as it was before deletion. Rate limited per account under the `relatives-write` class, one budget with adding and changing a relative (429 past it). */
+            /** @description The deleted relative, as it was before deletion (`RelativeSelfView` for the patient who owns it, U-168). Rate limited per account under the `relatives-write` class, one budget with adding and changing a relative (429 past it). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8527,7 +9082,7 @@ export interface operations {
                         /** @enum {string} */
                         status: "success" | "error";
                         message: string;
-                        data: components["schemas"]["RelativeView"];
+                        data: components["schemas"]["RelativeResponseView"];
                     };
                 };
             };
@@ -8560,7 +9115,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The updated relative. The relative must belong to the patient in the path. Rate limited per account under the `relatives-write` class, one budget with adding and deleting a relative (429 past it). */
+            /** @description The updated relative, as `RelativeSelfView` for the patient who owns it (U-168). `amka` / `afm` in the body: a value replaces the stored one, `null` erases it, an omitted key leaves it untouched; the form never holds the old value, so it sends only what was typed (D-W45-14). The relative must belong to the patient in the path. Rate limited per account under the `relatives-write` class, one budget with adding and deleting a relative (429 past it). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8570,7 +9125,7 @@ export interface operations {
                         /** @enum {string} */
                         status: "success" | "error";
                         message: string;
-                        data: components["schemas"]["RelativeView"];
+                        data: components["schemas"]["RelativeResponseView"];
                     };
                 };
             };
@@ -9979,6 +10534,121 @@ export interface operations {
                         status: "success" | "error";
                         message: string;
                         data: components["schemas"]["PushDeviceUnregisterView"];
+                    };
+                };
+            };
+        };
+    };
+    listMyNotifications: {
+        parameters: {
+            query?: {
+                filter?: "new" | "previous" | "all";
+                cursor?: string;
+                limit?: string;
+                lang?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of the caller own notification list, ordered by `occurredAt desc`, with `unreadCount` (every line the account has not opened, whatever the filter). The list holds what changes in the appointments of the account (registered, confirmed, declined, expired, moved, cancelled, not attended), the reminder of a visit, the reviews (the invitation to write one, published or not, a reply) and the questions (answered, not published); never the messages of doctors. A line is written when the thing happens, whatever the switches of the notification centre say, so an account that turned every email and push off still reads it here. `filter` is `new` (not opened yet), `previous` (opened) or `all` (default); `limit` is 1 to 50 (default 20); `cursor` is the opaque `nextCursor` of the previous page, `null` on the last one. A line shows from the moment its message would leave (a reminder appears at its hour, not at the booking) and for 90 days. `kind` is a closed vocabulary of what happened; `icon` is `CALENDAR`, `CLOCK`, `STAR` or `QUESTION`; `title` and `body` are plain text rendered now in `lang` (`el` or `en`, default the language of the account), to be shown as text, never as markup; `body` may be empty; `read` says whether the account opened it. `target` names what the tap opens, never a URL: `APPOINTMENT`, `RATING_INVITATION` or `QUESTION` with its id (a published review and a reply open the appointment); the thing may be gone by then, and the client then stays on the list. No account, email, phone or template is part of a line. The answer is sent with `Cache-Control: no-store`. A `filter`, `lang`, `limit` or `cursor` outside these, or any other query parameter, is 422. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["NotificationInboxPageView"];
+                    };
+                };
+            };
+        };
+    };
+    countMyUnreadNotifications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `unreadCount` is how many lines of the caller own list have shown and were not opened, within the 90 days the list keeps: the dot on the bell is `unreadCount > 0`. Read it when the app or the page returns to the foreground. The answer is sent with `Cache-Control: no-store`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["NotificationInboxUnreadCountView"];
+                    };
+                };
+            };
+        };
+    };
+    markAllMyNotificationsRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description `marked` is how many lines became read: only the caller own lines that had shown by the moment of the request (a reminder that appears a minute later stays new). `unreadCount` is the count after it. Calling it again marks nothing and answers `marked` 0. Any body property is 422. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["NotificationInboxReadAllView"];
+                    };
+                };
+            };
+        };
+    };
+    markMyNotificationRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description The line, now read, and the `unreadCount` after it. Call it when the person taps a line, before opening its `target`. It is idempotent: a line read already answers the same 200. An `id` that is unknown, belongs to another account or tenant, has not shown yet or is older than 90 days answers the same 404 EC404, so the route cannot be used to probe for lines. An `id` that is not a UUID, or any body property, is 422. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["NotificationInboxReadView"];
                     };
                 };
             };

@@ -16,6 +16,22 @@ const SPLIT_LIST = [
 	'split:border-border/60'
 ];
 const SPLIT_PANE = ['split:min-h-0', 'split:overflow-y-auto', 'split:overscroll-contain'];
+const centre = () =>
+	document.querySelector('[data-slot="split-view-centre"]') as HTMLElement | null;
+const MENU_INSET = [
+	'split:px-6',
+	'split:pt-section',
+	'split:pb-section-lg',
+	'laptop:px-pane-inset',
+	'laptop:pt-reading-gap'
+];
+const CENTRED_INSET = [
+	'split:px-pane-inset',
+	'split:pt-section',
+	'split:pb-pane-inset-lg',
+	'laptop:pt-reading-gap'
+];
+const CENTRE = ['split:mx-auto', 'split:w-full', 'split:max-w-split-solo'];
 /** None of `classes` (jest-dom's negated `toHaveClass` passes when only ONE of several is missing). */
 const lacks = (node: Element, ...classes: string[]) => {
 	for (const name of classes) expect(node, name).not.toHaveClass(name);
@@ -54,6 +70,61 @@ describe('SplitView', () => {
 		expect(root).not.toHaveClass('split:grid-split');
 		expect(list()).toHaveClass(...SPLIT_LIST);
 		expect(pane()).toHaveClass(...SPLIT_PANE);
+	});
+
+	it('D-W45-08: `widths="menu"` is a menu of 340 / 420 with its own inset from 950 (32 · 24 · 48; 40 · 48 from 1128), the same height and columns', () => {
+		render(Harness, { props: { widths: 'menu' } });
+		const root = screen.getByTestId('split');
+		expect(root).toHaveAttribute('data-widths', 'menu');
+		expect(root).toHaveClass('split:grid', 'split:h-split', 'split:grid-menu');
+		lacks(root, 'split:grid-split', 'split:grid-inbox');
+		expect(list()).toHaveClass(...SPLIT_LIST, ...MENU_INSET);
+		expect(pane()).toHaveClass(...SPLIT_PANE);
+		// The menu's inset is the menu's alone: without `centred` the right column takes none, and no box of its own.
+		lacks(pane(), ...CENTRED_INSET);
+		expect(centre()).toBeNull();
+		expect(root.className + list().className + pane().className).not.toMatch(/\[/u);
+	});
+
+	it('🔴 U-167: το περιεχόμενο της δεξιάς στήλης είναι στο κέντρο της — `centred` puts it in a box of at most 640 in the MIDDLE of the right column, inside the column’s inset (32 / 40 over, 48 a side, 64 under), never against the line', () => {
+		render(Harness, { props: { widths: 'menu', centred: true } });
+		expect(screen.getByTestId('split')).toHaveAttribute('data-centred');
+		expect(pane()).toHaveClass(...SPLIT_PANE, ...CENTRED_INSET);
+		const box = centre();
+		expect(box).not.toBeNull();
+		expect(box?.parentElement).toBe(pane());
+		expect(box).toHaveClass(...CENTRE);
+		// What the list opened is inside the centred box, and nowhere else in the column.
+		expect(box).toHaveTextContent('Λεπτομέρεια');
+		expect(pane().children).toHaveLength(1);
+		// The line stays the list's; the right column draws none of its own to lean on.
+		expect(list()).toHaveClass('split:border-r');
+		lacks(pane(), 'split:border-l', 'split:mx-auto');
+		expect(pane().className + (box?.className ?? '')).not.toMatch(/\[/u);
+	});
+
+	it('🔴 U-167 (negative) · D-W45-08: without `centred` nothing changes for today’s readers (messages, appointments, relatives) — no box, no inset, at either of their widths', () => {
+		for (const widths of ['wide', 'inbox'] as const) {
+			const view = render(Harness, { props: { widths } });
+			expect(screen.getByTestId('split')).not.toHaveAttribute('data-centred');
+			expect(centre()).toBeNull();
+			lacks(pane(), ...CENTRED_INSET, ...CENTRE);
+			lacks(list(), ...MENU_INSET);
+			expect(pane().firstElementChild?.tagName).toBe('H2');
+			view.unmount();
+		}
+	});
+
+	it('U-167 · U-139.1: `centred` with `solo` is the one column of 640 in the middle — no second inset, and what it holds stays the same element', async () => {
+		const view = render(Harness, { props: { centred: true, solo: true, open: true } });
+		const before = centre();
+		expect(pane()).toHaveClass(...SOLO);
+		lacks(pane(), ...CENTRED_INSET);
+		lacks(before as HTMLElement, ...CENTRE);
+		await view.rerender({ centred: true, solo: false, open: true });
+		expect(centre()).toBe(before);
+		expect(centre()).toHaveClass(...CENTRE);
+		expect(pane()).toHaveClass(...CENTRED_INSET);
 	});
 
 	it('U-139.1: nothing for the right column ⇒ from 950 ONE column of 640 in the middle — the list, never beside an empty side', () => {
@@ -128,5 +199,25 @@ describe('SplitView', () => {
 			/--breakpoint-laptop[\s\S]*var\(--spacing-split-list-w-lg\) minmax\(0, 1fr\)/u
 		);
 		expect(utility('h-split')).toContain('calc(100dvh - var(--spacing-bar-top))');
+	});
+
+	it('D-W45-08 · U-167: the menu’s widths are the prototype’s — 340, 420 from 1128 — beside the others, and `grid-menu` reads them', () => {
+		expect(platform.spacing['split-menu-w']).toBe(340);
+		expect(platform.spacing['split-menu-w-lg']).toBe(420);
+		// The centred box is the solo column's 640, and the insets are names of the scale (48, 64, 32, 40).
+		expect(platform.spacing['split-solo']).toBe(640);
+		expect(platform.spacing['pane-inset']).toBe(48);
+		expect(platform.spacing['pane-inset-lg']).toBe(64);
+		expect(platform.spacing['reading-gap']).toBe(40);
+		const css = readFileSync(join(projectRoot, 'src/routes/layout.css'), 'utf8');
+		const utility = (name: string) =>
+			new RegExp(`@utility ${name} \\{([\\s\\S]*?)\\n\\}`, 'u').exec(css)?.[1] ?? '';
+		expect(utility('grid-menu')).toContain('var(--spacing-split-menu-w) minmax(0, 1fr)');
+		expect(utility('grid-menu')).toMatch(
+			/--breakpoint-laptop[\s\S]*var\(--spacing-split-menu-w-lg\) minmax\(0, 1fr\)/u
+		);
+		// The other widths' utilities are as they were.
+		expect(utility('grid-split')).toContain('var(--spacing-split-list-w) minmax(0, 1fr)');
+		expect(utility('grid-inbox')).toContain('var(--spacing-inbox-list-w) minmax(0, 1fr)');
 	});
 });

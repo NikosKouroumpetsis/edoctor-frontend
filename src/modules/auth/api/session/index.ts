@@ -16,7 +16,10 @@ const DOCTOR_REFUSALS = [401, 403];
 export const authQueryKeys = {
 	patientSelf: () => ['auth', 'patient-self'] as const,
 	doctorAccount: () => ['auth', 'doctor-account'] as const,
-	legalVersion: (slug: string, lang: string) => ['auth', 'legal-version', slug, lang] as const
+	legalVersion: (slug: string, lang: string) => ['auth', 'legal-version', slug, lang] as const,
+	/** Wave 4.5 · screen 59: the account's own sign-in methods, and its live sessions (both personal). */
+	signInMethods: () => ['auth', 'sign-in-methods'] as const,
+	accountSessions: () => ['auth', 'account-sessions'] as const
 };
 
 /** The session as the browser learns it: a guest, or a member with or without a patient profile. */
@@ -26,20 +29,53 @@ export type PatientSelfFacts =
 			signedIn: true;
 			hasPatientProfile: boolean;
 			firstName: string | null;
+			lastName: string | null;
 			/** Who it is, to tell another account in this tab; `null` without a patient profile (the server names none). */
 			accountKey: string | null;
-			/** 🔴 U-65.6: on its way to the host, which keeps only the mask (`ui/host/lib/self`). */
-			loginEmail: string | null;
+			/**
+			 * 🔴 U-168 / D-W45-10: the sign-in address as the SERVER hides it (`loginEmailMasked`, `e***a@example.gr`). The
+			 * whole address never comes, and nothing here hides one: a value that is no mask is no value.
+			 */
+			maskedLoginEmail: string | null;
+			/** The sign-in mobile as the server hides it (`loginPhoneMasked`, D-47), read the same way. */
+			maskedLoginPhone: string | null;
+			/**
+			 * Wave 4.5 · screen 58: the ΑΜΚΑ and the ΑΦΜ as the server hides them (`amkaMasked` `•••••••2345`, `afmMasked`
+			 * `•••••6789`: the last four digits) — what «Προσωπικά στοιχεία» prints; `null` when none is stored.
+			 */
+			maskedAmka: string | null;
+			maskedAfm: string | null;
 	  };
 
+// Long enough for any real name or mask, short enough that a broken answer cannot grow what a page draws.
+const MAX_FIELD_LENGTH = 120;
+
+/** A text of the answer, or `null`: blank, oversized and what is no text at all read as absence (never a throw). */
+const text = (value: unknown): string | null =>
+	typeof value === 'string' && value.trim() && value.trim().length <= MAX_FIELD_LENGTH
+		? value.trim()
+		: null;
+
+/** A mask only when it looks like one (the booking's rule for the mobile, U-65.6): never a whole value kept as a mask. */
+const mask = (value: unknown, marks: RegExp): string | null => {
+	const masked = text(value);
+	return masked && marks.test(masked) ? masked : null;
+};
+
+// 🔴 U-168: an ΑΜΚΑ / ΑΦΜ is kept only as hidden marks and at most its last four digits — a whole number is no value.
+const ID_MASK = /^[•*]+\d{0,4}$/u;
+
 function mapPatientSelf(view: PatientSelfResponseView): PatientSelfFacts {
-	const firstName = view?.firstName?.trim() || null;
 	return {
 		signedIn: true,
 		hasPatientProfile: Boolean(view),
-		firstName,
+		firstName: text(view?.firstName),
+		lastName: text(view?.lastName),
 		accountKey: view?.tenantUserId ?? null,
-		loginEmail: view?.loginEmail ?? null
+		maskedLoginEmail: mask(view?.loginEmailMasked, /\*{3}/u),
+		maskedLoginPhone: mask(view?.loginPhoneMasked, /[•*]/u),
+		maskedAmka: mask(view?.amkaMasked, ID_MASK),
+		maskedAfm: mask(view?.afmMasked, ID_MASK)
 	};
 }
 

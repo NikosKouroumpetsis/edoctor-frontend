@@ -1,4 +1,5 @@
 import 'unplugin-icons/types/svelte';
+import type { Pathname, ResolvedPathname } from '$app/types';
 
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
@@ -51,6 +52,17 @@ declare global {
 		}
 		// interface Platform {}
 	}
+}
+
+/**
+ * 🔴 Wave 4.5 · screen 63 (card w45-w7): `/notifications` is the site's 26th pathname, and TypeScript relates a value
+ * typed as the WHOLE `Pathname` union to SvelteKit's `resolve` (one argument list per route) only up to 25 of them —
+ * past that every `resolve(localizeHref(…) as Pathname)` of the site stops compiling, whatever the path. This overload
+ * says what those calls always meant: a pathname as it stands, with no parameters. A call with a route id and its
+ * parameters still goes through SvelteKit's own signature. Types only; nothing changes at runtime.
+ */
+declare module '$app/paths' {
+	export function resolve(route: Pathname): ResolvedPathname;
 }
 
 export {};

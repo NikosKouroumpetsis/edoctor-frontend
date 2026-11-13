@@ -286,11 +286,150 @@ lastMethod }` for «Καλωσορίσατε και πάλι»; the tab keeps on
   staged, the person of «Για ποιον…» — is a rune of its screen. All of it goes with the screen.
 - Screen 54 (`/ratings/<invitationId>`) keeps its five values and its words in that form; one press sends once (a flag
   set before the mutation's state catches up). A submit goes back to the visit the way the 52 / 53 do
-  (`useAppointmentSteps`: the steps opened, else the visit in the form's place), says «Η αξιολόγηση υποβλήθηκε.» from
+  (`useAppointmentSteps`: the steps opened, else the visit in the form's place), says «Η κριτική υποβλήθηκε.» from
   the page's memory (`{ kind: 'rating' }`), writes the server's review under its `ratingId` (under the sign-out's mark)
   and reads every appointment again — the visit now names its `ratingId` and no invitation. A `401` opens the sign-in
   over the form and keeps the stars and the words. «Η κριτική σας» on the 51 is read by that `ratingId` only
   (`ownReviewQuery`, personal).
+
+## The account's settings (wave 4.5, screens 57 + 61)
+
+- Which row of «Γλώσσα και θέμα» is open is rune state of the slice (`profile/ui/language/hooks/use-preferences`):
+  one at a time, gone with the page. The address says which SECTION is open, never which row.
+- The theme is the shared preference (`$shared/preferences/theme`, `system | light | dark`, the device's storage): the
+  screen only calls `theme.set`. The language is the address (`/` Greek, `/en` English): a choice navigates to the same
+  path in the other language, and the message that says so is shown once the navigation has ended, in the new language.
+  🔴 D-W45-57 β: that navigation draws no new document, so `<html lang dir>` (the server's, `hooks.server.ts`) follows
+  the page's language in ONE place — the frame's effect on `followPageLocale` (`$shared/preferences/i18n/document-locale`);
+  no page writes it.
+- 🔴 D-W45-06 / U-169: the account's message language is server state — `accountLocaleQuery` (personal: a sign-out
+  removes it), whose cache holds `{ locale }` and NOTHING else of `GET /user/me`. It is read when the section opens for
+  a member; a choice writes `PUT /user/me` `{ locale }` only when the stored one differs, sets the cache to what was
+  written, and never holds the page: a refusal, an outage or three seconds without an answer and the language changes
+  all the same (it is the device's), to be tried again at the next change. A guest's choice asks the server nothing.
+- Who reads the shell — and the «Προφίλ» page, and «Απόρρητο» — comes from the session (`profile/lib/viewer`
+  `profileViewerOf`): `waiting` until the browser has asked (a skeleton, never a guest's page that changes a moment
+  later), a guest when the read got no answer.
+
+## The «Προφίλ» page, «Απόρρητο» and the deletion (wave 4.5, screens 56 + 62)
+
+- 🔴 U-168 / D-W45-10: the session's read (`auth/api/session`, `GET /patient/me`) keeps the name and the sign-in
+  address and mobile ONLY as the server's masks (`loginEmailMasked`, `loginPhoneMasked`; a value that is no mask is no
+  value). `SessionMember` carries them to the pages (`lastName`, `maskedLoginEmail`, `maskedLoginPhone`); nothing on
+  the web hides an address itself, and no whole one is ever in a cache, a rune or a storage.
+- 🔴 The tracking decision is ONE per page tree: `$shared/state/consent` `ConsentDecision` (context, set by the
+  frame), read from the browser's own storage once and shared by the cookie card, its window, the page «Εργαλεία
+  τρίτων και cookies» and the row of «Απόρρητο» — what one surface saves the others show at once, and a member's
+  choice reaches the server's record once whichever surface made it (`use-consent-record`). The catalogue is one cache
+  entry (`['consent','registry']`, anonymous); the row asks for it only on its own page.
+- «Διαγραφή λογαριασμού» (`account/ui/deletion-flow` `useAccountDeletion`, made by the screen): the preview is server
+  state — `deletionPreviewQuery`, personal, `gcTime` 0, asked again each time, for a member only. The hand-off
+  between the two steps (where the code went, when) is rune state of that one hook and NOTHING else: 🔴 U-65.6 never
+  an address, a storage or a log, so a reload forgets it and the code step returns to step 1; a sign-out or another
+  account in the tab forgets it too (`session.forgotten`). Each press is one request (send, confirm, resend). A
+  confirm with no readable answer keeps the code and says so; after one, the session gate's refusal is the deletion.
+- The end: `session.accountDeleted()` — the source's `deleted` (`auth/ui/host`) makes the tab a guest's with no request
+  (the confirm cleared the cookies), drops every personal read and every write's body, forgets «Καλωσορίσατε» on the
+  device (`forgetKnownAccount`) and tells the other tabs; the screen shows the end until its address is left.
+
+## «Προσωπικά στοιχεία» (wave 4.5, screen 58) and the relative's form
+
+- Who the page reads: the SESSION's own facts of the person (`SessionMember`: the names and the server's masks —
+  `maskedLoginEmail`, `maskedLoginPhone` and, since this screen, `maskedAmka`, `maskedAfm`) and ONE read of its own,
+  `profile/api/user` `accountPersonQuery` (`['profile','account-person']`, personal: the gender and the day of birth
+  of `GET /user/me`, nothing else of the profile — U-169). The page keeps no copy of either.
+- 🔴 U-168 · where a typed value lives: ONLY in the rune state of the open row's own form (and, for a challenge, of
+  `use-code-challenge`: the code and where it went) and in the body of its ONE request. A row's form is mounted while
+  the row is open, so «Ακύρωση», Escape, a save or a session's end destroy it. The email, the mobile, the ΑΜΚΑ and
+  the ΑΦΜ open EMPTY. Nothing typed is written to a query, a mutation's cache (the writes are plain calls, not
+  TanStack mutations), a storage, an address, a history entry or a log; every answer of a write stays in `api/`.
+- After a change: `ports.refresh()` (the screen's) invalidates the appointments' reads and awaits
+  `session.retryRead()` — it now resolves once the confirming read is back, and never rejects — while the page
+  invalidates its own `accountPersonQuery`; only then does the row close, on what the SERVER holds. After a change
+  of the sign-in email the verify's own mask is written to the session's read at once (`auth/api/login-email`
+  `keepLoginEmailMask`), and the device's «Καλωσορίσατε ξανά» memory takes that mask when it greets by an email
+  (`auth/lib/known-account` `renameKnownAccountEmail`) — never the address.
+- A session that ended on a write (`EC401`) is `session.expire()`: the shell becomes a guest's and the page — with
+  whatever was typed — is destroyed under the sign-in.
+- The relative's form (D-W45-14): `RelativeFacts` carries `amkaMasked` / `afmMasked`, never a number; the lists'
+  cache after a new relative holds no ΑΜΚΑ / ΑΦΜ at all until the read that follows brings the server's masks. Which
+  numbers «Αφαίρεση» was pressed for is rune state of the form (`removed`), gone with it.
+
+## «Σύνδεση και ασφάλεια» (wave 4.5, screen 59)
+
+- Two reads, both the `auth` module's and both personal (`personalQueryMeta`: a sign-out removes them):
+  `signInMethodsQuery` (`['auth','sign-in-methods']`: two booleans about the password — never the password — and the
+  linked providers, each with whether it may be unlinked) and `accountSessionsQuery` (`['auth','account-sessions']`:
+  each device's id, whether it is this one, the instant it was last active and its three words; a word outside a
+  vocabulary is kept as `OTHER`, an id that is not the server's is no entry). An answer the page cannot read is a
+  failed read, never a default. Each part of the page waits and fails on its own read. The sign-in address of the
+  code's line is the SESSION's own fact (`SessionMember.maskedLoginEmail`, the server's mask) — or no address.
+- 🔴 U-168 · where a password or a code lives: ONLY in the rune state of the open row's own form (`change-form`,
+  `code-form`) and in the body of its ONE request. The form is mounted while the row is open, so «Ακύρωση», Escape,
+  «Ξέχασα τον κωδικό μου» (the change's fields go), a kept change and a session's end destroy it. Nothing typed is
+  written to a query, a mutation's cache (the writes are plain calls, not TanStack mutations), a storage, an
+  address, a history entry or a log; every answer of a write stays in `api/`. `hooks/use-password-code` keeps only
+  WHEN the next code may be asked for.
+- After the password changed or was set BOTH reads are invalidated and awaited (every other device was signed out);
+  only then does the row close. After a provider was unlinked the sign-in methods are read again; after a device was
+  signed out, the devices. A `404` of either press (linked no more, signed in no more) is a stale page: the read is
+  asked again, with no word of failure.
+- Which row is open, which provider the window asks about, which refusal a row shows and which device's press is out
+  are rune state of the slice, gone with it; the address says the section alone — never a step, a provider or a
+  session's id.
+- A session that ended on a write (`EC401` alone) is `session.expire()`: the shell becomes a guest's and the page —
+  with whatever was typed — is destroyed under the sign-in.
+
+## The notification centre (wave 4.5, screen 60 · the inbox's «Ρυθμίσεις μηνυμάτων»)
+
+- 🔴 ONE place in the cache for the whole site: `notificationPreferencesKey` (`$shared/lib/notification-preferences`),
+  holding the server's answer of `GET /notification/preferences/me` as it came, personal (`personalQueryMeta`: a
+  sign-out removes it). Two modules read it, each its own facts through `select` in its own `api/`:
+  `notifications/api/preferences` (`notificationPreferencesQuery`: the sides, kinds and cells, a word the contract does
+  not name left out) and `messages/api/preferences` (`messagePreferencesQuery`: the two switches of the messages). The
+  ONE write is `saveNotificationPreferences(client, cells)`: the `PUT`, and the answer put back under the same key —
+  so a switch flipped on either page is the other's at once. No module keeps a copy of the centre.
+- Screen 60's switches (🔴 D-W45-24, `notifications/ui/settings/hooks/use-preferences`): a press is one write of one
+  cell. The page draws the read with the reader's own presses laid over it (`applyNotificationChanges`) — rune state
+  that holds, a cell, the change and how many of its writes are still out, never the server's answer. A write that
+  comes back takes its press off (the cache already holds the answer); a refused one takes it off too — the switch is
+  back where the server keeps it — and the page says «Η αλλαγή δεν αποθηκεύτηκε. Δοκιμάστε ξανά.» in passing. A `401`
+  also ends the session (`session.expire`, U-84). Presses on two switches never undo each other, whichever answers first.
+- The inbox's two switches move in the cache itself at the press (`previewNotificationPreferences`, which answers the
+  way back for a refusal): its sheet shows nothing but those two.
+- Which kind's window is open is rune state of the page, gone with it; the address says the section, never the kind.
+
+## The list of notifications (wave 4.5, screen 63)
+
+- 🔴 D-W45-17 · D-W45-49: «how many are new» has ONE place in the cache, `notificationInboxKeys.unread()`
+  (`['notifications','inbox','unread']`, `notifications/api/inbox`), personal. Its one standing reader is the root
+  layout's `notifications/ui/unread-host`: enabled for a member in the browser only (a guest and a session not known
+  yet ask nothing), on NO timer, asked again whenever the page comes back to the front
+  (`refetchOnWindowFocus: 'always'`). It gives the count to the page tree as `NotificationBadge`
+  (`$shared/state/notification-badge`, context, the `InboxBadge` pattern): the frame's menu row and pill dot and the
+  «Προφίλ»'s bell draw it and import nothing of the module. Every other source of the number WRITES into the same
+  place (`keepUnreadNotificationCount`): each page of the list (its `unreadCount`) and the answer of each «read» —
+  never a second request. It stands beside the messages' `InboxBadge` and never in its place.
+- The list is an infinite read per choice and language (`notificationInboxQuery(filter, lang)`,
+  `['notifications','inbox','list', filter, lang]`), personal: the cache keeps the facts `api/inbox/map` made of the
+  answer (the server's words as they came, a word out of the contract as none). «Εμφάνιση παλαιότερων» is
+  `fetchNextPage`: the pages add up.
+- The choice on screen is the ADDRESS's (`?filter=new|previous|all`, `notifications/lib/paths`), as «Ιστορικό» is the
+  appointments'. With none in the address the page takes its own — «Νέες» while something is new, else «Όλες» —
+  ONCE, when the count is first known (`use-inbox`: rune state of one word, `'new' | 'all' | null`, forgotten at a
+  sign-out), so reading the last new line does not move the reader to another choice.
+- 🔴 U-174 (Ε2 Β): a line is read only by a press. The press sends ONE `POST …/:id/read` at once and, before the
+  answer, writes the caches (`previewNotificationRead`: the line leaves the «Νέες» lists, is read in the «Όλες» ones,
+  the count drops by one; in-flight reads are cancelled first so none lands over it). Kept: the count is the
+  answer's and the «Προηγούμενες» lists are invalidated (never guessed). Refused: the snapshot goes back and the
+  lists and the count are asked again; a `401` also ends the session (`session.expire`, U-84); a `404` (a line that
+  is no longer the account's) does NOT put the line back — only the lists and the count are asked again. «Σήμανση
+  όλων ως διαβασμένων» is the same with `previewAllNotificationsRead`, and a refusal of it is also said in passing
+  (the settings' «Η αλλαγή δεν αποθηκεύτηκε. Δοκιμάστε ξανά.»). Two writes that cross make the page ask for the
+  count instead of trusting the last answer. The writes are plain calls, not TanStack mutations.
+- The first wait draws no choices; once a choice has been on screen (`use-inbox` `shown`, rune state of one
+  boolean, forgotten at a sign-out) another one still being read keeps the three choices over its wait.
+- Nothing of the list is in a storage, a cookie or an address; a line's id is in the path of its own «read» alone.
 
 ## The session across tabs (wave 3, D-W3-37)
 

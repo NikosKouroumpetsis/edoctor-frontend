@@ -10,7 +10,7 @@ describe('ReviewSummary', () => {
 			props: {
 				score: '4,9',
 				title: 'Κορυφαία επιλογή',
-				count: '124 αξιολογήσεις',
+				count: '124 κριτικές',
 				testId: 'summary',
 				testIdPrefix: 'reviews'
 			}

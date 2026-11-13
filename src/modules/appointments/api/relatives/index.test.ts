@@ -187,8 +187,13 @@ describe('screen 55 · the person’s relatives (P-W4 §4.6)', () => {
 	const answering = (data: unknown, status = 200) =>
 		vi.fn(async () => new Response(JSON.stringify({ status: 'ok', data }), { status }));
 
-	it('every relative, whole for the form (the optional fields `null` when blank), with the cookies', async () => {
-		const spy = answering([relative, { id: 'r-2', firstName: '', lastName: 'Χωρίς' }]);
+	// Rewrites «🔴 D-W45-10: … neither the server’s mask nor a whole value reaches the form» (card w45-w2) by D-W45-14
+	// (card w45-w5): the server's MASK now reaches the form, as its hint — a whole value still never does.
+	it('🔴 D-W45-14 · U-168: every relative for the form (the optional fields `null` when blank), with the cookies — its ΑΜΚΑ / ΑΦΜ ONLY as the server’s masks; a whole value an older server still sent is dropped', async () => {
+		const spy = answering([
+			{ ...relative, amkaMasked: '•••••••0001', afmMasked: '•••••6789', afm: '123456789' },
+			{ id: 'r-2', firstName: '', lastName: 'Χωρίς' }
+		]);
 		vi.stubGlobal('fetch', spy);
 		expect(await listRelatives('p/1')).toEqual([
 			{
@@ -199,10 +204,11 @@ describe('screen 55 · the person’s relatives (P-W4 §4.6)', () => {
 				gender: 'MALE',
 				phone: '+306900000000',
 				email: null,
-				amka: '00000000001',
-				afm: null
+				amkaMasked: '•••••••0001',
+				afmMasked: '•••••6789'
 			}
 		]);
+		expect(JSON.stringify(await listRelatives('p/1'))).not.toMatch(/00000000001|123456789/u);
 		const [url, init] = spy.mock.calls[0] as unknown as [string, RequestInit];
 		expect(url).toContain('/patient/p%2F1/relatives');
 		expect(init).toMatchObject({ method: 'GET', credentials: 'include' });

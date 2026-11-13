@@ -25,4 +25,30 @@ describe('InlineLinkText', () => {
 		await user.click(screen.getByRole('button', { name: 'τους όρους' }));
 		expect(onLinkPress).toHaveBeenCalledOnce();
 	});
+
+	it('a `tail` ends the sentence right after the link — no space between, and outside the link', () => {
+		const { container } = render(InlineLinkText, {
+			props: { text: 'Διαβάστε την', linkLabel: 'Πολιτική απορρήτου', tail: '.', href: '/privacy' }
+		});
+		const sentence = container.querySelector('[data-slot="inline-link-text"]') as HTMLElement;
+		expect(sentence.textContent?.replace(/\s+/gu, ' ').trim()).toBe(
+			'Διαβάστε την Πολιτική απορρήτου.'
+		);
+		expect(screen.getByRole('link', { name: 'Πολιτική απορρήτου' })).toHaveTextContent(
+			/^Πολιτική απορρήτου$/u
+		);
+	});
+
+	it('(negative) without a `tail` nothing follows the link; a tail that is markup is drawn as its letters', () => {
+		const plain = render(InlineLinkText, {
+			props: { text: 'Δείτε', linkLabel: 'τους όρους', href: '/terms' }
+		});
+		expect(plain.container.textContent?.trim().endsWith('τους όρους')).toBe(true);
+		plain.unmount();
+		const { container } = render(InlineLinkText, {
+			props: { text: 'Δείτε', linkLabel: 'τους όρους', tail: '<b>!</b>', href: '/terms' }
+		});
+		expect(container.querySelector('b')).toBeNull();
+		expect(container).toHaveTextContent('τους όρους<b>!</b>');
+	});
 });

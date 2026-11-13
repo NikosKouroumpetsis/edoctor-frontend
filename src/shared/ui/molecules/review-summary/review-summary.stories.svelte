@@ -9,7 +9,7 @@
 		args: {
 			score: '4,9',
 			title: 'Κορυφαία επιλογή',
-			count: '124 αξιολογήσεις',
+			count: '124 κριτικές',
 			linkLabel: 'Πώς λειτουργούν οι κριτικές',
 			onLink: () => {}
 		}
@@ -28,7 +28,7 @@
 			<ReviewSummary
 				score="4,9"
 				title="Κορυφαία επιλογή"
-				description="Ένας από τους πιο αγαπημένους επαγγελματίες, με βάση τις αξιολογήσεις"
+				description="Ένας από τους πιο αγαπημένους επαγγελματίες, με βάση τις κριτικές"
 				linkLabel="Πώς λειτουργούν οι κριτικές"
 				linkHref="#reviews"
 			/>
@@ -38,7 +38,7 @@
 
 <Story name="Without a link">
 	{#snippet template()}
-		<ReviewSummary score="4,7" title="Αξιολογήσεις" count="38 αξιολογήσεις" />
+		<ReviewSummary score="4,7" title="Κριτικές" count="38 κριτικές" />
 	{/snippet}
 </Story>
 
@@ -48,7 +48,7 @@
 			<ReviewSummary
 				score="4,9"
 				title="Κορυφαία επιλογή"
-				count="124 αξιολογήσεις"
+				count="124 κριτικές"
 				linkLabel="Πώς λειτουργούν οι κριτικές"
 				onLink={() => {}}
 			/>

@@ -1,4 +1,4 @@
-import type { PatientSelfResponseView, RelativeView } from '$shared/lib/api-client';
+import type { PatientSelfResponseView, RelativeScopedView } from '$shared/lib/api-client';
 import type { BookingPatientFacts, BookingRelativeFacts } from './types';
 
 /**
@@ -12,7 +12,9 @@ const toName = (value: unknown): string | null =>
  * A relative the booking can name: an id and both names, else nothing (the summary never prints half a person); its
  * relationship and gender as spelled, `''` when none (U-139.5: the words are `lib/`'s).
  */
-export function mapBookingRelative(view: RelativeView | null | undefined): BookingRelativeFacts[] {
+export function mapBookingRelative(
+	view: RelativeScopedView | null | undefined
+): BookingRelativeFacts[] {
 	const relativeId = toName(view?.id);
 	const firstName = toName(view?.firstName);
 	const lastName = toName(view?.lastName);

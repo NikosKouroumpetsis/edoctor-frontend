@@ -179,13 +179,18 @@ export const platform = {
 		// 704 from 1440).
 		'split-list-w': 420,
 		'split-list-w-lg': 460,
+		// Wave 4.5 · screen 57 (U-167, D-W45-08, the approved prototype's `57-settings/set.css` `.s-split`): the `SplitView`'s
+		// menu column from 950 (340, 420 from 1128) — what it opens is centred in what is left, at most `split-solo` wide.
+		'split-menu-w': 340,
+		'split-menu-w-lg': 420,
 		'split-solo': 640,
 		'pane-column': 640,
 		'split-sub': 656,
 		'split-sub-lg': 688,
 		'split-sub-xl': 704,
-		// … and the right column's inset from 950 (`appt.css:232`, `:242`, `:245`: 48 a side, 64 from 1128, 80 on the left
-		// from 1440), the 51's and its change screens' (`:323`, `:329`, `:332`).
+		// … and the right column's inset from 950 (`appt.css:232`, `:242`: 48 a side, 64 from 1128), the 51's and its change
+		// screens' (`:323`, `:329`). 🔴 U-167 (D-W45-56): both sides the same from 1440 too — the 80 on the left alone
+		// (`pane-inset-xl`, `appt.css:245`, `:332`) has no reader since the column sits in the middle of the right side.
 		'pane-inset': 48,
 		'pane-inset-lg': 64,
 		'pane-inset-xl': 80,
@@ -196,6 +201,11 @@ export const platform = {
 		// 55's row of a relative: the initial in its 44 circle (`55-relatives/appt.css:424` `.r-av`).
 		'review-comment': 136,
 		'relative-initial': 44,
+		// Wave 4.5 · screen 56 (record §5.1, `56-profile/prof.css:16` `.p-card .av`): the initial's circle of the name card.
+		'profile-initial': 88,
+		// Wave 4.5 · screen 63 (record §5.1, §5.8; `63-inbox/list.css:5, :9` `.i-gear`, `.i-row .ic`): the 44 circle of a
+		// notification's glyph, of the list's gear and of the «Προφίλ»'s bell (inside its 48 target where it is pressed).
+		'inbox-glyph': 44,
 		// Screen 50's capsules «Επερχόμενα / Ιστορικό» (`54-rating/appt.css:73` `.a-chip`, D-W4-66): the `Chip`'s `tab` pill.
 		'chip-tab': 36,
 		// 🔴 D-W4-65: the screen from which the capsule is its whole 384 (`tab-capsule-w` + 8 a side) — as at 402, where five

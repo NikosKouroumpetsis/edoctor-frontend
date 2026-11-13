@@ -24,7 +24,7 @@ type CachedAppointments = CachedRows | { pages: CachedRows[] };
 /**
  * 🔴 Review w4-w6 R1 MAJOR-1 (screen 54's `201`): the visit just rated, written where every screen reads it BEFORE the
  * form goes back — its own page and its row of every list lose the invitation and name the review — so the 51 stands at
- * once with «Η κριτική σας» and never «Αξιολογήστε», also while the new read is on its way or fails. Only what is in
+ * once with «Η κριτική σας» and never «Γράψτε κριτική», also while the new read is on its way or fails. Only what is in
  * the cache is rewritten (nothing made up); the keys are marked first, so a sign-out takes them (w3-w2 R1 MAJOR-1).
  */
 export function storeAppointmentRated(

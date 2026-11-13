@@ -49,8 +49,12 @@ const U_139_6 = {
 	el: 'Για να μπορεί το ιατρείο να καλέσει τον συγγενή σας. Τις ειδοποιήσεις για το ραντεβού τις λαμβάνετε εσείς.',
 	en: 'So the office can call your relative. You’ll still receive the appointment notifications.'
 };
-/** U-138.6: «αξιολόγηση» is the act (the buttons, the form, the notice), «κριτική» what is published. */
-const RATE = /αξιολ[οό]γ/iu;
+/**
+ * 🔴 U-173 (wave 4.5, card w45-w8; record §7α «Αντικαθιστά το U-138.6»): ONE word everywhere, «κριτική» — the act (the
+ * buttons, the form, the notice) says it as what is published does; the old word of U-138.6's act is said nowhere.
+ */
+const OLD_WORD = /ξιολ[οό]γ/iu;
+const REVIEW = /κριτικ/iu;
 const ACT = [
 	'ratings_form_title',
 	'ratings_done_title',
@@ -98,15 +102,19 @@ function findTextIssues(el: Catalog, en: Catalog, template: string): string[] {
 			issues.push(`${key}: a late cancel the patient never reads (U-137.5)`);
 		}
 	}
-	for (const key of ACT) if (!RATE.test(el[key] ?? '')) issues.push(`${key}: not the act`);
+	for (const key of ACT) {
+		if (OLD_WORD.test(el[key] ?? '') || !REVIEW.test(el[key] ?? '')) {
+			issues.push(`${key}: not «κριτική» (U-173)`);
+		}
+	}
 	for (const key of PUBLISHED) {
-		if (RATE.test(el[key] ?? '') || !(key in el)) issues.push(`${key}: not the review`);
+		if (OLD_WORD.test(el[key] ?? '') || !(key in el)) issues.push(`${key}: not the review`);
 	}
 	return issues;
 }
 
 describe('the patient’s words (wave 4.0)', () => {
-	it('D-W4-12 · D-W4-13 · D-W4-14 · U-137.5 · U-138.6 · U-139.6: the catalogs say what the wave decided', () => {
+	it('D-W4-12 · D-W4-13 · D-W4-14 · U-137.5 · U-173 · U-139.6: the catalogs say what the waves decided', () => {
 		expect(findTextIssues(readCatalog('el'), readCatalog('en'), readCalendarInvite())).toEqual([]);
 	});
 
@@ -120,7 +128,7 @@ describe('the patient’s words (wave 4.0)', () => {
 		);
 	});
 
-	it('(negative, planted) an email promised again, the old guest words, another calendar title, a late cancel, «αξιολόγηση» on the review — each is reported', () => {
+	it('(negative, planted) an email promised again, the old guest words, another calendar title, a late cancel, the old word on the review or on the act (U-173) — each is reported', () => {
 		const el = readCatalog('el');
 		const en = readCatalog('en');
 		const planted = {
@@ -130,7 +138,8 @@ describe('the patient’s words (wave 4.0)', () => {
 			appointments_calendar_title: 'Ραντεβού με {doctor}',
 			appointments_detail_canceled_late: 'Το ραντεβού ακυρώθηκε εκπρόθεσμα.',
 			ratings_mine_title: 'Η αξιολόγησή σας',
-			ratings_done_title: 'Η κριτική υποβλήθηκε.'
+			ratings_done_title: 'Η αξιολόγηση υποβλήθηκε.',
+			appointments_list_rate: 'Πείτε μας τη γνώμη σας'
 		};
 		expect(findTextIssues(planted, en, readCalendarInvite())).toEqual([
 			"ratings_done_body: not D-W4-12's words",
@@ -138,7 +147,8 @@ describe('the patient’s words (wave 4.0)', () => {
 			'appointments_guest_body: not the prototype’s',
 			"appointments_calendar_title (el): not the email's summary",
 			'appointments_detail_canceled_late: a late cancel the patient never reads (U-137.5)',
-			'ratings_done_title: not the act',
+			'ratings_done_title: not «κριτική» (U-173)',
+			'appointments_list_rate: not «κριτική» (U-173)',
 			'ratings_mine_title: not the review'
 		]);
 	});

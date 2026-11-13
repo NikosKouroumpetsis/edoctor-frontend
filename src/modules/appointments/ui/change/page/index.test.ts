@@ -230,6 +230,18 @@ describe('🔴 U-102 / U-136.2: a screen of its own, never a modal', () => {
 			const frame = document.querySelector('[data-slot="booking-change-screen"]');
 			expect(frame?.tagName).toBe('SECTION');
 			expect(frame).toHaveAttribute('data-placement', 'pane');
+			// 🔴 U-167 (D-W45-56, card w45-w9): from 950 in the MIDDLE of the right column at its own widths (656 / 688 /
+			// 704), the same inset on both sides — never against the list (`split:mx-0`), no 80 on the left alone.
+			expect(frame).toHaveClass(
+				'mx-auto',
+				'split:max-w-split-sub',
+				'laptop:max-w-split-sub-lg',
+				'desktop:max-w-split-sub-xl',
+				'split:px-pane-inset',
+				'laptop:px-pane-inset-lg'
+			);
+			const classes = (frame?.className ?? '').split(/\s+/u);
+			expect(classes.filter((name) => /(?:^|:)(?:m[xlr]-0|p[lr]-\S+)$/u.test(name))).toEqual([]);
 			expect(screen.queryByRole('dialog')).toBeNull();
 			expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
 			expect(screen.getByTestId('booking-back')).toHaveAttribute('href');

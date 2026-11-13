@@ -127,7 +127,7 @@ export function bookedVisitorLabel(
 }
 
 /**
- * The card's doctor (record §3.2): the photo, the specialty, the name, «★ 4,9 (22 αξιολογήσεις)» once reviewed — the
+ * The card's doctor (record §3.2): the photo, the specialty, the name, «★ 4,9 (22 κριτικές)» once reviewed — the
  * booking's (30, 31) and, since wave 4.0, an appointment's (51, `lib/list` `appointmentDoctorHead`).
  */
 export function bookingDoctorHead(

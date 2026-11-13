@@ -10,7 +10,7 @@
 	}: {
 		title: string;
 		body: string;
-		/** «Αξιολογήστε την επίσκεψη» (U-138.6: the act). */
+		/** «Γράψτε κριτική για την επίσκεψη» (U-173). */
 		cta: string;
 		href: string;
 		onOpen: (event: MouseEvent) => void;

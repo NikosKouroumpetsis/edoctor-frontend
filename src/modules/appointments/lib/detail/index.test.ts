@@ -553,7 +553,7 @@ describe('screen 51 · the actions, the link, the office, the done notice', () =
 				.title
 		).toBe('Η σημείωση αφαιρέθηκε.');
 		expect(buildAppointmentDoneNotice({ kind: 'rating' }, appointmentFactsSample, 'el')).toEqual({
-			title: 'Η αξιολόγηση υποβλήθηκε.',
+			title: 'Η κριτική υποβλήθηκε.',
 			lines: ['Ευχαριστούμε. Η ομάδα του eDoctor την ελέγχει πριν δημοσιευτεί.']
 		});
 	});

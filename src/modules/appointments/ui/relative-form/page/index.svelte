@@ -12,6 +12,7 @@
 	import { PhoneFieldInline } from '$shared/ui/molecules/phone-field-inline';
 	import { Select } from '$shared/ui/molecules/select';
 	import { TextField } from '$shared/ui/molecules/text-field';
+	import { TextButton } from '$shared/ui/primitives/text-button';
 	import { appointmentsQueryKeys } from '$modules/appointments/api/keys';
 	import {
 		bookingPatientQuery,
@@ -49,7 +50,8 @@
 		toBookingRelativeInput,
 		toRelativeUpdate,
 		type BookingRelativeFieldName,
-		type BookingRelativeValues
+		type BookingRelativeValues,
+		type RelativeIdField
 	} from '$modules/appointments/lib/relatives';
 	import { getSessionOptional } from '$shared/state/session';
 	import { ChangeFrame } from '$modules/appointments/ui/change-screen';
@@ -90,6 +92,15 @@
 	const forgive = (field: BookingRelativeFieldName) => {
 		if (isRefused(field)) refused = refused.filter((name) => name !== field);
 	};
+
+	// 🔴 D-W45-14 (U-168): an ΑΜΚΑ / ΑΦΜ on file is known only by the server's mask, read as the lists hold it NOW (a new
+	// relative's arrives with the next read) — the hint under its EMPTY field. «Αφαίρεση» marks it to be taken off at the
+	// save (`null`); from then on the field reads as one never given, as the application's.
+	let removed = $state<RelativeIdField[]>([]);
+	const maskOf = (id: RelativeIdField) =>
+		removed.includes(id)
+			? null
+			: ((id === 'amka' ? props.relative?.amkaMasked : props.relative?.afmMasked) ?? null);
 
 	/** A relative as the booking's lists name it (D-W3-23): the id, the names, the relationship and the gender. */
 	const named = (relative: BookingRelativeFacts): BookingRelativeFacts => ({
@@ -134,13 +145,28 @@
 	const write = createMutation(() => ({
 		// Without a network it fails at once and says so, rather than waiting for one unseen.
 		networkMode: 'always' as const,
-		// The new one whole as it was sent (its mobile, email, ΑΜΚΑ, ΑΦΜ never read back from the answer, review w3-w6 R1
-		// MINOR-1); a change as the server keeps it now. `null` for an answer that is none.
+		// The new one as it was sent (its mobile and email never read back from the answer, review w3-w6 R1 MINOR-1) —
+		// 🔴 U-168 / D-W45-14: but NEVER its ΑΜΚΑ / ΑΦΜ: the lists keep no whole number, and the server's masks come with
+		// the read that follows. A change as the server keeps it now. `null` for an answer that is none.
 		mutationFn: async (request: RelativeWrite) => {
 			if (request.kind === 'create') {
 				const made = await createBookingRelative(request.patientId, request.input);
+				const { firstName, lastName, relationship, gender, phone: mobile, email } = request.input;
 				return made
-					? { named: made, whole: { ...request.input, relativeId: made.relativeId } }
+					? {
+							named: made,
+							whole: {
+								relativeId: made.relativeId,
+								firstName,
+								lastName,
+								relationship,
+								gender,
+								phone: mobile,
+								email,
+								amkaMasked: null,
+								afmMasked: null
+							}
+						}
 					: null;
 			}
 			const kept = await updateRelative(request.patientId, request.relativeId, request.update);
@@ -198,7 +224,7 @@
 				props.toMobilePhone(phone.dialCode, phone.number)
 			);
 			if (stored) {
-				const update = toRelativeUpdate(values, read, stored);
+				const update = toRelativeUpdate(values, read, stored, removed);
 				if (!update) return;
 				if (!patientId) {
 					failure = m.relatives_failure_unknown({}, options);
@@ -224,7 +250,10 @@
 
 	// Screen 55 (record §11.2): a relative's «Αποθήκευση» sleeps until something changes; a new one's never does.
 	const changed = $derived(
-		form.isDirty || phone.dialCode !== initialPhone.dialCode || phone.number !== initialPhone.number
+		form.isDirty ||
+			removed.length > 0 ||
+			phone.dialCode !== initialPhone.dialCode ||
+			phone.number !== initialPhone.number
 	);
 
 	/**
@@ -239,6 +268,23 @@
 			form.setValue(field, kept);
 		};
 	}
+
+	type MessageOptions = { locale: RelativeFormProps['locale'] };
+	// The two numbers' fields, drawn the same way: the label, the helper while none is on file, what the field keeps.
+	const idFields = [
+		{
+			name: 'amka',
+			label: (at: MessageOptions) => m.relatives_field_amka({}, at),
+			helper: (at: MessageOptions) => m.relatives_field_amka_helper({}, at),
+			keep: keepBookingAmkaInput
+		},
+		{
+			name: 'afm',
+			label: (at: MessageOptions) => m.relatives_field_afm({}, at),
+			helper: (at: MessageOptions) => m.relatives_field_afm_helper({}, at),
+			keep: keepBookingAfmInput
+		}
+	] as const;
 
 	function save() {
 		if (write.isPending) return;
@@ -261,7 +307,9 @@
      typed shows back only as text. A refused write marks the fields the server refused (W8-Σ2), a refused ΑΜΚΑ or
      ΑΦΜ with its own words (W8 Delta 1, U-121.3); both keep only their digits (A7, Delta 1). A saved relative is
      handed to the caller (`onSaved`), which goes back to «Για ποιον…» with it CHOSEN; «Άκυρο» keeps nobody. Screen 55
-     opens the same form on a relative on file: its values first, «Αποθήκευση» asleep until something changes. -->
+     opens the same form on a relative on file: its values first, «Αποθήκευση» asleep until something changes.
+     🔴 D-W45-14 (U-168): on a relative on file the ΑΜΚΑ and the ΑΦΜ open EMPTY, the server's mask under each as a hint
+     («Έχει δοθεί: •••••••2345»); an empty field is left untouched, a number typed replaces it, «Αφαίρεση» takes it off. -->
 <ChangeFrame
 	title={stored
 		? m.relatives_sheet_edit_title({}, options)
@@ -376,30 +424,35 @@
 			onChangeText={() => forgive('email')}
 			data-testid={`${testId}-email`}
 		/>
-		<TextField
-			field={form.field('amka')}
-			label={m.relatives_field_amka({}, options)}
-			helperText={m.relatives_field_amka_helper({}, options)}
-			inputmode="numeric"
-			autocomplete="off"
-			size="lg"
-			invalid={isRefused('amka')}
-			oninput={keepIdDigits('amka', keepBookingAmkaInput)}
-			onChangeText={() => forgive('amka')}
-			data-testid={`${testId}-amka`}
-		/>
-		<TextField
-			field={form.field('afm')}
-			label={m.relatives_field_afm({}, options)}
-			helperText={m.relatives_field_afm_helper({}, options)}
-			inputmode="numeric"
-			autocomplete="off"
-			size="lg"
-			invalid={isRefused('afm')}
-			oninput={keepIdDigits('afm', keepBookingAfmInput)}
-			onChangeText={() => forgive('afm')}
-			data-testid={`${testId}-afm`}
-		/>
+		{#each idFields as id (id.name)}
+			{@const masked = maskOf(id.name)}
+			<div class="flex flex-col items-start">
+				<TextField
+					field={form.field(id.name)}
+					label={id.label(options)}
+					helperText={masked ? m.relatives_field_id_given({ masked }, options) : id.helper(options)}
+					inputmode="numeric"
+					autocomplete="off"
+					size="lg"
+					invalid={isRefused(id.name)}
+					oninput={keepIdDigits(id.name, id.keep)}
+					onChangeText={() => forgive(id.name)}
+					data-testid={`${testId}-${id.name}`}
+				/>
+				{#if masked}
+					<TextButton
+						label={m.relatives_field_id_remove({}, options)}
+						tone="danger"
+						underline
+						textClass="text-body-sm underline-offset-3"
+						aria-describedby={`${testId}-${id.name}-given`}
+						data-testid={`${testId}-${id.name}-remove`}
+						onclick={() => (removed = [...removed, id.name])}
+					/>
+					<span id={`${testId}-${id.name}-given`} class="sr-only">{id.label(options)}</span>
+				{/if}
+			</div>
+		{/each}
 		{#if failure}
 			<InlineNotice variant="danger" message={failure} testId={`${testId}-failure`} />
 		{/if}

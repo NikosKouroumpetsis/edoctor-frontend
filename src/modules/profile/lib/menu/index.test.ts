@@ -16,32 +16,54 @@ describe('profile::lib::menu', () => {
 		}
 	});
 
-	it('D-W4-56: a member reads «Οι συγγενείς μου» first in «account», as the application; still no «Ραντεβού γιατρού» or «Ταμείο»', () => {
+	// Rewrites «D-W4-56: a member reads «Οι συγγενείς μου» first in «account»» by card w45-w2 (record §5.1, U-164): the
+	// row keeps its page and its rule (a session only) and moves under «Ρυθμίσεις λογαριασμού»; «Αποσύνδεση» is the last.
+	it('🔴 U-164 (wave 4.5, screen 56): a member reads Ρυθμίσεις λογαριασμού · Οι συγγενείς μου · Βρείτε βοήθεια · Απόρρητο · — · Νομικά · Αποσύνδεση — «Αποσύνδεση» the LAST row (Ε3 Α); still no «Ραντεβού γιατρού» or «Ταμείο»', () => {
 		const sections = buildProfileMenu({ locale: 'el' }, { member: true });
 		expect(sections.map((section) => section.rows.map((row) => row.label))).toEqual([
-			['Οι συγγενείς μου', 'Ρυθμίσεις λογαριασμού', 'Βρείτε βοήθεια', 'Απόρρητο'],
-			['Νομικά']
+			['Ρυθμίσεις λογαριασμού', 'Οι συγγενείς μου', 'Βρείτε βοήθεια', 'Απόρρητο'],
+			['Νομικά', 'Αποσύνδεση']
 		]);
-		expect(sections[0].rows[0]).toEqual({
+		expect(sections[0].rows[1]).toEqual({
 			id: 'relatives',
 			icon: 'people-outline',
 			label: 'Οι συγγενείς μου'
 		});
+		expect(sections.at(-1)?.rows.at(-1)).toEqual({
+			id: 'sign-out',
+			icon: 'log-out-outline',
+			label: 'Αποσύνδεση'
+		});
 		const words = sections.flatMap((section) => section.rows.map((row) => row.label)).join(' ');
 		for (const hidden of ['Ραντεβού γιατρού', 'Ταμείο']) expect(words).not.toContain(hidden);
 		expect(
-			buildProfileMenu({ locale: 'en' }, { member: true })[0].rows.map((row) => row.label)
-		).toEqual(['My relatives', 'Account settings', 'Get help', 'Privacy']);
+			buildProfileMenu({ locale: 'en' }, { member: true }).map((section) =>
+				section.rows.map((row) => row.label)
+			)
+		).toEqual([
+			['Account settings', 'My relatives', 'Get help', 'Privacy'],
+			['Legal', 'Log out']
+		]);
 	});
 
-	it('D-W4-56 (negative): a guest never reads the row, named or by default', () => {
+	it('🔴 U-164.1 (negative): no row of a doctor’s, for a guest or a member — «Λειτουργία γιατρού» is the application’s alone', () => {
+		for (const member of [false, true]) {
+			for (const locale of ['el', 'en'] as const) {
+				const rows = buildProfileMenu({ locale }, { member }).flatMap((section) => section.rows);
+				expect(rows.map((row) => row.id).join(' ')).not.toMatch(/doctor|till/u);
+				expect(rows.map((row) => row.label).join(' ')).not.toMatch(/γιατρ|doctor|Ταμείο|Till/iu);
+			}
+		}
+	});
+
+	it('D-W4-56 (negative): a guest never reads the row, named or by default — nor «Αποσύνδεση» (U-164 Ε3)', () => {
 		for (const sections of [
 			buildProfileMenu({ locale: 'el' }, { member: false }),
 			buildProfileMenu({ locale: 'el' })
 		]) {
-			expect(sections.flatMap((section) => section.rows.map((row) => row.id))).not.toContain(
-				'relatives'
-			);
+			const ids = sections.flatMap((section) => section.rows.map((row) => row.id));
+			expect(ids).not.toContain('relatives');
+			expect(ids).not.toContain('sign-out');
 		}
 	});
 

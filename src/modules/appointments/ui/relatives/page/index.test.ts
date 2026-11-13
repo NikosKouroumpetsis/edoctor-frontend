@@ -477,6 +477,10 @@ describe('the relative’s form (record §11.2: the fields of screen 30)', () =>
 		// Below 950 a page of its own: «←» and «Άκυρο» go back the step they came, nothing is sent.
 		expect(split()).toHaveAttribute('data-open');
 		expect(screen.getByTestId('relatives-form')).toHaveAttribute('data-placement', 'pane');
+		// 🔴 U-167 (D-W45-56, card w45-w9): from 950 the form in the MIDDLE of the right column, never against the list.
+		expect(screen.getByTestId('relatives-form')).toHaveClass('mx-auto', 'split:max-w-split-sub');
+		expect(screen.getByTestId('relatives-form')).not.toHaveClass('split:mx-0');
+		expect(screen.getByTestId('relatives-form')).not.toHaveClass('desktop:pl-pane-inset-xl');
 		await user().type(screen.getByTestId('relatives-form-email'), 'x');
 		expect(save()).toBeEnabled();
 		await user().clear(screen.getByTestId('relatives-form-email'));
@@ -501,6 +505,158 @@ describe('the relative’s form (record §11.2: the fields of screen 30)', () =>
 		expect(Object.keys(writes()[0].body ?? {}).sort()).toEqual(['email', 'lastName']);
 		await waitFor(() => expect(go).toHaveBeenCalledWith(-1));
 		expect(screen.getByTestId('relatives-done')).toHaveTextContent('Οι αλλαγές αποθηκεύτηκαν.');
+	});
+
+	it('🔴 D-W45-14 · U-168: τα πεδία ανοίγουν άδεια — on a relative on file the ΑΜΚΑ and the ΑΦΜ open EMPTY, the SERVER’s mask under each as a hint («Έχει δοθεί: •••••••2345») with «Αφαίρεση»; one never given keeps its helper and has no «Αφαίρεση»', async () => {
+		relatives = relatives.map((entry) =>
+			entry.id === ANNA ? { ...entry, amkaMasked: '•••••••2345', afmMasked: null } : entry
+		);
+		draw(edit(ANNA), { depth: 1 });
+		await waitFor(() =>
+			expect(screen.getByTestId('relatives-form-first-name')).toHaveValue('Άννα')
+		);
+		const amka = screen.getByTestId('relatives-form-amka') as HTMLInputElement;
+		const afm = screen.getByTestId('relatives-form-afm') as HTMLInputElement;
+		expect(amka.value).toBe('');
+		expect(afm.value).toBe('');
+		await waitFor(() =>
+			expect(
+				document.getElementById(amka.getAttribute('aria-describedby') ?? '')
+			).toHaveTextContent('Έχει δοθεί: •••••••2345')
+		);
+		expect(screen.getByTestId('relatives-form-amka-remove')).toHaveTextContent('Αφαίρεση');
+		expect(document.getElementById(afm.getAttribute('aria-describedby') ?? '')).toHaveTextContent(
+			'9 ψηφία.'
+		);
+		expect(screen.queryByTestId('relatives-form-afm-remove')).toBeNull();
+		// The mask is a hint, never a value: «Αποθήκευση» sleeps, nothing differs from what is on file.
+		expect(save()).toBeDisabled();
+	});
+
+	it('🔴 D-W45-14: κενό = ανέγγιχτο — a change of the name sends the name ALONE (the ΑΜΚΑ on file is neither sent nor cleared); a number typed travels alone', async () => {
+		relatives = relatives.map((entry) =>
+			entry.id === ANNA ? { ...entry, amkaMasked: '•••••••2345', afmMasked: null } : entry
+		);
+		draw(edit(ANNA), { depth: 1 });
+		await waitFor(() =>
+			expect(screen.getByTestId('relatives-form-first-name')).toHaveValue('Άννα')
+		);
+		await user().clear(screen.getByTestId('relatives-form-last-name'));
+		await user().type(screen.getByTestId('relatives-form-last-name'), 'Γεωργίου');
+		await user().click(save());
+		await waitFor(() => expect(writes()).toHaveLength(1));
+		expect(writes()[0].body).toEqual({ lastName: 'Γεωργίου' });
+	});
+
+	it('🔴 D-W45-14: a NEW number over one on file travels alone; the lists keep the server’s mask of it, never the number', async () => {
+		relatives = relatives.map((entry) =>
+			entry.id === ANNA ? { ...entry, amkaMasked: '•••••••2345', afmMasked: null } : entry
+		);
+		// The server keeps the number and answers its own mask of it, in the write's answer and in every read after it.
+		answers[`PATCH /patient/pat-1/relatives/${ANNA}`] = () => {
+			relatives = relatives.map((entry) =>
+				entry.id === ANNA ? { ...entry, afmMasked: '•••••6783' } : entry
+			);
+			return json(relatives.find((entry) => entry.id === ANNA));
+		};
+		const { handle } = draw(edit(ANNA), { depth: 1 });
+		await waitFor(() =>
+			expect(screen.getByTestId('relatives-form-first-name')).toHaveValue('Άννα')
+		);
+		await user().type(screen.getByTestId('relatives-form-afm'), '123 456 783');
+		expect(save()).toBeEnabled();
+		await user().click(save());
+		await waitFor(() => expect(writes()).toHaveLength(1));
+		expect(writes()[0].body).toEqual({ afm: '123456783' });
+		const kept = () =>
+			JSON.stringify(
+				handle.client
+					?.getQueryCache()
+					.getAll()
+					.map((query) => query.state.data)
+			);
+		await waitFor(() => expect(kept()).toContain('•••••6783'));
+		expect(kept()).not.toContain('123456783');
+	});
+
+	it('🔴 D-W45-14: «Αφαίρεση» ⇒ `null` — the hint and the link go, «Αποθήκευση» wakes, and the save sends `amka: null` alone; a number typed after it is sent instead', async () => {
+		relatives = relatives.map((entry) =>
+			entry.id === ANNA ? { ...entry, amkaMasked: '•••••••2345', afmMasked: '•••••6783' } : entry
+		);
+		draw(edit(ANNA), { depth: 1 });
+		await waitFor(() =>
+			expect(screen.getByTestId('relatives-form-first-name')).toHaveValue('Άννα')
+		);
+		const amka = screen.getByTestId('relatives-form-amka') as HTMLInputElement;
+		await user().click(await screen.findByTestId('relatives-form-amka-remove'));
+		expect(screen.queryByTestId('relatives-form-amka-remove')).toBeNull();
+		expect(document.getElementById(amka.getAttribute('aria-describedby') ?? '')).toHaveTextContent(
+			'11 ψηφία.'
+		);
+		expect(screen.getByTestId('relatives-form')).not.toHaveTextContent('•••••••2345');
+		// The other number is untouched: its hint and its «Αφαίρεση» stay.
+		expect(screen.getByTestId('relatives-form-afm-remove')).toBeInTheDocument();
+		expect(save()).toBeEnabled();
+		await user().click(save());
+		await waitFor(() => expect(writes()).toHaveLength(1));
+		expect(writes()[0].body).toEqual({ amka: null });
+	});
+
+	it('D-W45-14: after «Αφαίρεση» a number typed is the one that travels (never `null` and then the number)', async () => {
+		relatives = relatives.map((entry) =>
+			entry.id === ANNA ? { ...entry, amkaMasked: '•••••••2345' } : entry
+		);
+		draw(edit(ANNA), { depth: 1 });
+		await waitFor(() =>
+			expect(screen.getByTestId('relatives-form-first-name')).toHaveValue('Άννα')
+		);
+		await user().click(await screen.findByTestId('relatives-form-amka-remove'));
+		await user().type(screen.getByTestId('relatives-form-amka'), '01019012345');
+		await user().click(save());
+		await waitFor(() => expect(writes()).toHaveLength(1));
+		expect(writes()[0].body).toEqual({ amka: '01019012345' });
+	});
+
+	it('🔴 U-168 · D-W45-14 (a new relative, as today — and): the number typed for a new relative travels in the body and is kept NOWHERE after it — the lists hold the server’s mask alone', async () => {
+		answers['POST /patient/pat-1/relatives'] = () => {
+			const made = { ...relativeView(MARIA, { firstName: 'Μαρία' }), amkaMasked: '•••••••2345' };
+			relatives = [...relatives, made];
+			return json(made, 201);
+		};
+		const { handle } = draw(NEW, { depth: 1 });
+		await screen.findByRole('heading', { level: 2, name: 'Νέος συγγενής' });
+		// A new relative has nothing on file: no hint, no «Αφαίρεση».
+		expect(screen.queryByTestId('relatives-form-amka-remove')).toBeNull();
+		expect(screen.getByTestId('relatives-form')).not.toHaveTextContent('Έχει δοθεί');
+		await waitFor(() => expect(reads('/patient/me').length).toBeGreaterThan(0));
+		await user().type(screen.getByTestId('relatives-form-first-name'), 'Μαρία');
+		await user().type(screen.getByTestId('relatives-form-last-name'), 'Παππά');
+		await user().click(screen.getByTestId('relatives-form-relationship'));
+		await user().click(await screen.findByRole('option', { name: 'Παιδί' }));
+		await user().click(screen.getByTestId('relatives-form-gender'));
+		await user().click(await screen.findByRole('option', { name: 'Γυναίκα' }));
+		await user().type(screen.getByTestId('relatives-form-amka'), '01019012345');
+		await user().click(save());
+		await waitFor(() => expect(writes()).toHaveLength(1));
+		expect(writes()[0].body).toMatchObject({ amka: '01019012345', afm: null });
+		await waitFor(() => expect(reads('/patient/pat-1/relatives').length).toBeGreaterThan(1));
+		const kept = JSON.stringify(
+			handle.client
+				?.getQueryCache()
+				.getAll()
+				.map((query) => query.state.data)
+		);
+		expect(kept).not.toContain('01019012345');
+		await waitFor(() =>
+			expect(
+				JSON.stringify(
+					handle.client
+						?.getQueryCache()
+						.getAll()
+						.map((query) => query.state.data)
+				)
+			).toContain('•••••••2345')
+		);
 	});
 
 	it('beside the list from 950: «Άκυρο» puts the form back as it is on file and stays; a save stays open too, as the server keeps it now', async () => {

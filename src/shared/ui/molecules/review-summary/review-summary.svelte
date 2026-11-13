@@ -12,7 +12,7 @@
 			/** Formatted by the caller («4,9», S-31.2). */
 			score: string;
 			title: string;
-			/** «124 αξιολογήσεις», or a `description` (the caller's own line). */
+			/** «124 κριτικές», or a `description` (the caller's own line). */
 			count?: string;
 			description?: string;
 			/** U-66.1 Π3: the reviews' window: from 744 the score of 64 between laurels of 56. */

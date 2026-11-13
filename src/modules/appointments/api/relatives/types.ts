@@ -21,8 +21,10 @@ export type BookingRelativeField = keyof BookingRelativeInput;
 
 /**
  * Screen 55: one relative as its own form reads it (`GET /patient/{patientId}/relatives`): the names, the relationship
- * and gender as spelled (`''` when none), and the optional mobile, email, ΑΜΚΑ and ΑΦΜ (`null` when none). 🔴 U-65.6:
- * these stay in `api/` and the form — never an address, a storage, a log.
+ * and gender as spelled (`''` when none), the optional mobile and email (`null` when none). 🔴 U-168 / D-W45-14: the
+ * ΑΜΚΑ and the ΑΦΜ ONLY as the server hides them (`amkaMasked` `•••••••2345`, `afmMasked` `•••••6789`; `null` when none
+ * is on file) — the whole number never comes, and none is kept. 🔴 U-65.6: these stay in `api/` and the form — never an
+ * address, a storage, a log.
  */
 export type RelativeFacts = {
 	relativeId: string;
@@ -32,8 +34,8 @@ export type RelativeFacts = {
 	gender: string;
 	phone: string | null;
 	email: string | null;
-	amka: string | null;
-	afm: string | null;
+	amkaMasked: string | null;
+	afmMasked: string | null;
 };
 
 /** Screen 55's change (`PATCH …/relatives/{relativeId}`): only what changed travels; a cleared field is `null` (D-78). */

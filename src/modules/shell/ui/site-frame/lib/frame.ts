@@ -16,25 +16,44 @@ export const doctorOnboardingPath = '/doctor/onboarding';
 const appointmentsPath = '/appointments';
 const relativesPath = '/profile/relatives';
 
+/** Wave 4.5 · screen 57 (D-W45-01): «Ρυθμίσεις λογαριασμού», the page a member's menu leads to (D-W45-21). */
+const accountSettingsPath = '/profile/account-settings';
+
+/** Wave 4.5 · screen 63 (D-W45-49): «Ειδοποιήσεις», the list — a route of its own, the application's address. */
+const notificationsPath = '/notifications';
+
 /**
  * The account menu from 744 (U-81.3), Airbnb's. A guest's four (U-17.2, U-17.5, U-19.1): «Σύνδεση ή εγγραφή» (bold) ·
  * — · «Ρυθμίσεις» · «Κέντρο βοήθειας» · — · «Είστε γιατρός;» with its line. 🔴 U-80.1 Ε3: a member's has no «Λογαριασμός»;
  * 🔴 U-134.6 + P-W4 Σ-13 (wave 4.0): «Μηνύματα» · «Τα ραντεβού μου» · «Αγαπημένα» (bold) · — · «Οι συγγενείς μου» ·
- * «Ρυθμίσεις» · «Κέντρο βοήθειας» · — · «Είστε γιατρός;» · — · «Αποσύνδεση».
+ * «Ρυθμίσεις» · «Κέντρο βοήθειας» · — · «Είστε γιατρός;» · — · «Αποσύνδεση». 🔴 D-W45-21 (wave 4.5, screen 56, U-164
+ * Ε4 Α): a member's «Ρυθμίσεις» is now «Ρυθμίσεις λογαριασμού», a LINK to the page of screen 57 in the same place —
+ * no window any more; a guest's menu does not change (D-W45-05: its «Ρυθμίσεις» stays the small window).
+ * 🔴 D-W45-17 (screen 63, record §5.1): a member's menu has «Ειδοποιήσεις» — the first row under the rule, before «Οι
+ * συγγενείς μου», not bold — with its dot and the name «Ειδοποιήσεις, νέες» while a notification is new
+ * (`hasNewNotifications`); it stands BESIDE the dot of «Μηνύματα» (`hasUnread`, U-84 Π5), never in its place.
  */
 export function buildAccountEntries(
 	messageOptions: FrameMessageOptions,
 	href: LocalizedHref,
 	isMember = false,
-	hasUnread = false
+	hasUnread = false,
+	hasNewNotifications = false
 ): AccountEntry[] {
 	const shared: AccountEntry[] = [
-		{
-			key: 'settings',
-			kind: 'settings',
-			label: m.account_menu_settings({}, messageOptions),
-			separated: !isMember
-		},
+		isMember
+			? {
+					key: 'account-settings',
+					kind: 'link',
+					label: m.profile_menu_account_settings({}, messageOptions),
+					href: href(accountSettingsPath)
+				}
+			: {
+					key: 'settings',
+					kind: 'settings',
+					label: m.account_menu_settings({}, messageOptions),
+					separated: true
+				},
 		{ key: 'help', kind: 'link', label: m.nav_help({}, messageOptions), href: href('/help') },
 		{
 			key: 'doctor',
@@ -81,11 +100,23 @@ export function buildAccountEntries(
 			emphasis: true
 		},
 		{
+			key: 'notifications',
+			kind: 'link',
+			label: m.notifications_inbox_bell_label({}, messageOptions),
+			href: href(notificationsPath),
+			separated: true,
+			...(hasNewNotifications
+				? {
+						name: m.notifications_inbox_bell_unread({}, messageOptions),
+						dotLabel: m.notifications_inbox_bell_unread({}, messageOptions)
+					}
+				: {})
+		},
+		{
 			key: 'relatives',
 			kind: 'link',
 			label: m.account_menu_relatives({}, messageOptions),
-			href: href(relativesPath),
-			separated: true
+			href: href(relativesPath)
 		},
 		...shared,
 		{
@@ -116,6 +147,21 @@ const APPOINTMENTS_PAGES = /^\/(?:appointments(?:\/.+)?|ratings\/.+)$/u;
 const RELATIVES_PAGES = /^\/profile\/relatives(?:\/.+)?$/u;
 
 /**
+ * Wave 4.5 · screen 57 (D-W45-01, D-W45-07): «Ρυθμίσεις λογαριασμού» (`/profile/account-settings`) and every section
+ * under it (`/profile/account-settings/…`) — pushed pages of the «Προφίλ» tab: no footer, no capsule, the list too.
+ * Screen 62 (card w45-w4): «Απόρρητο» (`/profile/privacy`) and «Εργαλεία τρίτων και cookies»
+ * (`/profile/third-party-tools`) are that shell's pages at the application's addresses, so the same frame.
+ */
+const SETTINGS_PAGES = /^\/profile\/(?:account-settings(?:\/.+)?|privacy|third-party-tools)$/u;
+
+/**
+ * Wave 4.5 · screen 63 (D-W45-49, record §5.8): «Ειδοποιήσεις», the list (`/notifications`; its choice is the address's
+ * query) — a pushed page of the «Προφίλ» below 744 (no capsule) and, from 950, a menu and a list that fill the screen
+ * (no footer), the settings' own frame.
+ */
+const NOTIFICATIONS_PAGES = /^\/notifications$/u;
+
+/**
  * 🔴 MINOR-4 (r1, U-25.2): whether `basePath` (the path without the language) belongs to the search, so the capsule
  * marks «Εξερευνήστε» there: the home and the results — never a profile or any other page (U-26.1's rule).
  */
@@ -127,7 +173,8 @@ export function isExploreFlow(basePath: string): boolean {
  * 🔴 U-81.2 / U-134.6: below 744 the web is the application, navigation too — the capsule's five tabs in the
  * application's order (U-81.4), the same for a guest and a member, each its page: «Εξερευνήστε» the search (the home and
  * its results, U-25.2), «Αγαπημένα», «Ραντεβού» (wave 4.0), «Μηνύματα» and «Προφίλ» (U-81.1: a page as the
- * application's tab, no sheet of a menu; current on «Οι συγγενείς μου» too, the prototype's `rel.js:159`).
+ * application's tab, no sheet of a menu; current on «Οι συγγενείς μου» too, the prototype's `rel.js:159`, and on
+ * «Ρυθμίσεις λογαριασμού», D-W45-07).
  */
 export function buildBottomNavItems(
 	messageOptions: FrameMessageOptions,
@@ -177,7 +224,11 @@ export function buildBottomNavItems(
 			icon: 'person-outline',
 			activeIcon: 'person',
 			href: href('/profile'),
-			current: path === '/profile' || RELATIVES_PAGES.test(path)
+			current:
+				path === '/profile' ||
+				RELATIVES_PAGES.test(path) ||
+				SETTINGS_PAGES.test(path) ||
+				NOTIFICATIONS_PAGES.test(path)
 		}
 	];
 }
@@ -260,7 +311,14 @@ export function frameHeaderOf(basePath: string, status = 200): FrameHeader {
 }
 
 /** The pages that end without the footer at every width; an error page under them has it again (U-61.1). */
-const FOOTERLESS_PAGES = [BOOKING_PAGES, ONBOARDING_PAGES, APPOINTMENTS_PAGES, RELATIVES_PAGES];
+const FOOTERLESS_PAGES = [
+	BOOKING_PAGES,
+	ONBOARDING_PAGES,
+	APPOINTMENTS_PAGES,
+	RELATIVES_PAGES,
+	SETTINGS_PAGES,
+	NOTIFICATIONS_PAGES
+];
 
 /**
  * Whether the frame draws its footer on `basePath` (the path without the language): every page but the results,
@@ -274,6 +332,8 @@ export function showsSiteFooter(basePath: string, status = 200): boolean {
 	// U-84 Π1: the messages end without it at every width (Airbnb). Wave 3: neither the booking nor the sign-up has it
 	// (their bar is pinned to the bottom, the application's below 744 and Airbnb's from it). 🔴 D-W4-55 (wave 4.0): nor
 	// the appointments, the rating or the relatives — from 950 their two columns fill the screen, as the messages'.
+	// 🔴 D-W45-07 (wave 4.5): nor «Ρυθμίσεις λογαριασμού» and its sections, for the same two columns; nor «Ειδοποιήσεις»,
+	// the list (screen 63), whose menu and list fill the screen the same way.
 	return (
 		!pagesWithoutFooter.includes(path) &&
 		!MESSAGES_PAGES.test(path) &&
@@ -299,6 +359,11 @@ export function showsBottomNav(basePath: string, status = 200): boolean {
 	// the tabs (the prototype's `body.pushed`); «Τα ραντεβού μου» and «Οι συγγενείς μου» keep them (P-W4 Σ-25).
 	if (APPOINTMENTS_PAGES.test(path) && path !== appointmentsPath) return false;
 	if (RELATIVES_PAGES.test(path) && path !== relativesPath) return false;
+	// 🔴 D-W45-07 (wave 4.5, the prototype's `body.pushed`, record §5.2): «Ρυθμίσεις λογαριασμού» is pushed over the tabs
+	// whole — its list too, as the application's screen — and so is every section under it.
+	if (SETTINGS_PAGES.test(path)) return false;
+	// 🔴 Record §5.8 (wave 4.5, screen 63): «Ειδοποιήσεις» is pushed over the tabs, «←» to the «Προφίλ», as the application's.
+	if (NOTIFICATIONS_PAGES.test(path)) return false;
 	// U-77, U-73.1: a doctor's articles and page are over the tabs too, as the profile (the application has none there).
 	return !/^\/doctors\/[^/]+(?:\/details\/[^/]+|\/articles|\/about)?$/u.test(path);
 }

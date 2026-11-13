@@ -34,3 +34,17 @@
 		<div class="max-w-form"><InlineLinkText {...args} /></div>
 	{/snippet}
 </Story>
+
+<!-- A sentence that goes on after its link: the `tail` (its full stop) sits against the link. -->
+<Story
+	name="With A Tail"
+	args={{
+		text: 'Διαβάστε πώς τα συλλέγουμε και τα χρησιμοποιούμε στην',
+		linkLabel: 'Πολιτική απορρήτου',
+		tail: '.'
+	}}
+>
+	{#snippet template(args)}
+		<div class="max-w-form"><InlineLinkText {...args} /></div>
+	{/snippet}
+</Story>

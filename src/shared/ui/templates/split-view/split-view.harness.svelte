@@ -5,6 +5,7 @@
 		open,
 		solo,
 		widths,
+		centred,
 		listLabel,
 		paneLabel,
 		onPane
@@ -12,6 +13,7 @@
 		open?: boolean;
 		solo?: boolean;
 		widths?: SplitViewWidths;
+		centred?: boolean;
 		listLabel?: string;
 		paneLabel?: string;
 		onPane?: (pane: HTMLDivElement | null) => void;
@@ -21,7 +23,16 @@
 	$effect(() => onPane?.(paneRef));
 </script>
 
-<SplitView {open} {solo} {widths} {listLabel} {paneLabel} bind:paneRef data-testid="split">
+<SplitView
+	{open}
+	{solo}
+	{widths}
+	{centred}
+	{listLabel}
+	{paneLabel}
+	bind:paneRef
+	data-testid="split"
+>
 	{#snippet list()}
 		<h1>Λίστα</h1>
 		<p>Γραμμή πρώτη</p>

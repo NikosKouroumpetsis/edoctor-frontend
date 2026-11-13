@@ -6,12 +6,15 @@
 	import { m } from '$paraglide/messages.js';
 	import { deLocalizeHref, locales, localizeHref } from '$paraglide/runtime';
 	import { getSupportEmail } from '$shared/config/support';
+	import { followPageLocale } from '$shared/preferences/i18n/document-locale';
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
 	import { theme } from '$shared/preferences/theme';
 	import { getInboxBadgeOptional } from '$shared/state/inbox-badge';
+	import { getNotificationBadgeOptional } from '$shared/state/notification-badge';
 	import { SearchDock, setSearchDock } from '$shared/state/search-dock';
 	import { getSessionOptional } from '$shared/state/session';
+	import { ConsentDecision, setConsentDecision } from '$shared/state/consent';
 	import { setSiteDialogs, SiteDialogs } from '$shared/state/site-dialogs';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import AppShell from '$shared/ui/organisms/app-shell';
@@ -48,6 +51,8 @@
 	} = $props();
 
 	const currentLocale = $derived(getPageLocale(page.url));
+	// 🔴 D-W45-57 β: a change of language without a reload — `<html lang>` follows the page's language (the ONE place).
+	$effect(() => followPageLocale(currentLocale));
 	const messageOptions = $derived({ locale: currentLocale });
 	const basePath = $derived(deLocalizeHref(page.url.pathname));
 	// P-W3 §3.1: the whole bar, only the mark (the booking) or none (the sign-up draws its own).
@@ -66,6 +71,8 @@
 	const languageOptions = $derived(buildLanguageOptions(currentLocale, samePageIn));
 	// The frame's windows and the toast, one per page tree (context, SSR-safe): a page asks, the frame draws.
 	const dialogs = setSiteDialogs(new SiteDialogs());
+	// Wave 4.5 · screen 62: the ONE tracking decision of the tree — the cookie card's and the page «Εργαλεία τρίτων»'s.
+	setConsentDecision(new ConsentDecision());
 	const toasts = setToasts(new ToastState());
 	// The session lives on the layout's auth host (U-80.1); without it (a test of the frame alone) a guest.
 	const session = getSessionOptional();
@@ -84,8 +91,12 @@
 	// 🔴 U-84 Π5: the messages module's one read; the frame only draws it. A guest's is always none.
 	const inbox = getInboxBadgeOptional();
 	const hasUnread = $derived(isMember && (inbox?.hasUnread ?? false));
+	// 🔴 D-W45-17 · D-W45-49 (screen 63): the notifications module's one read of «something is new», beside the
+	// messages' — the frame only draws it, on the menu's row and on the pill's dot. A guest's is always none.
+	const notifications = getNotificationBadgeOptional();
+	const hasNewNotifications = $derived(isMember && (notifications?.hasNew ?? false));
 	const accountEntries = $derived(
-		buildAccountEntries(messageOptions, localizedHref, isMember, hasUnread)
+		buildAccountEntries(messageOptions, localizedHref, isMember, hasUnread, hasNewNotifications)
 	);
 	const capsuleBadge = $derived(
 		hasUnread && inbox
@@ -160,6 +171,7 @@
 				{messageOptions}
 				{initial}
 				{hasUnread}
+				{hasNewNotifications}
 				onSettings={() => dialogs.openSettings()}
 				onSignIn={session ? () => session.requireSignIn() : undefined}
 				onSignOut={() => session?.signOut()}

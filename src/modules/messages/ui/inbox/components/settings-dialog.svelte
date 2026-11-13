@@ -13,10 +13,10 @@
 		updateDoctorSettings
 	} from '$modules/messages/api/conversations';
 	import {
-		messagePreferencesKey,
 		messagePreferencesQuery,
+		previewMessagePreference,
 		updateMessagePreference,
-		type MessagePreferences
+		type MessageSwitch
 	} from '$modules/messages/api/preferences';
 
 	let {
@@ -39,43 +39,25 @@
 	const preferences = createQuery(() => messagePreferencesQuery(open && isMember));
 	const doctor = createQuery(() => doctorSettingsQuery(open && isMember));
 
-	type Channel = 'push' | 'email';
-
 	const failed = () =>
 		toasts?.show({ tone: 'danger', message: m.messages_toast_failed({}, options) });
 
-	type PreferenceWrite = { channel: Channel; enabled: boolean };
-	const writePreference = createMutation<
-		MessagePreferences,
-		unknown,
-		PreferenceWrite,
-		{ before?: MessagePreferences }
-	>(() => ({
-		mutationFn: ({ channel, enabled }) => {
-			const target = preferences.data?.[channel];
-			if (!target) throw new Error('no such switch');
-			return updateMessagePreference(target, enabled);
-		},
-		onMutate: ({ channel, enabled }) => {
-			const before = client.getQueryData<MessagePreferences>(messagePreferencesKey);
-			const current = before?.[channel];
-			if (before && current) {
-				client.setQueryData<MessagePreferences>(messagePreferencesKey, {
-					...before,
-					[channel]: { ...current, enabled }
-				});
+	// Wave 4.5 (card w45-w3): the centre has ONE place in the cache, shared with «Ειδοποιήσεις» of the account's settings
+	// (`$shared/lib/notification-preferences`): the switch moves there at the press, the server's answer takes over, and
+	// a refused write goes back to what was read.
+	type PreferenceWrite = { target: MessageSwitch; enabled: boolean };
+	const writePreference = createMutation<void, unknown, PreferenceWrite, { undo: () => void }>(
+		() => ({
+			mutationFn: ({ target, enabled }) => updateMessagePreference(client, target, enabled),
+			onMutate: ({ target, enabled }) => ({
+				undo: previewMessagePreference(client, target, enabled)
+			}),
+			onError: (_error, _input, context) => {
+				context?.undo();
+				failed();
 			}
-			return { before };
-		},
-		onSuccess: (next) => {
-			client.setQueryDefaults(messagePreferencesKey, { meta: personalQueryMeta });
-			client.setQueryData<MessagePreferences>(messagePreferencesKey, next);
-		},
-		onError: (_error, _input, context) => {
-			client.setQueryData(messagePreferencesKey, context?.before);
-			failed();
-		}
-	}));
+		})
+	);
 
 	const writeAccepts = createMutation(() => ({
 		mutationFn: (accepts: boolean) => updateDoctorSettings(accepts),
@@ -121,22 +103,24 @@
 >
 	<div class="grid">
 		{#if preferences.data?.push}
+			{@const push = preferences.data.push}
 			{@render row(
 				'notifications-outline',
 				m.messages_settings_push({}, options),
 				m.messages_settings_push_body({}, options),
-				preferences.data.push.enabled,
-				(enabled) => writePreference.mutate({ channel: 'push', enabled }),
+				push.enabled,
+				(enabled) => writePreference.mutate({ target: push, enabled }),
 				'messages-settings-push'
 			)}
 		{/if}
 		{#if preferences.data?.email}
+			{@const email = preferences.data.email}
 			{@render row(
 				'mail-outline',
 				m.messages_settings_email({}, options),
 				m.messages_settings_email_body({}, options),
-				preferences.data.email.enabled,
-				(enabled) => writePreference.mutate({ channel: 'email', enabled }),
+				email.enabled,
+				(enabled) => writePreference.mutate({ target: email, enabled }),
 				'messages-settings-email'
 			)}
 		{/if}

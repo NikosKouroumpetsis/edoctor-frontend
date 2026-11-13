@@ -6,6 +6,7 @@ import { goto } from '$app/navigation';
 import { page } from '$app/state';
 import QueryHarness from '$shared/query/query.harness.svelte';
 import type { Session, SessionStatus } from '$shared/state/session';
+import type { SiteDialogs } from '$shared/state/site-dialogs';
 import type { ProfileScreenData } from '../types';
 import HostedHarness from './hosted.harness.svelte';
 import Harness from './screen.harness.svelte';
@@ -16,6 +17,41 @@ import Harness from './screen.harness.svelte';
  */
 
 const ID = '0193a1b2-7c3d-7e4f-8a9b-0c1d2e3f4a5b';
+
+/** The account's centre (`GET /notification/preferences/me`): two kinds of the patient's side, and a doctor's side. */
+const CENTRE = {
+	updatedAt: null,
+	sections: [
+		{
+			side: 'PATIENT',
+			categories: [
+				{
+					category: 'REMINDERS',
+					cells: [
+						{ channel: 'EMAIL', mode: 'TOGGLE', enabled: true, scope: null },
+						{ channel: 'SMS', mode: 'TOGGLE', enabled: false, scope: 'WHEN_DOCTOR_OFFERS' }
+					]
+				},
+				{
+					category: 'ACCOUNT',
+					cells: [{ channel: 'EMAIL', mode: 'ALWAYS', enabled: true, scope: null }]
+				}
+			]
+		},
+		{
+			side: 'DOCTOR',
+			categories: [
+				{
+					category: 'DOCTOR_MESSAGES',
+					cells: [{ channel: 'EMAIL', mode: 'TOGGLE', enabled: true, scope: null }]
+				}
+			]
+		}
+	]
+};
+
+const SESSION_HERE = '0193a1b2-7c3d-7e4f-8a9b-0c1d2e3f4a11';
+const SESSION_PHONE = '0193a1b2-7c3d-7e4f-8a9b-0c1d2e3f4a12';
 
 type Call = { url: string; method: string; credentials?: RequestCredentials };
 let calls: Call[];
@@ -47,6 +83,36 @@ beforeEach(() => {
 				if (written) return written();
 			}
 			if (path === '/patient/me') return json({ id: person, firstName: 'Ελένη', relatives: [] });
+			if (path === '/notification/preferences/me') return json(CENTRE);
+			// Wave 4.5 · screen 59: the account's sign-in methods and its devices (made-up ids).
+			if (path === '/auth/sign-in-methods/me') {
+				return json({
+					passwordStatus: { set: true, canSet: true },
+					providers: [{ provider: 'GOOGLE', canUnlink: true, refusal: null }]
+				});
+			}
+			if (path === '/auth/sessions/me') {
+				return json({
+					sessions: [
+						{
+							sessionId: SESSION_HERE,
+							current: true,
+							lastActiveAt: '2026-11-12T07:27:00.000Z',
+							kind: 'WEB',
+							os: 'MACOS',
+							browser: 'SAFARI'
+						},
+						{
+							sessionId: SESSION_PHONE,
+							current: false,
+							lastActiveAt: '2026-10-30T08:21:00.000Z',
+							kind: 'APP',
+							os: 'IOS',
+							browser: null
+						}
+					]
+				});
+			}
 			if (path === '/patient/pat-2/relatives') return json([]);
 			if (path === '/patient/pat-1/relatives') {
 				return json([
@@ -112,6 +178,7 @@ function draw(data: ProfileScreenData, start: SessionStatus = 'member') {
 
 type Handle = {
 	session: Session;
+	dialogs: SiteDialogs;
 	signIn: () => void;
 	otherSignsIn: () => void;
 	go: (next: ProfileScreenData) => void;
@@ -163,6 +230,13 @@ describe('screens/profile/[...path] (D-W4-51: one route in the place of `/profil
 				'noindex'
 			);
 			expect(screen.getByTestId('relatives-page')).toHaveAttribute('data-view', address.view);
+			// 🔴 D-W45-57 α (card w45-w9): no site's bar below 744 — the whole screen's height there.
+			expect(screen.getByTestId('relatives-page')).toHaveClass(
+				'min-h-dvh',
+				'tablet:min-h-page',
+				'split:min-h-0'
+			);
+			expect(screen.getByTestId('relatives-page')).not.toHaveClass('min-h-page');
 			expect(screen.queryByTestId('profile-page')).toBeNull();
 			await waitFor(() => expect(screen.getAllByText(/Γιώργος/u).length).toBeGreaterThan(0));
 			expect(document.title).not.toMatch(/Γιώργος|Παππάς/u);
@@ -626,5 +700,377 @@ describe('screens/profile/[...path] · 🔴 D-W4-78 (review w4-w9-r1 MAJOR-1, U-
 			expect(signIn()).toHaveAttribute('data-state', 'open');
 			expect(vi.mocked(goto)).not.toHaveBeenCalled();
 		});
+	});
+});
+
+describe('screens/profile/[...path] · wave 4.5, «Ρυθμίσεις λογαριασμού» under the same route (D-W45-01, D-W45-05)', () => {
+	it('D-W45-01: the shell’s address draws screen 57 — its own page, its title in the tab, never indexed — and asks the server nothing below 950', () => {
+		visit('/profile/account-settings');
+		draw({ address: { view: 'settings' } });
+		const main = screen.getByTestId('settings-page');
+		expect(main.tagName).toBe('MAIN');
+		// 🔴 D-W45-57 α (card w45-w9): a pushed page has no site's bar below 744 — the whole screen's height there.
+		expect(main).toHaveClass('min-h-dvh', 'tablet:min-h-page', 'split:min-h-0');
+		expect(main).not.toHaveClass('min-h-page');
+		expect(main).not.toHaveAttribute('data-section');
+		expect(
+			within(main).getByRole('heading', { level: 1, name: 'Ρυθμίσεις λογαριασμού' })
+		).toBeVisible();
+		expect(document.title).toBe('Ρυθμίσεις λογαριασμού | eDoctor');
+		expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute(
+			'content',
+			'noindex'
+		);
+		expect(screen.queryByTestId('profile-page')).toBeNull();
+		expect(screen.queryByTestId('relatives-page')).toBeNull();
+		// The rows are links in the page's language, each to its section's own address.
+		expect(screen.getByTestId('settings-section-link-language')).toHaveAttribute(
+			'href',
+			'/profile/account-settings/language'
+		);
+		expect(screen.getByTestId('settings-back')).toHaveAttribute('href', '/profile');
+		expect(calls).toEqual([]);
+	});
+
+	it('D-W45-01: a section’s address draws that section in the shell, the same title in the tab; «←» goes to the shell’s list', () => {
+		visit('/profile/account-settings/language');
+		draw({ address: { view: 'settings', section: 'language' } });
+		expect(screen.getByTestId('settings-page')).toHaveAttribute('data-section', 'language');
+		expect(screen.getByTestId('settings-section-language')).toBeInTheDocument();
+		expect(screen.getByTestId('settings-section-back')).toHaveAttribute(
+			'href',
+			'/profile/account-settings'
+		);
+		expect(document.title).toBe('Ρυθμίσεις λογαριασμού | eDoctor');
+		expect(document.title).not.toMatch(/Ελένη/u);
+	});
+
+	it('the English page: its title, and every address of the shell under `/en`', () => {
+		visit('/en/profile/account-settings');
+		draw({ address: { view: 'settings' } });
+		expect(document.title).toBe('Account settings | eDoctor');
+		expect(screen.getByTestId('settings-section-link-language')).toHaveAttribute(
+			'href',
+			'/en/profile/account-settings/language'
+		);
+		expect(screen.getByTestId('settings-back')).toHaveAttribute('href', '/en/profile');
+	});
+
+	it('🔴 D-W45-05: a guest’s address opens too, with «Γλώσσα και θέμα» alone; the choice of language goes to THIS page in that language — its path alone (U-65.6) — and asks the server nothing', async () => {
+		visit('/profile/account-settings/language?next=%2Fadmin&name=x#frag');
+		draw({ address: { view: 'settings', section: 'language' } }, 'guest');
+		expect(screen.getAllByTestId(/^settings-section-link-/u)).toHaveLength(1);
+		const user = userEvent.setup({ delay: null });
+		await user.click(screen.getByTestId('settings-row-language-action'));
+		await user.click(screen.getByTestId('settings-option-en'));
+		await waitFor(() =>
+			expect(vi.mocked(goto)).toHaveBeenCalledWith('/en/profile/account-settings/language', {
+				noScroll: true,
+				keepFocus: true
+			})
+		);
+		expect(calls).toEqual([]);
+	});
+
+	it('D-W45-06 composed: a member’s choice of language writes the account’s `locale` with the cookies, then goes to the same page in it', async () => {
+		visit('/profile/account-settings/language');
+		draw({ address: { view: 'settings', section: 'language' } }, 'member');
+		const user = userEvent.setup({ delay: null });
+		await user.click(screen.getByTestId('settings-row-language-action'));
+		await user.click(screen.getByTestId('settings-option-en'));
+		await waitFor(() => expect(vi.mocked(goto)).toHaveBeenCalled());
+		expect(bodies).toEqual([{ locale: 'en' }]);
+		const write = calls.find((call) => call.method === 'PUT');
+		expect(write?.url).toMatch(/\/user\/me$/u);
+		expect(write?.credentials).toBe('include');
+		expect(calls.every((call) => /\/user\/me$/u.test(call.url))).toBe(true);
+	});
+
+	it('🔴 D-W45-05: on the «Προφίλ» page a MEMBER’s «Ρυθμίσεις λογαριασμού» is a link to the shell; it opens no window of the frame', async () => {
+		visit('/profile');
+		const handle = drawWithSession({ address: { view: 'tab' } }, 'member');
+		const row = screen.getByTestId('profile-menu-account-settings');
+		expect(row.tagName).toBe('A');
+		expect(row).toHaveAttribute('href', '/profile/account-settings');
+		expect(handle().dialogs.settingsOpen).toBe(false);
+	});
+
+	it('🔴 D-W45-05 (negative): a GUEST’s row stays the frame’s small window «Ρυθμίσεις» — a button, no link to the shell', async () => {
+		visit('/profile');
+		const handle = drawWithSession({ address: { view: 'tab' } }, 'guest');
+		const row = screen.getByTestId('profile-menu-account-settings');
+		expect(row.tagName).toBe('BUTTON');
+		expect(row).not.toHaveAttribute('href');
+		await userEvent.setup({ delay: null }).click(row);
+		expect(handle().dialogs.settingsOpen).toBe(true);
+		expect(vi.mocked(goto)).not.toHaveBeenCalled();
+	});
+
+	it('D-W45-05: the row follows the session — a guest who signs in on the page finds the link, a member who signs out the window again', async () => {
+		visit('/profile');
+		const handle = drawWithSession({ address: { view: 'tab' } }, 'guest');
+		expect(screen.getByTestId('profile-menu-account-settings').tagName).toBe('BUTTON');
+		flushSync(() => handle().signIn());
+		expect(screen.getByTestId('profile-menu-account-settings')).toHaveAttribute(
+			'href',
+			'/profile/account-settings'
+		);
+		await handle().session.signOut();
+		await waitFor(() =>
+			expect(screen.getByTestId('profile-menu-account-settings').tagName).toBe('BUTTON')
+		);
+	});
+
+	it('🔴 card w45-w3 composed (D-W45-01): `/profile/account-settings/notifications` draws screen 60 — the notifications module’s page inside the shell’s section — from ONE read of the centre, with the cookies', async () => {
+		visit('/profile/account-settings/notifications');
+		draw({ address: { view: 'settings', section: 'notifications' } });
+		expect(screen.getByTestId('settings-page')).toHaveAttribute('data-section', 'notifications');
+		const section = screen.getByTestId('settings-section-notifications');
+		expect(within(section).getByRole('heading', { level: 2, name: 'Ειδοποιήσεις' })).toBeVisible();
+		expect(within(section).getByTestId('settings-section-back')).toHaveAttribute(
+			'href',
+			'/profile/account-settings'
+		);
+		const reminders = await within(section).findByTestId('notification-row-REMINDERS');
+		expect(reminders).toHaveTextContent('Υπενθυμίσεις ραντεβού');
+		expect(reminders).toHaveTextContent('Ενεργό: Email');
+		expect(within(section).getByTestId('notification-row-ACCOUNT')).toHaveTextContent(
+			'Πάντα: Email'
+		);
+		expect(within(section).getByTestId('notification-change-REMINDERS')).toBeInTheDocument();
+		expect(within(section).queryByTestId('notification-change-ACCOUNT')).toBeNull();
+		// 🔴 D-W45-22: the patient's side alone, on an account that has a doctor's side too.
+		expect(within(section).getAllByTestId(/^notification-row-/u)).toHaveLength(2);
+		expect(document.title).toBe('Ρυθμίσεις λογαριασμού | eDoctor');
+		expect(calls).toHaveLength(1);
+		expect(calls[0]).toMatchObject({ method: 'GET', credentials: 'include' });
+		expect(calls[0].url).toMatch(/\/notification\/preferences\/me$/u);
+		// The menu has its row, in the page's language.
+		expect(screen.getByTestId('settings-section-link-notifications')).toHaveAttribute(
+			'href',
+			'/profile/account-settings/notifications'
+		);
+	});
+
+	it('🔴 D-W45-24 composed: a switch of the window writes ONE cell with the cookies, and the row behind it says the new state', async () => {
+		visit('/profile/account-settings/notifications');
+		draw({ address: { view: 'settings', section: 'notifications' } });
+		const user = userEvent.setup({ delay: null });
+		await user.click(await screen.findByTestId('notification-change-REMINDERS'));
+		const window = await screen.findByTestId('notification-dialog');
+		expect(window).toHaveTextContent('Όταν το προσφέρει ο γιατρός');
+		written = () =>
+			json({
+				...CENTRE,
+				sections: [
+					{
+						side: 'PATIENT',
+						categories: [
+							{
+								category: 'REMINDERS',
+								cells: [
+									{ channel: 'EMAIL', mode: 'TOGGLE', enabled: true, scope: null },
+									{ channel: 'SMS', mode: 'TOGGLE', enabled: true, scope: 'WHEN_DOCTOR_OFFERS' }
+								]
+							},
+							CENTRE.sections[0].categories[1]
+						]
+					}
+				]
+			});
+		await user.click(screen.getByTestId('notification-switch-SMS'));
+		await waitFor(() =>
+			expect(bodies).toEqual([
+				{ cells: [{ category: 'REMINDERS', channel: 'SMS', enabled: true }] }
+			])
+		);
+		const write = calls.find((call) => call.method === 'PUT');
+		expect(write?.url).toMatch(/\/notification\/preferences\/me$/u);
+		expect(write?.credentials).toBe('include');
+		await waitFor(() =>
+			expect(screen.getByTestId('notification-row-REMINDERS')).toHaveTextContent(
+				'Ενεργό: Email, SMS'
+			)
+		);
+		expect(screen.getByTestId('notification-dialog')).toBeInTheDocument();
+	});
+
+	it('🔴 card w45-w3 · U-80.1 Ε6 / U-65.6: a GUEST who opens «Ειδοποιήσεις» is asked to sign in over the shell — no row of it, no section, and the server is asked NOTHING; signed in, the section opens and reads', async () => {
+		visit('/profile/account-settings/notifications');
+		const handle = drawWithSession(
+			{ address: { view: 'settings', section: 'notifications' } },
+			'guest'
+		);
+		expect(handle().session.flowOpen).toBe(true);
+		expect(screen.queryByTestId('settings-section-notifications')).toBeNull();
+		expect(screen.queryByTestId('notification-settings')).toBeNull();
+		expect(screen.queryByTestId('settings-section-link-notifications')).toBeNull();
+		expect(screen.getByTestId('settings-section-link-language')).toBeInTheDocument();
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		expect(calls).toEqual([]);
+		handle().signIn();
+		expect(await screen.findByTestId('notification-row-REMINDERS')).toBeInTheDocument();
+		expect(handle().session.flowOpen).toBe(false);
+		expect(calls.map((call) => call.method)).toEqual(['GET']);
+	});
+
+	it('🔴 card w45-w6 composed (D-W45-01, D-W45-58): `/profile/account-settings/security` draws screen 59 — the auth module’s page inside the shell’s section — from its TWO reads, with the cookies; no session’s id reaches the page or its address', async () => {
+		visit('/profile/account-settings/security');
+		draw({ address: { view: 'settings', section: 'security' } });
+		expect(screen.getByTestId('settings-page')).toHaveAttribute('data-section', 'security');
+		const section = screen.getByTestId('settings-section-security');
+		expect(
+			within(section).getByRole('heading', { level: 2, name: 'Σύνδεση και ασφάλεια' })
+		).toBeVisible();
+		expect(within(section).getByTestId('settings-section-back')).toHaveAttribute(
+			'href',
+			'/profile/account-settings'
+		);
+		const row = await within(section).findByTestId('security-row-password');
+		expect(row).toHaveTextContent('Κωδικός πρόσβασης');
+		expect(row).toHaveTextContent('Έχει οριστεί');
+		expect(within(section).getByTestId('security-provider-google')).toHaveTextContent(
+			'Συνδεδεμένο'
+		);
+		expect(await within(section).findByTestId('security-session-0')).toHaveTextContent(
+			'macOS · Safari'
+		);
+		expect(within(section).getByTestId('security-session-current')).toBeInTheDocument();
+		expect(within(section).getByTestId('security-session-1')).toHaveTextContent(
+			'iPhone · εφαρμογή eDoctor'
+		);
+		expect(within(section).queryByTestId('security-session-0-end')).toBeNull();
+		expect(within(section).getByTestId('security-session-1-end')).toBeInTheDocument();
+		// The headings under the section's own: the three parts, then the rows.
+		expect(
+			within(section)
+				.getAllByRole('heading', { level: 3 })
+				.map((heading) => heading.textContent?.trim())
+		).toEqual(['Σύνδεση', 'Σύνδεση με Google ή Apple', 'Συσκευές']);
+		const asked = calls.map((call) => [
+			call.method,
+			new URL(call.url, 'https://api.test').pathname.replace(/^\/api\/v\d+/u, ''),
+			call.credentials
+		]);
+		expect(asked).toEqual([
+			['GET', '/auth/sign-in-methods/me', 'include'],
+			['GET', '/auth/sessions/me', 'include']
+		]);
+		for (const id of [SESSION_HERE, SESSION_PHONE]) {
+			expect(document.body.innerHTML).not.toContain(id);
+			expect(page.url.href).not.toContain(id);
+		}
+		// 🔴 U-164.1: nothing of a doctor's on the user's page.
+		expect(section.textContent).not.toMatch(/γιατρ/iu);
+	});
+
+	it('🔴 card w45-w6 · U-80.1 Ε6 / U-65.6: a GUEST who opens «Σύνδεση και ασφάλεια» is asked to sign in over the shell — no row of it, no section, and the server is asked NOTHING; signed in, the section opens and reads', async () => {
+		visit('/profile/account-settings/security');
+		const handle = drawWithSession({ address: { view: 'settings', section: 'security' } }, 'guest');
+		expect(handle().session.flowOpen).toBe(true);
+		expect(screen.queryByTestId('settings-section-security')).toBeNull();
+		expect(screen.queryByTestId('security-page')).toBeNull();
+		expect(screen.queryByTestId('settings-section-link-security')).toBeNull();
+		expect(screen.getByTestId('settings-section-link-language')).toBeInTheDocument();
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		expect(calls).toEqual([]);
+		handle().signIn();
+		expect(await screen.findByTestId('security-row-password')).toBeInTheDocument();
+		expect(handle().session.flowOpen).toBe(false);
+		expect(calls.map((call) => call.method)).toEqual(['GET', 'GET']);
+	});
+
+	// Rewrites the list of the built (card w45-w3: «notifications, language»): card w45-w4 built «privacy» (screen 62),
+	// card w45-w5 «personal» (screen 58), the first.
+	// … and card w45-w6 «security» (screen 59), the second: all five.
+	it('🔴 D-W45-02 composed: το κέλυφος δείχνει μόνο ενότητες με σελίδα — every section the register calls built draws a page of its own under its title, never an empty section', async () => {
+		const { settingsSections } = await import('$modules/profile/config/settings');
+		const built = settingsSections.filter((section) => section.built);
+		expect(built.map((section) => section.id)).toEqual([
+			'personal',
+			'security',
+			'privacy',
+			'notifications',
+			'language'
+		]);
+		for (const section of built) {
+			visit(`/profile/${section.route}`);
+			const view = draw({ address: { view: 'settings', section: section.id } });
+			const title = screen
+				.getByTestId(`settings-section-${section.id}`)
+				.querySelector(`#settings-section-title-${section.id}`);
+			expect(title, section.id).not.toBeNull();
+			expect(title?.nextElementSibling, section.id).not.toBeNull();
+			view.unmount();
+		}
+	});
+
+	// Rewrites «…«Απόρρητο» still asks the consent’s window (the 62 changes it)» of card w45-w1 by D-W45-29 (card
+	// w45-w4, screen 62): the row is a link to the page «Απόρρητο» for everyone — a guest too — and asks no window.
+	it.each(['member', 'guest'] as const)(
+		'🔴 D-W45-29: on the «Προφίλ» page «Απόρρητο» is a LINK to `/profile/privacy` for a %s — the consent’s window is asked no more; the other rows are as they were',
+		async (status) => {
+			visit('/profile');
+			const handle = drawWithSession({ address: { view: 'tab' } }, status);
+			const row = screen.getByTestId('profile-menu-privacy');
+			expect(row.tagName).toBe('A');
+			expect(row).toHaveAttribute('href', '/profile/privacy');
+			await userEvent.setup({ delay: null }).click(row);
+			expect(handle().dialogs.consentRequested).toBe(false);
+			expect(screen.getByTestId('profile-menu-help')).toHaveAttribute('href', '/help');
+			expect(screen.getByTestId('profile-menu-legal')).toHaveAttribute('href', '/legal');
+		}
+	);
+
+	it('🔴 U-164 composed (wave 4.5, screen 56): a member’s `/profile` — the name card from the session’s own facts (the server’s mask), «Είστε γιατρός;» to the doctor’s sign-up, «Αποσύνδεση» the last row — in the page’s language, and nothing asked of the server', () => {
+		visit('/en/profile');
+		draw({ address: { view: 'tab' } });
+		expect(screen.getByTestId('profile-name')).toHaveTextContent('Ελένη Παππά');
+		expect(screen.getByTestId('profile-name-line')).toHaveTextContent('e***a@example.gr');
+		expect(screen.getByTestId('profile-doctor-card')).toHaveAttribute(
+			'href',
+			'/en/doctor/onboarding'
+		);
+		expect(screen.getByTestId('profile-menu-privacy')).toHaveAttribute(
+			'href',
+			'/en/profile/privacy'
+		);
+		expect(screen.getByTestId('profile-menu-sign-out')).toHaveTextContent('Log out');
+		expect(calls).toEqual([]);
+	});
+
+	it('🔴 D-W45-17 · D-W45-59 composed (card w45-w7, screen 63): a member’s `/profile` has the bell at the end of its title — a link to «Ειδοποιήσεις», the list, in the page’s language, below 744 ONLY (from 744 the way is the menu) — and the page itself still asks the server nothing', () => {
+		visit('/profile');
+		const greek = draw({ address: { view: 'tab' } });
+		const bell = screen.getByTestId('profile-bell');
+		expect(bell.tagName).toBe('A');
+		expect(bell).toHaveAttribute('href', '/notifications');
+		expect(bell).toHaveAccessibleName('Ειδοποιήσεις');
+		expect(bell.parentElement).toHaveClass('tablet:hidden');
+		expect(screen.getByRole('heading', { level: 1 }).parentElement).toContainElement(bell);
+		// The dot is the site's one read (the notifications' host): without it, none — and no request from here.
+		expect(screen.queryByTestId('profile-bell-dot')).toBeNull();
+		expect(calls).toEqual([]);
+		greek.unmount();
+
+		visit('/en/profile');
+		draw({ address: { view: 'tab' } });
+		expect(screen.getByTestId('profile-bell')).toHaveAttribute('href', '/en/notifications');
+		expect(screen.getByTestId('profile-bell')).toHaveAccessibleName('Notifications');
+	});
+
+	it('🔴 D-W45-59 (negative): a guest’s «Προφίλ» has NO bell, and neither has the wait before the session is known; 🔴 U-164.1: nothing of a doctor’s beside it', () => {
+		visit('/profile');
+		const guest = draw({ address: { view: 'tab' } }, 'guest');
+		expect(screen.getByTestId('profile-page')).toHaveAttribute('data-viewer', 'guest');
+		expect(screen.queryByTestId('profile-bell')).toBeNull();
+		guest.unmount();
+		const waiting = draw({ address: { view: 'tab' } }, 'unknown');
+		expect(screen.queryByTestId('profile-bell')).toBeNull();
+		waiting.unmount();
+		draw({ address: { view: 'tab' } });
+		expect(screen.getByTestId('profile-bell')).toBeInTheDocument();
+		expect(screen.getByTestId('profile-page')).not.toHaveTextContent(/Λειτουργία γιατρού/u);
+		expect(calls).toEqual([]);
 	});
 });

@@ -290,9 +290,33 @@ prototype's `appt.css:227-333`, `55-relatives/appt.css:456-463`): from 950 `grid
 (`split-list-w-lg` 460 from 1128) beside what it opened, the screen's height under the bar `h-split`; with nothing for
 the right column (U-139.1) one column in the middle, `split-solo` 640. A change screen is `pane-column` 640 wide at
 744–949 and, in the right column from 950, `split-sub` 656 / `split-sub-lg` 688 from 1128 / `split-sub-xl` 704 from 1440.
-The right column's inset from 950 (the 51 and its change screens, `appt.css:232`, `:242`, `:245`) is `pane-inset` 48 a
-side, `pane-inset-lg` 64 from 1128 and `pane-inset-xl` 80 on the left from 1440. The 51's wait draws the card's box
+The right column's inset from 950 (the 51 and its change screens, `appt.css:232`, `:242`) is `pane-inset` 48 a
+side and `pane-inset-lg` 64 from 1128, the same on both sides at every width: 🔴 U-167 (D-W45-56, wave 4.5) what the list
+opened sits in the MIDDLE of the right column (`mx-auto`, never `split:mx-0`) at its own greatest width — the 51
+`document-wide` 720, a change screen `split-sub` 656 / 688 / 704 — so `pane-inset-xl` 80 (the prototype's 80 on the left
+alone from 1440) has no reader any more. The 51's wait draws the card's box
 `pane-skeleton` 320 high (`.a-dsk .box`, `appt.css:205-206`) and the short one under it `placeholder-lg` 96 (`.box.s`).
+
+«Ρυθμίσεις λογαριασμού» (wave 4.5, screen 57, web only; 🔴 U-167, D-W45-08, the approved prototype's
+`57-settings/set.css`): from 950 `grid-menu` sets the `SplitView`'s menu column `split-menu-w` 340 (`split-menu-w-lg`
+420 from 1128) beside what it opened, which sits in the MIDDLE of the right column at most `split-solo` 640 wide
+(`centred`). The insets are names the scale already had: the menu column `section` 32 over (`reading-gap` 40 from
+1128), 24 a side (`pane-inset` 48 from 1128) and `section-lg` 48 under; the right column `section` 32 over
+(`reading-gap` 40 from 1128), `pane-inset` 48 a side and `pane-inset-lg` 64 under. A menu's row is 48 high with the
+`md` corner (12) from 950 and `row` 56 below it; a choice of screen 61 is `reading-row` 52 high with a 22 radio.
+
+«Προφίλ» (wave 4.5, screen 56, the approved prototype's `56-profile/prof.css`): the name card's circle is
+`profile-initial` 88 (web only, beside `relative-initial` 44) with the initial `display-xs` at 600; the card and
+«Είστε γιατρός;» wear the `xl` corner (24) and `shadow-overlay`; a row is `row` 56 high, its name `body-lg`, its glyph
+`icon-lg`, its «›» `icon-md`. The page's one column is `container-form` 560 at every width, and ends `results-list-end`
+152 above the phone's capsule.
+
+«Ειδοποιήσεις», the list (wave 4.5, screen 63, the approved prototype's `63-inbox/list.css`): `inbox-glyph` 44 (web
+only) is the round on the `chip` fill of a line's glyph, of the list's gear and of the «Προφίλ»'s bell — inside the 48
+target where it is pressed, the glyph `icon-lg`. A line is 16 over and under its rule (`line`), 14 between the round
+and the words: the title `body-md` at 500 (600 while new), the second line `body-sm` and the time `label-lg`, both
+`muted-foreground`; a new line's dot is 10 (`size-2.5`) on `accent`, as the menu's. From 950 the page is the settings'
+template (`SplitView` `menu`, `centred`): the same widths and insets. Below it one column of `split-solo` 640.
 
 The page column is 1440 and, from 1920, Airbnb's 1920 in the centre (its 4K zone,
 U-04.1): `container-page` and `Container width="page"` add `wide:max-w-wide`; the

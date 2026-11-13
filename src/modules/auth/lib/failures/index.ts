@@ -94,3 +94,40 @@ export function readSetPasswordCodeRejection(error: unknown): SetPasswordCodeRej
 	if (STALE_CODE_ERROR_CODES.includes(code)) return 'stale';
 	return INVALID_CODE_ERROR_CODES.includes(code) ? 'invalid' : null;
 }
+
+/**
+ * Wave 4.5 · screen 59: why a write of the account's own password was refused — the change (current + new), the code's
+ * send, or the set with the mailed code — by the same codes the sign-in's steps read. 🔴 A `401` alone says nothing: a
+ * wrong current password (`EC412`) and a wrong code (`EC011`) are `401` too, so ONLY `EC401`, the session gate's
+ * refusal, means the session is gone.
+ */
+export type AccountPasswordFailure =
+	| 'session'
+	| 'wrong-password'
+	| 'invalid-code'
+	| 'stale-code'
+	| 'locked'
+	| 'no-password'
+	| 'unavailable'
+	| 'rate-limited'
+	| 'invalid-value'
+	| 'unknown';
+
+const SESSION_REFUSED_ERROR_CODE = 'EC401';
+
+export function readAccountPasswordFailure(error: unknown): AccountPasswordFailure {
+	if (!(error instanceof ApiError)) return 'unknown';
+	const code = error.errorCode ?? '';
+	if (error.status === 401 && code === SESSION_REFUSED_ERROR_CODE) return 'session';
+	if (code === WRONG_CREDENTIALS_ERROR_CODE) return 'wrong-password';
+	if (code === SIGN_IN_UNAVAILABLE_ERROR_CODE) return 'unavailable';
+	const rejection = readSetPasswordCodeRejection(error);
+	if (rejection === 'locked') return 'locked';
+	if (error.status === 429) return 'rate-limited';
+	if (rejection === 'stale') return 'stale-code';
+	if (rejection === 'invalid') return 'invalid-code';
+	// An account with no password yet answers the change with «not found» (it sets one with the code instead).
+	if (error.status === 404) return 'no-password';
+	if (error.status === 422 || error.status === 400) return 'invalid-value';
+	return 'unknown';
+}

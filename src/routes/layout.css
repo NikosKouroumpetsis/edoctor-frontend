@@ -635,6 +635,15 @@
 	}
 }
 
+/* Wave 4.5 · screen 57 (U-167, D-W45-08, `57-settings/set.css`): from 950 the menu on the left (340, 420 from 1128), what it opened beside it. */
+@utility grid-menu {
+	grid-template-columns: var(--spacing-split-menu-w) minmax(0, 1fr);
+
+	@media (width >= --theme(--breakpoint-laptop)) {
+		grid-template-columns: var(--spacing-split-menu-w-lg) minmax(0, 1fr);
+	}
+}
+
 /*
  * Wave 3 · screen 30 (record §3.4): from 950 Airbnb's two columns — the panel (the first-visit question, the note, the
  * button) and the card beside it: 384 + 332, 64 apart; 440 + 368, 80 apart from 1128; 524 + 372 from 1440.

@@ -195,24 +195,29 @@ describe('the frame’s rules per page', () => {
 
 	// U-134.6 + P-W4 Σ-13 (wave 4.0) add «Τα ραντεβού μου» (bold, after «Μηνύματα») and «Οι συγγενείς μου» (above
 	// «Ρυθμίσεις», the rule moving up with it).
-	it('U-80.1 Ε3 · U-134.6: μενού χωρίς Λογαριασμό — a member’s rows, in their order, «Τα ραντεβού μου» and «Οι συγγενείς μου» among them', () => {
+	// Rewrites «U-80.1 Ε3 · U-134.6: μενού χωρίς Λογαριασμό» by D-W45-21 (wave 4.5, screen 56, U-164 Ε4 Α): a member's
+	// «Ρυθμίσεις» is «Ρυθμίσεις λογαριασμού», the page of screen 57. U-80.1 Ε3 stands: no entry «Λογαριασμός» of its own.
+	// Rewrites it again by D-W45-17 and card w45-w7 (screen 63, record §5.1): «Ειδοποιήσεις» is the first row under the
+	// rule, which moves up to it from «Οι συγγενείς μου». Nothing else of the order changed.
+	it('U-80.1 Ε3 · U-134.6 · 🔴 D-W45-21 · 🔴 D-W45-17: a member’s rows, in their order — Μηνύματα · Τα ραντεβού μου · Αγαπημένα · — · Ειδοποιήσεις · Οι συγγενείς μου · Ρυθμίσεις λογαριασμού · Κέντρο βοήθειας · — · Είστε γιατρός; · — · Αποσύνδεση; no entry «Λογαριασμός»', () => {
 		const entries = buildAccountEntries(el, href, true);
 		expect(entries.map((entry) => entry.label)).toEqual([
 			'Μηνύματα',
 			'Τα ραντεβού μου',
 			'Αγαπημένα',
+			'Ειδοποιήσεις',
 			'Οι συγγενείς μου',
-			'Ρυθμίσεις',
+			'Ρυθμίσεις λογαριασμού',
 			'Κέντρο βοήθειας',
 			'Είστε γιατρός;',
 			'Αποσύνδεση'
 		]);
-		expect(entries.map((entry) => entry.label).join(' ')).not.toMatch(/Λογαριασμ|Account/u);
+		expect(entries.map((entry) => entry.label)).not.toContain('Λογαριασμός');
 		expect(buildAccountEntries({ locale: 'en' }, href, true).map((e) => e.label)).not.toContain(
 			'Account'
 		);
 		expect(entries.filter((entry) => entry.separated).map((entry) => entry.key)).toEqual([
-			'relatives',
+			'notifications',
 			'doctor',
 			'sign-out'
 		]);
@@ -231,9 +236,105 @@ describe('the frame’s rules per page', () => {
 		).toEqual(['My appointments', 'My relatives']);
 	});
 
-	it('a guest’s menu stays the four of U-17.2, with no way out — (negative) neither «Τα ραντεβού μου» nor «Οι συγγενείς μου»', () => {
+	it('🔴 D-W45-21: a member’s «Ρυθμίσεις λογαριασμού» is a LINK to the page of screen 57, in the place «Ρυθμίσεις» had — after «Οι συγγενείς μου», under the same rule — and no window any more; the same in English', () => {
+		const entries = buildAccountEntries(el, href, true);
+		const keys = entries.map((entry) => entry.key);
+		// (Card w45-w7: «Ειδοποιήσεις» now stands before «Οι συγγενείς μου»; this row's own place did not move.)
+		expect(keys).toEqual([
+			'messages',
+			'appointments',
+			'favorites',
+			'notifications',
+			'relatives',
+			'account-settings',
+			'help',
+			'doctor',
+			'sign-out'
+		]);
+		expect(entries.find((entry) => entry.key === 'account-settings')).toEqual({
+			key: 'account-settings',
+			kind: 'link',
+			label: 'Ρυθμίσεις λογαριασμού',
+			href: '/profile/account-settings'
+		});
+		expect(entries.some((entry) => entry.kind === 'settings')).toBe(false);
+		expect(
+			buildAccountEntries({ locale: 'en' }, href, true).find(
+				(entry) => entry.key === 'account-settings'
+			)
+		).toMatchObject({ label: 'Account settings', href: '/profile/account-settings' });
+	});
+
+	// Rewrites «D-W45-17 (negative): no «Ειδοποιήσεις» in the menu yet — it comes with screen 63» by card w45-w7: screen
+	// 63 is built, so the entry D-W45-17 held back is there — a member's alone. U-164.1 stands as it was.
+	it('🔴 D-W45-17: «Ειδοποιήσεις» is in a MEMBER’s menu since screen 63 — a link to `/notifications`, not bold, the first row under the rule; (negative) never in a guest’s; 🔴 U-164.1: nothing of «Λειτουργία γιατρού» in either', () => {
+		const entries = buildAccountEntries(el, href, true);
+		expect(entries.find((entry) => entry.key === 'notifications')).toEqual({
+			key: 'notifications',
+			kind: 'link',
+			label: 'Ειδοποιήσεις',
+			href: '/notifications',
+			separated: true
+		});
+		const keys = entries.map((entry) => entry.key);
+		expect(keys.indexOf('notifications')).toBe(keys.indexOf('favorites') + 1);
+		expect(keys.indexOf('relatives')).toBe(keys.indexOf('notifications') + 1);
+		expect(entries.find((entry) => entry.key === 'relatives')).not.toHaveProperty('separated');
+		expect(
+			buildAccountEntries({ locale: 'en' }, href, true).find(
+				(entry) => entry.key === 'notifications'
+			)
+		).toMatchObject({ label: 'Notifications', href: '/notifications' });
+		for (const locale of ['el', 'en'] as const) {
+			// A guest's menu, whatever the dots say.
+			const guest = buildAccountEntries({ locale }, href, false, true, true)
+				.map((entry) => entry.label)
+				.join(' · ');
+			expect(guest).not.toMatch(/Ειδοποιήσεις|Notifications/u);
+			for (const isMember of [false, true]) {
+				const labels = buildAccountEntries({ locale }, href, isMember)
+					.map((entry) => entry.label)
+					.join(' · ');
+				expect(labels).not.toMatch(/Λειτουργία γιατρού|Doctor mode/u);
+			}
+		}
+	});
+
+	it('🔴 D-W45-17: the dot on «Ειδοποιήσεις» while a notification is new, with the row’s name «Ειδοποιήσεις, νέες» — and only then; 🔴 U-84 Π5 stays: the messages’ dot is its own, each lights without the other', () => {
+		const row = (unread: boolean, fresh: boolean, key: string, locale: 'el' | 'en' = 'el') =>
+			buildAccountEntries({ locale }, href, true, unread, fresh).find((entry) => entry.key === key);
+		expect(row(false, true, 'notifications')).toMatchObject({
+			label: 'Ειδοποιήσεις',
+			name: 'Ειδοποιήσεις, νέες',
+			dotLabel: 'Ειδοποιήσεις, νέες'
+		});
+		expect(row(false, true, 'notifications', 'en')).toMatchObject({
+			label: 'Notifications',
+			name: 'Notifications, new'
+		});
+		expect(row(false, false, 'notifications')).not.toHaveProperty('dotLabel');
+		expect(row(false, false, 'notifications')).not.toHaveProperty('name');
+		// A new notification lights nothing on «Μηνύματα», and an unread conversation nothing on «Ειδοποιήσεις».
+		expect(row(false, true, 'messages')).not.toHaveProperty('dotLabel');
+		expect(row(true, false, 'notifications')).not.toHaveProperty('dotLabel');
+		expect(row(true, false, 'messages')).toMatchObject({ dotLabel: 'Νέα μηνύματα' });
+		expect(row(true, true, 'messages')).toMatchObject({ dotLabel: 'Νέα μηνύματα' });
+		expect(row(true, true, 'notifications')).toMatchObject({ name: 'Ειδοποιήσεις, νέες' });
+		// The fifth argument is the notifications' alone: the four-argument call of U-84 Π5 reads as before.
+		expect(
+			buildAccountEntries(el, href, true, true).find((entry) => entry.key === 'notifications')
+		).not.toHaveProperty('dotLabel');
+	});
+
+	it('🔴 D-W45-05 · D-W45-21: a guest’s menu stays the four of U-17.2, with no way out — its «Ρυθμίσεις» still the small window — (negative) neither «Τα ραντεβού μου» nor «Οι συγγενείς μου» nor «Ρυθμίσεις λογαριασμού»', () => {
 		const entries = buildAccountEntries(el, href);
 		expect(entries.map((entry) => entry.key)).toEqual(['sign-in', 'settings', 'help', 'doctor']);
+		expect(entries.find((entry) => entry.key === 'settings')).toEqual({
+			key: 'settings',
+			kind: 'settings',
+			label: 'Ρυθμίσεις',
+			separated: true
+		});
 		expect(entries.filter((entry) => entry.separated).map((entry) => entry.key)).toEqual([
 			'settings',
 			'doctor'
@@ -318,5 +419,117 @@ describe('the frame’s rules per page', () => {
 				(item) => item.key === 'profile' && item.current
 			)
 		).toBe(false);
+	});
+
+	describe('🔴 D-W45-07 (wave 4.5): «Ρυθμίσεις λογαριασμού» and its sections', () => {
+		const SETTINGS = [
+			'/profile/account-settings',
+			'/profile/account-settings/',
+			'/profile/account-settings/language',
+			'/profile/account-settings/personal',
+			'/profile/account-settings/deletion',
+			'/profile/account-settings/deletion/code',
+			// Card w45-w4 (screen 62, D-W45-01): «Απόρρητο» and «Εργαλεία τρίτων και cookies», the shell's pages at the
+			// application's addresses.
+			'/profile/privacy',
+			'/profile/privacy/',
+			'/profile/third-party-tools'
+		];
+
+		it('D-W45-07: χωρίς υποσέλιδο σε κάθε πλάτος — no footer on the shell or under it; 🔴 U-61.1: an error page under them has it again, in the site’s whole frame', () => {
+			for (const path of SETTINGS) {
+				expect(showsSiteFooter(path), path).toBe(false);
+				expect(showsSiteFooter(path, 404), path).toBe(true);
+				expect(frameHeaderOf(path), path).toBe('site');
+				expect(frameHeaderOf(path, 404), path).toBe('site');
+			}
+		});
+
+		it('D-W45-07: χωρίς τις καρτέλες κάτω, και στη λίστα — the shell is pushed over the tabs whole (the prototype’s `body.pushed`); 🔴 U-61.2: an error page keeps the capsule', () => {
+			for (const path of SETTINGS) {
+				expect(showsBottomNav(path), path).toBe(false);
+				expect(showsBottomNav(path, 404), path).toBe(true);
+			}
+			// The «Προφίλ» tab and «Οι συγγενείς μου» keep theirs, as before.
+			expect(showsBottomNav('/profile')).toBe(true);
+			expect(showsBottomNav('/profile/relatives')).toBe(true);
+		});
+
+		it('D-W45-07: η καρτέλα «Προφίλ» μένει η τρέχουσα — on the shell and on every section', () => {
+			for (const path of SETTINGS) {
+				expect(
+					buildBottomNavItems(el, href, path)
+						.filter((item) => item.current)
+						.map((item) => item.key),
+					path
+				).toEqual(['profile']);
+			}
+		});
+
+		it('D-W45-07 (negative): look-alike paths keep the site’s own frame — another word, a prefix, the shell’s word outside `/profile`', () => {
+			for (const path of [
+				'/profile/account-settingsx',
+				'/profile/account-setting',
+				'/account-settings',
+				'/account-settings/language',
+				'/profile/settings',
+				'/en/profile/account-settings',
+				'/profile/privacyx',
+				'/profile/privacy/x',
+				'/profile/third-party-tools/x',
+				'/profile/third-party',
+				'/privacy',
+				'/third-party-tools'
+			]) {
+				expect(showsBottomNav(path), path).toBe(true);
+				expect(showsSiteFooter(path), path).toBe(true);
+				expect(
+					buildBottomNavItems(el, href, path).some(
+						(item) => item.key === 'profile' && item.current
+					),
+					path
+				).toBe(false);
+			}
+			// The «Προφίλ» page itself is as it was: its footer from 744 (U-81.1 Ε2).
+			expect(showsSiteFooter('/profile')).toBe(true);
+			expect(hidesFooterOnPhone('/profile')).toBe(true);
+			expect(hidesFooterOnPhone('/profile/account-settings')).toBe(false);
+		});
+	});
+	describe('wave 4.5 · screen 63 «Ειδοποιήσεις», the list (D-W45-49, record §5.8)', () => {
+		const LIST = ['/notifications', '/notifications/'];
+
+		it('D-W45-49: `/notifications` is a pushed page of the «Προφίλ» — no capsule, no footer at any width, the site’s bar from 744, «Προφίλ» the current tab; 🔴 U-61.1 / U-61.2: an error page there is inside the whole frame', () => {
+			for (const path of LIST) {
+				expect(showsBottomNav(path), path).toBe(false);
+				expect(showsSiteFooter(path), path).toBe(false);
+				expect(frameHeaderOf(path), path).toBe('site');
+				expect(showsBottomNav(path, 500), path).toBe(true);
+				expect(showsSiteFooter(path, 500), path).toBe(true);
+				expect(
+					buildBottomNavItems(el, href, path)
+						.filter((item) => item.current)
+						.map((item) => item.key),
+					path
+				).toEqual(['profile']);
+			}
+		});
+
+		it('D-W45-49 (negative): look-alike paths keep the site’s own frame — a path under it, a prefix, another word, the settings’ own section', () => {
+			for (const path of [
+				'/notifications/x',
+				'/notifications/018f3c1e-0000-7000-8000-000000000001',
+				'/notificationsx',
+				'/notification',
+				'/en/notifications',
+				'/profile/notifications'
+			]) {
+				expect(showsBottomNav(path), path).toBe(true);
+				expect(showsSiteFooter(path), path).toBe(true);
+			}
+			// The settings' section «Ειδοποιήσεις» (screen 60) is the shell's, as before.
+			expect(showsBottomNav('/profile/account-settings/notifications')).toBe(false);
+			expect(showsSiteFooter('/profile/account-settings/notifications')).toBe(false);
+		});
 	});
 });

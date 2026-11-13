@@ -553,6 +553,81 @@ describe('the session (U-80.1 Ε6)', () => {
 		}
 	});
 
+	it('🔴 D-W45-18 · U-168 (wave 4.5, screen 56): the session carries the name and the sign-in address and mobile AS THE SERVER HIDES THEM — never a whole one, and nothing hidden here', async () => {
+		signedIn = true;
+		patient = {
+			id: 'p',
+			firstName: 'Ελένη',
+			lastName: 'Παππά',
+			loginEmail: 'eleni.private@example.test',
+			loginEmailMasked: 'e***a@example.test',
+			loginPhoneMasked: '+30 69•• ••• 678',
+			// Card w45-w5 (screen 58): the ΑΜΚΑ / ΑΦΜ the same way — the server's masks, never a whole number.
+			amka: '14038800001',
+			amkaMasked: '•••••••0001',
+			afmMasked: null
+		};
+		const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+		render(Harness, { props: { client } });
+		await waitFor(() => expect(screen.getByTestId('status')).toHaveTextContent('member'));
+		expect(JSON.parse(screen.getByTestId('member-facts').textContent ?? '')).toEqual({
+			firstName: 'Ελένη',
+			lastName: 'Παππά',
+			maskedLoginEmail: 'e***a@example.test',
+			maskedLoginPhone: '+30 69•• ••• 678',
+			maskedAmka: '•••••••0001',
+			maskedAfm: null,
+			hasPatientProfile: true
+		});
+		expect(
+			JSON.stringify(
+				client
+					.getQueryCache()
+					.getAll()
+					.map((query) => query.state.data)
+			)
+		).not.toMatch(/eleni\.private|14038800001/u);
+	});
+
+	it('🔴 D-W45-30 (wave 4.5, screen 62): the account was deleted — a guest at once with NO request (the confirm cleared the cookies), the drafts and every write’s body forgotten, «Καλωσορίσατε» forgotten on this device, and the other tabs told', async () => {
+		signedIn = true;
+		window.localStorage.setItem(
+			knownAccountStorageKey,
+			JSON.stringify({
+				firstName: 'Μαρία',
+				maskedIdentifier: 'm***a@example.test',
+				channel: 'email',
+				lastMethod: 'otp'
+			})
+		);
+		const client = new QueryClient({
+			defaultOptions: { queries: { retry: false, gcTime: Infinity }, mutations: { retry: 0 } }
+		});
+		const posted: unknown[] = [];
+		const listen = new BroadcastChannel(sessionChannelName);
+		listen.onmessage = (event) => posted.push(event.data);
+		render(Harness, { props: { client } });
+		await waitFor(() => expect(screen.getByTestId('status')).toHaveTextContent('member'));
+		client.setQueryDefaults(['appointments'], { meta: { personal: true } });
+		client.setQueryData(['appointments', 'patient'], { id: 'p' });
+		await client
+			.getMutationCache()
+			.build(client, { mutationFn: async () => 'sent' })
+			.execute({ mobilePhone: '+306912345678' });
+		const before = calls.length;
+
+		await user().click(screen.getByTestId('account-deleted'));
+		await waitFor(() => expect(screen.getByTestId('status')).toHaveTextContent('guest'));
+		expect(screen.getByTestId('forgotten')).toHaveTextContent('1');
+		expect(calls.slice(before).map((call) => call.path)).not.toContain('/auth/logout');
+		expect(window.localStorage.getItem(knownAccountStorageKey)).toBeNull();
+		expect(client.getMutationCache().getAll()).toEqual([]);
+		await waitFor(() => expect(client.getQueryData(['appointments', 'patient'])).toBeUndefined());
+		await waitFor(() => expect(posted).toEqual(['signed-out']));
+		expect(screen.getByTestId('sign-out-failures')).toHaveTextContent('0');
+		listen.close();
+	});
+
 	it('the session says whether the account has a patient’s profile (`null` from the server: none)', async () => {
 		signedIn = true;
 		patient = { id: 'p', firstName: 'Μαρία' };

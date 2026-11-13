@@ -52,7 +52,7 @@ describe('screen 50 · the card (record §6.1, U-134.3)', () => {
 		});
 	});
 
-	it('🔴 U-139.5: «Για: Γιώργος Παππάς (γιος)» only for a relative; P-B4 §13.3.4: «Αξιολογήστε» only with an open invitation', () => {
+	it('🔴 U-139.5: «Για: Γιώργος Παππάς (γιος)» only for a relative; P-B4 §13.3.4: «Γράψτε κριτική» only with an open invitation', () => {
 		const card = buildAppointmentCard({
 			appointment: visit({
 				status: 'completed',

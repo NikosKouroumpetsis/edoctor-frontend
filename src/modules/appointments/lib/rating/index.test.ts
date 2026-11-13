@@ -177,13 +177,13 @@ describe('screen 54 · the invitation and the refusals (U-138.3, D-W4-23)', () =
 			)
 		).toEqual({
 			kind: 'blocked',
-			message: 'Ο χρόνος για να αξιολογήσετε αυτή την επίσκεψη έληξε.'
+			message: 'Ο χρόνος για να γράψετε κριτική για αυτή την επίσκεψη έληξε.'
 		});
 		expect(
 			readRatingInvitationView({ ...invitation, status: 'REVOKED', canSubmit: false }, 'el')
 		).toEqual({
 			kind: 'blocked',
-			message: 'Η επίσκεψη έχει ήδη αξιολογηθεί ή η πρόσκλησή της έκλεισε.'
+			message: 'Για την επίσκεψη έχει ήδη γραφτεί κριτική ή η πρόσκλησή της έκλεισε.'
 		});
 	});
 
@@ -198,7 +198,7 @@ describe('screen 54 · the invitation and the refusals (U-138.3, D-W4-23)', () =
 			'Η ομάδα του eDoctor ελέγχει κάθε κριτική πριν δημοσιευτεί.',
 			'Φαίνεται μόνο το μικρό σας όνομα και το αρχικό του επωνύμου: Ελένη Π.',
 			'Μετά την υποβολή η κριτική δεν αλλάζει.',
-			'Μπορείτε να αξιολογήσετε την επίσκεψη έως 21 Δεκεμβρίου 2026.'
+			'Μπορείτε να γράψετε κριτική για την επίσκεψη έως 21 Δεκεμβρίου 2026.'
 		]);
 		const bare = ratingThenLines({ authorName: null, expiresAt: null, locale: 'el' });
 		expect(bare).toEqual([
@@ -210,7 +210,7 @@ describe('screen 54 · the invitation and the refusals (U-138.3, D-W4-23)', () =
 
 	it('the last day «έως 21 Δεκεμβρίου 2026»; a refusal in the screen’s terms', () => {
 		expect(ratingUntilLine(invitation.expiresAt, 'el')).toBe(
-			'Μπορείτε να αξιολογήσετε την επίσκεψη έως 21 Δεκεμβρίου 2026.'
+			'Μπορείτε να γράψετε κριτική για την επίσκεψη έως 21 Δεκεμβρίου 2026.'
 		);
 		expect(ratingUntilLine(null, 'el')).toBeNull();
 		expect(readRatingOutcome({ kind: 'not-accessible', status: 403, blocker: null }, 'el')).toEqual(
@@ -225,14 +225,14 @@ describe('screen 54 · the invitation and the refusals (U-138.3, D-W4-23)', () =
 			)
 		).toEqual({
 			kind: 'blocked',
-			message: 'Ο γιατρός δεν μπορεί να δεχτεί αξιολογήσεις αυτή τη στιγμή.'
+			message: 'Ο γιατρός δεν μπορεί να δεχτεί κριτικές αυτή τη στιγμή.'
 		});
 		expect(
 			readRatingOutcome({ kind: 'already-rated', status: 409, blocker: null }, 'el').kind
 		).toBe('blocked');
 		expect(readRatingOutcome({ kind: 'unknown', status: 0, blocker: null }, 'el')).toEqual({
 			kind: 'failed',
-			message: 'Η αξιολόγηση δεν υποβλήθηκε. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.'
+			message: 'Η κριτική δεν υποβλήθηκε. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.'
 		});
 		expect(readRatingOutcome({ kind: 'session', status: 401, blocker: null }, 'el')).toEqual({
 			kind: 'session'
@@ -290,7 +290,7 @@ describe('«Η κριτική σας» on screen 51 (U-138.5, U-138.6)', () => {
 		});
 	});
 
-	it('in moderation warm (D-W4-12: no promise of an email); refused neutral with the policy; 🔴 U-138.6 «κριτική», never «αξιολόγηση»', () => {
+	it('in moderation warm (D-W4-12: no promise of an email); refused neutral with the policy; 🔴 U-173 «κριτική», never the old word', () => {
 		const pending = buildOwnReviewCard({
 			review: { ...review, moderation: 'PENDING', reply: null },
 			authorName: 'Ελένη Π.',
@@ -315,7 +315,7 @@ describe('«Η κριτική σας» on screen 51 (U-138.5, U-138.6)', () => {
 			policy: 'Πολιτική κριτικών',
 			seeOnProfile: null
 		});
-		expect(`${pending.title} ${refused.title}`).not.toMatch(/αξιολόγ/u);
+		expect(`${pending.title} ${refused.title}`).not.toMatch(/ξιολ[οό]γ/iu);
 	});
 
 	it('review w4-w6 R1 NIT-4 (negative): a published review the server gave no name for says no sentence — never «…με το όνομα » left hanging; the way to the profile stays', () => {

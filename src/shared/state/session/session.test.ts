@@ -62,6 +62,32 @@ describe('Session (U-80.1)', () => {
 		expect(() => makeSession('unknown').session.retryRead()).not.toThrow();
 	});
 
+	it('card w45-w5 (screen 58): asking again can be WAITED for — it resolves once the source’s read is back, at once for a source that tells nothing, and never rejects', async () => {
+		let answer: () => void = () => undefined;
+		const source = (retry?: () => void | Promise<unknown>) =>
+			new Session({
+				status: () => 'member',
+				member: () => ({ firstName: 'Ελένη' }),
+				signOut: async () => undefined,
+				retry
+			});
+		let back = false;
+		const waited = source(() => new Promise<void>((resolve) => (answer = resolve)))
+			.retryRead()
+			.then(() => (back = true));
+		await Promise.resolve();
+		expect(back).toBe(false);
+		answer();
+		await waited;
+		expect(back).toBe(true);
+		await expect(source(() => undefined).retryRead()).resolves.toBeUndefined();
+		await expect(source().retryRead()).resolves.toBeUndefined();
+		// (negative) a read that was lost is no failure of the caller's.
+		await expect(
+			source(() => Promise.reject(new Error('offline'))).retryRead()
+		).resolves.toBeUndefined();
+	});
+
 	it('Ε4: a member goes on at once, no surface opens', () => {
 		const { session } = makeSession('member');
 		const action = vi.fn();
@@ -218,5 +244,30 @@ describe('Session (U-80.1)', () => {
 		expect(session.pendingAction).toBeNull();
 		expect(session.flowOpen).toBe(false);
 		expect(signOut).not.toHaveBeenCalled();
+	});
+
+	it('🔴 D-W45-30 (wave 4.5, screen 62): the account was deleted — the source ends it with no sign-out of its own, and nothing that waited or was written stays', async () => {
+		const deleted = vi.fn(async () => undefined);
+		const signOut = vi.fn(async () => undefined);
+		const session = new Session({
+			status: () => 'member',
+			member: () => ({ firstName: 'Μαρία' }),
+			signOut,
+			deleted
+		});
+		session.resume('book');
+		session.flowOpen = true;
+		await session.accountDeleted();
+		expect(deleted).toHaveBeenCalledOnce();
+		expect(signOut).not.toHaveBeenCalled();
+		expect(session.forgotten).toBe(1);
+		expect(session.resumedAction).toBeNull();
+		expect(session.flowOpen).toBe(false);
+		expect(session.expired).toBe(false);
+		expect(session.signOutFailures).toBe(0);
+		// A source that knows no such end (a test's) still forgets.
+		const plain = makeSession('member').session;
+		await plain.accountDeleted();
+		expect(plain.forgotten).toBe(1);
 	});
 });

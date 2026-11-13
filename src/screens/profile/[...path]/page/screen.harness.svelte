@@ -2,7 +2,9 @@
 	import { flushSync, untrack } from 'svelte';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { removePersonalQueries, resetPersonalQueries } from '$shared/query';
+	import { ConsentDecision, setConsentDecision } from '$shared/state/consent';
 	import { Session, setSession, type SessionStatus } from '$shared/state/session';
+	import { setSiteDialogs, SiteDialogs } from '$shared/state/site-dialogs';
 	import { setToasts, ToastState } from '$shared/ui/molecules/toast';
 	import type { ProfileScreenData } from '../types';
 	import ProfileScreen from './index.svelte';
@@ -16,6 +18,12 @@
 		data: ProfileScreenData;
 		onReady?: (handle: {
 			session: Session;
+			/** The frame's windows a row may ask for («Ρυθμίσεις», the consent's). */
+			dialogs: SiteDialogs;
+			/** The frame's toast, to read what a page said. */
+			toasts: ToastState;
+			/** The server no longer knows the session: the next time the page asks who is there, nobody. */
+			serverForgets: () => void;
 			/** The same person signs in again. */
 			signIn: () => void;
 			/** Another account answers the sign-in: what the site's host does then (`auth/ui/host`), in its order. */
@@ -28,10 +36,30 @@
 	let address = $state<ProfileScreenData>(untrack(() => data));
 	let status = $state<SessionStatus>(untrack(() => start));
 	const client = useQueryClient();
+	let forgotten = false;
 	const session = new Session({
 		status: () => status,
-		member: () => (status === 'member' ? { firstName: 'Ελένη', hasPatientProfile: true } : null),
+		member: () =>
+			status === 'member'
+				? {
+						firstName: 'Ελένη',
+						lastName: 'Παππά',
+						maskedLoginEmail: 'e***a@example.gr',
+						hasPatientProfile: true
+					}
+				: null,
 		signOut: async () => {
+			status = 'guest';
+			removePersonalQueries(client);
+		},
+		// The page asks who is there again (`auth/ui/host`: the read is made anew): a session the server forgot is nobody.
+		retry: () => {
+			if (!forgotten) return;
+			status = 'guest';
+			removePersonalQueries(client);
+		},
+		// What the site's host does once the account is deleted (`auth/ui/host`): nobody, and nothing personal kept.
+		deleted: () => {
 			status = 'guest';
 			removePersonalQueries(client);
 		},
@@ -42,10 +70,16 @@
 		}
 	});
 	setSession(session);
-	setToasts(new ToastState());
+	const toasts = setToasts(new ToastState());
+	const dialogs = setSiteDialogs(new SiteDialogs());
+	// The frame's ONE tracking decision (`site-frame`): every surface of the consent on the page reads the same.
+	setConsentDecision(new ConsentDecision());
 	untrack(() =>
 		onReady?.({
 			session,
+			dialogs,
+			toasts,
+			serverForgets: () => (forgotten = true),
 			signIn: () => {
 				status = 'member';
 				session.completeSignIn();

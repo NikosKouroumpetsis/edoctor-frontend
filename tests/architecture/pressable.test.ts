@@ -140,8 +140,8 @@ describe('U-28.4: what presses looks pressable', () => {
 			.querySelector('[data-slot="chip-pill"]') as HTMLElement;
 		expect(hovers(chosenPill)).toEqual([]);
 
-		render(SelectableCard, { props: { title: 'Αξιολόγηση', selected: false } });
-		expect(hovers(screen.getByRole('radio', { name: /Αξιολόγηση/ }))).toEqual([
+		render(SelectableCard, { props: { title: 'Βαθμολογία', selected: false } });
+		expect(hovers(screen.getByRole('radio', { name: /Βαθμολογία/ }))).toEqual([
 			'can-hover:enabled:hover:border-foreground'
 		]);
 		render(SelectableCard, { props: { title: 'Προτεινόμενα', selected: true } });

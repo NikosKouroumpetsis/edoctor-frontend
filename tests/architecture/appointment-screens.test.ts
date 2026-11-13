@@ -83,6 +83,60 @@ function findOverlayIssues(files: SourceFile[]): string[] {
 	});
 }
 
+/**
+ * 🔴 U-167 · D-W45-56 (wave 4.5, card w45-w9; «το menu ειναι τερμα αριστερα αλλα ολες οι ρυθμισεις etc ειναι
+ * κεντροποιημενες οχι και αυτες τέρμα αριστερα»): from 950 what the list of screens 50–55 opened — the 51, every
+ * «Αλλαγή», the cancellation, the rating, a relative's form — sits in the MIDDLE of the right column. So no class of
+ * the patient's appointment slices pushes a box against the list from 950 (`split:mx-0`, `laptop:ml-0` …) nor insets
+ * one side alone with the column's inset (`desktop:pl-pane-inset-xl`, the 4.0's «80 on the left from 1440»).
+ */
+const WIDE_ZONES = ['split', 'laptop', 'desktop', 'wide'];
+const AGAINST_THE_LIST = /^m[xlrse]-0$/u;
+const ONE_SIDED_INSET = /^p[lrse]-pane-inset(?:-\w+)?$/u;
+
+function findPinnedColumnIssues(files: SourceFile[]): string[] {
+	return files.flatMap((file) => {
+		if (!CHANGE_SCREENS.test(file.path) || /\.(?:test|stories)\./u.test(file.path)) return [];
+		const found: string[] = [];
+		for (const { line, tokens } of classStrings(file.text)) {
+			for (const token of tokens) {
+				const { variants, utility } = splitVariants(token);
+				if (!variants.some((variant) => WIDE_ZONES.includes(variant))) continue;
+				if (AGAINST_THE_LIST.test(utility) || ONE_SIDED_INSET.test(utility)) {
+					found.push(`${file.path}:${line} ${token} (U-167)`);
+				}
+			}
+		}
+		return found;
+	});
+}
+
+/**
+ * 🔴 D-W45-57 α (wave 4.5, card w45-w9): below 744 the site has no top bar (U-16.3), so a page of the patient's that is
+ * pushed over the tabs is the WHOLE screen high — `min-h-page` (the screen minus the bar's 64) left a band in the body's
+ * colour under a short page. The screens of `/appointments`, `/ratings`, `/profile/[...path]` and `/notifications`
+ * take `min-h-page` only from 744, where the bar is.
+ */
+const PUSHED_SCREENS =
+	/^src\/screens\/(?:appointments|ratings|notifications|profile\/\[\.\.\.path\])\//u;
+const BAR_ZONES = ['tablet', 'split', 'laptop', 'desktop', 'wide'];
+
+function findBarHeightIssues(files: SourceFile[]): string[] {
+	return files.flatMap((file) => {
+		if (!PUSHED_SCREENS.test(file.path)) return [];
+		const found: string[] = [];
+		for (const { line, tokens } of classStrings(file.text)) {
+			for (const token of tokens) {
+				const { variants, utility } = splitVariants(token);
+				if (utility === 'min-h-page' && !variants.some((variant) => BAR_ZONES.includes(variant))) {
+					found.push(`${file.path}:${line} ${token} (D-W45-57)`);
+				}
+			}
+		}
+		return found;
+	});
+}
+
 const planted = (path: string, text: string): SourceFile => ({ path, text: stripComments(text) });
 
 describe('🔴 the patient’s appointment pages (U-132.1 · U-135.2 · U-137.5)', () => {
@@ -281,5 +335,87 @@ describe('🔴 U-102 · U-136 · U-137 · U-139.3: «Αλλαγή» and the canc
 			`${DELETE_WINDOW}: a window imported (U-139.3)`,
 			'src/modules/appointments/ui/relatives/components/editor.svelte: plays a dialog (U-139.3)'
 		]);
+	});
+});
+
+describe('🔴 U-167: η δεξιά στήλη των σελίδων του 4.0 κεντράρεται από 950 (D-W45-56, card w45-w9)', () => {
+	const DETAIL_PAGE = 'src/modules/appointments/ui/detail/page/index.svelte';
+	const CHANGE_FRAME = 'src/modules/appointments/ui/change-screen/components/change-frame.svelte';
+
+	it('the two places that set the right column’s box are read, each centred (`mx-auto`) at its own greatest width', () => {
+		const files = readSourceFiles();
+		const tokensOf = (path: string) =>
+			classStrings(files.find((file) => file.path === path)?.text ?? '').flatMap(
+				(entry) => entry.tokens
+			);
+		const detail = tokensOf(DETAIL_PAGE);
+		expect(detail).toEqual(expect.arrayContaining(['mx-auto', 'split:max-w-document-wide']));
+		const frame = tokensOf(CHANGE_FRAME);
+		expect(frame).toEqual(
+			expect.arrayContaining([
+				'mx-auto',
+				'split:max-w-split-sub',
+				'laptop:max-w-split-sub-lg',
+				'desktop:max-w-split-sub-xl'
+			])
+		);
+	});
+
+	it('no slice of the patient’s appointment pages pushes a box against the list from 950, nor insets one side alone', () => {
+		expect(findPinnedColumnIssues(readSourceFiles())).toEqual([]);
+	});
+
+	it('(negative, planted) `split:mx-0` on the 51, the 80 on the left of a change screen, `laptop:ml-0` on the form — each is reported; below 950, a reset of another kind and another feature are not this rule’s', () => {
+		expect(
+			findPinnedColumnIssues([
+				planted(
+					DETAIL_PAGE,
+					'<article class="mx-auto split:mx-0 split:max-w-document-wide"></article>'
+				),
+				planted(CHANGE_FRAME, "const pane = 'mx-auto desktop:pl-pane-inset-xl';"),
+				planted(
+					'src/modules/appointments/ui/relative-form/page/index.svelte',
+					'<div class="laptop:ml-0 tablet:mx-0 split:mb-0 split:px-pane-inset"></div>'
+				),
+				planted(
+					'src/modules/articles/ui/detail/page/index.svelte',
+					'<div class="laptop:mx-0"></div>'
+				)
+			])
+		).toEqual([
+			`${DETAIL_PAGE}:1 split:mx-0 (U-167)`,
+			`${CHANGE_FRAME}:1 desktop:pl-pane-inset-xl (U-167)`,
+			'src/modules/appointments/ui/relative-form/page/index.svelte:1 laptop:ml-0 (U-167)'
+		]);
+	});
+});
+
+describe('🔴 D-W45-57: below 744 a pushed page of the patient’s is the whole screen high (card w45-w9)', () => {
+	const SCREENS = [
+		'src/screens/appointments/[...path]/page/index.svelte',
+		'src/screens/ratings/[invitationId]/page/index.svelte',
+		'src/screens/profile/[...path]/page/index.svelte',
+		'src/screens/notifications/page/index.svelte'
+	];
+
+	it('the four screens are read, each the screen’s height below 744 and the height under the bar from it', () => {
+		const files = readSourceFiles();
+		for (const path of SCREENS) {
+			const tokens = classStrings(files.find((file) => file.path === path)?.text ?? '').flatMap(
+				(entry) => entry.tokens
+			);
+			expect(tokens, path).toEqual(expect.arrayContaining(['min-h-dvh', 'tablet:min-h-page']));
+		}
+		expect(findBarHeightIssues(files)).toEqual([]);
+	});
+
+	it('(negative, planted) a bare `min-h-page` on one of them is reported; from 744, and on a page that is not theirs, it is not', () => {
+		expect(
+			findBarHeightIssues([
+				planted(SCREENS[2], '<main class="min-h-page bg-card split:min-h-0"></main>'),
+				planted(SCREENS[3], '<main class="min-h-dvh bg-card tablet:min-h-page"></main>'),
+				planted('src/screens/favorites/page/index.svelte', '<main class="min-h-page"></main>')
+			])
+		).toEqual([`${SCREENS[2]}:1 min-h-page (D-W45-57)`]);
 	});
 });

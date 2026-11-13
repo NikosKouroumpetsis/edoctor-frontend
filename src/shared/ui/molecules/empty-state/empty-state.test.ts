@@ -81,6 +81,34 @@ describe('EmptyState', () => {
 		expect(screen.queryByRole('button')).toBeNull();
 	});
 
+	it('card w45-w7: `actionTestId` names the one way on — the button or the link — and nothing else; without it no name is printed', () => {
+		const pressed = render(EmptyState, {
+			props: {
+				title: 'Σφάλμα',
+				actionLabel: 'Δοκιμάστε ξανά',
+				onActionPress: () => undefined,
+				testId: 'failed',
+				actionTestId: 'retry'
+			}
+		});
+		expect(screen.getByTestId('retry')).toBe(
+			screen.getByRole('button', { name: 'Δοκιμάστε ξανά' })
+		);
+		expect(screen.getByTestId('failed')).not.toBe(screen.getByTestId('retry'));
+		pressed.unmount();
+
+		const linked = render(EmptyState, {
+			props: { title: 'Δεν βρέθηκε', actionLabel: 'Αρχική', actionHref: '/', actionTestId: 'home' }
+		});
+		expect(screen.getByTestId('home')).toBe(screen.getByRole('link', { name: 'Αρχική' }));
+		linked.unmount();
+
+		render(EmptyState, {
+			props: { title: 'Κενό', actionLabel: 'Κλείσε ραντεβού', onActionPress: () => undefined }
+		});
+		expect(screen.getByRole('button')).not.toHaveAttribute('data-testid');
+	});
+
 	it('U-02.2 (M-40): framed sets the same column in the application’s card with the 8 inset, the card named by the testId', async () => {
 		const onActionPress = vi.fn();
 		const { container } = render(EmptyState, {

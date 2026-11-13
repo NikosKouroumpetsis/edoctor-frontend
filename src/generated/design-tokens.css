@@ -241,6 +241,8 @@
 	--spacing-checkout-note: 104px;
 	--spacing-split-list-w: 420px;
 	--spacing-split-list-w-lg: 460px;
+	--spacing-split-menu-w: 340px;
+	--spacing-split-menu-w-lg: 420px;
 	--spacing-split-solo: 640px;
 	--spacing-pane-column: 640px;
 	--spacing-split-sub: 656px;
@@ -252,6 +254,8 @@
 	--spacing-pane-skeleton: 320px;
 	--spacing-review-comment: 136px;
 	--spacing-relative-initial: 44px;
+	--spacing-profile-initial: 88px;
+	--spacing-inbox-glyph: 44px;
 	--spacing-chip-tab: 36px;
 	--spacing-tab-capsule-fit: 400px;
 	--spacing-sheet-sm: 60dvh;

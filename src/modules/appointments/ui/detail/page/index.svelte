@@ -212,14 +212,16 @@
 
 <!-- Screen 51 «Το ραντεβού» (record §7, U-135; P-W4 §4.2). Below 950 its own page with «‹» alone on its line (D-W4-66: the
      status under it, no capsule); from 950 the
-     right column beside the list, «‹» hidden. Its head, what it has to say (in the application's order), the card of
+     right column beside the list, «‹» hidden — 🔴 U-167 (D-W45-56): in the MIDDLE of that column, at most 720 wide with
+     the same inset on both sides, never against the line. Its head, what it has to say (in the application's order),
+     the card of
      screen 30 with «Αλλαγή» on its rows (U-135.2: no button fixed at the bottom), the doctor's terms, the rows of actions
      and the link that cancels. 🔴 U-132.1: no map; U-137.5: no word of a late cancellation; U-65.6: every word a person
      or the server wrote is a text node. -->
 <article
 	data-testid="appointment-page"
 	data-state={state}
-	class="mx-auto w-full max-w-content px-gutter-sm pt-3 pb-section-lg tablet:px-reading-gap tablet:pt-6 tablet:pb-pane-inset-lg split:mx-0 split:max-w-document-wide split:px-pane-inset split:pt-section laptop:px-pane-inset-lg laptop:pt-reading-gap desktop:pl-pane-inset-xl"
+	class="mx-auto w-full max-w-content px-gutter-sm pt-3 pb-section-lg tablet:px-reading-gap tablet:pt-6 tablet:pb-pane-inset-lg split:max-w-document-wide split:px-pane-inset split:pt-section laptop:px-pane-inset-lg laptop:pt-reading-gap"
 >
 	<IconButton
 		icon="arrow-back"

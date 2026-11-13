@@ -179,7 +179,7 @@ describe('screen 50 · «Τα ραντεβού μου» (record §6.1, U-134)', 
 		expect(photo.querySelector('[data-slot="media-placeholder"]')).toBeInTheDocument();
 	});
 
-	it('🔴 U-139.5 · P-B4 §13.3.4: «Για: Γιώργος Παππάς (γιος)» only for a relative; «Αξιολογήστε την επίσκεψη» only with an open invitation, its own link to the form', () => {
+	it('🔴 U-139.5 · P-B4 §13.3.4: «Για: Γιώργος Παππάς (γιος)» only for a relative; «Γράψτε κριτική για την επίσκεψη» only with an open invitation, its own link to the form', () => {
 		draw({
 			tab: 'history',
 			list: listOf([
@@ -206,7 +206,7 @@ describe('screen 50 · «Τα ραντεβού μου» (record §6.1, U-134)', 
 		const [rated, canceled] = screen.getAllByTestId('appointment-card');
 		expect(within(rated).getByText('Για: Γιώργος Παππάς (γιος)')).toBeInTheDocument();
 		const rate = within(rated).getByTestId('appointment-card-rate');
-		expect(rate).toHaveTextContent('Αξιολογήστε την επίσκεψη');
+		expect(rate).toHaveTextContent('Γράψτε κριτική για την επίσκεψη');
 		expect(rate).toHaveAttribute('href', `/ratings/${INVITATION}`);
 		expect(rate).toHaveClass('min-h-touch', 'relative', 'z-10');
 		// Its own link, never inside the card's: no link within a link.

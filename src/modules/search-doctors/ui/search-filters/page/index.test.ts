@@ -177,7 +177,7 @@ describe('search-doctors::ui::search-filters', () => {
 		}
 		expect(cards.map((node) => node.querySelector('.font-semibold')?.textContent)).toEqual([
 			'Προτεινόμενα',
-			'Αξιολόγηση'
+			'Βαθμολογία'
 		]);
 		expect(cards[0].parentElement).toHaveClass('gap-2');
 	});

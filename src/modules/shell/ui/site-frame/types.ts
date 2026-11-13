@@ -9,20 +9,38 @@ export type LocalizedHref = (path: string) => ResolvedPathname;
 
 /**
  * One entry of the account menu from 744 (U-81.3): a page; «Σύνδεση» a page that opens the window in place, so it still
- * goes somewhere before the page's scripts have run; `settings` the «Ρυθμίσεις» dialog; `sign-out` the way out. Below 744
+ * goes somewhere before the page's scripts have run; `settings` a GUEST's «Ρυθμίσεις» dialog (D-W45-21: a member's
+ * «Ρυθμίσεις λογαριασμού» is a page, `account-settings`); `sign-out` the way out. Below 744
  * there is no menu: the capsule's «Προφίλ» is a page (U-81.1). `separated`: a rule above it.
  */
 export type AccountEntry =
 	| {
-			key: 'sign-in' | 'messages' | 'appointments' | 'favorites' | 'relatives' | 'help' | 'doctor';
+			key:
+				| 'sign-in'
+				| 'messages'
+				| 'appointments'
+				| 'favorites'
+				| 'notifications'
+				| 'relatives'
+				| 'account-settings'
+				| 'help'
+				| 'doctor';
 			kind: 'link';
 			label: string;
 			description?: string;
 			href: ResolvedPathname;
 			emphasis?: boolean;
 			separated?: boolean;
-			/** 🔴 U-84 Π5: the 8 dot on «Μηνύματα» while a conversation is unread, with what it says aloud. */
+			/**
+			 * 🔴 U-84 Π5: the 8 dot on «Μηνύματα» while a conversation is unread, with what it says aloud. 🔴 D-W45-17: the
+			 * same dot on «Ειδοποιήσεις» while a notification is new.
+			 */
 			dotLabel?: string;
+			/**
+			 * The row's whole name said aloud in place of its words and its dot («Ειδοποιήσεις, νέες», record §5.1); without
+			 * it the row is named by its label and the dot by `dotLabel`.
+			 */
+			name?: string;
 	  }
 	| { key: 'settings'; kind: 'settings'; label: string; separated?: boolean }
 	| { key: 'sign-out'; kind: 'sign-out'; label: string; separated?: boolean };

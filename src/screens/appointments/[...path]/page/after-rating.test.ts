@@ -12,7 +12,7 @@ import AppointmentsHarness from './screen.harness.svelte';
 /*
  * 🔴 Review w4-w6 R1 MAJOR-1, composed (P-W4 §8.2): screen 54's «Υποβολή» and then the 51 it goes back to, on the SAME
  * cache and the same memory of the page — while the appointment's new read is still on its way, or failed. The visit
- * stands at once with «Η αξιολόγηση υποβλήθηκε.» AND «Η κριτική σας · Σε έλεγχο», never «Αξιολογήστε». The server's
+ * stands at once with «Η κριτική υποβλήθηκε.» AND «Η κριτική σας · Σε έλεγχο», never «Γράψτε κριτική». The server's
  * «now» Tuesday 10 November 21:00 in Athens. Made-up people and offices.
  */
 
@@ -172,7 +172,7 @@ async function rateAndGoBack(then: 'held' | 'down') {
 	});
 	const user = userEvent.setup({ delay: null });
 	await screen.findByTestId('appointment-rating');
-	// The list beside the form, read: its row of this visit still says «Αξιολογήστε την επίσκεψη».
+	// The list beside the form, read: its row of this visit still says «Γράψτε κριτική για την επίσκεψη».
 	await waitFor(() => expect(screen.getAllByTestId('appointment-card-rate')).toHaveLength(2));
 	for (const slider of screen.getAllByRole('slider')) {
 		slider.focus();
@@ -195,17 +195,17 @@ async function rateAndGoBack(then: 'held' | 'down') {
 const pane = () => screen.getByTestId('appointment-page');
 
 describe('🔴 review w4-w6 R1 MAJOR-1 · 54 ⇒ 51 on one cache', () => {
-	it('the appointment’s new read still on its way: the 51 stands at once with «Η αξιολόγηση υποβλήθηκε.» AND «Η κριτική σας · Σε έλεγχο» — never «Αξιολογήστε», on the page or on the list’s card', async () => {
+	it('the appointment’s new read still on its way: the 51 stands at once with «Η κριτική υποβλήθηκε.» AND «Η κριτική σας · Σε έλεγχο» — never «Γράψτε κριτική», on the page or on the list’s card', async () => {
 		await rateAndGoBack('held');
 		expect(await screen.findByTestId('appointment-done')).toHaveTextContent(
-			'Η αξιολόγηση υποβλήθηκε.'
+			'Η κριτική υποβλήθηκε.'
 		);
 		const review = within(pane()).getByTestId('appointment-review');
 		expect(review).toHaveTextContent('Η κριτική σας');
 		expect(review).toHaveTextContent('Σε έλεγχο');
 		expect(screen.queryByTestId('appointment-ask')).toBeNull();
 		expect(screen.queryByTestId('appointment-rate')).toBeNull();
-		expect(pane()).not.toHaveTextContent('Αξιολογήστε');
+		expect(pane()).not.toHaveTextContent('Γράψτε κριτική');
 		// The list beside it (from 950): this visit's card lost its link; the other visit keeps its own.
 		const cards = screen.getAllByTestId('appointment-card');
 		const mine = cards.find((card) => card.hasAttribute('data-selected')) as HTMLElement;
@@ -213,10 +213,10 @@ describe('🔴 review w4-w6 R1 MAJOR-1 · 54 ⇒ 51 on one cache', () => {
 		expect(screen.getAllByTestId('appointment-card-rate')).toHaveLength(1);
 	});
 
-	it('(negative) the new reads FAIL after the `201`: the same — the review and the green notice stay, «Αξιολογήστε» never comes back', async () => {
+	it('(negative) the new reads FAIL after the `201`: the same — the review and the green notice stay, «Γράψτε κριτική» never comes back', async () => {
 		await rateAndGoBack('down');
 		expect(await screen.findByTestId('appointment-done')).toHaveTextContent(
-			'Η αξιολόγηση υποβλήθηκε.'
+			'Η κριτική υποβλήθηκε.'
 		);
 		await waitFor(() =>
 			expect(
@@ -225,7 +225,7 @@ describe('🔴 review w4-w6 R1 MAJOR-1 · 54 ⇒ 51 on one cache', () => {
 		);
 		expect(within(pane()).getByTestId('appointment-review')).toHaveTextContent('Σε έλεγχο');
 		expect(screen.queryByTestId('appointment-ask')).toBeNull();
-		expect(pane()).not.toHaveTextContent('Αξιολογήστε');
+		expect(pane()).not.toHaveTextContent('Γράψτε κριτική');
 		expect(screen.queryByTestId('appointment-failed')).toBeNull();
 	});
 });

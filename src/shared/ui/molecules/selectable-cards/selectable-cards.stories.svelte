@@ -90,8 +90,8 @@
 					},
 					{
 						value: 'rating',
-						title: 'Αξιολόγηση',
-						description: 'Καλύτερη αξιολόγηση πρώτα',
+						title: 'Βαθμολογία',
+						description: 'Καλύτερη βαθμολογία πρώτα',
 						icon: door
 					},
 					{ value: 'distance', title: 'Απόσταση', description: 'Κοντινότεροι πρώτα', icon: bed }
@@ -120,8 +120,8 @@
 				},
 				{
 					value: 'rating',
-					title: 'Αξιολόγηση',
-					description: 'Καλύτερη αξιολόγηση πρώτα',
+					title: 'Βαθμολογία',
+					description: 'Καλύτερη βαθμολογία πρώτα',
 					icon: doorSm
 				},
 				{ value: 'distance', title: 'Απόσταση', description: 'Κοντινότεροι πρώτα', icon: bedSm }

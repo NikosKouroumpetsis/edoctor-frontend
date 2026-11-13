@@ -12,6 +12,8 @@
 		/** The sentence; the link follows it on the same line and wraps with it. */
 		text: string;
 		linkLabel: string;
+		/** What ends the sentence after the link (its full stop), set against the link with no space between. */
+		tail?: string;
 		/** A link to a page (`<a>`), or … */
 		href?: string;
 		/** … an action in place (`<button>`), the application's `onLinkPress`. */
@@ -27,6 +29,7 @@
 	let {
 		text,
 		linkLabel,
+		tail,
 		href,
 		onLinkPress,
 		tone = 'muted',
@@ -57,5 +60,5 @@
 			data-testid={linkTestId}
 			class={cn(linkClass, 'inline cursor-pointer')}
 			onclick={() => onLinkPress?.()}>{linkLabel}</button
-		>{/if}
+		>{/if}{#if tail}{tail}{/if}
 </p>

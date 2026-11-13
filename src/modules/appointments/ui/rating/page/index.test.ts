@@ -28,7 +28,7 @@ import type { RatingInvitationRead } from '../hooks/use-invitation.svelte';
 import Harness from './rating.harness.svelte';
 
 /*
- * Screen 54 «Αξιολόγηση επίσκεψης» (record §10, U-138; P-W4 §4.5): the form of the email's link — «Η επίσκεψή σας», five
+ * Screen 54 «Κριτική επίσκεψης» (record §10, U-138; P-W4 §4.5): the form of the email's link — «Η επίσκεψή σας», five
  * aspects on the shared stars (a press whole, the same star again half), the grade by the server's formula, the words
  * to 2000 without `<` `>`, the preview, the four lines, «Πώς λειτουργούν οι κριτικές», ONE «Υποβολή»; the refusals, the
  * guest, an invitation already answered. The server's «now» Tuesday 10 November 21:00 in Athens; made-up people.
@@ -263,13 +263,11 @@ async function rateAll() {
 	await press.click(star('friendliness', 5));
 }
 
-describe('screen 54 · «Αξιολόγηση επίσκεψης» (record §10.2, U-138)', () => {
+describe('screen 54 · «Κριτική επίσκεψης» (record §10.2, U-138)', () => {
 	it('U-138.3: the form at once — «Η επίσκεψή σας», the line of help, the five aspects in the server’s order with their lines; «Υποβολή» locked until all five', () => {
 		draw();
 		const form = screen.getByTestId('appointment-rating');
-		expect(within(form).getByRole('heading', { level: 2 })).toHaveTextContent(
-			'Αξιολόγηση επίσκεψης'
-		);
+		expect(within(form).getByRole('heading', { level: 2 })).toHaveTextContent('Κριτική επίσκεψης');
 		expect(screen.getByTestId('appointment-context')).toHaveTextContent('Η επίσκεψή σας');
 		expect(screen.getByTestId('appointment-context')).toHaveTextContent('Πέμπτη 22 Οκτωβρίου');
 		expect(form).toHaveTextContent(
@@ -340,7 +338,7 @@ describe('screen 54 · «Αξιολόγηση επίσκεψης» (record §10.
 			'Η ομάδα του eDoctor ελέγχει κάθε κριτική πριν δημοσιευτεί.',
 			'Φαίνεται μόνο το μικρό σας όνομα και το αρχικό του επωνύμου: Ελένη Π.',
 			'Μετά την υποβολή η κριτική δεν αλλάζει.',
-			'Μπορείτε να αξιολογήσετε την επίσκεψη έως 21 Δεκεμβρίου 2026.'
+			'Μπορείτε να γράψετε κριτική για την επίσκεψη έως 21 Δεκεμβρίου 2026.'
 		]);
 	});
 
@@ -371,7 +369,7 @@ describe('screen 54 · «Αξιολόγηση επίσκεψης» (record §10.
 		expect(field).not.toHaveClass('min-h-checkout-note');
 	});
 
-	it('the submit: ONE press sends the five as the server names them (1–10) and the trimmed words; back on the visit with «Η αξιολόγηση υποβλήθηκε.» (D-W4-12, D-W4-33)', async () => {
+	it('the submit: ONE press sends the five as the server names them (1–10) and the trimmed words; back on the visit with «Η κριτική υποβλήθηκε.» (D-W4-12, D-W4-33)', async () => {
 		const { go, memory } = draw();
 		await rateAll();
 		await user().type(screen.getByTestId('appointment-rating-comment'), '  Πολύ καλά.  ');
@@ -402,7 +400,7 @@ describe('screen 54 · «Αξιολόγηση επίσκεψης» (record §10.
 		await waitFor(() =>
 			expect(goto).toHaveBeenCalledWith(`/appointments/${ID}`, { replaceState: true })
 		);
-		// 🔴 D-W4-63 · D-W4-33: «Η αξιολόγηση υποβλήθηκε.» comes from the page's memory — no address the form asked for
+		// 🔴 D-W4-63 · D-W4-33: «Η κριτική υποβλήθηκε.» comes from the page's memory — no address the form asked for
 		// carries a `done`, a word of the review or anything after `?`.
 		expect(memory.doneOf(ID)).toEqual({ kind: 'rating' });
 		for (const [href] of vi.mocked(goto).mock.calls) {
@@ -418,7 +416,7 @@ describe('screen 54 · «Αξιολόγηση επίσκεψης» (record §10.
 		await user().click(submit());
 		const blocked = await screen.findByTestId('appointment-rating-blocked');
 		expect(within(blocked).getByTestId('appointment-rating-blocker')).toHaveTextContent(
-			'Ο γιατρός δεν μπορεί να δεχτεί αξιολογήσεις αυτή τη στιγμή.'
+			'Ο γιατρός δεν μπορεί να δεχτεί κριτικές αυτή τη στιγμή.'
 		);
 		expect(submit()).toHaveTextContent('Πίσω στο ραντεβού');
 		expect(screen.queryByTestId('booking-cancel')).toBeNull();
@@ -455,14 +453,14 @@ describe('screen 54 · «Αξιολόγηση επίσκεψης» (record §10.
 		}
 	});
 
-	it('a failure keeps the stars and the words with «Η αξιολόγηση δεν υποβλήθηκε…»; 🔴 U-84: a `401` opens the sign-in over the form and keeps them too', async () => {
+	it('a failure keeps the stars and the words with «Η κριτική δεν υποβλήθηκε…»; 🔴 U-84: a `401` opens the sign-in over the form and keeps them too', async () => {
 		answer = () => refusal(500, 'boom');
 		const { handle, go } = draw();
 		await rateAll();
 		await user().type(screen.getByTestId('appointment-rating-comment'), 'Μένει');
 		await user().click(submit());
 		expect(await screen.findByTestId('appointment-rating-failure')).toHaveTextContent(
-			'Η αξιολόγηση δεν υποβλήθηκε. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.'
+			'Η κριτική δεν υποβλήθηκε. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.'
 		);
 		expect(aspect('trust')).toHaveAttribute('aria-valuenow', '10');
 		expect(screen.getByTestId('appointment-rating-comment')).toHaveValue('Μένει');
@@ -485,7 +483,7 @@ describe('screen 54 · «Αξιολόγηση επίσκεψης» (record §10.
 			)
 		});
 		expect(screen.getByTestId('appointment-rating-blocker')).toHaveTextContent(
-			'Ο χρόνος για να αξιολογήσετε αυτή την επίσκεψη έληξε.'
+			'Ο χρόνος για να γράψετε κριτική για αυτή την επίσκεψη έληξε.'
 		);
 		expect(screen.getByTestId('appointment-context')).toHaveTextContent('Η επίσκεψή σας');
 		expect(submit()).toHaveTextContent('Πίσω στο ραντεβού');
@@ -526,7 +524,7 @@ describe('screen 54 · «Αξιολόγηση επίσκεψης» (record §10.
 
 		draw({ read: readOf(null, { refused: true, loading: false }), visit: visitOf(null) });
 		expect(screen.getByTestId('appointment-rating-refused')).toHaveTextContent(
-			'Η πρόσκληση αξιολόγησης δεν ανήκει σε αυτόν τον λογαριασμό ή δεν υπάρχει πια.'
+			'Η πρόσκληση κριτικής δεν ανήκει σε αυτόν τον λογαριασμό ή δεν υπάρχει πια.'
 		);
 		cleanup();
 
@@ -560,14 +558,16 @@ describe('screen 54 · «Αξιολόγηση επίσκεψης» (record §10.
 		);
 	});
 
-	it('🔴 U-138.6: «αξιολόγηση» is the act (the title, the notice), «κριτική» what is published (the grade, the preview, the lines)', async () => {
+	// Card w45-w8: rewrites U-138.6 (one word for the act, another for what is published) — U-173 takes its place (record §7α).
+	it('🔴 U-173: ΜΙΑ λέξη παντού — the title is «Κριτική επίσκεψης» as the grade and the preview say «κριτική»; (negative) no word of the form says the old one', async () => {
 		draw();
 		await rateAll();
-		expect(
-			within(screen.getByTestId('appointment-rating')).getByRole('heading', { level: 2 })
-		).toHaveTextContent(/αξιολόγ/iu);
+		const form = screen.getByTestId('appointment-rating');
+		expect(within(form).getByRole('heading', { level: 2 })).toHaveTextContent('Κριτική επίσκεψης');
 		expect(screen.getByTestId('appointment-rating-grade')).toHaveTextContent(/κριτικής/u);
-		expect(screen.getByTestId('appointment-rating-grade')).not.toHaveTextContent(/αξιολόγ/iu);
-		expect(screen.getByTestId('appointment-rating-preview')).not.toHaveTextContent(/αξιολόγ/iu);
+		expect(form).not.toHaveTextContent(/ξιολ[οό]γ/iu);
+		// 🔴 U-167 (D-W45-56, card w45-w9): from 950 the form in the MIDDLE of the right column, never against the list.
+		expect(form).toHaveClass('mx-auto', 'split:max-w-split-sub');
+		expect(form).not.toHaveClass('split:mx-0');
 	});
 });

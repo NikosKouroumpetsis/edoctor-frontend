@@ -191,7 +191,7 @@
 <main
 	data-testid="appointments-page"
 	data-view={screen.address.view}
-	class="min-h-page bg-card split:min-h-0"
+	class="min-h-dvh bg-card tablet:min-h-page split:min-h-0"
 >
 	<AppointmentsList
 		locale={screen.locale}

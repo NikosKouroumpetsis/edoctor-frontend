@@ -106,7 +106,7 @@
      below 950 its own page over the capsule, from 950 the right column beside the visit's «Ιστορικό», the visit
      selected (U-136.2); the list never opens another appointment here (`autoOpen`). No footer (D-W4-55), never a map
      (U-132.1). -->
-<main data-testid="rating-page" class="min-h-page bg-card split:min-h-0">
+<main data-testid="rating-page" class="min-h-dvh bg-card tablet:min-h-page split:min-h-0">
 	<AppointmentsList
 		locale={screen.locale}
 		tab={pages.tab}

@@ -1,66 +1,37 @@
 <script lang="ts">
 	import type { Pathname } from '$app/types';
-	import { browser } from '$app/environment';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { createQuery } from '@tanstack/svelte-query';
 	import { m } from '$paraglide/messages.js';
 	import { localizeHref } from '$paraglide/runtime';
 	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
 	import { getSiteDialogsOptional } from '$shared/state/site-dialogs';
-	import {
-		readConsentSnapshot,
-		writeConsentSnapshot,
-		type ConsentSnapshot
-	} from '$shared/storage/consent-storage';
 	import { CookieConsent } from '$shared/ui/organisms/cookie-consent';
-	import { getConsentRegistry } from '$modules/shell/api/consent';
-	import { fallbackConsentRegistry } from '$modules/shell/config/consent-fallback-registry';
 	import {
 		buildAcceptAllChoices,
 		buildDraftChoices,
 		buildEssentialOnlyChoices,
-		resolveConsentPrompt,
-		selectWebTools
+		resolveConsentPrompt
 	} from '$modules/shell/lib/consent';
 	import { legalPath } from '$modules/shell/lib/legal';
 	import ConsentToolsDialog from '../components/tools-dialog.svelte';
 	import { useConsentRecord } from '../hooks/use-consent-record.svelte';
+	import { useConsentTools } from '../hooks/use-consent-tools.svelte';
 
 	const locale = $derived(getPageLocale(page.url));
 	const messageOptions = $derived({ locale });
 	const localizedHref = (path: string) => resolve(localizeHref(path, { locale }) as Pathname);
 
-	// The registry (anonymous GET, checked at the boundary).
-	const registryQuery = createQuery(() => ({
-		queryKey: ['consent', 'registry'],
-		queryFn: ({ signal }: { signal: AbortSignal }) => getConsentRegistry(signal),
-		enabled: browser,
-		staleTime: 10 * 60 * 1000
-	}));
-	// The application's `consentRegistryQuery`: the bundled registry when the served one cannot be read, has no usable
-	// version (`null`) or no tool left after the boundary; nothing until it answers.
-	const registry = $derived.by(() => {
-		// Both read every time: a query result tells its changes only for the fields that were read.
-		const data = registryQuery.data;
-		const failed = registryQuery.isError;
-		if (failed) return fallbackConsentRegistry;
-		if (data === undefined) return null;
-		return data && data.tools.length > 0 ? data : fallbackConsentRegistry;
-	});
-	const tools = $derived(selectWebTools(registry));
-
-	// The decision this browser keeps (first party, no personal data); read once in the browser.
-	let snapshot = $state<ConsentSnapshot | null>(null);
-	let read = $state(false);
-	$effect(() => {
-		snapshot = readConsentSnapshot();
-		read = true;
-	});
+	// The registry and the decision this browser keeps — the ONE catalogue and the ONE decision the page «Εργαλεία τρίτων
+	// και cookies» reads too (wave 4.5, screen 62): a choice saved there closes this card, and the other way round.
+	const consent = useConsentTools();
+	const tools = $derived(consent.tools);
+	const snapshot = $derived(consent.snapshot);
+	const read = $derived(consent.read);
 
 	let decided = $state(false);
 	let manageOpen = $state(false);
-	// U-82.1: «Απόρρητο» of the phone's `/profile` asks for this window, as its row does in the application.
+	// A page may ask for this window (`SiteDialogs.openConsent`).
 	const dialogs = getSiteDialogsOptional();
 	$effect(() => {
 		if (!dialogs?.consentRequested) return;
@@ -68,7 +39,7 @@
 		manageOpen = true;
 	});
 	const resolution = $derived(
-		resolveConsentPrompt({ snapshot, tools, registryVersion: registry?.registryVersion })
+		resolveConsentPrompt({ snapshot, tools, registryVersion: consent.registry?.registryVersion })
 	);
 	const open = $derived(read && !decided && resolution.shouldPrompt);
 
@@ -76,8 +47,7 @@
 	$effect(() => {
 		const reconciled = resolution.reconciledSnapshot;
 		if (!read || !reconciled) return;
-		writeConsentSnapshot(reconciled);
-		snapshot = reconciled;
+		consent.keep(reconciled);
 	});
 
 	// 🔴 R-4: a member's decision also reaches the server's record (`POST /consent/record`); a guest's stays here until a
@@ -86,10 +56,7 @@
 
 	/** Keeps the decision in the browser so the card never asks again for this registry version. */
 	function decide(choices: Record<string, boolean>) {
-		if (!registry) return;
-		const next = { registryVersion: registry.registryVersion, choices };
-		writeConsentSnapshot(next);
-		snapshot = next;
+		if (!consent.save(choices)) return;
 		decided = true;
 		manageOpen = false;
 	}

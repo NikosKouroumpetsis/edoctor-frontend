@@ -10,7 +10,7 @@ import type { AppointmentDetailRead } from '$modules/appointments/ui/detail';
 import type { RatingInvitationRead } from './hooks/use-invitation.svelte';
 
 /**
- * Screen 54 «Αξιολόγηση επίσκεψης» (record §10, U-138; P-W4 §4.5): the invitation the address names, the visit it rates,
+ * Screen 54 «Κριτική επίσκεψης» (record §10, U-138; P-W4 §4.5): the invitation the address names, the visit it rates,
  * its doctor, and what only the screen may compose — the name the review will carry and its preview (the doctor's
  * profile, D-W4-25 / D-W4-26), «Πώς λειτουργούν οι κριτικές» (D-W4-24) and the review policy.
  */

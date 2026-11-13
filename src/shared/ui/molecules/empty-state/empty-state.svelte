@@ -27,6 +27,8 @@
 			titleAs?: string;
 			/** Names the column (`plain`) or the card around it (`framed`). */
 			testId?: string;
+			/** Names the one way on (its button or its link), for a test that presses it. */
+			actionTestId?: string;
 		};
 </script>
 
@@ -46,6 +48,7 @@
 		variant = 'plain',
 		titleAs = 'p',
 		testId,
+		actionTestId,
 		class: className,
 		...restProps
 	}: EmptyStateProps = $props();
@@ -90,6 +93,7 @@
 				tone={actionTone}
 				href={actionHref}
 				onclick={actionHref ? undefined : () => onActionPress?.()}
+				data-testid={actionTestId}
 			/>
 		{/if}
 	</div>

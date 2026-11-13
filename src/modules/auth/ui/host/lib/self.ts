@@ -1,16 +1,13 @@
 import type { PatientSelfFacts } from '$modules/auth/api/session';
-import { maskEmail } from '$modules/auth/lib/masks';
 
-/** The session as the page keeps it (`GET /patient/me`, mapped): the sign-in address only as its mask. */
-export type SessionFacts =
-	| Extract<PatientSelfFacts, { signedIn: false }>
-	| (Omit<Extract<PatientSelfFacts, { signedIn: true }>, 'loginEmail'> & {
-			maskedLoginEmail: string | null;
-	  });
+/** The session as the page keeps it (`GET /patient/me`, mapped): the sign-in address and mobile only as the server's masks. */
+export type SessionFacts = PatientSelfFacts;
 
-/** 🔴 U-65.6: what goes in the page's memory of the read, so the address itself stays nowhere once it is answered. */
+/**
+ * 🔴 U-168 / D-W45-10 (U-65.6): what goes in the page's memory of the read. The server sends the sign-in address already
+ * hidden (`loginEmailMasked`) and never the whole one, so nothing is hidden HERE any more: the page keeps exactly what
+ * came — a guest as a guest, a member with the server's own masks.
+ */
 export function toSessionFacts(facts: PatientSelfFacts): SessionFacts {
-	if (!facts.signedIn) return facts;
-	const { loginEmail, ...rest } = facts;
-	return { ...rest, maskedLoginEmail: loginEmail ? maskEmail(loginEmail) : null };
+	return facts;
 }

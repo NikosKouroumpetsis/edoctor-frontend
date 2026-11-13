@@ -95,7 +95,7 @@
 					description: 'Η δική μας σειρά.',
 					icon: sparkles
 				},
-				{ value: 'rating', title: 'Αξιολόγηση', icon: star },
+				{ value: 'rating', title: 'Βαθμολογία', icon: star },
 				{ value: 'distance', title: 'Απόσταση', icon: navigate }
 			]}
 		/>

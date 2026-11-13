@@ -180,6 +180,64 @@ Wave 4.0 (the patient's appointments, screens 50–55) adds:
   (`bg-foreground`), its words `text-card`; the inbox's chips keep `outline` (U-131.4), both held by
   `tests/architecture/prototype-looks.test.ts`.
 
+Wave 4.5 (the account, screens 56–63) adds:
+
+- `lib/notification-preferences` (card w45-w3, screen 60): the account's notification centre
+  (`GET` / `PUT /notification/preferences/me`) has two real consumers in two modules — «Ειδοποιήσεις» of the account's
+  settings (`modules/notifications`) and «Ρυθμίσεις μηνυμάτων» of the inbox (`modules/messages`) — and a module never
+  imports another, so its ONE read, ONE write and ONE cache key live here (the promotion rule's first case):
+  `notificationPreferencesKey`, `getNotificationPreferences(signal)` (the `GET`, for a module's `queryFn`),
+  `saveNotificationPreferences(client, cells)` (the patch, its answer written under the key, marked personal first)
+  and `previewNotificationPreferences(client, cells)` (the cells in their new place before the answer, and the way
+  back). Each module's `api/` builds its OWN query on that key and that read — its `select`, its `enabled` / `retry`,
+  and 🔴 the sign-out's mark said in its own file (`meta: personalQueryMeta`; the inbox's guard
+  `tests/architecture/messages-privacy.test.ts` reads it there). The server's answer reaches only a module's `api/`,
+  which maps it: no wire type leaves an `api/` (W-4).
+- `templates/split-view`'s `widths="menu"` and `centred` (🔴 U-167, D-W45-08, screen 57): `menu` is a menu of sections
+  on the left, 340 from 950 and 420 from 1128 (`grid-menu`), which the template also insets from 950 (32 over, 24 a
+  side, 48 under; 40 over and 48 a side from 1128) — a list of the other widths insets itself, as before. `centred`
+  puts what the right column shows in a box of at most 640 (`split-solo`) in the MIDDLE of that column, inside the
+  column's own inset (32 over, 40 from 1128; 48 a side; 64 under) — never against the line between the columns. The
+  default is `false`: the messages fill their column (Airbnb's), and the appointments and the relatives (wave 4.0) keep
+  their own widths — 720 the appointment, 656 / 688 / 704 a change screen — so they centre their own box in the column
+  (`mx-auto`, 🔴 U-167 · D-W45-56, card w45-w9) instead of taking the template's 640. A caller's content draws its own
+  sides only below 950 (`split:p-0`).
+- `molecules/editable-row` (`EditableRow`, D-W45-09): a row that is edited in its place. Closed: `title` (15 / 600,
+  `titleAs` `h2` by default) over `value` (14 muted, optional) and the link `actionLabel` (14 / 600 underlined) on the
+  right, a line under it, 20 over and under. Open (`bind:open`, `onOpenChange`): the title, the link `closeLabel`, an
+  optional `help` line and the caller's `children` (fields, choices, a button), which come in with a short CSS move
+  that always shows (U-12). `dimmed` — another row of the list is open — fades it and takes its press away
+  (`aria-disabled`). The focus goes to the first thing in the content when it opens and back to the action's link
+  when it closes, however it closed (its link, Escape, the caller after a choice). Every word is the caller's and a
+  text node (U-65.6); no colour under the pointer (U-100). Read by screen 61 («Γλώσσα και θέμα»); the 58 and the 59
+  put their fields and «Αποθήκευση» in it.
+- `icons/ionicon`: `shield-outline` joins the glyphs (the application's «Σύνδεση και ασφάλεια»), extracted from the
+  same font by the same script as the others; so does `log-out-outline` (screen 56's «Αποσύνδεση» row), and
+  `laptop-outline` and `tablet-portrait-outline` (screen 59's devices, beside `phone-portrait-outline`).
+- `state/consent` (`ConsentDecision`, card w45-w4, screen 62): the tracking decision this browser keeps, as the page
+  tree reads it — `snapshot`, `loaded`, `load()` (the storage, once, in the browser) and `save(next)`. One per tree
+  (context, set by the frame beside `SiteDialogs`; SSR-safe: the server knows no decision). It exists because the
+  cookie card (the frame) and the page «Εργαλεία τρίτων και cookies» (a page under `/profile`) are two surfaces of
+  one decision in two places of the tree; `storage/consent-storage` stays the one reader and writer of the storage.
+- `state/notification-badge` (`NotificationBadge`, card w45-w7, screen 63; D-W45-17): «a notification is new» as the
+  page tree reads it — `count`, `hasNew`. One per tree (context, set by the notifications module's `unread-host` in
+  the root layout): the module owns the one read, the frame (the menu's row, the pill's dot) and the «Προφίλ»'s bell
+  only draw it. The `InboxBadge` pattern, beside it — the two dots are told apart by whoever draws them.
+- `ui/molecules/empty-state`: `actionTestId` (card w45-w7) names the state's one way on — its button or its link —
+  for a test that presses it; `testId` still names the column.
+- `src/app.d.ts` (card w45-w7): an overload `resolve(route: Pathname)` of `$app/paths`. TypeScript relates a value
+  typed as the WHOLE `Pathname` union to SvelteKit's `resolve` (one argument list per route) only while the site has
+  at most 25 pathnames; `/notifications` was the 26th, and every `resolve(localizeHref(…) as Pathname)` stopped
+  compiling. The overload says what those calls mean (a pathname as it stands, no parameters). Types only — remove it
+  if SvelteKit's own signature comes to accept the union.
+- `state/session`: `SessionMember` carries `lastName`, `maskedLoginEmail`, `maskedLoginPhone` (screen 56, 🔴 U-168:
+  the server's masks, never a whole value) and `maskedAmka`, `maskedAfm` (screen 58, the same way);
+  `Session.accountDeleted()` and the source's `deleted` (screen 62, D-W45-30) end the session of an account that was
+  deleted, with no sign-out of their own. `Session.retryRead()` returns a promise that resolves once the source's
+  read is back (the source's `retry` may return one) and never rejects: a page that changed the person's own details
+  waits for it before it shows them again (screen 58).
+- `primitives/inline-link-text`: `tail` — what ends the sentence after the link (its full stop), set against the link.
+
 Everything under `src/shared/ui` is generic (U-02.1, guarded by
 `tests/architecture/shared-ui-generic.test.ts`): words, hrefs and the locale
 come from the caller as props, a Paraglide key is only `common_*` or the

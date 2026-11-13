@@ -17,7 +17,7 @@
 		card: AppointmentCard;
 		/** The appointment's page (already resolved and localized). */
 		href: string;
-		/** «Αξιολογήστε την επίσκεψη»'s form, only while an invitation is open (P-B4 §13.3.4). */
+		/** «Γράψτε κριτική για την επίσκεψη»'s form, only while an invitation is open (P-B4 §13.3.4). */
 		rateHref: string | null;
 		rateLabel: string;
 		/** The one open beside the list (from 950 its border is dark). */
@@ -33,7 +33,7 @@
 <!-- Record §6.1 (U-134.3): screen 30's card — the line-2 border, the 12 corner, 16 inside — the doctor's photo 64 (8
      corner; the silhouette when it does not load, D-W4-68) first, then the status pill, the day and the time (16/600; below 744 the time on its own line, never a dot
      left hanging and a day too long for its box wraps, Σ2), the doctor (14/500), «specialty · service» and the address (13 muted), «Για: …» for a relative, and
-     «Αξιολογήστε την επίσκεψη» with its own 48 target. The whole card opens the appointment (its link stretches over it);
+     «Γράψτε κριτική για την επίσκεψη» with its own 48 target. The whole card opens the appointment (its link stretches over it);
      the rating's link lies above that. From 950 the open one has the dark border (`appt.css:84`); no colour, no shadow
      under the pointer (U-100). Every word is a text node (U-65.6). -->
 <li

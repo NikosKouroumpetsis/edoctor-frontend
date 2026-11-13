@@ -465,7 +465,7 @@ describe('screen 51 · «Το ραντεβού» (record §7.2, U-135)', () => {
 		expect(screen.queryByTestId('appointment-directions')).toBeNull();
 	});
 
-	it('h1 · U-135.5: after the visit «Πώς ήταν η επίσκεψη;» with «Αξιολογήστε την επίσκεψη» while an invitation is open; «Μήνυμα στον γιατρό» beside «Κλείστε ξανά ραντεβού» (prototype `appt.js:268`, review w4-w4 R1 MAJOR-2), never «Κλήση ιατρείου»; only the length under the day', () => {
+	it('h1 · U-135.5: after the visit «Πώς ήταν η επίσκεψη;» with «Γράψτε κριτική για την επίσκεψη» while an invitation is open; «Μήνυμα στον γιατρό» beside «Κλείστε ξανά ραντεβού» (prototype `appt.js:268`, review w4-w4 R1 MAJOR-2), never «Κλήση ιατρείου»; only the length under the day', () => {
 		draw({
 			read: readOf(
 				appointment(
@@ -505,7 +505,7 @@ describe('screen 51 · «Το ραντεβού» (record §7.2, U-135)', () => {
 	// Rewrites the row's half of the first U-154 guard (`tablet:` alone, the row from 744 whatever the band's width): U-156
 	// (card w4-w14, bug #10) makes it `tablet:row-wide:` — at 950 the band sits in the narrow right column (434 wide, its
 	// sentence in three lines). What U-154 decided (under 744 the button over the whole width) is asserted unchanged.
-	it('h1b · U-154: under 744 «Αξιολογήστε την επίσκεψη» takes the band’s whole width (stretched by the column, never `self-start`), its label centred; in the row (U-156: from 744 and a band as wide as `row-wide`) the button at its own width in the middle, as before', () => {
+	it('h1b · U-154: under 744 «Γράψτε κριτική για την επίσκεψη» takes the band’s whole width (stretched by the column, never `self-start`), its label centred; in the row (U-156: from 744 and a band as wide as `row-wide`) the button at its own width in the middle, as before', () => {
 		draw({
 			read: readOf(
 				appointment(
@@ -537,7 +537,7 @@ describe('screen 51 · «Το ραντεβού» (record §7.2, U-135)', () => {
 		}
 		expect(rate).toHaveClass('tablet:row-wide:shrink-0', 'tablet:row-wide:self-center');
 		expect(rate).toHaveClass('px-5', 'py-3', 'min-h-control-md');
-		const label = within(rate).getByText('Αξιολογήστε την επίσκεψη');
+		const label = within(rate).getByText('Γράψτε κριτική για την επίσκεψη');
 		expect(label).toHaveClass('text-center', 'text-body-sm');
 		expect(rate.childElementCount).toBe(1);
 	});
@@ -782,6 +782,22 @@ describe('screen 51 · «Το ραντεβού» (record §7.2, U-135)', () => {
 			'href',
 			'/appointments?tab=history'
 		);
+	});
+
+	// Card w45-w9 (D-W45-56): rewrites the 4.0's place of the right column — `split:mx-0` and the 80 on the left from 1440.
+	it('🔴 U-167: from 950 the appointment sits in the MIDDLE of the right column — centred at every width, at most 720, the same inset on both sides; (negative) never against the list, never an inset of one side alone', () => {
+		draw();
+		const page = screen.getByTestId('appointment-page');
+		expect(page).toHaveClass(
+			'mx-auto',
+			'w-full',
+			'split:max-w-document-wide',
+			'split:px-pane-inset',
+			'laptop:px-pane-inset-lg'
+		);
+		const classes = page.className.split(/\s+/u);
+		expect(classes.filter((name) => /(?:^|:)m[xlr]-0$/u.test(name))).toEqual([]);
+		expect(classes.filter((name) => /(?:^|:)p[lr]-/u.test(name))).toEqual([]);
 	});
 
 	it('🔴 U-65.6: what a person or the server wrote stays words — a note with markup is drawn as text', () => {

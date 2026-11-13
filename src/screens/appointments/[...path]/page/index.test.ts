@@ -465,7 +465,7 @@ describe('screens/appointments/[...path] · screens 50 + 51 composed', () => {
 		);
 	});
 
-	it('W4-9 · P-B4 §13.3.4 (negative): no `ratingId` reads no review — never a list of reviews per appointment; an open invitation lights «Πώς ήταν η επίσκεψη;» and the card’s «Αξιολογήστε»', async () => {
+	it('W4-9 · P-B4 §13.3.4 (negative): no `ratingId` reads no review — never a list of reviews per appointment; an open invitation lights «Πώς ήταν η επίσκεψη;» and the card’s «Γράψτε κριτική»', async () => {
 		const invited = {
 			status: 'completed',
 			startTime: '2026-10-22T07:00:00.000Z',
@@ -727,6 +727,13 @@ describe('screens/appointments/[...path] · 🔴 Σ1 (live check w4-live-web): t
 		).not.toThrow();
 		await screen.findByTestId('appointment-when');
 		expect(screen.getByTestId('appointments-page')).toHaveAttribute('data-view', 'appointment');
+		// 🔴 D-W45-57 α (card w45-w9): a pushed page has no site's bar below 744 — the whole screen's height there.
+		expect(screen.getByTestId('appointments-page')).toHaveClass(
+			'min-h-dvh',
+			'tablet:min-h-page',
+			'split:min-h-0'
+		);
+		expect(screen.getByTestId('appointments-page')).not.toHaveClass('min-h-page');
 		expect(document.title).toBe('Το ραντεβού μου | eDoctor');
 		await waitFor(() =>
 			expect(screen.getByTestId('appointment-doctor')).toHaveAttribute('href', '/doctors/dr-nikos')

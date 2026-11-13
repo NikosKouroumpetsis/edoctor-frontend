@@ -1,3 +1,5 @@
+import { m } from '$paraglide/messages.js';
+import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type { ConsentSnapshot } from '$shared/storage/consent-storage';
 import type {
 	ConsentCategory,
@@ -87,4 +89,44 @@ function isSameChoices(left: Record<string, boolean>, right: Record<string, bool
 		leftKeys.length === Object.keys(right).length &&
 		leftKeys.every((key) => left[key] === right[key])
 	);
+}
+
+const categoryTitles: Record<ConsentCategory, (options: { locale: SupportedLocale }) => string> = {
+	essential: (options) => m.consent_category_essential_title({}, options),
+	functional: (options) => m.consent_category_functional_title({}, options),
+	analytics: (options) => m.consent_category_analytics_title({}, options),
+	marketing: (options) => m.consent_category_marketing_title({}, options)
+};
+
+/**
+ * The optional categories the stored decision has OPEN, in the catalogue's order: a category is open when at least one
+ * of its web tools is allowed. No decision, or a tool the catalogue no longer has, opens nothing.
+ */
+export function openConsentCategories(
+	tools: readonly ConsentToolFacts[],
+	snapshot: ConsentSnapshot | null
+): ConsentCategory[] {
+	return consentCategoryOrder.filter(
+		(category) =>
+			category !== 'essential' &&
+			tools.some((tool) => tool.category === category && snapshot?.choices[tool.id] === true)
+	);
+}
+
+/**
+ * 🔴 D-W45-28 (wave 4.5, screen 62): what the row «Εργαλεία τρίτων και cookies» of «Απόρρητο» says is open — «Μόνο τα
+ * απαραίτητα» with no decision or every optional category closed, else «Απαραίτητα, » and the names of the open
+ * categories in the catalogue's order.
+ */
+export function consentSummaryLine(
+	tools: readonly ConsentToolFacts[],
+	snapshot: ConsentSnapshot | null,
+	locale: SupportedLocale
+): string {
+	const names = openConsentCategories(tools, snapshot).map((category) =>
+		categoryTitles[category]({ locale })
+	);
+	return names.length === 0
+		? m.consent_tools_summary_essential_only({}, { locale })
+		: m.consent_tools_summary_some({ names: names.join(', ') }, { locale });
 }

@@ -587,7 +587,7 @@ export function appointmentCancelLinkLabel(
 		: m.appointments_detail_cancel({}, { locale });
 }
 
-/** P-B4 §13.3.4: «Αξιολογήστε την επίσκεψη» (50, 51) only with an open invitation; the form's address is its id. */
+/** P-B4 §13.3.4: «Γράψτε κριτική για την επίσκεψη» (50, 51) only with an open invitation; the form's address is its id. */
 export function appointmentRateInvitationId(appointment: AppointmentFacts): string | null {
 	return appointment.ratingInvitation?.invitationId ?? null;
 }
@@ -602,7 +602,7 @@ export type AppointmentDone =
 /**
  * U-136.6 · the green notice on the appointment after a save (record §8.2, screen 54): «Η ώρα άλλαξε.» with «Ήταν …»
  * and — only with an email (D-W4-11) — «Σας στείλαμε email με τη νέα ώρα.»; «Ο επισκέπτης άλλαξε.» with whom it is for
- * now; the note saved or removed; «Η αξιολόγηση υποβλήθηκε.» (D-W4-12: no promise of an email).
+ * now; the note saved or removed; «Η κριτική υποβλήθηκε.» (D-W4-12: no promise of an email).
  */
 export function buildAppointmentDoneNotice(
 	done: AppointmentDone,

@@ -271,9 +271,13 @@ export function relativeChangeFailureMessage(
 		: bookingRelativeFailureMessage(failure, locale);
 }
 
+/** The two numbers of a relative that «Αφαίρεση» may take off (D-W45-14). */
+export type RelativeIdField = 'amka' | 'afm';
+
 /**
  * Screen 55's «Επεξεργασία συγγενή» starts from what is on file (the application's `toRelativeValues`): the names, the
- * relationship and gender as spelled, every optional field blank when none.
+ * relationship and gender as spelled, the email blank when none. 🔴 U-168 / D-W45-14: the ΑΜΚΑ and the ΑΦΜ open EMPTY
+ * whatever is on file — the page has only the server's mask of them, and a mask is never a field's value.
  */
 export function relativeFormValues(relative: RelativeFacts): BookingRelativeValues {
 	return {
@@ -282,8 +286,8 @@ export function relativeFormValues(relative: RelativeFacts): BookingRelativeValu
 		relationship: relative.relationship,
 		gender: relative.gender,
 		email: relative.email ?? '',
-		amka: relative.amka ?? '',
-		afm: relative.afm ?? ''
+		amka: '',
+		afm: ''
 	};
 }
 
@@ -312,12 +316,15 @@ export function relativePhoneValue(
 /**
  * Screen 55's change (P-W4 §4.6, D-78): ONLY what differs from what is on file travels — the names trimmed and cleaned,
  * the two enums when they are the contract's, an optional field emptied as `null` (that is how the server clears it).
+ * 🔴 D-W45-14 · the ΑΜΚΑ and the ΑΦΜ: an EMPTY field is «untouched» (the page never has the number to compare), a number
+ * typed travels, and `null` goes only for one «Αφαίρεση» was pressed for (`removed`) with nothing typed after it.
  * `{}` when nothing differs (no write is needed); `null` when the form cannot be whole.
  */
 export function toRelativeUpdate(
 	values: BookingRelativeValues,
 	phone: BookingRelativePhone,
-	stored: RelativeFacts
+	stored: RelativeFacts,
+	removed: readonly RelativeIdField[] = []
 ): RelativeUpdate | null {
 	const whole = toBookingRelativeInput(values, phone);
 	if (!whole) return null;
@@ -328,7 +335,9 @@ export function toRelativeUpdate(
 	if (whole.gender !== stored.gender) update.gender = whole.gender;
 	if (whole.phone !== stored.phone) update.phone = whole.phone;
 	if (whole.email !== stored.email) update.email = whole.email;
-	if (whole.amka !== stored.amka) update.amka = whole.amka;
-	if (whole.afm !== stored.afm) update.afm = whole.afm;
+	for (const id of ['amka', 'afm'] as const) {
+		if (whole[id] !== null) update[id] = whole[id];
+		else if (removed.includes(id)) update[id] = null;
+	}
 	return update;
 }

@@ -12,6 +12,7 @@ import { projectRoot } from '../../../../../../tests/architecture/source-scan';
 import { isExploreFlow } from '../lib/frame';
 import SiteFrame from './index.svelte';
 import { InboxBadge } from '$shared/state/inbox-badge';
+import { NotificationBadge } from '$shared/state/notification-badge';
 import SessionHarness from './session.harness.svelte';
 
 // The consent card reads the registry; an empty one never asks, so the card stays out of these frame tests.
@@ -238,7 +239,11 @@ describe('SiteFrame (eDoctor frame on the generic shell)', () => {
 		expect(screen.getByTestId('footer-from-tablet')).toHaveClass('hidden', 'tablet:block');
 	});
 
-	it('U-80.1 Ε3: a member’s menu has no «Λογαριασμός», its pill the initial; «Αποσύνδεση» signs out', async () => {
+	// Rewrites «U-80.1 Ε3: a member’s menu has no «Λογαριασμός»» by D-W45-21 (wave 4.5, screen 56): the fifth row is
+	// «Ρυθμίσεις λογαριασμού», a link to the page of screen 57 — no entry «Λογαριασμός» of its own, as before.
+	// (Card w45-w7, D-W45-17: «Ειδοποιήσεις» now stands before «Οι συγγενείς μου», under the rule that was that row's;
+	// every expectation below is the one it was, one place further down.)
+	it('U-80.1 Ε3 · 🔴 D-W45-21: a member’s menu — «Ρυθμίσεις λογαριασμού» a link to its page, no window — its pill the initial; «Αποσύνδεση» signs out', async () => {
 		const user = userEvent.setup();
 		const session = memberSession();
 		const signOut = vi.spyOn(session, 'signOut');
@@ -250,22 +255,26 @@ describe('SiteFrame (eDoctor frame on the generic shell)', () => {
 			'Μηνύματα',
 			'Τα ραντεβού μου',
 			'Αγαπημένα',
+			'Ειδοποιήσεις',
 			'Οι συγγενείς μου',
-			'Ρυθμίσεις',
+			'Ρυθμίσεις λογαριασμού',
 			'Κέντρο βοήθειας',
 			'Είστε γιατρός; Γίνετε μέλος και δεχτείτε ραντεβού online.',
 			'Αποσύνδεση'
 		]);
+		expect(items[5]).toHaveAttribute('href', '/profile/account-settings');
+		expect(items[5].tagName).toBe('A');
+		expect(items[5]).not.toHaveClass('font-semibold');
 		expect(items[0]).toHaveAttribute('href', '/messages');
 		// U-134.6 / P-W4 Σ-13 (wave 4.0): «Τα ραντεβού μου» bold beside «Μηνύματα»; «Οι συγγενείς μου» under the rule.
 		expect(items[1]).toHaveAttribute('href', '/appointments');
 		expect(items[1]).toHaveClass('font-semibold');
 		expect(items[2]).toHaveAttribute('href', '/favorites');
-		expect(items[3]).toHaveAttribute('href', '/profile/relatives');
-		expect(items[3]).not.toHaveClass('font-semibold');
+		expect(items[4]).toHaveAttribute('href', '/profile/relatives');
+		expect(items[4]).not.toHaveClass('font-semibold');
 		expect(items[0]).toHaveClass('font-semibold');
 		expect(menu.querySelectorAll('[data-slot="dropdown-menu-separator"]')).toHaveLength(3);
-		await user.click(items[7]);
+		await user.click(items[8]);
 		expect(signOut).toHaveBeenCalledTimes(1);
 	});
 
@@ -317,6 +326,128 @@ describe('SiteFrame (eDoctor frame on the generic shell)', () => {
 		});
 		expect(capsule().querySelector('[data-slot="bottom-nav-badge"]')).toBeNull();
 		expect(screen.queryByTestId('header-account-dot')).toBeNull();
+	});
+
+	it('🔴 D-W45-17: «Ειδοποιήσεις» of a member’s menu — a link to the list, not bold, the first row under the rule, named for a test; with nothing new no dot on it or on the pill', async () => {
+		const user = userEvent.setup();
+		render(SessionHarness, {
+			props: {
+				session: memberSession(),
+				notifications: new NotificationBadge({ count: () => 0 }),
+				children
+			}
+		});
+		expect(screen.queryByTestId('header-account-dot')).toBeNull();
+		expect(screen.getByTestId('header-account-menu')).toHaveAccessibleName('Μενού και προφίλ');
+		const menu = await openMenu(user);
+		const row = within(menu).getByTestId('header-account-entry-notifications');
+		expect(row.tagName).toBe('A');
+		expect(row).toHaveAttribute('href', '/notifications');
+		expect(row).toHaveAccessibleName('Ειδοποιήσεις');
+		expect(row).not.toHaveClass('font-semibold');
+		expect(row).toHaveClass('min-h-touch');
+		expect(row.querySelector('span')).toBeNull();
+		expect(row.previousElementSibling).toHaveAttribute('data-slot', 'dropdown-menu-separator');
+		expect(row.nextElementSibling).toHaveAttribute('href', '/profile/relatives');
+		expect(within(menu).queryByTestId('header-account-entry-notifications-dot')).toBeNull();
+	});
+
+	it('🔴 D-W45-17: a new notification — the dot on «Ειδοποιήσεις», the row said as «Ειδοποιήσεις, νέες», and the pill’s dot lights for it too (its name says why); «Μηνύματα» has no mark of its own', async () => {
+		const user = userEvent.setup();
+		render(SessionHarness, {
+			props: {
+				session: memberSession(),
+				inbox: new InboxBadge({ count: () => 0 }),
+				notifications: new NotificationBadge({ count: () => 2 }),
+				children
+			}
+		});
+		expect(screen.getByTestId('header-account-dot')).toBeInTheDocument();
+		expect(screen.getByTestId('header-account-menu')).toHaveAccessibleName(
+			'Μενού και προφίλ, νέες ειδοποιήσεις'
+		);
+		// The capsule's badge is the messages' alone (U-84 Π5): a notification puts nothing on it.
+		expect(capsule().querySelector('[data-slot="bottom-nav-badge"]')).toBeNull();
+		const menu = await openMenu(user);
+		const row = within(menu).getByTestId('header-account-entry-notifications');
+		expect(row).toHaveAccessibleName('Ειδοποιήσεις, νέες');
+		expect(row).toHaveTextContent(/^\s*Ειδοποιήσεις\s*$/u);
+		expect(row).not.toHaveClass('font-semibold');
+		const dot = within(menu).getByTestId('header-account-entry-notifications-dot');
+		expect(dot).toHaveAttribute('aria-hidden', 'true');
+		expect(dot).toHaveClass('size-2', 'rounded-full', 'bg-accent');
+		expect(within(menu).queryByTestId('header-account-entry-dot')).toBeNull();
+		expect(within(menu).queryByRole('img', { name: 'Νέα μηνύματα' })).toBeNull();
+	});
+
+	it('🔴 U-84 Π5 μένει πράσινος · D-W45-17: both at once — each row its own dot, the pill ONE dot whose name says both; in English too', async () => {
+		const user = userEvent.setup();
+		const both = render(SessionHarness, {
+			props: {
+				session: memberSession(),
+				inbox: new InboxBadge({ count: () => 1 }),
+				notifications: new NotificationBadge({ count: () => 1 }),
+				children
+			}
+		});
+		expect(screen.getAllByTestId('header-account-dot')).toHaveLength(1);
+		expect(screen.getByTestId('header-account-menu')).toHaveAccessibleName(
+			'Μενού και προφίλ, νέα μηνύματα και νέες ειδοποιήσεις'
+		);
+		const menu = await openMenu(user);
+		expect(within(menu).getByRole('img', { name: 'Νέα μηνύματα' })).toBeInTheDocument();
+		expect(within(menu).getByTestId('header-account-entry-dot')).toBeInTheDocument();
+		expect(within(menu).getByTestId('header-account-entry-notifications-dot')).toBeInTheDocument();
+		expect(within(menu).getByTestId('header-account-entry-messages')).toHaveClass('font-semibold');
+		both.unmount();
+
+		visit('/en/articles');
+		render(SessionHarness, {
+			props: {
+				session: memberSession(),
+				notifications: new NotificationBadge({ count: () => 3 }),
+				children
+			}
+		});
+		expect(screen.getByTestId('header-account-menu')).toHaveAccessibleName(
+			'Menu and profile, new notifications'
+		);
+		const english = await openMenu(user);
+		expect(within(english).getByTestId('header-account-entry-notifications')).toHaveAttribute(
+			'href',
+			'/en/notifications'
+		);
+		expect(within(english).getByTestId('header-account-entry-notifications')).toHaveAccessibleName(
+			'Notifications, new'
+		);
+	});
+
+	it('🔴 D-W45-17 (negative): a guest has no «Ειδοποιήσεις» and no dot, whatever the badge says', async () => {
+		const user = userEvent.setup();
+		render(SessionHarness, {
+			props: {
+				session: guestSession(),
+				notifications: new NotificationBadge({ count: () => 5 }),
+				children
+			}
+		});
+		expect(screen.queryByTestId('header-account-dot')).toBeNull();
+		expect(screen.getByTestId('header-account-menu')).toHaveAccessibleName('Μενού και προφίλ');
+		const menu = await openMenu(user);
+		expect(within(menu).queryByTestId('header-account-entry-notifications')).toBeNull();
+		expect(menu).not.toHaveTextContent(/Ειδοποιήσεις/u);
+	});
+
+	it('D-W45-49: «Ειδοποιήσεις», the list — no capsule and no footer at `/notifications`, in English too', () => {
+		visit('/notifications');
+		const greek = renderFrame();
+		expect(screen.queryByRole('navigation', { name: 'Πλοήγηση' })).toBeNull();
+		expect(footer()).toBeNull();
+		greek.unmount();
+		visit('/en/notifications?filter=previous');
+		renderFrame();
+		expect(document.querySelector('[data-slot="bottom-nav"]')).toBeNull();
+		expect(footer()).toBeNull();
 	});
 
 	it('U-84 Π1, Π2: a conversation: no capsule and no footer; the list: its capsule with «Μηνύματα» current, no footer', () => {
@@ -514,6 +645,18 @@ describe('SiteFrame (eDoctor frame on the generic shell)', () => {
 			'/en/account-deletion'
 		);
 		expect(screen.getByTestId('footer-language')).toHaveTextContent('English (EN)');
+	});
+
+	it('🔴 D-W45-57 β (card w45-w9): `<html lang>` follows the page’s language without a reload — English under /en, Greek again at /; the frame is the one place that writes it', async () => {
+		document.documentElement.lang = 'el';
+		visit('/en/profile/account-settings/language');
+		const english = renderFrame();
+		await waitFor(() => expect(document.documentElement).toHaveAttribute('lang', 'en'));
+		expect(document.documentElement).toHaveAttribute('dir', 'ltr');
+		english.unmount();
+		visit('/profile/account-settings/language');
+		renderFrame();
+		await waitFor(() => expect(document.documentElement).toHaveAttribute('lang', 'el'));
 	});
 
 	it('§7.2 (U-24, D3): the results end without the footer, in Greek and in English; every other page keeps it', () => {

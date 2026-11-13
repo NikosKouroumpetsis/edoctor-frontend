@@ -18,6 +18,7 @@ export {
 	type BookingRelativeFieldName,
 	type BookingRelativePhone,
 	type BookingRelativeValues,
+	type RelativeIdField,
 	type RelativePhoneSplitter
 } from './form';
 export {

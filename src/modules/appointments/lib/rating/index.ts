@@ -16,9 +16,9 @@ import { RATING_ASPECTS, RATING_COMMENT_MAX_LENGTH } from '$modules/appointments
 import { appointmentDateLabel } from '$modules/appointments/lib/when';
 
 /*
- * Screen 54 «Αξιολόγηση επίσκεψης» and screen 51's «Η κριτική σας» in words and rules (record §10.2, U-138, P-W4 §4.5).
- * 🔴 U-138.6: «αξιολόγηση» is the act (the form, its button, its notice), «κριτική» what is published (the card, the
- * preview, the grade). The press of a star is the shared `StarInput`'s (`toggleStar`, review w4-w0 R1 NIT-2): a value
+ * Screen 54 «Κριτική επίσκεψης» and screen 51's «Η κριτική σας» in words and rules (record §10.2, U-138, P-W4 §4.5).
+ * 🔴 U-173 (takes U-138.6's place): ONE word, «κριτική» — the form, its button and its notice as what is published (the
+ * card, the preview, the grade). The press of a star is the shared `StarInput`'s (`toggleStar`, review w4-w0 R1 NIT-2): a value
  * here is 0 (none) or 1–10, one point a half star (U-49).
  */
 
@@ -272,7 +272,7 @@ export type RatingOutcome =
 /**
  * A refused read or submit in the screen's terms (P-W4 §4.5): another account's invitation ⇒ «Η πρόσκληση δεν είναι
  * διαθέσιμη»; a blocker ⇒ its words (the form locks); a second review ⇒ «already rated»; the session ⇒ the sign-in;
- * too many writes ⇒ «Πολλές προσπάθειες…»; the rest ⇒ «Η αξιολόγηση δεν υποβλήθηκε…», the values kept.
+ * too many writes ⇒ «Πολλές προσπάθειες…»; the rest ⇒ «Η κριτική δεν υποβλήθηκε…», the values kept.
  */
 export function readRatingOutcome(
 	failure: RatingFailureFacts,
@@ -301,7 +301,7 @@ export function readRatingOutcome(
 	}
 }
 
-/** «Μπορείτε να αξιολογήσετε την επίσκεψη έως 21 Δεκεμβρίου 2026.» (record §10.2); `null` without the instant. */
+/** «Μπορείτε να γράψετε κριτική για την επίσκεψη έως 21 Δεκεμβρίου 2026.» (record §10.2); `null` without the instant. */
 export function ratingUntilLine(
 	expiresAt: string | null | undefined,
 	locale: SupportedLocale

@@ -88,7 +88,7 @@ describe('«Η κριτική σας» (U-138.5, U-138.6)', () => {
 		expect(screen.queryByTestId('appointment-review-reply')).toBeNull();
 	});
 
-	it('refused: neutral «Δεν δημοσιεύτηκε» with «Πολιτική κριτικών»; 🔴 U-138.6 «κριτική», never «αξιολόγηση»', () => {
+	it('refused: neutral «Δεν δημοσιεύτηκε» with «Πολιτική κριτικών»; 🔴 U-173 «κριτική», never the old word', () => {
 		draw({ ...review, moderation: 'REJECTED', reply: null });
 		expect(screen.getByTestId('appointment-review-status')).toHaveAttribute('data-tone', 'muted');
 		expect(screen.getByTestId('appointment-review-policy')).toHaveAttribute(
@@ -96,7 +96,7 @@ describe('«Η κριτική σας» (U-138.5, U-138.6)', () => {
 			'/legal/review-policy'
 		);
 		expect(screen.queryByTestId('appointment-review-profile')).toBeNull();
-		expect(screen.getByTestId('appointment-review')).not.toHaveTextContent(/αξιολόγ/iu);
+		expect(screen.getByTestId('appointment-review')).not.toHaveTextContent(/ξιολ[οό]γ/iu);
 	});
 
 	it('🔴 U-65.6 (negative): what the patient or the doctor wrote stays words — markup is drawn as text; a doctor nobody may see leaves no way to the profile', () => {

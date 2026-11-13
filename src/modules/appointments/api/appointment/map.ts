@@ -74,7 +74,7 @@ const movesLeft = (value: unknown): number | null =>
 
 /**
  * D-W4-01 (P-B4 §13.1, §13.3.4): the visit's open invitation, only whole — its id and the instant it closes; a broken
- * one is none, so «Αξιολογήστε την επίσκεψη» never leads to a form the server cannot name.
+ * one is none, so «Γράψτε κριτική για την επίσκεψη» never leads to a form the server cannot name.
  */
 function mapRatingInvitationRef(value: unknown): AppointmentRatingInvitationRef | null {
 	const ref = record(value);

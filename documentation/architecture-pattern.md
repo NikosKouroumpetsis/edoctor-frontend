@@ -1070,6 +1070,143 @@ appointment,relatives,phone,keys}` (the generated contract's views and bodies, `
   member's menu, the capsule kept only on the two lists, no footer on any of them (D-W4-55) but on an error page.
   The «Προφίλ» page gives a member «Οι συγγενείς μου» first in «account» (D-W4-56, the application's place); «Ραντεβού
   γιατρού» and «Ταμείο» stay hidden (U-82.2).
+- «Ρυθμίσεις λογαριασμού» (wave 4.5, screens 57 + 61, D-W45-01 … D-W45-09) under the same `routes/profile/[...path]`:
+  `account-settings` the shell and `account-settings/language` «Γλώσσα και θέμα», read by `readProfileAddress` against
+  the module's closed register `modules/profile/config/settings` (`settingsSections`: the five sections in their fixed
+  order — personal, security, privacy, notifications, language — each with its glyph, its address of D-W45-01, whether
+  only a member reads it, and whether its screen is BUILT). 🔴 D-W45-02: a section has an address and a row only once
+  built (`built: true` + its page in the shell); until then it is a 404 and no row. `lib/settings`
+  `buildSettingsSections(options, { member })` is what the shell shows (🔴 D-W45-05: a guest «Γλώσσα και θέμα» alone);
+  `lib/paths` `accountSettingsPath`, `settingsSectionPath(section)`. `ui/settings` is the shell — the `SplitView` with
+  `widths="menu"` and `centred` (🔴 U-167): from 950 the menu and the section in the middle of the right column, the
+  shell's own address showing its first section in place; below 950 the list OR one section on its own page, the rows
+  links to each section's address; it waits for the session with a skeleton (U-80.1 Ε6). `ui/language` is screen 61 —
+  two shared `EditableRow`s whose choices hold at their press; the theme is `theme.set('system' | 'light' | 'dark')`;
+  the language goes to the same page in the other language and, for a signed-in person, first writes the account's
+  `locale` (`api/user`: `accountLocaleQuery` keeps of `GET /user/me` the `locale` ALONE, `updateAccountLocale` is
+  `PUT /user/me` `{ locale }`; 🔴 D-W45-06: only when it differs, a failure never stops the change). The frame
+  (`SETTINGS_PAGES`, D-W45-07): no footer and no capsule on the shell or under it, the «Προφίλ» tab current. On the
+  «Προφίλ» page a member's «Ρυθμίσεις λογαριασμού» is a link to the shell; a guest's still opens the frame's small
+  window (D-W45-05).
+- «Ειδοποιήσεις», the settings (wave 4.5, screen 60, card w45-w3; D-W45-22 … D-W45-24) at
+  `account-settings/notifications`, a section only a member reads. It is the `notifications` module's
+  (`api/preferences`, `config/groups`, `lib/preferences`, `ui/settings`), and a module never imports another: the
+  shell (`profile/ui/settings`) takes the page of a section it does not own from the SCREEN, as a snippet
+  (`sectionContent: { notifications }`, composed in `screens/profile/[...path]`), and gives it the section's place, its
+  title and its «←»; «Γλώσσα και θέμα» stays the profile module's own page. A section that becomes `built` in the
+  register has its page handed in the same change (the screen's spec guards it: no built section draws empty).
+  🔴 A guest whose address names a member's section is asked to sign in over the shell, once and only when the page
+  arrived as a guest's (`session.requireSignIn()`, the rating page's way): under the sign-in the guest's own shell,
+  signed in the section the address names. `config/groups`: the page's three groups and the kinds each lists, a fixed
+  table (🔴 D-W45-22: the PATIENT's side alone, also on a doctor's account); `lib/preferences`
+  `buildNotificationGroups(facts, options)`: the rows — title, what is on («Ενεργό: …», «Πάντα: …» when every channel
+  of the kind is the server's to keep on, «Ανενεργό»; `SET_BY_DOCTOR` is never counted as on), the window's line and
+  cells — a kind the server does not send has no row, one outside the table joins the last group, one the page cannot
+  name is left out. `ui/settings`: «Αλλαγή» (only where the kind has a switch) opens the shared `ActionDialog` at every
+  width, one row a channel — a `Switch`, or «Πάντα» / «Ορίζει ο γιατρός». 🔴 D-W45-24: every press is ONE write of ONE
+  cell (`state-management.md`). The card «Ενεργοποίηση ειδοποιήσεων» is the application's alone (D-W45-25).
+  The centre (`GET` / `PUT /notification/preferences/me`) is read by two modules — this page and the inbox's
+  «Ρυθμίσεις μηνυμάτων» — through ONE reader and writer, `$shared/lib/notification-preferences` (`shared.md`).
+- «Προφίλ», the page (wave 4.5, screen 56, cards w45-w2; U-164, D-W45-17 … D-W45-21) at `/profile`, the
+  `profile/ui/tab` slice: below 744 the application's tab, from 744 the same one column in the middle for a direct
+  link. A MEMBER reads the title, the name card (`components/name-card`, a plain box — 🔴 U-164 Ε2 Β: never pressed),
+  «Είστε γιατρός;» as a card (`components/doctor-card`, a link to the doctor's sign-up the screen resolves, D-W45-20)
+  and the rows of `lib/menu` `buildProfileMenu(options, { member })` — Ρυθμίσεις λογαριασμού · Οι συγγενείς μου ·
+  Βρείτε βοήθεια · Απόρρητο · — · Νομικά · Αποσύνδεση, the last a button with no «›» that the page itself carries out
+  (`session.signOut`, one press). A GUEST reads the title, the words, «Συνδεθείτε ή εγγραφείτε», the same card and
+  the rows without the two a session brings. Until the session is known the page waits (`lib/viewer`
+  `profileViewerOf`: `waiting | guest | member`, the one reading every page of the «Προφίλ» shares). The name card's
+  words come from `lib/identity` `buildProfileIdentity(session.member)` (D-W45-18): the initial and «Όνομα Επώνυμο»
+  over the sign-in address — else the mobile — 🔴 U-168 as the SERVER hides it (`GET /patient/me`
+  `loginEmailMasked` / `loginPhoneMasked`; the `auth` module's read keeps a value only when it is a mask, and nothing
+  on the web hides an address itself). The title row takes a `headerAction` snippet (the bell of screen 63,
+  D-W45-17). 🔴 U-164.1: no row of a doctor's — «Λειτουργία γιατρού» is the application's alone. The menu at the top
+  right from 744 (`shell/ui/site-frame/lib/frame` `buildAccountEntries`, D-W45-21): a member's «Ρυθμίσεις» is
+  «Ρυθμίσεις λογαριασμού», a link to the shell; a guest's stays the small window.
+- «Απόρρητο» (wave 4.5, screen 62, card w45-w4; D-W45-26 … D-W45-31) at the application's addresses, all under
+  `routes/profile/[...path]`: `privacy` is a section of the shell (built, a member's row); the pages it opens are the
+  register's closed list `settingsPages` (`profile/config/settings`) — `third-party-tools`,
+  `account-settings/deletion`, `account-settings/deletion/code` — read by `readProfileAddress` as
+  `{ view: 'settings', section: 'privacy', page }`. The shell draws a page in the section's place with its own title
+  and a «←» at every width (`pageContent`, handed in by the screen as `sectionContent` is). 🔴 D-W45-29: a GUEST reads
+  «Απόρρητο» and the tools' page too — the register's `guestPage` — as ONE column of its own (`SplitView` `solo`,
+  «←» to the «Προφίλ»), never a row of the guest's shell and never a sign-in. Three modules, composed by the screen:
+  `profile/ui/privacy` (the group «Απόρρητο δεδομένων», the card-rows, the box; «Διαγραφή λογαριασμού» only for a
+  member; the Privacy policy at its start, D-W45-27: the legal pages anchor only headings of the CMS text, and the
+  rights' section is a plain line), `shell/ui/consent-prompt` (`ConsentTools`: the window «Διαχείριση προτιμήσεων»
+  as a page, on the SAME body `components/tool-sections`, catalogue and decision — `hooks/use-consent-tools`;
+  `useConsentSummary` is the row's line, 🔴 D-W45-28 `lib/consent` `consentSummaryLine`) and
+  `account/ui/deletion-flow` (🔴 D-W45-30, U-173 Ε1 Α: the application's two steps on the server's existing
+  `auth/account-deletion/me`, `/start`, `/confirm` — `api/deletion`, `lib/deletion-flow`, `useAccountDeletion`; the
+  public page `account/ui/deletion` does not change). The screen keeps the flow's one state, sends a deletion address
+  without a session to the «Προφίλ» and the code step with no code out back to step 1 (both `replaceState`), and
+  draws the end (`DeletionDone`) in the shell's place once the browser's session has closed
+  (`session.accountDeleted()`). 🔴 U-65.6: the code is digits only, lives in the page's memory alone and travels only
+  in the body of the confirm — never an address, a storage or a log. The frame (`SETTINGS_PAGES`) covers
+  `/profile/privacy` and `/profile/third-party-tools` too.
+- «Προσωπικά στοιχεία» (wave 4.5, screen 58, card w45-w5; U-168, D-W45-10, D-W45-14 … D-W45-16) at
+  `/profile/account-settings/personal`: the register's FIRST section (`built`, a member's alone). The slice
+  `profile/ui/personal` — the page that composes, one form per row under `components/` (`name-form`,
+  `birth-date-form`, `gender-form`, `email-form`, `phone-form`, `identifier-form` for the ΑΜΚΑ and the ΑΦΜ,
+  `code-step`), `hooks/use-personal` (who is read, which ONE row is open, each row's write) and
+  `hooks/use-code-challenge` (the two steps of the email's and the mobile's challenge) — draws seven `EditableRow`s;
+  a row's form is mounted while it is open and goes with it, so «Ακύρωση» drops what was typed. The view models are
+  `profile/lib/personal` (`buildPersonalRows`, the words of each refusal), the constants `profile/config/personal`.
+  🔴 Each call lives in the module that OWNS it and the screen composes them (a module imports no other):
+  `profile/api/user` (`accountPersonQuery`: the gender and the day of birth of `GET /user/me`; `updateAccountGender`;
+  `updateAccountBirthDate` for an account with no patient profile), `appointments/api/patient`
+  (`updateBookingPatientProfile`, `updatePatientIdentifiers` = `PUT /patient/me`), `appointments/api/phone` (the
+  booking's three calls, with `readPhoneChangeFailure`) and `auth/api/login-email` (`start`, `resend`, `verify`,
+  `readLoginEmailChangeFailure`, `keepLoginEmailMask`). They reach the page as its PORTS
+  (`profile/ui/personal` `PersonalPorts`), built by `screens/profile/[...path]/hooks/use-personal` and handed to
+  the shell as `sectionContent.personal`. On the web the mobile is edited IN its row at every width (no sheet, no
+  window). An account the server names no patient for reads the four rows that have a source (the date of birth,
+  the gender, the email, the mobile). 🔴 A refused code is a `401` too: only `EC401` is a session that ended.
+- «Σύνδεση και ασφάλεια» (wave 4.5, screen 59, card w45-w6; U-168, D-W45-35 … D-W45-40) at
+  `/profile/account-settings/security`: the register's SECOND section (`built`, a member's alone — with it all five
+  are built). Every call of it is the `auth` module's own, so the whole screen lives there and needs no ports: the
+  screen only hands the page to the shell as `sectionContent.security`. `auth/api/password-credential`
+  (`changePassword`, beside the sign-in flow's own `initSetPassword` / `setPassword`, which the page calls AS THEY
+  ARE — no second copy), `auth/api/sign-in-methods` (`signInMethodsQuery`, `unlinkSignInProvider`,
+  `readProviderUnlinkFailure`) and `auth/api/sessions` (`accountSessionsQuery`, `endAccountSession`,
+  `readSessionEndFailure`); the refusals of the password's writes are read by the flow's own map
+  (`auth/lib/failures` `readAccountPasswordFailure`). The view models are `auth/lib/security` (the password's row
+  from the server's two booleans — 🔴 D-W45-39 no «Ορισμός» without a sign-in email — the providers' rows, 🔴
+  D-W45-35 a device's words composed HERE from the three closed vocabularies, the refusals' words), the names no
+  language changes `auth/config/security`. The slice `auth/ui/security`: the page that composes, one component per
+  part (`password-part`, `providers-part`, `devices-part`), the two forms of the password's row (`change-form`,
+  `code-form`), `unlink-dialog` (the one window, the shared `ActionDialog`), `hooks/use-security` (the two reads,
+  each with its own wait and failure; whether the password's row is open) and `hooks/use-password-code` (the code's
+  sends and their 60″). The password is changed or set IN its row at every width (`EditableRow`); the other rows
+  fade meanwhile. 🔴 Only `401 EC401` is a session that ended: a wrong current password (`EC412`) and a wrong code
+  (`EC011`) are said under their field. 🔴 D-W45-38: «Αποσύνδεση» of a provider that may not go opens no window and
+  sends no request. 🔴 D-W45-40: this device has no «Αποσύνδεση». A session's id is in the page's memory and in the
+  request's path alone — in no attribute and no address. The web sends no `x-device` (the server reads the
+  User-Agent).
+- «Ειδοποιήσεις», the list (wave 4.5, screen 63, card w45-w7; U-174, D-W45-45, D-W45-49, D-W45-59) at
+  `/notifications` — a route of its own (`routes/notifications`, `screens/notifications`), not under `/profile`. The
+  word «center» is the preferences' table (screen 60): the list is `inbox` everywhere. `notifications/api/inbox`
+  (`listNotifications` with `filter`, `lang` = the PAGE's language, `limit`, `cursor`; `countUnreadNotifications`;
+  `markNotificationRead`, `markAllNotificationsRead`; `map` — the answer as facts; `cache` — the keys, the count's one
+  place, what a press shows before the answer and its way back; `readNotificationInboxFailure`), `config/inbox` (the
+  three choices in order, the glyph of each kind, the most characters of a line), `lib/paths`
+  (`readNotificationsAddress`: `?filter=` against the closed list of three) and `lib/inbox` (the view models: which
+  choice opens, «Νέες (n)», what the page shows, when a line came by the Greek clock, its row, and
+  `notificationTargetOf`). The slice `ui/inbox`: the page that composes, `components/` (`menu` from 950, `row`,
+  `round-link` for the gear and the bell, `skeleton`, `bell`), `hooks/use-inbox`. From 950 it is the settings'
+  template (`SplitView` `menu` `centred`, U-167): the three choices the left menu, the list in the middle of the
+  right column under its choice's title; 744–949 one column with the pills under the title; below 744 the pushed
+  page with «←» to the «Προφίλ». A guest's words, the wait, a failure and an account with no notification draw no
+  choices and are one column (`solo`). The frame (`shell/ui/site-frame/lib/frame` `NOTIFICATIONS_PAGES`): no footer
+  at any width, no capsule. 🔴 D-W45-45: the module says WHAT a line opens (`appointment` | `rating` | nothing) and
+  the SCREEN says where — `/appointments/<id>`, `/ratings/<id>` — since a module never imports another; 🔴 D-W45-59:
+  a line about a question (no such page on the site) or of an unknown kind opens nothing — new, it is a button that
+  only reads it; read, plain text. A line's words are the server's, drawn as text whatever their shape. The second
+  slice `ui/unread-host` is in the root layout beside the messages': the one read of «how many are new». 🔴 D-W45-17:
+  a member's menu has «Ειδοποιήσεις» (the first row under the rule; `buildAccountEntries`' fifth argument lights its
+  dot, the row then named «Ειδοποιήσεις, νέες»), the pill's dot lights for it too, and the «Προφίλ» page has the
+  module's `NotificationBell` at the end of a member's title, below 744 only — the screen hands it to the tab
+  (`headerAction`). The deletion's preview names the new kind `notificationInboxItems` («Ειδοποιήσεις»).
 - The patient's facts and rules (wave 4.0, P-W4 §4.7, card W4-3) in the same module: `api/appointment` (+ the list's
   infinite read `appointmentListQuery`, the ONE scan of the upcoming `upcomingScanQuery` (D-W4-21), the change
   `changeAppointment` and `cancelAppointment` with `readAppointmentChangeFailure`, `storeAppointmentDetail`; the facts
@@ -1131,7 +1268,10 @@ appointment,relatives,phone,keys}` (the generated contract's views and bodies, `
   `ChoiceList`, `FirstVisit`, `NoteField` with its `maxLength` and `height` (`note` 104, `short` 96 for the 53), `RadioRows`, `ChangeLink`, the box «Το ραντεβού σας»
   `ChangeContext`, and `useAppointmentSteps`: open one step on, leave the steps that were opened, once) — and on
   `ui/relative-form` (the booking's «Νέος συγγενής» moved with `mv`, ONE form for the booking and the 52; each caller
-  says where it goes back and what follows a save). The screen composes the doctor module's picker on the
+  says where it goes back and what follows a save; 🔴 D-W45-14, wave 4.5: a relative's ΑΜΚΑ / ΑΦΜ are known only by
+  the server's masks — `RelativeFacts.amkaMasked` / `afmMasked` — so on a relative on file the two fields open EMPTY
+  with the mask as their hint («Έχει δοθεί: …»), an empty field is left untouched, a number typed travels, and
+  «Αφαίρεση» marks it to go as `null` with the form's one save: `lib/relatives/form` `toRelativeUpdate(…, removed)`). The screen composes the doctor module's picker on the
   appointment's ONE office (`hooks/use-time`: the profile's slot reads, its own hour and the taken ones left out) and
   the auth module's rule for a mobile. Each screen gives way to the appointment when it may not open (the hour without
   `canReschedule`, the person and the note outside pending / booked, the cancel of a closed visit; the deadline that
