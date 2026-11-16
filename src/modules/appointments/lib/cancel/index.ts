@@ -13,38 +13,16 @@ import {
 	APPOINTMENT_CANCEL_MESSAGE_MAX_LENGTH,
 	PATIENT_CANCEL_REASONS
 } from '$modules/appointments/config';
-import { appointmentDeadlineLabel } from '$modules/appointments/lib/when';
+import { appointmentDeadlineLabel } from '$shared/lib/appointment-when';
+import { cancelReasonLabel } from '$shared/lib/appointment-reasons';
 
 /*
  * Screen 53 «Ακύρωση ραντεβού» in words (record §9.2, U-137, P-W4 §4.4, P-B4 §13.3.2). 🔴 U-137.5: no word here — nor
  * before nor after — ever says «εκπρόθεσμα»: the patient never reads it.
  */
 
-type Message = (inputs: Record<string, never>, options: { locale: SupportedLocale }) => string;
-
-/**
- * Every reason the contract takes, in words (the application's `CANCEL_REASON_KEYS`): total over BOTH sides' lists, as
- * a doctor's cancellation is read on the patient's page too («Λόγος: …»); only the patient's five are offered.
- */
-const CANCEL_REASON_WORDS = {
-	DOCTOR_UNAVAILABLE: m.appointments_cancel_reason_doctor_unavailable,
-	EMERGENCY: m.appointments_cancel_reason_emergency,
-	FEELING_BETTER: m.appointments_cancel_reason_feeling_better,
-	FOUND_ANOTHER_DOCTOR: m.appointments_cancel_reason_found_another_doctor,
-	OTHER: m.appointments_cancel_reason_other,
-	PERSONAL: m.appointments_cancel_reason_personal,
-	SCHEDULE_CONFLICT: m.appointments_cancel_reason_schedule_conflict
-} as const satisfies Record<AppointmentCancelReasonCode, Message>;
-
 /** The patient's reasons, typed by the contract: a code the server stops taking fails the build here. */
 const PATIENT_REASONS: readonly AppointmentCancelReasonCode[] = PATIENT_CANCEL_REASONS;
-
-/** A stored reason in words, `null` for none or for a code this build does not know (never the code itself). */
-export function cancelReasonLabel(code: string | null, locale: SupportedLocale): string | null {
-	return code && Object.hasOwn(CANCEL_REASON_WORDS, code)
-		? CANCEL_REASON_WORDS[code as AppointmentCancelReasonCode]({}, { locale })
-		: null;
-}
 
 /** «Επιλέξτε τον λόγο»: the five the patient may send (D-20), in the server's order. */
 export function cancelReasonOptions(
@@ -52,7 +30,7 @@ export function cancelReasonOptions(
 ): { code: AppointmentCancelReasonCode; label: string }[] {
 	return PATIENT_REASONS.map((code) => ({
 		code,
-		label: CANCEL_REASON_WORDS[code]({}, { locale })
+		label: cancelReasonLabel(code, locale) ?? ''
 	}));
 }
 
@@ -97,7 +75,7 @@ export function buildCancelTerms({
 	locale
 }: {
 	appointment: Pick<AppointmentFacts, 'status' | 'startTime' | 'officeTimeZone'>;
-	actions: AppointmentActionsFacts | null;
+	actions: Pick<AppointmentActionsFacts, 'cancellationDeadline' | 'cancellationCutoffHours'> | null;
 	phone: string | null;
 	locale: SupportedLocale;
 }): { title: string; lines: CancelTermsLine[] } {

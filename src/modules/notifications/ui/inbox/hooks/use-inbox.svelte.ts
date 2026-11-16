@@ -14,7 +14,8 @@ import {
 	readNotificationInboxFailure,
 	refreshNotifications,
 	settleNotificationLists,
-	type NotificationInboxFilter
+	type NotificationInboxFilter,
+	type NotificationInboxSide
 } from '$modules/notifications/api/inbox';
 import {
 	buildNotificationFilters,
@@ -32,8 +33,11 @@ import type { NotificationsViewer } from '$modules/notifications/types';
  * decided ONCE, when the count is first known, and kept for the visit (reading the last new line does not move the
  * reader to another choice). 🔴 U-174 (Ε2 Β): a line is read only by a press — at the press, one request, undone if the
  * server refuses it. How many are new is the dots' one read (`notificationUnreadCountQuery`), never a second one.
+ * 🔴 D-W51-89 (screen 75): every read and write is of ONE side — the patient's mode its own lines, the doctor's his.
  */
 export function useNotificationInbox(options: {
+	/** The side of the account the list is of. */
+	side: () => NotificationInboxSide;
 	viewer: () => NotificationsViewer;
 	/** The choice the address names, `null` for none. */
 	asked: () => NotificationInboxFilter | null;
@@ -50,7 +54,7 @@ export function useNotificationInbox(options: {
 	const member = $derived(options.viewer() === 'member');
 
 	const count = createQuery(() => ({
-		...notificationUnreadCountQuery(),
+		...notificationUnreadCountQuery(options.side()),
 		enabled: browser && member
 	}));
 	const unread = $derived(member ? (count.data ?? null) : null);
@@ -71,7 +75,7 @@ export function useNotificationInbox(options: {
 	const filter = $derived(member ? (options.asked() ?? opened) : null);
 
 	const list = createInfiniteQuery(() => ({
-		...notificationInboxQuery(filter ?? 'all', options.locale()),
+		...notificationInboxQuery(options.side(), filter ?? 'all', options.locale()),
 		enabled: browser && member && filter !== null
 	}));
 	const data = $derived(member && filter !== null ? list.data : undefined);
@@ -149,8 +153,8 @@ export function useNotificationInbox(options: {
 			refreshNotifications(client);
 			return;
 		}
-		keepUnreadNotificationCount(client, left);
-		settleNotificationLists(client);
+		keepUnreadNotificationCount(client, options.side(), left);
+		settleNotificationLists(client, options.side());
 	}
 
 	return {
@@ -172,7 +176,7 @@ export function useNotificationInbox(options: {
 		get rows() {
 			return rows;
 		},
-		/** How many are new, of every choice (the account's). */
+		/** How many are new, of every choice (the side's). */
 		get unread() {
 			return unread ?? 0;
 		},
@@ -199,7 +203,7 @@ export function useNotificationInbox(options: {
 			const answer = markNotificationRead(notificationId);
 			// The answer is read below; until then a refusal is not an unhandled one.
 			answer.catch(() => undefined);
-			const back = await previewNotificationRead(client, notificationId);
+			const back = await previewNotificationRead(client, options.side(), notificationId);
 			try {
 				const left = await answer;
 				settled(notificationId);
@@ -213,9 +217,9 @@ export function useNotificationInbox(options: {
 		async readAll() {
 			if (!member || readingAll || (unread ?? 0) === 0) return;
 			readingAll = true;
-			const answer = markAllNotificationsRead();
+			const answer = markAllNotificationsRead(options.side());
 			answer.catch(() => undefined);
-			const back = await previewAllNotificationsRead(client);
+			const back = await previewAllNotificationsRead(client, options.side());
 			try {
 				const left = await answer;
 				readingAll = false;

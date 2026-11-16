@@ -52,21 +52,32 @@
 
 <!-- Record §6.3 (the shared `WizardScreen`, U-81.2: below 744 the application's frame): the pills, the step's title and
      line, its content once the server's progress is here, and the bar — the stage's segments over «Πίσω» and
-     «Επόμενο». A failed read says so with «Δοκιμάστε ξανά»; a refused write keeps the words and says so (record §6.10). -->
+     «Επόμενο». A failed read says so with «Δοκιμάστε ξανά»; a refused write keeps the words and says so (record §6.10).
+     🔴 U-183.5 (wave 5.1, screen 64, `64-switch/sw.js:152-159`): an «Επεξεργασία» of the application's page is the same
+     step with only «Ακύρωση» and «Αποθήκευση» under it (the sub-flows keep their own words until their last page), no
+     stages' bar, no «Αποθήκευση και έξοδος». -->
 <WizardScreen
 	title={heading ? title : undefined}
 	subtitle={heading ? subtitle : undefined}
 	{brand}
 	pills={controller.pills(commit, Boolean(next?.loading))}
 	progress={controller.bar}
-	back={{
-		label: m.doctor_onboarding_frame_back({}, options),
-		onClick: controller.goBack,
-		testId: 'doctor-onboarding-back'
-	}}
+	back={controller.editing
+		? {
+				label: m.doctor_application_cancel({}, options),
+				onClick: controller.cancelEdit,
+				testId: 'doctor-onboarding-cancel'
+			}
+		: {
+				label: m.doctor_onboarding_frame_back({}, options),
+				onClick: controller.goBack,
+				testId: 'doctor-onboarding-back'
+			}}
 	next={next
 		? {
-				label: next.label ?? m.doctor_onboarding_frame_next({}, options),
+				label: controller.editEnds
+					? m.doctor_application_save({}, options)
+					: (next.label ?? m.doctor_onboarding_frame_next({}, options)),
 				onClick: next.onClick,
 				disabled: !controller.ready || Boolean(next.disabled),
 				loading: controller.saving || Boolean(next.loading),

@@ -6,6 +6,11 @@
 	import { isPlainClick } from '$shared/lib/navigation';
 	import { getSessionOptional } from '$shared/state/session';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
+	import { ActionOffer } from '$shared/ui/molecules/action-offer';
+	import { BulletList } from '$shared/ui/molecules/bullet-list';
+	import { NoteField } from '$shared/ui/molecules/note-field';
+	import { RadioRows } from '$shared/ui/molecules/radio-rows';
+	import { TermsBox } from '$shared/ui/molecules/terms-box';
 	import { Button } from '$shared/ui/primitives/button';
 	import {
 		cancelAppointment,
@@ -31,13 +36,9 @@
 	import {
 		ChangeContext,
 		ChangeFrame,
-		NoteField,
-		RadioRows,
 		useAppointmentSteps
 	} from '$modules/appointments/ui/change-screen';
 	import { getAppointmentsMemoryOptional } from '$modules/appointments/ui/memory';
-	import Offer from '../components/offer.svelte';
-	import Terms from '../components/terms.svelte';
 	import type { AppointmentCancelProps } from '../types';
 
 	let props: AppointmentCancelProps = $props();
@@ -218,15 +219,22 @@
 	>
 		<ChangeContext {context} />
 		{#if terms.lines.length > 0}
-			<Terms title={terms.title} lines={terms.lines} />
+			<TermsBox
+				title={terms.title}
+				lines={terms.lines}
+				testId="appointment-cancel-terms"
+				class="mb-4"
+			/>
 		{/if}
 		{#if appointment.actions.canReschedule}
-			<Offer
+			<ActionOffer
 				title={copy.offerTitle}
 				body={copy.offerBody}
 				action={m.appointments_detail_reschedule({}, options)}
 				href={props.links.step(props.appointment.id, 'time')}
 				onOpen={openTime}
+				testId="appointment-cancel-offer"
+				actionTestId="appointment-cancel-offer-time"
 			/>
 		{/if}
 		<h3 id={reasonsId} class="mt-6 mb-3 text-body-lg font-semibold text-foreground">
@@ -260,11 +268,7 @@
 				testId="appointment-cancel-text"
 			/>
 		</div>
-		<ul class="mt-1 grid list-disc gap-1.5 ps-4 text-label-lg font-normal text-muted-foreground">
-			{#each cancelThenLines(appointment, props.locale) as line, index (index)}
-				<li>{line}</li>
-			{/each}
-		</ul>
+		<BulletList items={cancelThenLines(appointment, props.locale)} />
 		{#if failure}
 			<p
 				role="alert"

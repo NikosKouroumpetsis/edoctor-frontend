@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { officeDialNumber, officeFloorValue, officePhoneLabel } from '.';
+import {
+	mobilePhoneLine,
+	officeAddressLine,
+	officeDialNumber,
+	officeFloorLine,
+	officeFloorValue,
+	officePhoneLabel,
+	officePhoneLine,
+	type OfficeAddress
+} from '.';
 
 describe('shared/lib/office (P-W4 Σ-26: the profile and the appointment say an office the same way)', () => {
 	it('the floor in words: «Ισόγειο», «Υπόγειο», «3ος» — a fraction cut to its level', () => {
@@ -48,5 +57,75 @@ describe('shared/lib/office (P-W4 Σ-26: the profile and the appointment say an 
 		expect(officePhoneLabel('κλήση')).toBeUndefined();
 		expect(officePhoneLabel('   ')).toBeUndefined();
 		expect(officePhoneLabel(undefined)).toBeUndefined();
+	});
+});
+
+const NBSP = '\u00a0';
+const office: OfficeAddress = {
+	street: 'Ερμού',
+	streetNumber: '101',
+	city: 'Αθήνα',
+	state: 'Αττική',
+	floor: 2,
+	translations: [
+		{
+			language: 'en',
+			street: 'Ermou',
+			streetNumber: '101',
+			city: 'Athens',
+			state: 'Attica',
+			floor: null
+		}
+	]
+};
+
+describe('shared/lib/office · D-W51-37: an appointment’s office and phones, the 51’s and the 68’s one way', () => {
+	it('the line in the page’s language, the floor in words («2ος όροφος», «Ισόγειο»)', () => {
+		expect(officeAddressLine(office, 'el')).toBe('Ερμού 101, Αθήνα, Αττική');
+		expect(officeAddressLine(office, 'en')).toBe('Ermou 101, Athens, Attica');
+		expect(officeFloorLine(office, 'el')).toBe('2ος όροφος');
+		expect(officeFloorLine({ ...office, floor: 0 }, 'el')).toBe('Ισόγειο');
+		expect(officeFloorLine({ ...office, floor: -1 }, 'el')).toBe('Υπόγειο');
+	});
+
+	it('(negative) a half translation is not taken; no floor is no line; an empty part is never joined', () => {
+		const half = {
+			...office,
+			translations: [{ ...office.translations[0], city: null }]
+		};
+		expect(officeAddressLine(half, 'en')).toBe('Ερμού 101, Αθήνα, Αττική');
+		expect(officeFloorLine({ ...office, floor: null }, 'el')).toBeNull();
+		expect(
+			officeAddressLine({ ...office, street: null, state: null, translations: [] }, 'el')
+		).toBe('101, Αθήνα');
+	});
+
+	it('the office’s phone as read and dialled; none without a digit', () => {
+		expect(officePhoneLine('302103210101')).toEqual({
+			label: ['210', '321', '0101'].join(NBSP),
+			dial: '302103210101'
+		});
+		expect(officePhoneLine('κλήση;')).toBeNull();
+		expect(officePhoneLine(null)).toBeNull();
+	});
+
+	it('🔴 U-182.7: a person’s mobile whole, «+30 697 765 4321», dialled with its country', () => {
+		expect(mobilePhoneLine('306977654321')).toEqual({
+			label: ['+30', '697', '765', '4321'].join(NBSP),
+			dial: '+306977654321'
+		});
+		expect(mobilePhoneLine('+30 697 765 4321')?.dial).toBe('+306977654321');
+		expect(mobilePhoneLine('6977654321')?.dial).toBe('+306977654321');
+		expect(mobilePhoneLine('447911123456')).toEqual({
+			label: '+447911123456',
+			dial: '+447911123456'
+		});
+	});
+
+	it('(negative, U-65.6) only digits reach the page and the dialler; nothing without one', () => {
+		expect(mobilePhoneLine('30<b>697</b>7654321;javascript:')?.dial).toBe('+306977654321');
+		expect(mobilePhoneLine('κλήση')).toBeNull();
+		expect(mobilePhoneLine('')).toBeNull();
+		expect(mobilePhoneLine(undefined)).toBeNull();
 	});
 });

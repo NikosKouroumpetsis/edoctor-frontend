@@ -7,15 +7,24 @@ import type {
 	NotificationInboxTargetKind
 } from './types';
 
-// The contract's words, total over their types: a word the contract gains or loses does not compile here.
-const ICONS = { CALENDAR: true, CLOCK: true, STAR: true, QUESTION: true } as const satisfies Record<
-	NotificationInboxIcon,
-	true
->;
+// The contract's words, every one of them (🔴 D-W51-90, screen 75: the doctor's glyphs and what his lines are about too);
+// a word the contract adds later reads as none (the calendar, no target) until it is named here.
+const ICONS = {
+	CALENDAR: true,
+	CLOCK: true,
+	STAR: true,
+	QUESTION: true,
+	CALENDAR_CANCELED: true,
+	CHECK: true,
+	SYNC: true,
+	BADGE: true
+} as const satisfies Record<NotificationInboxIcon, true>;
 const TARGETS = {
 	APPOINTMENT: true,
 	RATING_INVITATION: true,
-	QUESTION: true
+	QUESTION: true,
+	CALENDAR_CONNECTION: true,
+	DOCTOR: true
 } as const satisfies Record<NotificationInboxTargetKind, true>;
 
 /** The most lines one page may bring (the server's own cap, D-W45-46) and the longest cursor it accepts back. */

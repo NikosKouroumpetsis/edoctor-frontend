@@ -144,7 +144,7 @@ const reasons = () => screen.getByRole('radiogroup', { name: 'Επιλέξτε �
 describe('screen 53 · the form (record §9.2, U-137)', () => {
 	it('🔴 U-137.2 / U-102: a screen of its own, never a sheet — the box, the deadline in two lines, the offer, the five reasons, what follows', () => {
 		const { onReread } = draw();
-		expect(document.querySelector('[data-slot="booking-change-screen"]')?.tagName).toBe('SECTION');
+		expect(document.querySelector('[data-slot="step-screen"]')?.tagName).toBe('SECTION');
 		expect(screen.queryByRole('dialog')).toBeNull();
 		expect(screen.getByRole('heading', { level: 2, name: 'Ακύρωση ραντεβού' })).toBeInTheDocument();
 		expect(screen.getByTestId('appointment-context')).toHaveTextContent('Το ραντεβού σας');

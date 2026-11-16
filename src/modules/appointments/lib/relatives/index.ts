@@ -29,4 +29,3 @@ export {
 	type RelativesDone
 } from './list';
 export { relativeUpcoming, relativeUpcomingLine, type RelativeUpcomingFacts } from './upcoming';
-export { relativeNameWithWord, relativeSubject, relativeWordLabel } from './words';

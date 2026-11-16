@@ -38,18 +38,30 @@ export type ApiEnvelope<T> = {
 	data: T;
 };
 
+/** The facts a refusal names beside its words (a flat record of plain values, never anything nested). */
+export type ApiErrorDetails = Readonly<Record<string, string | number | boolean | null>>;
+
 export class ApiError extends Error {
 	readonly status: number;
 	readonly url: string;
 	/** The backend's own code of a refusal (`EC011`, `USER_LOCKED`), read only by the session's calls. */
 	readonly errorCode?: string;
+	/** What the refusal names for the page to say it in its own words (a session call's `details`), when it names any. */
+	readonly details?: ApiErrorDetails;
 
-	constructor(message: string, status: number, url: string, errorCode?: string) {
+	constructor(
+		message: string,
+		status: number,
+		url: string,
+		errorCode?: string,
+		details?: ApiErrorDetails
+	) {
 		super(message);
 		this.name = 'ApiError';
 		this.status = status;
 		this.url = url;
 		this.errorCode = errorCode;
+		this.details = details;
 	}
 }
 
@@ -205,13 +217,42 @@ export type HttpSessionOptions = {
 	signal?: AbortSignal;
 };
 
-/** The `{ errorCode, errorMessage }` a refusal carries, when it carries it. */
-async function readRefusal(response: Response): Promise<{ code?: string; message?: string }> {
+// A refusal's facts are a handful of plain values: more keys, or a longer word, is no answer of the contract's.
+const MAX_DETAIL_KEYS = 16;
+const MAX_DETAIL_TEXT = 200;
+
+/**
+ * 🔴 U-65.6 (D-W51-44): the `details` of a refusal only as the server builds them — a flat record of strings, finite
+ * numbers, booleans and nulls, each word short; anything else (nested, an array, a long text) is none at all.
+ */
+function readDetails(value: unknown): ApiErrorDetails | undefined {
+	if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;
+	const entries = Object.entries(value as Record<string, unknown>);
+	if (entries.length === 0 || entries.length > MAX_DETAIL_KEYS) return undefined;
+	const plain = entries.every(
+		([, entry]) =>
+			entry === null ||
+			typeof entry === 'boolean' ||
+			(typeof entry === 'number' && Number.isFinite(entry)) ||
+			(typeof entry === 'string' && entry.length <= MAX_DETAIL_TEXT)
+	);
+	return plain ? (Object.fromEntries(entries) as ApiErrorDetails) : undefined;
+}
+
+/** The `{ errorCode, errorMessage, details }` a refusal carries, when it carries it. */
+async function readRefusal(
+	response: Response
+): Promise<{ code?: string; message?: string; details?: ApiErrorDetails }> {
 	try {
-		const body = (await response.json()) as { errorCode?: unknown; errorMessage?: unknown };
+		const body = (await response.json()) as {
+			errorCode?: unknown;
+			errorMessage?: unknown;
+			details?: unknown;
+		};
 		return {
 			code: typeof body?.errorCode === 'string' ? body.errorCode : undefined,
-			message: typeof body?.errorMessage === 'string' ? body.errorMessage.trim() : undefined
+			message: typeof body?.errorMessage === 'string' ? body.errorMessage.trim() : undefined,
+			details: readDetails(body?.details)
 		};
 	} catch {
 		return {};
@@ -262,7 +303,8 @@ async function sessionRequest<T>(
 			refusal.message || `Request failed with status ${response.status}`,
 			response.status,
 			url,
-			refusal.code
+			refusal.code,
+			refusal.details
 		);
 	}
 
@@ -327,7 +369,8 @@ export async function httpSessionFile(path: string, signal?: AbortSignal): Promi
 			refusal.message || `Request failed with status ${response.status}`,
 			response.status,
 			url,
-			refusal.code
+			refusal.code,
+			refusal.details
 		);
 	}
 
@@ -338,7 +381,26 @@ export async function httpSessionFile(path: string, signal?: AbortSignal): Promi
  * A public write that names nobody (U-78, a device's vote): JSON in and out, never the site's cookies, the device's
  * own key in a header and so never in an address. A refusal carries its status, as a session's does.
  */
-export async function httpPublicPut<T>(
+export function httpPublicPut<T>(
+	path: string,
+	options: { body: unknown; headers?: Record<string, string>; signal?: AbortSignal }
+): Promise<T> {
+	return publicWrite<T>('PUT', path, options);
+}
+
+/**
+ * 🔴 D-W51-72 (wave 5.1, the cancel link): a public `POST` with no session — the same rules as `httpPublicPut` (never the
+ * cookies), a refusal with its status, its code and its `details`.
+ */
+export function httpPublicPost<T>(
+	path: string,
+	options: { body: unknown; headers?: Record<string, string>; signal?: AbortSignal }
+): Promise<T> {
+	return publicWrite<T>('POST', path, options);
+}
+
+async function publicWrite<T>(
+	method: 'PUT' | 'POST',
 	path: string,
 	options: { body: unknown; headers?: Record<string, string>; signal?: AbortSignal }
 ): Promise<T> {
@@ -347,7 +409,7 @@ export async function httpPublicPut<T>(
 
 	try {
 		response = await fetch(url, {
-			method: 'PUT',
+			method,
 			credentials: 'omit',
 			headers: {
 				Accept: 'application/json',
@@ -369,7 +431,8 @@ export async function httpPublicPut<T>(
 			refusal.message || `Request failed with status ${response.status}`,
 			response.status,
 			url,
-			refusal.code
+			refusal.code,
+			refusal.details
 		);
 	}
 

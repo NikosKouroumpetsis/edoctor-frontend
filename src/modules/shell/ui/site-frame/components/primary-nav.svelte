@@ -31,7 +31,13 @@
 	<a href={href('/help')} class={[linkClass, 'hidden laptop:inline-flex']}
 		>{m.nav_help({}, messageOptions)}</a
 	>
-	<a href={href(doctorOnboardingPath)} class={[linkClass, 'hidden laptop:inline-flex']}
-		>{m.nav_for_doctors({}, messageOptions)}</a
-	>
+	<!-- 🔴 Wave 5.1 · screen 64 (U-185.1, D-W51-19, `64-switch/sw.js:869-871`; round 2): a licence of the marketplace has no
+	     «Για γιατρούς» — its place goes to the other links, and «Λειτουργία γιατρού» stands beside the ☰ (`DoctorModeLink`).
+	     `<html data-doctor-mode>` (this device's memory before the first paint, then the server's answer) decides in CSS,
+	     so nothing changes under the eye (U-100); for everyone else the wrapper draws no box (`contents`): the bar as it was. -->
+	<span data-slot="for-doctors-entry" class="contents doctor-mode:hidden">
+		<a href={href(doctorOnboardingPath)} class={[linkClass, 'hidden laptop:inline-flex']}
+			>{m.nav_for_doctors({}, messageOptions)}</a
+		>
+	</span>
 </nav>

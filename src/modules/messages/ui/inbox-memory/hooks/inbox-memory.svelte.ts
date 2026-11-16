@@ -3,20 +3,21 @@ import { createContext } from '$shared/lib/headless';
 import { getSessionOptional } from '$shared/state/session';
 import { ThreadMemory } from './thread-memory.svelte';
 
-/** The chips of an account with both sides (U-84 Π4): by whom the conversation is with. */
-export type InboxFilter = 'all' | 'patients' | 'doctors';
-
 /**
  * What the messages' pages keep while the person moves between them (one per page tree, context, never a module singleton).
- * `/messages` and `/messages/<id>` are two routes, each its own page: R-11: the chip stays chosen, as on the application's
- * tab, which stays mounted; R-10: what has not left outlives the page it was sent from.
+ * `/messages` and `/messages/<id>` are two routes, each its own page: R-11: the doctor's search stays as typed, open, as
+ * on the application's tab, which stays mounted (🔴 U-182.3 rewrote the chips it kept: there are none any more); R-10:
+ * what has not left outlives the page it was sent from.
  */
 export class InboxMemory {
-	filter = $state<InboxFilter>('all');
+	/** 🔴 D-W51-80: the doctor's 🔍 open, and the words in it (in memory only, never an address or a storage). */
+	searchOpen = $state(false);
+	searchText = $state('');
 	readonly thread = new ThreadMemory();
 
 	forget() {
-		this.filter = 'all';
+		this.searchOpen = false;
+		this.searchText = '';
 		this.thread.forget();
 	}
 }

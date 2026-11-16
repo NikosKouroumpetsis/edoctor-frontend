@@ -8,7 +8,7 @@ import type {
 } from '$modules/appointments/api/appointment';
 import type { BookingPatientFacts } from '$modules/appointments/api/patient';
 import type { BookingReadinessFacts } from '$modules/appointments/api/readiness';
-import { relativeNameWithWord } from '$modules/appointments/lib/relatives/words';
+import { relativeNameWithWord } from '$shared/lib/relative-words';
 import type {
 	BookingDoctorFacts,
 	BookingOfficeFacts,

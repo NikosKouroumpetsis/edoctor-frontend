@@ -18,7 +18,9 @@
 	const controller = useDoctorOnboardingStep(() => props, 'email');
 	const draft = controller.draft;
 	const options = $derived({ locale: props.locale });
-	const email = $derived(readDoctorContactEmail(draft.edits, controller.progress));
+	const email = $derived(readDoctorContactEmail(draft.edits));
+	// 🔴 U-169 · D-W51-12: the address on file only as the server hides it — shown as the current one, never pre-filled.
+	const current = $derived(controller.progress?.contactEmail.notificationEmailMasked ?? null);
 	const valid = $derived(isValidContactEmail(email));
 	let touched = $state(false);
 	let failure = $state<string | null>(null);
@@ -41,7 +43,8 @@
 
 	/**
 	 * «Συνέχεια» (record §6.4): the address is written (it answers the progress), the code is sent to it, and the code's
-	 * screen opens as one more page. A refusal keeps the address and says so.
+	 * screen opens as one more page. A refusal keeps the address and says so. 🔴 D-W51-12: the typed address stays in this
+	 * tab's draft — the server answers only its mask — until the code's screen has verified it.
 	 */
 	async function next() {
 		if (!valid || sender.isPending) return;
@@ -50,7 +53,6 @@
 			{ kind: 'notification-email', notificationEmail: email.trim() }
 		]);
 		if (!answer) return;
-		draft.clear('contactEmail');
 		try {
 			await sender.mutateAsync();
 		} catch (error) {
@@ -77,6 +79,11 @@
 	testId="doctor-onboarding-email"
 >
 	<div class="flex flex-col gap-3">
+		{#if current}
+			<p class="text-body-sm text-muted-foreground" data-testid="doctor-onboarding-email-current">
+				{m.doctor_onboarding_contact_email_current({ email: current }, options)}
+			</p>
+		{/if}
 		<TextField
 			label={m.doctor_onboarding_contact_email_label({}, options)}
 			value={email}

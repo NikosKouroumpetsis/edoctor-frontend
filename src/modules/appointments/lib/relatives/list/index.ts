@@ -2,7 +2,7 @@ import { m } from '$paraglide/messages.js';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type { RelativeFacts } from '$modules/appointments/api/relatives';
 import { PATIENT_RELATIVES_MAX } from '$modules/appointments/config';
-import { relativeSubject, relativeWordLabel } from '$modules/appointments/lib/relatives/words';
+import { relativeSubject, relativeWordLabel } from '$shared/lib/relative-words';
 
 /** One row of «Οι συγγενείς μου» (record §11.2): the initial in its circle, the name, the word of the relationship. */
 export type RelativeRow = { relativeId: string; initial: string; name: string; word: string };

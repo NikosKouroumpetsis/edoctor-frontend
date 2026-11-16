@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { useQueryClient, type QueryClient } from '@tanstack/svelte-query';
+	import { setDoctorStanding, type DoctorStanding } from '$shared/state/doctor-standing';
 	import { Session, setSession, type SessionStatus } from '$shared/state/session';
 	import { setToasts, ToastState } from '$shared/ui/molecules/toast';
 	import type { DoctorOnboardingScreen } from '$modules/doctor-onboarding/lib/steps';
@@ -16,12 +17,15 @@
 		screen,
 		context,
 		toasts = new ToastState(),
+		standing,
 		onReady
 	}: {
 		start?: SessionStatus;
 		screen: DoctorOnboardingScreen;
 		context: DoctorOnboardingContext;
 		toasts?: ToastState;
+		/** Wave 5.1 · screen 64: the doctor standing the layout's host gives (an edit is judged by it). */
+		standing?: DoctorStanding;
 		onReady?: (handle: {
 			session: Session;
 			client: QueryClient;
@@ -44,6 +48,9 @@
 	setSession(session);
 	const client = useQueryClient();
 	untrack(() => setToasts(toasts));
+	untrack(() => {
+		if (standing) setDoctorStanding(standing);
+	});
 
 	function ready(draft: OnboardingDraft) {
 		onReady?.({ session, client, draft, setStatus: (next) => (status = next) });

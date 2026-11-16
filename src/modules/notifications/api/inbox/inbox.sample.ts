@@ -98,3 +98,86 @@ export function sampleInboxPage(
 		unreadCount: options.unreadCount ?? items.filter((entry) => !entry.read).length
 	};
 }
+
+/** The doctor's side (screen 75): fixed ids of its lines and of what they are about. */
+export const DOCTOR_SAMPLE_IDS = {
+	request: '018f3c1e-0000-7000-8000-000000000d01',
+	outcome: '018f3c1e-0000-7000-8000-000000000d02',
+	canceled: '018f3c1e-0000-7000-8000-000000000d03',
+	review: '018f3c1e-0000-7000-8000-000000000d04',
+	sync: '018f3c1e-0000-7000-8000-000000000d05',
+	licence: '018f3c1e-0000-7000-8000-000000000d06',
+	requestAppointment: '018f3c1e-0000-7000-8000-000000000da1',
+	outcomeAppointment: '018f3c1e-0000-7000-8000-000000000da2',
+	canceledAppointment: '018f3c1e-0000-7000-8000-000000000da3',
+	reviewAppointment: '018f3c1e-0000-7000-8000-000000000da4',
+	connection: '018f3c1e-0000-7000-8000-000000000dc1',
+	doctor: '018f3c1e-0000-7000-8000-000000000dd1'
+} as const;
+
+/**
+ * Six lines of the doctor's side, newest first, in the server's words (`w51-b11` §6: kind, icon, target of each):
+ * three new (a request, «Τι έγινε με την επίσκεψη;», a late cancellation) and three read (a new review, the calendar's
+ * sync that stopped, the licence that ends). Made-up people.
+ */
+export function sampleDoctorInboxItems(): SampleInboxItem[] {
+	return [
+		item({
+			id: DOCTOR_SAMPLE_IDS.request,
+			kind: 'APPOINTMENT_REQUESTED',
+			icon: 'CALENDAR',
+			title: 'Νέο αίτημα ραντεβού',
+			body: 'Νίκος Μαυρίδης · σήμερα, 17:30',
+			occurredAt: '2026-11-12T07:00:00.000Z',
+			target: { kind: 'APPOINTMENT', id: DOCTOR_SAMPLE_IDS.requestAppointment }
+		}),
+		item({
+			id: DOCTOR_SAMPLE_IDS.outcome,
+			kind: 'APPOINTMENT_OUTCOME_PROMPT',
+			icon: 'CHECK',
+			title: 'Τι έγινε με την επίσκεψη;',
+			body: 'Δημήτρης Ζαφειρίου · σήμερα, 10:30',
+			occurredAt: '2026-11-12T06:00:00.000Z',
+			target: { kind: 'APPOINTMENT', id: DOCTOR_SAMPLE_IDS.outcomeAppointment }
+		}),
+		item({
+			id: DOCTOR_SAMPLE_IDS.canceled,
+			kind: 'APPOINTMENT_CANCELED_BY_PATIENT',
+			icon: 'CALENDAR_CANCELED',
+			title: 'Ο ασθενής ακύρωσε',
+			body: 'Μάρκος Ηλιόπουλος · σήμερα, 11:30 · εκπρόθεσμα, μέσα στις 8 ώρες',
+			occurredAt: '2026-11-12T05:00:00.000Z',
+			target: { kind: 'APPOINTMENT', id: DOCTOR_SAMPLE_IDS.canceledAppointment }
+		}),
+		item({
+			id: DOCTOR_SAMPLE_IDS.review,
+			kind: 'RATING_RECEIVED',
+			icon: 'STAR',
+			title: 'Νέα κριτική',
+			body: 'Κατερίνα Λαμπράκη · για την επίσκεψη της 9 Νοεμβρίου',
+			occurredAt: '2026-11-11T09:00:00.000Z',
+			read: true,
+			target: { kind: 'APPOINTMENT', id: DOCTOR_SAMPLE_IDS.reviewAppointment }
+		}),
+		item({
+			id: DOCTOR_SAMPLE_IDS.sync,
+			kind: 'CALENDAR_SYNC_FAILING',
+			icon: 'SYNC',
+			title: 'Ο συγχρονισμός με το Google Calendar σταμάτησε',
+			body: 'Συνδέστε ξανά το ημερολόγιό σας.',
+			occurredAt: '2026-11-08T09:00:00.000Z',
+			read: true,
+			target: { kind: 'CALENDAR_CONNECTION', id: DOCTOR_SAMPLE_IDS.connection }
+		}),
+		item({
+			id: DOCTOR_SAMPLE_IDS.licence,
+			kind: 'LICENSE_EXPIRING',
+			icon: 'BADGE',
+			title: 'Η άδειά σας λήγει σε 20 ημέρες',
+			body: 'Στις 2 Δεκεμβρίου 2026. Για ανανέωση, γράψτε μας.',
+			occurredAt: '2026-11-05T09:00:00.000Z',
+			read: true,
+			target: { kind: 'DOCTOR', id: DOCTOR_SAMPLE_IDS.doctor }
+		})
+	];
+}

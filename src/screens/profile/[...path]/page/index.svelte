@@ -206,6 +206,7 @@
 		hrefOf={screen.hrefOf}
 		onRow={screen.onRow}
 		doctorHref={screen.doctorHref}
+		doctorModeHref={screen.doctorModeHref}
 		headerAction={bell}
 	/>
 {:else}

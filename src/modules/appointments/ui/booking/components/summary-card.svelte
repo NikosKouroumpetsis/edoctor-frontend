@@ -2,7 +2,7 @@
 	import { cn } from '$shared/lib/utils';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import type { BookingCard, BookingCardRow, BookingStep } from '$modules/appointments/lib/booking';
-	import { ChangeLink } from '$modules/appointments/ui/change-screen';
+	import { ChangeLink } from '$shared/ui/molecules/change-link';
 	import DoctorPhoto from '$modules/appointments/ui/doctor-photo';
 	import StatusPill from '$modules/appointments/ui/status-pill';
 

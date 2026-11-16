@@ -221,3 +221,49 @@ export function isDoctorOnboardingBeyondProgress(
 	const order = DOCTOR_ONBOARDING_STEPS as readonly DoctorOnboardingStep[];
 	return order.indexOf(step) > order.indexOf(SECTION_LAST_STEPS[first]);
 }
+
+/**
+ * 🔴 U-183.5 · D-W51-17 (wave 5.1, screen 64): the rows of the application's page, each the step its «Επεξεργασία» opens,
+ * in the three stages' sections (`64-switch/sw.js:121-139`).
+ */
+export const DOCTOR_APPLICATION_SECTIONS = [
+	['basic', 'email', 'specialty'],
+	['location', 'office', 'amenities', 'payments', 'price', 'calendar'],
+	['terms', 'access']
+] as const satisfies readonly (readonly DoctorOnboardingStep[])[];
+
+export type DoctorApplicationRow = (typeof DOCTOR_APPLICATION_SECTIONS)[number][number];
+
+/** Every page an edit may stand on: the rows' steps, the screens they open, and their sub-flows' next steps. */
+const EDITABLE_SCREENS: readonly DoctorOnboardingScreen[] = [
+	...DOCTOR_APPLICATION_SECTIONS.flat(),
+	'email-code',
+	'specialty-list',
+	'address-search',
+	'address-confirm',
+	'pin'
+];
+
+/** Whether «Επεξεργασία» may open `screen` (never the overview, a stage's intro or the end). */
+export function isDoctorOnboardingEditable(screen: DoctorOnboardingScreen): boolean {
+	return EDITABLE_SCREENS.includes(screen);
+}
+
+/** The sub-flows that keep their order within one edit (email ⇒ its code; the address ⇒ its confirmation ⇒ the pin). */
+const EDIT_NEXT: Partial<Record<DoctorOnboardingStep, DoctorOnboardingStep>> = {
+	email: 'email-code',
+	location: 'address-confirm',
+	'address-confirm': 'pin'
+};
+
+/** The page after `step` within one edit, or `null`: the edit ends here, saved, back on the application's page. */
+export function nextDoctorOnboardingEditStep(
+	step: DoctorOnboardingStep
+): DoctorOnboardingStep | null {
+	return EDIT_NEXT[step] ?? null;
+}
+
+/** The address an edit's page stands at: its own, with `?edit=1` (the application's own query, nothing of a person). */
+export function doctorOnboardingEditPath(screen: DoctorOnboardingScreen): string {
+	return `${doctorOnboardingPath(screen)}?edit=1`;
+}

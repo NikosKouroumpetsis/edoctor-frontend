@@ -10,6 +10,7 @@
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 	import { getPageLocale } from '$shared/preferences/i18n/page-locale';
 	import { theme } from '$shared/preferences/theme';
+	import { getDoctorStandingOptional } from '$shared/state/doctor-standing';
 	import { getInboxBadgeOptional } from '$shared/state/inbox-badge';
 	import { getNotificationBadgeOptional } from '$shared/state/notification-badge';
 	import { SearchDock, setSearchDock } from '$shared/state/search-dock';
@@ -26,6 +27,7 @@
 	import AccountMenu from '../components/account-menu.svelte';
 	import BrandLink from '../components/brand-link.svelte';
 	import CompactSearch from '../components/compact-search.svelte';
+	import DoctorModeLink from '../components/doctor-mode-link.svelte';
 	import PrimaryNav from '../components/primary-nav.svelte';
 	import SettingsDialog from '../components/settings-dialog.svelte';
 	import SocialLinks from '../components/social-links.svelte';
@@ -95,9 +97,30 @@
 	// messages' — the frame only draws it, on the menu's row and on the pill's dot. A guest's is always none.
 	const notifications = getNotificationBadgeOptional();
 	const hasNewNotifications = $derived(isMember && (notifications?.hasNew ?? false));
+	// 🔴 Wave 5.1 · screen 64 (D-W51-10): the doctor-dashboard module's one read of the account's doctor standing — the
+	// frame only draws it: «Λειτουργία γιατρού» in the bar (from 1128) and the ☰ (744–1127), «Η αίτησή σας ελέγχεται».
+	const doctor = getDoctorStandingOptional();
 	const accountEntries = $derived(
-		buildAccountEntries(messageOptions, localizedHref, isMember, hasUnread, hasNewNotifications)
+		buildAccountEntries(
+			messageOptions,
+			localizedHref,
+			isMember,
+			hasUnread,
+			hasNewNotifications,
+			doctor?.kind ?? 'none'
+		)
 	);
+	const enterDoctorMode = () => void doctor?.switchTo('DOCTOR');
+	// A switch the server did not keep: the person stays where they are, and is told (the sign-out's way, R-2).
+	let switchFailures = untrack(() => doctor?.switchFailures ?? 0);
+	$effect(() => {
+		const failures = doctor?.switchFailures ?? 0;
+		if (failures === switchFailures) return;
+		switchFailures = failures;
+		untrack(() =>
+			toasts.show({ tone: 'danger', message: m.doctor_mode_failed({}, messageOptions) })
+		);
+	});
 	const capsuleBadge = $derived(
 		hasUnread && inbox
 			? {
@@ -118,6 +141,13 @@
 		{#if headerKind === 'brand'}
 			<!-- Record §3.4: from 744 the booking's bar is the mark alone over a thin line (always drawn). -->
 			<AppHeader showFrom="tablet" class="border-border">
+				{#snippet brand()}
+					<BrandLink href={localizedHref('/')} {messageOptions} />
+				{/snippet}
+			</AppHeader>
+		{:else if headerKind === 'logo'}
+			<!-- 🔴 D-W51-72: the cancel link's page — the mark alone over a thin line at every width, no menu of an account. -->
+			<AppHeader showFrom="none" class="border-border">
 				{#snippet brand()}
 					<BrandLink href={localizedHref('/')} {messageOptions} />
 				{/snippet}
@@ -166,6 +196,11 @@
 			<CompactSearch {dock} {messageOptions} />
 		{/snippet}
 		{#snippet actions()}
+			<DoctorModeLink
+				href={localizedHref}
+				{messageOptions}
+				onDoctorMode={doctor?.canEnterDoctorMode ? enterDoctorMode : undefined}
+			/>
 			<AccountMenu
 				entries={accountEntries}
 				{messageOptions}
@@ -175,6 +210,7 @@
 				onSettings={() => dialogs.openSettings()}
 				onSignIn={session ? () => session.requireSignIn() : undefined}
 				onSignOut={() => session?.signOut()}
+				onDoctorMode={enterDoctorMode}
 			/>
 		{/snippet}
 	</AppHeader>

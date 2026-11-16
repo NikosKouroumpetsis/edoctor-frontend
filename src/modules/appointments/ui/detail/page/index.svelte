@@ -7,7 +7,11 @@
 	import { isPlainClick } from '$shared/lib/navigation';
 	import { saveFile } from '$shared/lib/save-file';
 	import { readServerNow } from '$shared/lib/server-clock';
+	import { APPOINTMENT_DAY_TIME_SEPARATOR } from '$shared/lib/appointment-when';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
+	import { InfoBand } from '$shared/ui/molecules/info-band';
+	import { NoticeCard } from '$shared/ui/molecules/notice-card';
+	import { StatusHeading } from '$shared/ui/molecules/status-heading';
 	import { Button } from '$shared/ui/primitives/button';
 	import { IconButton } from '$shared/ui/primitives/icon-button';
 	import {
@@ -32,10 +36,7 @@
 	import Actions from '../components/actions.svelte';
 	import Ask from '../components/ask.svelte';
 	import Card from '../components/card.svelte';
-	import Header from '../components/header.svelte';
-	import Notice from '../components/notice.svelte';
 	import State from '../components/state.svelte';
-	import Terms from '../components/terms.svelte';
 	import type { AppointmentDetailProps } from '../types';
 
 	let {
@@ -236,23 +237,53 @@
 	/>
 
 	{#if state === 'ready' && appointment && header}
-		<Header {header} />
+		<!-- Record §7.2 (D-W51-37: the shared head): the status pill, the day and the time (28/600; below 744 the time on a
+		     line of its own and a day too long for the screen wraps, Σ3 — never cut), and «Σε 2 ημέρες · Διάρκεια 30
+		     λεπτά» (the history: the length alone). -->
+		<StatusHeading
+			pill={header.status}
+			day={header.day}
+			time={header.time}
+			separator={APPOINTMENT_DAY_TIME_SEPARATOR}
+			sub={header.sub}
+			pillTestId="appointment-status"
+			titleTestId="appointment-when"
+			subTestId="appointment-sub"
+		/>
 
+		<!-- What it has to say (`appt.css:132-136`, U-135.5), the shared `NoticeCard` (D-W51-37): its sentence, its lines, the
+		     call when the deadline passed (U-76.1). -->
 		{#if doneNotice}
-			<Notice
+			<NoticeCard
 				tone="done"
-				text={doneNotice.title}
+				title={doneNotice.title}
 				lines={doneNotice.lines}
+				role="status"
 				testId="appointment-done"
+				class="mb-3"
 			/>
 		{/if}
 		{#each notices as notice (notice.id)}
-			<Notice
+			{#snippet call()}
+				{#if notice.call}
+					<Button
+						tone="outline"
+						hover={false}
+						href={`tel:${notice.call.dial}`}
+						label={notice.call.label}
+						leading={phoneGlyph}
+						textClass="text-body-sm"
+						data-testid="appointment-notice-call"
+					/>
+				{/if}
+			{/snippet}
+			<NoticeCard
 				tone={notice.tone}
-				text={notice.text}
+				title={notice.text}
 				lines={notice.lines}
-				call={notice.call}
+				action={notice.call ? call : undefined}
 				testId={`appointment-notice-${notice.id}`}
+				class="mb-3"
 			/>
 		{/each}
 
@@ -279,7 +310,9 @@
 		/>
 
 		{#if terms}
-			<Terms {terms} />
+			<!-- «Όροι του γιατρού» (record §7.2, U-135.6, P-B4 §13.3.1): the quiet band, only while the patient can still
+			     cancel — how it is confirmed, then the cancellation's line and its very instant. -->
+			<InfoBand title={terms.title} lines={terms.lines} testId="appointment-terms" class="mt-3" />
 		{/if}
 
 		<Actions rows={actionRows} {directionsHref} helpHref={links.help} onCalendar={addToCalendar} />

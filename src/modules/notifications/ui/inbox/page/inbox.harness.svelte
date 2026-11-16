@@ -67,11 +67,12 @@
 
 	// The screen's addresses, as it resolves them: each choice a word of the query, each target the other module's page.
 	const links: NotificationInboxLinks = {
-		profile: '/profile',
+		back: '/profile',
 		settings: '/profile/account-settings/notifications',
 		filter: (choice) => `/notifications?filter=${choice}`,
 		target: (target) =>
-			target.kind === 'appointment' ? `/appointments/${target.id}` : `/ratings/${target.id}`
+			target.kind === 'appointment' ? `/appointments/${target.id}` : `/ratings/${target.id}`,
+		open: null
 	};
 
 	untrack(() =>
@@ -87,5 +88,5 @@
 
 <!-- Tests only: screen 63 under a session and the frame's toast, with the addresses the screen gives it, as the site's
      root composes them. -->
-<NotificationInbox {locale} {filter} {links} {offline} />
+<NotificationInbox side="patient" {locale} {filter} {links} {offline} />
 <Toaster {toasts} />

@@ -1,6 +1,6 @@
 import type { ApiResponseData } from '$shared/lib/api-client';
 import { toStarScore } from '$shared/lib/rating-stars';
-import { readInstant } from '$modules/appointments/api/instant';
+import { readInstant } from '$shared/lib/instant';
 import { RATING_ASPECTS } from '$modules/appointments/config';
 import type {
 	OwnReviewFacts,

@@ -146,6 +146,48 @@ describe('Chip', () => {
 		expect(screen.getByText('Πληρωμή με κάρτα στο ιατρείο')).toHaveClass('truncate');
 	});
 
+	it('wave 5.1 · screen 67 (`.l-n`): `countLook="bubble"` draws the count as a 20 round bubble — the chip’s grey when idle, the page’s fill on the chosen dark chip; the words stay the label’s', () => {
+		const { unmount } = render(Chip, {
+			props: {
+				label: 'Αιτήματα',
+				href: '/doctor/appointments?tab=requests',
+				variant: 'contrast',
+				size: 'tab',
+				count: '2',
+				countLook: 'bubble',
+				hover: false
+			}
+		});
+		const idle = screen.getByText('2');
+		expect(idle).toHaveAttribute('data-look', 'bubble');
+		expect(idle).toHaveClass('h-5', 'min-w-5', 'rounded-full', 'bg-chip', 'text-foreground');
+		expect(idle).toHaveClass('shrink-0', 'whitespace-nowrap', 'font-semibold');
+		expect(screen.getByRole('link', { name: 'Αιτήματα 2' })).toBeInTheDocument();
+		unmount();
+		render(Chip, {
+			props: {
+				label: 'Αιτήματα',
+				href: '/doctor/appointments?tab=requests',
+				variant: 'contrast',
+				size: 'tab',
+				count: '2',
+				countLook: 'bubble',
+				selected: true,
+				hover: false
+			}
+		});
+		const chosen = screen.getByText('2');
+		expect(chosen).toHaveClass('bg-card', 'text-foreground');
+		expect(chosen).not.toHaveClass('bg-chip');
+	});
+
+	it('(negative) the default count is the words after the label — no bubble', () => {
+		render(Chip, { props: { label: 'Κάρτα', variant: 'outline', count: '64' } });
+		const count = screen.getByText('64');
+		expect(count).toHaveAttribute('data-look', 'text');
+		expect(count).not.toHaveClass('rounded-full', 'bg-chip');
+	});
+
 	it('U-24.3 (negative, NIT-3 of r1): a chip without a count draws its label alone (no pair)', () => {
 		render(Chip, { props: { label: 'Μετρητά', variant: 'outline' } });
 		const chip = screen.getByRole('button', { name: 'Μετρητά' });

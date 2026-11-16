@@ -21,6 +21,8 @@ export type DoctorOnboardingContext = {
 	href: (path: string) => string;
 	helpHref: string;
 	homeHref: string;
+	/** 🔴 Wave 5.1 · screen 64: the «Προφίλ», where «‹» of the application's page leads (below 744); the home without it. */
+	profileHref?: string;
 	readCodeFailure: (error: unknown) => DoctorOnboardingCodeFailure;
 	/**
 	 * W8-Σ1 · a typed number in the form the server takes (E.164: a national «210 412 3456» becomes «+302104123456»),

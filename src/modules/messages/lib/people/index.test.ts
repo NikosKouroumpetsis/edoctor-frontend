@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildCounterpartFacts, nameInitial } from '.';
+import { buildCounterpartFacts, nameInitial, nameInitials } from '.';
 
 describe('the other person (U-84.3)', () => {
 	it('a doctor: name, specialty, page', () => {
@@ -42,7 +42,8 @@ describe('the other person (U-84.3)', () => {
 		expect(of('patient', 'Drakos').sentenceName).toBe('Drakos');
 	});
 
-	it('a patient: a name, «Ασθενής», no page and no photo even if one were sent', () => {
+	// Rewrites U-84.3 «a patient: a name, «Ασθενής»» → D-W51-86: the appointment's line takes the place of «Ασθενής».
+	it('🔴 D-W51-86: η γραμμή του ραντεβού, ποτέ «Ασθενής» — a patient: a name and two initials, no subtitle, no page and no photo even if one were sent', () => {
 		const facts = buildCounterpartFacts(
 			{
 				kind: 'patient',
@@ -56,8 +57,8 @@ describe('the other person (U-84.3)', () => {
 		);
 		expect(facts).toMatchObject({
 			name: 'Μαρία Παπαδάκη',
-			subtitle: 'Ασθενής',
-			initial: 'Μ',
+			subtitle: '',
+			initial: 'ΜΠ',
 			isDoctor: false,
 			slug: null,
 			imageUrl: null
@@ -71,5 +72,7 @@ describe('the other person (U-84.3)', () => {
 	it('an initial is a whole character', () => {
 		expect(nameInitial('🩺 Άννα')).toBe('🩺');
 		expect(nameInitial('dr anna')).toBe('A');
+		expect(nameInitials('  Ιωάννα   Καρρά Παππά ')).toBe('ΙΚ');
+		expect(nameInitials('🩺 άννα')).toBe('🩺Ά');
 	});
 });

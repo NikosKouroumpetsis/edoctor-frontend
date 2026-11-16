@@ -1,14 +1,13 @@
 import type { Snippet } from 'svelte';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
+import type { StepScreenPlacement } from '$shared/ui/templates/step-screen';
 
 /**
- * Where a «Αλλαγή» screen stands (P-W4 §3.5): `page` a page of its own (the booking's, a `<main>` the screen's height,
- * «←» beside its column from 950), `pane` the right column of an appointment's split (screens 52–54, U-136.2: a
- * `<section>` in the page's `<main>`, «←» in its flow at every width, the change's widths), `solo` the one column in
- * the middle of the wide screen when nothing stands on its left (U-139.1, screen 55's first «Νέος συγγενής»,
- * `55-relatives/appt.css:463`): the `pane` of 744–949 — 640 with its 40 a side — at every width from 744.
+ * Where a «Αλλαγή» screen stands (P-W4 §3.5; the shared `StepScreen`'s, D-W51-50): `page` a page of its own (the
+ * booking's), `pane` the right column of an appointment's split (screens 52–54, U-136.2), `solo` the one column in the
+ * middle of the wide screen when nothing stands on its left (U-139.1, screen 55's first «Νέος συγγενής»).
  */
-export type ChangeFramePlacement = 'page' | 'pane' | 'solo';
+export type ChangeFramePlacement = Exclude<StepScreenPlacement, 'centred'>;
 
 /** The frame of every «Αλλαγή» screen (record §3.3, §8.2): «←», the title, the content, «Άκυρο» and «Αποθήκευση». */
 export type ChangeFrameProps = {

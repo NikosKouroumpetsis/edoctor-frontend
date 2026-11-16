@@ -1,2 +1,2 @@
 export { default } from './page/index.svelte';
-export type { InboxPageProps } from './types';
+export type { InboxFreshPatient, InboxPageProps } from './types';

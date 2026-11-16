@@ -133,7 +133,8 @@ describe('screens/notifications · «Ειδοποιήσεις», the list (D-W45
 			`/en/appointments/${SAMPLE_IDS.appointment}`
 		);
 		const list = calls.find((call) => call.path === '/inbox/me');
-		expect(list?.query).toEqual({ filter: 'previous', lang: 'en', limit: '20' });
+		// D-W51-89: the patient's mode says its side aloud (Rewrites the query without it).
+		expect(list?.query).toEqual({ side: 'patient', filter: 'previous', lang: 'en', limit: '20' });
 	});
 
 	it('🔴 U-80.1 Ε6 · rule 11: before the session is known, and for a guest, the page asks the server NOTHING and draws no person’s fact', async () => {

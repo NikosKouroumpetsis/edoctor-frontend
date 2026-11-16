@@ -14,15 +14,23 @@ export const notificationInboxFilters: readonly NotificationInboxFilter[] = [
 	'all'
 ];
 
-/** The glyph of each kind of line (record §5.8: a calendar, a clock, a star, a question mark). */
+/**
+ * The glyph of each kind of line (record §5.8: a calendar, a clock, a star, a question mark), and since screen 75
+ * (D-W51-90, `sw.js` `NI`; the application's own glyphs): a cancelled appointment, a visit to settle, the external
+ * calendar, the licence.
+ */
 export const notificationInboxGlyphs: Record<NotificationInboxIcon, IoniconName> = {
 	CALENDAR: 'calendar-outline',
 	CLOCK: 'time-outline',
 	STAR: 'star-outline',
-	QUESTION: 'help-circle-outline'
+	QUESTION: 'help-circle-outline',
+	CALENDAR_CANCELED: 'calendar-remove-outline',
+	CHECK: 'checkmark-circle-outline',
+	SYNC: 'sync-outline',
+	BADGE: 'ribbon-outline'
 };
 
-/** A line whose kind the server names with a word the page does not know: the calendar. */
+/** A line whose glyph the server names with a word the page does not know (none of the contract's): the calendar. */
 export const notificationInboxFallbackGlyph: IoniconName = 'calendar-outline';
 
 /**

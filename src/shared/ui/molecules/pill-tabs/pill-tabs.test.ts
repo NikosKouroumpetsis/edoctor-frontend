@@ -90,4 +90,20 @@ describe('PillTabs', () => {
 		expect(container.innerHTML).not.toMatch(/\b(tablet|split|laptop|desktop|wide):/);
 		expect(container.innerHTML).not.toMatch(/\bdark:|#[0-9a-f]{3,8}\b|bg-white|text-black/i);
 	});
+
+	it('🔴 screen 66 (D-W51-27, `sw.css:96-98`): `solid` — the chip’s fill, the chosen one filled dark with light words and a shadow, 15/600 both, no hover colour (U-100)', () => {
+		renderTabs({ variant: 'solid' });
+		const [chosen, other] = screen.getAllByRole('tab');
+		expect(chosen).toHaveAttribute('data-variant', 'solid');
+		expect(chosen).toHaveClass('bg-foreground', 'border-foreground', 'shadow-floating', 'px-5');
+		expect(chosen).not.toHaveClass('px-4');
+		expect(chosen.firstElementChild).toHaveClass('text-body-md', 'font-semibold', 'text-card');
+		expect(other).toHaveClass('bg-chip', 'border-transparent');
+		expect(other.firstElementChild).toHaveClass('text-body-md', 'font-semibold', 'text-foreground');
+		expect(other.className).not.toMatch(/hover:/u);
+		// Live check w51-s2: no scrolling box around the solid row — it would clip the shadow into a square.
+		const scroller = screen.getByRole('tablist').parentElement as HTMLElement;
+		expect(scroller).toHaveClass('overflow-visible');
+		expect(scroller.className).not.toMatch(/overflow-(?:x-)?(?:auto|hidden|scroll|clip)/u);
+	});
 });

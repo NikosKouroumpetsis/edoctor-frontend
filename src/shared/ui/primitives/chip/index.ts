@@ -1,4 +1,9 @@
-import Root, { type ChipProps, type ChipSize, type ChipVariant } from './chip.svelte';
+import Root, {
+	type ChipCountLook,
+	type ChipProps,
+	type ChipSize,
+	type ChipVariant
+} from './chip.svelte';
 import { setChipGroupContext, type ChipGroupEntry, type ChipGroupType } from './context';
 
 export {
@@ -6,6 +11,7 @@ export {
 	setChipGroupContext,
 	type ChipGroupEntry,
 	type ChipGroupType,
+	type ChipCountLook,
 	type ChipProps,
 	type ChipSize,
 	type ChipVariant,

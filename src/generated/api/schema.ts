@@ -944,6 +944,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/messaging/doctor/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The doctor writes first to a patient of theirs: open the one conversation of the pair, or continue it, with a message. */
+        post: operations["startMessagingDoctorConversation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/messaging/conversations/{conversationId}/messages": {
         parameters: {
             query?: never;
@@ -1101,6 +1118,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/appointment/public/cancel-links/{cancelToken}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the visit of one cancel link, with no session (the page of a patient without an account). */
+        get: operations["getAppointmentCancelLink"];
+        put?: never;
+        /** Cancel the visit of one cancel link with a reason, with no session (a patient without an account). */
+        post: operations["cancelAppointmentByLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/appointment/booking-readiness": {
         parameters: {
             query?: never;
@@ -1152,6 +1187,159 @@ export interface paths {
         head?: never;
         /** Move or amend an appointment (requires session cookies). */
         patch: operations["rescheduleAppointment"];
+        trace?: never;
+    };
+    "/appointment/appointments/{appointmentId}/reschedule-slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the free hours of the doctor to move one appointment to (requires a DOCTOR or backoffice session). */
+        get: operations["listAppointmentRescheduleSlots"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment/doctor/slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the free hours of the signed-in doctor for a new appointment (requires a DOCTOR session). */
+        get: operations["listDoctorSlots"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment/doctor/patients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search the patients of the signed-in doctor by name or mobile (requires a DOCTOR session). */
+        get: operations["searchDoctorPatients"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment/doctor/patients/phone-match": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find the patients of the signed-in doctor with one mobile (requires a DOCTOR session). */
+        get: operations["matchDoctorPatientsByPhone"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment/doctor/patients/{kind}/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the card of one patient of the signed-in doctor (requires a DOCTOR session). */
+        get: operations["getDoctorPatient"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment/doctor/patients/{kind}/{id}/appointments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one more page of the appointments of a patient of the signed-in doctor (requires a DOCTOR session). */
+        get: operations["listDoctorPatientAppointments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment/doctor/patients/record/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change the record of a patient without an account of the signed-in doctor (requires a DOCTOR session). */
+        patch: operations["updateDoctorPatientRecord"];
+        trace?: never;
+    };
+    "/appointment/doctor/patients/record/{id}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Join a record of the signed-in doctor to the account of the same patient (requires a DOCTOR session). */
+        post: operations["mergeDoctorPatientRecord"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appointment/appointments/{appointmentId}/charges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set the services and the final price of one appointment in one write (requires a DOCTOR or backoffice session). */
+        put: operations["editAppointmentCharges"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/appointment/appointments/{appointmentId}/cancel": {
@@ -1418,7 +1606,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List the notifications of the signed-in account, newest first (requires session cookies). */
+        /** List the notifications of the signed-in account, one side at a time, newest first (requires session cookies). */
         get: operations["listMyNotifications"];
         put?: never;
         post?: never;
@@ -1435,7 +1623,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Count the notifications the signed-in account has not opened (requires session cookies). */
+        /** Count the notifications of one side the signed-in account has not opened (requires session cookies). */
         get: operations["countMyUnreadNotifications"];
         put?: never;
         post?: never;
@@ -1454,7 +1642,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Mark every notification of the signed-in account as read (requires session cookies). */
+        /** Mark every notification of one side of the signed-in account as read (requires session cookies). */
         post: operations["markAllMyNotificationsRead"];
         delete?: never;
         options?: never;
@@ -2032,6 +2220,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/doctor/me/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the doctor standing of the session account: registration, licences, notice, mode (requires a session). */
+        get: operations["getDoctorDashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/me/dashboard/mode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Keep the mode the session account opens in next time (requires a session). */
+        put: operations["setDoctorDashboardMode"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/location/address-search/suggestions": {
         parameters: {
             query?: never;
@@ -2075,6 +2297,23 @@ export interface paths {
         };
         /** List every specialty with its names in each language (requires a session). */
         get: operations["listProfessionals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor-service/doctor-services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the doctor services the account reaches, each titled in the language of the request (requires a session). */
+        get: operations["listDoctorServices"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4388,12 +4627,14 @@ export interface components {
                 asDoctor: number;
             } | null;
         };
-        /** @description One row of the list; `side` is the side of the reader. There is never a read state of the other person (U-84.2). */
+        /** @description One row of the list; `side` is the side of the reader. There is never a read state of the other person (U-84.2). 🔴 D-W51-79: `patientId` (the account key of the card of 73) and `appointmentLine` only on the doctor side, else `null`. */
         MessagingConversationView: {
             id: string;
             /** @enum {string} */
             side: "patient" | "doctor";
             counterpart: components["schemas"]["MessagingCounterpartView"];
+            patientId: string | null;
+            appointmentLine: components["schemas"]["MessagingAppointmentLineView"] | null;
             lastMessage: components["schemas"]["MessagingLastMessageView"] | null;
             unreadCount: number;
             archived: boolean;
@@ -4409,6 +4650,18 @@ export interface components {
             slug: string | null;
             specialty: string | null;
             photoUrl: string | null;
+        };
+        /** @description D-W51-79: under the name of a patient on the doctor side, the appointment the conversation is about — the nearest one (`upcoming`) or request (`request`) from today on, else the last visit — and the relative it was for, by the relation its model stores. */
+        MessagingAppointmentLineView: {
+            /** @enum {string} */
+            kind: "upcoming" | "request" | "lastVisit";
+            /** Format: date-time */
+            startTime: string;
+            forRelative: {
+                firstName: string | null;
+                lastName: string | null;
+                relation: string | null;
+            } | null;
         };
         MessagingLastMessageView: {
             preview: string;
@@ -4428,12 +4681,14 @@ export interface components {
             sentAt: string;
             clientMessageId: string | null;
         };
-        /** @description `counterpart` is null on a poll (`after`), which reads only the new messages and this state. */
+        /** @description `counterpart` and `appointmentLine` are null on a poll (`after`), which reads only the new messages and this state. 🔴 D-W51-79: `patientId` and `appointmentLine` only on the doctor side, as in the list. */
         MessagingThreadView: {
             conversationId: string;
             /** @enum {string} */
             side: "patient" | "doctor";
             counterpart: components["schemas"]["MessagingCounterpartView"] | null;
+            patientId: string | null;
+            appointmentLine: components["schemas"]["MessagingAppointmentLineView"] | null;
             state: components["schemas"]["MessagingThreadStateView"];
             items: components["schemas"]["MessagingMessageView"][];
             hasMore: boolean;
@@ -4470,6 +4725,41 @@ export interface components {
         MessagingDoctorSettingsView: {
             acceptsNewConversations: boolean;
         };
+        /** @description D-W51-58 (U-198.1, screen 53 without a session): what the page of one cancel link shows — the doctor, the hour on the office clock, the office and the terms — and nothing of the patient. `late`: the deadline passed, so the office is called. */
+        AppointmentPublicCancelLinkView: {
+            status: components["schemas"]["AppointmentStatus"];
+            /** Format: date-time */
+            startTime: string;
+            /** Format: date-time */
+            endTime: string;
+            officeTimeZone: string;
+            doctor: components["schemas"]["AppointmentPublicCancelLinkDoctorView"];
+            office: components["schemas"]["AppointmentPublicCancelLinkOfficeView"];
+            cancellation: components["schemas"]["AppointmentPatientCancellationView"];
+            canCancel: boolean;
+            late: boolean;
+        };
+        /** @enum {string} */
+        AppointmentStatus: "pending" | "checked_in" | "completed" | "canceled" | "booked" | "rejected" | "unavailable" | "expired" | "no_show";
+        /** @description D-W51-58: the doctor of a visit on the page of a cancel link: the public name and the specialty of the catalogue. */
+        AppointmentPublicCancelLinkDoctorView: {
+            fullName: string | null;
+            specialty: string | null;
+        };
+        /** @description D-W51-58: the office of a visit on the page of a cancel link — the address in the reader's language, and its phone. */
+        AppointmentPublicCancelLinkOfficeView: {
+            street: string | null;
+            streetNumber: string | null;
+            city: string | null;
+            postalCode: string | null;
+            floor: number | null;
+            phone: string | null;
+        };
+        /** @description D-W51-33 (U-90.1 A2): the cutoff that holds for the patient of a visit and the deadline the patient's own actions carry. */
+        AppointmentPatientCancellationView: {
+            cutoffHours: number;
+            deadline: string | null;
+        };
         /** @description What the app needs before the last booking step (D-05). `insideCancellationCutoff` (U-90.1 A4): the deadline of the slot has passed; `false` without a slot. `firstVisitKnown` (A-1): the person has seen the doctor, `null` without a doctor. `patientSmsExpected` (A-3, U-103.3): the doctor's answer also leaves by SMS; `null` without a slot or a doctor of the tenant. */
         BookingReadinessView: {
             phoneVerified: boolean;
@@ -4490,15 +4780,20 @@ export interface components {
         AppointmentDetailResponseView: {
             actions: components["schemas"]["AppointmentActionsView"];
             officePhone: string | null;
+            visitsWithDoctor?: components["schemas"]["AppointmentVisitsWithDoctorView"];
+            patientCancellation?: components["schemas"]["AppointmentPatientCancellationView"];
+            conversationId?: string | null;
             officeTimeZone: string;
             serviceLines?: components["schemas"]["AppointmentServiceLineView"][];
             auditLogs?: components["schemas"]["AppointmentAuditLogResponseView"][];
+            unattendedOutcomeAt?: string | null;
             ratingInvitation: components["schemas"]["AppointmentRatingInvitationRef"] | null;
             ratingId: string | null;
             id: string;
             doctorId: string;
             officeId: string;
             patientId: string;
+            patientKind: components["schemas"]["AppointmentPatientKind"];
             relativeId: string | null;
             bookedForType: components["schemas"]["AppointmentBookedForType"];
             /** Format: date-time */
@@ -4541,7 +4836,7 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        /** @description D-118: what the reader may do with this appointment NOW, by the server clock and the rules the writes check. The cutoff fields, the deadline, the reason a move is refused and the moves left are the patient's answer (U-135.6, U-136.5), `null` or `false` for the doctor side, whose refused move has no reason; `outcomes`/`correction` are the doctor side's (`[]` and `null` for the patient, D-24/D-59). For a request outside its deadline, `cancellationDeadline` is the deadline once confirmed. */
+        /** @description D-118: what the reader may do with this appointment NOW, by the server clock and the rules the writes check. The cutoff fields, the deadline, the refused move's reason and the moves left are the patient's (U-135.6, U-136.5), `null`/`false` for the doctor side; `outcomes`, `correction` and `canEditCharges` (D-W51-44) are the doctor side's (`[]`, `null`, `false` for the patient, D-24/D-59). For a request outside its deadline, `cancellationDeadline` is the deadline once confirmed. */
         AppointmentActionsView: {
             canCancel: boolean;
             canReschedule: boolean;
@@ -4554,6 +4849,7 @@ export interface components {
             cancellationDeadline: string | null;
             rescheduleDenial: components["schemas"]["PatientRescheduleDenial"] | null;
             reschedulesLeft: number | null;
+            canEditCharges: boolean;
         };
         /** @enum {string} */
         AppointmentOutcome: "ARRIVED" | "NO_SHOW" | "COMPLETED";
@@ -4565,6 +4861,11 @@ export interface components {
         };
         /** @enum {string} */
         PatientRescheduleDenial: "STATUS" | "AFTER_CUTOFF" | "LIMIT_REACHED";
+        /** @description D-W51-33: the completed visits the person of an appointment had with its doctor before it, and the latest start of them. */
+        AppointmentVisitsWithDoctorView: {
+            count: number;
+            lastAt: string | null;
+        };
         AppointmentServiceLineView: {
             id: string;
             appointmentId: string;
@@ -4605,9 +4906,9 @@ export interface components {
             expiresAt: string;
         };
         /** @enum {string} */
-        AppointmentBookedForType: "SELF" | "RELATIVE";
+        AppointmentPatientKind: "ACCOUNT" | "RECORD";
         /** @enum {string} */
-        AppointmentStatus: "pending" | "checked_in" | "completed" | "canceled" | "booked" | "rejected" | "unavailable" | "expired" | "no_show";
+        AppointmentBookedForType: "SELF" | "RELATIVE";
         /** @description D-06: frozen at booking time; a later profile edit never rewrites it. D-55: a response carries `tenantUserId` only to that same account, every other reader gets `null`. D-W45-11: a response carries `amka` / `afm` only to the doctor side and the backoffice, never to the patient of the appointment. */
         AppointmentPatientSnapshotView: {
             id: string;
@@ -4663,17 +4964,20 @@ export interface components {
             nextCursor: string | null;
             total: number;
         };
-        /** @description The appointment as every response carries it, built only by the actor-scoped mapper. `officeTimeZone` is the IANA zone the office keeps its hours in, so a client prints every hour on the office clock. */
+        /** @description The appointment as every response carries it, built only by the actor-scoped mapper. `officeTimeZone` is the IANA zone the office keeps its hours in, so a client prints every hour on the office clock. D-W51-21: the doctor side also reads `actions` and `unattendedOutcomeAt` on it; a member reads neither key. */
         AppointmentResponseView: {
             officeTimeZone: string;
             serviceLines?: components["schemas"]["AppointmentServiceLineView"][];
             auditLogs?: components["schemas"]["AppointmentAuditLogResponseView"][];
+            actions?: components["schemas"]["AppointmentActionsView"];
+            unattendedOutcomeAt?: string | null;
             ratingInvitation: components["schemas"]["AppointmentRatingInvitationRef"] | null;
             ratingId: string | null;
             id: string;
             doctorId: string;
             officeId: string;
             patientId: string;
+            patientKind: components["schemas"]["AppointmentPatientKind"];
             relativeId: string | null;
             bookedForType: components["schemas"]["AppointmentBookedForType"];
             /** Format: date-time */
@@ -4715,6 +5019,130 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        /** @description D-W51-41: the free hours of the doctor for moving one appointment, in the IANA `timezone` of its office, each day from the first asked, for its `durationMinutes` (the longest active service), with the appointment itself not busy. */
+        AppointmentRescheduleSlotsView: {
+            appointmentId: string;
+            timezone: string;
+            durationMinutes: number;
+            slotsByDate: components["schemas"]["AppointmentRescheduleSlotsDayView"][];
+        };
+        AppointmentRescheduleSlotsDayView: {
+            date: string;
+            slots: components["schemas"]["AppointmentRescheduleSlotView"][];
+        };
+        /** @description One free hour of the doctor, `startTime` to `endTime` (ISO, UTC), the very hours the move then accepts. */
+        AppointmentRescheduleSlotView: {
+            startTime: string;
+            endTime: string;
+        };
+        /** @description D-W51-56: the free hours of the doctor for a NEW visit, in the IANA `timezone` of the office, each day from the first asked, for its `durationMinutes` (the longest service chosen): the hours `createAppointment` of the doctor accepts. */
+        AppointmentDoctorSlotsView: {
+            officeId: string;
+            timezone: string;
+            durationMinutes: number;
+            slotsByDate: components["schemas"]["AppointmentRescheduleSlotsDayView"][];
+        };
+        AppointmentDoctorPatientListView: {
+            items: components["schemas"]["AppointmentDoctorPatientView"][];
+            nextCursor: string | null;
+        };
+        /** @description D-W51-64: one person of the doctor — of an appointment in any status, or a record added without one; a record the doctor joined to an account is that account (D-W51-67). `key` is the route key of its card, `person` what `createAppointment` takes. `phone` is whole (U-182.7), in the stored login form; `bookedBy` the account holder who books for a relative, with the relationship of the relative; `next` the nearest open appointment from today on; `visits` the completed ones. */
+        AppointmentDoctorPatientView: {
+            key: components["schemas"]["AppointmentDoctorPatientKey"];
+            person: components["schemas"]["AppointmentPerson"];
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            email: string | null;
+            hasAccount: boolean;
+            bookedBy: {
+                firstName: string | null;
+                lastName: string | null;
+                relationship: string | null;
+            } | null;
+            next: {
+                /** Format: date-time */
+                startTime: string;
+                status: components["schemas"]["AppointmentStatus"];
+            } | null;
+            visits: {
+                count: number;
+                firstAt: string | null;
+                lastAt: string | null;
+            };
+            noShows: number;
+        };
+        AppointmentDoctorPatientKey: {
+            kind: components["schemas"]["AppointmentDoctorPatientKeyKind"];
+            id: string;
+        };
+        /** @enum {string} */
+        AppointmentDoctorPatientKeyKind: "account" | "relative" | "record";
+        /** @description D-W51-53: the person of one appointment, never one bare id that means two things. */
+        AppointmentPerson: {
+            /** @constant */
+            kind: "ACCOUNT";
+            patientId: string;
+            relativeId: string | null;
+        } | {
+            /** @constant */
+            kind: "RECORD";
+            recordId: string;
+        };
+        /** @description D-W51-65: the card of one patient of the doctor — the person whole (U-182.7), for a relative the account holder who books whole too, the counters, and the first page of each list of appointments with this doctor only. `editable` only for a record of the doctor, `conversationId` only for an account, `addedAt` only for a record, `mergeCandidate` only for a record whose mobile is that of an account patient of the same doctor (U-198.2). */
+        AppointmentDoctorPatientCardView: {
+            key: components["schemas"]["AppointmentDoctorPatientKey"];
+            person: components["schemas"]["AppointmentPerson"];
+            hasAccount: boolean;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            email: string | null;
+            amka: string | null;
+            afm: string | null;
+            gender: string | null;
+            relationship: string | null;
+            bookedBy: {
+                firstName: string | null;
+                lastName: string | null;
+                phone: string | null;
+                email: string | null;
+                amka: string | null;
+                afm: string | null;
+            } | null;
+            visits: {
+                count: number;
+                firstAt: string | null;
+                lastAt: string | null;
+            };
+            noShows: number;
+            editable: boolean;
+            conversationId: string | null;
+            addedAt: string | null;
+            mergeCandidate: {
+                key: components["schemas"]["AppointmentDoctorPatientKey"];
+                firstName: string | null;
+                lastName: string | null;
+            } | null;
+            upcoming: components["schemas"]["AppointmentListPageResponseView"];
+            past: components["schemas"]["AppointmentListPageResponseView"];
+        };
+        /** @description D-W51-66: the record of the doctor after its change, whole (U-182.7), with the key of its card. */
+        AppointmentDoctorPatientRecordView: {
+            key: components["schemas"]["AppointmentDoctorPatientKey"];
+            firstName: string;
+            lastName: string;
+            phone: string;
+            email: string | null;
+            amka: string | null;
+            afm: string | null;
+            /** Format: date-time */
+            addedAt: string;
+        };
+        /** @description D-W51-67: the card the doctor reads after a join — the account the record now belongs to on the doctor's side. */
+        AppointmentDoctorPatientMergeView: {
+            key: components["schemas"]["AppointmentDoctorPatientKey"];
         };
         /** @description Ε-Φ7-1 (D-55): an invitation as its patient reads it — its state on the SERVER clock (an OPEN one past `expiresAt` reads `EXPIRED`, D-118), whether a rating is accepted now and the code that refuses it, the rating it produced, and the author name a rating would be stored with now (D-W4-26); never the tenant, the patient account, the mailbox or a counter. */
         AppointmentRatingInvitationActorView: {
@@ -4897,15 +5325,15 @@ export interface components {
             target: components["schemas"]["NotificationInboxTargetView"];
         };
         /** @enum {string} */
-        NotificationInboxKind: "APPOINTMENT_REQUESTED" | "APPOINTMENT_CONFIRMED" | "APPOINTMENT_REJECTED" | "APPOINTMENT_EXPIRED" | "APPOINTMENT_RESCHEDULED" | "APPOINTMENT_CANCELED_BY_PATIENT" | "APPOINTMENT_CANCELED_BY_DOCTOR" | "APPOINTMENT_NO_SHOW" | "APPOINTMENT_REMINDER" | "RATING_INVITATION" | "RATING_PUBLISHED" | "RATING_NOT_PUBLISHED" | "RATING_REPLY_PUBLISHED" | "QUESTION_ANSWERED" | "QUESTION_REJECTED";
+        NotificationInboxKind: "APPOINTMENT_REQUESTED" | "APPOINTMENT_CONFIRMED" | "APPOINTMENT_REJECTED" | "APPOINTMENT_EXPIRED" | "APPOINTMENT_RESCHEDULED" | "APPOINTMENT_CANCELED_BY_PATIENT" | "APPOINTMENT_CANCELED_BY_DOCTOR" | "APPOINTMENT_NO_SHOW" | "APPOINTMENT_REMINDER" | "RATING_INVITATION" | "RATING_PUBLISHED" | "RATING_NOT_PUBLISHED" | "RATING_REPLY_PUBLISHED" | "QUESTION_ANSWERED" | "QUESTION_REJECTED" | "APPOINTMENT_OUTCOME_PROMPT" | "RATING_RECEIVED" | "CALENDAR_CONFLICT" | "CALENDAR_SYNC_FAILING" | "LICENSE_EXPIRING" | "LICENSE_EXPIRED";
         /** @enum {string} */
-        NotificationInboxIcon: "CALENDAR" | "CLOCK" | "STAR" | "QUESTION";
+        NotificationInboxIcon: "CALENDAR" | "CLOCK" | "STAR" | "QUESTION" | "CALENDAR_CANCELED" | "CHECK" | "SYNC" | "BADGE";
         NotificationInboxTargetView: {
             kind: components["schemas"]["NotificationInboxTargetKind"];
             id: string;
         };
         /** @enum {string} */
-        NotificationInboxTargetKind: "APPOINTMENT" | "RATING_INVITATION" | "QUESTION";
+        NotificationInboxTargetKind: "APPOINTMENT" | "RATING_INVITATION" | "QUESTION" | "CALENDAR_CONNECTION" | "DOCTOR";
         NotificationInboxUnreadCountView: {
             unreadCount: number;
         };
@@ -5055,9 +5483,11 @@ export interface components {
             isReadSelected: boolean;
             isWriteSelected: boolean;
         };
+        /** @description U-169 / D-W51-12: `notificationEmail` (whole) only when the backoffice reads another account; the doctor reads the mask. */
         DoctorProfileBaseView: {
             doctorId: string;
-            notificationEmail: string | null;
+            notificationEmailMasked: string | null;
+            notificationEmail?: string | null;
             notificationEmailVerifiedAt: string | null;
             facebook: string | null;
             website: string | null;
@@ -5271,10 +5701,7 @@ export interface components {
                 /** @enum {string|null} */
                 gender: "MALE" | "FEMALE" | null;
             };
-            contactEmail: {
-                notificationEmail: string | null;
-                verified: boolean;
-            };
+            contactEmail: components["schemas"]["DoctorContactEmailView"];
             professional: {
                 professionalId: string | null;
                 licenseNumber: string | null;
@@ -5314,6 +5741,12 @@ export interface components {
         DoctorOnboardingState: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "LOCKED";
         /** @enum {string} */
         DoctorOnboardingSection: "BASIC_INFO" | "CONTACT_EMAIL" | "PROFESSIONAL" | "OFFICE_ADDRESS" | "OFFICE_PHONE" | "OFFICE_PAYMENTS" | "SERVICE_PRICING" | "CALENDAR" | "LIABILITY" | "TERMS" | "ACTIVATION_INTENT";
+        /** @description U-169 / D-W51-12: the contact email of the registration. The doctor reads it masked only; `notificationEmail` (whole) is present only when the backoffice reads another account, as it always did. */
+        DoctorContactEmailView: {
+            notificationEmailMasked: string | null;
+            verified: boolean;
+            notificationEmail?: string | null;
+        };
         DoctorOnboardingProgressOfficeView: {
             streetLine: string;
             postalCode: string;
@@ -5337,6 +5770,43 @@ export interface components {
         /** @description The answer of the email code request, the one registration write that does not return the progress (cooldown). */
         DoctorNotificationEmailCodeSentView: {
             success: boolean;
+        };
+        /** @description D-W51-10 (U-185.1, U-185.3): «who am I as a doctor», for every signed-in account: the registration, the two licences, whether the doctor mode exists (`licensed`), the expiry notice, the mode in force and the name card (licensed only). */
+        DoctorDashboardView: {
+            registration: components["schemas"]["DoctorOnboardingState"];
+            licences: {
+                marketplace: components["schemas"]["DoctorDashboardLicenceView"];
+                payments: components["schemas"]["DoctorDashboardLicenceView"];
+            };
+            licensed: boolean;
+            notice: components["schemas"]["DoctorDashboardNoticeView"] | null;
+            lastMode: components["schemas"]["DoctorDashboardMode"];
+            card: components["schemas"]["DoctorDashboardCardView"] | null;
+        };
+        /** @description D-W51-10: one licence category of the dashboard answer; `endsAt` is the end of the farthest active, or the latest. */
+        DoctorDashboardLicenceView: {
+            status: components["schemas"]["DoctorLicenceStanding"];
+            endsAt: string | null;
+        };
+        /** @enum {string} */
+        DoctorLicenceStanding: "NONE" | "ACTIVE" | "EXPIRED";
+        /** @description U-185.2: the notice above «Today»; `null` without an end within 30 days. */
+        DoctorDashboardNoticeView: {
+            kind: components["schemas"]["DoctorLicenceNoticeKind"];
+            category: components["schemas"]["DoctorLicenceNoticeCategory"];
+            endsAt: string;
+        };
+        /** @enum {string} */
+        DoctorLicenceNoticeKind: "EXPIRING" | "EXPIRED";
+        /** @enum {string} */
+        DoctorLicenceNoticeCategory: "MARKETPLACE" | "PAYMENTS";
+        /** @enum {string} */
+        DoctorDashboardMode: "PATIENT" | "DOCTOR";
+        /** @description U-164.1: the name card of the doctor menu; the specialty only from the catalogue (U-122), `null` without one. */
+        DoctorDashboardCardView: {
+            firstName: string | null;
+            lastName: string | null;
+            specialtyName: string | null;
         };
         /** @description The suggestions of one typed text, at most five, and the session token (UUIDv4) every next call of the same search sends back; a new search starts without one and receives a new token. */
         AddressSearchSuggestionsResponseView: {
@@ -5374,6 +5844,36 @@ export interface components {
             transliteration: string;
             normalizedName: string;
         };
+        /** @description D-W51-44: the list of `GET /doctor-service/doctor-services`, the services «Υπηρεσίες και κόστος» ticks from. */
+        DoctorServiceListResponseView: components["schemas"]["DoctorServiceListItemView"][];
+        /** @description D-W51-44: one row of the list of doctor services, titled by its base service in the language of the request. */
+        DoctorServiceListItemView: {
+            title: string;
+            translations?: components["schemas"]["DoctorServiceTranslationView"][];
+            catalogue?: components["schemas"]["CatalogueView"] | null;
+            id: string;
+            doctorId: string;
+            serviceId: string;
+            price: number;
+            amount: number | null;
+            customDurationInMinutes: number;
+            isSpecialized: boolean;
+            yearsOfexperience: number | null;
+            catalogueId: string | null;
+        };
+        DoctorServiceTranslationView: {
+            id: string;
+            language: components["schemas"]["ILanguage"];
+            subtitle: string | null;
+            description: string | null;
+        };
+        CatalogueView: {
+            id: string;
+            doctorId: string;
+            category: components["schemas"]["ICatalogueCategory"];
+        };
+        /** @enum {string} */
+        ICatalogueCategory: "REGULAR" | "REDUCED" | "SECONDARY" | "SECONDARY_REDUCED" | "PROMOTION" | "PROMOTION_REDUCED";
         ErpCartView: {
             id: string;
             doctorId: string;
@@ -9340,6 +9840,7 @@ export interface operations {
                 archived?: "0" | "1";
                 cursor?: string;
                 limit?: number;
+                q?: string;
                 lang?: "el" | "en";
                 language?: "el" | "en";
             };
@@ -9349,7 +9850,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description `side` (`all` by default) keeps the conversations where the reader is that side; `archived=1` reads «Προηγούμενες συνομιλίες». Up to 30 a page, `nextCursor` goes in `cursor`. `lastMessage.preview` is one line, cut on the server at 140 characters. `sideCounts` is on the first page: an account holding both sides shows its chips from it. There is never a read state of the other person. Rate limited per IP under `messaging-read`. */
+            /** @description `side` (`all` by default) keeps the conversations where the reader is that side; `archived=1` reads «Προηγούμενες συνομιλίες». Up to 30 a page, `nextCursor` goes in `cursor`. `lastMessage.preview` is one line, cut on the server at 140 characters. `sideCounts` is on the first page: an account holding both sides shows its chips from it. There is never a read state of the other person. `q` (D-W51-80) searches the first and last name of the patient, without accents or case, every word in the name, and only with `side=doctor`: any other side, a blank one after the trim, more than 40 characters or a control character is 422; the cursor pages the search the same way. A row of the doctor side carries `patientId` (the key of the patient card, `account/<patientId>`) and `appointmentLine` (D-W51-79: the nearest open appointment `upcoming` or request `request` from today on, else the last visit `lastVisit`, with `forRelative` for a relative, or null); a row of the patient side has both null. Rate limited per IP under `messaging-read`. Before the licence (U-183.5) a doctor account reads its patient side only: `side=doctor` is refused with 403 «Doctor licence is required before …», `side=all` and the badge leave the doctor side out (`sideCounts.asDoctor` is 0). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9403,6 +9904,46 @@ export interface operations {
             };
         };
     };
+    startMessagingDoctorConversation: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    kind: "account" | "relative";
+                    /** Format: uuid */
+                    id: string;
+                    /** Format: uuid */
+                    clientMessageId: string;
+                    body: string;
+                };
+            };
+        };
+        responses: {
+            /** @description U-193.1 (D-W51-78): only a doctor account; any other is 403. `kind` and `id` are the key of the patient card: `account` (the patient profile, an appointment of a record joined to it counts) or `relative` (the conversation is with the account that books for the relative); a `record` has no account and is 422 by the schema. Only a patient with an appointment or a request of any status with this doctor: another doctor's patient, an unknown one and another tenant's are the same 404. An existing conversation of the pair takes the message and comes back. The same `clientMessageId` answers the same message. 409 `MESSAGING_BLOCKED`; 400 `MESSAGING_SELF`, `MESSAGE_EMPTY` or `MESSAGE_TOO_LONG`; 422 for a body that fails the schema; 429 `MESSAGING_NEW_LIMIT`, `MESSAGING_SEND_LIMIT` or `MESSAGE_DUPLICATE` (the limits of a patient, per doctor account), with `Retry-After`. The patient gets the notice of a new message, with no text. The text is plain: render it only as text. A conversation where the account is the doctor is refused with 403 «Doctor licence is required before …» until the licence (U-183.5); its patient side never is. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["MessagingSentMessageView"];
+                    };
+                };
+            };
+        };
+    };
     listMessagingMessages: {
         parameters: {
             query?: {
@@ -9420,7 +9961,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Oldest first inside a page. `before` reads backwards, `after` polls forwards, never both; up to 50 a page. On a poll `counterpart` is null and only the new messages and `state` travel. 404 for a conversation that is not the reader's, unknown or of another tenant alike. */
+            /** @description Oldest first inside a page. `before` reads backwards, `after` polls forwards, never both; up to 50 a page. On a poll `counterpart` and `appointmentLine` are null and only the new messages and `state` travel. On the doctor side `patientId` and `appointmentLine` are those of the list (D-W51-79); on the patient side both are null. 404 for a conversation that is not the reader's, unknown or of another tenant alike. A conversation where the account is the doctor is refused with 403 «Doctor licence is required before …» until the licence (U-183.5); its patient side never is. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9458,7 +9999,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The same `clientMessageId` answers the same message, so «Δοκιμάστε ξανά» never doubles. 404 for a conversation that is not the reader's; 409 `MESSAGING_BLOCKED` or `MESSAGING_PRE_REPLY_LIMIT`; 400 `MESSAGE_EMPTY` or `MESSAGE_TOO_LONG`; 422 for a body that fails the schema; 429 `MESSAGING_SEND_LIMIT` or `MESSAGE_DUPLICATE`, with `Retry-After`. */
+            /** @description The same `clientMessageId` answers the same message, so «Δοκιμάστε ξανά» never doubles. 404 for a conversation that is not the reader's; 409 `MESSAGING_BLOCKED` or `MESSAGING_PRE_REPLY_LIMIT`; 400 `MESSAGE_EMPTY` or `MESSAGE_TOO_LONG`; 422 for a body that fails the schema; 429 `MESSAGING_SEND_LIMIT` or `MESSAGE_DUPLICATE`, with `Retry-After`. A conversation where the account is the doctor is refused with 403 «Doctor licence is required before …» until the licence (U-183.5); its patient side never is. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -9495,7 +10036,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Only forwards: an older message changes nothing. `unreadCount` is what stays unread after that message. The other person never learns it. 404 for a message outside the conversation. */
+            /** @description Only forwards: an older message changes nothing. `unreadCount` is what stays unread after that message. The other person never learns it. 404 for a message outside the conversation. A conversation where the account is the doctor is refused with 403 «Doctor licence is required before …» until the licence (U-183.5); its patient side never is. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9514,6 +10055,7 @@ export interface operations {
     getMessagingUnreadCount: {
         parameters: {
             query?: {
+                side?: "all" | "patient" | "doctor";
                 lang?: "el" | "en";
                 language?: "el" | "en";
             };
@@ -9523,7 +10065,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Conversations, not messages, with none of the archived ones. */
+            /** @description Conversations, not messages, with none of the archived ones. `side` (D-W51-77, `all` by default) counts the conversations where the reader is that side: the doctor mode asks `doctor`, the patient mode `patient`; an unknown side or key is 422. Before the licence (U-183.5) a doctor account reads its patient side only: `side=doctor` is refused with 403 «Doctor licence is required before …», `side=all` and the badge leave the doctor side out (`sideCounts.asDoctor` is 0). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9583,7 +10125,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description A new message takes it out by itself. */
+            /** @description A new message takes it out by itself. A conversation where the account is the doctor is refused with 403 «Doctor licence is required before …» until the licence (U-183.5); its patient side never is. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9613,7 +10155,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Successful response. */
+            /** @description A conversation where the account is the doctor is refused with 403 «Doctor licence is required before …» until the licence (U-183.5); its patient side never is. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9643,7 +10185,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Successful response. */
+            /** @description A conversation where the account is the doctor is refused with 403 «Doctor licence is required before …» until the licence (U-183.5); its patient side never is. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9673,7 +10215,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Successful response. */
+            /** @description A conversation where the account is the doctor is refused with 403 «Doctor licence is required before …» until the licence (U-183.5); its patient side never is. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9703,7 +10245,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description `text/plain; charset=utf-8` as an attachment, the file itself and not the JSON envelope. Only someone who takes part; 429 `MESSAGING_EXPORT_LIMIT` past 10 a day, with `Retry-After`. */
+            /** @description `text/plain; charset=utf-8` as an attachment, the file itself and not the JSON envelope. Only someone who takes part; 429 `MESSAGING_EXPORT_LIMIT` past 10 a day, with `Retry-After`. A conversation where the account is the doctor is refused with 403 «Doctor licence is required before …» until the licence (U-183.5); its patient side never is. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9763,7 +10305,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Open until the doctor closes it. 403 for an account without a doctor profile. */
+            /** @description Open until the doctor closes it. 403 for an account without a doctor profile. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9797,7 +10339,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Closed, nobody starts a new conversation; the existing ones go on. 403 for an account without a doctor profile. */
+            /** @description Closed, nobody starts a new conversation; the existing ones go on. 403 for an account without a doctor profile. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9808,6 +10350,68 @@ export interface operations {
                         status: "success" | "error";
                         message: string;
                         data: components["schemas"]["MessagingDoctorSettingsView"];
+                    };
+                };
+            };
+        };
+    };
+    getAppointmentCancelLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cancelToken: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description U-198.1 / D-W51-58: the page `/a/{token}` of the web, which the SMS and the email to a patient a doctor booked without an eDoctor account carry. It names the doctor (the public name and the specialty of the catalogue), the hour (`startTime`, `endTime`, printed on the clock of `officeTimeZone`), the office (the address in the language of the request and the phone it has now, the one to call) and the terms of the cancel of a patient (`cancellation`: the cutoff that holds for the visit and its deadline, null once it may not be cancelled online) — and NOTHING of the patient. `canCancel`: the visit may be cancelled online now, by the rules of a patient's own cancel (U-76.1); `late`: its deadline passed, so the page says to call the office. The link cancels only its own visit, only while it is pending or booked and before its CURRENT start (a visit the doctor moved keeps it until the new hour). An unknown, used, revoked or expired link, a visit of an account, and a token that is not a link secret all answer the same 404 `cancel link not found.` with the same body; a token with a character outside base64url, or over 64 characters, is 422. No session, no cookie; the per-IP class `public-cancel-link` (30 an hour, shared with the cancel) answers 429 past it. Never cached (`Cache-Control: no-store`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentPublicCancelLinkView"];
+                    };
+                };
+            };
+        };
+    };
+    cancelAppointmentByLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cancelToken: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    reasonCode: "SCHEDULE_CONFLICT" | "FEELING_BETTER" | "FOUND_ANOTHER_DOCTOR" | "PERSONAL" | "OTHER";
+                    reasonText?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description U-198.1 / D-W51-58: the patient a doctor booked without an eDoctor account cancels the ONE visit of the link, by the rules of a patient's own cancel (`cancelAppointment` of a member): `reasonCode` is one of the reasons of a patient (422 otherwise, a reason of the doctor side too) and `reasonText` (optional) holds 1 to 500 characters and no NUL character, stored as plain text. A booked visit past its cancellation deadline answers 403 `CANCEL_AFTER_CANCELLATION_CUTOFF` and nothing is written (the page then says to call the office); a visit the doctor put inside its deadline, and a request, are cancelled until the hour. The answer is the page of the canceled visit (`status: canceled`, `canCancel: false`). In the same write the link is used and every other link of the visit revoked, so a second use — of this link or of another message of the same visit — answers the 404 of `getAppointmentCancelLink`, as does every link that cancels nothing. The doctor is told as of any cancel by the patient (email, the SMS of a late cancel when switched on, the push), and the patient gets the email receipt when the record has an address. A cancel that finds the visit changed in the meantime answers 409. No session; the per-IP class `public-cancel-link` (30 an hour, shared with the read) answers 429 past it. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentPublicCancelLinkView"];
                     };
                 };
             };
@@ -9866,7 +10470,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One page ordered by `startTime, id` in the direction of `sortDir`: `asc` (the default, oldest first) or `desc` (newest first). `limit` defaults to the configured page size and is refused past the configured maximum; `cursor` is the opaque `nextCursor` of the previous page and belongs to the `sortDir` it was issued for — a cursor of the other direction is refused (422); `total` is the whole matched set and does not change between pages. `historyBefore` (optional, an ISO date-time; a client reads its tabs with `scope` instead, whose bounds the server sets) keeps ONLY the history: every appointment in a final status (`completed`, `canceled`, `rejected`, `expired`, `no_show`, `unavailable`) whatever its time, and every open one (`pending`, `booked`, `checked_in`) whose `startTime` is before `historyBefore`; an open appointment at or after it is never returned. It combines with every other filter and the role scope, and with `sortDir` and `cursor` in both directions; without it the list is unchanged. `scope` (optional) reads the tab the server bounds by its OWN clock (D-118): for the doctor side (DOCTOR and backoffice) the day is the platform calendar day (Europe/Athens, daylight saving included) — `today` is every open appointment starting today, `upcoming` every open one after today, `history` every final one and every open one before today; for a member `upcoming` is every open appointment from now on and `history` every final one and every open one that started before now, and `today` answers 422. The scopes of one reader are disjoint and together hold every appointment. `scope` sets the time bounds itself, so it is refused (422) beside `from`, `to` or `historyBefore`; it combines with `status`, `sortDir` and `cursor`. `as` (optional, `patient` or `doctor`) names the side an account that is both a doctor and a patient reads: without it a doctor account reads the doctor side, every other app account the patient side and the backoffice its tenant; `as=patient` lists the appointments its own patient profile booked, with the member scopes; `as=doctor` from an account that is no doctor answers 403 and `as` from the backoffice 422. Every item carries `officeTimeZone`, the IANA zone of its office. For a member every item carries `ratingInvitation` and `ratingId` too: a completed visit offers `ratingInvitation` — the `invitationId` its rating form opens (`ratings/{invitationId}`, `getRatingInvitation`) and `expiresAt`, the end of its window — exactly while the invitation itself takes a rating on the server clock (open and not past `expiresAt`, before any worker closes it, D-118) and the visit is not rated yet; whether its doctor may still be rated is answered by `getRatingInvitation`, not here. `ratingId` is the rating the member wrote of the visit, read with `getRating`; the two are never set together. Every other visit, the doctor side and the backoffice read both as `null`. A whole page costs one read of the ratings, and a page with no completed visit none. */
+            /** @description One page ordered by `startTime, id` in the direction of `sortDir`: `asc` (the default, oldest first) or `desc` (newest first). `limit` defaults to the configured page size and is refused past the configured maximum; `cursor` is the opaque `nextCursor` of the previous page and belongs to the `sortDir` it was issued for — a cursor of the other direction is refused (422); `total` is the whole matched set and does not change between pages. `historyBefore` (optional, an ISO date-time; a client reads its tabs with `scope` instead, whose bounds the server sets) keeps ONLY the history: every appointment in a final status (`completed`, `canceled`, `rejected`, `expired`, `no_show`, `unavailable`) whatever its time, and every open one (`pending`, `booked`, `checked_in`) whose `startTime` is before `historyBefore`; an open appointment at or after it is never returned. It combines with every other filter and the role scope, and with `sortDir` and `cursor` in both directions; without it the list is unchanged. `scope` (optional) reads the tab the server bounds by its OWN clock (D-118): for the doctor side (DOCTOR and backoffice) the day is the platform calendar day (Europe/Athens, daylight saving included) — `today` is every open appointment starting today, `upcoming` every open one after today, `history` every final one and every open one before today; for a member `upcoming` is every open appointment from now on and `history` every final one and every open one that started before now, and `today` answers 422. The scopes of one reader are disjoint and together hold every appointment. `scope` sets the time bounds itself, so it is refused (422) beside `from`, `to` or `historyBefore`; it combines with `status`, `sortDir` and `cursor`. `as` (optional, `patient` or `doctor`) names the side an account that is both a doctor and a patient reads: without it a doctor account reads the doctor side, every other app account the patient side and the backoffice its tenant; `as=patient` lists the appointments its own patient profile booked, with the member scopes; `as=doctor` from an account that is no doctor answers 403 and `as` from the backoffice 422. Every item carries `officeTimeZone`, the IANA zone of its office. For a member every item carries `ratingInvitation` and `ratingId` too: a completed visit offers `ratingInvitation` — the `invitationId` its rating form opens (`ratings/{invitationId}`, `getRatingInvitation`) and `expiresAt`, the end of its window — exactly while the invitation itself takes a rating on the server clock (open and not past `expiresAt`, before any worker closes it, D-118) and the visit is not rated yet; whether its doctor may still be rated is answered by `getRatingInvitation`, not here. `ratingId` is the rating the member wrote of the visit, read with `getRating`; the two are never set together. Every other visit, the doctor side and the backoffice read both as `null`. A whole page costs one read of the ratings, and a page with no completed visit none. On the doctor side (DOCTOR and backoffice) every item also carries `actions`, decided at ONE server «now» for the whole page by the very rules `getAppointment` answers them with (D-118, D-W51-21), and `unattendedOutcomeAt`: the instant the lifecycle worker writes the configured unattended outcome (`COMPLETED` by default) for a `booked` or `checked_in` visit with no `outcomeSource` — its `endTime` plus the configured delay (24 hours by default), the very bound the worker sweeps with — set for a visit still ahead too, and `null` for every other one (a request, a final status, a visit with an outcome). A member reads neither key. Both are decided on the row itself, so they cost the page no read. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9894,10 +10498,18 @@ export interface operations {
                 "application/json": {
                     doctorId: string;
                     officeId: string;
-                    patientId: string;
+                    patientId?: string;
                     /** @enum {string} */
-                    bookedForType: "SELF" | "RELATIVE";
+                    bookedForType?: "SELF" | "RELATIVE";
                     relativeId?: string | null;
+                    /** Format: uuid */
+                    patientRecordId?: string;
+                    newPatient?: {
+                        firstName: string;
+                        lastName: string;
+                        phone: string;
+                        email?: string | null;
+                    };
                     /** Format: date-time */
                     startTime: string;
                     /** @enum {string} */
@@ -9913,7 +10525,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The created appointment. A patient booking at an office with no phone is refused with 403 `OFFICE_PHONE_REQUIRED`. The booking is decided by the side the account takes in it: naming its own doctor profile as `doctorId` makes it a doctor booking, naming its own patient profile as `patientId` (another doctor) a patient booking, and a booking of a doctor for the patient profile of its own account — by that doctor or by the backoffice, for itself or for a relative of its own (`RELATIVE`) — is refused with 403 `PATIENT_IS_THE_DOCTOR`, the blocker code `getBookingReadiness` reports it with beforehand (one account is never both sides of an appointment; another doctor books the same person by the patient rules; judged on the accounts behind the two profiles). Every id is read in its canonical lower-case text before the side is chosen, so the letter case of an id changes nothing. A patient booking never sends `status`: the doctor confirmation mode decides it (AUTO ⇒ `booked`, MANUAL ⇒ `pending`) and the mode is snapshotted on the row. A MEMBER keeps one `pending` request per PERSON with one doctor (D-70): the account itself and each of its relatives count separately, and a second one for the same person answers 422 `PATIENT_PENDING_LIMIT_REACHED`. `firstVisit` (optional boolean) is the patient's answer to «first visit with this doctor?» and is read back on the appointment: when that person already holds an appointment this doctor accepted (`firstVisitKnown: true` of the readiness) the server stores false whatever is sent; with no answer it stores null, and a booking by the doctor side always stores null. Anything but a boolean, `null` included, answers 422. `services` holds 1 to 10 lines and `patientNote` at most 500 characters (the configured limit may be lower); past either the booking answers 422 and nothing is written. Rate limited per IP under the `booking` class. */
+            /** @description The created appointment. D-W51-56: the body names exactly ONE person — `patientId` (an account, with `bookedForType` and its `relativeId`), `patientRecordId` (a record of that doctor of a patient without an account) or `newPatient` (`firstName`, `lastName` — 1 to 80 letters each, no HTML —, `phone` — a Greek mobile of 10 digits starting with 69, spaces and `+30` allowed, stored as the login form `3069…` — and an optional `email` of at most 254, `''` read as none), else 422; a record or a new patient is booked for itself (`bookedForType` absent or `SELF`, no `relativeId`, else 422), and only by the doctor side: from the patient side it answers the one 403. A `patientRecordId` that is not a record of that doctor answers 404. `newPatient` adds the doctor's record first, once every refusal that needs no hour has passed, and the record stays when the hour then fails (for example 409 on an overlap). A `booked` of the doctor side is confirmed at once (U-197.2): `confirmedAt` is the creation instant and `confirmedBy` the doctor side, and the audit holds `CREATED` and `CONFIRMED`. The answer carries `patientKind` (`ACCOUNT` or `RECORD`). A patient booking at an office with no phone is refused with 403 `OFFICE_PHONE_REQUIRED`. The booking is decided by the side the account takes in it: naming its own doctor profile as `doctorId` makes it a doctor booking, naming its own patient profile as `patientId` (another doctor) a patient booking, and a booking of a doctor for the patient profile of its own account — by that doctor or by the backoffice, for itself or for a relative of its own (`RELATIVE`) — is refused with 403 `PATIENT_IS_THE_DOCTOR`, the blocker code `getBookingReadiness` reports it with beforehand (one account is never both sides of an appointment; another doctor books the same person by the patient rules; judged on the accounts behind the two profiles). Every id is read in its canonical lower-case text before the side is chosen, so the letter case of an id changes nothing. A patient booking never sends `status`: the doctor confirmation mode decides it (AUTO ⇒ `booked`, MANUAL ⇒ `pending`) and the mode is snapshotted on the row. A MEMBER keeps one `pending` request per PERSON with one doctor (D-70): the account itself and each of its relatives count separately, and a second one for the same person answers 422 `PATIENT_PENDING_LIMIT_REACHED`. `firstVisit` (optional boolean) is the patient's answer to «first visit with this doctor?» and is read back on the appointment: when that person already holds an appointment this doctor accepted (`firstVisitKnown: true` of the readiness) the server stores false whatever is sent; with no answer it stores null, and a booking by the doctor side always stores null. Anything but a boolean, `null` included, answers 422. `services` holds 1 to 10 lines and `patientNote` at most 500 characters and no NUL character (the configured limit may be lower); past either the booking answers 422 and nothing is written. Rate limited per IP under the `booking` class. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -9940,7 +10552,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The appointment with its service lines and audit log, `officeTimeZone`: the IANA zone its office keeps its hours in, so every hour is shown on the office clock, and `actions`: what the reader may do with it NOW, decided on the server clock by the very rules the writes check (D-118), and `officePhone`: the current number of the office, else the one frozen at booking, null when neither exists — a member cancels a booked visit until its cancellation deadline and a request until its hour (`!canCancel && isPastCancellationCutoff` means the deadline has passed and only the phone is left) and moves strictly before the cutoff and within the move limit, the doctor side answers a pending request, moves a pending or booked one, cancels anything not over, declares the `outcomes` due after the hour and makes the open `correction`. For a member, `cancellationDeadline` is the instant until which the visit is cancelled online, the very one its messages print as «you can cancel until …», and `null` whenever `canCancel` is false: `startTime` minus `cancellationCutoffHours`, exactly on which a cancel is still on time; `startTime` itself for a visit the doctor side put inside its deadline and for a request already inside it, both cancelled until the hour; for a request still outside its deadline it is the deadline that holds once the request is confirmed, while the request itself is withdrawn until its hour. `rescheduleDenial` names why a member may not move the visit, in the order the move asks: `STATUS` (not pending or booked), `AFTER_CUTOFF` (the cutoff has passed, and from the hour on), `LIMIT_REACHED` (the member moved it as often as allowed), `null` exactly when `canReschedule` is true; `reschedulesLeft` is how many moves the member has left (0 with `LIMIT_REACHED`), `null` once the visit is no longer pending or booked ahead. A move by the doctor side or a note never spends one. The doctor side reads all three as `null`, and its `canReschedule` false carries no reason. Booking readiness and an already rated visit are asked by the write itself. `ratingInvitation` and `ratingId` follow the rules of `listAppointments`: the open rating invitation and the rating of a completed visit, for a member only, on every single-appointment answer. The side comes from the appointment itself: its doctor reads it as the doctor side, the holder of its patient profile as a member (a doctor who booked another doctor reads that visit as a patient), the backoffice every appointment of its tenant; everyone else gets the one 403. A member reads every audit line without the explanation of an automatic change, and every line that set the outcome of the visit (a declared outcome, or a status move to `completed`/`no_show` by anyone) without who set it, its reason or its snapshots (`actorRole` null). */
+            /** @description The appointment with its service lines and audit log, `officeTimeZone`: the IANA zone its office keeps its hours in, so every hour is shown on the office clock, and `actions`: what the reader may do with it NOW, decided on the server clock by the very rules the writes check (D-118), and `officePhone`: the current number of the office, else the one frozen at booking, null when neither exists — a member cancels a booked visit until its cancellation deadline and a request until its hour (`!canCancel && isPastCancellationCutoff` means the deadline has passed and only the phone is left) and moves strictly before the cutoff and within the move limit, the doctor side answers a pending request, moves a pending or booked one, cancels anything not over, declares the `outcomes` due after the hour and makes the open `correction`. For a member, `cancellationDeadline` is the instant until which the visit is cancelled online, the very one its messages print as «you can cancel until …», and `null` whenever `canCancel` is false: `startTime` minus `cancellationCutoffHours`, exactly on which a cancel is still on time; `startTime` itself for a visit the doctor side put inside its deadline and for a request already inside it, both cancelled until the hour; for a request still outside its deadline it is the deadline that holds once the request is confirmed, while the request itself is withdrawn until its hour. `rescheduleDenial` names why a member may not move the visit, in the order the move asks: `STATUS` (not pending or booked), `AFTER_CUTOFF` (the cutoff has passed, and from the hour on), `LIMIT_REACHED` (the member moved it as often as allowed), `null` exactly when `canReschedule` is true; `reschedulesLeft` is how many moves the member has left (0 with `LIMIT_REACHED`), `null` once the visit is no longer pending or booked ahead. A move by the doctor side or a note never spends one. The doctor side reads all three as `null`, and its `canReschedule` false carries no reason. Booking readiness and an already rated visit are asked by the write itself. `ratingInvitation` and `ratingId` follow the rules of `listAppointments`: the open rating invitation and the rating of a completed visit, for a member only, on every single-appointment answer. The side comes from the appointment itself: its doctor reads it as the doctor side, the holder of its patient profile as a member (a doctor who booked another doctor reads that visit as a patient), the backoffice every appointment of its tenant; everyone else gets the one 403. A member reads every audit line without the explanation of an automatic change, and every line that set the outcome of the visit (a declared outcome, or a status move to `completed`/`no_show` by anyone) without who set it, its reason or its snapshots (`actorRole` null). The doctor side also reads `unattendedOutcomeAt`, as on `listAppointments` (D-W51-21); a member reads no such key. On this answer and on every other single-appointment answer (never on `listAppointments`) the doctor side (DOCTOR and backoffice) also reads three keys of its own (D-W51-33), and a member reads none of them: `visitsWithDoctor` — `count`, how many `completed` appointments the same person had with this doctor before this one (the account itself, or that one relative, each counted apart; this appointment and anything starting at or after it never count), `0` for a first visit, and `lastAt`, the `startTime` of the latest of them, `null` with `count` 0; `patientCancellation` — `cutoffHours`, the cancellation cutoff that holds for the patient of this visit (the more favourable of the promised and the live one), and `deadline`, the very instant a member reads as `actions.cancellationDeadline` on the same visit at the same moment (`startTime` itself for a visit the doctor side put inside its deadline and for a request already inside it), `null` once the patient may no longer cancel online; `conversationId` — the conversation this doctor already holds with the account the visit belongs to (the same one for a visit booked for a relative), `null` when there is none. Whether a new conversation may start is not answered here. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9980,7 +10592,294 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The updated appointment, with its `actions`. A member may move it only before the effective cancellation cutoff and only into a slot that still passes notice, horizon and availability. A member moving a BOOKED visit to an hour whose cancellation deadline has already passed gets 422 `RESCHEDULE_INSIDE_CANCELLATION_CUTOFF` and nothing is written, unless the body carries `acknowledgeInsideCancellationCutoff: true`; a request (`pending`) and the doctor side are never asked. A doctor moves only a pending or booked appointment (403 otherwise), without the patient accepting, and the status does not change. A member who hands a `pending` request to another person (`relativeId`) takes that person's own D-70 place (422 `PATIENT_PENDING_LIMIT_REACHED` when it is taken). Who the visit is for (`bookedForType`, `relativeId`) and the `patientNote` change only while it is pending or booked, for every role (403 otherwise), and a new person carries its own frozen `relativeSnapshot` (null for the account holder). Only a relative the body names in `relativeId` is checked: a relative that does not exist, or one of another account, is refused with 403 `relative does not belong to patient.` (a relative that was deleted too), while a body that names none — a new hour, a note, a move by the doctor side — goes through for a visit whose relative was deleted, which keeps its frozen `relativeSnapshot`. Only the patient of the appointment writes `patientNote` (D-39): a body from the doctor side that carries it is refused with 403. A new person is asked «first visit?» again (D-W3-22): a visit of that person this doctor already accepted stores `firstVisit` false, otherwise the `firstVisit` of the body, or null without it; `firstVisit` comes only from the patient (403 from the doctor side) and only together with a change of the person (422 otherwise). A write that finds the appointment closed in the meantime answers that same 403; one that finds it changed but still open answers 409. `patientNote` holds at most 500 characters (422 past it; the configured limit may be lower). Rate limited per IP under the `booking` class. */
+            /** @description The updated appointment, with its `actions`. A member may move it only before the effective cancellation cutoff and only into a slot that still passes notice, horizon and availability. A member moving a BOOKED visit to an hour whose cancellation deadline has already passed gets 422 `RESCHEDULE_INSIDE_CANCELLATION_CUTOFF` and nothing is written, unless the body carries `acknowledgeInsideCancellationCutoff: true`; a request (`pending`) and the doctor side are never asked. The doctor side moves only a pending or booked appointment (403 otherwise), without the patient accepting, and only to an hour still ahead on the server clock (422 `RESCHEDULE_INTO_THE_PAST` otherwise, nothing written); the hours it may choose are those of `listAppointmentRescheduleSlots`. A booked visit stays booked. A request (`pending`) moved by the doctor side is confirmed in the same write (U-190.2): it becomes `booked` with `confirmedAt` and `confirmedBy` as `confirmAppointment` writes them, its `expiresAt` is cleared, the audit gains an `UPDATED` and a `CONFIRMED` line, and the patient receives ONE message, the confirmation, which names the earlier hour when it changed — never a separate «moved» message; the cancellation rules do not change (U-90.1 A2 on the new hour). A request confirmed meanwhile by another write answers 409. A member's move never changes the status. A member who hands a `pending` request to another person (`relativeId`) takes that person's own D-70 place (422 `PATIENT_PENDING_LIMIT_REACHED` when it is taken). Who the visit is for (`bookedForType`, `relativeId`) and the `patientNote` change only while it is pending or booked, for every role (403 otherwise), and a new person carries its own frozen `relativeSnapshot` (null for the account holder). Only a relative the body names in `relativeId` is checked: a relative that does not exist, or one of another account, is refused with 403 `relative does not belong to patient.` (a relative that was deleted too), while a body that names none — a new hour, a note, a move by the doctor side — goes through for a visit whose relative was deleted, which keeps its frozen `relativeSnapshot`. Only the patient of the appointment writes `patientNote` (D-39): a body from the doctor side that carries it is refused with 403. A new person is asked «first visit?» again (D-W3-22): a visit of that person this doctor already accepted stores `firstVisit` false, otherwise the `firstVisit` of the body, or null without it; `firstVisit` comes only from the patient (403 from the doctor side) and only together with a change of the person (422 otherwise). A write that finds the appointment closed in the meantime answers that same 403; one that finds it changed but still open answers 409. `patientNote` holds at most 500 characters and no NUL character (422 past it or with one; the configured limit may be lower); it is stored as plain text, invisible and control characters removed, HTML kept as written. Rate limited per IP under the `booking` class. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentDetailResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    listAppointmentRescheduleSlots: {
+        parameters: {
+            query?: {
+                date?: string;
+                days?: number;
+            };
+            header?: never;
+            path: {
+                appointmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description D-W51-41 (U-189.1): the real free hours of the doctor of this appointment, to move it to at its own office: the weekly schedule of that office with its exceptions, inside the availability window and the running marketplace licence (never on or after the UTC day the licence ends), without the hours of every other appointment that blocks and of the busy hours of the external calendar, and never an hour that has passed on the server clock (D-118). The appointment itself is not busy. Unlike `/availability/public/slots`, neither the minimum notice nor the booking horizon of the patient applies, nor the switches for online bookings of the doctor and of the office. `durationMinutes` is the longest active service of the appointment, and every slot lasts it. `date` (YYYY-MM-DD, a day the calendar has) is the first day, the server's «today» when absent; `days` (1 to 7, default 1) how many; every day of them inside the availability window and the licence is listed with its slots, possibly none. `timezone` is the IANA zone of the office. Every listed `startTime` is accepted by `rescheduleAppointment` at the moment of the read. Only the doctor side of the appointment reads it — its doctor and the backoffice of its tenant: everyone else gets the one 403 of `getAppointment`, the account that is the patient of the visit a 403 too, and a visit that is not pending or booked the 403 `only a pending or booked appointment can be moved.`; an unknown query key, a malformed or impossible day or `days` out of range answer 422. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentRescheduleSlotsView"];
+                    };
+                };
+            };
+        };
+    };
+    listDoctorSlots: {
+        parameters: {
+            query: {
+                officeId: string;
+                date?: string;
+                days?: number;
+                doctorServiceIds: string | string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description D-W51-56 (screen 72): the real free hours of the signed-in doctor for a NEW appointment at `officeId`, one of its own offices (403 `office does not belong to doctor.` otherwise), for the services in `doctorServiceIds` (1 to 10 distinct ids of its own services, the key repeated for several; 422 otherwise): the calculation of `listAppointmentRescheduleSlots` — the weekly schedule with its exceptions, the availability window and the running marketplace licence, without the hours of every appointment that blocks and of the busy hours of the external calendar, never an hour that has passed — with no appointment left out. `durationMinutes` is the longest service chosen, and every slot lasts it. `date` (YYYY-MM-DD) is the first day, the server's «today» when absent; `days` 1 to 7 (default 1). Every listed `startTime` is accepted by `createAppointment` of that doctor at the moment of the read. Only an account that acts as a doctor reads it: a patient account and the backoffice get 403. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentDoctorSlotsView"];
+                    };
+                };
+            };
+        };
+    };
+    searchDoctorPatients: {
+        parameters: {
+            query?: {
+                q?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description D-W51-55 / D-W51-64 (screens 72, 73, «Οι ασθενείς μου»): the people of the signed-in doctor only — the persons of its appointments in any status (an account, each of its relatives apart, or a record) and the records it added without one; a record the doctor joined to an account (`mergeDoctorPatientRecord`) is read as that account, with the visits of both (U-198.2). `q` (at most 40 characters, no NUL; 422 otherwise) matches the name without accents or case, every word inside the first and last name, and the mobile by its digits, with or without spaces — a record by its name and mobile as they are now. Ordered: first everyone with an open appointment (`pending`, `booked`, `checked_in`) from the start of today on the platform calendar (D-118), the nearest first; then everyone else by the latest completed visit, a person with none by its latest booking and a record without a visit by when it was added, newest first. One page of at most `limit` (1 to 50, default 10); `nextCursor` (null on the last page) is the opaque `cursor` of the next page, any other cursor answers 422. Each item: `key` (`{ kind: account | relative | record, id }`, the key of `getDoctorPatient`), `person` (`{ kind: ACCOUNT, patientId, relativeId }` or `{ kind: RECORD, recordId }`, what `createAppointment` takes as `patientId` / `relativeId` or `patientRecordId`), the name, the whole mobile in the login form and the email (the doctor reads them whole, U-182.7), `hasAccount`, `bookedBy` (the account holder who books for a relative, with the `relationship` of the relative), `next` (`startTime` and `status` of the nearest open appointment from today on, `pending` for a request), `visits` (`count` of the completed ones, `firstAt` and `lastAt` their first and last start) and `noShows` (how many `no_show`). Only an account that acts as a doctor reads it: a patient account and the backoffice get 403. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentDoctorPatientListView"];
+                    };
+                };
+            };
+        };
+    };
+    matchDoctorPatientsByPhone: {
+        parameters: {
+            query: {
+                phone: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description D-W51-55 (screen 72, «ίδιο κινητό»): the people of the signed-in doctor whose mobile is `phone` — a Greek mobile of 10 digits starting with 69, spaces and `+30` allowed (422 otherwise) — the accounts and relatives by the mobile frozen on their appointments and the records by theirs, in the items of `searchDoctorPatients`, at most 50, `nextCursor` always null. A warning, never a refusal: two people may share a mobile. Only an account that acts as a doctor reads it: a patient account and the backoffice get 403. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentDoctorPatientListView"];
+                    };
+                };
+            };
+        };
+    };
+    getDoctorPatient: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kind: "account" | "relative" | "record";
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description D-W51-63 / D-W51-65 (screen 73): one patient of the signed-in doctor by its `key` of `searchDoctorPatients` — `account` (the Patient profile id), `relative` (the Relative id) or `record` (the id of the doctor's own record); any other `kind` or an id that is not a uuid answers 422. A person is a patient of the doctor when it has an appointment with it in any status, or is one of its records: anyone else — another doctor's patient, a record of another doctor, an unknown id — answers the one 404, never a 403 that tells them apart. A record the doctor joined to an account answers the card of that account (its `key` says so). The card carries the person whole (U-182.7): name, mobile, email, AMKA, AFM — an account and a relative as the patient gave them on the latest booking with this doctor, a record as the doctor keeps it now — `gender` and `relationship` for a relative, and `bookedBy`, the account holder who books for a relative, whole too; `visits` (`count` of the completed ones, `firstAt`, `lastAt`) and `noShows`; `editable` true only for a record that is not joined to an account (`updateDoctorPatientRecord`); `addedAt` the day a record was added, null otherwise; `conversationId` the conversation of this doctor with the account (the holder's for a relative), null for a record and when there is none; `mergeCandidate` only for a record: an account patient of this doctor with the same mobile (`key`, name), what `mergeDoctorPatientRecord` takes, null when there is none. `upcoming` (the open appointments from the start of today on, nearest first) and `past` (every other one, newest first) are the first pages of `listDoctorPatientAppointments`, with this doctor only, each item as the doctor side of `listAppointments` reads it. Only an account that acts as a doctor reads it: a patient account and the backoffice get 403. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentDoctorPatientCardView"];
+                    };
+                };
+            };
+        };
+    };
+    listDoctorPatientAppointments: {
+        parameters: {
+            query: {
+                section: "upcoming" | "past";
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                kind: "account" | "relative" | "record";
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description D-W51-65: the appointments of one patient (`getDoctorPatient` key, the same 404) with the signed-in doctor only, as the doctor side of `listAppointments` reads them. `section` `upcoming`: the open ones (`pending`, `booked`, `checked_in`) starting from the start of today on the platform calendar (D-118), nearest first; `past`: every final one and every open one before today, newest first. The two hold every appointment of the person once. `limit` 1 to 50 (default 10); `cursor` is the `nextCursor` of the previous page of the same section (a cursor of the other section answers 422); `total` is the size of the section. For an account they include the visits of the records the doctor joined to it, which stay `RECORD` and never appear on the patient's side. Only an account that acts as a doctor reads it: a patient account and the backoffice get 403. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentListPageResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    updateDoctorPatientRecord: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    firstName?: string;
+                    lastName?: string;
+                    phone?: string;
+                    email?: string | null;
+                    amka?: string | null;
+                    afm?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description D-W51-66 (screen 73, «Στοιχεία ασθενή»): the record after the change, whole (U-182.7), with the `key` of its card and `addedAt`. Only the doctor of the record changes it: another doctor's and an unknown record answer the one 404; a record joined to an account no longer changes (409). At least one field, every one optional, an unknown key 422: `firstName` / `lastName` letters only, 1 to 80 each (so no HTML); `phone` a Greek mobile of 10 digits starting with 69, spaces and `+30` allowed, stored as the login form; `email` a valid address of at most 254 characters, `null` or `''` erases it; `amka` 11 digits whose first six are a real date, `afm` 9 digits with a valid check digit (spaces and hyphens dropped), `null` erases either — the very checks of the patient's own profile; no field may hold a NUL. AMKA and AFM are stored encrypted. In the same transaction the copy of the record on its open appointments still ahead is renewed, so their messages reach the new name, mobile and email; every earlier appointment keeps the copy it was booked with. Only an account that acts as a doctor writes it: a patient account and the backoffice get 403. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentDoctorPatientRecordView"];
+                    };
+                };
+            };
+        };
+    };
+    mergeDoctorPatientRecord: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    patientId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description D-W51-67 (U-198.2): joins the record of the doctor to `patientId`, an account that is already a patient of the same doctor on the same mobile — the `mergeCandidate` of the record's card. From then on `searchDoctorPatients`, the card and its lists read the two as one person, the account, with every appointment of both. ONLY the doctor's side changes: the appointments of the record stay `RECORD`, so the account's own lists and appointments never show them, and nothing is written to the account. The answer is the `key` of the account's card. Another doctor's or an unknown record, and an account that is not a patient of this doctor, answer the one 404; an account patient of the doctor on another mobile answers 409 `the account does not have the mobile of the patient record.`; a record already joined answers 409. A join is not undone in this release. Only an account that acts as a doctor writes it: a patient account and the backoffice get 403. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentDoctorPatientMergeView"];
+                    };
+                };
+            };
+        };
+    };
+    editAppointmentCharges: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    services: {
+                        /** Format: uuid */
+                        doctorServiceId: string;
+                        quantity: number;
+                    }[];
+                    finalTotalAmount?: number;
+                    reason?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description D-W51-44 («Υπηρεσίες και κόστος»): the appointment after ONE write of its services and its final price, as `getAppointment` answers it. `services` (1 to 10, each `doctorServiceId` once, `quantity` 1 to 50) becomes the whole active set; every one must be a service of the doctor of the appointment that still exists and the doctor's profession may offer (422 otherwise). The server decides the VAT of every line as the booking does — the rate already frozen on the appointment's own line of that service, else the booking's default — so a body with a VAT rate, a net or a VAT amount answers 422. The visit lasts as long as its longest service; when that makes it longer and it would then fall on another appointment of the doctor that blocks or on a busy hour of the external calendar, the answer is 409 `CHARGES_DO_NOT_FIT` with `details`: `durationMinutes` (how long the visit would last), `overlapMinutes` (how many of its minutes fall on the first one) and `nextStartTime` (when that one starts), and nothing is written. `finalTotalAmount` (optional, in euros, 0 to 99999999 in whole cents — a third decimal answers 422, it is never rounded) is the price the patient sees: the server splits it into net and VAT by the rates of the lines, to the cent, and stamps it as the doctor's own price (`priceOverriddenAt`, `priceOverrideReason` = `reason`). Without it, or equal to the total of the services, the final amounts are the services' own and any earlier price of the doctor is cleared. `reason` (optional) holds 1 to 500 characters and no NUL character. The audit gains a `SERVICES_REPLACED` line, and a `PRICE_OVERRIDDEN` one when the doctor's price is set; the patient gets no message. Only the doctor side of the appointment writes it — its doctor and the backoffice of its tenant: everyone else gets the one 403 of `getAppointment`, the account that is the patient of the visit a 403 too; only while `actions.canEditCharges` (pending, booked, checked in) — 403 `service edit is not allowed in current status.` otherwise, and a final price after completion 422 `cannot override final price after completion.`. A write that finds the appointment closed in the meantime answers its 403; one that finds it changed but still open answers 409. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10015,7 +10914,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The canceled appointment, with its `actions`. `reasonCode` is mandatory and must belong to the list of the caller own role. A member cancels a booked visit until its cancellation deadline: past it the answer is 403 `CANCEL_AFTER_CANCELLATION_CUTOFF` and nothing is written, and the patient calls the office (`officePhone`), whose doctor side still cancels at any hour. A member withdraws a request (`pending`) until its hour, flagged `canceledLate` past the deadline, and cancels until its hour a visit the doctor side put inside its deadline, not flagged. From the hour on the answer is 403. Repeating the call is idempotent. Rate limited per IP under the `booking` class. */
+            /** @description The canceled appointment, with its `actions`. `reasonCode` is mandatory and must belong to the list of the caller own role; `reasonText` (optional) holds 1 to 500 characters and no NUL character (422 otherwise), stored as plain text. A member cancels a booked visit until its cancellation deadline: past it the answer is 403 `CANCEL_AFTER_CANCELLATION_CUTOFF` and nothing is written, and the patient calls the office (`officePhone`), whose doctor side still cancels at any hour. A member withdraws a request (`pending`) until its hour, flagged `canceledLate` past the deadline, and cancels until its hour a visit the doctor side put inside its deadline, not flagged. From the hour on the answer is 403. Repeating the call is idempotent. Rate limited per IP under the `booking` class. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10048,7 +10947,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The appointment moved from `pending` to `booked`. Idempotent when it is already booked; a terminal appointment answers 409. */
+            /** @description The appointment moved from `pending` to `booked`. Idempotent when it is already booked; a terminal appointment answers 409. `reason` (optional) holds 1 to 500 characters and no NUL character (422 otherwise). On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10082,7 +10981,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The appointment after the one-tap answer of the doctor: `ARRIVED` checks it in, `COMPLETED` and `NO_SHOW` settle it from either `booked` or `checked_in`. Answered only once the appointment has started, and only once: an already settled appointment answers 409. Repeating `ARRIVED` on a checked-in appointment is idempotent. An outcome the SYSTEM recorded (`outcomeSource = SYSTEM`) may be corrected into its opposite until `endTime` plus the configured correction window; correcting a completion into a no-show revokes the rating invitation and answers 409 when the patient already rated the visit. */
+            /** @description The appointment after the one-tap answer of the doctor: `ARRIVED` checks it in, `COMPLETED` and `NO_SHOW` settle it from either `booked` or `checked_in`. Answered only once the appointment has started, and only once: an already settled appointment answers 409. Repeating `ARRIVED` on a checked-in appointment is idempotent. An outcome the SYSTEM recorded (`outcomeSource = SYSTEM`) may be corrected into its opposite until `endTime` plus the configured correction window; correcting a completion into a no-show revokes the rating invitation and answers 409 when the patient already rated the visit, with `details.reason` `PATIENT_ALREADY_RATED` (U-196.1), a stable mark beside the message. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10117,7 +11016,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The appointment moved from `pending` to `rejected`. `reasonCode` is mandatory and comes from the reject list; an already booked appointment answers 409. */
+            /** @description The appointment moved from `pending` to `rejected`. `reasonCode` is mandatory and comes from the reject list; `message` (optional) holds 1 to 500 characters and no NUL character (422 otherwise), stored as plain text; an already booked appointment answers 409. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10218,7 +11117,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One page ordered newest first (`createdAt desc, id desc`). `limit` defaults to the page size and is refused (422) past the maximum; `cursor` is the opaque `nextCursor` of the previous page, refused (422) when it is not one; `total` is the whole matched set and does not change between pages. `as` (optional, `patient` or `doctor`) names the side an account that is both a doctor and a patient reads: without it a doctor account reads the ratings it received, every other app account the ratings it wrote and the backoffice every rating of its tenant; `as=patient` lists the ratings its own patient profile wrote; `as=doctor` from an account that is no doctor answers 403 and `as` from the backoffice 422. The patient side reads a doctor reply only once it is approved — a pending or rejected reply reads as `NONE`, with no trace in `updatedAt` — and `replyModerationStatus` filters on that visible status. Moderation notes reach the backoffice only, and a moderator id only the moderator. */
+            /** @description One page ordered newest first (`createdAt desc, id desc`). `limit` defaults to the page size and is refused (422) past the maximum; `cursor` is the opaque `nextCursor` of the previous page, refused (422) when it is not one; `total` is the whole matched set and does not change between pages. `as` (optional, `patient` or `doctor`) names the side an account that is both a doctor and a patient reads: without it a doctor account reads the ratings it received, every other app account the ratings it wrote and the backoffice every rating of its tenant; `as=patient` lists the ratings its own patient profile wrote; `as=doctor` from an account that is no doctor answers 403 and `as` from the backoffice 422. The patient side reads a doctor reply only once it is approved — a pending or rejected reply reads as `NONE`, with no trace in `updatedAt` — and `replyModerationStatus` filters on that visible status. Moderation notes reach the backoffice only, and a moderator id only the moderator. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10245,7 +11144,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One rating, read on the side the rating gives the account: its doctor reads it as the doctor (its reply with the moderation status), the holder of its patient profile as the patient (a reply only once approved — until then `updatedAt` is the last change of the rating or its moderation, never of the reply), the backoffice every rating of its tenant. No rating response names the tenant. A rating that does not exist, one of another tenant and an account on neither side answer the one 403 `rating is not accessible to this account.` */
+            /** @description One rating, read on the side the rating gives the account: its doctor reads it as the doctor (its reply with the moderation status), the holder of its patient profile as the patient (a reply only once approved — until then `updatedAt` is the last change of the rating or its moderation, never of the reply), the backoffice every rating of its tenant. No rating response names the tenant. A rating that does not exist, one of another tenant and an account on neither side answer the one 403 `rating is not accessible to this account.` On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10278,7 +11177,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The rating with the one reply of its doctor, waiting for moderation (`replyModerationStatus` `PENDING`); the patient and the public read it only once approved. An account acting as a doctor — `DOCTOR` as its primary or a secondary role — answers its own ratings only: a rating that does not exist, one of another doctor and one of another tenant answer the one 403 `rating is not accessible to this account.`; a second reply answers 409, also when two replies race. */
+            /** @description The rating with the one reply of its doctor, waiting for moderation (`replyModerationStatus` `PENDING`); the patient and the public read it only once approved. An account acting as a doctor — `DOCTOR` as its primary or a secondary role — answers its own ratings only: a rating that does not exist, one of another doctor and one of another tenant answer the one 403 `rating is not accessible to this account.`; a second reply answers 409, also when two replies race. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10303,7 +11202,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Which appointment events the doctor pays an SMS for (D-09), the reminder offsets currently enabled, and `reminderOffsetOptionsHours`: the only offsets an update may contain. A doctor who never saved them reads the defaults with every SMS off. */
+            /** @description Which appointment events the doctor pays an SMS for (D-09), the reminder offsets currently enabled, and `reminderOffsetOptionsHours`: the only offsets an update may contain. A doctor who never saved them reads the defaults with every SMS off. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10340,7 +11239,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The stored settings. The body is a patch: an absent field keeps its current value. A reminder offset outside `reminderOffsetOptionsHours` is refused with 422 (D-15); the target is always the doctor of the session. */
+            /** @description The stored settings. The body is a patch: an absent field keeps its current value. A reminder offset outside `reminderOffsetOptionsHours` is refused with 422 (D-15); the target is always the doctor of the session. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10365,7 +11264,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The remaining SMS units across the active packages, the packages themselves, and how many messages were charged this calendar month. Who granted a package is server-side only. */
+            /** @description The remaining SMS units across the active packages, the packages themselves, and how many messages were charged this calendar month. Who granted a package is server-side only. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10393,7 +11292,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One page ordered by `sentAt desc, id desc`, with the recipient masked. `limit` defaults to the configured page size and is refused past the configured maximum; `cursor` is the opaque `nextCursor` of the previous page; `total` is the whole matched set. `error` names why a line was not sent: besides the delivery reasons, `RECIPIENT_OPTED_OUT` (the patient turned SMS reminders off) and `REMINDER_EXPIRED` (the reminder would have left once the visit began), both with no unit charged. */
+            /** @description One page ordered by `sentAt desc, id desc`, with the recipient masked. `limit` defaults to the configured page size and is refused past the configured maximum; `cursor` is the opaque `nextCursor` of the previous page; `total` is the whole matched set. `error` names why a line was not sent: besides the delivery reasons, `RECIPIENT_OPTED_OUT` (the patient turned SMS reminders off) and `REMINDER_EXPIRED` (the reminder would have left once the visit began), both with no unit charged. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10418,7 +11317,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The centre of the signed-in app account, a doctor included: one `PATIENT` section, and a `DOCTOR` section only for an account that acts as a doctor and holds a doctor profile (a doctor reads its patient side here too). Each category lists its channels: `mode` `ALWAYS` (always sent, `enabled` true), `TOGGLE` (a switch, `enabled` its value) or `SET_BY_DOCTOR` (the SMS a doctor offers for its own appointments, `enabled` null); a channel a category does not list does not exist for it. `scope` names a switch that covers part of its category: `NEW_REQUESTS_ONLY`, `LATE_CANCELLATIONS_ONLY` (the doctor SMS, the same values as `getMyNotificationSettings`) and `WHEN_DOCTOR_OFFERS` (SMS reminders, sent only where the doctor offers them). An account that never saved anything reads the defaults (every switch on, the doctor SMS off) with `updatedAt` null. A switch turned off stops also what is already waiting to leave. Push switches are stored and read; push messages start in a later release. A backoffice account answers 403. */
+            /** @description The centre of the signed-in app account, a doctor included: one `PATIENT` section, and a `DOCTOR` section only for an account that acts as a doctor and holds a doctor profile (a doctor reads its patient side here too). Each category lists its channels: `mode` `ALWAYS` (always sent, `enabled` true), `TOGGLE` (a switch, `enabled` its value) or `SET_BY_DOCTOR` (the SMS a doctor offers for its own appointments, `enabled` null); a channel a category does not list does not exist for it. `scope` names a switch that covers part of its category: `NEW_REQUESTS_ONLY`, `LATE_CANCELLATIONS_ONLY` (the doctor SMS, the same values as `getMyNotificationSettings`) and `WHEN_DOCTOR_OFFERS` (SMS reminders, sent only where the doctor offers them). An account that never saved anything reads the defaults (every switch on, the doctor SMS off) with `updatedAt` null. A switch turned off stops also what is already waiting to leave. Push switches are stored and read; push messages start in a later release. A backoffice account answers 403. Before the licence (U-183.5) the centre of a doctor account has its patient side only, and a cell of the doctor side is refused with 403 «Doctor licence is required before …». */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10455,7 +11354,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The centre after the change. `cells` is a patch: each entry names a `TOGGLE` cell by `category` and `channel` once, and the cells it does not name keep their value. An `ALWAYS` or `SET_BY_DOCTOR` cell, a channel the category lacks and a cell named twice answer 422; a cell of the `DOCTOR` side from an account with no doctor profile answers 403 `doctor profile not found for current user.`. The two doctor SMS cells are the same switches as `smsDoctorNewRequest` and `smsDoctorLateCancel` of `getMyNotificationSettings`: one source, written in the same transaction. */
+            /** @description The centre after the change. `cells` is a patch: each entry names a `TOGGLE` cell by `category` and `channel` once, and the cells it does not name keep their value. An `ALWAYS` or `SET_BY_DOCTOR` cell, a channel the category lacks and a cell named twice answer 422; a cell of the `DOCTOR` side from an account with no doctor profile answers 403 `doctor profile not found for current user.`. The two doctor SMS cells are the same switches as `smsDoctorNewRequest` and `smsDoctorLateCancel` of `getMyNotificationSettings`: one source, written in the same transaction. Before the licence (U-183.5) the centre of a doctor account has its patient side only, and a cell of the doctor side is refused with 403 «Doctor licence is required before …». */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10546,6 +11445,7 @@ export interface operations {
                 cursor?: string;
                 limit?: string;
                 lang?: "el" | "en";
+                side?: "patient" | "doctor";
             };
             header?: never;
             path?: never;
@@ -10553,7 +11453,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One page of the caller own notification list, ordered by `occurredAt desc`, with `unreadCount` (every line the account has not opened, whatever the filter). The list holds what changes in the appointments of the account (registered, confirmed, declined, expired, moved, cancelled, not attended), the reminder of a visit, the reviews (the invitation to write one, published or not, a reply) and the questions (answered, not published); never the messages of doctors. A line is written when the thing happens, whatever the switches of the notification centre say, so an account that turned every email and push off still reads it here. `filter` is `new` (not opened yet), `previous` (opened) or `all` (default); `limit` is 1 to 50 (default 20); `cursor` is the opaque `nextCursor` of the previous page, `null` on the last one. A line shows from the moment its message would leave (a reminder appears at its hour, not at the booking) and for 90 days. `kind` is a closed vocabulary of what happened; `icon` is `CALENDAR`, `CLOCK`, `STAR` or `QUESTION`; `title` and `body` are plain text rendered now in `lang` (`el` or `en`, default the language of the account), to be shown as text, never as markup; `body` may be empty; `read` says whether the account opened it. `target` names what the tap opens, never a URL: `APPOINTMENT`, `RATING_INVITATION` or `QUESTION` with its id (a published review and a reply open the appointment); the thing may be gone by then, and the client then stays on the list. No account, email, phone or template is part of a line. The answer is sent with `Cache-Control: no-store`. A `filter`, `lang`, `limit` or `cursor` outside these, or any other query parameter, is 422. */
+            /** @description One page of the caller own notification list of one `side`, ordered by `occurredAt desc`, with `unreadCount` (every line of that side the account has not opened, whatever the filter). `side` is `patient` (default: the patient mode) or `doctor` (the doctor mode); a line belongs to exactly one side, and an account that is not a doctor reads an empty doctor side (no licence is asked). The patient side holds what changes in the appointments of the account (registered, confirmed, declined, expired, moved, cancelled, not attended), the reminder of a visit, the reviews (the invitation to write one, published or not, a reply) and the questions (answered, not published). The doctor side holds what the patients, the system and the backoffice did with the doctor appointments, never what the doctor did: a new request, a new appointment confirmed at once, a moved one, one the patient cancelled (late or not), a request that expired, «what happened with the visit», a new review, a clash with the external calendar, a calendar sync that stopped, and a licence that ends or ended (marketplace and till); a patient without an account counts too. «A new request» and «what happened with the visit» read themselves once the appointment no longer waits for that answer, wherever the doctor answered. Never the messages, and never the notices about the account itself. A line is written when the thing happens, whatever the switches of the notification centre say, so an account that turned every email and push off still reads it here. `filter` is `new` (not opened yet), `previous` (opened) or `all` (default); `limit` is 1 to 50 (default 20); `cursor` is the opaque `nextCursor` of the previous page, `null` on the last one. A line shows from the moment its message would leave (a reminder appears at its hour, not at the booking) and for 90 days. `kind` is a closed vocabulary of what happened; `icon` is `CALENDAR`, `CLOCK`, `STAR`, `QUESTION`, `CALENDAR_CANCELED`, `CHECK`, `SYNC` or `BADGE`; `title` and `body` are plain text rendered now in `lang` (`el` or `en`, default the language of the account), to be shown as text, never as markup; `body` may be empty; `read` says whether the account opened it. `target` names what the tap opens, never a URL: `APPOINTMENT`, `RATING_INVITATION`, `QUESTION`, `CALENDAR_CONNECTION` (the calendar connection screen) or `DOCTOR` (the doctor account, for a licence) with its id (a published review, a reply and a new review open the appointment); the thing may be gone by then, and the client then stays on the list. No account, email, phone or template is part of a line; a doctor line names the person of the visit only. The answer is sent with `Cache-Control: no-store`. A `filter`, `lang`, `limit`, `cursor` or `side` outside these, or any other query parameter, is 422. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10571,14 +11471,16 @@ export interface operations {
     };
     countMyUnreadNotifications: {
         parameters: {
-            query?: never;
+            query?: {
+                side?: "patient" | "doctor";
+            };
             header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description `unreadCount` is how many lines of the caller own list have shown and were not opened, within the 90 days the list keeps: the dot on the bell is `unreadCount > 0`. Read it when the app or the page returns to the foreground. The answer is sent with `Cache-Control: no-store`. */
+            /** @description `unreadCount` is how many lines of the caller own list of `side` (`patient`, default, or `doctor`) have shown and were not opened, within the 90 days the list keeps: the dot on the bell of that mode is `unreadCount > 0`; the doctor side of an account that is not a doctor is 0. Read it when the app or the page returns to the foreground, and after a doctor answer. The answer is sent with `Cache-Control: no-store`. A `side` outside these, or any other query parameter, is 422. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10596,7 +11498,9 @@ export interface operations {
     };
     markAllMyNotificationsRead: {
         parameters: {
-            query?: never;
+            query?: {
+                side?: "patient" | "doctor";
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -10607,7 +11511,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description `marked` is how many lines became read: only the caller own lines that had shown by the moment of the request (a reminder that appears a minute later stays new). `unreadCount` is the count after it. Calling it again marks nothing and answers `marked` 0. Any body property is 422. */
+            /** @description `marked` is how many lines became read: only the caller own lines of `side` (`patient`, default, or `doctor`) that had shown by the moment of the request (a reminder that appears a minute later stays new); the other side is never touched. `unreadCount` is the count of that side after it. Calling it again marks nothing and answers `marked` 0. A `side` outside these, any other query parameter, or any body property is 422. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10638,7 +11542,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The line, now read, and the `unreadCount` after it. Call it when the person taps a line, before opening its `target`. It is idempotent: a line read already answers the same 200. An `id` that is unknown, belongs to another account or tenant, has not shown yet or is older than 90 days answers the same 404 EC404, so the route cannot be used to probe for lines. An `id` that is not a UUID, or any body property, is 422. */
+            /** @description The line, now read, and the `unreadCount` of the side of that line after it. Call it when the person taps a line, before opening its `target`; no `side` is named, the line is the caller own of either side. It is idempotent: a line read already answers the same 200. An `id` that is unknown, belongs to another account or tenant, has not shown yet or is older than 90 days answers the same 404 EC404, so the route cannot be used to probe for lines. An `id` that is not a UUID, or any body property, is 422. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10727,7 +11631,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Every availability the caller may see, with its weekly schedule. */
+            /** @description Every availability the caller may see, with its weekly schedule. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10828,7 +11732,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The created availability with its weekly schedule. The three booking policy fields are per-office overrides: `null` inherits the doctor value. */
+            /** @description The created availability with its weekly schedule. The three booking policy fields are per-office overrides: `null` inherits the doctor value. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -10855,7 +11759,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The availability, or `null` when no availability carries that id. */
+            /** @description The availability, or `null` when no availability carries that id. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10882,7 +11786,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The deleted availability, as it was before deletion. */
+            /** @description The deleted availability, as it was before deletion. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10927,7 +11831,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The updated availability. */
+            /** @description The updated availability. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11015,7 +11919,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The availability with the new schedule. The call replaces every day, it does not merge. */
+            /** @description The availability with the new schedule. The call replaces every day, it does not merge. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11042,7 +11946,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Every date override of the availability, or [] when there is none. */
+            /** @description Every date override of the availability, or [] when there is none. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11081,7 +11985,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The availability with the new override applied. */
+            /** @description The availability with the new override applied. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -11109,7 +12013,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The availability with the override removed. */
+            /** @description The availability with the override removed. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11149,7 +12053,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The availability with the override updated. */
+            /** @description The availability with the override updated. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11174,7 +12078,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The connection with its provider, status and selected calendars, or the disconnected state. */
+            /** @description The connection with its provider, status and selected calendars, or the disconnected state. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11199,7 +12103,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The outcome code and the resulting connection state. */
+            /** @description The outcome code and the resulting connection state. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11230,7 +12134,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The provider authorization URL to open, and the `state` the callback must carry back. */
+            /** @description The provider authorization URL to open, and the `state` the callback must carry back. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11299,7 +12203,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The provider authorization URL to open, and the `state` the callback must carry back. */
+            /** @description The provider authorization URL to open, and the `state` the callback must carry back. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11362,7 +12266,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Every calendar of the connected account, flagged with the ones currently selected. */
+            /** @description Every calendar of the connected account, flagged with the ones currently selected. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11394,7 +12298,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The outcome code and the resulting connection state. The call replaces the selection, it does not merge. */
+            /** @description The outcome code and the resulting connection state. The call replaces the selection, it does not merge. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11419,7 +12323,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The outcome code and the resulting connection state. */
+            /** @description The outcome code and the resulting connection state. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11444,7 +12348,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The outcome code and the resulting connection state. */
+            /** @description The outcome code and the resulting connection state. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11469,7 +12373,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The outcome code and the resulting connection state after the manual cycle. */
+            /** @description The outcome code and the resulting connection state after the manual cycle. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11496,7 +12400,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The base profile with the four booking policy fields: confirmation mode, cancellation cutoff, minimum booking notice and maximum booking horizon. */
+            /** @description The base profile with the four booking policy fields: confirmation mode, cancellation cutoff, minimum booking notice and maximum booking horizon. The contact email is `notificationEmailMasked` (U-169: the doctor never reads it whole); `notificationEmail` is present only when the backoffice reads another account. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11540,7 +12444,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The updated base profile. Each booking policy field is validated against the configured range and refused with 422 outside it. */
+            /** @description The updated base profile. Each booking policy field is validated against the configured range and refused with 422 outside it. The contact email reads as in the GET: masked, and whole only for the backoffice changing another account. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11594,7 +12498,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Every office linked to the doctor, each as the doctor-office link plus the office aggregate with its translations. */
+            /** @description Every office linked to the doctor, each as the doctor-office link plus the office aggregate with its translations. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11621,7 +12525,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Where the registration stands (`NOT_STARTED` for an account that never started, `LOCKED` after three deletions), what it still lacks in screen order (`missing`), every saved answer under the name of its write body, and `deleteAfter` while it is in progress. Never cached (`no-store`). */
+            /** @description Where the registration stands (`NOT_STARTED` for an account that never started, `LOCKED` after three deletions), what it still lacks in screen order (`missing`), every saved answer under the name of its write body, and `deleteAfter` while it is in progress. The contact email is `contactEmail.notificationEmailMasked` (U-169: the doctor never reads it whole; a change is a new address and its code); `contactEmail.notificationEmail` is present only when the backoffice reads another account. Never cached (`no-store`). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -12037,7 +12941,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. The doctor sends `legalAcceptance` with the doctor terms at their version in force, recorded with the time; without it the doctor is refused with `DOCTOR_TERMS_NOT_ACCEPTED`, and the backoffice saving for an account may not send it. A version that is no longer in force answers 400: read the terms page again and send its current version. */
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. The doctor sends `legalAcceptance` with the doctor terms at their version in force, recorded with the time; without it the doctor is refused with `DOCTOR_TERMS_NOT_ACCEPTED`, and the backoffice saving for an account may not send it. A version that is no longer in force answers 400: read the terms page again and send its current version. After the completion (U-183.5) the insurance still changes, `legalAcceptance` is not required, and terms sent then are not recorded again: the accepted terms keep their version and time. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -12108,7 +13012,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. A registration that still lacks a section is refused before any write with `DOCTOR_ONBOARDING_INCOMPLETE` (and `DOCTOR_UNDER_MINIMUM_AGE` or `DOCTOR_TERMS_NOT_ACCEPTED` where they apply); read the progress again and open `missing[0]`. The older checks run first and answer 422 with their own marker: `DOCTOR_NOTIFICATION_EMAIL_MISSING` or `DOCTOR_NOTIFICATION_EMAIL_UNVERIFIED`, `DEFAULT_DOCTOR_SERVICE_MISSING`, `DEFAULT_DOCTOR_SERVICE_PRICE_INVALID` or `DEFAULT_DOCTOR_SERVICE_DURATION_INVALID`, and `DOCTOR_ONBOARDING_OFFICE_MISSING`, `DOCTOR_ONBOARDING_OFFICE_PHONE_MISSING` or `DOCTOR_ONBOARDING_OFFICE_ADDRESS_MISSING`; a registration without the liability answer is refused with 400, and one without its activation intent with 422 (`activation intent info is required before completion`). */
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. A registration that still lacks a section is refused before any write with `DOCTOR_ONBOARDING_INCOMPLETE` (and `DOCTOR_UNDER_MINIMUM_AGE` or `DOCTOR_TERMS_NOT_ACCEPTED` where they apply); read the progress again and open `missing[0]`. The older checks run first and answer 422 with their own marker: `DOCTOR_NOTIFICATION_EMAIL_MISSING` or `DOCTOR_NOTIFICATION_EMAIL_UNVERIFIED`, `DEFAULT_DOCTOR_SERVICE_MISSING`, `DEFAULT_DOCTOR_SERVICE_PRICE_INVALID` or `DEFAULT_DOCTOR_SERVICE_DURATION_INVALID`, and `DOCTOR_ONBOARDING_OFFICE_MISSING`, `DOCTOR_ONBOARDING_OFFICE_PHONE_MISSING` or `DOCTOR_ONBOARDING_OFFICE_ADDRESS_MISSING`; a registration without the liability answer is refused with 400, and one without its activation intent with 422 (`activation intent info is required before completion`). A registration that is already completed completes once (U-183.5): a second call answers the saved registration and writes no new completion date, no new welcome message and no sales answer. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -12119,6 +13023,63 @@ export interface operations {
                         status: "success" | "error";
                         message: string;
                         data: components["schemas"]["DoctorOnboardingProgressView"];
+                    };
+                };
+            };
+        };
+    };
+    getDoctorDashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The standing of the session's own account (no other account can be named): `registration` (`NOT_STARTED`, `IN_PROGRESS`, `LOCKED`, `COMPLETED`), the `marketplace` and `payments` licences (`NONE`, `ACTIVE` with the end of the farthest active, `EXPIRED` with the latest end; a pending, rejected or revoked licence reads `NONE`), `licensed` (a completed registration and either licence, an expired one included: only then the clients show the doctor mode), `notice` (`EXPIRING` from 30 platform days before the end unless a later licence renews it, `EXPIRED` after it; of the marketplace licence, else of the payments one), `lastMode` (the stored mode in force: a stored `DOCTOR` without a marketplace licence reads `PATIENT`) and `card` (first and last name of the profile and the specialty of the catalogue in the request language, only when licensed). It carries no email, tax number or other account field. Never cached (`no-store`). A query parameter answers 422. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorDashboardView"];
+                    };
+                };
+            };
+        };
+    };
+    setDoctorDashboardMode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    mode: "PATIENT" | "DOCTOR";
+                };
+            };
+        };
+        responses: {
+            /** @description The new dashboard view, the same `DoctorDashboardView` the read answers. `PATIENT` is always taken; `DOCTOR` only by a licensed account with a marketplace licence, else 403 with `DOCTOR_MODE_NOT_ALLOWED` in the message (a payments-only licence opens the till, which is a screen and not a mode). Any other mode or any other field answers 422. The standing of the session's own account (no other account can be named): `registration` (`NOT_STARTED`, `IN_PROGRESS`, `LOCKED`, `COMPLETED`), the `marketplace` and `payments` licences (`NONE`, `ACTIVE` with the end of the farthest active, `EXPIRED` with the latest end; a pending, rejected or revoked licence reads `NONE`), `licensed` (a completed registration and either licence, an expired one included: only then the clients show the doctor mode), `notice` (`EXPIRING` from 30 platform days before the end unless a later licence renews it, `EXPIRED` after it; of the marketplace licence, else of the payments one), `lastMode` (the stored mode in force: a stored `DOCTOR` without a marketplace licence reads `PATIENT`) and `card` (first and last name of the profile and the specialty of the catalogue in the request language, only when licensed). It carries no email, tax number or other account field. Never cached (`no-store`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorDashboardView"];
                     };
                 };
             };
@@ -12208,6 +13169,31 @@ export interface operations {
                         status: "success" | "error";
                         message: string;
                         data: components["schemas"]["ProfessionalListResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    listDoctorServices: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description D-W51-44: the services «Υπηρεσίες και κόστος» ticks from — every one with its `price` in euros, `customDurationInMinutes`, its catalogue and its own texts (`translations`), and `title`: the title of its base service in the language of the request (`Accept-Language` or `lang`, English when it names none), else the base service's own name. An account acting as a doctor reads only its own services, the doctor of the session — nothing in the request names another doctor, and a query key is ignored; `ADMIN` reads every doctor's, `SEMI_ADMIN` and `SUPPORT` those of their tenant; a patient is refused with 403. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorServiceListResponseView"];
                     };
                 };
             };

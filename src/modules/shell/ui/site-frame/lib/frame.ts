@@ -1,5 +1,6 @@
 import { m } from '$paraglide/messages.js';
 import { languages, type SupportedLocale } from '$shared/preferences/i18n/locales';
+import type { DoctorStandingKind } from '$shared/state/doctor-standing';
 import type { LanguageOption } from '$shared/ui/molecules/language-switcher';
 import type { BottomNavItem } from '$shared/ui/organisms/bottom-nav';
 import type { FooterColumn, FooterLink } from '$shared/ui/organisms/site-footer';
@@ -11,6 +12,9 @@ import type { AccountEntry, FrameHeader, FrameMessageOptions, LocalizedHref } fr
  * the doctor's sign-up (its overview), no longer the empty `/plans`; «Πλάνα συνδρομής» keeps `/plans` (P-W3 Σ-11).
  */
 export const doctorOnboardingPath = '/doctor/onboarding';
+
+/** 🔴 D-W51-16 (wave 5.1, screen 65): the doctor's dashboard, «Σήμερα» — where «Λειτουργία γιατρού» leads. */
+export const doctorDashboardPath = '/doctor';
 
 /** Wave 4.0 · screens 50 and 55 (D-W4-20, D-W4-51): «Τα ραντεβού μου» and «Οι συγγενείς μου», the application's words. */
 const appointmentsPath = '/appointments';
@@ -32,14 +36,40 @@ const notificationsPath = '/notifications';
  * 🔴 D-W45-17 (screen 63, record §5.1): a member's menu has «Ειδοποιήσεις» — the first row under the rule, before «Οι
  * συγγενείς μου», not bold — with its dot and the name «Ειδοποιήσεις, νέες» while a notification is new
  * (`hasNewNotifications`); it stands BESIDE the dot of «Μηνύματα» (`hasUnread`, U-84 Π5), never in its place.
+ * 🔴 Wave 5.1 · screen 64 (U-185.1, U-183.5, D-W51-16; `64-switch/sw.js:884-892`), by the member's doctor standing:
+ * a licence of the marketplace (`doctor`) has no «Είστε γιατρός;» and, in its own group right after «Αγαπημένα», the row
+ * «Λειτουργία γιατρού» — below 1128 only (`hideFrom`: from 1128 the bar has it); a completed registration without a
+ * licence (`pending`) reads «Η αίτησή σας ελέγχεται» in the same place and to the same page; a licence of the till alone
+ * (`payments`) has neither (the web has no till in 5.1); anyone else reads «Είστε γιατρός;» as before (U-164.1).
  */
 export function buildAccountEntries(
 	messageOptions: FrameMessageOptions,
 	href: LocalizedHref,
 	isMember = false,
 	hasUnread = false,
-	hasNewNotifications = false
+	hasNewNotifications = false,
+	doctor: DoctorStandingKind = 'none'
 ): AccountEntry[] {
+	const standing = isMember ? doctor : 'none';
+	const doctorEntry: AccountEntry[] =
+		standing === 'doctor' || standing === 'payments'
+			? []
+			: [
+					{
+						key: 'doctor',
+						kind: 'link',
+						label:
+							standing === 'pending'
+								? m.doctor_application_review_title({}, messageOptions)
+								: m.account_menu_doctor_title({}, messageOptions),
+						description:
+							standing === 'pending'
+								? m.doctor_application_review_body({}, messageOptions)
+								: m.account_menu_doctor_body({}, messageOptions),
+						href: href(doctorOnboardingPath),
+						separated: true
+					}
+				];
 	const shared: AccountEntry[] = [
 		isMember
 			? {
@@ -55,14 +85,7 @@ export function buildAccountEntries(
 					separated: true
 				},
 		{ key: 'help', kind: 'link', label: m.nav_help({}, messageOptions), href: href('/help') },
-		{
-			key: 'doctor',
-			kind: 'link',
-			label: m.account_menu_doctor_title({}, messageOptions),
-			description: m.account_menu_doctor_body({}, messageOptions),
-			href: href(doctorOnboardingPath),
-			separated: true
-		}
+		...doctorEntry
 	];
 	if (!isMember) {
 		return [
@@ -99,6 +122,18 @@ export function buildAccountEntries(
 			href: href('/favorites'),
 			emphasis: true
 		},
+		...(standing === 'doctor'
+			? [
+					{
+						key: 'doctor-mode',
+						kind: 'switch',
+						label: m.doctor_mode_doctor({}, messageOptions),
+						href: href(doctorDashboardPath),
+						separated: true,
+						hideFrom: 'laptop'
+					} satisfies AccountEntry
+				]
+			: []),
 		{
 			key: 'notifications',
 			kind: 'link',
@@ -297,23 +332,44 @@ const BOOKING_PAGES = /^\/doctors\/[^/]+\/booking(?:\/.+)?$/u;
 const ONBOARDING_PAGES = /^\/doctor\/onboarding(?:\/.+)?$/u;
 
 /**
+ * 🔴 Wave 5.1 · screen 65 (D-W51-16): the doctor's dashboard, «Σήμερα» (`/doctor`) and «Μενού» (`/doctor/menu`) — a group
+ * of routes with its own frame (bar, ☰, capsule), so the patient's frame draws none of its own there. 🔴 Screen 67
+ * (D-W51-31): «Ραντεβού» (`/doctor/appointments`) and every page under it too; screen 73 (D-W51-73): «Οι ασθενείς μου»
+ * (`/doctor/patients`) and every page under it (live 15/11: it drew the patient's header over the doctor's); screen 74
+ * (D-W51-85): the doctor's messages (`/doctor/messages`) and every page under them; screen 75 (D-W51-89): the doctor's
+ * notifications (`/doctor/notifications`).
+ */
+const DOCTOR_DASHBOARD_PAGES =
+	/^\/doctor(?:\/menu|\/notifications|\/(?:appointments|patients|messages)(?:\/.+)?)?$/u;
+
+/**
+ * 🔴 Wave 5.1 · D-W51-72 (U-198.1): the cancel link's page (`/a/<token>`), screen 53 for a patient without an account —
+ * the mark alone at every width, no menu, no footer, no capsule: nothing of an account, nowhere else to go.
+ */
+const CANCEL_LINK_PAGES = /^\/a\/[^/]+$/u;
+
+/**
  * 🔴 U-81.2 / P-W3 §3.1: the frame's top bar on `basePath` (the path without the language) — `site` the whole bar
  * (from 744, U-16.3), `brand` only the mark over a thin line (the booking from 744, record §3.4: nothing leads away
- * from it), `none` no bar of the frame (the sign-up draws its own: the mark, «Βοήθεια», «Αποθήκευση και έξοδος»).
+ * from it), `logo` the same mark at every width (the cancel link's page, D-W51-72), `none` no bar of the frame (the
+ * sign-up draws its own: the mark, «Βοήθεια», «Αποθήκευση και έξοδος»).
  * 🔴 U-61.1 (review w3-w1 MINOR-1): an error page (`status` ≥ 400) under either is the site's, inside the whole frame.
  */
 export function frameHeaderOf(basePath: string, status = 200): FrameHeader {
 	if (status >= 400) return 'site';
 	const path = trimmed(basePath);
-	if (ONBOARDING_PAGES.test(path)) return 'none';
+	if (ONBOARDING_PAGES.test(path) || DOCTOR_DASHBOARD_PAGES.test(path)) return 'none';
 	if (BOOKING_PAGES.test(path)) return 'brand';
+	if (CANCEL_LINK_PAGES.test(path)) return 'logo';
 	return 'site';
 }
 
 /** The pages that end without the footer at every width; an error page under them has it again (U-61.1). */
 const FOOTERLESS_PAGES = [
 	BOOKING_PAGES,
+	CANCEL_LINK_PAGES,
 	ONBOARDING_PAGES,
+	DOCTOR_DASHBOARD_PAGES,
 	APPOINTMENTS_PAGES,
 	RELATIVES_PAGES,
 	SETTINGS_PAGES,
@@ -355,6 +411,10 @@ export function showsBottomNav(basePath: string, status = 200): boolean {
 	if (/^\/messages\/[^/]+$/u.test(path)) return false;
 	// 🔴 U-81.2 (wave 3): the booking and the sign-up are pushed over the tabs, as in the application: their own bar.
 	if (BOOKING_PAGES.test(path) || ONBOARDING_PAGES.test(path)) return false;
+	// 🔴 D-W51-16 (wave 5.1): the doctor's dashboard has its own capsule (Σήμερα · Μηνύματα · Μενού), never the patient's.
+	if (DOCTOR_DASHBOARD_PAGES.test(path)) return false;
+	// 🔴 D-W51-72: the cancel link's page leads nowhere — no capsule of an account.
+	if (CANCEL_LINK_PAGES.test(path)) return false;
 	// 🔴 U-81.2 (wave 4.0, P-W4 §3.3): an appointment and what it opens, the rating and a relative's form are pushed over
 	// the tabs (the prototype's `body.pushed`); «Τα ραντεβού μου» and «Οι συγγενείς μου» keep them (P-W4 Σ-25).
 	if (APPOINTMENTS_PAGES.test(path) && path !== appointmentsPath) return false;

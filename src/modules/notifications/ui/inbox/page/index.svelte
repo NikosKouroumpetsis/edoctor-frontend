@@ -20,7 +20,7 @@
 	import { useNotificationInbox } from '../hooks/use-inbox.svelte';
 	import type { NotificationInboxPageProps } from '../types';
 
-	let { locale, filter: asked, links, offline }: NotificationInboxPageProps = $props();
+	let { side, locale, filter: asked, links, offline }: NotificationInboxPageProps = $props();
 
 	const options = $derived({ locale });
 	const title = $derived(m.notifications_inbox_title({}, options));
@@ -30,6 +30,7 @@
 	const toasts = getToastsOptional();
 
 	const inbox = useNotificationInbox({
+		side: () => side,
 		viewer: () => viewer,
 		asked: () => asked,
 		locale: () => locale,
@@ -49,6 +50,13 @@
 	// The same three choices are the left menu from 950 and the pills below it; CSS alone shows one of the two. Only
 	// the one on screen carries the page's names for a test.
 	const wide = new MediaQuery(`(min-width: ${breakpoints.split}px)`, false);
+
+	// 🔴 D-W51-90 (88 §75): the doctor's list with nothing in it says what will come there — his appointments' news.
+	const noneBody = $derived(
+		side === 'doctor'
+			? m.notifications_inbox_empty_all_doctor_body({}, options)
+			: m.notifications_inbox_empty_all_body({}, options)
+	);
 
 	function retry() {
 		if (viewer === 'failed') void session?.retryRead();
@@ -75,7 +83,9 @@
      list sits in the MIDDLE of the right column under the choice's own title (U-167, the settings' measures); 744–949 one
      column with the pills under the title; below 744 the application's pushed page, «←» to the «Προφίλ». The gear leads
      to the notifications' settings (screen 60). 🔴 U-174 (Ε2 Β): a line is read when it is PRESSED, and «Σήμανση όλων ως
-     διαβασμένων» reads them all. Every word of a line is the server's, drawn as text (U-65.6). -->
+     διαβασμένων» reads them all. Every word of a line is the server's, drawn as text (U-65.6). 🔴 Screen 75 (D-W51-89 …
+     91): the same page for the doctor's side, inside his frame — «←» to his «Μενού», no gear (D-W51-02), his empty
+     words, and a line opens his 68 one step on (`links.open`). -->
 <SplitView list={menu} widths="menu" centred open solo={plain} data-testid="notifications-split">
 	<div
 		data-testid="notifications-page"
@@ -91,7 +101,7 @@
 				size="sm"
 				iconSize="md"
 				aria-label={m.notifications_inbox_back({}, options)}
-				href={links.profile}
+				href={links.back}
 				data-testid="notifications-back"
 				class="mb-3 tablet:hidden"
 			/>
@@ -118,7 +128,7 @@
 						{current.title}
 					</h2>
 				{/if}
-				{#if viewer === 'member'}
+				{#if viewer === 'member' && links.settings}
 					<RoundLink
 						href={links.settings}
 						icon="settings-outline"
@@ -160,7 +170,7 @@
 				<EmptyState
 					titleAs="h2"
 					title={m.notifications_inbox_empty_all_title({}, options)}
-					description={m.notifications_inbox_empty_all_body({}, options)}
+					description={noneBody}
 					icon={bellGlyph}
 					class="pt-section split:pt-reading-gap"
 					testId="notifications-empty-all"
@@ -214,11 +224,13 @@
 					{/if}
 					<ul aria-label={current?.title ?? title} data-testid="notifications-list" class="mt-2">
 						{#each inbox.rows as row (row.id)}
+							{@const href = row.target ? links.target(row.target) : null}
 							<Row
 								{row}
-								href={row.target ? links.target(row.target) : null}
+								{href}
 								newLabel={m.notifications_inbox_row_new({}, options)}
 								onPress={() => void inbox.read(row.id)}
+								onOpen={href && links.open ? () => links.open?.(href) : null}
 							/>
 						{/each}
 					</ul>

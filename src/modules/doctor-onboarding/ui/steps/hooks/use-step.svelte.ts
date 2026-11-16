@@ -6,6 +6,7 @@ import { page } from '$app/state';
 import { m } from '$paraglide/messages.js';
 import { readHistoryDepth } from '$shared/lib/navigation';
 import { personalQueryMeta } from '$shared/query';
+import { getDoctorStandingOptional } from '$shared/state/doctor-standing';
 import { getSessionOptional } from '$shared/state/session';
 import { getToastsOptional } from '$shared/ui/molecules/toast';
 import type { WizardScreenPill, WizardScreenProgress } from '$shared/ui/templates/wizard-screen';
@@ -20,10 +21,13 @@ import {
 	type DoctorOnboardingWrite
 } from '$modules/doctor-onboarding/api/progress';
 import {
+	doctorOnboardingEditPath,
 	doctorOnboardingPath,
 	doctorOnboardingStepOf,
 	isDoctorOnboardingBeyondProgress,
+	isDoctorOnboardingEditable,
 	needsContactEmail,
+	nextDoctorOnboardingEditStep,
 	nextDoctorOnboardingStep,
 	previousDoctorOnboardingStep,
 	readDoctorOnboardingFill,
@@ -58,6 +62,7 @@ export function useDoctorOnboardingStep(
 	const openIn = () => (typeof states === 'function' ? states() : states);
 	const client = useQueryClient();
 	const session = getSessionOptional();
+	const standing = getDoctorStandingOptional();
 	const toasts = getToastsOptional();
 	const draft = getOnboardingDraft();
 	const step: DoctorOnboardingStep = doctorOnboardingStepOf(screen);
@@ -72,6 +77,27 @@ export function useDoctorOnboardingStep(
 		signedIn ? progressRead.data : undefined
 	);
 	const needsEmail = $derived(needsContactEmail(progress));
+	/**
+	 * 🔴 U-183.5 · D-W51-16 (wave 5.1, screen 64): «Επεξεργασία» of the application's page — `?edit=1` — only on a COMPLETED
+	 * registration without a licence (the doctor standing's `pending`): the same step, «Ακύρωση / Αποθήκευση» under it, no
+	 * stages' bar, back on the application's page once saved. Anywhere else the address's `edit` changes nothing: the
+	 * normal flow (a sign-up in progress walks its steps, a licensed one reads its overview).
+	 */
+	const editAsked = $derived(
+		page.url.searchParams.get('edit') === '1' && isDoctorOnboardingEditable(screen)
+	);
+	const editing = $derived(
+		editAsked &&
+			progress?.state === 'COMPLETED' &&
+			standing?.known === true &&
+			standing.kind === 'pending'
+	);
+	// A completed registration asked for an edit is judged once the standing is here (never before: no flash of a move).
+	const editPending = $derived(
+		editAsked && progress?.state === 'COMPLETED' && Boolean(standing) && standing?.known !== true
+	);
+	const isOpen = (state: DoctorOnboardingState) =>
+		openIn().includes(state) || (state === 'COMPLETED' && editing);
 	// After a reload the entry still knows how many pages lie behind it (review w3-w3 R1 MINOR-5).
 	const depthHere = () => readHistoryDepth('onboarding', page.state);
 	// A page the person already left (a «back» while it saved) moves nobody: its late answer stays in the cache only.
@@ -82,7 +108,13 @@ export function useDoctorOnboardingStep(
 
 	let saveError = $state<string | null>(null);
 
-	const hrefOf = (target: DoctorOnboardingScreen) => context().href(doctorOnboardingPath(target));
+	// An edit's pages keep `?edit=1` (its sub-flows too); the application's page never does.
+	const hrefOf = (target: DoctorOnboardingScreen) =>
+		context().href(
+			editing && target !== 'overview'
+				? doctorOnboardingEditPath(target)
+				: doctorOnboardingPath(target)
+		);
 	const navigate = (target: DoctorOnboardingScreen, deeper: number, replaceState = false) =>
 		here
 			? // The sign-up's own address, resolved by the screen in the page's language.
@@ -101,14 +133,12 @@ export function useDoctorOnboardingStep(
 		const status = session?.status;
 		const forgotten = session?.forgotten ?? 0;
 		const known = progress;
+		const judging = editPending;
 		untrack(() => {
 			if (status === 'member') memberHere = true;
 			const leftAsGuest = status === 'guest' && !memberHere;
-			if (
-				leftAsGuest ||
-				forgotten !== forgottenAtStart ||
-				(known && !openIn().includes(known.state))
-			) {
+			if (judging && !leftAsGuest && forgotten === forgottenAtStart) return;
+			if (leftAsGuest || forgotten !== forgottenAtStart || (known && !isOpen(known.state))) {
 				void navigate('overview', 0, true);
 				return;
 			}
@@ -210,9 +240,29 @@ export function useDoctorOnboardingStep(
 		}
 	}
 
+	/**
+	 * U-183.5: an edit ends on the application's page — back through the history it came by (the page it was opened
+	 * from), else in its place. «Αποθήκευση» says so; «Ακύρωση» leaves the unsaved words behind.
+	 */
+	function leaveEdit(saved: boolean) {
+		if (!here) return;
+		if (!saved) draft.forget();
+		const depth = depthHere();
+		if (depth > 0) history.go(-depth);
+		else void navigate('overview', 0, true);
+		if (saved) toasts?.show({ message: m.doctor_application_saved({}, options) });
+	}
+
 	/** «Επόμενο»: the step after this one, for the progress the last write answered (the email screens come and go). */
 	function goNext(after?: DoctorOnboardingProgress | null) {
 		if (!here || leaving) return;
+		if (editing) {
+			// An edit's sub-flow keeps its order (email ⇒ code, address ⇒ confirmation ⇒ pin), then ends saved.
+			const chained = nextDoctorOnboardingEditStep(step);
+			if (chained && screen === step) void navigate(chained, depthHere() + 1);
+			else leaveEdit(true);
+			return;
+		}
 		const target = nextDoctorOnboardingStep(step, needsContactEmail(after ?? progress));
 		void navigate(target, depthHere() + 1);
 	}
@@ -263,7 +313,31 @@ export function useDoctorOnboardingStep(
 		},
 		/** The progress is here: a page draws its fields from it (and from the draft), never before. */
 		get ready() {
-			return progress !== undefined && openIn().includes(progress.state);
+			return progress !== undefined && isOpen(progress.state);
+		},
+		/** 🔴 U-183.5: this page is an «Επεξεργασία» of a completed registration without a licence. */
+		get editing() {
+			return editing;
+		},
+		/** The edit ends on this page («Αποθήκευση»), or goes on to its sub-flow's next one. */
+		get editEnds() {
+			return editing && (screen !== step || nextDoctorOnboardingEditStep(step) === null);
+		},
+		/** «Ακύρωση» of an edit: nothing written here is kept, back on the application's page. */
+		cancelEdit() {
+			leaveEdit(false);
+		},
+		/** U-183.5: «Επεξεργασία» of the application's page opens `target` as one more page, `?edit=1` its address. */
+		editHrefOf(target: DoctorOnboardingScreen) {
+			return context().href(doctorOnboardingEditPath(target));
+		},
+		openEdit(target: DoctorOnboardingScreen) {
+			if (!here) return;
+			// The sign-up's own address, resolved by the screen in the page's language.
+			// eslint-disable-next-line svelte/no-navigation-without-resolve
+			void goto(context().href(doctorOnboardingEditPath(target)), {
+				state: { onboarding: { depth: depthHere() + 1 } }
+			});
 		},
 		get loadError() {
 			return signedIn && progress === undefined && progressRead.isError;
@@ -301,7 +375,7 @@ export function useDoctorOnboardingStep(
 		},
 		/** The bar's segments: the stage and how far into it this step is (none on the overview or a screen a step opens). */
 		get bar(): WizardScreenProgress | undefined {
-			return fill
+			return fill && !editing
 				? {
 						steps: 3,
 						currentStep: fill.stage,
@@ -323,7 +397,7 @@ export function useDoctorOnboardingStep(
 				href: context().helpHref,
 				testId: 'doctor-onboarding-help'
 			};
-			if (screen === 'overview' || screen === 'done') return [help];
+			if (screen === 'overview' || screen === 'done' || editing) return [help];
 			return [
 				help,
 				{

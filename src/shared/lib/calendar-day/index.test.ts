@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { formatCalendarDay, formatCalendarDayParts } from '.';
+import {
+	addCalendarDays,
+	calendarDayStripLabels,
+	formatCalendarDay,
+	formatCalendarDayParts
+} from '.';
 
 const DAY_LABEL = { day: 'numeric', month: 'short', weekday: 'short' } as const;
 
@@ -48,5 +53,33 @@ describe('shared::lib::calendar-day', () => {
 				.join('')
 		).toBe('Thu, Oct 1');
 		expect(formatCalendarDayParts('2026-02-31', 'el', DAY_LABEL)).toEqual([]);
+	});
+
+	it('calendarDayStripLabels: a strip card’s two lines and its whole name, weekday first in both languages', () => {
+		expect(calendarDayStripLabels('2026-11-16', 'el')).toEqual({
+			weekdayDay: 'Δευ 16',
+			month: 'Νοε',
+			accessible: 'Δευ 16 Νοε'
+		});
+		expect(calendarDayStripLabels('2026-11-16', 'en')).toEqual({
+			weekdayDay: 'Mon 16',
+			month: 'Nov',
+			accessible: 'Mon 16 Nov'
+		});
+		expect(calendarDayStripLabels('2026-02-31', 'el')).toEqual({
+			weekdayDay: '',
+			month: '',
+			accessible: ''
+		});
+	});
+
+	it('addCalendarDays: across a month, a year and the change of the clocks; none for a day the calendar lacks', () => {
+		expect(addCalendarDays('2026-11-16', 7)).toBe('2026-11-23');
+		expect(addCalendarDays('2026-11-30', 1)).toBe('2026-12-01');
+		expect(addCalendarDays('2026-12-31', 1)).toBe('2027-01-01');
+		expect(addCalendarDays('2026-10-24', 1)).toBe('2026-10-25');
+		expect(addCalendarDays('2026-10-25', 1)).toBe('2026-10-26');
+		expect(addCalendarDays('2026-02-31', 1)).toBeNull();
+		expect(addCalendarDays('2026-11-16', 1.5)).toBeNull();
 	});
 });

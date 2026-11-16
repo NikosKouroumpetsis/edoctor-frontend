@@ -37,3 +37,17 @@
 
 <!-- No tabs draw nothing: one place is not a choice. -->
 <Story name="Empty" args={{ tabs: [] }} />
+
+<!-- Screen 66 (`solid`): the chip's fill, the chosen one filled dark (Airbnb's «Σήμερα · Επερχόμενα»). -->
+<Story
+	name="Solid"
+	args={{
+		variant: 'solid',
+		tabs: [
+			{ label: 'Σήμερα', value: 'today' },
+			{ label: 'Επερχόμενα', value: 'upcoming' }
+		],
+		value: 'today',
+		'aria-label': 'Ραντεβού'
+	}}
+/>

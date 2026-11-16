@@ -9,6 +9,8 @@
 	 * `contrast` (wave 4.0, D-W4-28, screen 50's `.a-chip.on`): the chosen pill filled dark, its words light.
 	 */
 	export type ChipVariant = 'filled' | 'tinted' | 'outline' | 'contrast';
+	/** How a chip draws its count (`text` by default). */
+	export type ChipCountLook = 'text' | 'bubble';
 
 	// The drawn pill per variant: its idle and its active look (the ring is inset, so a choice never reflows the row).
 	// U-28.4 (Airbnb's): with a pointer, a chip not chosen darkens its border on hover; a chosen or disabled one does not
@@ -113,6 +115,11 @@
 		icon?: IoniconName;
 		/** A count after the label (a filter's number of results). */
 		count?: string | null;
+		/**
+		 * How the count is drawn: `text` the smaller words after the label (the results' filters), `bubble` a 20 round
+		 * badge on the chip's own fill (wave 5.1 · screen 67's «Αιτήματα 2», `64-switch/sw.css:148-149` `.l-n`).
+		 */
+		countLook?: ChipCountLook;
 		selected?: boolean;
 		/** A trailing ✕ that marks the chip active; pressing the chip then calls `onRemove`. */
 		removable?: boolean;
@@ -153,6 +160,7 @@
 		label,
 		icon,
 		count,
+		countLook = 'text',
 		selected = false,
 		removable = false,
 		onRemove,
@@ -202,6 +210,15 @@
 	const countTone = $derived(
 		active && variant !== 'outline' ? activeText : 'text-muted-foreground'
 	);
+	// The bubble (`.l-n`): 20 round, 12/600, the chip's grey when idle and the page's own fill on a chosen dark chip.
+	const countClasses = $derived(
+		countLook === 'bubble'
+			? cn(
+					'inline-grid h-5 min-w-5 shrink-0 place-items-center self-center rounded-full px-1.5 text-label-md font-semibold whitespace-nowrap text-foreground',
+					active ? 'bg-card' : 'bg-chip'
+				)
+			: cn('shrink-0 text-label-md whitespace-nowrap', countTone)
+	);
 
 	function handleClick(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
 		if (removable && onRemove) onRemove();
@@ -243,10 +260,7 @@
 				class="inline-flex min-w-0 flex-row items-baseline gap-1.5"
 			>
 				{@render labelText()}
-				<span
-					data-slot="chip-count"
-					class={cn('shrink-0 text-label-md whitespace-nowrap', countTone)}>{count}</span
-				>
+				<span data-slot="chip-count" data-look={countLook} class={countClasses}>{count}</span>
 			</span>
 		{:else}
 			{@render labelText()}

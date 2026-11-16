@@ -1,35 +1,72 @@
 <script lang="ts" module>
 	/**
-	 * The list's width from 950: `wide` 420 (460 from 1128, the default), `inbox` 380 (400 from 1128), `menu` 340 (420
-	 * from 1128) — a menu of sections, which the template also insets from 950 (32 over, 24 a side, 48 under; 40 over
-	 * and 48 a side from 1128).
+	 * The list's width once the columns stand side by side: `wide` 420 (460 from 1128, the default), `inbox` 380 (400
+	 * from 1128), `menu` 340 (420 from 1128) — a menu of sections, which the template also insets (32 over, 24 a side,
+	 * 48 under; 40 over and 48 a side from 1128).
 	 */
 	export type SplitViewWidths = 'wide' | 'inbox' | 'menu';
 
-	// From 950 the screen under the site's bar, the list and what it opened side by side. Whole classes per width
-	// (Tailwind reads only written classes).
-	const rootClasses: Record<SplitViewWidths, string> = {
-		wide: 'split:grid split:h-split split:grid-split',
-		inbox: 'split:grid split:h-split split:grid-inbox',
-		menu: 'split:grid split:h-split split:grid-menu'
+	/**
+	 * Where the two columns begin: `split` 950 (the default, every list until wave 5.1), `laptop` 1128 (D-W51-36: a list
+	 * whose cards carry their own answers needs the room before something opens beside it).
+	 */
+	export type SplitViewFrom = 'split' | 'laptop';
+
+	/** Every class of one breakpoint, written whole (Tailwind reads only written classes). */
+	type SplitViewClasses = {
+		root: Record<SplitViewWidths, string>;
+		/** The menu column's own inset (`57-settings/set.css` `.s-lcol`); a list of the other widths insets itself. */
+		listInsets: Partial<Record<SplitViewWidths, string>>;
+		/** Each column scrolls on its own; the list keeps the line between them. */
+		list: string;
+		pane: string;
+		/** U-139.1: nothing for the right ⇒ one column of 640 in the middle, the page's height under the bar (D-W4-66). */
+		solo: string;
+		soloRoot: string;
+		/** 🔴 U-167 (`57-settings/set.css` `.s-rcol`): the right column's inset and, in its MIDDLE, a box of at most 640. */
+		centredPane: string;
+		centre: string;
+		/** What shows beside the other once they stand side by side. */
+		shown: string;
 	};
-	// The menu column's own inset from 950 (`57-settings/set.css` `.s-lcol`); a list of the other widths insets itself.
-	const listInsets: Partial<Record<SplitViewWidths, string>> = {
-		menu: 'split:px-6 split:pt-section split:pb-section-lg laptop:px-pane-inset laptop:pt-reading-gap'
+
+	const CLASSES: Record<SplitViewFrom, SplitViewClasses> = {
+		split: {
+			root: {
+				wide: 'split:grid split:h-split split:grid-split',
+				inbox: 'split:grid split:h-split split:grid-inbox',
+				menu: 'split:grid split:h-split split:grid-menu'
+			},
+			listInsets: {
+				menu: 'split:px-6 split:pt-section split:pb-section-lg laptop:px-pane-inset laptop:pt-reading-gap'
+			},
+			list: 'split:overflow-y-auto split:overscroll-contain split:border-r split:border-border/60',
+			pane: 'split:min-h-0 split:overflow-y-auto split:overscroll-contain',
+			solo: 'split:mx-auto split:w-full split:max-w-split-solo',
+			soloRoot: 'split:min-h-page',
+			centredPane:
+				'split:px-pane-inset split:pt-section split:pb-pane-inset-lg laptop:pt-reading-gap',
+			centre: 'split:mx-auto split:w-full split:max-w-split-solo',
+			shown: 'split:block'
+		},
+		laptop: {
+			root: {
+				wide: 'laptop:grid laptop:h-split laptop:grid-split',
+				inbox: 'laptop:grid laptop:h-split laptop:grid-inbox',
+				menu: 'laptop:grid laptop:h-split laptop:grid-menu'
+			},
+			listInsets: {
+				menu: 'laptop:px-pane-inset laptop:pt-reading-gap laptop:pb-section-lg'
+			},
+			list: 'laptop:overflow-y-auto laptop:overscroll-contain laptop:border-r laptop:border-border/60',
+			pane: 'laptop:min-h-0 laptop:overflow-y-auto laptop:overscroll-contain',
+			solo: 'laptop:mx-auto laptop:w-full laptop:max-w-split-solo',
+			soloRoot: 'laptop:min-h-page',
+			centredPane: 'laptop:px-pane-inset laptop:pt-reading-gap laptop:pb-pane-inset-lg',
+			centre: 'laptop:mx-auto laptop:w-full laptop:max-w-split-solo',
+			shown: 'laptop:block'
+		}
 	};
-	// Each column scrolls on its own from 950; the list keeps the line between them.
-	const listClasses =
-		'split:overflow-y-auto split:overscroll-contain split:border-r split:border-border/60';
-	const paneClasses = 'split:min-h-0 split:overflow-y-auto split:overscroll-contain';
-	// U-139.1: nothing for the right ⇒ from 950 one column of 640 in the middle of the screen, the page's height under
-	// the bar (D-W4-66: the page's own colour reaches the bottom, never the body's under a short column).
-	const soloClasses = 'split:mx-auto split:w-full split:max-w-split-solo';
-	const soloRootClasses = 'split:min-h-page';
-	// 🔴 U-167 (`57-settings/set.css` `.s-rcol`): from 950 the right column's inset (32 over, 40 from 1128; 48 a side; 64
-	// under) and, in the MIDDLE of what is left, a box of at most 640 — never against the line between the columns.
-	const centredPaneClasses =
-		'split:px-pane-inset split:pt-section split:pb-pane-inset-lg laptop:pt-reading-gap';
-	const centreClasses = 'split:mx-auto split:w-full split:max-w-split-solo';
 </script>
 
 <script lang="ts">
@@ -42,6 +79,7 @@
 		open = false,
 		solo = false,
 		widths = 'wide',
+		from = 'split',
 		centred = false,
 		listLabel,
 		paneLabel,
@@ -60,6 +98,8 @@
 		 */
 		solo?: boolean;
 		widths?: SplitViewWidths;
+		/** Where the columns begin standing side by side: 950 (`split`, the default) or 1128 (`laptop`, D-W51-36). */
+		from?: SplitViewFrom;
 		/**
 		 * 🔴 U-167: from 950 what the right column shows sits in the MIDDLE of that column, at most 640 wide, inside the
 		 * column's own inset — never pushed against the line. Nothing changes below 950, nor with `solo`.
@@ -73,20 +113,23 @@
 		/** The right column: what the list opened. */
 		children: Snippet;
 	} = $props();
+
+	const zone = $derived(CLASSES[from]);
 </script>
 
 <!-- The inbox's two columns (U-84 Π1, D-W4-52), now the template of every list that opens something beside it. Below
-     950 one column: the list, or what it opened (`open`); from 950 the list (`widths`) and the rest side by side, each
-     scrolling on its own under the site's bar — the rest in the middle of its column with `centred` (U-167). Both
-     columns are always in the page, so the list keeps its place and its scroll while something opens; only CSS tells
-     the zones apart (U-03.1). -->
+     950 (1128 with `from="laptop"`, D-W51-36) one column: the list, or what it opened (`open`); from there the list
+     (`widths`) and the rest side by side, each scrolling on its own under the site's bar — the rest in the middle of its
+     column with `centred` (U-167). Both columns are always in the page, so the list keeps its place and its scroll while
+     something opens; only CSS tells the zones apart (U-03.1). -->
 <div
 	data-slot="split-view"
 	data-widths={widths}
+	data-from={from}
 	data-centred={centred || undefined}
 	data-open={open || undefined}
 	data-solo={solo || undefined}
-	class={cn(solo ? soloRootClasses : rootClasses[widths], className)}
+	class={cn(solo ? zone.soloRoot : zone.root[widths], className)}
 	{...restProps}
 >
 	<div
@@ -96,7 +139,7 @@
 		class={cn(
 			'min-w-0',
 			open && 'hidden',
-			solo ? !open && soloClasses : cn(listClasses, listInsets[widths], open && 'split:block')
+			solo ? !open && zone.solo : cn(zone.list, zone.listInsets[widths], open && zone.shown)
 		)}
 	>
 		{@render list()}
@@ -109,14 +152,12 @@
 		class={cn(
 			'min-w-0',
 			!open && 'hidden',
-			solo
-				? open && soloClasses
-				: cn(paneClasses, centred && centredPaneClasses, !open && 'split:block')
+			solo ? open && zone.solo : cn(zone.pane, centred && zone.centredPane, !open && zone.shown)
 		)}
 	>
 		{#if centred}
 			<!-- The same box with or without `solo` (which centres the whole column itself), so what it holds stays in place. -->
-			<div data-slot="split-view-centre" class={solo ? undefined : centreClasses}>
+			<div data-slot="split-view-centre" class={solo ? undefined : zone.centre}>
 				{@render children()}
 			</div>
 		{:else}

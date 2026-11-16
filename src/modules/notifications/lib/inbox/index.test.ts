@@ -212,6 +212,13 @@ describe('modules/notifications/lib/inbox · what a press opens (D-W45-45, D-W45
 			notificationTargetOf({ kind: 'CONVERSATION', id: SAMPLE_IDS.appointment } as never)
 		).toBeNull();
 	});
+
+	it('🔴 D-W51-90 (screen 75): the calendar’s connection and the doctor (a licence) open NOTHING on the web in 5.1 — no «Σύνδεση ημερολογίου», no «Λογαριασμός γιατρού» (D-W51-04): the press only reads the line', () => {
+		expect(
+			notificationTargetOf({ kind: 'CALENDAR_CONNECTION', id: SAMPLE_IDS.appointment })
+		).toBeNull();
+		expect(notificationTargetOf({ kind: 'DOCTOR', id: SAMPLE_IDS.appointment })).toBeNull();
+	});
 });
 
 describe('modules/notifications/lib/inbox · the rows (record §5.8, U-65.6)', () => {
@@ -278,6 +285,15 @@ describe('modules/notifications/lib/inbox · the rows (record §5.8, U-65.6)', (
 		expect(glyphOf('STAR')).toBe('star-outline');
 		expect(glyphOf('QUESTION')).toBe('help-circle-outline');
 		expect(glyphOf(null)).toBe('calendar-outline');
+	});
+
+	it('🔴 D-W51-90 (`sw.js` `NI`, the application’s glyphs): the doctor’s four — a cancelled appointment, a visit to settle, the external calendar, the licence; never the fallback for a word of the contract', () => {
+		const glyphOf = (icon: NotificationInboxItemFacts['icon']) =>
+			rows([{ ...facts()[0], icon }])[0]?.glyph;
+		expect(glyphOf('CALENDAR_CANCELED')).toBe('calendar-remove-outline');
+		expect(glyphOf('CHECK')).toBe('checkmark-circle-outline');
+		expect(glyphOf('SYNC')).toBe('sync-outline');
+		expect(glyphOf('BADGE')).toBe('ribbon-outline');
 	});
 
 	it('🔴 `w45-b4`: an empty second line is NO line (`null`), so the row draws its title and its time alone', () => {

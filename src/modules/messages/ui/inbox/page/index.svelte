@@ -11,13 +11,21 @@
 	import { Button } from '$shared/ui/primitives/button';
 	import { SplitView } from '$shared/ui/templates/split-view';
 	import { getInboxMemoryOptional, useInboxMemory } from '$modules/messages/ui/inbox-memory';
+	import Fresh from '../components/fresh.svelte';
 	import ListColumn from '../components/list-column.svelte';
 	import SettingsDialog from '../components/settings-dialog.svelte';
 	import Thread from '../components/thread.svelte';
 	import { useInboxList } from '../hooks/use-inbox-list.svelte';
 	import type { InboxPageProps } from '../types';
 
-	let { locale, links, conversationId = null, archive = false }: InboxPageProps = $props();
+	let {
+		locale,
+		links,
+		side,
+		conversationId = null,
+		archive = false,
+		fresh = null
+	}: InboxPageProps = $props();
 
 	const options = $derived({ locale });
 	const session = getSessionOptional();
@@ -40,11 +48,14 @@
 	onDestroy(() => memory.follow(null));
 
 	const wide = new MediaQuery(`(min-width: ${breakpoints.split}px)`, false);
+	// What covers the list below 950: a conversation, or one the doctor starts (U-193.1).
+	const covered = $derived(Boolean(conversationId) || Boolean(fresh));
 	const list = useInboxList({
 		locale: () => locale,
+		side: () => side,
 		archive: () => archive,
 		enabled: () => isMember,
-		shown: () => !conversationId || wide.current,
+		shown: () => !covered || wide.current,
 		memory: inbox
 	});
 
@@ -59,10 +70,21 @@
 	const newest = $derived(list.rows[0]?.id);
 	$effect(() => {
 		const id = newest;
-		if (archive || conversationId || !id || !wide.current) return;
+		if (archive || covered || !id || !wide.current) return;
 		// The screen's address, already resolved (a module knows no route); so below.
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		untrack(() => void goto(links.conversation(id), OPEN_IN_PLACE));
+	});
+
+	// 🔴 U-193.1 (D-W51-87): the conversation the card already names, or the one the first message made, takes the
+	// place of `/new` — a replace, never a step «‹» comes back to.
+	const startedIn = (id: string) =>
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		void goto(links.conversation(id), { replaceState: true, noScroll: true });
+	const known = $derived(fresh?.conversationId ?? null);
+	$effect(() => {
+		const id = known;
+		if (id) untrack(() => startedIn(id));
 	});
 
 	function retry() {
@@ -81,6 +103,8 @@
 		{list}
 		{locale}
 		{links}
+		{side}
+		memory={inbox}
 		{archive}
 		{waiting}
 		failed={sessionFailed}
@@ -92,7 +116,8 @@
 	/>
 {/snippet}
 
-<!-- 🔴 U-84 (wave 2, screens 18 + 21, one page for the patient and the doctor, U-65.4). Below 744 the application's tab, and
+<!-- 🔴 U-84 (wave 2, screens 18 + 21); 🔴 U-182.3 (D-W51-85): one page for both modes, each reading its own side only
+     (the patient's `/messages`, the doctor's `/doctor/messages` inside the doctor's frame). Below 744 the application's tab, and
      a conversation is its own screen with no capsule; 744–949 one column, list or conversation; from 950 Airbnb's inbox:
      the list (380, 400 from 1128) and the conversation, each scrolling on its own, no footer. -->
 <main
@@ -134,8 +159,12 @@
 		{@render column()}
 	{:else}
 		<!-- D-W4-52: the template these two columns became, the inbox's 380 / 400 (no visible change). -->
-		<SplitView list={column} widths="inbox" open={Boolean(conversationId)} bind:paneRef={pane}>
-			{#if conversationId}
+		<SplitView list={column} widths="inbox" open={covered} bind:paneRef={pane}>
+			{#if fresh}
+				{#key `${fresh.target.kind}/${fresh.target.id}`}
+					<Fresh patient={fresh} {locale} {links} onStarted={startedIn} />
+				{/key}
+			{:else if conversationId}
 				{#key conversationId}
 					<Thread
 						{conversationId}
@@ -158,7 +187,11 @@
 						<h2 class="mt-4 text-title-sm text-foreground">
 							{m.messages_choose_title({}, options)}
 						</h2>
-						<p class="mt-1.5 text-body-md">{m.messages_choose_body({}, options)}</p>
+						<p class="mt-1.5 text-body-md">
+							{side === 'doctor'
+								? m.messages_choose_body_doctor({}, options)
+								: m.messages_choose_body({}, options)}
+						</p>
 					</div>
 				</div>
 			{/if}
@@ -166,4 +199,4 @@
 	{/if}
 </main>
 
-<SettingsDialog bind:open={settingsOpen} {locale} archiveHref={links.archive} {isMember} />
+<SettingsDialog bind:open={settingsOpen} {locale} archiveHref={links.archive} {isMember} {side} />

@@ -117,3 +117,16 @@
 		<SplitView list={menu} widths="menu" centred>{@render section()}</SplitView>
 	{/snippet}
 </Story>
+
+<!-- D-W51-36: `from="laptop"` — one column up to 1127 (the list, or what it opened), both side by side from 1128. -->
+<Story name="From 1128, At 1440" globals={{ viewport: { value: 'z1440' } }}>
+	{#snippet template()}
+		<SplitView list={column} from="laptop" centred>{@render detail()}</SplitView>
+	{/snippet}
+</Story>
+
+<Story name="From 1128, At 950" globals={{ viewport: { value: 'z950' } }}>
+	{#snippet template()}
+		<SplitView list={column} from="laptop" centred>{@render detail()}</SplitView>
+	{/snippet}
+</Story>

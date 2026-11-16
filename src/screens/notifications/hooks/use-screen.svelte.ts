@@ -20,11 +20,12 @@ export function useNotificationsScreen(data: () => NotificationsScreenData) {
 	const locale = $derived<SupportedLocale>(getPageLocale(page.url));
 	const href = (path: string) => resolve(localizeHref(path, { locale }) as Pathname);
 	const links = $derived<NotificationInboxLinks>({
-		profile: href(profilePath),
+		back: href(profilePath),
 		settings: href(settingsSectionPath('notifications')),
 		filter: (filter) => `${href(notificationsPath)}${notificationsSearch(filter)}`,
 		target: (target) =>
-			href(target.kind === 'appointment' ? appointmentPath(target.id) : ratingPath(target.id))
+			href(target.kind === 'appointment' ? appointmentPath(target.id) : ratingPath(target.id)),
+		open: null
 	});
 
 	return {

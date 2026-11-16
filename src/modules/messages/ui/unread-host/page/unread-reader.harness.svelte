@@ -7,10 +7,10 @@
 </script>
 
 <output data-testid="badge">{badge.count}:{badge.label}</output>
-<output data-testid="inbox-filter">{memory.filter}</output>
+<output data-testid="inbox-search">[{memory.searchText}]</output>
 <button
 	type="button"
 	class="min-h-touch min-w-touch"
-	data-testid="choose-chip"
-	onclick={() => (memory.filter = 'patients')}>chip</button
+	data-testid="type-search"
+	onclick={() => (memory.searchText = 'κα')}>search</button
 >

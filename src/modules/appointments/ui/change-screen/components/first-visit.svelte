@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { cn } from '$shared/lib/utils';
-	import RadioRows, { type RadioRowsFrame } from './radio-rows.svelte';
+	import { RadioRows, type RadioRowsFrame } from '$shared/ui/molecules/radio-rows';
 
 	let {
 		title,

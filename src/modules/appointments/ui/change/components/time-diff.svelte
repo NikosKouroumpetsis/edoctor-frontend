@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { DiffBox } from '$shared/ui/molecules/diff-box';
+
 	let {
 		wasLabel,
 		was,
@@ -16,20 +18,12 @@
 </script>
 
 <!-- `appt.css:272-278` · U-136.3: what «Αποθήκευση» will do, said before it is pressed — the hour it was (struck), the hour
-     it becomes, and what happens to the state, under a thin line. -->
-<div
-	data-testid="appointment-time-diff"
-	class="mt-5 rounded-md border border-line-2 px-4 py-3.5 text-body-sm text-foreground"
->
-	<p class="flex flex-row justify-between gap-4 py-0.5">
-		<span class="shrink-0 text-muted-foreground">{wasLabel}</span>
-		<s class="text-end text-muted-foreground">{was}</s>
-	</p>
-	<p class="flex flex-row justify-between gap-4 py-0.5">
-		<span class="shrink-0 text-muted-foreground">{nextLabel}</span>
-		<span class="text-end font-semibold">{next}</span>
-	</p>
-	<p class="mt-2.5 border-t border-line pt-2.5 text-label-lg font-normal text-muted-foreground">
-		{stays}
-	</p>
-</div>
+     it becomes, and what happens to the state, under a thin line (the shared `DiffBox` since D-W51-51, class for class). -->
+<DiffBox
+	rows={[
+		{ id: 'was', label: wasLabel, value: was, struck: true },
+		{ id: 'next', label: nextLabel, value: next }
+	]}
+	note={stays}
+	testId="appointment-time-diff"
+/>

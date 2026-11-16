@@ -37,6 +37,13 @@ const SCOPE = new RegExp(
 /** The files whose reads are the drafts' own: each of their reads wears the sign-out's mark (MINOR-1 δ). */
 const OWN_READS =
 	/^src\/(modules\/(doctor-onboarding|appointments)|modules\/doctor\/ui\/public-profiles|screens\/doctor\/onboarding|screens\/doctors\/\[slug\]\/booking|screens\/(appointments|ratings|profile))\//u;
+/**
+ * Rewrites «every read of the module's files wears the sign-out's mark» (MINOR-1 δ) for ONE slice: 🔴 D-W51-72 (wave
+ * 5.1, card w51-w8 round 2) — the cancel link's page has NO session, its one read is the link holder's, not a person's
+ * of the session. Marked, it was forgotten on its way by the auth host's guest answer (`removePersonalQueries`) and the
+ * page stayed «loading» (live 15/11, ~21″). Every other rule of the scope holds for it; its read must wear NO mark.
+ */
+const SESSIONLESS_READS = /^src\/modules\/appointments\/ui\/cancel-link\//u;
 /** The only file that writes the address's search: the booking's closed, non-personal hints (P-W3 §3.2.5). */
 const HINTS_WRITER = 'src/modules/appointments/lib/booking/url/index.ts';
 
@@ -112,7 +119,7 @@ function findings(files: SourceFile[]): string[] {
 			found.push(`${file.path}: a cache write without the sign-out's mark`);
 		}
 		// MINOR-1 δ: every read of the drafts' own files, `api/` or not (a `fetchQuery({ queryKey, queryFn })` in `ui/`).
-		if (OWN_READS.test(file.path)) {
+		if (OWN_READS.test(file.path) && !SESSIONLESS_READS.test(file.path)) {
 			const reads = [...file.text.matchAll(/\bqueryFn\b/gu)].length;
 			const marks = [...file.text.matchAll(/meta: personalQueryMeta/gu)].length;
 			if (marks < reads) found.push(`${file.path}: a read without the sign-out's mark`);
@@ -489,5 +496,37 @@ describe('🔴 U-112.2: the drafts live in the root’s provider, and go nowhere
 
 	it.each(BRANCHES)('(negative, NIT-3) %s · `%s` alone ⇒ %s', (path, text, reason) => {
 		expect(findings([{ path, text: stripComments(text) }])).toEqual([`${path}: ${reason}`]);
+	});
+
+	it('🔴 D-W51-72 (round 2): only the cancel link’s slice reads without the mark — the same read anywhere else of the module is reported, and a storage or a log there still is', () => {
+		const read = 'export const read = () => ({ queryKey: [], queryFn: get });';
+		const link = 'src/modules/appointments/ui/cancel-link/hooks/use-cancel-link.svelte.ts';
+		expect(findings([{ path: link, text: read }])).toEqual([]);
+		expect(
+			findings([{ path: 'src/modules/appointments/ui/cancel/hooks/x.svelte.ts', text: read }])
+		).toEqual([
+			"src/modules/appointments/ui/cancel/hooks/x.svelte.ts: a read without the sign-out's mark"
+		]);
+		expect(findings([{ path: link, text: 'console.log(token);' }])).toEqual([`${link}: a log`]);
+		expect(
+			findings([{ path: link, text: "sessionStorage.setItem('k', token);" }]).length
+		).toBeGreaterThan(0);
+	});
+
+	it('🔴 D-W51-72 (round 2): the cancel link’s read wears NO sign-out mark and lives outside the person’s `appointments` root', () => {
+		const files = readSourceFiles().filter((file) => SESSIONLESS_READS.test(file.path));
+		expect(files.length).toBeGreaterThan(0);
+		for (const file of files) {
+			expect(stripComments(file.text), file.path).not.toMatch(
+				/\bpersonalQueryMeta\b|\bsetQueryDefaults\b|\bappointmentsQueryKeys\b/u
+			);
+		}
+		const keys = readFileSync(
+			join(projectRoot, 'src/modules/appointments/api/keys/index.ts'),
+			'utf8'
+		);
+		expect(keys).toMatch(
+			/appointmentCancelLinkQueryKey = \(token: string\) =>\s*\['appointment-cancel-link', token\]/u
+		);
 	});
 });

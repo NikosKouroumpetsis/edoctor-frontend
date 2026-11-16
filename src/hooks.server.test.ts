@@ -43,3 +43,26 @@ describe('hooks.server · `/el/…` ⇒ the Greek canonical address (🔴 D-W3-3
 		expect(await locationOf('https://edoctor.invalid/el//evil.example')).toBe('/evil.example');
 	});
 });
+
+describe('hooks.server · the page’s before-paint keys (D-W51-19)', () => {
+	it('the doctor standing’s memory key reaches `app.html`, the theme’s too', async () => {
+		let html = '';
+		const resolve = vi.fn(
+			async (
+				_event: unknown,
+				options?: { transformPageChunk?: (input: { html: string; done: boolean }) => string }
+			) => {
+				html =
+					options?.transformPageChunk?.({
+						html: '%edoctor.preferences.key% %edoctor.doctor-mode.key%',
+						done: true
+					}) ?? '';
+				return new Response('page');
+			}
+		);
+		const address = 'https://edoctor.invalid/';
+		const event = { url: new URL(address), request: new Request(address) };
+		await handle({ event, resolve } as unknown as Parameters<typeof handle>[0]);
+		expect(html).toMatch(/^edoctor\.[a-z]+\.preferences\.v1 edoctor\.[a-z]+\.doctor-mode\.v1$/u);
+	});
+});

@@ -2,7 +2,7 @@ import type { Handle } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import { getTextDirection } from '$paraglide/runtime';
 import { paraglideMiddleware } from '$paraglide/server';
-import { preferencesStorageKey } from '$shared/config/env';
+import { doctorModeStorageKey, preferencesStorageKey } from '$shared/config/env';
 import { canonicalGreekPath } from '$shared/preferences/i18n';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
@@ -15,6 +15,7 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 					.replace('%paraglide.lang%', locale)
 					.replace('%paraglide.dir%', getTextDirection(locale))
 					.replace('%edoctor.preferences.key%', preferencesStorageKey)
+					.replace('%edoctor.doctor-mode.key%', doctorModeStorageKey)
 		});
 	});
 

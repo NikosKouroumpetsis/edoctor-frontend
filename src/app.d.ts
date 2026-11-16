@@ -49,6 +49,22 @@ declare global {
 			appointment?: { depth: number };
 			/** Wave 4 (U-139): a relative's form opened from the list of relatives, with the same count of steps behind it. */
 			relatives?: { depth: number };
+			/**
+			 * Wave 5.1 (D-W51-46, U-102): the refusal or the cancellation of the doctor's appointment (screen 69) opened from
+			 * screen 68 (`depth` 1): «‹», «Να μείνει» and the done action go back that step, to the same 68.
+			 */
+			doctorAppointment?: { depth: number };
+			/**
+			 * Wave 5.1 (D-W51-73, U-102): a patient's card of screen 73 opened from screen 68's name or from the list below 1128
+			 * (`depth` 1), and «Στοιχεία ασθενή» or the join opened from the card (1): «‹», «Άκυρο» and the done action go back
+			 * that step, to where it was opened from — a link alone goes to the list (or the card) in place.
+			 */
+			doctorPatient?: { depth: number };
+			/**
+			 * Wave 5.1 (D-W51-90, `sw.js:989` `ap-back`): the doctor's 68 opened from a line of his notifications (screen 75,
+			 * `depth` 1): its «‹» goes back that step, to the list — a link alone keeps the 68's own way back.
+			 */
+			doctorNotification?: { depth: number };
 		}
 		// interface Platform {}
 	}

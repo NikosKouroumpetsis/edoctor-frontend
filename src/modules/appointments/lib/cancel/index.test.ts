@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { cancelReasonLabel } from '$shared/lib/appointment-reasons';
 import { createForm } from '$shared/lib/form';
 import {
 	appointmentActionsSample,
@@ -10,7 +11,6 @@ import {
 	cancelEntryOf,
 	cancelFormRules,
 	cancelMessageCounter,
-	cancelReasonLabel,
 	cancelReasonOptions,
 	cancelThenLines,
 	clampCancelMessage,

@@ -1,6 +1,6 @@
 import { m } from '$paraglide/messages.js';
 import { PLATFORM_TIME_ZONE } from '$shared/config/time-zone';
-import { formatCalendarDay } from '$shared/lib/calendar-day';
+import { calendarDayStripLabels, formatCalendarDay } from '$shared/lib/calendar-day';
 import { formatClock, formatDecimal, formatEuro, readZonedParts } from '$shared/lib/format';
 import { formatDayTime, formatInstantDayTime } from '$shared/lib/format-day-time';
 import { withDoctorTitle } from '$shared/lib/text';
@@ -154,23 +154,19 @@ export function availabilityFromLabel(startMinute: number, locale: SupportedLoca
 	return m.doctor_availability_from({ time: formatClock(startMinute) ?? '' }, options(locale));
 }
 
-/** «Πέμ 30» — the strip's first line, weekday first in both languages (the application's join). */
+/** «Πέμ 30» — the strip's first line, weekday first in both languages (the shared strip's words). */
 export function availabilityWeekdayDayLabel(date: string, locale: SupportedLocale): string {
-	const weekday = formatCalendarDay(date, locale, { weekday: 'short' });
-	const day = formatCalendarDay(date, locale, { day: 'numeric' });
-	return weekday && day ? `${weekday} ${day}` : '';
+	return calendarDayStripLabels(date, locale).weekdayDay;
 }
 
 /** «Οκτ» — the strip's second line. */
 export function availabilityMonthLabel(date: string, locale: SupportedLocale): string {
-	return formatCalendarDay(date, locale, { month: 'short' }) ?? '';
+	return calendarDayStripLabels(date, locale).month;
 }
 
 /** «Πέμ 30 Οκτ» — the strip card's name for assistive tech. */
 export function availabilityAccessibleDateLabel(date: string, locale: SupportedLocale): string {
-	const weekdayDay = availabilityWeekdayDayLabel(date, locale);
-	const month = availabilityMonthLabel(date, locale);
-	return weekdayDay && month ? `${weekdayDay} ${month}` : '';
+	return calendarDayStripLabels(date, locale).accessible;
 }
 
 /** «(2)» beside a group's title, no spaces inside (S-31.8). */

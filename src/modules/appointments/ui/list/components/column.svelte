@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages.js';
+	import { nearEnd } from '$shared/lib/near-end';
 	import { cn } from '$shared/lib/utils';
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 	import { EmptyState } from '$shared/ui/molecules/empty-state';
@@ -60,16 +61,6 @@
 		}
 		return out;
 	});
-
-	// The next page when the end of the list nears the screen (the inbox's way).
-	const nearEnd = (node: HTMLElement) => {
-		if (typeof IntersectionObserver === 'undefined') return;
-		const observer = new IntersectionObserver(([entry]) => {
-			if (entry.isIntersecting) onMore();
-		});
-		observer.observe(node);
-		return { destroy: () => observer.disconnect() };
-	};
 </script>
 
 {#snippet glyph(name: 'calendar-outline' | 'cloud-offline-outline')}
@@ -196,7 +187,8 @@
 				{/each}
 			</div>
 			{#if hasMore}
-				<div use:nearEnd aria-hidden="true" class="h-px"></div>
+				<!-- The next page when the end of the list nears the screen (the inbox's way, `$shared/lib/near-end`). -->
+				<div use:nearEnd={onMore} aria-hidden="true" class="h-px"></div>
 			{/if}
 		{/if}
 	{/if}

@@ -3,7 +3,7 @@ import { readZonedParts, zonedDay } from '$shared/lib/format';
 import { withDoctorTitle } from '$shared/lib/text';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type { AppointmentFacts } from '$modules/appointments/api/appointment';
-import { appointmentDeadlineLabel } from '$modules/appointments/lib/when';
+import { appointmentDeadlineLabel } from '$shared/lib/appointment-when';
 import type { BookingSlotChoice } from '../types';
 
 export type BookingSuccessContent = {

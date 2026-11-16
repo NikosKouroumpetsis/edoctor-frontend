@@ -212,7 +212,7 @@ describe('screen 30 · «Επιβεβαίωση ραντεβού» (record §3.2
 		draw();
 		await waitFor(() => expect(row('phone')).toBeTruthy());
 		const changes = [
-			...document.querySelectorAll('[data-slot="booking-change"]')
+			...document.querySelectorAll('[data-slot="change-link"]')
 		] as HTMLAnchorElement[];
 		expect(changes.map((link) => link.getAttribute('href'))).toEqual([
 			`/doctors/${SLUG}/booking/time?${HINTS}`,
@@ -237,7 +237,7 @@ describe('screen 30 · «Επιβεβαίωση ραντεβού» (record §3.2
 			expect([...button.classList].filter((name) => name.includes('hover:'))).toEqual([]);
 		}
 		for (const node of document.querySelectorAll(
-			'[data-slot="booking-change"] *, [data-slot="booking-round-link"] *'
+			'[data-slot="change-link"] *, [data-slot="round-link"] *'
 		)) {
 			expect([...node.classList].filter((name) => name.includes('hover:'))).toEqual([]);
 		}
@@ -258,7 +258,7 @@ describe('screen 30 · «Επιβεβαίωση ραντεβού» (record §3.2
 		expect(close).toHaveAttribute('href', `/doctors/${SLUG}`);
 		expect(close.parentElement).toHaveClass('justify-end', 'tablet:justify-start');
 		// R1 MINOR-5 (`strings.json`): «Κλείσιμο» below 744 (×), «Πίσω» from it (←) — one name per width.
-		const names = [...close.querySelectorAll('[data-slot="booking-round-link-name"]')];
+		const names = [...close.querySelectorAll('[data-slot="round-link-name"]')];
 		expect(names.map((name) => name.textContent)).toEqual(['Κλείσιμο', 'Πίσω']);
 		expect(names[0]).toHaveClass('sr-only', 'tablet:hidden');
 		expect(names[1]).toHaveClass('hidden', 'tablet:inline', 'tablet:sr-only');

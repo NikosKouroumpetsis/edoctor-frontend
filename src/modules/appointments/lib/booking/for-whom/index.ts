@@ -1,7 +1,7 @@
 import { m } from '$paraglide/messages.js';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type { BookingPatientFacts } from '$modules/appointments/api/patient';
-import { relativeWordLabel } from '$modules/appointments/lib/relatives/words';
+import { relativeWordLabel } from '$shared/lib/relative-words';
 import type { BookingVisitor } from '../types';
 
 /**

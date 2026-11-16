@@ -14,6 +14,8 @@ export type {
 	BookingReadinessBlocker,
 	BookingReadinessView,
 	DoctorNotificationEmailCodeSentView,
+	DoctorDashboardModeView,
+	DoctorDashboardView,
 	DoctorOnboardingProgressOfficeView,
 	DoctorOnboardingProgressView,
 	DoctorOnboardingSectionView,

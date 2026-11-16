@@ -5,7 +5,7 @@
 	import { getToastsOptional } from '$shared/ui/molecules/toast';
 	import type { BookingRelativeFacts } from '$modules/appointments/api/patient';
 	import { appointmentChangeOpen } from '$modules/appointments/lib/change';
-	import { relativeSubject } from '$modules/appointments/lib/relatives';
+	import { relativeSubject } from '$shared/lib/relative-words';
 	import { useAppointmentSteps } from '$modules/appointments/ui/change-screen';
 	import { getAppointmentsMemoryOptional } from '$modules/appointments/ui/memory';
 	import RelativeForm from '$modules/appointments/ui/relative-form';

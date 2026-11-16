@@ -37,5 +37,11 @@ export const knownAccountStorageKey = `edoctor.${appEnv}.known-account.v1`;
 export const authReturnStorageKey = `edoctor.${appEnv}.auth-return.v1`;
 export const favoritePendingStorageKey = `edoctor.${appEnv}.favorite-pending.v1`;
 export const helpfulStorageKey = `edoctor.${appEnv}.helpful.v1`;
+/**
+ * 🔴 D-W51-19 (wave 5.1, screen 64): what this device remembers of the account's doctor standing between page loads —
+ * only its kind and the mode it opens in, never a fact of the person — so the bar and the home decide before the first
+ * paint; a sign-out forgets it.
+ */
+export const doctorModeStorageKey = `edoctor.${appEnv}.doctor-mode.v1`;
 /** 🔴 D-W3-37: the tabs' channel of the session, by its name only (it carries one event, never a fact of the person). */
 export const sessionChannelName = `edoctor.${appEnv}.session.v1`;

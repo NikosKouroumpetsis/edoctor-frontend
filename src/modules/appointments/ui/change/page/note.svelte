@@ -2,6 +2,8 @@
 	import { untrack } from 'svelte';
 	import { m } from '$paraglide/messages.js';
 	import { createForm } from '$shared/lib/form';
+	import { NoteField } from '$shared/ui/molecules/note-field';
+	import { BOOKING_PATIENT_NOTE_MAX_LENGTH } from '$modules/appointments/config';
 	import {
 		bookingNoteCounter,
 		bookingNoteRule,
@@ -14,7 +16,7 @@
 		toNoteChangeRequest,
 		type ChangeOutcome
 	} from '$modules/appointments/lib/change';
-	import { ChangeContext, ChangeFrame, NoteField } from '$modules/appointments/ui/change-screen';
+	import { ChangeContext, ChangeFrame } from '$modules/appointments/ui/change-screen';
 	import { useAppointmentChange } from '../hooks/use-change.svelte';
 	import type { AppointmentChangeProps } from '../types';
 
@@ -78,6 +80,7 @@
 		counter={bookingNoteCounter(note.value, props.locale)}
 		error={failure}
 		help={m.appointments_change_note_help({}, options)}
+		maxLength={BOOKING_PATIENT_NOTE_MAX_LENGTH}
 		onInput={(value) => note.setValue(clampBookingNote(value))}
 		testId="appointment-note-field"
 	/>

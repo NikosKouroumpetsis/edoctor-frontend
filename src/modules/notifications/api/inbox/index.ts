@@ -22,6 +22,7 @@ export type {
 	NotificationInboxIcon,
 	NotificationInboxItemFacts,
 	NotificationInboxPageFacts,
+	NotificationInboxSide,
 	NotificationInboxTargetFacts,
 	NotificationInboxTargetKind
 } from './types';

@@ -8,6 +8,7 @@
 	import { personalQueryMeta } from '$shared/query';
 	import { getSessionOptional } from '$shared/state/session';
 	import { EmptyState } from '$shared/ui/molecules/empty-state';
+	import { NoteField } from '$shared/ui/molecules/note-field';
 	import { ReviewCard } from '$shared/ui/molecules/review-card';
 	import { StarInput } from '$shared/ui/molecules/star-input';
 	import { StateGlyph } from '$shared/ui/molecules/state-glyph';
@@ -47,7 +48,6 @@
 	import {
 		ChangeContext,
 		ChangeFrame,
-		NoteField,
 		useAppointmentSteps
 	} from '$modules/appointments/ui/change-screen';
 	import { getAppointmentsMemoryOptional } from '$modules/appointments/ui/memory';

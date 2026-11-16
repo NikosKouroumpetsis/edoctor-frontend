@@ -1,6 +1,6 @@
 import { PLATFORM_TIME_ZONE } from '$shared/config/time-zone';
 import type { ApiResponseData, AppointmentDetailResponseView } from '$shared/lib/api-client';
-import { readInstant } from '$modules/appointments/api/instant';
+import { readInstant } from '$shared/lib/instant';
 import type {
 	AppointmentActionsFacts,
 	AppointmentActorKind,

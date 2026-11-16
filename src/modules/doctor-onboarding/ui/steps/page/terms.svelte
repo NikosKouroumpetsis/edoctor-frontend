@@ -12,7 +12,10 @@
 		DOCTOR_ONBOARDING_LIABILITY_COMPANY_MAX_LENGTH,
 		DOCTOR_ONBOARDING_TERMS
 	} from '$modules/doctor-onboarding/config';
-	import { toDoctorLiabilityInput } from '$modules/doctor-onboarding/lib/payload';
+	import {
+		toDoctorInsuranceInput,
+		toDoctorLiabilityInput
+	} from '$modules/doctor-onboarding/lib/payload';
 	import {
 		isValidLiabilityCompany,
 		isValidPolicyExpiry
@@ -38,9 +41,12 @@
 	// «Αποθήκευση και έξοδος» stays locked through all of it, the gap between the two writes included (w3-w6 R1 NIT-1).
 	let committing = $state(false);
 	const expiryHalf = $derived(insured && expiryTyped && values.liabilityInsuranceExpiresAt === '');
+	// 🔴 U-183.5 · D-W51-12: an «Επεξεργασία» of a completed registration changes the insurance alone — the doctors' terms
+	// accepted then are not asked, shown or written again.
+	const editing = $derived(controller.editing);
 	const complete = $derived(
 		values.liabilityInsurance !== null &&
-			values.termsAccepted &&
+			(editing || values.termsAccepted) &&
 			(!insured ||
 				(isValidLiabilityCompany(values.liabilityCompany) &&
 					isValidPolicyExpiry(values.liabilityInsuranceExpiresAt)))
@@ -83,6 +89,14 @@
 		}
 		committing = true;
 		try {
+			if (editing) {
+				const insurance = toDoctorInsuranceInput(values);
+				const saved = insurance
+					? await controller.save([{ kind: 'insurance', input: insurance }])
+					: null;
+				if (saved) draft.clear('liability');
+				return Boolean(saved);
+			}
 			const first = await saveAt(false);
 			const { answer } = first.stale ? await saveAt(true) : first;
 			if (answer) {
@@ -171,25 +185,27 @@
 			</div>
 		{/if}
 	</section>
-	<section class="mt-section flex flex-col gap-3">
-		<div class="flex flex-col gap-1">
-			<h2 class="text-body-lg font-semibold text-foreground">
-				{m.doctor_onboarding_terms_accept_title({}, options)}
-			</h2>
-			<p class="text-body-sm text-muted-foreground">
-				{m.doctor_onboarding_terms_accept_hint({}, options)}
-			</p>
-		</div>
-		<TermsAccept
-			accepted={values.termsAccepted}
-			label={m.doctor_onboarding_terms_accept(
-				{ terms: m.doctor_onboarding_terms_accept_link({}, options) },
-				options
-			)}
-			lead={m.doctor_onboarding_terms_accept({ terms: '' }, options).trimEnd()}
-			linkLabel={m.doctor_onboarding_terms_accept_link({}, options)}
-			href={termsHref}
-			onChange={(accepted) => draft.update('terms', { accepted })}
-		/>
-	</section>
+	{#if !editing}
+		<section class="mt-section flex flex-col gap-3">
+			<div class="flex flex-col gap-1">
+				<h2 class="text-body-lg font-semibold text-foreground">
+					{m.doctor_onboarding_terms_accept_title({}, options)}
+				</h2>
+				<p class="text-body-sm text-muted-foreground">
+					{m.doctor_onboarding_terms_accept_hint({}, options)}
+				</p>
+			</div>
+			<TermsAccept
+				accepted={values.termsAccepted}
+				label={m.doctor_onboarding_terms_accept(
+					{ terms: m.doctor_onboarding_terms_accept_link({}, options) },
+					options
+				)}
+				lead={m.doctor_onboarding_terms_accept({ terms: '' }, options).trimEnd()}
+				linkLabel={m.doctor_onboarding_terms_accept_link({}, options)}
+				href={termsHref}
+				onChange={(accepted) => draft.update('terms', { accepted })}
+			/>
+		</section>
+	{/if}
 </Frame>

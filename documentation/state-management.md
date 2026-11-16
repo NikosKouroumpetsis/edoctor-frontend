@@ -161,7 +161,8 @@ lastMethod }` for «Καλωσορίσατε και πάλι»; the tab keeps on
 - 🔴 What a person wrote stays in a rune of the page (`ThreadMemory`, the #18's `useContactDoctor`): never an address, a
   storage, a log, or a persisted cache (`tests/architecture/messages-privacy.test.ts`).
 - `InboxMemory` (`$modules/messages/ui/inbox-memory`, one per page tree, in context, on the unread host) is what the
-  messages' pages keep between them, as the application's tab stays mounted: the chosen chip, and per conversation what has
+  messages' pages keep between them, as the application's tab stays mounted: the doctor's 🔍 open and its words (the
+  chips it once kept went with U-182.3), and per conversation what has
   not left, so a send that fails after the person moved on is a «Δεν στάλθηκε» back on its own conversation. The draft
   does not outlive its page.
 - `Session.forgotten` grows at a sign-out, at a sign-out in another tab of the browser (D-W3-37, below) and when another
@@ -190,6 +191,20 @@ lastMethod }` for «Καλωσορίσατε και πάλι»; the tab keeps on
   written keeps its place. No rune: nothing is drawn from the mark.
 - `InboxBadge` (`$shared/state/inbox-badge`, one per page tree, in context): the messages module's `unread-host` reads, the
   frame draws, and neither imports the other (the pattern of `Session`).
+- 🔴 U-182.3 (wave 5.1, screen 74, D-W51-77 / 85): each mode reads ONLY its own side, never both, never chips — the
+  patient's `/messages` asks `side=patient`, the doctor's `/doctor/messages` (inside the doctor's frame) `side=doctor`;
+  the badge counts the side of the page's mode (`$shared/lib/mode-side` `modeSideOfPath`, shared since screen 75 with the
+  notifications' dots: the doctor's dashboard, the sign-up aside, reads the doctor's), each side a cache of its own (`messagesQueryKeys.unread(side)`; a write asks every side
+  again, `unreads()`). «Δέχομαι νέες συνομιλίες» is the doctor's mode's only.
+- The doctor's side (D-W51-79 / 80 / 86 / 87): under each patient's name the appointment it is about
+  (`appointmentLine`, read at the boundary by `api/conversations` `mapAppointmentLine`, worded by `lib/appointment-line`
+  with the shared «πότε» of `$shared/lib/appointment-when` `appointmentNearWhenLabel` / `appointmentNearDayLabel`),
+  never «Ασθενής»; the name and the first row of ⋯ open the card of screen 73 (`patientId`, a server id only). 🔍 asks
+  `q` (no control characters, ≤ 40, `lib/search` `readInboxSearchQuery`) after 500 ms of quiet; closed or emptied, the
+  whole list at once. «Μήνυμα» of 68 / 73 opens the conversation, else `/doctor/messages/new?kind=account|relative&id=`
+  (the screen reads the card of 73 and hands its facts to the slice, `InboxFreshPatient`): its first message is the
+  doctor's start (`POST …/messaging/doctor/conversations`, the same id while the words stay the same), and the
+  conversation replaces the address; a card that already names one replaces it at once.
 - «Επικοινωνήστε με τον γιατρό» asks the server nothing to be drawn: only its press does (D-103). The state of the #18 lives at
   the screen, so a member's new read of the profile beneath it touches nothing.
 
@@ -401,8 +416,8 @@ lastMethod }` for «Καλωσορίσατε και πάλι»; the tab keeps on
 
 ## The list of notifications (wave 4.5, screen 63)
 
-- 🔴 D-W45-17 · D-W45-49: «how many are new» has ONE place in the cache, `notificationInboxKeys.unread()`
-  (`['notifications','inbox','unread']`, `notifications/api/inbox`), personal. Its one standing reader is the root
+- 🔴 D-W45-17 · D-W45-49: «how many are new» has ONE place in the cache per side (since screen 75, below),
+  `notificationInboxKeys.unread(side)` (`['notifications','inbox', side, 'unread']`, `notifications/api/inbox`), personal. Its one standing reader is the root
   layout's `notifications/ui/unread-host`: enabled for a member in the browser only (a guest and a session not known
   yet ask nothing), on NO timer, asked again whenever the page comes back to the front
   (`refetchOnWindowFocus: 'always'`). It gives the count to the page tree as `NotificationBadge`
@@ -410,8 +425,8 @@ lastMethod }` for «Καλωσορίσατε και πάλι»; the tab keeps on
   «Προφίλ»'s bell draw it and import nothing of the module. Every other source of the number WRITES into the same
   place (`keepUnreadNotificationCount`): each page of the list (its `unreadCount`) and the answer of each «read» —
   never a second request. It stands beside the messages' `InboxBadge` and never in its place.
-- The list is an infinite read per choice and language (`notificationInboxQuery(filter, lang)`,
-  `['notifications','inbox','list', filter, lang]`), personal: the cache keeps the facts `api/inbox/map` made of the
+- The list is an infinite read per side, choice and language (`notificationInboxQuery(side, filter, lang)`,
+  `['notifications','inbox', side, 'list', filter, lang]`), personal: the cache keeps the facts `api/inbox/map` made of the
   answer (the server's words as they came, a word out of the contract as none). «Εμφάνιση παλαιότερων» is
   `fetchNextPage`: the pages add up.
 - The choice on screen is the ADDRESS's (`?filter=new|previous|all`, `notifications/lib/paths`), as «Ιστορικό» is the
@@ -430,6 +445,232 @@ lastMethod }` for «Καλωσορίσατε και πάλι»; the tab keeps on
 - The first wait draws no choices; once a choice has been on screen (`use-inbox` `shown`, rune state of one
   boolean, forgotten at a sign-out) another one still being read keeps the three choices over its wait.
 - Nothing of the list is in a storage, a cookie or an address; a line's id is in the path of its own «read» alone.
+- 🔴 Wave 5.1 · screen 75 (D-W51-81, D-W51-89 … 91): every read and write is of ONE side — `?side=patient` (screen 63,
+  `/notifications`) or `?side=doctor` (screen 75, `/doctor/notifications`, inside the doctor's frame); the single
+  «read» names none (the server knows the line's side). Each side has its own place in the cache, under
+  `$shared/lib/notification-inbox` `notificationInboxSideKey(side)` (`['notifications','inbox', side]`): the count
+  `notificationInboxKeys.unread(side)`, the lists `list(side, filter, lang)`; a press, «Σήμανση όλων» and their settling
+  touch their side alone. The root layout's `unread-host` asks the side of the page's mode (`$shared/lib/mode-side`, the
+  messages' rule), so the frame's ☰ dot and the bell of the doctor's «Μενού» are the doctor's, every other dot the
+  patient's. 🔴 U-200.1 / D-W51-91: after each of the doctor's answers (66 / 68 «Επιβεβαίωση» and the outcome, 69, 70,
+  «Υπηρεσίες και κόστος», 71) the `doctor-dashboard` hooks call `refreshNotificationInboxSide(client, 'doctor')` — the
+  server read «Νέο αίτημα» / «Τι έγινε;» itself, so the dot goes out without a reload; the patient's side is never asked.
+  A line of the doctor's opens his 68 one step on in the history (`links.open`, `page.state.doctorNotification`), so its
+  «‹» comes back to the list.
+
+## The doctor standing and the two modes (wave 5.1, screens 64 / 65 / 76)
+
+- **One read, one write** (D-W51-10, D-W51-11): the `doctor-dashboard` module's `DoctorStandingHost`
+  (`src/routes/+layout.svelte`, inside the session, above both frames) reads `GET /doctor/me/dashboard` for a member
+  only (TanStack, `personalQueryMeta`, asked again when the page comes back to the front) and owns
+  `PUT /doctor/me/dashboard/mode`. Every other part reads the shared `DoctorStanding`
+  (`$shared/state/doctor-standing`, context): its `kind` — `none` · `pending` (a completed registration without a
+  licence, U-183.5) · `doctor` (a licence of the marketplace, an expired one too, U-185.1) · `payments` (the till's alone:
+  no doctor mode on the web in 5.1, D-W51-16) — the notice, the mode in force and the name card. None of the patient's
+  frame, the «Προφίλ», the sign-up or the doctor's frame imports another module (the `NotificationBadge` way).
+- **The switch** (U-185.3): `standing.switchTo(mode)` draws the shared `ModeTransition` for about a second, keeps the
+  mode on the server and opens that mode's page (`/doctor`, the home); a refusal moves nobody and the site's frame says
+  so (`switchFailures`, the sign-out's way).
+- **Before the first paint** (D-W51-19): the device remembers the kind and the mode only, versioned —
+  `edoctor.<appEnv>.doctor-mode.v1` — written from the answer, forgotten when the page knows nobody (a sign-out, an
+  ended or deleted account). `app.html` reads it before the first paint: a licence of the marketplace marks
+  `<html data-doctor-mode="doctor">` (the bar's «Για γιατρούς / Λειτουργία γιατρού» share one cell and the CSS variant
+  `doctor-mode:` shows the right one, so nothing changes under the eye, U-100), and the bare home of one who left in the
+  doctor's mode opens `/doctor`. After a sign-in the host makes the same decision on the home, once.
+- **The doctor's frame** is a route group of its own (`src/routes/doctor/(dashboard)/+layout.svelte`): the patient's
+  frame draws no bar, capsule or footer on `/doctor` and `/doctor/menu`, and the group's gate waits for the answer —
+  a guest signs in, anyone without a marketplace licence goes home.
+
+## The doctor's «Σήμερα» (wave 5.1, screen 66)
+
+- **The reads** (D-W51-22): `modules/doctor-dashboard/api/appointments` — ALWAYS `as=doctor` — the requests
+  (`status=pending`), yesterday-and-today of the server's clock (`from` yesterday 00:00 Athens, `to` the last millisecond
+  of today: the server keeps both ends) and «from tomorrow» (`scope=upcoming`), each read to its end (100 a page, ten
+  pages at most), under `doctorDashboardQueryKeys.appointments()`; `api/readiness` only when there is no appointment at
+  all. All personal (`personalQueryMeta`). `lib/today` splits them into the groups, each appointment once.
+- **Fresh** (D-W51-24): every read asks again every 60″ while the page shows (`refetchInterval`, never in the background)
+  and at once when it comes back (`refetchOnWindowFocus: 'always'`); a `401` / `403` / `404` stops the asking.
+- **«Now»** is the server's (`readServerNow`), drawn again every minute, at the platform's midnight (the day's window
+  moves) and at the earliest deadline of a request (D-W51-23: the card goes, the toast says «Το αίτημα έληξε»).
+- **One tap** (D-W51-25): «Επιβεβαίωση» / «Δεν ήρθε» / «Ολοκληρώθηκε» write at once; the card's buttons wait until the
+  lists are read again; `409` reads them again (the request gone ⇒ «Το αίτημα έληξε»), `401` ends the session
+  (`Session.expire`), anything else says «Κάτι πήγε στραβά. Δοκιμάστε ξανά.». The toast is the site frame's
+  `ToastState` (the frame wraps the doctor's routes too).
+- 🔴 The hook reads every query result's `data` and `isError` on every pass, never behind a `&&`: the library tells a
+  result only the properties it saw read, so a read skipped once would never learn that its answer arrived.
+- **The desk** (card w51-w3): the clocks and the one-tap answers live in ONE hook, `ui/card` `useDoctorDesk`, with the
+  card itself; «Σήμερα» and «Ραντεβού» (screen 67) both use it — never a copy of the mutation.
+
+## The doctor's «Ραντεβού» (wave 5.1, screen 67)
+
+- **The address** (D-W51-31): `/doctor/appointments` under the doctor's frame (`«Σήμερα»` stays the current tab,
+  `isDoctorTodayTab`), `?tab=requests|upcoming|history` (any other word «Επερχόμενα»), `?office=<id>` (any other value
+  every office); `/<id>` (a server id, one level) is screen 68 with the same pill and office; anything else a 404. The
+  pills are links that keep both.
+- **Screen 68 beside it** (D-W51-36): the list stands on the shared `SplitView` with `from="laptop"`: from 1128 the
+  list of 460 and the appointment in the middle of the rest, the first card of the pill opened in place
+  (`goto(…, { replaceState, noScroll, keepFocus })`, screen 50's way) and the open one dark-bordered; below 1128 a card
+  opens the 68 as a page of its own, with «‹» back to the list. The screen composes the two slices (`pane`).
+- **The reads** (D-W51-29), ALWAYS `as=doctor`, each only while its pill shows: «Αιτήματα» (`status=pending`, to the
+  end; its number is on its pill on every pill, so it is always read), «Επερχόμενα» (`scope=today`, the still-ahead
+  kept by `lib/appointments`, + `scope=upcoming`), «Ιστορικό» (`scope=history&sortDir=desc`, an infinite query, 20 a
+  page, the closed ones only — the open of the days before are «Τι έγινε» of screen 66). With no office «Αιτήματα» and
+  «Επερχόμενα» share «Σήμερα»'s cache keys; one office has keys of its own (`requests(officeId)` …, whose prefix is
+  `requests()`, so a write still invalidates them all).
+- **The office filter**: `api/offices` (`GET /doctor/profile/offices`, the id and the street per language only); shown
+  only with more than one office; an office of the address that is not the doctor's reads every office; with an office
+  in the address the lists wait for that answer. A choice is `goto(…, { replaceState: true })`.
+- **The next page**: `$shared/lib/near-end` on a node drawn again after each page (`{#key}`), so a page whose closed
+  rows are few still asks for the next; a first page with none at all reads the next at once, never «nothing».
+
+## The doctor's «Το ραντεβού» (wave 5.1, screen 68)
+
+- **The read** (D-W51-38): `doctorAppointmentQuery(id)` (`GET /appointment/appointments/{id}`, the side the
+  appointment's own) under `doctorDashboardQueryKeys.detail(id)` — beside the lists' root, not under it. Personal
+  (`personalQueryMeta`): the WHOLE ΑΜΚΑ / ΑΦΜ / mobile / email (🔴 U-182.7) live in this cache only and go at a
+  sign-out; the lists' facts keep the names alone. A `403` and a `404` read the same «Δεν βρήκαμε αυτό το ραντεβού».
+- **The writes** (D-W51-25, the desk of `ui/card`, the same mutation as 66 and 67): every write's answer IS the
+  appointment's detail, so `onSuccess` puts it in `detail(id)` as it came (never read twice for one tap) and
+  invalidates the lists alone; a `409` / refusal invalidates the detail too. `doneOf(id)` remembers this page's last
+  answer for the green card («Γράφτηκε «Ολοκληρώθηκε».»), the page's memory, never the address.
+- **Its clocks**: the desk's minute and midnight; at a request's deadline and at the end of a correction window the
+  detail is read again (D-W51-23, D-W51-61).
+
+## The doctor's refusal and cancellation (wave 5.1, screen 69)
+
+- **The address** (D-W51-46): `/doctor/appointments/<id>/reject|cancel` — the same route as 67 / 68
+  (`readDoctorAppointmentsAddress`: `step` `'reject' | 'cancel'`, only those two words, else a 404), with the list's
+  `?tab=&office=`. From 1128 it stands in the 68's place beside the list (the card stays chosen); below 1128 alone;
+  below 744 over the tabs (the frame hides the capsule, `isDoctorAppointmentStepPage`).
+- **Opened** (D-W51-49) from the 68 («Απόρριψη» of a request, «Ακύρωση ραντεβού» of a kept one with `canCancel`) as
+  one more step of the history (`useHistorySteps('doctorAppointment')`, depth 1), and from the cards of 66 / 67 as a
+  plain link. «‹», «Να μείνει» and the done action go back that step, else replace with the 68 (same pill and office).
+- **The read**: the 68's `doctorAppointmentQuery(id)` (the same cache; `staleTime` 0, so the opening reads the
+  server's `actions` again). The form only while they allow the step (`doctorReasonEntry`: `canReject`; `canCancel`
+  and not a request), else «δεν γίνεται πια» with one way back.
+- **The write** (`ui/reason` hook, D-W51-48): `POST …/reject` `{ reasonCode, message? }` or `POST …/cancel`
+  `{ reasonCode, reasonText? }` — the reason of the server's list (`DOCTOR_REJECT_REASONS` / `DOCTOR_CANCEL_REASONS`),
+  the words trimmed, left out when blank, cut at `DOCTOR_REASON_TEXT_MAX_LENGTH` (500, the contract's `maxLength`,
+  guarded by `tests/architecture/appointment-rules.test.ts`). Success: the answer goes in `detail(id)` as it came, the
+  lists (`appointments()`) are invalidated, the toast, back to the 68 (its «από εσάς» block). `409`: its words, the
+  detail and the lists read again (the closed view follows); `422` / a lost request / `429`: its words, the form
+  stays; `401`: the sign-in. One press: refused while one is on its way and once the server took it.
+
+## The doctor's «Αλλαγή ώρας» and «Υπηρεσίες και κόστος» (wave 5.1, screen 70)
+
+- **The address** (D-W51-51 / 52): `/doctor/appointments/<id>/time|services` — the same route and parser as 69
+  (`step` `'reject' | 'cancel' | 'time' | 'services'`, any other word a 404; `DoctorReasonStep` keeps 69's two), the
+  same split and the same push over the tabs below 744.
+- **Opened** from the 68 (a request's «Αλλαγή»; «Αλλαγή» of «Ημέρα και ώρα» with `canReschedule`, of «Υπηρεσίες» and
+  «Κόστος» with `canEditCharges`) and from 69's «Θέλετε απλώς άλλη ώρα;» as one more step of the history
+  (`useHistorySteps('doctorAppointment')`), and from the request cards of 66 / 67 as a plain link.
+- **The reads**: the 68's `doctorAppointmentQuery(id)`; then, only while the step is allowed, the doctor's REAL free
+  hours (`doctorRescheduleSlotsQuery(id)`, U-189.1: an infinite query, a week a page from the server's «today», the
+  next from the day after the last one while the server lists a whole week — «Επόμενες ημέρες») or the doctor's own
+  services (`doctorServicesQuery(locale)`). Both personal, `staleTime` 0.
+- **What the page keeps** (runes, never the address): the day and the hour chosen (an hour the server said was taken,
+  or that passed on the server's clock, leaves the grid), the services chosen (with the counts the appointment had;
+  the last one stays) and «Τελική τιμή» as typed (read strictly: a comma or a dot, two decimals, 0 to the contract's
+  bound; a new choice starts it again from the total).
+- **The writes**: `PATCH …/{id}` `{ startTime }` (U-190.2: a request is confirmed in the same write) and `PUT
+…/charges` `{ services, finalTotalAmount? }` (the price only when it differs from the total). Success: the answer in
+  `detail(id)` as it came, the lists invalidated, the save remembered in the screen's `DoctorAppointmentMemory`
+  (`ui/memory`, a context of the appointments screen; another appointment, a reload or a sign-out forgets it) for the
+  68's green card, back to the 68. `409` of the move / `422 RESCHEDULE_INTO_THE_PAST`: the hour leaves the grid and the
+  hours are read again; `409 CHARGES_DO_NOT_FIT`: «Δεν χωράει…» from the server's `details`; `403` / `404`: «δεν
+  γίνεται πια»; a lost request / `5xx` / `429`: its words, the choice stays; `401`: the sign-in. One press at a time.
+
+## The doctor's outcome and «Διόρθωση έκβασης» (wave 5.1, screen 71)
+
+- **The 68's blocks** (D-W51-61, `lib/detail` `buildDoctorAppointmentBlock`): while the server offers `NO_SHOW` /
+  `COMPLETED` — «Η επίσκεψη είναι σε εξέλιξη.» from the hour to the server's `endTime`, «Ο ασθενής είναι στο
+  ιατρείο.» once `checked_in`, else «Τι έγινε με την επίσκεψη;» — with «Δεν ήρθε · Ολοκληρώθηκε», «Ήρθε, είναι
+  ακόμα στο ιατρείο» (`ARRIVED`, one tap of the desk, only while the visit lasts and the server offers it) and what
+  each answer means. A settled visit with the server's `actions.correction` says who wrote it («Γράψατε «…». Αν έγινε
+  λάθος, …» for `outcomeSource: DOCTOR`, U-196.1; «Το «…» γράφτηκε αυτόματα, …» for `SYSTEM`) until
+  `outcomeCorrectableUntil` (`doctorUntilPhrase`: «σήμερα, …», «αύριο, …», else the day with its article — never
+  computed), with «Διόρθωση». At the end of the window the detail is read again (its «Διόρθωση» goes with it).
+- **The address** (D-W51-62): `/doctor/appointments/<id>/correction` — the same route, parser, split and push over the
+  tabs as 69 / 70; opened from the 68 as one more step of the history.
+- **The read**: the 68's `doctorAppointmentQuery(id)`; the form only while the server opens the opposite verdict
+  (`doctorCorrectionEntry`), else «δεν γίνεται πια» with one way back. The verdict chosen is the page's rune (the
+  current one checked first); only the server's `correction.to` ever travels (`doctorCorrectionTarget`).
+- **The write**: the existing `POST …/outcome` `{ outcome }` with the opposite verdict. Success: the answer in
+  `detail(id)` as it came, the lists invalidated, `{ kind: 'corrected', to }` in the screen's `DoctorAppointmentMemory`
+  for the 68's green card «Διορθώθηκε σε «…».», back to the 68. The `409` whose `details.reason` is
+  `PATIENT_ALREADY_RATED` (U-196.1, `DOCTOR_CORRECTION_RATED`, bound to the backend's mark by
+  `tests/architecture/appointment-rules.test.ts`; since card w51-w8 the mark alone, never the words) ⇒ «Ο ασθενής έχει
+  ήδη γράψει κριτική· η διόρθωση δεν γίνεται.»; any other `409`, `403`, `404` ⇒ «δεν γίνεται πια»; a lost request /
+  `5xx` / `422` / `429`: its words, the choice stays; `401`: the sign-in. One press at a time.
+
+## The doctor's «Νέο ραντεβού» (wave 5.1, screen 72)
+
+- **The address** (D-W51-53 / 69): `/doctor/appointments/new` — the same route and parser as 67 – 71 (`view: 'new'`),
+  with `?kind=account|relative|record&id=<uuid>` (a patient already chosen, the 73's «Νέο ραντεβού») and `?from=today`
+  (opened from «Σήμερα»). From «Ραντεβού» («+», `doctor-appointments-new`) it stands right of the list from 1128 (the
+  list's pill and office stay in the address); from «Σήμερα» («+», `doctor-today-new`) a centred page of its own;
+  below 744 over the tabs (`isDoctorAppointmentStepPage`). Opened as one more step of the history
+  (`useHistorySteps('doctorAppointment')`); «←» / «Άκυρο» go back that step, else replace with its page.
+- **The reads** (all personal): «οι ασθενείς μου» (`doctorPatientSearchQuery`, the words cut at 40 and asked after
+  300 ms; none = the most recent), «ίδιο κινητό» (`doctorPatientPhoneQuery`, only for a valid Greek mobile), the one
+  patient of the address (`doctorPatientQuery(kind, id)`; a `404` back to the search with its words), the offices
+  (only more than one is a choice), the doctor's services, the free hours of the office for the chosen services
+  (`doctorNewSlotsQuery`, an infinite query a week a page, `staleTime` 0) and the SMS switch / balance of «Ενημέρωση».
+- **What the page keeps** (runes, never the address): the step (search · new · picked), the chosen patient's KEY (its
+  facts stay in the cache), the new patient's form (U-197.3: name and surname letters only, 80 each; the mobile
+  required and Greek; the email optional, 254), the office, the service, the day and the hour.
+- **The write**: `POST /appointment/appointments` `{ doctorId, officeId, startTime, status: 'booked', services, … }`
+  with exactly one of `patientId` (+ `bookedForType` / `relativeId`), `patientRecordId` or `newPatient`. Success: the
+  answer in `detail(id)` as it came, the lists and the searches invalidated, `{ kind: 'booked', told }` in the screen's
+  `DoctorAppointmentMemory` for the 68's green card («Το ραντεβού κλείστηκε.» and who was told), replace with the 68.
+  `409`: the hour leaves the grid and the hours are read again; `404`: back to the search; `422` / `400` naming a field:
+  the form marks it; `429` / a lost request: its words, the choice stays; `401`: the sign-in. One press at a time.
+- **Without an account** (D-W51-71): a `patientKind: 'RECORD'` appointment has no «Μήνυμα» on the 68 and shows
+  «Χωρίς λογαριασμό eDoctor» there and on the cards of 66 / 67.
+
+## The doctor's «Οι ασθενείς μου» (wave 5.1, screen 73)
+
+- **The address** (D-W51-73): `/doctor/patients` (the list, from the row «Οι ασθενείς μου» of «Μενού»; «Μενού» stays
+  the current tab, `isDoctorMenuTab`), `/doctor/patients/<kind>/<id>` (one card; `kind` one of `account | relative |
+record`, `id` a uuid) and a record's `/edit` («Στοιχεία ασθενή») and `/merge` (the join) — ONE route
+  `routes/doctor/(dashboard)/patients/[...path]` and ONE parser (`readDoctorPatientsAddress`); anything else is a 404. From 1128 the card stands right of the list (the first opens by itself, 67's way); below it alone; the two
+  record screens are pushed over the tabs below 744 (`isDoctorPatientStepPage`).
+- **The way back** (3β, `sw.js` `pt-open` / `pt-back`): every way INTO a card — the 68's name, a row of the list
+  below 1128 — and every way out of it — «Επεξεργασία», «Ένωση» — is one more step of the history
+  (`useHistorySteps('doctorPatient')`, `App.PageState.doctorPatient`); «‹», «Άκυρο» and the done action go back that
+  step (to the 68, the list, the same card), else replace with the list (the card's «‹») or the card. From 1128 the
+  card's «‹» shows only when the history holds where it came from. «Νέο ραντεβού» opens the 72 with the patient
+  chosen (`?from=patient&kind=&id=`, a page alone; its «Άκυρο» comes back to the card).
+- **The reads** (all personal, `api/patients`): the list page after page (`doctorPatientsQuery`, the words cut at
+  40 and asked after 300 ms, 20 a page by the server's `nextCursor`), one card (`doctorPatientCardQuery`, a key of its
+  own beside the 72's `patient(kind, id)`, which holds another shape), the pages of the card's «Επόμενα» /
+  «Προηγούμενα» after its first (`doctorPatientAppointmentsQuery`, only on «Περισσότερα»). A `404` / `403` is the one
+  «δεν βρέθηκε» (D-W51-63). The 72's booking reads them again (`patients()` `list`, `card`, `appointments`).
+- **The writes**: «Αποθήκευση» `PATCH …/record/{id}` (the six fields, the mobile its 10 digits, an emptied one
+  `null`; the rules of the 72's form and of the relatives' ΑΜΚΑ / ΑΦΜ before the write) and the join `POST
+…/record/{id}/merge { patientId }` (only the server's `mergeCandidate`). Success: `patients()` and the appointments
+  invalidated, `saved` / `merged` in the screen's `DoctorPatientMemory` (by the card's `kind:id`, never the address),
+  back to the card, which says «Αποθηκεύτηκε.» / «Οι καρτέλες ενώθηκαν.». `422` names its fields under them, `409`
+  «δεν αλλάζει πια» / «δεν είναι πια δυνατή», `404` gone, `429` / a lost request its words, `401` the sign-in.
+
+## The page of the cancel link (wave 5.1, `/a/<token>`, D-W51-72)
+
+- **The address**: `/a/<token>` — no session, the logo alone in the frame, no footer, no tabs. The token is read
+  locally first (`readAppointmentCancelToken`: 16 characters of base64url, the backend's opaque token); anything else
+  is «Ο σύνδεσμος δεν ισχύει πια.» with no call at all. `+page.server.ts` sets `Cache-Control: no-store`,
+  `Referrer-Policy: no-referrer` and `X-Robots-Tag: noindex, nofollow`; the page adds the same as `<meta>`.
+- **The read** (browser only, the rate limit is the visitor's): `getAppointmentCancelLink(token)` without cookies, at
+  once (it waits for no session), never retried or refetched; the facts carry no patient field (only the doctor, the
+  office, the hour and the terms). A token never reaches a log, the console or an error: `ApiError.url` names the
+  route's pattern. 🔴 It is the link holder's, not the session's: NO `personalQueryMeta` and a key of its own
+  (`appointmentCancelLinkQueryKey`, outside `appointments`) — the auth host forgets every marked read at a guest's answer
+  (`removePersonalQueries`), and a marked read on its way was ended silently and left the page «loading» (card w51-w8
+  round 2; `tests/architecture/drafts-privacy.test.ts` excepts this one slice from the mark and forbids it there).
+- **The write**: `POST …/cancel` `{ reasonCode, reasonText? }` with `httpPublicPost` (the 53's form and reasons,
+  `PATIENT_CANCEL_REASONS`, the words cut at the contract's bound). Success: «Το ραντεβού ακυρώθηκε.» / «Ο
+  γιατρός ενημερώθηκε.» over the link's box (the read kept as it was; nothing is read again). `404` (or a `422` of the read) ⇒ «Ο σύνδεσμος δεν ισχύει πια.»; `403` after
+  the deadline / `409` ⇒ read again (the late view: «Για ακύρωση, καλέστε το ιατρείο» with the office's `tel:`);
+  `422` of the write ⇒ in the form; `429` ⇒ «Πολλές προσπάθειες…».
 
 ## The session across tabs (wave 3, D-W3-37)
 
@@ -582,6 +823,7 @@ edoctor.<appEnv>.consent.v1
 edoctor.<appEnv>.consent-recorded.v1
 edoctor.<appEnv>.helpful.v1
 edoctor.<appEnv>.favorite-pending.v1
+edoctor.<appEnv>.doctor-mode.v1
 ```
 
 The consent key keeps the visitor's tracking decision (`$shared/storage/consent-storage`, the application's

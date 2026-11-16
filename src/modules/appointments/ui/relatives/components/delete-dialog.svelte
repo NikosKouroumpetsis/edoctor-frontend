@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 	import { m } from '$paraglide/messages.js';
+	import { relativeSubject } from '$shared/lib/relative-words';
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 	import { getSessionOptional } from '$shared/state/session';
 	import { InlineNotice } from '$shared/ui/molecules/inline-notice';
@@ -11,10 +12,7 @@
 		forgetRelative,
 		readRelativeChangeFailure
 	} from '$modules/appointments/api/relatives';
-	import {
-		relativeChangeFailureMessage,
-		relativeSubject
-	} from '$modules/appointments/lib/relatives';
+	import { relativeChangeFailureMessage } from '$modules/appointments/lib/relatives';
 
 	let {
 		open = $bindable(false),

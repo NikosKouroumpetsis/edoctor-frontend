@@ -17,7 +17,14 @@
 
 	const controller = useDoctorOnboardingStep(() => props, 'email-code');
 	const options = $derived({ locale: props.locale });
-	const destination = $derived(controller.progress?.contactEmail.notificationEmail ?? null);
+	// 🔴 U-169 · D-W51-12: the address the doctor typed, from this tab's draft (the server answers only its mask), sent
+	// with the code; what the screen says back is the server's mask of it.
+	const destination = $derived(
+		controller.draft.read('contactEmail', 'notificationEmail', '').trim() || null
+	);
+	const shown = $derived(
+		controller.progress?.contactEmail.notificationEmailMasked ?? destination ?? ''
+	);
 	let code = $state('');
 	let error = $state<string | null>(null);
 	let feedback = $state<{ kind: 'wait' | 'sent'; message: string } | null>(null);
@@ -37,12 +44,11 @@
 		unknown: () => m.auth_otp_errors_unknown({}, options)
 	};
 
-	// A code screen with no address behind it (a link, a reload before any was written) gives its place to the address's,
-	// once the server's progress says so (never before the router has started: D-W3-31).
+	// A code screen with no address behind it (a link, a reload: the draft is this tab's memory only) gives its place to
+	// the address's, once the server's progress is here (never before the router has started: D-W3-31).
 	$effect(() => {
 		const progress = controller.progress;
-		if (progress && !progress.contactEmail.notificationEmail)
-			untrack(() => controller.replace('email'));
+		if (progress && controller.ready && !destination) untrack(() => controller.replace('email'));
 	});
 
 	const resender = createMutation(() => ({
@@ -62,7 +68,9 @@
 				return true;
 			}
 		);
-		if (answer) controller.goNext(answer);
+		if (!answer) return;
+		controller.draft.clear('contactEmail');
+		controller.goNext(answer);
 	}
 
 	async function askAgain() {
@@ -98,7 +106,7 @@
 	{controller}
 	context={props}
 	title={m.doctor_onboarding_contact_email_code_title({}, options)}
-	subtitle={m.doctor_onboarding_contact_email_code_subtitle({ email: destination ?? '' }, options)}
+	subtitle={m.doctor_onboarding_contact_email_code_subtitle({ email: shown }, options)}
 	next={{
 		label: m.doctor_onboarding_contact_email_confirm({}, options),
 		disabled: !destination || !isValidEmailCode(code),

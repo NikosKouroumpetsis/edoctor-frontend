@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { untrack, type Snippet } from 'svelte';
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
+	import { setDoctorStanding, type DoctorStanding } from '$shared/state/doctor-standing';
 	import { setInboxBadge, type InboxBadge } from '$shared/state/inbox-badge';
 	import { setNotificationBadge, type NotificationBadge } from '$shared/state/notification-badge';
 	import { setSession, type Session } from '$shared/state/session';
@@ -12,11 +13,14 @@
 		session,
 		inbox,
 		notifications,
+		standing,
 		children
 	}: {
 		session: Session;
 		inbox?: InboxBadge;
 		notifications?: NotificationBadge;
+		/** Wave 5.1 · screen 64: the doctor standing the layout's host gives (its one read). */
+		standing?: DoctorStanding;
 		children: Snippet;
 	} = $props();
 
@@ -24,6 +28,7 @@
 	untrack(() => {
 		if (inbox) setInboxBadge(inbox);
 		if (notifications) setNotificationBadge(notifications);
+		if (standing) setDoctorStanding(standing);
 	});
 	const client = new QueryClient({
 		defaultOptions: { queries: { retry: false, gcTime: Infinity } }

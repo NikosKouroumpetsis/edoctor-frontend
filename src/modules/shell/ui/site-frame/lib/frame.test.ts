@@ -35,6 +35,19 @@ describe('the frame’s rules per page', () => {
 		expect(showsBottomNav('/doctor/onboarding/stage/9', 404)).toBe(true);
 	});
 
+	it('🔴 D-W51-72 (wave 5.1): the cancel link’s page — the mark alone at every width, no footer, no capsule; nothing else is such a page', () => {
+		for (const path of ['/a/AbCdEfGh_-123456', '/a/x']) {
+			expect(frameHeaderOf(path), path).toBe('logo');
+			expect(showsSiteFooter(path), path).toBe(false);
+			expect(showsBottomNav(path), path).toBe(false);
+		}
+		for (const path of ['/a', '/a/x/y', '/about', '/appointments']) {
+			expect(frameHeaderOf(path), path).not.toBe('logo');
+		}
+		// An error page there is the site's, inside the whole frame (U-61.1).
+		expect(frameHeaderOf('/a/x', 404)).toBe('site');
+	});
+
 	it('🔴 U-61.1 (review w3-w1 MINOR-1): an error page under the booking or the sign-up is inside the whole frame — the bar and the footer', () => {
 		for (const path of [
 			'/doctor/onboarding/stage/9',
@@ -62,13 +75,22 @@ describe('the frame’s rules per page', () => {
 		expect(frameHeaderOf('/doctor/onboarding/office')).toBe('none');
 	});
 
+	// Rewrites «P-W3 §3.1 (negative): … `/doctor` keeps the site's frame» by D-W51-16 (wave 5.1, screen 65): `/doctor` is
+	// the doctor's «Σήμερα» now, a page of its own frame (below); the other look-alikes are as they were.
 	it('P-W3 §3.1 (negative): look-alike paths keep the site’s frame — no slug, another word, the plural', () => {
 		for (const path of [
 			'/doctors/booking',
 			'/doctors/dr-athena/bookings',
 			'/doctor/onboardings',
 			'/doctors/onboarding',
-			'/doctor',
+			'/doctor/menus',
+			'/doctor/today',
+			'/doctor/appointment',
+			'/doctor/appointmentsx',
+			'/doctor/patientsx',
+			'/doctor/messagesx',
+			'/doctor/notificationsx',
+			'/doctor/notifications/x',
 			'/plans'
 		]) {
 			expect(frameHeaderOf(path), path).toBe('site');
@@ -291,11 +313,15 @@ describe('the frame’s rules per page', () => {
 				.map((entry) => entry.label)
 				.join(' · ');
 			expect(guest).not.toMatch(/Ειδοποιήσεις|Notifications/u);
+			// Rewrites «U-164.1: nothing of «Λειτουργία γιατρού» in either» by U-185.1 (wave 5.1, screen 64): it holds for
+			// whoever is not licensed for the marketplace — a guest, no registration, one under review, the till's alone.
 			for (const isMember of [false, true]) {
-				const labels = buildAccountEntries({ locale }, href, isMember)
-					.map((entry) => entry.label)
-					.join(' · ');
-				expect(labels).not.toMatch(/Λειτουργία γιατρού|Doctor mode/u);
+				for (const doctor of ['none', 'pending', 'payments'] as const) {
+					const labels = buildAccountEntries({ locale }, href, isMember, false, false, doctor)
+						.map((entry) => entry.label)
+						.join(' · ');
+					expect(labels).not.toMatch(/Λειτουργία γιατρού|Doctor mode/u);
+				}
 			}
 		}
 	});
@@ -530,6 +556,107 @@ describe('the frame’s rules per page', () => {
 			// The settings' section «Ειδοποιήσεις» (screen 60) is the shell's, as before.
 			expect(showsBottomNav('/profile/account-settings/notifications')).toBe(false);
 			expect(showsSiteFooter('/profile/account-settings/notifications')).toBe(false);
+		});
+	});
+
+	describe('wave 5.1 · screens 64 / 65 — the doctor standing in the patient’s frame (U-185.1, U-183.5, D-W51-16)', () => {
+		const member = (
+			doctor: 'none' | 'pending' | 'doctor' | 'payments',
+			locale: 'el' | 'en' = 'el'
+		) => buildAccountEntries({ locale }, href, true, false, false, doctor);
+
+		it('U-185.1: Λειτουργία γιατρού μόνο με εγγραφή + άδεια — a licence of the marketplace has the switch in its own group after «Αγαπημένα», only below 1128, and no «Είστε γιατρός;»', () => {
+			const entries = member('doctor');
+			expect(entries.map((entry) => entry.key)).toEqual([
+				'messages',
+				'appointments',
+				'favorites',
+				'doctor-mode',
+				'notifications',
+				'relatives',
+				'account-settings',
+				'help',
+				'sign-out'
+			]);
+			expect(entries.find((entry) => entry.key === 'doctor-mode')).toEqual({
+				key: 'doctor-mode',
+				kind: 'switch',
+				label: 'Λειτουργία γιατρού',
+				href: '/doctor',
+				separated: true,
+				hideFrom: 'laptop'
+			});
+			expect(member('doctor', 'en').find((entry) => entry.key === 'doctor-mode')?.label).toBe(
+				'Doctor mode'
+			);
+			// 🔴 U-164.1 (rewritten for a licence): the ONE word of a doctor's in the patient's menu is the switch.
+			const words = entries.map((entry) => entry.label).join(' · ');
+			expect(words).not.toMatch(/Είστε γιατρός|Ραντεβού γιατρού|Ταμείο|Λειτουργία ασθενή/u);
+		});
+
+		it('U-183.5: a completed registration without a licence reads «Η αίτησή σας ελέγχεται» in the place of «Είστε γιατρός;», to the application’s page; no switch', () => {
+			const entries = member('pending');
+			expect(entries.find((entry) => entry.key === 'doctor')).toEqual({
+				key: 'doctor',
+				kind: 'link',
+				label: 'Η αίτησή σας ελέγχεται',
+				description: 'Δείτε ή αλλάξτε τα στοιχεία της εγγραφής σας.',
+				href: '/doctor/onboarding',
+				separated: true
+			});
+			expect(entries.some((entry) => entry.key === 'doctor-mode')).toBe(false);
+		});
+
+		it('D-W51-16: καμία Λειτουργία γιατρού για μόνο-ταμείου στο web — and no «Είστε γιατρός;» either (a licence is no sign-up)', () => {
+			const keys = member('payments').map((entry) => entry.key);
+			expect(keys).not.toContain('doctor-mode');
+			expect(keys).not.toContain('doctor');
+		});
+
+		it('(negative) a guest’s menu stays the four of U-17.2 whatever a standing says; no registration reads «Είστε γιατρός;» as before', () => {
+			for (const doctor of ['doctor', 'pending', 'payments'] as const) {
+				expect(
+					buildAccountEntries(el, href, false, false, false, doctor).map((entry) => entry.key)
+				).toEqual(['sign-in', 'settings', 'help', 'doctor']);
+			}
+			expect(member('none').find((entry) => entry.key === 'doctor')?.label).toBe('Είστε γιατρός;');
+		});
+
+		// Widened by D-W51-31 (step 3, screen 67): «Ραντεβού» and what is under it are pages of the same frame.
+		// Widened by D-W51-73 (step 9, screen 73, live 15/11): «Οι ασθενείς μου» and what is under it too.
+		// Widened by D-W51-85 (step 10, screen 74): the doctor's messages and what is under them too.
+		// Widened by D-W51-89 (step 11, screen 75): the doctor's notifications too (else two bars, as `/doctor/patients` live).
+		it('D-W51-16 · D-W51-31 · D-W51-73 · D-W51-85 · D-W51-89: `/doctor`, `/doctor/menu`, `/doctor/appointments…`, `/doctor/patients…`, `/doctor/messages…` and `/doctor/notifications` are the doctor’s frame — no bar, capsule or footer of the patient’s; 🔴 U-61.1 / U-61.2: an error page there is inside the site’s whole frame', () => {
+			for (const path of [
+				'/doctor',
+				'/doctor/',
+				'/doctor/menu',
+				'/doctor/appointments',
+				'/doctor/appointments/',
+				'/doctor/appointments/0193d000-0000-7000-8000-000000000001',
+				'/doctor/patients',
+				'/doctor/patients/account/0193d000-0000-7000-8000-000000000001',
+				'/doctor/patients/record/0193d000-0000-7000-8000-000000000002/edit',
+				'/doctor/messages',
+				'/doctor/messages/0193d000-0000-7000-8000-000000000003',
+				'/doctor/messages/archive',
+				'/doctor/messages/new',
+				'/doctor/notifications',
+				'/doctor/notifications/'
+			]) {
+				expect(frameHeaderOf(path), path).toBe('none');
+				expect(showsBottomNav(path), path).toBe(false);
+				expect(showsSiteFooter(path), path).toBe(false);
+				expect(frameHeaderOf(path, 404), path).toBe('site');
+				expect(showsBottomNav(path, 404), path).toBe(true);
+				expect(showsSiteFooter(path, 404), path).toBe(true);
+			}
+			// The sign-up keeps its own (none), the patient's pages theirs.
+			expect(frameHeaderOf('/doctor/onboarding')).toBe('none');
+			expect(showsBottomNav('/profile')).toBe(true);
+			// D-W51-89: the patient's list (screen 63) stays the patient's frame's.
+			expect(frameHeaderOf('/notifications')).toBe('site');
+			expect(showsSiteFooter('/notifications')).toBe(false);
 		});
 	});
 });

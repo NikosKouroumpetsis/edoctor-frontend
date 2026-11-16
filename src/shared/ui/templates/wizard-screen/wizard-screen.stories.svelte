@@ -133,3 +133,19 @@
 		</WizardScreen>
 	{/snippet}
 </Story>
+
+<!-- Wave 5.1 · screen 64: a page opened over another — «‹» at the start below 744 (the mark from 744), no bar at its end. -->
+<Story name="Opened over a page">
+	{#snippet template()}
+		<WizardScreen title="Λάβαμε την αίτησή σας" brand={mark} pills={[pills[0]]} centered={false}>
+			{#snippet leading()}
+				<a href="#back" aria-label="Πίσω" class="grid min-h-touch min-w-touch place-items-center"
+					>‹</a
+				>
+			{/snippet}
+			<p class="text-body-lg text-muted-foreground">
+				Τα στοιχεία της εγγραφής σας, με «Επεξεργασία».
+			</p>
+		</WizardScreen>
+	{/snippet}
+</Story>

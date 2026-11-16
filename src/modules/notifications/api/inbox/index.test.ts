@@ -15,9 +15,18 @@ import {
 	previewAllNotificationsRead,
 	previewNotificationRead,
 	readNotificationInboxFailure,
-	type NotificationInboxPageFacts
+	settleNotificationLists,
+	type NotificationInboxPageFacts,
+	type NotificationInboxSide
 } from '.';
-import { SAMPLE_IDS, sampleInboxItem, sampleInboxItems, sampleInboxPage } from './inbox.sample';
+import {
+	DOCTOR_SAMPLE_IDS,
+	SAMPLE_IDS,
+	sampleDoctorInboxItems,
+	sampleInboxItem,
+	sampleInboxItems,
+	sampleInboxPage
+} from './inbox.sample';
 
 /*
  * Wave 4.5 · screen 63 «Ειδοποιήσεις», the list (D-W45-46; `w45-b4` «Σύμβαση για τους clients»): the four calls, the
@@ -49,12 +58,12 @@ function server(answer: (call: Call) => Response | Promise<Response>) {
 const client = () => new QueryClient({ defaultOptions: { queries: { gcTime: Infinity } } });
 type ListData = InfiniteData<NotificationInboxPageFacts, string | undefined>;
 
-/** A client that has read «Νέες», «Προηγούμενες» and «Όλες» of the sample, and the count. */
-function readClient() {
+/** A client that has read «Νέες», «Προηγούμενες» and «Όλες» of the sample, and the count — of the patient's side. */
+function readClient(side: NotificationInboxSide = 'patient') {
 	const all = mapNotificationInboxPage(sampleInboxPage());
 	const cache = client();
 	const put = (filter: 'new' | 'previous' | 'all', items: NotificationInboxPageFacts['items']) =>
-		cache.setQueryData<ListData>(notificationInboxKeys.list(filter, 'el'), {
+		cache.setQueryData<ListData>(notificationInboxKeys.list(side, filter, 'el'), {
 			pages: [{ items, nextCursor: null, unreadCount: 3 }],
 			pageParams: [undefined]
 		});
@@ -67,12 +76,12 @@ function readClient() {
 		all.items.filter((entry) => entry.read)
 	);
 	put('all', all.items);
-	keepUnreadNotificationCount(cache, 3);
+	keepUnreadNotificationCount(cache, side, 3);
 	const ids = (filter: 'new' | 'previous' | 'all') =>
 		cache
-			.getQueryData<ListData>(notificationInboxKeys.list(filter, 'el'))
+			.getQueryData<ListData>(notificationInboxKeys.list(side, filter, 'el'))
 			?.pages.flatMap((page) => page.items.map((entry) => `${entry.id}:${entry.read}`));
-	return { cache, ids, count: () => cache.getQueryData(notificationInboxKeys.unread()) };
+	return { cache, ids, count: () => cache.getQueryData(notificationInboxKeys.unread(side)) };
 }
 
 describe('modules/notifications/api/inbox · the answer as facts (W-4, U-65.6)', () => {
@@ -98,6 +107,31 @@ describe('modules/notifications/api/inbox · the answer as facts (W-4, U-65.6)',
 		expect(page.unreadCount).toBe(3);
 		// The server's `kind` (its closed list of fifteen) is not the page's to keep: the words and the glyph say it.
 		expect(Object.keys(page.items[0] ?? {})).not.toContain('kind');
+	});
+
+	it('🔴 D-W51-90 (screen 75, `w51-b11` §6): the doctor’s words of the contract are kept — the glyphs of a cancellation, a visit to settle, the calendar, the licence; the calendar’s connection and the doctor as what a line is about', () => {
+		const page = mapNotificationInboxPage(sampleInboxPage(sampleDoctorInboxItems()));
+		expect(page.items.map((entry) => entry.icon)).toEqual([
+			'CALENDAR',
+			'CHECK',
+			'CALENDAR_CANCELED',
+			'STAR',
+			'SYNC',
+			'BADGE'
+		]);
+		expect(page.items.map((entry) => entry.target?.kind)).toEqual([
+			'APPOINTMENT',
+			'APPOINTMENT',
+			'APPOINTMENT',
+			'APPOINTMENT',
+			'CALENDAR_CONNECTION',
+			'DOCTOR'
+		]);
+		expect(page.items[4]?.target).toEqual({
+			kind: 'CALENDAR_CONNECTION',
+			id: DOCTOR_SAMPLE_IDS.connection
+		});
+		expect(page.unreadCount).toBe(3);
 	});
 
 	it('🔴 `w45-b4`: a line’s second line MAY be empty (the two of the questions today) — it stays empty, never a made-up word', () => {
@@ -201,20 +235,23 @@ describe('modules/notifications/api/inbox · the answer as facts (W-4, U-65.6)',
 });
 
 describe('modules/notifications/api/inbox · the four calls (D-W45-46)', () => {
-	it('the list: `GET /notification/inbox/me` with the cookies and `filter`, `lang` (the PAGE’s language), `limit`, and the cursor only on a next page', async () => {
+	// Rewrites the query of «the list» (no side) by D-W51-89 (screen 75): every read names its side, said aloud.
+	it('the list: `GET /notification/inbox/me` with the cookies and `side`, `filter`, `lang` (the PAGE’s language), `limit`, and the cursor only on a next page', async () => {
 		const calls = server(() => json(sampleInboxPage()));
-		const page = await listNotifications({ filter: 'new', lang: 'en' });
-		await listNotifications({ filter: 'previous', lang: 'el', cursor: 'next-1' });
+		const page = await listNotifications({ side: 'patient', filter: 'new', lang: 'en' });
+		await listNotifications({ side: 'doctor', filter: 'previous', lang: 'el', cursor: 'next-1' });
 		expect(page.items).toHaveLength(5);
 		expect(
 			calls.map((call) => call.url.pathname.replace(/^.*\/notification/u, '/notification'))
 		).toEqual(['/notification/inbox/me', '/notification/inbox/me']);
 		expect(Object.fromEntries(calls[0].url.searchParams)).toEqual({
+			side: 'patient',
 			filter: 'new',
 			lang: 'en',
 			limit: '20'
 		});
 		expect(Object.fromEntries(calls[1].url.searchParams)).toEqual({
+			side: 'doctor',
 			filter: 'previous',
 			lang: 'el',
 			limit: '20',
@@ -226,11 +263,14 @@ describe('modules/notifications/api/inbox · the four calls (D-W45-46)', () => {
 		}
 	});
 
-	it('the count: `GET …/unread-count`, the number alone', async () => {
+	// Rewrites «the count: … no query» by D-W51-89: the count is of one side (`?side=`).
+	it('the count: `GET …/unread-count?side=`, the number alone — of the side asked', async () => {
 		const calls = server(() => json({ unreadCount: 4 }));
-		expect(await countUnreadNotifications()).toBe(4);
+		expect(await countUnreadNotifications('patient')).toBe(4);
+		expect(await countUnreadNotifications('doctor')).toBe(4);
 		expect(calls[0].url.pathname).toMatch(/\/notification\/inbox\/me\/unread-count$/u);
-		expect(calls[0].url.search).toBe('');
+		expect(calls[0].url.search).toBe('?side=patient');
+		expect(calls[1].url.search).toBe('?side=doctor');
 		expect(calls[0].init).toMatchObject({ method: 'GET', credentials: 'include' });
 	});
 
@@ -245,11 +285,13 @@ describe('modules/notifications/api/inbox · the four calls (D-W45-46)', () => {
 		expect(calls[0].init).toMatchObject({ method: 'POST', credentials: 'include', body: '{}' });
 	});
 
-	it('«Σήμανση όλων ως διαβασμένων»: ONE `POST …/read-all` with an empty body', async () => {
+	// Rewrites «ONE `POST …/read-all`» (no query) by D-W51-81 / 89: «all» is all of ONE side.
+	it('«Σήμανση όλων ως διαβασμένων»: ONE `POST …/read-all?side=` with an empty body — the side asked, never both', async () => {
 		const calls = server(() => json({ marked: 3, unreadCount: 0 }));
-		expect(await markAllNotificationsRead()).toBe(0);
+		expect(await markAllNotificationsRead('doctor')).toBe(0);
 		expect(calls).toHaveLength(1);
 		expect(calls[0].url.pathname).toMatch(/\/notification\/inbox\/me\/read-all$/u);
+		expect(calls[0].url.search).toBe('?side=doctor');
 		expect(calls[0].init).toMatchObject({ method: 'POST', credentials: 'include', body: '{}' });
 	});
 
@@ -286,18 +328,25 @@ describe('modules/notifications/api/inbox · the four calls (D-W45-46)', () => {
 });
 
 describe('modules/notifications/api/inbox · the reads in the cache (D-W45-17, D-W45-49, U-65.6)', () => {
-	it('🔴 D-W45-17: «how many are new» is ONE key for the whole site, personal, asked again whenever the page comes back to the front — and on no timer', () => {
-		const query = notificationUnreadCountQuery();
-		expect(query.queryKey).toEqual(['notifications', 'inbox', 'unread']);
-		expect(query.queryKey).toEqual(notificationInboxKeys.unread());
+	// Rewrites «ONE key for the whole site» by D-W51-81 / 89: one key per SIDE (the dots of a mode count its own side).
+	it('🔴 D-W45-17 · D-W51-89: «how many are new» is ONE key per side, personal, asked again whenever the page comes back to the front — and on no timer', () => {
+		const query = notificationUnreadCountQuery('patient');
+		expect(query.queryKey).toEqual(['notifications', 'inbox', 'patient', 'unread']);
+		expect(query.queryKey).toEqual(notificationInboxKeys.unread('patient'));
+		expect(notificationUnreadCountQuery('doctor').queryKey).toEqual([
+			'notifications',
+			'inbox',
+			'doctor',
+			'unread'
+		]);
 		expect(query.meta).toEqual({ personal: true });
 		expect(query.refetchOnWindowFocus).toBe('always');
 		expect(query).not.toHaveProperty('refetchInterval');
 	});
 
 	it('the list: one place per choice and language, personal; the next page by the last one’s `nextCursor`, `undefined` at the end', () => {
-		const query = notificationInboxQuery('previous', 'en');
-		expect(query.queryKey).toEqual(['notifications', 'inbox', 'list', 'previous', 'en']);
+		const query = notificationInboxQuery('patient', 'previous', 'en');
+		expect(query.queryKey).toEqual(['notifications', 'inbox', 'patient', 'list', 'previous', 'en']);
 		expect(query.meta).toEqual({ personal: true });
 		expect(query.initialPageParam).toBeUndefined();
 		const next = query.getNextPageParam as (page: NotificationInboxPageFacts) => unknown;
@@ -308,19 +357,22 @@ describe('modules/notifications/api/inbox · the reads in the cache (D-W45-17, D
 	it('🔴 D-W45-49: every page of the list also says how many are new — it goes to the dots’ ONE place, no second request', async () => {
 		const calls = server(() => json(sampleInboxPage(undefined, { unreadCount: 7 })));
 		const cache = client();
-		const data = await cache.fetchInfiniteQuery(notificationInboxQuery('all', 'el'));
+		const data = await cache.fetchInfiniteQuery(notificationInboxQuery('doctor', 'all', 'el'));
 		expect(data.pages[0]?.items).toHaveLength(5);
-		expect(cache.getQueryData(notificationInboxKeys.unread())).toBe(7);
+		expect(cache.getQueryData(notificationInboxKeys.unread('doctor'))).toBe(7);
+		// D-W51-81: a page of the doctor's side says nothing of the patient's count.
+		expect(cache.getQueryData(notificationInboxKeys.unread('patient'))).toBeUndefined();
 		expect(calls).toHaveLength(1);
+		expect(calls[0]?.url.searchParams.get('side')).toBe('doctor');
 		// 🔴 U-65.6: an answer that lands in an empty place is still the sign-out's to take.
-		expect(cache.getQueryDefaults(notificationInboxKeys.unread()).meta).toEqual({
+		expect(cache.getQueryDefaults(notificationInboxKeys.unread('doctor')).meta).toEqual({
 			personal: true
 		});
 	});
 
 	it('🔴 U-174 (Ε2 Β): a press reads the line BEFORE the server answers — it leaves «Νέες», it is no longer new in «Όλες», one fewer is new; «Προηγούμενες» is not guessed', async () => {
 		const { cache, ids, count } = readClient();
-		await previewNotificationRead(cache, SAMPLE_IDS.reminder);
+		await previewNotificationRead(cache, 'patient', SAMPLE_IDS.reminder);
 		expect(ids('new')).toEqual([`${SAMPLE_IDS.confirmed}:false`, `${SAMPLE_IDS.invitation}:false`]);
 		expect(ids('all')).toEqual([
 			`${SAMPLE_IDS.confirmed}:false`,
@@ -339,7 +391,7 @@ describe('modules/notifications/api/inbox · the reads in the cache (D-W45-17, D
 	it('🔴 U-174 (Ε2 Β), the way back: a write the server refuses puts every list and the count where they were', async () => {
 		const { cache, ids, count } = readClient();
 		const before = { new: ids('new'), all: ids('all'), previous: ids('previous') };
-		const back = await previewNotificationRead(cache, SAMPLE_IDS.confirmed);
+		const back = await previewNotificationRead(cache, 'patient', SAMPLE_IDS.confirmed);
 		expect(ids('new')).not.toEqual(before.new);
 		back();
 		expect({ new: ids('new'), all: ids('all'), previous: ids('previous') }).toEqual(before);
@@ -349,7 +401,7 @@ describe('modules/notifications/api/inbox · the reads in the cache (D-W45-17, D
 	it('«Σήμανση όλων ως διαβασμένων» at the press: «Νέες» is empty, nothing is new in «Όλες», the count is none — and the way back restores all of it', async () => {
 		const { cache, ids, count } = readClient();
 		const before = { new: ids('new'), all: ids('all') };
-		const back = await previewAllNotificationsRead(cache);
+		const back = await previewAllNotificationsRead(cache, 'patient');
 		expect(ids('new')).toEqual([]);
 		expect(ids('all')?.every((entry) => entry.endsWith(':true'))).toBe(true);
 		expect(count()).toBe(0);
@@ -360,16 +412,36 @@ describe('modules/notifications/api/inbox · the reads in the cache (D-W45-17, D
 
 	it('(negative) a press with nothing read yet writes no list and invents no count; the count never goes below none', async () => {
 		const empty = client();
-		const back = await previewNotificationRead(empty, SAMPLE_IDS.confirmed);
-		expect(empty.getQueriesData({ queryKey: notificationInboxKeys.lists() })).toEqual([]);
-		expect(empty.getQueryData(notificationInboxKeys.unread())).toBeUndefined();
+		const back = await previewNotificationRead(empty, 'patient', SAMPLE_IDS.confirmed);
+		expect(empty.getQueriesData({ queryKey: notificationInboxKeys.lists('patient') })).toEqual([]);
+		expect(empty.getQueryData(notificationInboxKeys.unread('patient'))).toBeUndefined();
 		back();
-		expect(empty.getQueryData(notificationInboxKeys.unread())).toBeUndefined();
+		expect(empty.getQueryData(notificationInboxKeys.unread('patient'))).toBeUndefined();
 
 		const { cache, count } = readClient();
-		keepUnreadNotificationCount(cache, 0);
-		await previewNotificationRead(cache, SAMPLE_IDS.confirmed);
+		keepUnreadNotificationCount(cache, 'patient', 0);
+		await previewNotificationRead(cache, 'patient', SAMPLE_IDS.confirmed);
 		expect(count()).toBe(0);
+	});
+
+	it('🔴 D-W51-81 · D-W51-89: a press, «Σήμανση όλων» and their settling are ONE side’s — the other side’s lists and count stay as they were', async () => {
+		const { cache } = readClient('doctor');
+		const patientList = ['notifications', 'inbox', 'patient', 'list', 'previous', 'el'];
+		cache.setQueryData(notificationInboxKeys.unread('patient'), 4);
+		cache.setQueryData<ListData>(patientList, {
+			pages: [{ items: [], nextCursor: null, unreadCount: 4 }],
+			pageParams: [undefined]
+		});
+		await previewNotificationRead(cache, 'doctor', SAMPLE_IDS.confirmed);
+		expect(cache.getQueryData(notificationInboxKeys.unread('doctor'))).toBe(2);
+		await previewAllNotificationsRead(cache, 'doctor');
+		expect(cache.getQueryData(notificationInboxKeys.unread('doctor'))).toBe(0);
+		expect(cache.getQueryData(notificationInboxKeys.unread('patient'))).toBe(4);
+		settleNotificationLists(cache, 'doctor');
+		expect(cache.getQueryState(patientList)?.isInvalidated).toBe(false);
+		expect(
+			cache.getQueryState(notificationInboxKeys.list('doctor', 'previous', 'el'))?.isInvalidated
+		).toBe(true);
 	});
 
 	it('the sample is the server’s shape: every line has the eight fields of the contract', () => {

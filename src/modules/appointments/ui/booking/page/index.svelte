@@ -2,8 +2,11 @@
 	import { m } from '$paraglide/messages.js';
 	import { ErrorState } from '$shared/ui/molecules/error-state';
 	import { InlineNotice } from '$shared/ui/molecules/inline-notice';
+	import { NoteField } from '$shared/ui/molecules/note-field';
+	import { RoundLink } from '$shared/ui/molecules/round-link';
 	import { Button } from '$shared/ui/primitives/button';
-	import { FirstVisit, NoteField, RoundLink } from '$modules/appointments/ui/change-screen';
+	import { BOOKING_PATIENT_NOTE_MAX_LENGTH } from '$modules/appointments/config';
+	import { FirstVisit } from '$modules/appointments/ui/change-screen';
 	import SummaryCard from '../components/summary-card.svelte';
 	import { useBookingReview } from '../hooks/use-review.svelte';
 	import type { BookingReviewProps } from '../types';
@@ -163,6 +166,7 @@
 						value={review.note}
 						counter={review.noteCounter}
 						error={review.failure?.noteError ?? null}
+						maxLength={BOOKING_PATIENT_NOTE_MAX_LENGTH}
 						onInput={(value) => review.setNote(value)}
 					/>
 					<div class="hidden flex-row justify-end border-t border-border pt-4 tablet:flex">

@@ -145,7 +145,7 @@ const noHover = (root: Element) => {
 describe('«Επιλέξτε υπηρεσία» (record §3.3, U-103.2)', () => {
 	it('W8-Δ1: a short «Αλλαγή» screen is white to the bottom — the screen’s height below 744, less the bar’s from 744', () => {
 		draw('service');
-		expect(document.querySelector('[data-slot="booking-change-screen"]')).toHaveClass(
+		expect(document.querySelector('[data-slot="step-screen"]')).toHaveClass(
 			'bg-card',
 			'min-h-dvh',
 			'tablet:min-h-page'
@@ -172,7 +172,7 @@ describe('«Επιλέξτε υπηρεσία» (record §3.3, U-103.2)', () => 
 		expect(cards[0]).toHaveTextContent('140');
 		expect(cards[1]).toHaveTextContent('60 λεπτά');
 		noHover(group);
-		noHover(document.querySelector('[data-slot="booking-change-bar"]') as Element);
+		noHover(document.querySelector('[data-slot="step-screen-bar"]') as Element);
 		expect(save()).toHaveClass('rounded-full');
 	});
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages.js';
 	import type { BookingRelativeFacts } from '$modules/appointments/api/patient';
-	import { relativeSubject } from '$modules/appointments/lib/relatives';
+	import { relativeSubject } from '$shared/lib/relative-words';
 	import RelativeForm from '$modules/appointments/ui/relative-form';
 	import { useBookingChange } from '../hooks/use-change.svelte';
 	import type { BookingMobileProps } from '../types';

@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { createQuery } from '@tanstack/svelte-query';
 	import { browser } from '$app/environment';
+	import { page } from '$app/state';
+	import { deLocalizeHref } from '$paraglide/runtime';
+	import { modeSideOfPath } from '$shared/lib/mode-side';
 	import { NotificationBadge, setNotificationBadge } from '$shared/state/notification-badge';
 	import { getSessionOptional } from '$shared/state/session';
 	import {
@@ -13,12 +16,15 @@
 
 	const session = getSessionOptional();
 	const isMember = $derived(session?.isMember ?? false);
+	// 🔴 D-W51-89 · U-182.3 (the messages' badge's rule, D-W51-77): the dots count the side of the page's mode — the
+	// doctor's dashboard his own lines (screen 75), every other page the account's as a patient (screen 63); never both.
+	const side = $derived(modeSideOfPath(deLocalizeHref(page.url.pathname)));
 
 	// 🔴 D-W45-17 · D-W45-49: «how many are new», only for a member — a guest, and a session not known yet, ask the
 	// server NOTHING (`enabled` goes false at a sign-out too). No timer: it is asked when the member arrives, whenever
 	// the page comes back to the front, and every «read» answers its new value into the same place.
 	const unread = createQuery(() => ({
-		...notificationUnreadCountQuery(),
+		...notificationUnreadCountQuery(side),
 		enabled: browser && isMember
 	}));
 

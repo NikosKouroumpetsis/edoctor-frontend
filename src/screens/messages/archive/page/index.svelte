@@ -6,4 +6,4 @@
 </script>
 
 <!-- 🔴 U-84 Π1 (Airbnb's IMG_2611): «Προηγούμενες συνομιλίες», a page with ←, no capsule below 744. -->
-<Inbox locale={screen.locale} links={screen.links} archive />
+<Inbox locale={screen.locale} links={screen.links} side="patient" archive />

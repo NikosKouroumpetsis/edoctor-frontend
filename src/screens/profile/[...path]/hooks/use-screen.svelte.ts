@@ -11,6 +11,7 @@ import type { RelativePhoneSplitter } from '$modules/appointments/lib/relatives'
 import type { RelativeMobileParser } from '$modules/appointments/ui/relative-form';
 import type { RelativesAddress, RelativesLinks } from '$modules/appointments/ui/relatives';
 import { parseIdentifier, readDialCode } from '$modules/auth/lib/identifier';
+import { doctorTodayPath } from '$modules/doctor-dashboard/lib/paths';
 import { DOCTOR_ONBOARDING_PATH } from '$modules/doctor-onboarding/lib/steps';
 import { notificationsPath } from '$modules/notifications/lib/paths';
 import {
@@ -138,6 +139,10 @@ export function useProfileScreen(data: () => ProfileScreenData) {
 		/** «Είστε γιατρός;» of the «Προφίλ» (D-W45-20): the doctor's sign-up, where the menu's same entry leads. */
 		get doctorHref() {
 			return href(DOCTOR_ONBOARDING_PATH);
+		},
+		/** 🔴 Wave 5.1 · screen 64: «Λειτουργία γιατρού» of the «Προφίλ» — the doctor's «Σήμερα» (D-W51-16). */
+		get doctorModeHref() {
+			return href(doctorTodayPath);
 		},
 		/** The bell of the «Προφίλ» (screen 63, D-W45-49): «Ειδοποιήσεις», the list. */
 		get notificationsHref() {

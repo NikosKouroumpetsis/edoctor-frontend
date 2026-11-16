@@ -1,17 +1,20 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages.js';
+	import { getDoctorStandingOptional } from '$shared/state/doctor-standing';
 	import { getSessionOptional } from '$shared/state/session';
+	import { MenuRow } from '$shared/ui/molecules/menu-row';
+	import { ModePill } from '$shared/ui/molecules/mode-pill';
+	import { NameCard } from '$shared/ui/molecules/name-card';
 	import { Button } from '$shared/ui/primitives/button';
 	import { buildProfileIdentity } from '$modules/profile/lib/identity';
 	import { buildProfileMenu } from '$modules/profile/lib/menu';
 	import { profileViewerOf } from '$modules/profile/lib/viewer';
 	import DoctorCard from '../components/doctor-card.svelte';
-	import MenuRow from '../components/menu-row.svelte';
-	import NameCard from '../components/name-card.svelte';
 	import Skeleton from '../components/skeleton.svelte';
 	import type { ProfileTabProps } from '../types';
 
-	let { locale, hrefOf, onRow, doctorHref, headerAction }: ProfileTabProps = $props();
+	let { locale, hrefOf, onRow, doctorHref, doctorModeHref, headerAction }: ProfileTabProps =
+		$props();
 
 	const options = $derived({ locale });
 	// The page's server knows nobody (U-80.1 Ε6): it draws the wait, and the browser fills it in.
@@ -21,6 +24,26 @@
 	const sections = $derived(buildProfileMenu(options, { member: isMember }));
 	const identity = $derived(isMember ? buildProfileIdentity(session?.member) : null);
 	let signingOut = $state(false);
+	// 🔴 Wave 5.1 · screen 64 (U-185.1, U-183.5, D-W51-16): the doctor-dashboard module's one read, drawn here — a guest
+	// and anyone without a completed registration read «Είστε γιατρός;» as before; a completed one without a licence «Η
+	// αίτησή σας ελέγχεται»; a licence of the marketplace no card and the pill «Λειτουργία γιατρού» (below 744); a till's
+	// licence alone neither on the web. A member waits for the answer (or this device's memory) before the card shows,
+	// so it never changes under the eye.
+	const doctor = getDoctorStandingOptional();
+	const doctorKind = $derived(isMember ? (doctor?.kind ?? 'none') : 'none');
+	const doctorDecided = $derived(!isMember || !doctor || doctor.known || doctor.hinted);
+	const showsDoctorCard = $derived(
+		doctorDecided && (doctorKind === 'none' || doctorKind === 'pending')
+	);
+	const showsModePill = $derived(
+		isMember && Boolean(doctorModeHref) && (doctor?.canEnterDoctorMode ?? false)
+	);
+
+	function enterDoctorMode(event: MouseEvent) {
+		if (!doctor) return;
+		event.preventDefault();
+		void doctor.switchTo('DOCTOR');
+	}
 
 	// One press, one sign-out: the row takes no second one while the first is on its way.
 	async function signOut() {
@@ -64,7 +87,12 @@
 			{#if isMember}
 				{#if identity}
 					<div class="mt-3">
-						<NameCard {identity} />
+						<NameCard
+							initial={identity.initial}
+							title={identity.title}
+							line={identity.line}
+							testId="profile-name"
+						/>
 					</div>
 				{/if}
 			{:else}
@@ -84,9 +112,11 @@
 					onclick={() => session?.requireSignIn()}
 				/>
 			{/if}
-			<div class="mt-3.5">
-				<DoctorCard {locale} href={doctorHref} />
-			</div>
+			{#if showsDoctorCard}
+				<div class="mt-3.5">
+					<DoctorCard {locale} href={doctorHref} pending={doctorKind === 'pending'} />
+				</div>
+			{/if}
 			<div class="mt-5 flex flex-col gap-2">
 				{#each sections as section, index (section.id)}
 					<div
@@ -118,4 +148,13 @@
 			</div>
 		{/if}
 	</div>
+	{#if showsModePill && doctorModeHref}
+		<ModePill
+			label={m.doctor_mode_doctor({}, options)}
+			href={doctorModeHref}
+			onclick={enterDoctorMode}
+			disabled={doctor?.switching !== null && doctor?.switching !== undefined}
+			testId="profile-doctor-mode"
+		/>
+	{/if}
 </main>

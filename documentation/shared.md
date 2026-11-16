@@ -27,8 +27,14 @@ src/shared/
                 `query-state`, `server-clock`, `rich-text`: the CMS document as allowlisted blocks and the
                 headings' ids, the application's `createAnchorIds`, `seo`: `jsonLdScript`, `text`: the search's
                 fold, words and highlight runs, `http`: `httpGet` and `httpGetWithMeta` (the envelope's `meta`),
-                …), and the runes-based building blocks in `.svelte.ts`
-                (`form`, `headless`, `debounce`)
+                since wave 5.1 (card w51-w2, D-W51-27: the patient's pages and the doctor's «Σήμερα» say them alike,
+                and a module never imports another) `appointment-when`: an appointment's hours on its office's clock,
+                `appointment-status`: the states' words and tones (the patient's, and the doctor's
+                `doctorAppointmentStatusPill`), `relative-words`: the ONE helper of a relationship's word (U-139.5,
+                and `bookerWordLabel`, «Το έκλεισε: … (γονέας)»), `instant`: the ONE reader of a server instant,
+                `relative-time`: «σε {n} λεπτά», …; card w51-w3, D-W51-29: `near-end`, the ONE `nearEnd` action
+                of a list's next page — screen 50's and the doctor's «Ιστορικό» — that calls back each time the
+                end shows), and the runes-based building blocks in `.svelte.ts` (`form`, `headless`, `debounce`)
   preferences/ theme, language, and preferences resolution
   providers/   root and subtree providers
   query/       TanStack Svelte Query setup (`personalQueryMeta`, `removePersonalQueries`, `resetPersonalQueries`,
@@ -213,7 +219,10 @@ Wave 4.5 (the account, screens 56–63) adds:
   put their fields and «Αποθήκευση» in it.
 - `icons/ionicon`: `shield-outline` joins the glyphs (the application's «Σύνδεση και ασφάλεια»), extracted from the
   same font by the same script as the others; so does `log-out-outline` (screen 56's «Αποσύνδεση» row), and
-  `laptop-outline` and `tablet-portrait-outline` (screen 59's devices, beside `phone-portrait-outline`).
+  `laptop-outline` and `tablet-portrait-outline` (screen 59's devices, beside `phone-portrait-outline`);
+  `checkmark-circle-outline`, `sync-outline` (Ionicons) and `calendar-remove-outline` (MaterialCommunityIcons, as the
+  application draws it) for the doctor's notifications (screen 75, card w51-w11), from the same fonts with the same
+  script (it gives back `ribbon-outline`, `calendar-outline`, `checkmark-circle`, `bone`, `tooth-outline` exactly).
 - `state/consent` (`ConsentDecision`, card w45-w4, screen 62): the tracking decision this browser keeps, as the page
   tree reads it — `snapshot`, `loaded`, `load()` (the storage, once, in the browser) and `save(next)`. One per tree
   (context, set by the frame beside `SiteDialogs`; SSR-safe: the server knows no decision). It exists because the
@@ -223,6 +232,15 @@ Wave 4.5 (the account, screens 56–63) adds:
   page tree reads it — `count`, `hasNew`. One per tree (context, set by the notifications module's `unread-host` in
   the root layout): the module owns the one read, the frame (the menu's row, the pill's dot) and the «Προφίλ»'s bell
   only draw it. The `InboxBadge` pattern, beside it — the two dots are told apart by whoever draws them.
+  Since screen 75 (D-W51-89) the count is of the side of the page's mode (the doctor's dashboard his own lines).
+- `lib/mode-side` (`modeSideOfPath`, `ModeSide`; card w51-w11, D-W51-77 / 89): the side of the mode a page is in, by
+  its path without the language — the doctor's dashboard (`/doctor/**`, the sign-up aside) the doctor's, every other
+  page the patient's. The ONE rule of the messages' badge and of the notifications' dots (moved here from
+  `messages/lib/paths` `messagesSideOfPath`).
+- `lib/notification-inbox` (`notificationInboxKey`, `notificationInboxSideKey`, `refreshNotificationInboxSide`; card
+  w51-w11, D-W51-81 / 91): the ONE place of each side of the notifications' list in TanStack's cache, so the
+  `doctor-dashboard` hooks ask the doctor's side again after an answer (U-200.1) without importing the notifications
+  module (the `notification-preferences` way).
 - `ui/molecules/empty-state`: `actionTestId` (card w45-w7) names the state's one way on — its button or its link —
   for a test that presses it; `testId` still names the column.
 - `src/app.d.ts` (card w45-w7): an overload `resolve(route: Pathname)` of `$app/paths`. TypeScript relates a value
@@ -237,6 +255,131 @@ Wave 4.5 (the account, screens 56–63) adds:
   read is back (the source's `retry` may return one) and never rejects: a page that changed the person's own details
   waits for it before it shows them again (screen 58).
 - `primitives/inline-link-text`: `tail` — what ends the sentence after the link (its full stop), set against the link.
+
+Wave 5.1 (the doctor's dashboard, card w51-w2, screen 66 «Σήμερα», D-W51-27) adds, each generic:
+
+- `molecules/visit-card` (`VisitCard`): screen 66's card — the initials' circle (48, `visitInitials`), when (with an
+  optional `soon` beside it), who, `meta`, `byline`, `quote`, a `deadline` with its warm dot, a quiet `footnote`, the
+  state's pill (`tag`), `dim` (over and done) and an `actions` snippet under it all, the card's whole width. Since
+  screen 68 (D-W51-36) `href` makes the whole card a link (its `<a>` stretched over the card, screen 50's way; the
+  `actions` lie above it, each its own press), `selected` gives the one open beside a list the dark border from the
+  caller's breakpoint (`selectFrom`: `split` 950, `laptop` 1128) and `aria-current`, and `inPlace` keeps the page's
+  scroll and the focus (the router's own attributes). Every word the caller's, a text node (U-65.6); no colour under
+  the pointer (U-100).
+- `molecules/button-stack` (`ButtonStack`): 1–3 answers one under the other at EVERY width (🔴 U-190.1), round, the
+  whole width, 48 high, the outlined ones in their order and the `emphasis` (dark) one LAST whatever its place
+  (🔴 U-189.1); `loading` swaps a button's words for the busy indicator and refuses its presses.
+- `molecules/status-pill` (`StatusPill`): a state's pill (warm, green, neutral; the approved `.a-st`); the patient's
+  `modules/appointments/ui/status-pill` draws it with the patient's words.
+- `molecules/pill-tabs`: `variant="solid"` — Airbnb's «Σήμερα · Επερχόμενα» (the chip's fill, the chosen one filled
+  dark with light words and a shadow; no hover colour); `outline` stays the default.
+
+Wave 5.1 · screen 67 «Ραντεβού» (card w51-w3, D-W51-29) adds:
+
+- `primitives/chip`: `countLook="bubble"` — the count as a 20 round bubble (`64-switch/sw.css:148-149` `.l-n`: the chip's
+  grey when idle, the page's fill on the chosen dark chip), screen 67's «Αιτήματα 2»; `text` (the results' filters)
+  stays the default.
+
+Wave 5.1 · screen 68 «Το ραντεβού», the doctor's side (card w51-w4, D-W51-36 / D-W51-37: what the 68 takes from the
+patient's 51 moved here, and the 51 draws it unchanged):
+
+- `templates/split-view`: `from?: 'split' | 'laptop'` — where the two columns begin. `split` (950) is the default and
+  changes nothing for any list until 5.1 (the 50, the inbox, the menus); `laptop` (1128) is screen 67 with screen 68
+  beside it: one column up to 1127, the list of 460 and the rest from 1128, every class written whole per breakpoint.
+- `molecules/change-link` (`ChangeLink`, moved from `modules/appointments/ui/change-screen`): «Αλλαγή» / «Προσθήκη» as
+  a link to a new screen (U-102), `data-slot="change-link"`.
+- `molecules/fact-row` (`FactRow`): one fact of a card — its label, values (`emphasis` for an amount), a phone that
+  calls, labelled `pairs` (a mobile dials), the amounts and their total, a muted `hint`, its `change` (a `ChangeLink`).
+  The 51's card and the 68's box draw their rows with it.
+- `molecules/status-heading` (`StatusHeading`): the state's pill, the day and the time (the caller's separator from 744) and how near / how long — the head of the 51 and the 68.
+- `molecules/info-band` (`InfoBand`): a quiet band of terms (its name, the first line bold, the rest muted) — the 51's
+  «Όροι του γιατρού», the 68's «Οι όροι σας». The 51's notices are the existing `NoticeCard` (its `action` the call).
+- `lib/office`: `OfficeAddress`, `officeAddressIn` / `officeAddressLine` / `officeAddressJoin` (the address in the
+  page's language, one translation whole or none), `officeFloorLine` («2ος όροφος»), `officePhoneLine` (an office's
+  phone as read and dialled) and `mobilePhoneLine` (🔴 U-182.7: a person's mobile WHOLE, «+30 697 765 4321», dialled
+  with its country).
+- `lib/appointment-reasons`: `cancelReasonLabel` (moved from `modules/appointments/lib/cancel`).
+- `lib/relative-time`: `withinDayLabel` — «Σε 20 λεπτά», «Σε 5 ώρες», «Πριν από 2 ώρες» within a day, else `null`.
+
+Wave 5.1 · screen 69 «Απόρριψη αιτήματος» / «Ακύρωση ραντεβού» (card w51-w5, D-W51-50: what the doctor's 69 takes from
+the patient's 53 moved here, every word and test id the caller's; the 53 and the patient's «Αλλαγή» screens draw it
+unchanged):
+
+- `templates/step-screen` (`StepScreen`, the implementation of `modules/appointments/ui/change-screen`'s
+  `ChangeFrame`, which is now its patient wrapper with the booking's words and test ids): a step screen of its own
+  (U-102) — «←» / «‹» (`backIcon`), the title, the content, «Άκυρο / action» pinned below 744 and in the flow from it
+  (`cancelLabel: null` one way on, `bar: false` none), a `footer`. `placement`: `page` · `pane` (the 50's split from 950) · `solo` · `centred` (the right column of `SplitView from="laptop" centred`: `solo` below 1128, the split's 640
+  centre from it). `data-slot="step-screen"` / `"step-screen-bar"`.
+- `molecules/radio-rows` (`RadioRows`, moved): one choice as whole rows (U-112), `frame` `phone` | `always`.
+- `molecules/note-field` (`NoteField`, moved): the words with «n/max» under them; `maxLength` is the caller's (no
+  default of a feature's), `height` `note` | `short` | `review`, `data-slot="note-field"`.
+- `molecules/round-link` (`RoundLink`, moved): the round 40 link in its 48 target, `data-slot="round-link"`.
+- `molecules/context-card` (`ContextCard`): what a step screen is about — a `leading` circle (a photo, initials), the
+  word, the strong line, the muted lines (empty ones left out). The patient's `ChangeContext` draws it with the
+  doctor's photo.
+- `molecules/bullet-list` (`BulletList`): «Τι θα γίνει», short muted lines with their dot.
+- `molecules/notice-card`: `detail` — a last line of the caller's own (words with a `tel:` link inside).
+- `molecules/button-stack`: an action's `href` makes it a link in the same look (its `onPress(event)` first: a caller
+  may take the plain press over); `disabled` / `loading` lock it.
+- `lib/navigation`: `useHistorySteps(flow)` — the step screens' history (`open(href, depth)`, `leave(fallback)`: back
+  the steps it was opened with, else replace with the page it belongs to); `useAppointmentSteps` is its patient
+  wrapper. `App.PageState.doctorAppointment` counts the doctor's 69.
+- `lib/appointment-when`: `appointmentDayMonthLabel` («22 Οκτωβρίου»); `lib/relative-words`: `relativeGenderLabel`.
+
+Wave 5.1 · screen 70 «Αλλαγή ώρας» / «Υπηρεσίες και κόστος» (card w51-w6, D-W51-51 / 52; every word and test id the
+caller's):
+
+- `molecules/diff-box` (`DiffBox`): the 52's «Ήταν / Νέα ώρα» box — rows of a muted label and a value (bold, or
+  struck through for what it was, `struck`), a `note` under a thin line. The patient's `TimeDiff` is now its wrapper
+  (same classes, `appointment-time-diff`); the 70 draws «Ήταν / Νέα ώρα» and «Διάρκεια · Σύνολο υπηρεσιών» with it.
+- `molecules/check-rows` (`CheckRows`): MANY choices as whole rows (U-112, never tiles) — the words over a muted line,
+  the dark box with its tick on the right (the checkbox primitive's `foreground` tone), `role="checkbox"` rows in a
+  `group`; a press names the row's value, the caller keeps what is chosen.
+- `molecules/amount-field` (`AmountField`): an amount with its sign (the caller's «€»), `inputmode="decimal"`, the
+  caller's `maxLength`, its own `error` under it (`role="alert"`, the field red); the caller reads the text.
+- `molecules/action-offer` (`ActionOffer`, moved from `modules/appointments/ui/cancel/components/offer`): «Θέλετε
+  απλώς άλλη ώρα;» — the words on the left, an outlined link on the right (`onOpen` takes the plain press). The 53
+  passes its own test ids; the doctor's 69 offers screen 70 with it.
+- `molecules/fact-row`: `notes` — muted lines of what the fact is now («Τελική τιμή που ορίσατε.»), before the hint.
+- `lib/http`: a refusal keeps its flat `details` (`ApiError.details`, strings / finite numbers / booleans / nulls,
+  16 keys and 200 characters at most; anything nested is none) — the 409 «Δεν χωράει» reads them.
+- `lib/calendar-day`: `calendarDayStripLabels` («Δευ 16» over «Νοε», «Δευ 16 Νοε» its name; the profile's strip
+  delegates to it) and `addCalendarDays`.
+
+Wave 5.1 · screen 71 «Διόρθωση έκβασης» (card w51-w7, D-W51-62; every word and test id the caller's):
+
+- `molecules/terms-box` (`TermsBox`, moved from `modules/appointments/ui/cancel/components/terms`): the 53's `.a-terms`
+  band — its name small and muted, each row its strong words over the muted ones, a thin line between
+  (`data-slot="terms-box"`). The 53 draws «Προθεσμία ακύρωσης» with it (its own `appointment-cancel-terms`, `mb-4`), the
+  71 «Τώρα».
+- `molecules/radio-rows`: an option's `note` — a quiet word after its label («όπως είναι τώρα», 12 muted, part of the
+  row's name; `data-slot="radio-rows-note"`).
+
+Wave 5.1 · screen 72 «Νέο ραντεβού» and the page of the cancel link `/a/<token>` (card w51-w8, D-W51-70 / 72; every
+word and test id the caller's):
+
+- `molecules/person-rows` (`PersonRows`): people as whole rows in one framed list (U-112) — the initials in their
+  circle, or the caller's sign on the chip's fill (`glyph`, «Νέος ασθενής»), the name over muted lines, a quiet `note`
+  («Χωρίς λογαριασμό eDoctor», `data-slot="person-rows-note"`), the «›» on the right; 72 high, one line between rows,
+  no colour under the pointer (U-100). A press names the row's `id`; `label` or `labelledby` names the list.
+- `molecules/radio-rows`: an option's `detail` — a muted line under its label (the 72's «30′ · 50 €» of a service;
+  `data-slot="radio-rows-detail"`, the row 64 high).
+- `molecules/context-card`: a `trailing` snippet on the right (the 72's «Αλλαγή» of the chosen patient) and the
+  caller's `class` (its own margin).
+- `templates/step-screen`: `backHref: null` draws no «←» (a page with nowhere behind it, the cancel link's).
+- `lib/http`: `httpPublicPost` — a public write without cookies (`credentials: 'omit'`), the envelope and `ApiError`
+  as `httpPost` reads them; the cancel link writes with it.
+
+Wave 5.1 · screen 73 «Οι ασθενείς μου» (card w51-w9, D-W51-03 / 74 / 75; every word and test id the caller's):
+
+- `molecules/person-rows`: `look="lines"` — the 55's rows of a list of people (no frame, a line under each row, the
+  circle 48, the name 16), a row with `href` is ONE link (`onSelect(id, event)` may open it in place), and
+  `selectedId` fills the open person's row from 1128 (`laptop:bg-chip`, `aria-current="page"`). `framed` (the 72's)
+  stays the default; `onSelect` now also hands the press after the id.
+- `molecules/status-row` (`StatusRow`, new): a thing with a state as ONE link row — the title 15/600 over its muted
+  line, the state's `StatusPill` and «›» at the end, a line under it; in a box narrower than 520 (`row-wide`) the pill
+  goes under the texts. The 73's appointments of a patient.
+- `molecules/fact-row`: `muted` draws the values in the muted colour (what was never given, «Δεν έχει δοθεί»).
 
 Everything under `src/shared/ui` is generic (U-02.1, guarded by
 `tests/architecture/shared-ui-generic.test.ts`): words, hrefs and the locale

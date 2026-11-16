@@ -5,13 +5,17 @@
 	import { Session, setSession, type SessionStatus } from '$shared/state/session';
 	import { setToasts, ToastState } from '$shared/ui/molecules/toast';
 	import type { MessagesLinks } from '$modules/messages/types';
+	import type { MessagesSide } from '$modules/messages/types';
 	import { setInboxMemory, type InboxMemory } from '$modules/messages/ui/inbox-memory';
+	import type { InboxFreshPatient } from '../types';
 	import Inbox from './index.svelte';
 
 	let {
 		start = 'member',
+		side = 'patient',
 		conversationId = null,
 		archive = false,
+		fresh = null,
 		hasPatientProfile = true,
 		toasts = new ToastState(),
 		memory,
@@ -19,8 +23,10 @@
 		onReady
 	}: {
 		start?: SessionStatus;
+		side?: MessagesSide;
 		conversationId?: string | null;
 		archive?: boolean;
+		fresh?: InboxFreshPatient | null;
 		hasPatientProfile?: boolean;
 		toasts?: ToastState;
 		/** What the site keeps above the page: given, it outlives this page (the routes change the page). */
@@ -63,8 +69,9 @@
 		archive: '/messages/archive',
 		conversation: (id) => `/messages/${id}`,
 		doctorProfile: (slug) => `/doctors/${slug}`,
-		search: '/'
+		search: '/',
+		patientCard: (patientId) => `/doctor/patients/account/${patientId}`
 	};
 </script>
 
-<Inbox locale="el" {links} {conversationId} {archive} />
+<Inbox locale="el" {links} {side} {conversationId} {archive} {fresh} />

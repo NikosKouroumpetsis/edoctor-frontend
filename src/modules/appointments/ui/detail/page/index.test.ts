@@ -120,7 +120,7 @@ const readBlob = (blob: Blob) =>
 	});
 
 const row = (id: string) =>
-	document.querySelector(`[data-slot="appointment-row"][data-row="${id}"]`) as HTMLElement;
+	document.querySelector(`[data-slot="fact-row"][data-row="${id}"]`) as HTMLElement;
 const user = () => userEvent.setup({ delay: null });
 
 beforeEach(() => {
@@ -229,7 +229,7 @@ describe('screen 51 · «Το ραντεβού» (record §7.2, U-135)', () => {
 		expect(doctor).toHaveTextContent('4,9');
 		expect(screen.getByTestId('appointment-message')).toHaveTextContent('Μήνυμα στον γιατρό');
 		expect(screen.getByTestId('appointment-call')).toHaveAttribute('href', 'tel:+302103210101');
-		const changes = [...document.querySelectorAll('[data-slot="booking-change"]')];
+		const changes = [...document.querySelectorAll('[data-slot="change-link"]')];
 		expect(
 			changes.map((link) => [link.getAttribute('data-step'), link.getAttribute('href')])
 		).toEqual([
@@ -305,7 +305,7 @@ describe('screen 51 · «Το ραντεβού» (record §7.2, U-135)', () => {
 			'href',
 			'tel:+302103210101'
 		);
-		expect(row('date-time').querySelector('[data-slot="booking-change"]')).toBeNull();
+		expect(row('date-time').querySelector('[data-slot="change-link"]')).toBeNull();
 		expect(screen.queryByTestId('appointment-cancel')).toBeNull();
 	});
 
@@ -321,8 +321,8 @@ describe('screen 51 · «Το ραντεβού» (record §7.2, U-135)', () => {
 		expect(row('date-time')).toHaveTextContent(
 			'Έχετε αλλάξει την ώρα όσες φορές επιτρέπεται. Για άλλη αλλαγή, καλέστε το ιατρείο.'
 		);
-		expect(row('date-time').querySelector('[data-slot="booking-change"]')).toBeNull();
-		expect(row('visitor').querySelector('[data-slot="booking-change"]')).not.toBeNull();
+		expect(row('date-time').querySelector('[data-slot="change-link"]')).toBeNull();
+		expect(row('visitor').querySelector('[data-slot="change-link"]')).not.toBeNull();
 	});
 
 	it('a2 · U-137.4: a request reads «Ακύρωση αιτήματος» and when it expires; «Ακύρωση ραντεβού» for a kept one', () => {
@@ -499,7 +499,7 @@ describe('screen 51 · «Το ραντεβού» (record §7.2, U-135)', () => {
 		expect(screen.queryByTestId('appointment-call')).toBeNull();
 		expect(screen.getByTestId('appointment-sub')).toHaveTextContent(/^Διάρκεια 30 λεπτά$/u);
 		expect(screen.queryByTestId('appointment-cancel')).toBeNull();
-		expect(document.querySelector('[data-slot="booking-change"]')).toBeNull();
+		expect(document.querySelector('[data-slot="change-link"]')).toBeNull();
 	});
 
 	// Rewrites the row's half of the first U-154 guard (`tablet:` alone, the row from 744 whatever the band's width): U-156

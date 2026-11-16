@@ -42,3 +42,28 @@ export function formatCalendarDayParts(
 		? new Intl.DateTimeFormat(language, { ...options, timeZone: 'UTC' }).formatToParts(parsed)
 		: [];
 }
+
+/** A day card of a strip of days: «Πέμ 30» over «Οκτ», and «Πέμ 30 Οκτ» as its whole name. */
+export type CalendarDayStripLabels = { weekdayDay: string; month: string; accessible: string };
+
+/**
+ * One day of a strip of days in the language, weekday first in both languages (the application's join): the card's two
+ * lines and its name for assistive tech; empty words for a day the calendar lacks. Shared by every strip that offers
+ * days (the profile's availability, the doctor's «Αλλαγή ώρας»).
+ */
+export function calendarDayStripLabels(day: string, language: string): CalendarDayStripLabels {
+	const weekday = formatCalendarDay(day, language, { weekday: 'short' });
+	const date = formatCalendarDay(day, language, { day: 'numeric' });
+	const weekdayDay = weekday && date ? `${weekday} ${date}` : '';
+	const month = formatCalendarDay(day, language, { month: 'short' }) ?? '';
+	return { weekdayDay, month, accessible: weekdayDay && month ? `${weekdayDay} ${month}` : '' };
+}
+
+const CALENDAR_DAY_IN_MS = 86_400_000;
+
+/** The calendar day `days` after `day` (`YYYY-MM-DD`), or `null` for a day the calendar lacks. */
+export function addCalendarDays(day: string, days: number): string | null {
+	const parsed = readCalendarDay(day);
+	if (!parsed || !Number.isInteger(days)) return null;
+	return new Date(parsed.getTime() + days * CALENDAR_DAY_IN_MS).toISOString().slice(0, 10);
+}

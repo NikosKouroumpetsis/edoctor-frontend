@@ -11,6 +11,7 @@ import { Session } from '$shared/state/session';
 import { projectRoot } from '../../../../../../tests/architecture/source-scan';
 import { isExploreFlow } from '../lib/frame';
 import SiteFrame from './index.svelte';
+import { DoctorStanding, type DoctorStandingKind } from '$shared/state/doctor-standing';
 import { InboxBadge } from '$shared/state/inbox-badge';
 import { NotificationBadge } from '$shared/state/notification-badge';
 import SessionHarness from './session.harness.svelte';
@@ -705,5 +706,87 @@ describe('SiteFrame (eDoctor frame on the generic shell)', () => {
 			expect(otherLink).not.toHaveAttribute('aria-current');
 			view.unmount();
 		}
+	});
+
+	describe('wave 5.1 · screen 64 — the doctor standing in the patient’s frame', () => {
+		const standingOf = (kind: DoctorStandingKind, switchTo = vi.fn(async () => true)) => ({
+			standing: new DoctorStanding({
+				facts: () => ({ kind, notice: null, lastMode: 'PATIENT', card: null }),
+				switchTo
+			}),
+			switchTo
+		});
+
+		it('U-185.1: a licence of the marketplace — «Λειτουργία γιατρού» of the ☰ (744–1127) and of the bar (from 1128) switch in place, the transition then the page (the standing’s one write)', async () => {
+			const user = userEvent.setup();
+			const { standing, switchTo } = standingOf('doctor');
+			render(SessionHarness, { props: { session: memberSession(), standing, children } });
+			const menu = await openMenu(user);
+			const row = within(menu).getByRole('menuitem', { name: 'Λειτουργία γιατρού' });
+			expect(row).toHaveAttribute('href', '/doctor');
+			expect(row).toHaveClass('laptop:hidden');
+			expect(within(menu).queryByText('Είστε γιατρός;')).toBeNull();
+			await user.click(row);
+			expect(switchTo).toHaveBeenCalledWith('DOCTOR');
+			await user.click(screen.getByTestId('header-doctor-mode'));
+			expect(switchTo).toHaveBeenCalledTimes(2);
+		});
+
+		it('U-185.1 · D-W51-19 (round 2): «Λειτουργία γιατρού» stands beside the ☰, one line, from 1128, only where `<html data-doctor-mode>` says so; «Για γιατρούς» gives its place up there — for everyone else the bar is as it was (no box of either wrapper)', () => {
+			const { standing } = standingOf('doctor');
+			render(SessionHarness, { props: { session: memberSession(), standing, children } });
+			const link = screen.getByTestId('header-doctor-mode');
+			expect(link).toHaveTextContent('Λειτουργία γιατρού');
+			expect(link).toHaveAttribute('href', '/doctor');
+			expect(link).toHaveClass('hidden', 'laptop:inline-flex', 'whitespace-nowrap');
+			expect(link).not.toHaveClass('inline-flex');
+			const banner = screen.getByRole('banner');
+			const primary = within(banner).getByRole('navigation', { name: 'Κύρια πλοήγηση' });
+			expect(primary).not.toContainElement(link);
+			expect(link.closest('[data-slot="doctor-mode-entry"]')).toHaveClass(
+				'hidden',
+				'doctor-mode:contents'
+			);
+			const forDoctors = within(primary).getByRole('link', { name: 'Για γιατρούς' });
+			expect(forDoctors.closest('[data-slot="for-doctors-entry"]')).toHaveClass(
+				'contents',
+				'doctor-mode:hidden'
+			);
+			// Beside the ☰: the same group of the bar's end.
+			expect(link.closest('[data-slot="doctor-mode-entry"]')?.parentElement).toContainElement(
+				screen.getByTestId('header-account-menu')
+			);
+		});
+
+		it('U-183.5: a completed registration without a licence — «Η αίτησή σας ελέγχεται» in the ☰, no switch; the bar keeps «Για γιατρούς» (to the same page)', async () => {
+			const user = userEvent.setup();
+			const { standing, switchTo } = standingOf('pending');
+			render(SessionHarness, { props: { session: memberSession(), standing, children } });
+			const menu = await openMenu(user);
+			expect(
+				within(menu).getByRole('menuitem', { name: /Η αίτησή σας ελέγχεται/u })
+			).toHaveAttribute('href', '/doctor/onboarding');
+			expect(within(menu).queryByRole('menuitem', { name: 'Λειτουργία γιατρού' })).toBeNull();
+			await user.click(screen.getByTestId('header-doctor-mode'));
+			expect(switchTo).not.toHaveBeenCalled();
+		});
+
+		// Widened by D-W51-31 (step 3, screen 67): «Ραντεβού» is a page of the doctor's frame too.
+		it('D-W51-16 · D-W51-31: on `/doctor`, `/doctor/menu` and `/doctor/appointments` the patient’s frame draws no bar, capsule or footer of its own', () => {
+			for (const path of [
+				'/doctor',
+				'/en/doctor/menu',
+				'/doctor/appointments',
+				'/en/doctor/appointments?tab=history'
+			]) {
+				visit(path);
+				const view = renderFrame();
+				expect(screen.queryByRole('banner')).toBeNull();
+				expect(screen.queryAllByRole('navigation')).toEqual([]);
+				expect(footer()).toBeNull();
+				expect(screen.getByRole('heading', { level: 1, name: 'Σελίδα' })).toBeInTheDocument();
+				view.unmount();
+			}
+		});
 	});
 });

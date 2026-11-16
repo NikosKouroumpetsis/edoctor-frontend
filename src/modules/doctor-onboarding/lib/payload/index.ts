@@ -3,6 +3,7 @@ import type {
 	DoctorOnboardingActivationIntentInput,
 	DoctorOnboardingBasicInfoInput,
 	DoctorOnboardingCompleteInput,
+	DoctorOnboardingInsuranceInput,
 	DoctorOnboardingLiabilityInput,
 	DoctorOnboardingLicenseInput,
 	DoctorOnboardingOfficeAddressInput,
@@ -291,6 +292,26 @@ export function toDoctorLiabilityInput(
 			context: 'DOCTOR',
 			acceptances: [{ documentCode: DOCTOR_ONBOARDING_TERMS.documentCode, version, accepted: true }]
 		}
+	};
+}
+
+/**
+ * 🔴 U-183.5 · D-W51-12: the insurance alone, for «Επεξεργασία» of a completed registration — the answer, the company and
+ * the expiry as `liability` writes them, never the doctors' terms (accepted once, they are not written again).
+ */
+export function toDoctorInsuranceInput(
+	values: DoctorLiabilityValues
+): DoctorOnboardingInsuranceInput | null {
+	if (values.liabilityInsurance === null) return null;
+	const insured = values.liabilityInsurance;
+	const company = values.liabilityCompany.trim();
+	return {
+		liabilityInsurance: insured,
+		liabilityCompany: insured && company ? company : null,
+		liabilityInsuranceExpiresAt:
+			insured && values.liabilityInsuranceExpiresAt
+				? toDayInstant(values.liabilityInsuranceExpiresAt)
+				: null
 	};
 }
 

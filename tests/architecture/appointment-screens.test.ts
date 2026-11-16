@@ -60,6 +60,8 @@ function findPageIssues(files: SourceFile[]): string[] {
  *   import `ui/rating` may make (`info-dialog`).
  */
 const CHANGE_SCREENS = /^src\/modules\/appointments\/ui\/[^/]+\//u;
+/** D-W51-50 (card w51-w5): the change screens' frame, shared since the doctor's screen 69 takes it too. */
+const STEP_SCREEN = 'src/shared/ui/templates/step-screen/step-screen.svelte';
 const RATING_SCREEN = /^src\/modules\/appointments\/ui\/rating\//u;
 const RELATIVES = /^src\/modules\/appointments\/ui\/relatives\//u;
 const DELETE_WINDOW = 'src/modules/appointments/ui/relatives/components/delete-dialog.svelte';
@@ -96,7 +98,8 @@ const ONE_SIDED_INSET = /^p[lrse]-pane-inset(?:-\w+)?$/u;
 
 function findPinnedColumnIssues(files: SourceFile[]): string[] {
 	return files.flatMap((file) => {
-		if (!CHANGE_SCREENS.test(file.path) || /\.(?:test|stories)\./u.test(file.path)) return [];
+		const scanned = CHANGE_SCREENS.test(file.path) || file.path === STEP_SCREEN;
+		if (!scanned || /\.(?:test|stories)\./u.test(file.path)) return [];
 		const found: string[] = [];
 		for (const { line, tokens } of classStrings(file.text)) {
 			for (const token of tokens) {
@@ -340,7 +343,8 @@ describe('🔴 U-102 · U-136 · U-137 · U-139.3: «Αλλαγή» and the canc
 
 describe('🔴 U-167: η δεξιά στήλη των σελίδων του 4.0 κεντράρεται από 950 (D-W45-56, card w45-w9)', () => {
 	const DETAIL_PAGE = 'src/modules/appointments/ui/detail/page/index.svelte';
-	const CHANGE_FRAME = 'src/modules/appointments/ui/change-screen/components/change-frame.svelte';
+	// D-W51-50 (card w51-w5): the change screens' frame is the shared `StepScreen` now (`change-frame` gives it the words).
+	const CHANGE_FRAME = STEP_SCREEN;
 
 	it('the two places that set the right column’s box are read, each centred (`mx-auto`) at its own greatest width', () => {
 		const files = readSourceFiles();

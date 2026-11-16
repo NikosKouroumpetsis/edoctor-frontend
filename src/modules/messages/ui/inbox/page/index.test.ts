@@ -12,6 +12,7 @@ import { removePersonalQueries } from '$shared/query';
 import { writeFirstMessageNote } from '$modules/messages/api/conversations';
 import { messagePreferencesKey } from '$modules/messages/api/preferences';
 import { InboxMemory } from '$modules/messages/ui/inbox-memory';
+import type { InboxFreshPatient } from '../types';
 import Harness from './inbox.harness.svelte';
 
 const CONVERSATION = '018f3c1e-7a2b-7c3d-8e4f-0a1b2c3d4e5f';
@@ -68,6 +69,8 @@ let calls: Call[];
 let thread: {
 	side: string;
 	counterpart: unknown;
+	patientId?: string | null;
+	appointmentLine?: unknown;
 	state: ReturnType<typeof state>;
 	items: ReturnType<typeof message>[];
 	hasMore: boolean;
@@ -179,7 +182,9 @@ afterEach(() => {
 
 type Props = {
 	start?: SessionStatus;
+	side?: 'patient' | 'doctor';
 	conversationId?: string | null;
+	fresh?: InboxFreshPatient | null;
 	archive?: boolean;
 	hasPatientProfile?: boolean;
 	toasts?: ToastState;
@@ -308,56 +313,192 @@ describe('the messages’ page (U-84, screens 18 + 21)', () => {
 		expect(screen.queryByTestId('messages-error')).toBeNull();
 	});
 
-	it('Π4: the chips only for an account with both sides: «Ασθενείς» reads where it is the doctor', async () => {
+	// Rewrites Π4 / U-65.4 → U-182.3 (D-W51-85): the chips «Όλα · Ασθενείς · Γιατροί» go; each mode reads its own side.
+	it('🔴 U-182.3: μόνο η πλευρά της λειτουργίας, χωρίς τσιπάκια — the patient’s mode asks `side=patient`, the doctor’s `side=doctor`, never both, never `all`; no chip even for an account with both sides', async () => {
 		sideCounts = { asPatient: 2, asDoctor: 5 };
 		draw();
 		await screen.findAllByTestId('messages-row');
-		expect(screen.getByTestId('messages-filter-all')).toHaveTextContent('7');
-		await user().click(screen.getByTestId('messages-filter-patients'));
-		await waitFor(() => expect(calls.some((call) => call.url.includes('side=doctor'))).toBe(true));
-		cleanup();
-		sideCounts = { asPatient: 2, asDoctor: 0 };
-		draw();
-		await screen.findAllByTestId('messages-row');
+		const lists = () => calls.filter((call) => call.url.includes('/messaging/conversations?'));
+		expect(lists().every((call) => call.url.includes('side=patient'))).toBe(true);
 		expect(screen.queryByTestId('messages-filter-all')).toBeNull();
-	});
-
-	it('🔴 R-11: the chip stays chosen from the list to a conversation and back: two routes, each its own page, as the application’s tab', async () => {
-		sideCounts = { asPatient: 2, asDoctor: 5 };
-		const memory = new InboxMemory();
-		draw({ memory });
-		await user().click(await screen.findByTestId('messages-filter-patients'));
-		await waitFor(() => expect(calls.some((call) => call.url.includes('side=doctor'))).toBe(true));
-		cleanup();
-		openThread({ memory });
-		await screen.findAllByTestId('messages-bubble');
+		expect(screen.queryByRole('radio')).toBeNull();
+		expect(screen.queryByTestId('messages-search-open')).toBeNull();
 		cleanup();
 		calls = [];
-		draw({ memory });
-		const chip = await screen.findByTestId('messages-filter-patients');
-		expect(chip).toHaveAttribute('data-state', 'on');
-		expect(calls.some((call) => call.url.includes('side=doctor'))).toBe(true);
+		draw({ side: 'doctor' });
+		await screen.findAllByTestId('messages-row');
+		expect(lists().length).toBeGreaterThan(0);
+		expect(lists().every((call) => call.url.includes('side=doctor'))).toBe(true);
+		expect(screen.queryByTestId('messages-filter-patients')).toBeNull();
+		cleanup();
+		calls = [];
+		draw({ side: 'doctor', archive: true });
+		await waitFor(() => expect(lists().length).toBeGreaterThan(0));
+		expect(lists().every((call) => /side=doctor.*archived=1/u.test(call.url))).toBe(true);
 		expect(calls.some((call) => call.url.includes('side=all'))).toBe(false);
 	});
 
-	it('R-11 (negative): the archive has no chips, so the chip chosen on the list says nothing of it', async () => {
-		sideCounts = { asPatient: 2, asDoctor: 5 };
-		const memory = new InboxMemory();
-		memory.filter = 'patients';
-		draw({ memory, archive: true });
-		await waitFor(() => expect(calls.some((call) => call.url.includes('archived=1'))).toBe(true));
-		expect(calls.some((call) => call.url.includes('side=all'))).toBe(true);
-		expect(calls.some((call) => call.url.includes('side=doctor'))).toBe(false);
-		expect(memory.filter).toBe('patients');
+	it('🔴 D-W51-86: η γραμμή του ραντεβού, ποτέ «Ασθενής» — under each patient the appointment it is about, two initials; none without one', async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true, now: Date.parse('2026-11-15T10:00:00.000Z') });
+		const line = (kind: string, startTime: string, forRelative: unknown = null) => ({
+			kind,
+			startTime,
+			forRelative
+		});
+		list = [
+			row({
+				counterpart: { ...patient, fullName: 'Ιωάννα Καρρά' },
+				appointmentLine: line('upcoming', '2026-11-17T09:00:00.000Z')
+			}),
+			row({
+				id: OTHER,
+				counterpart: { ...patient, fullName: 'Ελένη Μαυρίδη' },
+				appointmentLine: line('request', '2026-11-15T15:30:00.000Z', {
+					firstName: 'Νίκος',
+					lastName: 'Μαυρίδης',
+					relation: 'CHILD'
+				})
+			}),
+			row({
+				id: '018f3c1e-7a2b-7c3d-8e4f-0a1b2c3d4e61',
+				counterpart: { ...patient, fullName: 'Σοφία Ρήγα' },
+				appointmentLine: line('lastVisit', '2026-11-12T08:00:00.000Z')
+			}),
+			row({
+				id: '018f3c1e-7a2b-7c3d-8e4f-0a1b2c3d4e62',
+				counterpart: { ...patient, fullName: 'Ζωή Ζαχαρίου' },
+				appointmentLine: line('request', '2026-11-15T15:30:00.000Z')
+			}),
+			row({
+				id: '018f3c1e-7a2b-7c3d-8e4f-0a1b2c3d4e63',
+				counterpart: patient,
+				appointmentLine: null
+			})
+		];
+		draw({ side: 'doctor' });
+		const rows = await screen.findAllByTestId('messages-row');
+		expect(rows[0]).toHaveTextContent('Ραντεβού: Τρίτη 17 Νοεμβρίου, 11:00');
+		expect(rows[0]).toHaveTextContent('ΙΚ');
+		expect(rows[1]).toHaveTextContent('Αίτημα για τον/την Νίκος Μαυρίδης (παιδί) · σήμερα, 17:30');
+		expect(rows[2]).toHaveTextContent('Τελευταία επίσκεψη: 12 Νοεμβρίου');
+		expect(rows[3]).toHaveTextContent('Αίτημα: σήμερα, 17:30');
+		for (const each of rows) expect(each).not.toHaveTextContent('Ασθενής');
+		expect(rows[4].textContent).not.toMatch(/Ραντεβού|Αίτημα|Τελευταία/u);
 	});
 
-	it('R-11 (negative): no chip left to lift it with: the chosen one lets go, and hides nothing', async () => {
-		sideCounts = { asPatient: 2, asDoctor: 0 };
+	it('🔴 D-W51-86 / U-65.6 (negative): a line the contract does not know, or markup in a name, never draws a wrong line or runs', async () => {
+		list = [
+			row({
+				counterpart: patient,
+				appointmentLine: { kind: 'admin', startTime: '2026-11-16T09:00:00.000Z', forRelative: null }
+			}),
+			row({
+				id: OTHER,
+				counterpart: patient,
+				appointmentLine: {
+					kind: 'request',
+					startTime: '2026-11-16T09:00:00.000Z',
+					forRelative: {
+						firstName: '<img src=x onerror=alert(1)>',
+						lastName: null,
+						relation: 'NEPHEW'
+					}
+				}
+			}),
+			row({
+				id: '018f3c1e-7a2b-7c3d-8e4f-0a1b2c3d4e61',
+				counterpart: patient,
+				appointmentLine: { kind: 'upcoming', startTime: 'αύριο', forRelative: null }
+			})
+		];
+		draw({ side: 'doctor' });
+		const rows = await screen.findAllByTestId('messages-row');
+		expect(rows[0].textContent).not.toMatch(/Ραντεβού|Αίτημα/u);
+		expect(rows[1]).toHaveTextContent('Αίτημα για τον/την <img src=x onerror=alert(1)> ·');
+		expect(rows[1].querySelector('img')).toBeNull();
+		expect(rows[2].textContent).not.toMatch(/Ραντεβού/u);
+	});
+
+	it('🔴 D-W51-86: the doctor’s empty page — its own words, no way out', async () => {
+		list = [];
+		draw({ side: 'doctor' });
+		const empty = await screen.findByTestId('messages-empty');
+		expect(empty).toHaveTextContent('Δεν έχετε μηνύματα από ασθενείς');
+		expect(empty).toHaveTextContent(
+			'Οι ασθενείς σας γράφουν από το προφίλ σας. Μπορείτε να γράψετε και εσείς σε ασθενή που έχει ραντεβού μαζί σας, από την καρτέλα του.'
+		);
+		expect(within(empty).queryByRole('link')).toBeNull();
+	});
+
+	it('🔴 U-182.3 (live 15/11): from 950 the doctor’s empty side beside the list speaks of patients, never of doctors', async () => {
+		vi.stubGlobal(
+			'matchMedia',
+			vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }))
+		);
+		list = [];
+		draw({ side: 'doctor' });
+		const choose = await screen.findByTestId('messages-choose');
+		expect(choose).toHaveTextContent('Τα μηνύματά σας με ασθενείς εμφανίζονται εδώ.');
+		expect(choose.textContent).not.toContain('γιατρούς');
+	});
+
+	it('🔴 D-W51-80: 🔍 beside ⚙ (the doctor’s only): «Όνομα ασθενή», ≤ 40, the words after a quiet moment; none ⇒ «Καμία συνομιλία με «…».»; closed ⇒ the whole list at once', async () => {
+		const stubbed = vi.mocked(fetch);
+		const base = stubbed.getMockImplementation();
+		stubbed.mockImplementation(async (input, init) => {
+			const url = decodeURIComponent(String(input));
+			if (url.includes('/messaging/conversations?') && url.includes('q=')) {
+				calls.push({ url, method: 'GET' });
+				return json({
+					items: url.includes('q=κα') ? list : [],
+					nextCursor: null,
+					sideCounts: null
+				});
+			}
+			return (base as NonNullable<typeof base>)(input, init);
+		});
+		draw({ side: 'doctor' });
+		await screen.findAllByTestId('messages-row');
+		const open = screen.getByTestId('messages-search-open');
+		expect(open).toHaveAccessibleName('Αναζήτηση');
+		await user().click(open);
+		expect(open).toHaveAttribute('aria-pressed', 'true');
+		const field = screen.getByRole('searchbox', { name: 'Αναζήτηση συνομιλίας' });
+		expect(field).toHaveAttribute('placeholder', 'Όνομα ασθενή');
+		expect(field).toHaveAttribute('maxlength', '40');
+		await user().type(field, 'κα');
+		await waitFor(() => expect(calls.some((call) => call.url.includes('q=κα'))).toBe(true), {
+			timeout: 2000
+		});
+		expect(calls.some((call) => call.url.includes('q=κ&') || call.url.endsWith('q=κ'))).toBe(false);
+		await user().clear(field);
+		await user().type(field, 'ξυζ');
+		expect(
+			await screen.findByTestId('messages-no-results', {}, { timeout: 2000 })
+		).toHaveTextContent('Καμία συνομιλία με «ξυζ».');
+		expect(screen.getByTestId('messages-past')).toBeInTheDocument();
+		await user().click(open);
+		expect(screen.queryByRole('searchbox', { name: 'Αναζήτηση συνομιλίας' })).toBeNull();
+		expect(await screen.findAllByTestId('messages-row')).toHaveLength(1);
+	});
+
+	it('🔴 R-11: the doctor’s search stays as typed from the list to a conversation and back (two pages, as the application’s tab); forgetting takes it', async () => {
 		const memory = new InboxMemory();
-		memory.filter = 'patients';
-		draw({ memory });
-		await waitFor(() => expect(memory.filter).toBe('all'));
-		await waitFor(() => expect(calls.some((call) => call.url.includes('side=all'))).toBe(true));
+		draw({ side: 'doctor', memory });
+		await user().click(await screen.findByTestId('messages-search-open'));
+		await user().type(screen.getByRole('searchbox', { name: 'Αναζήτηση συνομιλίας' }), 'κα');
+		cleanup();
+		calls = [];
+		draw({ side: 'doctor', memory });
+		expect(await screen.findByRole('searchbox', { name: 'Αναζήτηση συνομιλίας' })).toHaveValue(
+			'κα'
+		);
+		await waitFor(() =>
+			expect(calls.some((call) => decodeURIComponent(call.url).includes('q=κα'))).toBe(true)
+		);
+		memory.forget();
+		expect(memory.searchText).toBe('');
+		expect(memory.searchOpen).toBe(false);
 	});
 
 	it('Π1 archive: `archived=1`, its own empty page, no gear', async () => {
@@ -386,6 +527,36 @@ describe('the messages’ page (U-84, screens 18 + 21)', () => {
 				keepFocus: true
 			})
 		);
+	});
+
+	it('🔴 D-W51-85: the doctor’s side as the 21 — from 950 (1440 too) the list of 380 / 400 and the conversation beside it, each scrolling on its own; below 950 (768, 402) the conversation alone, the list behind it', async () => {
+		thread.side = 'doctor';
+		thread.counterpart = patient;
+		openThread({ side: 'doctor' });
+		await screen.findAllByTestId('messages-bubble');
+		const split = document.querySelector('[data-slot="split-view"]') as HTMLElement;
+		expect(split).toHaveAttribute('data-widths', 'inbox');
+		expect(split).toHaveAttribute('data-open');
+		expect(split.className).toContain('split:grid-inbox');
+		const listColumn = split.querySelector('[data-slot="split-view-list"]') as HTMLElement;
+		const pane = split.querySelector('[data-slot="split-view-pane"]') as HTMLElement;
+		// Below 950 hidden (768, 402), from 950 shown (950, 1440): only CSS tells the widths apart (U-03.1).
+		expect(listColumn.className.split(' ')).toEqual(
+			expect.arrayContaining(['hidden', 'split:block'])
+		);
+		expect(listColumn).toContainElement(screen.getByTestId('messages-list'));
+		expect(pane.className.split(' ')).not.toContain('hidden');
+		expect(pane).toContainElement(screen.getByTestId('messages-thread'));
+		// «‹» below 950 only.
+		expect(screen.getByTestId('messages-back').className).toContain('split:hidden');
+		cleanup();
+		draw({ side: 'doctor' });
+		await screen.findAllByTestId('messages-row');
+		const alone = document.querySelector('[data-slot="split-view"]') as HTMLElement;
+		expect(alone).not.toHaveAttribute('data-open');
+		expect(
+			(alone.querySelector('[data-slot="split-view-list"]') as HTMLElement).className.split(' ')
+		).not.toContain('hidden');
 	});
 
 	it('Π2: the conversation: who, the note with 112 and 166, the day, the time, «Στάλθηκε» only on my last', async () => {
@@ -446,17 +617,224 @@ describe('the messages’ page (U-84, screens 18 + 21)', () => {
 		expect(first).not.toHaveTextContent('Dr.');
 	});
 
-	it('Π4: a doctor’s side: a patient has a name and «Ασθενής», no page, and no 112 in the note', async () => {
-		thread.side = 'doctor';
-		thread.counterpart = patient;
-		openThread();
+	// Rewrites Π4 «a doctor’s side: a patient has a name and «Ασθενής»» → D-W51-86: the appointment's line, the card.
+	it('🔴 D-W51-86: a doctor’s side — the patient’s name and the appointment’s line, never «Ασθενής»; the name and the first row of ⋯ open the card of screen 73; no 112 in the note', async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true, now: Date.parse('2026-11-15T10:00:00.000Z') });
+		const PATIENT_ID = '0193d000-0000-7000-8000-0000000000e1';
+		Object.assign(thread, {
+			side: 'doctor',
+			counterpart: patient,
+			patientId: PATIENT_ID,
+			appointmentLine: {
+				kind: 'upcoming',
+				startTime: '2026-11-16T09:00:00.000Z',
+				forRelative: null
+			}
+		});
+		openThread({ side: 'doctor' });
 		await screen.findAllByTestId('messages-bubble');
 		expect(screen.getByTestId('messages-note')).toHaveTextContent(
 			'Τα μηνύματα τα βλέπετε μόνο εσείς και Μαρία Παπαδάκη.'
 		);
 		expect(screen.getByTestId('messages-note')).not.toHaveTextContent('112');
-		expect(screen.queryByTestId('messages-who')).toBeNull();
+		expect(screen.getByTestId('messages-who')).toHaveAttribute(
+			'href',
+			`/doctor/patients/account/${PATIENT_ID}`
+		);
+		expect(screen.getByTestId('messages-who-line')).toHaveTextContent('Ραντεβού: αύριο, 11:00');
+		expect(screen.getByTestId('messages-thread')).not.toHaveTextContent('Ασθενής');
 		expect(screen.queryByTestId('messages-profile')).toBeNull();
+		await user().click(screen.getByTestId('messages-menu'));
+		const menu = await screen.findByTestId('messages-menu-dialog');
+		const first = within(menu).getAllByRole('link')[0];
+		expect(first).toBe(within(menu).getByTestId('messages-menu-card'));
+		expect(first).toHaveTextContent('Η καρτέλα του ασθενή');
+		expect(first).toHaveAttribute('href', `/doctor/patients/account/${PATIENT_ID}`);
+		// 🔴 `sw.js:1070` `pt-back` (live 15/11): one step on, so the card's «‹» comes back to the conversation.
+		vi.mocked(goto).mockClear();
+		await user().click(first);
+		expect(goto).toHaveBeenCalledWith(`/doctor/patients/account/${PATIENT_ID}`, {
+			state: { doctorPatient: { depth: 1 } }
+		});
+		vi.mocked(goto).mockClear();
+		await user().click(screen.getByTestId('messages-who'));
+		expect(goto).toHaveBeenCalledWith(`/doctor/patients/account/${PATIENT_ID}`, {
+			state: { doctorPatient: { depth: 1 } }
+		});
+	});
+
+	it('D-W51-86 (negative): no patient’s id (or one that is no server id) ⇒ the name opens nothing and ⋯ has no card; no line ⇒ no second line', async () => {
+		Object.assign(thread, {
+			side: 'doctor',
+			counterpart: patient,
+			patientId: '../x',
+			appointmentLine: null
+		});
+		openThread({ side: 'doctor' });
+		await screen.findAllByTestId('messages-bubble');
+		expect(screen.queryByTestId('messages-who')).toBeNull();
+		expect(screen.queryByTestId('messages-who-line')).toBeNull();
+		await user().click(screen.getByTestId('messages-menu'));
+		await screen.findByTestId('messages-menu-dialog');
+		expect(screen.queryByTestId('messages-menu-card')).toBeNull();
+	});
+
+	describe('🔴 U-193.1: ο γιατρός γράφει πρώτος (D-W51-87, `/doctor/messages/new`)', () => {
+		const PATIENT_ID = '0193d000-0000-7000-8000-0000000000b3';
+		const STARTED = '018f3c1e-7a2b-7c3d-8e4f-0a1b2c3d4e70';
+		const fresh = (extra: Partial<InboxFreshPatient> = {}): InboxFreshPatient => ({
+			target: { kind: 'relative', id: PATIENT_ID },
+			state: 'ready',
+			name: 'Ελένη Μαυρίδη',
+			line: {
+				kind: 'request',
+				startTime: '2026-11-15T15:30:00.000Z',
+				forRelative: { firstName: 'Νίκος', lastName: 'Μαυρίδης', relation: 'CHILD' }
+			},
+			conversationId: null,
+			cardHref: `/doctor/patients/relative/${PATIENT_ID}`,
+			retry: () => undefined,
+			...extra
+		});
+		/** What the doctor's start answers, by its turn. */
+		let starts: (() => Response)[];
+		const posted = () =>
+			calls.filter(
+				(call) => call.method === 'POST' && call.url.endsWith('/messaging/doctor/conversations')
+			);
+
+		beforeEach(() => {
+			vi.useFakeTimers({ shouldAdvanceTime: true, now: Date.parse('2026-11-15T10:00:00.000Z') });
+			starts = [];
+			const stubbed = vi.mocked(fetch);
+			const base = stubbed.getMockImplementation();
+			stubbed.mockImplementation(async (input, init) => {
+				if (String(input).endsWith('/messaging/doctor/conversations')) {
+					calls.push({
+						url: String(input),
+						method: init?.method ?? 'GET',
+						body: init?.body ? JSON.parse(String(init.body)) : undefined
+					});
+					const next = starts.shift();
+					if (next) return next();
+					const body = JSON.parse(String(init?.body));
+					return json(
+						{
+							conversationId: STARTED,
+							message: {
+								id: '0010',
+								mine: true,
+								body: body.body,
+								sentAt: '2026-11-15T10:00:00.000Z',
+								clientMessageId: body.clientMessageId
+							}
+						},
+						201
+					);
+				}
+				return (base as NonNullable<typeof base>)(input, init);
+			});
+		});
+
+		it('the 21’s conversation with nothing in it: the account that books, the line, the lock’s note, «Ξεκινάτε συνομιλία…», no ⋯; the first message starts it and the conversation takes the page’s place (a replace)', async () => {
+			draw({ side: 'doctor', fresh: fresh() });
+			const page = await screen.findByTestId('messages-fresh');
+			expect(within(page).getByTestId('messages-who')).toHaveAttribute(
+				'href',
+				`/doctor/patients/relative/${PATIENT_ID}`
+			);
+			expect(within(page).getByTestId('messages-who')).toHaveTextContent('Ελένη Μαυρίδη');
+			expect(within(page).getByTestId('messages-who-line')).toHaveTextContent(
+				'Αίτημα για τον/την Νίκος Μαυρίδης (παιδί) · σήμερα, 17:30'
+			);
+			expect(within(page).getByTestId('messages-note')).toHaveTextContent(
+				'Τα μηνύματα τα βλέπετε μόνο εσείς και Ελένη Μαυρίδη.'
+			);
+			expect(within(page).getByTestId('messages-fresh-start')).toHaveTextContent(
+				'Ξεκινάτε συνομιλία. Ο ασθενής θα πάρει ειδοποίηση ότι έχει νέο μήνυμα στο eDoctor.'
+			);
+			expect(within(page).queryByTestId('messages-menu')).toBeNull();
+			await user().type(composer(), 'Καλημέρα, για το αυριανό ραντεβού.');
+			await user().click(screen.getByRole('button', { name: 'Αποστολή' }));
+			await waitFor(() => expect(posted()).toHaveLength(1));
+			expect(posted()[0].body).toEqual({
+				kind: 'relative',
+				id: PATIENT_ID,
+				clientMessageId: expect.any(String),
+				body: 'Καλημέρα, για το αυριανό ραντεβού.'
+			});
+			await waitFor(() =>
+				expect(goto).toHaveBeenCalledWith(`/messages/${STARTED}`, {
+					replaceState: true,
+					noScroll: true
+				})
+			);
+			// 🔴 U-84: the words went in the request's body alone — never an address.
+			for (const args of vi.mocked(goto).mock.calls)
+				expect(String(args[0])).not.toContain('Καλημέρα');
+		});
+
+		it('(negative) the refusals say why, the words stay in the field, and a retry of the same words keeps the SAME id: `404` «δεν βρέθηκε», `409` blocked, `429` the new conversations’ limit, the same text to many, no network', async () => {
+			const coded = (status: number, code: string) => () => refusal(status, `Refused: ${code}`);
+			starts = [
+				() => refusal(404),
+				coded(409, 'MESSAGING_BLOCKED'),
+				coded(429, 'MESSAGING_NEW_LIMIT'),
+				coded(429, 'MESSAGE_DUPLICATE'),
+				() => {
+					throw new TypeError('offline');
+				}
+			];
+			draw({ side: 'doctor', fresh: fresh() });
+			await screen.findByTestId('messages-fresh');
+			await user().type(composer(), 'Γεια σας');
+			const send = () => user().click(screen.getByRole('button', { name: 'Αποστολή' }));
+			for (const words of [
+				'Ο ασθενής δεν βρέθηκε στους ασθενείς σας.',
+				'Δεν μπορείτε να στείλετε μηνύματα σε αυτή τη συνομιλία.',
+				'Ξεκινήσατε πολλές νέες συνομιλίες σήμερα. Δοκιμάστε ξανά αύριο.',
+				'Στείλατε το ίδιο μήνυμα σε πολλούς ασθενείς. Δοκιμάστε ξανά αργότερα.',
+				'Δεν στάλθηκε. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.'
+			]) {
+				await send();
+				expect(await screen.findByText(words)).toBeInTheDocument();
+				expect(composer()).toHaveValue('Γεια σας');
+			}
+			const ids = new Set(
+				posted().map((call) => (call.body as { clientMessageId: string }).clientMessageId)
+			);
+			expect(posted()).toHaveLength(5);
+			expect(ids.size).toBe(1);
+			expect(goto).not.toHaveBeenCalled();
+		});
+
+		it('the card names a conversation already: it takes the page’s place at once, and nothing is posted', async () => {
+			draw({ side: 'doctor', fresh: fresh({ conversationId: CONVERSATION }) });
+			await waitFor(() =>
+				expect(goto).toHaveBeenCalledWith(`/messages/${CONVERSATION}`, {
+					replaceState: true,
+					noScroll: true
+				})
+			);
+			expect(posted()).toEqual([]);
+		});
+
+		it('(negative) not a patient of the doctor’s (the card’s `404`, or no account): «δεν βρέθηκε», no field; a failed read asks again', async () => {
+			draw({ side: 'doctor', fresh: fresh({ state: 'missing', name: '' }) });
+			const missing = await screen.findByTestId('messages-fresh-missing');
+			expect(missing).toHaveTextContent('Ο ασθενής δεν βρέθηκε στους ασθενείς σας.');
+			expect(within(missing).getByRole('link', { name: 'Πίσω στα μηνύματα' })).toHaveAttribute(
+				'href',
+				'/messages'
+			);
+			expect(screen.queryByRole('textbox', { name: 'Γράψτε ένα μήνυμα' })).toBeNull();
+			cleanup();
+			const retry = vi.fn();
+			draw({ side: 'doctor', fresh: fresh({ state: 'failed', retry }) });
+			await user().click(await screen.findByRole('button', { name: 'Δοκιμάστε ξανά' }));
+			expect(retry).toHaveBeenCalledOnce();
+			expect(posted()).toEqual([]);
+		});
 	});
 
 	it('🔴 U-65.6 (negative): a message with markup and emoji shows as it was written, and nothing of it runs', async () => {
@@ -1063,9 +1441,8 @@ describe('the messages’ page (U-84, screens 18 + 21)', () => {
 		await user().click(screen.getByTestId('messages-settings'));
 		const push = await screen.findByTestId('messages-settings-push');
 		expect(push).toHaveAttribute('aria-checked', 'true');
-		await waitFor(() =>
-			expect(calls.some((call) => call.url.endsWith('/messaging/settings/me'))).toBe(true)
-		);
+		// Rewrites «the doctor's settings asked (a `403` for a patient)» → U-182.3: the patient's mode never asks for «Δέχομαι».
+		expect(calls.some((call) => call.url.endsWith('/messaging/settings/me'))).toBe(false);
 		expect(screen.queryByTestId('messages-settings-accept')).toBeNull();
 		await user().click(push);
 		await waitFor(() =>
@@ -1107,7 +1484,8 @@ describe('the messages’ page (U-84, screens 18 + 21)', () => {
 		expect(client?.getQueryData(messagePreferencesKey)).toBeUndefined();
 	});
 
-	it('Π4 ⚙: a doctor has «Δέχομαι»', async () => {
+	// Rewrites «Π4 ⚙: a doctor has «Δέχομαι»» → U-182.3: «Δέχομαι» is the doctor's mode's only (the application's a10 §6.4).
+	it('🔴 U-182.3 ⚙: the doctor’s mode has «Δέχομαι»; the patient’s mode never asks for it', async () => {
 		const stubbed = vi.mocked(fetch);
 		const base = stubbed.getMockImplementation();
 		stubbed.mockImplementation(async (input, init) =>
@@ -1116,6 +1494,13 @@ describe('the messages’ page (U-84, screens 18 + 21)', () => {
 				: (base as NonNullable<typeof base>)(input, init)
 		);
 		draw();
+		await screen.findAllByTestId('messages-row');
+		await user().click(screen.getByTestId('messages-settings'));
+		await screen.findByTestId('messages-settings-dialog');
+		expect(screen.queryByTestId('messages-settings-accept')).toBeNull();
+		expect(calls.some((call) => call.url.endsWith('/messaging/settings/me'))).toBe(false);
+		cleanup();
+		draw({ side: 'doctor' });
 		await screen.findAllByTestId('messages-row');
 		await user().click(screen.getByTestId('messages-settings'));
 		const accept = await screen.findByTestId('messages-settings-accept');

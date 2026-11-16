@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import type { Component } from 'svelte';
 import { focusManager, type QueryClient } from '@tanstack/svelte-query';
+import { page } from '$app/state';
 import QueryHarness from '$shared/query/query.harness.svelte';
 import type { Session, SessionStatus } from '$shared/state/session';
 import { keepUnreadNotificationCount } from '$modules/notifications/api/inbox';
@@ -39,6 +40,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+	page.url = new URL('http://localhost/') as typeof page.url;
 	focusManager.setFocused(undefined);
 	vi.useRealTimers();
 	vi.unstubAllGlobals();
@@ -89,8 +91,40 @@ describe('🔴 D-W45-17 · D-W45-49 · the one read of «a notification is new»
 		draw('member');
 		await waitFor(() => expect(badge()).toHaveTextContent('2:true'));
 		expect(calls).toHaveLength(1);
-		expect(calls[0].url).toMatch(/\/notification\/inbox\/me\/unread-count$/u);
+		// Rewrites «…/unread-count» with no query (D-W51-89: every read names its side; the patient's mode, the patient's).
+		expect(calls[0].url).toMatch(/\/notification\/inbox\/me\/unread-count\?side=patient$/u);
 		expect(calls[0]).toMatchObject({ method: 'GET', credentials: 'include' });
+	});
+
+	it('🔴 D-W51-89 · U-182.3: on the doctor’s dashboard the dots count the doctor’s side alone (screen 75) — the same one read, `?side=doctor`; the sign-up stays the patient’s', async () => {
+		page.url = new URL('https://edoctor.test/doctor/notifications') as typeof page.url;
+		const handle = draw('member');
+		await waitFor(() => expect(badge()).toHaveTextContent('2:true'));
+		expect(calls).toHaveLength(1);
+		expect(calls[0].url).toMatch(/\/notification\/inbox\/me\/unread-count\?side=doctor$/u);
+		// The patient's side is not the doctor's dot: a count of it changes nothing here.
+		keepUnreadNotificationCount(handle().client, 'patient', 0);
+		await vi.advanceTimersByTimeAsync(10);
+		expect(badge()).toHaveTextContent('2:true');
+		keepUnreadNotificationCount(handle().client, 'doctor', 0);
+		await waitFor(() => expect(badge()).toHaveTextContent('0:false'));
+	});
+
+	it('🔴 D-W51-89 (negative): the English doctor’s pages are his side too; the doctor’s sign-up and a look-alike word are the patient’s', async () => {
+		for (const [path, side] of [
+			['/en/doctor', 'doctor'],
+			['/doctor/onboarding', 'patient'],
+			['/doctornotifications', 'patient']
+		] as const) {
+			calls = [];
+			page.url = new URL(`https://edoctor.test${path}`) as typeof page.url;
+			const { unmount } = render(QueryHarness, {
+				props: { component: Harness as unknown as Component<never>, props: { start: 'member' } }
+			});
+			await waitFor(() => expect(calls).toHaveLength(1));
+			expect(calls[0].url, path).toMatch(new RegExp(`unread-count\\?side=${side}$`, 'u'));
+			unmount();
+		}
 	});
 
 	it('🔴 rule 9: όχι polling με χρονόμετρο — an hour on the page asks nothing more', async () => {
@@ -118,9 +152,9 @@ describe('🔴 D-W45-17 · D-W45-49 · the one read of «a notification is new»
 	it('🔴 ONE place in the cache: what a page of the list or a «read» answers shows on every dot at once, with no request', async () => {
 		const handle = draw('member');
 		await waitFor(() => expect(badge()).toHaveTextContent('2:true'));
-		keepUnreadNotificationCount(handle().client, 1);
+		keepUnreadNotificationCount(handle().client, 'patient', 1);
 		await waitFor(() => expect(badge()).toHaveTextContent('1:true'));
-		keepUnreadNotificationCount(handle().client, 0);
+		keepUnreadNotificationCount(handle().client, 'patient', 0);
 		await waitFor(() => expect(badge()).toHaveTextContent('0:false'));
 		expect(calls).toHaveLength(1);
 	});
@@ -187,7 +221,7 @@ describe('🔴 record §5.1 · the bell of the «Προφίλ»', () => {
 		expect(dot).toHaveAttribute('aria-hidden', 'true');
 		expect(dot).toHaveClass('size-2.5', 'rounded-full', 'bg-accent', 'pointer-events-none');
 		expect(bell()).toContainElement(dot);
-		keepUnreadNotificationCount(handle().client, 0);
+		keepUnreadNotificationCount(handle().client, 'patient', 0);
 		await waitFor(() => expect(screen.queryByTestId('profile-bell-dot')).toBeNull());
 		expect(bell()).toHaveAccessibleName('Ειδοποιήσεις');
 	});

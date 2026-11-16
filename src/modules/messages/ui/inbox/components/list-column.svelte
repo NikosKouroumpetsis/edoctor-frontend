@@ -1,27 +1,33 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { m } from '$paraglide/messages.js';
 	import { readServerNow } from '$shared/lib/server-clock';
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { Banner } from '$shared/ui/molecules/banner';
-	import { ChipGroup } from '$shared/ui/molecules/chip-group';
 	import { ConversationRow } from '$shared/ui/molecules/conversation-row';
 	import { EmptyState } from '$shared/ui/molecules/empty-state';
 	import { ErrorState } from '$shared/ui/molecules/error-state';
+	import { SearchField } from '$shared/ui/molecules/search-field';
 	import { StateGlyph } from '$shared/ui/molecules/state-glyph';
-	import { Chip } from '$shared/ui/primitives/chip';
 	import { IconButton } from '$shared/ui/primitives/icon-button';
 	import { Skeleton } from '$shared/ui/primitives/skeleton';
+	import { mapAppointmentLine } from '$modules/messages/api/conversations';
+	import { MESSAGES_SEARCH_MAX_LENGTH } from '$modules/messages/config/limits';
+	import { buildAppointmentLine } from '$modules/messages/lib/appointment-line';
 	import { buildCounterpartFacts } from '$modules/messages/lib/people';
 	import { conversationTimeLabel } from '$modules/messages/lib/time';
-	import type { MessagesLinks } from '$modules/messages/types';
-	import type { InboxFilter, InboxList } from '../hooks/use-inbox-list.svelte';
+	import type { MessagesLinks, MessagesSide } from '$modules/messages/types';
+	import type { InboxMemory } from '$modules/messages/ui/inbox-memory';
+	import type { InboxList } from '../hooks/use-inbox-list.svelte';
 	import EmptyArt from './empty-art.svelte';
 
 	let {
 		list,
 		locale,
 		links,
+		side,
+		memory,
 		archive = false,
 		waiting = false,
 		failed = false,
@@ -34,6 +40,10 @@
 		list: InboxList;
 		locale: SupportedLocale;
 		links: MessagesLinks;
+		/** 🔴 U-182.3: the side of the page's mode. */
+		side: MessagesSide;
+		/** R-11: where the doctor's 🔍 stays open with its words between the pages. */
+		memory: InboxMemory;
 		archive?: boolean;
 		/** The page does not know yet who reads it. */
 		waiting?: boolean;
@@ -49,28 +59,24 @@
 
 	const options = $derived({ locale });
 	const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
+	const isDoctor = $derived(side === 'doctor');
+	// 🔴 D-W51-80: the 🔍 is the doctor's only (88 §74, «η αναζήτηση μηνυμάτων υπάρχει μόνο στη λειτουργία γιατρού»).
+	const canSearch = $derived(isDoctor && !archive);
+	let searchRef = $state<HTMLInputElement | null>(null);
 
-	const filters = $derived<{ key: InboxFilter; label: string; count: number }[]>(
-		list.sideCounts
-			? [
-					{
-						key: 'all',
-						label: m.messages_filter_all({}, options),
-						count: list.sideCounts.asPatient + list.sideCounts.asDoctor
-					},
-					{
-						key: 'patients',
-						label: m.messages_filter_patients({}, options),
-						count: list.sideCounts.asDoctor
-					},
-					{
-						key: 'doctors',
-						label: m.messages_filter_doctors({}, options),
-						count: list.sideCounts.asPatient
-					}
-				]
-			: []
-	);
+	function toggleSearch() {
+		memory.searchOpen = !memory.searchOpen;
+		// Closed: the list comes back whole at once, and the words go with it.
+		if (!memory.searchOpen) memory.searchText = '';
+		else void tick().then(() => searchRef?.focus());
+	}
+
+	/** 🔴 D-W51-86: under a patient's name the appointment it is about; under a doctor's, the specialty. */
+	const subtitleOf = (row: InboxList['rows'][number], subtitle: string) =>
+		isDoctor
+			? (buildAppointmentLine(mapAppointmentLine(row.appointmentLine), readServerNow(), locale) ??
+				'')
+			: subtitle;
 
 	// The next page when the end of the list nears the screen.
 	const nearEnd = (node: HTMLElement) => {
@@ -118,17 +124,49 @@
 			<h1 class="text-heading-md font-semibold text-foreground tablet:text-heading-lg">
 				{m.messages_page_title({}, options)}
 			</h1>
-			<IconButton
-				icon="settings-outline"
-				appearance="tint"
-				surface="soft"
-				size="sm"
-				iconSize="md"
-				aria-label={m.messages_settings({}, options)}
-				data-testid="messages-settings"
-				onclick={onSettings}
-			/>
+			<div class="flex flex-row items-center gap-2.5">
+				{#if canSearch}
+					<!-- 🔴 D-W51-80 (`sw.js:779` `.m-ic.on`): 🔍 beside ⚙, its ring while the field is open. -->
+					<IconButton
+						icon="search"
+						appearance="tint"
+						surface="soft"
+						size="sm"
+						iconSize="md"
+						pressed={memory.searchOpen}
+						aria-label={m.messages_doctor_search_open({}, options)}
+						data-testid="messages-search-open"
+						onclick={toggleSearch}
+					/>
+				{/if}
+				<IconButton
+					icon="settings-outline"
+					appearance="tint"
+					surface="soft"
+					size="sm"
+					iconSize="md"
+					aria-label={m.messages_settings({}, options)}
+					data-testid="messages-settings"
+					onclick={onSettings}
+				/>
+			</div>
 		</div>
+		{#if canSearch && memory.searchOpen}
+			<SearchField
+				bind:value={memory.searchText}
+				bind:ref={searchRef}
+				shape="pill"
+				placeholder={m.messages_doctor_search_placeholder({}, options)}
+				aria-label={m.messages_doctor_search_label({}, options)}
+				maxlength={MESSAGES_SEARCH_MAX_LENGTH}
+				autocomplete="off"
+				autocapitalize="off"
+				spellcheck={false}
+				onClear={() => (memory.searchText = '')}
+				testId="messages-search"
+				class="mt-3"
+			/>
+		{/if}
 	{/if}
 
 	{#if offline}
@@ -169,35 +207,18 @@
 			{/each}
 		</div>
 	{:else}
-		{#if list.showsChips && !archive}
-			<ChipGroup
-				type="single"
-				aria-label={m.messages_page_title({}, options)}
-				class="mt-3 scrollbar-none flex flex-row gap-2 overflow-x-auto"
-			>
-				{#each filters as filter (filter.key)}
-					<Chip
-						label={filter.label}
-						count={String(filter.count)}
-						variant="outline"
-						selected={list.filter === filter.key}
-						onclick={() => (list.filter = filter.key)}
-						data-testid={`messages-filter-${filter.key}`}
-					/>
-				{/each}
-			</ChipGroup>
-		{/if}
-
+		<!-- 🔴 U-182.3 (D-W51-85; rewrites Π4 / U-65.4): no chips — the page's mode is the side it reads. -->
 		{#if list.rows.length > 0}
 			<ul class="mt-3 tablet:-mx-2">
 				{#each list.rows as row (row.id)}
 					{@const facts = buildCounterpartFacts(row.counterpart, locale)}
 					{@const unread = row.unreadCount > 0}
+					{@const subtitle = subtitleOf(row, facts.subtitle)}
 					<li>
 						<ConversationRow
 							href={links.conversation(row.id)}
 							title={facts.name}
-							subtitle={facts.subtitle}
+							{subtitle}
 							preview={row.lastMessage?.preview}
 							previewPrefix={row.lastMessage?.mine ? m.messages_you({}, options) : undefined}
 							time={row.lastMessage
@@ -210,7 +231,7 @@
 							avatarTone={facts.isDoctor ? 'primary' : 'neutral'}
 							accessibleLabel={[
 								facts.name,
-								facts.subtitle,
+								subtitle,
 								unread ? m.messages_row_unread({ count: row.unreadCount }, options) : ''
 							]
 								.filter(Boolean)
@@ -223,6 +244,11 @@
 			{#if list.hasMore}
 				<div use:nearEnd aria-hidden="true" class="h-px"></div>
 			{/if}
+		{:else if list.searched}
+			<!-- 🔴 D-W51-80: the words typed, as text (U-65.6). -->
+			<p data-testid="messages-no-results" class="mt-4 text-body-md text-muted-foreground">
+				{m.messages_doctor_search_none({ query: list.searched }, options)}
+			</p>
 		{:else if archive}
 			<EmptyState
 				titleAs="h2"
@@ -232,6 +258,15 @@
 				icon={pastGlyph}
 				class="pt-section-lg"
 				testId="messages-archive-empty"
+			/>
+		{:else if isDoctor}
+			<!-- 🔴 D-W51-86 (88 §74): the doctor's own empty page, no way out of it. -->
+			<EmptyState
+				titleAs="h2"
+				title={m.messages_doctor_empty_title({}, options)}
+				description={m.messages_doctor_empty_body({}, options)}
+				icon={emptyArt}
+				testId="messages-empty"
 			/>
 		{:else if doctorOnly}
 			<EmptyState

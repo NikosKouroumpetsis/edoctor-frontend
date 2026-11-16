@@ -34,6 +34,12 @@ function emailCalendarWords(template: string, locale: 'el' | 'en') {
 	return { summary: summary.replace('{{name}}', '{doctor}'), description: field('description') };
 }
 
+/** U-137.5: only the patient never reads «εκπρόθεσμα»; the doctor still does (88 §70 «…χωρίς «εκπρόθεσμη».», D-W51-51). */
+const DOCTOR_SIDE_LATE_WORDS = new Set([
+	'doctor_move_rule_inside_one',
+	'doctor_move_rule_inside_other'
+]);
+
 const D_W4_12 = {
 	ratings_done_body: 'Ευχαριστούμε. Η ομάδα του eDoctor την ελέγχει πριν δημοσιευτεί.',
 	ratings_mine_say_pending: 'Η ομάδα του eDoctor την ελέγχει πριν δημοσιευτεί.'
@@ -98,6 +104,7 @@ function findTextIssues(el: Catalog, en: Catalog, template: string): string[] {
 		}
 	}
 	for (const [key, text] of Object.entries(el)) {
+		if (DOCTOR_SIDE_LATE_WORDS.has(key)) continue;
 		if (/εκπρόθεσμ/iu.test(text) || /(^|_)late(_|$)/u.test(key)) {
 			issues.push(`${key}: a late cancel the patient never reads (U-137.5)`);
 		}

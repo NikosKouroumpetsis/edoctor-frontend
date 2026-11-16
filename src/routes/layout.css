@@ -10,6 +10,12 @@
 @import '../generated/design-tokens.css';
 
 @custom-variant dark (&:is(.dark *));
+/*
+ * 🔴 D-W51-19 (wave 5.1, screen 64): the account is a doctor with a marketplace licence, as `<html data-doctor-mode>`
+ * says — set before the first paint from this device's memory (`app.html`), then kept by the doctor standing — so the
+ * bar's «Για γιατρούς / Λειτουργία γιατρού» is right from the first paint and never changes under the eye (U-100).
+ */
+@custom-variant doctor-mode (&:where([data-doctor-mode='doctor'] *));
 /* A screen with a pointer that hovers (U-09.3): the photo arrows wait for the pointer there; on touch they show. */
 @custom-variant can-hover (@media (hover: hover));
 /*
@@ -265,6 +271,11 @@
 	   without JS, never hidden until hydration), a photo mounted in the browser takes it at its `load`. `both`: it is
 	   transparent before it starts, opaque after. */
 	--animate-reveal: reveal var(--transition-duration-reveal) var(--ease-standard) both;
+	/* Wave 5.1 · screen 64 (U-185.3, `64-switch/sw.css:28-35`): the switch between the two dashboards — the mark and the
+	   words grow in from 92 % (0.5 s, the words 0.08 s later) while a line runs under them, once a second, always. */
+	--animate-mode-in: card-enter 500ms var(--ease-standard) both;
+	--animate-mode-in-late: card-enter 500ms 80ms var(--ease-standard) both;
+	--animate-mode-run: mode-run 1s var(--ease-standard) infinite;
 
 	@keyframes reveal {
 		from {
@@ -403,6 +414,15 @@
 		20%,
 		50% {
 			opacity: 0;
+		}
+	}
+
+	@keyframes mode-run {
+		from {
+			translate: -100% 0;
+		}
+		to {
+			translate: 250% 0;
 		}
 	}
 

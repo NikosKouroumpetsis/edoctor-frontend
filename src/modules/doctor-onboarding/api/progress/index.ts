@@ -16,6 +16,7 @@ export type {
 	DoctorOnboardingExternalPlace,
 	DoctorOnboardingFailure,
 	DoctorOnboardingGender,
+	DoctorOnboardingInsuranceInput,
 	DoctorOnboardingLiabilityInput,
 	DoctorOnboardingLicenseInput,
 	DoctorOnboardingOfficeAddressInput,

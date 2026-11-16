@@ -29,6 +29,24 @@
 				document.documentElement.dataset.theme = theme;
 			})();
 		</script>
+		<script>
+			/* D-W51-19 (wave 5.1, screen 64): before the first paint, what this device remembers of the account's doctor
+			   standing — a licence of the marketplace marks <html data-doctor-mode> (the bar's «Λειτουργία γιατρού»), and one
+			   that left in the doctor's mode opens the doctor's «Σήμερα» from the bare home. Nothing of the person. */
+			(() => {
+				try {
+					const hint = JSON.parse(localStorage.getItem('%edoctor.doctor-mode.key%') || 'null');
+					if (!hint || hint.v !== 1 || hint.kind !== 'doctor') return;
+					document.documentElement.dataset.doctorMode = 'doctor';
+					if (hint.lastMode !== 'DOCTOR' || location.search || location.hash) return;
+					const path = location.pathname.replace(/\/+$/, '');
+					if (path === '') location.replace('/doctor');
+					else if (path === '/en') location.replace('/en/doctor');
+				} catch {
+					return;
+				}
+			})();
+		</script>
 		%sveltekit.head%
 	</head>
 

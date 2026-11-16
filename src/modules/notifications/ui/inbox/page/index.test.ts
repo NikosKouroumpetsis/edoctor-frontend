@@ -186,7 +186,9 @@ describe('🔴 U-174 · D-W45-49 · notifications/ui/inbox · the three choices'
 		);
 		expect(counts()).toHaveLength(1);
 		expect(lists()).toHaveLength(1);
-		expect(lists()[0].query).toEqual({ filter: 'new', lang: 'el', limit: '20' });
+		// D-W51-89: the patient's list says its side aloud (Rewrites the query without it).
+		expect(lists()[0].query).toEqual({ side: 'patient', filter: 'new', lang: 'el', limit: '20' });
+		expect(counts()[0].query).toEqual({ side: 'patient' });
 		expect(posts()).toHaveLength(0);
 	});
 
@@ -734,8 +736,9 @@ describe('notifications/ui/inbox · «Σήμανση όλων ως διαβασ�
 		await shown('rows');
 		await user().click(screen.getByTestId('notifications-read-all'));
 		await shown('empty');
+		// D-W51-81: «all» is all of the list's side (Rewrites the empty query).
 		expect(posts()).toEqual([
-			{ path: '/inbox/me/read-all', method: 'POST', query: {}, body: '{}' }
+			{ path: '/inbox/me/read-all', method: 'POST', query: { side: 'patient' }, body: '{}' }
 		]);
 		expect(screen.getByTestId('notifications-empty-new')).toHaveTextContent(
 			'Δεν έχετε νέες ειδοποιήσεις'

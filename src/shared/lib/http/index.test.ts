@@ -3,6 +3,7 @@ import {
 	ApiError,
 	httpGet,
 	httpGetWithMeta,
+	httpPublicPost,
 	httpPublicPut,
 	httpSessionDelete,
 	httpSessionFile,
@@ -101,6 +102,29 @@ describe('the session’s requests (U-80.1 Ε6)', () => {
 		expect(error).toMatchObject({ status: 400, errorCode: 'EC011', message: 'wrong code' });
 	});
 
+	it('🔴 D-W51-44: a refusal keeps the flat `details` it names (the page says them in its own words)', async () => {
+		const details = {
+			durationMinutes: 40,
+			overlapMinutes: 10,
+			nextStartTime: '2026-11-16T09:30:00.000Z'
+		};
+		stubFetch(answer(409, { errorCode: 'EC415', errorMessage: 'Already exist: X', details }));
+		const error = await httpSessionPut('/appointment/appointments/a-1/charges', {
+			body: { services: [] }
+		}).catch((failure: ApiError) => failure);
+		expect(error).toMatchObject({ status: 409, errorCode: 'EC415', details });
+	});
+
+	it('U-65.6 (negative): `details` that are nested, an array, empty, too many or too long are none at all', async () => {
+		const long = 'x'.repeat(201);
+		const many = Object.fromEntries(Array.from({ length: 17 }, (_, index) => [`k${index}`, index]));
+		for (const details of [{ next: { at: 1 } }, [1, 2], {}, many, { text: long }, '<b>x</b>']) {
+			stubFetch(answer(409, { errorCode: 'EC415', errorMessage: 'no', details }));
+			const error = await httpSessionGet('/patient/me').catch((failure: ApiError) => failure);
+			expect((error as ApiError).details, JSON.stringify(details)).toBeUndefined();
+		}
+	});
+
 	it('(negative) a refusal that is not JSON has no code; no network is status 0', async () => {
 		stubFetch(new Response('<html>', { status: 502 }));
 		const bad = await httpSessionGet('/patient/me').catch((failure: ApiError) => failure);
@@ -188,6 +212,33 @@ describe('a public write (U-78)', () => {
 		stubFetch(new TypeError('offline'));
 		const offline: unknown = await httpPublicPut('/v', { body: {} }).catch((failure) => failure);
 		expect((offline as ApiError).status).toBe(0);
+	});
+
+	it('D-W51-72: a public POST never carries the cookies and reads a refusal’s status, code and details', async () => {
+		const spy = stubFetch(answer(200, { status: 'ok', data: { status: 'canceled' } }));
+		const done = await httpPublicPost<{ status: string }>('/p', { body: { reasonCode: 'OTHER' } });
+		expect(done).toEqual({ status: 'canceled' });
+		const [, init] = spy.mock.calls[0] as unknown as [string, RequestInit];
+		expect(init.method).toBe('POST');
+		expect(init.credentials).toBe('omit');
+		expect(init.body).toBe('{"reasonCode":"OTHER"}');
+		stubFetch(
+			answer(403, {
+				errorCode: 'EC003',
+				errorMessage: 'CANCEL_AFTER_CANCELLATION_CUTOFF',
+				details: { a: 1 }
+			})
+		);
+		const refused = (await httpPublicPost('/p', { body: {} }).catch(
+			(failure) => failure
+		)) as ApiError;
+		expect(refused).toBeInstanceOf(ApiError);
+		expect(refused).toMatchObject({
+			status: 403,
+			errorCode: 'EC003',
+			message: 'CANCEL_AFTER_CANCELLATION_CUTOFF'
+		});
+		expect(refused.details).toEqual({ a: 1 });
 	});
 
 	it('a read may name its headers and leave the cookies behind', async () => {

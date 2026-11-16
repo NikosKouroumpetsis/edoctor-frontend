@@ -9,6 +9,7 @@
 		nextDisabled = false,
 		nextLoading = false,
 		withBrand = true,
+		withLeading = false,
 		withActions = true,
 		withFooter = false,
 		centered,
@@ -34,6 +35,7 @@
 		nextDisabled?: boolean;
 		nextLoading?: boolean;
 		withBrand?: boolean;
+		withLeading?: boolean;
 		withActions?: boolean;
 		withFooter?: boolean;
 		centered?: boolean;
@@ -51,6 +53,8 @@
 </script>
 
 {#snippet brand()}<a href="#home" class="min-h-touch min-w-touch">Σήμα</a>{/snippet}
+{#snippet leading()}<a href="#back" aria-label="Πίσω" class="min-h-touch min-w-touch">‹</a
+	>{/snippet}
 {#snippet start()}<button type="button" class="min-h-touch w-full">Ξεκινήστε</button>{/snippet}
 
 <WizardScreen
@@ -59,6 +63,7 @@
 	progress={withProgress ? progress : undefined}
 	{centered}
 	brand={withBrand ? brand : undefined}
+	leading={withLeading ? leading : undefined}
 	pills={shown}
 	back={withActions ? { label: 'Πίσω', onClick: onBack, testId: 'back' } : undefined}
 	next={withActions

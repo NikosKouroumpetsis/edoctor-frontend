@@ -58,14 +58,13 @@ export function readDoctorBasicValues(edits: DoctorOnboardingEdits, progress: Pr
 	} satisfies DoctorBasicValues;
 }
 
-/** 34 «Ποιο email να χρησιμοποιούμε;»: the unsaved edit, else the one on file. */
-export function readDoctorContactEmail(edits: DoctorOnboardingEdits, progress: Progress): string {
-	return readEdit(
-		edits,
-		'contactEmail',
-		'notificationEmail',
-		progress?.contactEmail.notificationEmail ?? ''
-	);
+/**
+ * 34 «Ποιο email να χρησιμοποιούμε;»: the address the doctor types — 🔴 U-169 · D-W51-12: the one on file comes only
+ * hidden (`notificationEmailMasked`, shown as the current one), so the field starts empty and asks for a new one; what is
+ * typed stays in this tab's draft until its code is verified (the code's screen sends it with the code).
+ */
+export function readDoctorContactEmail(edits: DoctorOnboardingEdits): string {
+	return readEdit(edits, 'contactEmail', 'notificationEmail', '');
 }
 
 export type DoctorProfessionalValues = {

@@ -62,6 +62,9 @@ const isRecord = (value: unknown): value is Record_ =>
 const part = <T extends object>(value: T | null | undefined): Partial<T> =>
 	isRecord(value) ? value : {};
 const text = (value: unknown): string | null => (typeof value === 'string' ? value : null);
+/** 🔴 U-169: the server's mask of an address (`e***a@…`); anything else — a whole address included — is none. */
+const masked = (value: unknown): string | null =>
+	typeof value === 'string' && value.length <= 254 && /\*{3}/u.test(value) ? value : null;
 const flag = (value: unknown): boolean => value === true;
 const flagOrNull = (value: unknown): boolean | null => (typeof value === 'boolean' ? value : null);
 const finite = (value: unknown): number | null =>
@@ -137,7 +140,8 @@ export function mapDoctorOnboardingProgress(
 			gender: oneOf(GENDERS, basicInfo.gender)
 		},
 		contactEmail: {
-			notificationEmail: text(contactEmail.notificationEmail),
+			// U-169: a mask only when it looks like one — a whole address is never kept as one.
+			notificationEmailMasked: masked(contactEmail.notificationEmailMasked),
 			verified: flag(contactEmail.verified)
 		},
 		professional: {

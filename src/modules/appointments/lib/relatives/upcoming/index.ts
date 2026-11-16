@@ -2,7 +2,7 @@ import { m } from '$paraglide/messages.js';
 import { withDoctorTitle } from '$shared/lib/text';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type { AppointmentFacts } from '$modules/appointments/api/appointment';
-import { appointmentDayTimeLabel } from '$modules/appointments/lib/when';
+import { appointmentDayTimeLabel } from '$shared/lib/appointment-when';
 
 /** A relative's upcoming visits as the deletion's window says them: how many, and the first. */
 export type RelativeUpcomingFacts = { count: number; first: AppointmentFacts | null };

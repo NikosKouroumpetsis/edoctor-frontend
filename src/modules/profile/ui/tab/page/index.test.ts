@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import type { ResolvedPathname } from '$app/types';
+import { DoctorStanding, type DoctorStandingKind } from '$shared/state/doctor-standing';
 import { Session, type SessionMember, type SessionStatus } from '$shared/state/session';
 import Harness from './tab.harness.svelte';
 
@@ -46,23 +47,43 @@ function renderTab(
 		locale = 'el',
 		state = session(status),
 		bell = false,
-		memberPage = status === 'member'
-	}: { locale?: 'el' | 'en'; state?: Session; bell?: boolean; memberPage?: boolean } = {}
+		memberPage = status === 'member',
+		standing
+	}: {
+		locale?: 'el' | 'en';
+		state?: Session;
+		bell?: boolean;
+		memberPage?: boolean;
+		standing?: DoctorStanding;
+	} = {}
 ) {
 	const onRow = vi.fn();
 	render(Harness, {
 		props: {
 			session: state,
+			standing,
 			locale,
 			bell,
 			onRow,
 			doctorHref: '/doctor/onboarding' as ResolvedPathname,
+			doctorModeHref: '/doctor' as ResolvedPathname,
 			hrefOf: (row: string) =>
 				((row === 'account-settings' && memberPage ? '/profile/account-settings' : pages[row]) ??
 					null) as ResolvedPathname | null
 		}
 	});
 	return { onRow, state };
+}
+
+/** The doctor standing the layout's host gives (its one read), for a kind of account (wave 5.1, screen 64). */
+function standingOf(kind: DoctorStandingKind | undefined, switchTo = vi.fn(async () => true)) {
+	return {
+		standing: new DoctorStanding({
+			facts: () => (kind ? { kind, notice: null, lastMode: 'PATIENT', card: null } : undefined),
+			switchTo
+		}),
+		switchTo
+	};
 }
 
 const rowsOf = (section: string) =>
@@ -305,11 +326,18 @@ describe('the `/profile` page · a guest (U-81.1, U-82.1; record §5.1 «Χωρ�
 		expect(screen.getByTestId('profile-page')).not.toHaveTextContent('Αποσύνδεση');
 	});
 
-	it.each(['guest', 'member'] as const)(
+	it.each([
+		['guest', 'none'],
+		['member', 'none'],
+		['member', 'pending'],
+		['member', 'payments']
+	] as const)(
 		// Rewrites U-82.2 by D-W4-56: «Οι συγγενείς μου» has its page since wave 4.0; the two without one stay hidden.
-		'U-82.2 · 🔴 U-164.1: γραμμές χωρίς σελίδα web κρυμμένες («Ραντεβού γιατρού», «Ταμείο») and nothing of «Λειτουργία γιατρού» — %s',
-		(status) => {
-			renderTab(status);
+		// Rewrites «U-164.1: nothing of «Λειτουργία γιατρού»» by U-185.1 (wave 5.1, screen 64): it holds for whoever is not
+		// licensed for the marketplace — a guest, no registration, one under review, the till's alone (D-W51-16).
+		'U-82.2 · 🔴 U-164.1: γραμμές χωρίς σελίδα web κρυμμένες («Ραντεβού γιατρού», «Ταμείο») and nothing of «Λειτουργία γιατρού» — %s, %s',
+		(status, kind) => {
+			renderTab(status, { standing: standingOf(kind).standing });
 			const page = screen.getByTestId('profile-page');
 			for (const hidden of ['Ραντεβού γιατρού', 'Ταμείο', 'Λειτουργία γιατρού']) {
 				expect(page).not.toHaveTextContent(hidden);
@@ -376,5 +404,52 @@ describe('the `/profile` page · a guest (U-81.1, U-82.1; record §5.1 «Χωρ�
 		const page = screen.getByTestId('profile-page');
 		expect(page).toHaveClass('pb-results-list-end', 'tablet:pb-pane-inset-lg');
 		expect(page.firstElementChild).toHaveClass('mx-auto', 'max-w-form');
+	});
+
+	describe('wave 5.1 · screen 64 — the doctor standing on the «Προφίλ» (U-185.1, U-183.5, D-W51-16)', () => {
+		it('U-185.1: Λειτουργία γιατρού μόνο με εγγραφή + άδεια — a licence of the marketplace: the pill (below 744), no card; pressed, the switch', async () => {
+			const { standing, switchTo } = standingOf('doctor');
+			renderTab('member', { standing });
+			const pill = screen.getByTestId('profile-doctor-mode');
+			expect(pill).toHaveTextContent('Λειτουργία γιατρού');
+			expect(pill).toHaveAttribute('href', '/doctor');
+			expect(pill.className).toMatch(/\btablet:hidden\b/u);
+			expect(screen.queryByTestId('profile-doctor-card')).toBeNull();
+			await userEvent.setup().click(pill);
+			expect(switchTo).toHaveBeenCalledWith('DOCTOR');
+			// 🔴 U-164.1 (rewritten for a licence): never a doctor's row on the «Προφίλ»; the pill is its one word.
+			const page = screen.getByTestId('profile-page');
+			for (const hidden of ['Ραντεβού γιατρού', 'Ταμείο', 'Είστε γιατρός;']) {
+				expect(page).not.toHaveTextContent(hidden);
+			}
+		});
+
+		it('U-183.5: a completed registration without a licence — the card reads «Η αίτησή σας ελέγχεται», to the application’s page; no pill', () => {
+			renderTab('member', { standing: standingOf('pending').standing });
+			const card = screen.getByTestId('profile-doctor-card');
+			expect(card).toHaveTextContent('Η αίτησή σας ελέγχεται');
+			expect(card).toHaveTextContent('Δείτε ή αλλάξτε τα στοιχεία της εγγραφής σας.');
+			expect(card).toHaveAttribute('href', '/doctor/onboarding');
+			expect(card).toHaveAttribute('data-state', 'pending');
+			expect(screen.queryByTestId('profile-doctor-mode')).toBeNull();
+		});
+
+		it('D-W51-16: καμία Λειτουργία γιατρού για μόνο-ταμείου στο web — no pill and no card', () => {
+			renderTab('member', { standing: standingOf('payments').standing });
+			expect(screen.queryByTestId('profile-doctor-mode')).toBeNull();
+			expect(screen.queryByTestId('profile-doctor-card')).toBeNull();
+		});
+
+		it('D-W51-19: a member’s card waits for the answer — never «Είστε γιατρός;» that turns into another a moment later; a guest’s is there at once', () => {
+			renderTab('member', { standing: standingOf(undefined).standing });
+			expect(screen.queryByTestId('profile-doctor-card')).toBeNull();
+			expect(screen.queryByTestId('profile-doctor-mode')).toBeNull();
+		});
+
+		it('(negative) a guest has neither the pill nor the review card, whatever a standing says', () => {
+			renderTab('guest', { standing: standingOf('doctor').standing });
+			expect(screen.queryByTestId('profile-doctor-mode')).toBeNull();
+			expect(screen.getByTestId('profile-doctor-card')).toHaveTextContent('Είστε γιατρός;');
+		});
 	});
 });

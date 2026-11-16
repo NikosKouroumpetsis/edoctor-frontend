@@ -30,9 +30,9 @@ import type { AppointmentDone } from '$modules/appointments/lib/detail';
 import { appointmentOfficeShortLine } from '$modules/appointments/lib/detail';
 import { appointmentDoctorName, appointmentForWhomLine } from '$modules/appointments/lib/list';
 import type { AppointmentStep } from '$modules/appointments/lib/paths';
-import { relativeWordLabel } from '$modules/appointments/lib/relatives/words';
-import { canAmendAppointment } from '$modules/appointments/lib/status';
-import { appointmentDayTimeLabel, appointmentShortWhenLabel } from '$modules/appointments/lib/when';
+import { relativeWordLabel } from '$shared/lib/relative-words';
+import { canAmendAppointment } from '$shared/lib/appointment-status';
+import { appointmentDayTimeLabel, appointmentShortWhenLabel } from '$shared/lib/appointment-when';
 
 /*
  * Screen 52 «Αλλαγή ραντεβού» in words and rules (record §8.2, U-136, P-W4 §4.3): the hour (same office, same

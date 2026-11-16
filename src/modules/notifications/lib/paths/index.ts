@@ -5,6 +5,12 @@ import { notificationInboxFilters } from '$modules/notifications/config/inbox';
 export const notificationsPath = '/notifications';
 
 /**
+ * 🔴 D-W51-89 (screen 75, the application's `/doctor/notifications`): the doctor's own list, inside his frame — the same
+ * page and the same `?filter=` as screen 63, of the doctor's side.
+ */
+export const doctorNotificationsPath = '/doctor/notifications';
+
+/**
  * A choice in the address (`?filter=new`): a fixed word of three, never a person's fact (🔴 U-65.6) — the way «Τα
  * ραντεβού μου» keeps «Ιστορικό» (`?tab=history`), so a reload, «back» and a copied link agree.
  */

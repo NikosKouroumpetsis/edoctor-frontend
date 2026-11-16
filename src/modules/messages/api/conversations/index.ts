@@ -23,17 +23,27 @@ import {
 } from '$shared/lib/http';
 import { personalQueryMeta } from '$shared/query';
 import { THREAD_POLL_MS } from '$modules/messages/config/limits';
-import type { ConversationSideFilter, MessageReportReason } from '$modules/messages/types';
+import type {
+	ConversationSideFilter,
+	DoctorConversationTarget,
+	MessageReportReason,
+	MessagesSide
+} from '$modules/messages/types';
+
+export { mapAppointmentLine, mapPatientId } from './map';
 
 const BASE = '/messaging';
 
 /** 🔴 U-84: every read below is one person's: `personalQueryMeta`, so a sign-out leaves none of it in the tab. */
 export const messagesQueryKeys = {
 	all: ['messages'] as const,
-	unread: () => ['messages', 'unread'] as const,
+	/** Every side's badge (what a write asks again). */
+	unreads: () => ['messages', 'unread'] as const,
+	/** 🔴 D-W51-77: one badge per side, each its own cache. */
+	unread: (side: MessagesSide) => ['messages', 'unread', side] as const,
 	lists: () => ['messages', 'list'] as const,
-	list: (side: ConversationSideFilter, archived: boolean, lang: string) =>
-		['messages', 'list', side, archived, lang] as const,
+	list: (side: ConversationSideFilter, archived: boolean, lang: string, q = '') =>
+		['messages', 'list', side, archived, lang, q] as const,
 	threads: () => ['messages', 'thread'] as const,
 	thread: (conversationId: string, lang: string) =>
 		['messages', 'thread', conversationId, lang] as const,
@@ -57,15 +67,16 @@ const everyUnlessFinal = (ms: number | false) => (query: { state: { error: unkno
 /**
  * 🔴 U-84: the badge. `enabled` is only a member's: a guest asks the server nothing, and no timer runs. TanStack's
  * interval asks only while the page shows (`refetchIntervalInBackground` stays off, its focus manager reads
- * `visibilityState`), and at once when it shows again.
+ * `visibilityState`), and at once when it shows again. 🔴 D-W51-77: the side of the page's mode, never both.
  */
-export function unreadCountQuery(enabled: boolean, everyMs: number) {
+export function unreadCountQuery(side: MessagesSide, enabled: boolean, everyMs: number) {
 	return {
-		queryKey: messagesQueryKeys.unread(),
+		queryKey: messagesQueryKeys.unread(side),
 		queryFn: ({ signal }: { signal?: AbortSignal }) =>
-			httpSessionGet<MessagingUnreadCountView>(`${BASE}/unread-count`, { signal }).then(
-				(data) => data.conversations
-			),
+			httpSessionGet<MessagingUnreadCountView>(`${BASE}/unread-count`, {
+				params: { side },
+				signal
+			}).then((data) => data.conversations),
 		enabled,
 		refetchInterval: everyUnlessFinal(everyMs),
 		refetchIntervalInBackground: false,
@@ -75,18 +86,28 @@ export function unreadCountQuery(enabled: boolean, everyMs: number) {
 	};
 }
 
-/** The list: newest first, in pages. 🔴 Only a member's, and it polls while it shows. */
+/**
+ * The list: newest first, in pages. 🔴 Only a member's, and it polls while it shows. 🔴 D-W51-80: `q` (the doctor's side
+ * only, 1–40 after the trim — the caller's `readInboxSearchQuery`) narrows it to the patients by that name; `''` none.
+ */
 export function conversationsInfiniteQuery(
-	options: { side: ConversationSideFilter; archived: boolean; lang: string },
+	options: { side: ConversationSideFilter; archived: boolean; lang: string; q?: string },
 	enabled: boolean,
 	everyMs: number | false
 ) {
 	const { side, archived, lang } = options;
+	const q = side === 'doctor' ? (options.q ?? '') : '';
 	return {
-		queryKey: messagesQueryKeys.list(side, archived, lang),
+		queryKey: messagesQueryKeys.list(side, archived, lang, q),
 		queryFn: ({ pageParam, signal }: { pageParam: string | null; signal?: AbortSignal }) =>
 			httpSessionGet<MessagingConversationListView>(`${BASE}/conversations`, {
-				params: { side, archived: archived ? '1' : '0', lang, cursor: pageParam ?? undefined },
+				params: {
+					side,
+					archived: archived ? '1' : '0',
+					lang,
+					q: q || undefined,
+					cursor: pageParam ?? undefined
+				},
 				signal
 			}),
 		initialPageParam: null as string | null,
@@ -175,6 +196,20 @@ export function startConversation(input: {
 	body: string;
 }): Promise<MessagingSentMessageView> {
 	return httpSessionPost<MessagingSentMessageView>(`${BASE}/conversations`, { body: input });
+}
+
+/**
+ * 🔴 U-193.1 (D-W51-78): the doctor writes first, to a patient of theirs by the key of screen 73 — the one conversation
+ * of the pair, found or made, with its message (`404` not a patient of theirs, `409` blocked, `429` a limit). The same
+ * id never doubles.
+ */
+export function startDoctorConversation(
+	target: DoctorConversationTarget,
+	input: { clientMessageId: string; body: string }
+): Promise<MessagingSentMessageView> {
+	return httpSessionPost<MessagingSentMessageView>(`${BASE}/doctor/conversations`, {
+		body: { kind: target.kind, id: target.id, ...input }
+	});
 }
 
 /** U-84 Π2: a message; «Δοκιμάστε ξανά» sends the same id, so it never doubles. */
@@ -340,7 +375,7 @@ export function patchThreadState(
 /** A write moved what the lists and the badge show: they ask again. */
 export function refreshInbox(client: QueryClient) {
 	void client.invalidateQueries({ queryKey: messagesQueryKeys.lists() });
-	void client.invalidateQueries({ queryKey: messagesQueryKeys.unread() });
+	void client.invalidateQueries({ queryKey: messagesQueryKeys.unreads() });
 }
 
 /** U-84 Π3: the line under the first message, as the #18 knew it («συνήθως απαντά …»): names and words, never the text. */

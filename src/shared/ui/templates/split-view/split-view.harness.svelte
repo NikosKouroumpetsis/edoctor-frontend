@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { SplitView, type SplitViewWidths } from './index';
+	import { SplitView, type SplitViewFrom, type SplitViewWidths } from './index';
 
 	let {
 		open,
 		solo,
 		widths,
+		from,
 		centred,
 		listLabel,
 		paneLabel,
@@ -13,6 +14,7 @@
 		open?: boolean;
 		solo?: boolean;
 		widths?: SplitViewWidths;
+		from?: SplitViewFrom;
 		centred?: boolean;
 		listLabel?: string;
 		paneLabel?: string;
@@ -27,6 +29,7 @@
 	{open}
 	{solo}
 	{widths}
+	{from}
 	{centred}
 	{listLabel}
 	{paneLabel}

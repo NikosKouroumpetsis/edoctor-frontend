@@ -174,6 +174,10 @@ export type DoctorOnboardingProgressOfficeView = Schemas['DoctorOnboardingProgre
 export type DoctorOnboardingStateView = Schemas['DoctorOnboardingState'];
 export type DoctorOnboardingSectionView = Schemas['DoctorOnboardingSection'];
 export type DoctorNotificationEmailCodeSentView = Schemas['DoctorNotificationEmailCodeSentView'];
+// Wave 5.1 · screens 64 / 65 / 76 (D-W51-10, D-W51-11, `modules/doctor-dashboard`): «who am I as a doctor» and the mode
+// the account opens in next time.
+export type DoctorDashboardView = Schemas['DoctorDashboardView'];
+export type DoctorDashboardModeView = Schemas['DoctorDashboardMode'];
 export type AddressSearchSuggestionsResponseView = Schemas['AddressSearchSuggestionsResponseView'];
 export type AddressSearchSuggestionView = Schemas['AddressSearchSuggestionView'];
 export type AddressSearchDetailsResponseView = Schemas['AddressSearchDetailsResponseView'];

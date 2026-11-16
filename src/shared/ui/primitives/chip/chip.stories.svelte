@@ -95,6 +95,34 @@
 	{/snippet}
 </Story>
 
+<!-- Wave 5.1 · screen 67 (`64-switch/sw.css:148-149` `.l-n`): the count as a round bubble — the chip's grey when idle, the
+     page's fill on the chosen dark chip. -->
+<Story name="Contrast Tabs With A Count Bubble">
+	{#snippet template()}
+		<div class="flex flex-row gap-2">
+			<Chip
+				label="Αιτήματα"
+				href="#requests"
+				variant="contrast"
+				size="tab"
+				count="2"
+				countLook="bubble"
+				selected
+				hover={false}
+			/>
+			<Chip
+				label="Αιτήματα"
+				href="#requests-idle"
+				variant="contrast"
+				size="tab"
+				count="2"
+				countLook="bubble"
+				hover={false}
+			/>
+		</div>
+	{/snippet}
+</Story>
+
 <Story
 	name="Removable"
 	args={{ variant: 'tinted', removable: true, label: 'Γυναίκα', onRemove: () => {} }}

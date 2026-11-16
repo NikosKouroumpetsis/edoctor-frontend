@@ -42,6 +42,19 @@ export type AccountEntry =
 			 */
 			name?: string;
 	  }
+	/**
+	 * 🔴 Wave 5.1 · screen 64 (U-185.1): «Λειτουργία γιατρού», a switch of mode — the transition, then the doctor's page
+	 * (`href` before the page's scripts have run); `hideFrom: 'laptop'`: from 1128 the bar has it, so the row and its
+	 * rule go (`64-switch/sw.css:18-20`).
+	 */
+	| {
+			key: 'doctor-mode';
+			kind: 'switch';
+			label: string;
+			href: ResolvedPathname;
+			separated?: boolean;
+			hideFrom?: 'laptop';
+	  }
 	| { key: 'settings'; kind: 'settings'; label: string; separated?: boolean }
 	| { key: 'sign-out'; kind: 'sign-out'; label: string; separated?: boolean };
 
@@ -49,4 +62,4 @@ export type AccountEntry =
  * The frame's top bar on a page (P-W3 §3.1): `site` the whole bar (from 744), `brand` only the mark over a thin line (the
  * booking), `none` no bar of the frame (the doctor's sign-up draws its own).
  */
-export type FrameHeader = 'site' | 'brand' | 'none';
+export type FrameHeader = 'site' | 'brand' | 'logo' | 'none';

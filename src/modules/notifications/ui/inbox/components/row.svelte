@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isPlainClick } from '$shared/lib/navigation';
 	import { cn } from '$shared/lib/utils';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import type { NotificationRow } from '$modules/notifications/types';
@@ -7,7 +8,8 @@
 		row,
 		href,
 		newLabel,
-		onPress
+		onPress,
+		onOpen = null
 	}: {
 		row: NotificationRow;
 		/** The screen of what the line is about (D-W45-45); `null` when it opens nothing (a question, an unknown kind). */
@@ -16,7 +18,19 @@
 		newLabel: string;
 		/** 🔴 U-174 (Ε2 Β): the press — «read» leaves with it, and never holds the link back. */
 		onPress: () => void;
+		/**
+		 * How the page opens `href` instead of the browser, for a plain press (screen 75: one step on in the history);
+		 * `null`, the link's own way. A new tab or window always keeps the link's way.
+		 */
+		onOpen?: (() => void) | null;
 	} = $props();
+
+	function press(event: MouseEvent) {
+		onPress();
+		if (!onOpen || !isPlainClick(event)) return;
+		event.preventDefault();
+		onOpen();
+	}
 
 	const testId = $derived(`notifications-row-${row.id}`);
 	const box =
@@ -87,7 +101,7 @@
 			{href}
 			data-testid={testId}
 			data-new={row.fresh || undefined}
-			onclick={onPress}
+			onclick={press}
 			class={cn(box, pressable)}
 		>
 			{@render line()}

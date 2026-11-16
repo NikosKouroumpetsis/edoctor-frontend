@@ -75,6 +75,12 @@ function routeOf(write: DoctorOnboardingWrite): Route {
 				'/doctor/onboarding/liability',
 				write.input
 			);
+		case 'insurance':
+			return route<'saveDoctorOnboardingLiability'>(
+				'POST',
+				'/doctor/onboarding/liability',
+				write.input
+			);
 		case 'activation-intent':
 			return route<'saveDoctorOnboardingActivationIntent'>(
 				'POST',

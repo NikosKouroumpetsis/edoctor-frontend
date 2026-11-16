@@ -18,15 +18,20 @@
 	import { Spinner } from '$shared/ui/primitives/spinner';
 	import { TextButton } from '$shared/ui/primitives/text-button';
 	import { ActionDialog } from '$shared/ui/templates/action-dialog';
+	import { mapAppointmentLine, mapPatientId } from '$modules/messages/api/conversations';
 	import { MESSAGE_COUNT_FROM, MESSAGE_MAX_LENGTH } from '$modules/messages/config/limits';
+	import { buildAppointmentLine } from '$modules/messages/lib/appointment-line';
 	import { buildCounterpartFacts } from '$modules/messages/lib/people';
 	import { buildThreadRows, type ThreadEntry } from '$modules/messages/lib/thread';
 	import { messageClock, messageDayLabel } from '$modules/messages/lib/time';
+	import { isPlainClick, useHistorySteps } from '$shared/lib/navigation';
 	import { readServerNow } from '$shared/lib/server-clock';
 	import type { MessagesLinks } from '$modules/messages/types';
 	import type { ThreadMemory } from '$modules/messages/ui/inbox-memory';
 	import { useThread } from '../hooks/use-thread.svelte';
+	import LockNote from './lock-note.svelte';
 	import ReportDialog from './report-dialog.svelte';
+	import ThreadHead from './thread-head.svelte';
 	import ThreadMenu from './thread-menu.svelte';
 
 	let {
@@ -70,6 +75,28 @@
 	const rows = $derived(buildThreadRows(thread.entries));
 	const lastKey = $derived(thread.entries.at(-1)?.key);
 	const isPatientSide = $derived(thread.conversation?.side === 'patient');
+	const isDoctorSide = $derived(thread.conversation?.side === 'doctor');
+	// 🔴 D-W51-86: on the doctor's side the appointment the conversation is about under the name, never «Ασθενής».
+	const subtitle = $derived(
+		isDoctorSide
+			? (buildAppointmentLine(
+					mapAppointmentLine(thread.conversation?.appointmentLine),
+					readServerNow(),
+					locale
+				) ?? '')
+			: facts.subtitle
+	);
+	// 🔴 D-W51-86: the name, and the first row of ⋯, open the patient's card of screen 73 (`account/<patientId>`).
+	const patientId = $derived(isDoctorSide ? mapPatientId(thread.conversation?.patientId) : null);
+	const cardHref = $derived(patientId && links.patientCard ? links.patientCard(patientId) : null);
+	// 🔴 `sw.js:1068-1070` `pt-back` (live 15/11): the card opens one step on, like from the 68, so «‹» comes back here.
+	const cardSteps = useHistorySteps('doctorPatient');
+	function openCard(event: MouseEvent) {
+		if (!cardHref || !isPlainClick(event)) return;
+		event.preventDefault();
+		cardSteps.open(cardHref, 1);
+	}
+	const profileHref = $derived(facts.slug ? links.doctorProfile(facts.slug) : null);
 
 	// From 744 Enter sends; below it a new line, as on the application's keyboard.
 	const tablet = new MediaQuery(`(min-width: ${breakpoints.tablet}px)`, false);
@@ -222,68 +249,19 @@
 			<Skeleton class="h-control-lg w-2/5 self-end rounded-bubble" />
 		</div>
 	{:else}
-		<header
-			class="sticky top-0 z-30 flex min-h-touch shrink-0 flex-row items-center gap-1 border-b border-border bg-background px-3 pb-2 tablet:top-bar-top tablet:h-row-lg tablet:gap-3 tablet:border-border/60 tablet:bg-card tablet:px-6 tablet:pb-0 split:top-0"
-		>
-			<IconButton
-				icon="chevron-back"
-				appearance="tint"
-				surface="soft"
-				size="sm"
-				iconSize="md"
-				aria-label={m.messages_back({}, options)}
-				href={links.list}
-				data-testid="messages-back"
-				class="split:hidden"
-			/>
-			{#snippet who()}
-				{@render avatar('size-avatar-md', 'text-body-lg')}
-				<span class="grid min-w-0 grid-cols-1">
-					<span class="truncate text-body-lg font-semibold text-foreground tablet:text-bubble"
-						>{facts.name}</span
-					>
-					<span class="truncate text-label-lg font-normal text-muted-foreground"
-						>{facts.subtitle}</span
-					>
-				</span>
-			{/snippet}
-			{#if facts.slug}
-				<!-- The screen's addresses, already resolved (a module knows no route). -->
-				<!-- eslint-disable svelte/no-navigation-without-resolve -->
-				<a
-					href={links.doctorProfile(facts.slug)}
-					data-testid="messages-who"
-					class="flex min-h-touch min-w-touch flex-1 flex-row items-center gap-3 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50 can-hover:hover:bg-foreground/4"
-				>
-					{@render who()}
-				</a>
-				<a
-					href={links.doctorProfile(facts.slug)}
-					data-testid="messages-profile"
-					class="group hidden min-h-touch min-w-touch items-center outline-none tablet:inline-flex"
-				>
-					<span
-						class="inline-flex h-thread-pill-h items-center rounded-full border border-input px-4 text-body-sm font-semibold whitespace-nowrap text-foreground transition-colors duration-standard ease-standard group-focus-visible:ring-3 group-focus-visible:ring-ring/50 can-hover:group-hover:bg-background"
-						>{m.messages_profile({}, options)}</span
-					>
-				</a>
-				<!-- eslint-enable svelte/no-navigation-without-resolve -->
-			{:else}
-				<div class="flex min-h-touch min-w-0 flex-1 flex-row items-center gap-3">
-					{@render who()}
-				</div>
-			{/if}
-			<IconButton
-				icon="ellipsis-horizontal"
-				appearance="bare"
-				size="sm"
-				iconSize="md"
-				aria-label={m.messages_more({}, options)}
-				aria-haspopup="dialog"
-				data-testid="messages-menu"
-				onclick={() => (menuOpen = true)}
-			/>
-		</header>
+		<ThreadHead
+			{locale}
+			backHref={links.list}
+			name={facts.name}
+			{subtitle}
+			initial={facts.initial}
+			imageUrl={facts.imageUrl}
+			isDoctor={facts.isDoctor}
+			whoHref={profileHref ?? cardHref}
+			onWho={profileHref ? undefined : openCard}
+			{profileHref}
+			onMore={() => (menuOpen = true)}
+		/>
 
 		<div
 			class="flex-1 p-3 tablet:px-6 tablet:pt-4 tablet:pb-6"
@@ -300,18 +278,11 @@
 						{#if thread.loadingOlder}<Spinner />{/if}
 					</div>
 				{/if}
-				<!-- Who reads this, and 112 / 166, at the top of every conversation. -->
-				<p
-					data-testid="messages-note"
-					class="mx-auto mb-4 flex max-w-narrow flex-row items-start gap-2 rounded-md bg-background px-3 py-2 text-label-lg font-normal text-muted-foreground tablet:mt-1 tablet:mb-2 tablet:max-w-card-wide tablet:px-3.5 tablet:py-2.5"
-				>
-					<Ionicon name="lock-closed-outline" class="mt-0.5 icon-sm shrink-0" />
-					<span>
-						{isPatientSide
-							? m.messages_note_patient({ name: facts.sentenceName }, options)
-							: m.messages_note_doctor({ name: facts.name }, options)}
-					</span>
-				</p>
+				<LockNote
+					words={isPatientSide
+						? m.messages_note_patient({ name: facts.sentenceName }, options)
+						: m.messages_note_doctor({ name: facts.name }, options)}
+				/>
 
 				{#each rows as row (row.key)}
 					{#if row.kind === 'day'}
@@ -460,6 +431,8 @@
 	bind:open={menuOpen}
 	title={facts.name}
 	{locale}
+	{cardHref}
+	onCard={openCard}
 	archived={threadState?.archived ?? false}
 	canReport={Boolean(thread.lastReceived)}
 	canBlock={!threadState?.blockedByMe}

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { cleanup, render, screen, waitFor } from '@testing-library/svelte';
 import type { Component } from 'svelte';
 import { flushSync } from 'svelte';
 import { page } from '$app/state';
@@ -61,10 +61,11 @@ describe('what the messages’ pages keep (R-10, R-11)', () => {
 				props: { start: 'member', onSession: (found: Session) => (session = found) }
 			}
 		});
-		screen.getByTestId('choose-chip').click();
-		await waitFor(() => expect(screen.getByTestId('inbox-filter')).toHaveTextContent('patients'));
+		// Rewrites R-11's chip (Π4 / U-65.4 → U-182.3: no chips any more): the doctor's search is what the pages keep.
+		screen.getByTestId('type-search').click();
+		await waitFor(() => expect(screen.getByTestId('inbox-search')).toHaveTextContent('[κα]'));
 		await session?.signOut();
-		await waitFor(() => expect(screen.getByTestId('inbox-filter')).toHaveTextContent('all'));
+		await waitFor(() => expect(screen.getByTestId('inbox-search')).toHaveTextContent('[]'));
 	});
 });
 
@@ -90,6 +91,28 @@ describe('the unread badge (U-84 Π5, U-84.7)', () => {
 		await vi.advanceTimersByTimeAsync(59_000);
 		expect(calls).toHaveLength(1);
 		await vi.advanceTimersByTimeAsync(2_000);
+		expect(calls).toHaveLength(2);
+	});
+
+	it('🔴 D-W51-77 · U-182.3: σήμα ανά λειτουργία — the patient’s pages count `side=patient`, the doctor’s dashboard `side=doctor`; never both', async () => {
+		draw('member');
+		await waitFor(() => expect(calls).toHaveLength(1));
+		expect(calls[0]).toContain('side=patient');
+		cleanup();
+		calls = [];
+		page.url = new URL('https://edoctor.test/en/doctor') as typeof page.url;
+		draw('member');
+		await waitFor(() => expect(calls).toHaveLength(1));
+		expect(calls[0]).toContain('/messaging/unread-count?side=doctor');
+		expect(calls.some((url) => url.includes('side=all') || !url.includes('side='))).toBe(false);
+	});
+
+	it('every 30 s on the doctor’s messages too', async () => {
+		page.url = new URL('https://edoctor.test/doctor/messages') as typeof page.url;
+		draw('member');
+		await waitFor(() => expect(calls).toHaveLength(1));
+		expect(calls[0]).toContain('side=doctor');
+		await vi.advanceTimersByTimeAsync(31_000);
 		expect(calls).toHaveLength(2);
 	});
 

@@ -130,7 +130,7 @@ describe('screen 31 · «Η κράτησή σας καταχωρήθηκε» (re
 		expect(row('status')).toHaveTextContent('Σε αναμονή');
 		expect(row('date-time')).toHaveTextContent('Κυριακή 8 Νοεμβρίου · 09:30');
 		expect(row('note')).toHaveTextContent('Πόνος στο γόνατο');
-		expect(card.querySelector('[data-slot="booking-change"]')).toBeNull();
+		expect(card.querySelector('[data-slot="change-link"]')).toBeNull();
 	});
 
 	it('review w3-w3 R1 MINOR-2 (D-06): the reason, the visitor and the cost are the appointment’s own as booked — not today’s service, names or price', async () => {

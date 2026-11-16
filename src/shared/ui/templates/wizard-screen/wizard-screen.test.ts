@@ -223,6 +223,20 @@ describe('WizardScreen (the steps’ frame, record §6.3)', () => {
 		expect(document.querySelectorAll('[data-slot="wizard-screen-pill"]')).toHaveLength(0);
 	});
 
+	it('wave 5.1 · screen 64: a page with nothing to do at its end has no bar, not even its line', () => {
+		render(Harness, { props: { withProgress: false, withActions: false, withFooter: false } });
+		expect(slot('wizard-screen-bar')).toBeNull();
+		expect(screen.getByRole('main')).toBeInTheDocument();
+	});
+
+	it('wave 5.1 · screen 64: what the caller puts at the start stands there below 744 only; from 744 the mark takes its place', () => {
+		render(Harness, { props: { withLeading: true } });
+		const leading = slot('wizard-screen-leading');
+		expect(leading).toHaveClass('mr-auto', 'tablet:hidden');
+		expect(within(leading).getByRole('link', { name: 'Πίσω' })).toBeInTheDocument();
+		expect(slot('wizard-screen-brand')).toHaveClass('hidden', 'tablet:flex');
+	});
+
 	it('U-65.6 (negative): the caller’s words are text, never markup — a title made of a tag stays its letters', () => {
 		const hostile = '<img src=x onerror="alert(1)">';
 		render(Harness, { props: { title: hostile, subtitle: '</p><script>x</script>' } });

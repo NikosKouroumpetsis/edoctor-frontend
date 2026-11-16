@@ -5,8 +5,10 @@
 	// 🔴 U-129.1: stage 2 wears the prototype's own clinic (`33-doctor/doctor.js:30`), not a set's house.
 	import { HouseCross as OfficeIcon } from '$shared/ui/icons/house-cross';
 	import { m } from '$paraglide/messages.js';
+	import { getDoctorStandingOptional } from '$shared/state/doctor-standing';
 	import { InlineNotice } from '$shared/ui/molecules/inline-notice';
 	import { Button } from '$shared/ui/primitives/button';
+	import { Spinner } from '$shared/ui/primitives/spinner';
 	import { WizardScreen } from '$shared/ui/templates/wizard-screen';
 	import { doctorOnboardingProgressQuery } from '$modules/doctor-onboarding/api/progress';
 	import {
@@ -17,6 +19,7 @@
 	import BrandLink from '../components/brand-link.svelte';
 	import { useDoctorOnboardingStep } from '../hooks/use-step.svelte';
 	import type { DoctorOnboardingContext } from '../types';
+	import Application from './application.svelte';
 
 	let props: DoctorOnboardingContext = $props();
 
@@ -28,6 +31,19 @@
 		buildDoctorOnboardingOverviewContent(controller.progress ?? null, props.locale)
 	);
 	const stages = $derived(buildDoctorOnboardingStages(props.locale));
+	// 🔴 U-183.5 · D-W51-16 (wave 5.1, screen 64): a COMPLETED registration without a licence reads the application's page
+	// in the place of the overview's one message; a licensed one the overview as before. A completed one waits for the
+	// doctor standing before either is drawn, so neither shows and turns into the other.
+	const standing = getDoctorStandingOptional();
+	const completed = $derived(controller.progress?.state === 'COMPLETED');
+	const application = $derived(
+		completed && standing?.known === true && standing.kind === 'pending'
+			? controller.progress
+			: undefined
+	);
+	const judging = $derived(
+		completed && Boolean(standing) && standing?.known !== true && !standing?.failed
+	);
 	const ICONS = [UserIcon, OfficeIcon, DoneIcon];
 	// A member's button waits for the session and the progress; a guest's is there at once.
 	const waiting = $derived(
@@ -80,7 +96,11 @@
 <svelte:head>
 	<title
 		>{m.doctor_onboarding_frame_meta_title(
-			{ title: m.doctor_onboarding_overview_title({}, options) },
+			{
+				title: application
+					? m.doctor_onboarding_done_title({}, options)
+					: m.doctor_onboarding_overview_title({}, options)
+			},
 			options
 		)}</title
 	>
@@ -111,81 +131,94 @@
 	{/if}
 {/snippet}
 
-<!-- 33 · Επισκόπηση (record §6.4): the title (30/600, 40/700 from 744), a sign-up in progress says so with the day it
+{#if application}
+	<Application {...props} {controller} progress={application} />
+{:else if judging}
+	<WizardScreen {brand} pills={controller.pills()} testId="doctor-onboarding-overview">
+		<div class="flex justify-center py-section" data-testid="doctor-onboarding-loading">
+			<Spinner tone="muted" />
+		</div>
+	</WizardScreen>
+{:else}
+	<!-- 33 · Επισκόπηση (record §6.4): the title (30/600, 40/700 from 744), a sign-up in progress says so with the day it
      would be deleted, then the three stages — a number in a circle, the title and its line, the stage's glyph on the
      right; one round button below («Ξεκινήστε» / «Συνέχεια»), none for a finished or a locked sign-up. From 1128 the
      title and the stages side by side. No colour under the pointer (U-100). -->
-<WizardScreen
-	{brand}
-	pills={controller.pills()}
-	footer={content.button || !controller.signedIn ? footer : undefined}
-	testId="doctor-onboarding-overview"
->
-	<div
-		class="flex flex-col gap-6 laptop:grid laptop:grid-cols-2 laptop:items-center laptop:gap-section-lg"
+	<WizardScreen
+		{brand}
+		pills={controller.pills()}
+		footer={content.button || !controller.signedIn ? footer : undefined}
+		testId="doctor-onboarding-overview"
 	>
-		<div class="flex flex-col gap-4">
-			<h1
-				class="text-heading-xl font-semibold text-foreground tablet:text-display-md tablet:font-bold"
-			>
-				{m.doctor_onboarding_overview_title({}, options)}
-			</h1>
-			{#if controller.loadError}
-				<InlineNotice
-					variant="danger"
-					message={m.doctor_onboarding_frame_load_error({}, options)}
-					actionLabel={m.doctor_onboarding_frame_retry({}, options)}
-					onAction={controller.retry}
-					testId="doctor-onboarding-load-error"
-				/>
-			{/if}
-			{#if content.resume}
-				<div
-					class="flex flex-col gap-1 rounded-md bg-muted px-4 py-3.5"
-					data-testid="doctor-onboarding-resume"
+		<div
+			class="flex flex-col gap-6 laptop:grid laptop:grid-cols-2 laptop:items-center laptop:gap-section-lg"
+		>
+			<div class="flex flex-col gap-4">
+				<h1
+					class="text-heading-xl font-semibold text-foreground tablet:text-display-md tablet:font-bold"
 				>
-					<p class="text-body-sm text-foreground">{content.resume}</p>
-					{#if content.resumeDeadline}
-						<p class="text-body-sm text-muted-foreground" data-testid="doctor-onboarding-deadline">
-							{content.resumeDeadline}
-						</p>
-					{/if}
-				</div>
-			{/if}
-			{#if content.notice}
-				<p
-					class="rounded-md bg-muted px-4 py-3.5 text-body-sm text-foreground"
-					role="status"
-					data-testid="doctor-onboarding-notice"
-				>
-					{content.notice}
-				</p>
-			{/if}
-			{#if failure || controller.saveError}
-				<InlineNotice
-					variant="danger"
-					message={failure ?? controller.saveError ?? ''}
-					testId="doctor-onboarding-start-error"
-				/>
-			{/if}
-		</div>
-		<ol class="flex flex-col" data-testid="doctor-onboarding-stages">
-			{#each stages as stage, index (stage.number)}
-				{@const Icon = ICONS[index]}
-				<li class="flex flex-row gap-4 border-t border-border py-5 first:border-t-0 first:pt-0">
-					<span
-						aria-hidden="true"
-						class="grid size-control-xs shrink-0 place-items-center rounded-full bg-chip text-body-sm font-semibold text-foreground"
+					{m.doctor_onboarding_overview_title({}, options)}
+				</h1>
+				{#if controller.loadError}
+					<InlineNotice
+						variant="danger"
+						message={m.doctor_onboarding_frame_load_error({}, options)}
+						actionLabel={m.doctor_onboarding_frame_retry({}, options)}
+						onAction={controller.retry}
+						testId="doctor-onboarding-load-error"
+					/>
+				{/if}
+				{#if content.resume}
+					<div
+						class="flex flex-col gap-1 rounded-md bg-muted px-4 py-3.5"
+						data-testid="doctor-onboarding-resume"
 					>
-						{stage.number}
-					</span>
-					<span class="flex min-w-0 flex-1 flex-col gap-0.5">
-						<span class="text-title-xs font-semibold text-foreground">{stage.title}</span>
-						<span class="text-body-sm text-muted-foreground">{stage.body}</span>
-					</span>
-					<Icon aria-hidden="true" class="size-control-sm shrink-0 self-center text-foreground" />
-				</li>
-			{/each}
-		</ol>
-	</div>
-</WizardScreen>
+						<p class="text-body-sm text-foreground">{content.resume}</p>
+						{#if content.resumeDeadline}
+							<p
+								class="text-body-sm text-muted-foreground"
+								data-testid="doctor-onboarding-deadline"
+							>
+								{content.resumeDeadline}
+							</p>
+						{/if}
+					</div>
+				{/if}
+				{#if content.notice}
+					<p
+						class="rounded-md bg-muted px-4 py-3.5 text-body-sm text-foreground"
+						role="status"
+						data-testid="doctor-onboarding-notice"
+					>
+						{content.notice}
+					</p>
+				{/if}
+				{#if failure || controller.saveError}
+					<InlineNotice
+						variant="danger"
+						message={failure ?? controller.saveError ?? ''}
+						testId="doctor-onboarding-start-error"
+					/>
+				{/if}
+			</div>
+			<ol class="flex flex-col" data-testid="doctor-onboarding-stages">
+				{#each stages as stage, index (stage.number)}
+					{@const Icon = ICONS[index]}
+					<li class="flex flex-row gap-4 border-t border-border py-5 first:border-t-0 first:pt-0">
+						<span
+							aria-hidden="true"
+							class="grid size-control-xs shrink-0 place-items-center rounded-full bg-chip text-body-sm font-semibold text-foreground"
+						>
+							{stage.number}
+						</span>
+						<span class="flex min-w-0 flex-1 flex-col gap-0.5">
+							<span class="text-title-xs font-semibold text-foreground">{stage.title}</span>
+							<span class="text-body-sm text-muted-foreground">{stage.body}</span>
+						</span>
+						<Icon aria-hidden="true" class="size-control-sm shrink-0 self-center text-foreground" />
+					</li>
+				{/each}
+			</ol>
+		</div>
+	</WizardScreen>
+{/if}

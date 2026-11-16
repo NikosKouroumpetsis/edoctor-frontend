@@ -60,10 +60,9 @@ describe('doctor-onboarding · lib/values (🔴 U-112.2: edits over the server�
 				licenseObtainedDate: '2001-06-15T00:00:00.000Z'
 			}
 		});
-		expect(readDoctorContactEmail({}, progress)).toBe('dr@example.test');
-		expect(readDoctorContactEmail({ contactEmail: { notificationEmail: 'x' } }, progress)).toBe(
-			'x'
-		);
+		// 🔴 U-169 · D-W51-12: the one on file is only its mask — the field asks a new address, never pre-filled.
+		expect(readDoctorContactEmail({})).toBe('');
+		expect(readDoctorContactEmail({ contactEmail: { notificationEmail: 'x' } })).toBe('x');
 		expect(readDoctorProfessionalValues({}, progress)).toEqual({
 			professionalId: 'p-1',
 			licenseNumber: '123',

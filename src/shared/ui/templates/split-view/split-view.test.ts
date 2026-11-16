@@ -220,4 +220,57 @@ describe('SplitView', () => {
 		expect(utility('grid-split')).toContain('var(--spacing-split-list-w) minmax(0, 1fr)');
 		expect(utility('grid-inbox')).toContain('var(--spacing-inbox-list-w) minmax(0, 1fr)');
 	});
+
+	it('D-W51-36: `from="laptop"` stands the columns side by side from 1128 — the list of 460, each column scrolling, the right one centred — and from 950 stays ONE column', () => {
+		render(Harness, { props: { from: 'laptop', centred: true } });
+		const root = screen.getByTestId('split');
+		expect(root).toHaveAttribute('data-from', 'laptop');
+		expect(root).toHaveClass('laptop:grid', 'laptop:h-split', 'laptop:grid-split');
+		expect(list()).toHaveClass(
+			'laptop:overflow-y-auto',
+			'laptop:overscroll-contain',
+			'laptop:border-r',
+			'laptop:border-border/60'
+		);
+		expect(pane()).toHaveClass(
+			'hidden',
+			'laptop:block',
+			'laptop:min-h-0',
+			'laptop:overflow-y-auto',
+			'laptop:px-pane-inset',
+			'laptop:pt-reading-gap',
+			'laptop:pb-pane-inset-lg'
+		);
+		expect(centre()).toHaveClass('laptop:mx-auto', 'laptop:w-full', 'laptop:max-w-split-solo');
+		// Nothing of 950: from 950 to 1127 one column, the list or what it opened.
+		const every =
+			root.className + list().className + pane().className + (centre()?.className ?? '');
+		expect(every).not.toMatch(/(^|\s)split:/u);
+		expect(every).not.toMatch(/\[/u);
+	});
+
+	it('D-W51-36: `from="laptop"` with `open` shows only what the list opened below 1128, both from it; `solo` centres one column from 1128', () => {
+		const view = render(Harness, { props: { from: 'laptop', open: true } });
+		expect(list()).toHaveClass('hidden', 'laptop:block');
+		expect(pane()).not.toHaveClass('hidden');
+		view.unmount();
+		render(Harness, { props: { from: 'laptop', solo: true } });
+		const root = screen.getByTestId('split');
+		expect(root).toHaveClass('laptop:min-h-page');
+		lacks(root, 'laptop:grid', 'split:grid', 'split:min-h-page');
+		expect(list()).toHaveClass('laptop:mx-auto', 'laptop:w-full', 'laptop:max-w-split-solo');
+	});
+
+	it('D-W51-36 (negative): without `from` nothing changes — the 950 of every list until 5.1, no class of 1128’s own', () => {
+		render(Harness, { props: { centred: true } });
+		const root = screen.getByTestId('split');
+		expect(root).toHaveAttribute('data-from', 'split');
+		expect(root).toHaveClass('split:grid', 'split:h-split', 'split:grid-split');
+		expect(list()).toHaveClass(...SPLIT_LIST);
+		expect(pane()).toHaveClass('split:block', ...SPLIT_PANE, ...CENTRED_INSET);
+		expect(centre()).toHaveClass(...CENTRE);
+		lacks(root, 'laptop:grid', 'laptop:h-split', 'laptop:grid-split');
+		lacks(list(), 'laptop:block', 'laptop:overflow-y-auto', 'laptop:border-r');
+		lacks(pane(), 'laptop:block', 'laptop:min-h-0', 'laptop:px-pane-inset');
+	});
 });

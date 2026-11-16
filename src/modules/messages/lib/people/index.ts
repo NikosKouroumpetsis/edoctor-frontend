@@ -12,7 +12,9 @@ export type CounterpartFacts = {
 	 * conversation's side as the server says it, never a guess from the name. A patient's name, and no name, as they are.
 	 */
 	sentenceName: string;
-	/** Their specialty, or «Ασθενής». */
+	/**
+	 * Their specialty; a patient's is empty — 🔴 D-W51-86: the appointment's line takes its place, never «Ασθενής».
+	 */
 	subtitle: string;
 	initial: string;
 	imageUrl: string | null;
@@ -27,6 +29,18 @@ export function nameInitial(name: string): string {
 	return ([...bare][0] ?? '').toLocaleUpperCase();
 }
 
+/** A patient's two initials, as the doctor's lists draw them («Ιωάννα Καρρά» ⇒ «ΙΚ»), whole characters. */
+export function nameInitials(name: string): string {
+	return name
+		.trim()
+		.split(/\s+/u)
+		.filter(Boolean)
+		.slice(0, 2)
+		.map((word) => [...word][0] ?? '')
+		.join('')
+		.toLocaleUpperCase();
+}
+
 export function buildCounterpartFacts(
 	counterpart: MessagingCounterpartView | null | undefined,
 	locale: SupportedLocale
@@ -37,10 +51,8 @@ export function buildCounterpartFacts(
 	return {
 		name,
 		sentenceName: isDoctor && known ? withDoctorTitle(known) : name,
-		subtitle: isDoctor
-			? (counterpart?.specialty?.trim() ?? '')
-			: m.messages_patient({}, { locale }),
-		initial: nameInitial(name),
+		subtitle: isDoctor ? (counterpart?.specialty?.trim() ?? '') : '',
+		initial: isDoctor ? nameInitial(name) : nameInitials(name),
 		imageUrl: isDoctor && counterpart?.photoUrl ? resolveMediaUrl(counterpart.photoUrl) : null,
 		isDoctor,
 		slug: isDoctor ? (counterpart?.slug ?? null) : null

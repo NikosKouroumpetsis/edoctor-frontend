@@ -1207,6 +1207,35 @@ appointment,relatives,phone,keys}` (the generated contract's views and bodies, `
   dot, the row then named «Ειδοποιήσεις, νέες»), the pill's dot lights for it too, and the «Προφίλ» page has the
   module's `NotificationBell` at the end of a member's title, below 744 only — the screen hands it to the tab
   (`headerAction`). The deletion's preview names the new kind `notificationInboxItems` («Ειδοποιήσεις»).
+- The page of the cancel link (wave 5.1, card w51-w8; U-198.1, D-W51-72) at `/a/<token>`, no session: ONE route
+  `routes/a/[token]` whose `+page.server.ts` reads the token at the boundary (`modules/appointments/lib/cancel-link`
+  `readAppointmentCancelToken`, 16 characters of base64url, else `null` and no call) and sets `Cache-Control:
+no-store`, `Referrer-Policy: no-referrer`, `X-Robots-Tag: noindex, nofollow` (guarded by its `page.server.test.ts`)
+  ⇒ `screens/a/[token]` ⇒ the module's slice `ui/cancel-link` (its own read and write without cookies, `api/cancel-link`;
+  the 53's reasons, terms and `ChangeContext`). The frame (`site-frame/lib/frame` `CANCEL_LINK_PAGES`): the header
+  `logo` (the brand alone), no footer, no capsule.
+- The doctor's «Οι ασθενείς μου» (wave 5.1, screen 73, card w51-w9; D-W51-73): ONE route
+  `routes/doctor/(dashboard)/patients/[...path]` (its `+page.ts` reads the rest against the closed list of
+  `lib/paths` `readDoctorPatientsAddress`, else 404) ⇒ `screens/doctor/patients/[...path]` (the addresses, the
+  `DoctorPatientMemory` of the page tree) ⇒ the `doctor-dashboard` slices `ui/patients` (the list, `SplitView` from
+  1128 with the card as its pane), `ui/patient` (the card), `ui/record` («Στοιχεία ασθενή») and `ui/merge` (the join),
+  each a screen of its own in the card's place (U-102); the facts in `api/patients`, the words in `lib/patients`.
+- The doctor's messages (wave 5.1, screen 74, card w51-w10; D-W51-85 … 87): ONE route
+  `routes/doctor/(dashboard)/messages/[...path]` (its `+page.ts` reads the rest against the closed list of
+  `messages/lib/paths` `readDoctorMessagesAddress`: the list, `/<id>`, `/archive`, `/new?kind=account|relative&id=`,
+  else 404) ⇒ `screens/doctor/messages/[...path]` (the doctor's addresses, the card of 73 for a conversation the doctor
+  starts — `page/new.svelte` with `hooks/use-new` reading `doctor-dashboard`'s `useDoctorPatientCard` and
+  `lib/patients` `doctorPatientConversationFacts`) ⇒ the messages module's ONE slice `ui/inbox`, with `side="doctor"`
+  (the patient's three screens pass `side="patient"`). The frame (`site-frame/lib/frame` `DOCTOR_DASHBOARD_PAGES`) draws
+  none of its own there; the doctor's frame (`lib/paths` `isDoctorMessagesTab` / `isDoctorMessagesPushedPage`) makes
+  «Μηνύματα» the current tab and pushes a conversation, `/new` and the archive over the tabs below 744.
+- The doctor's notifications (wave 5.1, screen 75, card w51-w11; D-W51-89 … 91): `routes/doctor/(dashboard)/notifications`
+  (its `+page.ts` reads `?filter=` with screen 63's `readNotificationsAddress`) ⇒ `screens/doctor/notifications` (the
+  doctor's addresses: «←» `/doctor/menu`, no gear, a line's 68 `/doctor/appointments/<id>` opened one step on through
+  `useHistorySteps('doctorNotification')`) ⇒ the notifications module's ONE slice `ui/inbox` with `side="doctor"` (the
+  patient's `/notifications` passes `side="patient"`). `DOCTOR_DASHBOARD_PAGES` holds `/doctor/notifications` (no bar of
+  the patient's); `lib/paths` `isDoctorMenuTab` keeps «Μενού» current and the capsule there; the ☰ row and the bell of
+  «Μενού» lead there (`doctorFramePaths.notifications`, the end of D-W51-18).
 - The patient's facts and rules (wave 4.0, P-W4 §4.7, card W4-3) in the same module: `api/appointment` (+ the list's
   infinite read `appointmentListQuery`, the ONE scan of the upcoming `upcomingScanQuery` (D-W4-21), the change
   `changeAppointment` and `cancelAppointment` with `readAppointmentChangeFailure`, `storeAppointmentDetail`; the facts

@@ -13,7 +13,7 @@ import type {
 	RatingSubmitRequest
 } from '$modules/appointments/api/rating';
 import { RATING_ASPECTS, RATING_COMMENT_MAX_LENGTH } from '$modules/appointments/config';
-import { appointmentDateLabel } from '$modules/appointments/lib/when';
+import { appointmentDateLabel } from '$shared/lib/appointment-when';
 
 /*
  * Screen 54 «Κριτική επίσκεψης» and screen 51's «Η κριτική σας» in words and rules (record §10.2, U-138, P-W4 §4.5).

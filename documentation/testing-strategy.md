@@ -408,7 +408,7 @@ In place:
   `screens/ratings/[invitationId]` hold no rune state, effect, session, width or read of the appointments' own (L-1:
   the module's `useAppointmentsPages` tells them); the forms of screens 52 (note), 53 and 54 are `createForm` with
   `form.field`, no field in a rune (L-2); only the module's `api/` pages through the appointments (the upcoming «to
-  the end, ten pages»); a relationship's word is read only by `lib/relatives/words` (the neutral ones also by the
+  the end, ten pages»); a relationship's word is read only by `shared/lib/relative-words` (the neutral ones also by the
   form's options); the Messages' inbox stands on the `SplitView` with its `inbox` widths and no columns of its own;
   every `createQueries` is read through a `combine` that answers ONE object (never an array, MINOR-2 of review
   w4-w9-r1); `Session.expired` is read by `useKeptThroughExpiry` alone (D-W4-78) — and once by the auth host, the

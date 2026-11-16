@@ -42,6 +42,11 @@
 		subtitle?: string;
 		/** The mark at the top bar's start, from 744 (the caller's home link). */
 		brand?: Snippet;
+		/**
+		 * What stands at the top bar's start below 744, where the mark does not show (wave 5.1 · screen 64: the «‹» of a
+		 * page opened over another, `64-switch/sw.js:144`); from 744 the mark takes its place.
+		 */
+		leading?: Snippet;
 		/** The pills at the top bar's end, in reading order. */
 		pills?: WizardScreenPill[];
 		/** The segmented progress over the bar; none without it (an overview, the last page). */
@@ -69,6 +74,7 @@
 		title,
 		subtitle,
 		brand,
+		leading,
 		pills = [],
 		progress,
 		back,
@@ -99,6 +105,11 @@
 		data-slot="wizard-screen-header"
 		class="flex h-bar-top shrink-0 flex-row items-center justify-end gap-2 px-gutter-sm tablet:h-wizard-top tablet:gap-3 tablet:px-gutter-lg"
 	>
+		{#if leading}
+			<div data-slot="wizard-screen-leading" class="mr-auto flex items-center tablet:hidden">
+				{@render leading()}
+			</div>
+		{/if}
 		{#if brand}
 			<div data-slot="wizard-screen-brand" class="mr-auto hidden items-center tablet:flex">
 				{@render brand()}
@@ -137,45 +148,48 @@
 		</div>
 	</main>
 
-	<div
-		data-slot="wizard-screen-bar"
-		class={cn('fixed inset-x-0 bottom-0 z-40 bg-card', !progress && 'border-t border-border')}
-	>
-		{#if progress}
-			<StepProgress
-				steps={progress.steps}
-				currentStep={progress.currentStep}
-				progress={progress.fill}
-				aria-label={progress.label}
-				data-testid={testId ? `${testId}-progress` : undefined}
-			/>
-		{/if}
-		{#if footer}
-			<div
-				data-slot="wizard-screen-footer"
-				class="px-5 pt-3 pb-safe-area-action tablet:px-gutter-lg"
-			>
-				{@render footer()}
-			</div>
-		{:else if back && next}
-			<ActionBar
-				secondaryAppearance="link"
-				secondaryLabel={back.label}
-				onSecondaryClick={back.onClick}
-				secondaryDisabled={back.disabled}
-				secondaryTestId={back.testId}
-				primaryShape="pill"
-				primaryTone="accent"
-				primaryLabel={next.label}
-				onPrimaryClick={next.onClick}
-				primaryDisabled={next.disabled}
-				primaryLoading={next.loading}
-				primaryTestId={next.testId}
-				hover={false}
-				class="tablet:px-gutter-lg"
-			/>
-		{/if}
-	</div>
+	<!-- A page with nothing to do at its end (screen 64's application page) has no bar, not even its line. -->
+	{#if progress || footer || (back && next)}
+		<div
+			data-slot="wizard-screen-bar"
+			class={cn('fixed inset-x-0 bottom-0 z-40 bg-card', !progress && 'border-t border-border')}
+		>
+			{#if progress}
+				<StepProgress
+					steps={progress.steps}
+					currentStep={progress.currentStep}
+					progress={progress.fill}
+					aria-label={progress.label}
+					data-testid={testId ? `${testId}-progress` : undefined}
+				/>
+			{/if}
+			{#if footer}
+				<div
+					data-slot="wizard-screen-footer"
+					class="px-5 pt-3 pb-safe-area-action tablet:px-gutter-lg"
+				>
+					{@render footer()}
+				</div>
+			{:else if back && next}
+				<ActionBar
+					secondaryAppearance="link"
+					secondaryLabel={back.label}
+					onSecondaryClick={back.onClick}
+					secondaryDisabled={back.disabled}
+					secondaryTestId={back.testId}
+					primaryShape="pill"
+					primaryTone="accent"
+					primaryLabel={next.label}
+					onPrimaryClick={next.onClick}
+					primaryDisabled={next.disabled}
+					primaryLoading={next.loading}
+					primaryTestId={next.testId}
+					hover={false}
+					class="tablet:px-gutter-lg"
+				/>
+			{/if}
+		</div>
+	{/if}
 </div>
 
 <!-- A pill: the visible 36 (40 from 744) inside its 48 target, 13/500 (14 from 744) on a 1 px line, 12 a side below 360;

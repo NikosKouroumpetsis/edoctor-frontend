@@ -18,7 +18,7 @@ const wire = {
 	completedAt: null,
 	missing: ['OFFICE_ADDRESS', 'SOMETHING_NEW', 'TERMS'],
 	basicInfo: { firstName: 'Μαρία', lastName: 'Τ.', dateOfBirth: '1985-04-12', gender: 'FEMALE' },
-	contactEmail: { notificationEmail: 'dr@example.test', verified: true },
+	contactEmail: { notificationEmailMasked: 'd***r@example.test', verified: true },
 	professional: { professionalId: 'p-1', licenseNumber: null, licenseObtainedDate: null },
 	office: {
 		streetLine: 'Καραΐσκου 74',
@@ -72,6 +72,23 @@ describe('doctor-onboarding · api/progress (contract §5.1, §5.2)', () => {
 		expect(progress?.calendar.category).toBe('GOOGLE');
 	});
 
+	it('🔴 U-169 · D-W51-12: the contact email only as the server hides it; (negative) a whole address in its place is none', () => {
+		expect(mapDoctorOnboardingProgress(wire as never)?.contactEmail).toEqual({
+			notificationEmailMasked: 'd***r@example.test',
+			verified: true
+		});
+		const whole = mapDoctorOnboardingProgress({
+			...wire,
+			contactEmail: {
+				notificationEmailMasked: 'dr@example.test',
+				notificationEmail: 'dr@example.test',
+				verified: true
+			}
+		} as never);
+		expect(whole?.contactEmail).toEqual({ notificationEmailMasked: null, verified: true });
+		expect(JSON.stringify(whole)).not.toContain('dr@example.test');
+	});
+
 	it('(negative) an answer that is no progress is none; an office without a point is none', () => {
 		expect(mapDoctorOnboardingProgress(null)).toBeNull();
 		expect(mapDoctorOnboardingProgress(broken({ state: 'ADMIN' }))).toBeNull();
@@ -108,7 +125,7 @@ describe('doctor-onboarding · api/progress (contract §5.1, §5.2)', () => {
 			completedAt: null,
 			missing: [],
 			basicInfo: { firstName: null, lastName: null, dateOfBirth: null, gender: null },
-			contactEmail: { notificationEmail: null, verified: false },
+			contactEmail: { notificationEmailMasked: null, verified: false },
 			professional: { professionalId: null, licenseNumber: null, licenseObtainedDate: null },
 			office: null,
 			servicePricing: { price: null, customDurationInMinutes: null },

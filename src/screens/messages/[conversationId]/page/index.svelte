@@ -9,4 +9,4 @@
 </script>
 
 <!-- 🔴 U-84 Π2: a conversation: its own screen below 950, beside the list from it. -->
-<Inbox locale={screen.locale} links={screen.links} {conversationId} />
+<Inbox locale={screen.locale} links={screen.links} side="patient" {conversationId} />

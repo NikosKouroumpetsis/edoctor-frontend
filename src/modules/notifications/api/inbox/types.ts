@@ -1,4 +1,11 @@
 import type { NotificationInboxItemView } from '$shared/lib/api-client';
+import type { ModeSide } from '$shared/lib/mode-side';
+
+/**
+ * 🔴 D-W51-81 · D-W51-89: the side of the account a request reads (`?side=`) — the patient's list (screen 63) or the
+ * doctor's (screen 75). A line is of ONE side; an account that is not a doctor reads an empty doctor's side.
+ */
+export type NotificationInboxSide = ModeSide;
 
 /** The list's three choices as the request names them (`?filter=`, D-W45-46): «Νέες», «Προηγούμενες», «Όλες». */
 export type NotificationInboxFilter = 'new' | 'previous' | 'all';

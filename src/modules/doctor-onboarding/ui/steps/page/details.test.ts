@@ -266,18 +266,27 @@ describe('34 · the contact email (record §6.4: only when the account has none)
 				dateOfBirth: '1985-04-12',
 				gender: 'FEMALE'
 			},
-			contactEmail: { notificationEmail: null, verified: false }
+			contactEmail: { notificationEmailMasked: null, verified: false }
 		});
+	// 🔴 U-169 · D-W51-12 (w51-b1): the server answers the address only hidden; the one typed stays in this tab's draft.
+	const unverified = () => ({
+		...withoutEmail(),
+		contactEmail: { notificationEmailMasked: 'd***r@example.test', verified: false }
+	});
+	const typed = (ready: Handle) =>
+		ready.draft.update('contactEmail', { notificationEmail: 'dr@example.test' });
 
 	it('«Συνέχεια» writes the address, sends the code to it and opens the code’s screen as one more page', async () => {
 		server = withoutEmail();
-		draw('email');
+		const { handle: drawn } = draw('email');
 		await ready();
 		expect(next()).toHaveTextContent('Συνέχεια');
 		expect(next()).toBeDisabled();
 		await user().type(screen.getByTestId('doctor-onboarding-email-field'), ' dr@example.test ');
 		await user().click(next());
 		await waitFor(() => opened('/doctor/onboarding/email/code', 1));
+		// D-W51-12: the typed address waits in the draft for its code (the server keeps only its mask).
+		expect(drawn.draft.edits.contactEmail?.notificationEmail?.trim()).toBe('dr@example.test');
 		expect(writes()).toEqual([
 			{
 				path: '/doctor/onboarding/notification-email',
@@ -309,17 +318,16 @@ describe('34 · the contact email (record §6.4: only when the account has none)
 		expect(vi.mocked(goto)).not.toHaveBeenCalled();
 	});
 
+	// Rewrites «the code … to the address on file» by D-W51-12 (U-169): the address sent with the code is the one typed
+	// in this tab (the draft), and the screen says back the server's mask of it; once verified the draft lets it go.
 	it('the code: «Στείλαμε έναν κωδικό 6 ψηφίων στο …», «Επιβεβαίωση» locked until the 6 digits, then the address and the code are verified and the specialty opens', async () => {
-		server = {
-			...withoutEmail(),
-			contactEmail: { notificationEmail: 'dr@example.test', verified: false }
-		};
+		server = unverified();
 		answers['POST /doctor/onboarding/notification-email/verify'] = () =>
 			json({ ...server, missing: ['PROFESSIONAL'] });
-		draw('email-code', { depth: 1 });
+		const { handle: drawn } = draw('email-code', { depth: 1, prepare: typed });
 		await ready();
 		expect(
-			screen.getByText('Στείλαμε έναν κωδικό 6 ψηφίων στο dr@example.test.')
+			screen.getByText('Στείλαμε έναν κωδικό 6 ψηφίων στο d***r@example.test.')
 		).toBeInTheDocument();
 		expect(next()).toHaveTextContent('Επιβεβαίωση');
 		expect(next()).toBeDisabled();
@@ -333,15 +341,13 @@ describe('34 · the contact email (record §6.4: only when the account has none)
 				body: { notificationEmail: 'dr@example.test', code: '123456' }
 			}
 		]);
+		expect(drawn.draft.edits.contactEmail).toBeUndefined();
 	});
 
 	it('(negative) a wrong code empties the boxes and says so in the sign-in’s words; «Αποστολή νέου κωδικού» waits the 60″ after the first code, asking nothing', async () => {
-		server = {
-			...withoutEmail(),
-			contactEmail: { notificationEmail: 'dr@example.test', verified: false }
-		};
+		server = unverified();
 		answers['POST /doctor/onboarding/notification-email/verify'] = () => refusal(400, 'wrong');
-		draw('email-code', { depth: 1 });
+		draw('email-code', { depth: 1, prepare: typed });
 		await ready();
 		await user().type(screen.getByTestId('doctor-onboarding-code-input'), '000000');
 		await user().click(next());
@@ -363,6 +369,25 @@ describe('34 · the contact email (record §6.4: only when the account has none)
 		await waitFor(() => opened('/doctor/onboarding/email', 0, true));
 	});
 
+	it('🔴 U-169 · D-W51-12 (negative): a reload on the code’s screen keeps no address (the server answers only its mask) — the address’s screen asks it again; the field is never pre-filled with the one on file, which shows as its mask', async () => {
+		server = unverified();
+		const reloaded = draw('email-code');
+		await waitFor(() => opened('/doctor/onboarding/email', 0, true));
+		reloaded.view.unmount();
+		vi.mocked(goto).mockClear();
+		server = {
+			...unverified(),
+			contactEmail: { notificationEmailMasked: 'd***r@example.test', verified: true }
+		};
+		draw('email');
+		await ready();
+		expect(screen.getByTestId('doctor-onboarding-email-field')).toHaveValue('');
+		expect(screen.getByTestId('doctor-onboarding-email-current')).toHaveTextContent(
+			'Τρέχον email: d***r@example.test'
+		);
+		expect(document.body.textContent).not.toContain('dr@example.test');
+	});
+
 	it('🔴 D-W3-39 (review w3-w6 R2 NIT-3): the code goes out in the PAGE’s language — «Συνέχεια» (34) and «Αποστολή νέου» (34b) name `?lang=` from the context', async () => {
 		const codesSent = () =>
 			langs.filter((call) => call.path.endsWith('/notification-email/verification-code'));
@@ -375,17 +400,15 @@ describe('34 · the contact email (record §6.4: only when the account has none)
 		expect(codesSent()[0].lang).toBe('en');
 		english.view.unmount();
 
-		// A reload on the code's screen: no code has just left, so «Αποστολή νέου» sends one at once.
-		server = {
-			...withoutEmail(),
-			contactEmail: { notificationEmail: 'dr@example.test', verified: false }
-		};
-		const greek = draw('email-code');
+		// The code's screen opened again in the same tab (the typed address in the draft, D-W51-12) with no code just
+		// sent: «Αποστολή νέου» sends one at once.
+		server = unverified();
+		const greek = draw('email-code', { prepare: typed });
 		await ready();
 		await user().click(screen.getByTestId('doctor-onboarding-code-resend'));
 		await waitFor(() => expect(codesSent()).toHaveLength(2));
 		greek.view.unmount();
-		draw('email-code', { locale: 'en' });
+		draw('email-code', { locale: 'en', prepare: typed });
 		await ready();
 		await user().click(screen.getByTestId('doctor-onboarding-code-resend'));
 		await waitFor(() => expect(codesSent()).toHaveLength(3));
@@ -418,7 +441,7 @@ describe('W-4 · w3-b3’s codes ⇒ the approved texts (W8-Σ1: never «check y
 		const withoutEmail = () =>
 			doctorOnboardingProgressSample({
 				missing: ['CONTACT_EMAIL', 'PROFESSIONAL'],
-				contactEmail: { notificationEmail: null, verified: false }
+				contactEmail: { notificationEmailMasked: null, verified: false }
 			});
 		server = withoutEmail();
 		answers['PUT /doctor/onboarding/notification-email'] = () =>

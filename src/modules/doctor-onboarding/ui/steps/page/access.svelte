@@ -47,7 +47,10 @@
 		!values.salesContactRequested ||
 			(isValidPhone(values.salesContactPhone) && contactPhone !== null)
 	);
-	const complete = $derived(chosen.length > 0 && phoneValid);
+	// 🔴 U-183.5 (wave 5.1, screen 64): an «Επεξεργασία» of a completed registration changes what to turn on alone — the
+	// call of a team member went with the completion, which is not written again.
+	const editing = $derived(controller.editing);
+	const complete = $derived(chosen.length > 0 && (editing || phoneValid));
 	let phoneLeft = $state(false);
 	// The server refused this mobile (W8 Delta 1): its field says so until it changes.
 	let phoneRefused = $state(false);
@@ -84,6 +87,10 @@
 	 */
 	async function finish() {
 		if (!complete || finishing) return;
+		if (editing) {
+			if (await saveIntent()) controller.goNext();
+			return;
+		}
 		finishing = true;
 		const intent = await controller.save([
 			{ kind: 'activation-intent', input: toDoctorActivationIntentInput(values) }
@@ -198,39 +205,41 @@
 			</p>
 		{/if}
 	</section>
-	<section class="mt-section flex flex-col gap-4">
-		<div class="flex min-h-touch flex-row items-center gap-4 border-b border-border py-2">
-			<span class="min-w-0 flex-1 text-body-lg text-foreground">
-				{m.doctor_onboarding_access_contact({}, options)}
-			</span>
-			<Switch
-				checked={values.salesContactRequested}
-				aria-label={m.doctor_onboarding_access_contact({}, options)}
-				hover={false}
-				onCheckedChange={(salesContactRequested) =>
-					draft.update('salesContact', { salesContactRequested })}
-				data-testid="doctor-onboarding-contact"
-			/>
-		</div>
-		{#if values.salesContactRequested}
-			<TextField
-				label={m.doctor_onboarding_access_contact_phone({}, options)}
-				value={values.salesContactPhone}
-				type="tel"
-				size="lg"
-				inputmode="tel"
-				autocomplete="tel"
-				maxlength={DOCTOR_ONBOARDING_PHONE_MAX_LENGTH}
-				error={phoneRefused || (phoneLeft && !phoneValid)
-					? m.doctor_onboarding_access_contact_phone_error({}, options)
-					: undefined}
-				onChangeText={(salesContactPhone) => {
-					phoneRefused = false;
-					draft.update('salesContact', { salesContactPhone });
-				}}
-				onblur={() => (phoneLeft = true)}
-				data-testid="doctor-onboarding-contact-phone"
-			/>
-		{/if}
-	</section>
+	{#if !editing}
+		<section class="mt-section flex flex-col gap-4">
+			<div class="flex min-h-touch flex-row items-center gap-4 border-b border-border py-2">
+				<span class="min-w-0 flex-1 text-body-lg text-foreground">
+					{m.doctor_onboarding_access_contact({}, options)}
+				</span>
+				<Switch
+					checked={values.salesContactRequested}
+					aria-label={m.doctor_onboarding_access_contact({}, options)}
+					hover={false}
+					onCheckedChange={(salesContactRequested) =>
+						draft.update('salesContact', { salesContactRequested })}
+					data-testid="doctor-onboarding-contact"
+				/>
+			</div>
+			{#if values.salesContactRequested}
+				<TextField
+					label={m.doctor_onboarding_access_contact_phone({}, options)}
+					value={values.salesContactPhone}
+					type="tel"
+					size="lg"
+					inputmode="tel"
+					autocomplete="tel"
+					maxlength={DOCTOR_ONBOARDING_PHONE_MAX_LENGTH}
+					error={phoneRefused || (phoneLeft && !phoneValid)
+						? m.doctor_onboarding_access_contact_phone_error({}, options)
+						: undefined}
+					onChangeText={(salesContactPhone) => {
+						phoneRefused = false;
+						draft.update('salesContact', { salesContactPhone });
+					}}
+					onblur={() => (phoneLeft = true)}
+					data-testid="doctor-onboarding-contact-phone"
+				/>
+			{/if}
+		</section>
+	{/if}
 </Frame>

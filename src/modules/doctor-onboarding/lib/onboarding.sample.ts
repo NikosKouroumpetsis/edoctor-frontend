@@ -11,7 +11,7 @@ export function doctorOnboardingProgressSample(
 		completedAt: null,
 		missing: ['BASIC_INFO', 'PROFESSIONAL', 'OFFICE_ADDRESS', 'OFFICE_PHONE'],
 		basicInfo: { firstName: 'Μαρία', lastName: 'Τριανταφύλλου', dateOfBirth: null, gender: null },
-		contactEmail: { notificationEmail: 'dr@example.test', verified: true },
+		contactEmail: { notificationEmailMasked: 'd***r@example.test', verified: true },
 		professional: { professionalId: null, licenseNumber: null, licenseObtainedDate: null },
 		office: null,
 		servicePricing: { price: null, customDurationInMinutes: null },

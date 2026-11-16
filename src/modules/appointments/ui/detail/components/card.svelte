@@ -1,11 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { cn } from '$shared/lib/utils';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
+	import { FactRow } from '$shared/ui/molecules/fact-row';
 	import { Skeleton } from '$shared/ui/primitives/skeleton';
 	import type { BookingCardHead } from '$modules/appointments/lib/booking';
 	import type { AppointmentChangeTarget, AppointmentRow } from '$modules/appointments/lib/detail';
-	import { ChangeLink } from '$modules/appointments/ui/change-screen';
 	import DoctorPhoto from '$modules/appointments/ui/doctor-photo';
 
 	let {
@@ -50,8 +49,9 @@
 {/snippet}
 
 <!-- Record §7.2 (U-135.2): screen 30's card — the doctor first (photo 72, specialty, the name, ★; the whole block opens the
-     profile), the two buttons, then one labelled fact per row with its «Αλλαγή» (a new screen, U-102), the 12 corner and
-     16 inside, a thin line between rows. Every word a person or the server wrote is a text node (U-65.6). -->
+     profile), the two buttons, then one labelled fact per row with its «Αλλαγή» (a new screen, U-102; the shared `FactRow`,
+     D-W51-37), the 12 corner and 16 inside, a thin line between rows. Every word a person or the server wrote is a text
+     node (U-65.6). -->
 <section
 	data-slot="appointment-facts"
 	data-testid="appointment-facts"
@@ -88,63 +88,24 @@
 	</div>
 
 	{#each rows as row (row.id)}
-		<div
-			data-slot="appointment-row"
-			data-row={row.id}
-			class="flex flex-row items-start justify-between gap-3 border-t border-line py-4 last:pb-0"
-		>
-			<div class="min-w-0 flex-1">
-				<p class="text-body-sm font-semibold text-foreground">{row.label}</p>
-				{#each row.values as value, index (index)}
-					<p
-						class={cn(
-							'mt-1 text-foreground',
-							row.id === 'price' ? 'text-body-lg font-semibold' : 'text-body-sm'
-						)}
-					>
-						{value}
-					</p>
-				{/each}
-				{#if row.phone}
-					<p class="mt-1 text-body-sm">
-						<a
-							href={`tel:${row.phone.dial}`}
-							data-testid="appointment-phone"
-							class="-my-3 inline-flex min-h-touch min-w-touch items-center font-semibold text-primary-text outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-						>
-							{row.phone.label}
-						</a>
-					</p>
-				{/if}
-				{#if row.breakdown}
-					<div class="mt-1.5 grid gap-1.5 text-body-sm text-foreground">
-						{#each row.breakdown.lines as line, index (index)}
-							<p class="flex flex-row justify-between gap-4">
-								<span>{line.label}</span><span class="shrink-0">{line.amount}</span>
-							</p>
-						{/each}
-						<p
-							class="flex flex-row justify-between gap-4 border-t border-line pt-2 text-body-lg font-semibold"
-						>
-							<span>{row.breakdown.totalLabel}</span><span class="shrink-0"
-								>{row.breakdown.total}</span
-							>
-						</p>
-					</div>
-				{/if}
-				{#if row.hint}
-					<p class="mt-1 text-label-lg font-normal text-muted-foreground">{row.hint}</p>
-				{/if}
-			</div>
-			{#if row.change}
-				<ChangeLink
-					label={row.change.label}
-					ariaLabel={changeLabel(row)}
-					step={row.change.target}
-					href={changeHref(row.change.target)}
-					{onOpen}
-				/>
-			{/if}
-		</div>
+		<FactRow
+			row={row.id}
+			label={row.label}
+			values={row.values}
+			emphasis={row.id === 'price'}
+			phone={row.phone}
+			phoneTestId="appointment-phone"
+			breakdown={row.breakdown}
+			hint={row.hint}
+			change={row.change
+				? {
+						label: row.change.label,
+						ariaLabel: changeLabel(row),
+						step: row.change.target,
+						href: changeHref(row.change.target),
+						onOpen
+					}
+				: null}
+		/>
 	{/each}
 </section>

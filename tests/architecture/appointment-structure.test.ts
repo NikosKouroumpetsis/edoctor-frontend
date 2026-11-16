@@ -11,7 +11,7 @@ import { classStrings, readSourceFiles, stripComments, type SourceFile } from '.
  *   (the note), 53 and 54 are the shared form; none keeps a field in a rune of its own.
  * - D-W4-59 · D-W4-21: the read of the upcoming «to the end, ten pages at most» is the module's `api/`; no page, hook
  *   of a slice or screen pages through the appointments itself.
- * - U-139.5 · D-W4-22: a relationship's word is said by the ONE helper (`lib/relatives/words`); the neutral words are
+ * - U-139.5 · D-W4-22: a relationship's word is said by the ONE helper (`shared/lib/relative-words`); the neutral words are
  *   also the form's options (`lib/relatives/form`, D-W4-74: the choice is the relationship) — nowhere else.
  * - D-W4-52: the Messages stand on the `SplitView` (its `inbox` widths), and lay out no columns of their own.
  * - Σ1: `createQueries` is read through `combine` that answers ONE object, never as the library's array — nor as an
@@ -83,8 +83,10 @@ function findScanIssues(files: SourceFile[]): string[] {
 }
 
 const RELATION_WORD = /\brelatives_(?:relationship|word)_[a-z_]+\b/u;
+// Card w51-w2 (D-W51-27, §1 of the card: what the doctor's «Σήμερα» needs of `appointments` moves to `src/shared`): the
+// ONE helper now lives in `src/shared/lib/relative-words` — the rule (one helper) is the same, only its path moved.
 const RELATION_HOMES = [
-	'src/modules/appointments/lib/relatives/words/index.ts',
+	'src/shared/lib/relative-words/index.ts',
 	'src/modules/appointments/lib/relatives/form/index.ts'
 ];
 const GENDERED_WORD = /\brelatives_word_[a-z_]+\b/u;
@@ -418,7 +420,7 @@ describe('🔴 D-W4-59 · D-W4-21: the upcoming are read to the end by the modul
 });
 
 describe('🔴 U-139.5 · D-W4-22: a relationship’s word is said by the ONE helper', () => {
-	it('U-139.5: the words are read in `lib/relatives/words` (and, the neutral ones, as the form’s options) — nowhere else of `src/`', () => {
+	it('U-139.5: the words are read in `shared/lib/relative-words` (and, the neutral ones, as the form’s options) — nowhere else of `src/`', () => {
 		const files = sources();
 		for (const path of RELATION_HOMES) {
 			expect(files.find((file) => file.path === path)?.text, path).toMatch(RELATION_WORD);
@@ -442,7 +444,7 @@ describe('🔴 U-139.5 · D-W4-22: a relationship’s word is said by the ONE he
 					"const CHILD = gender === 'FEMALE' ? m.relatives_word_daughter : m.relatives_relationship_child;"
 				),
 				planted(
-					'src/modules/appointments/lib/relatives/words/index.ts',
+					'src/shared/lib/relative-words/index.ts',
 					'const WORDS = { CHILD: m.relatives_relationship_child, DAUGHTER: m.relatives_word_daughter };'
 				)
 			])
@@ -595,8 +597,9 @@ describe('🔴 D-W4-78: what a session that ended on a write keeps open is decid
 			.filter((file) => /\bexpired\b/u.test(file.text))
 			.map((file) => file.path);
 		// The word as another thing (a status' key, a text's value): read by the scan, no read of the session's mark.
+		// Card w51-w2 (D-W51-27): the status words moved to `src/shared/lib/appointment-status` — path only.
 		for (const path of [
-			'src/modules/appointments/lib/status/index.ts',
+			'src/shared/lib/appointment-status/index.ts',
 			'src/modules/appointments/lib/detail/index.ts',
 			'src/modules/appointments/api/appointment/map.ts',
 			EXPIRED_OWNER,

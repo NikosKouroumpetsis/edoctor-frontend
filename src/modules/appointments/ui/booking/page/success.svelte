@@ -5,6 +5,7 @@
 	import { getSessionOptional } from '$shared/state/session';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { InlineNotice } from '$shared/ui/molecules/inline-notice';
+	import { RoundLink } from '$shared/ui/molecules/round-link';
 	import { Button } from '$shared/ui/primitives/button';
 	import { Skeleton } from '$shared/ui/primitives/skeleton';
 	import { appointmentDetailQuery } from '$modules/appointments/api/appointment';
@@ -16,7 +17,6 @@
 		buildBookingCard,
 		buildBookingSuccess
 	} from '$modules/appointments/lib/booking';
-	import { RoundLink } from '$modules/appointments/ui/change-screen';
 	import SummaryCard from '../components/summary-card.svelte';
 	import type { BookingSuccessProps } from '../types';
 

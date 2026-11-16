@@ -23,12 +23,15 @@
 		open = $bindable(false),
 		locale,
 		archiveHref,
-		isMember
+		isMember,
+		side
 	}: {
 		open?: boolean;
 		locale: SupportedLocale;
 		archiveHref: string;
 		isMember: boolean;
+		/** 🔴 U-182.3: «Δέχομαι νέες συνομιλίες» is the doctor's, in the doctor's mode only (the application's a10 §6.4). */
+		side: 'patient' | 'doctor';
 	} = $props();
 
 	const options = $derived({ locale });
@@ -37,7 +40,7 @@
 
 	// Asked only when it opens: the page itself needs neither.
 	const preferences = createQuery(() => messagePreferencesQuery(open && isMember));
-	const doctor = createQuery(() => doctorSettingsQuery(open && isMember));
+	const doctor = createQuery(() => doctorSettingsQuery(open && isMember && side === 'doctor'));
 
 	const failed = () =>
 		toasts?.show({ tone: 'danger', message: m.messages_toast_failed({}, options) });
@@ -94,7 +97,7 @@
 	</div>
 {/snippet}
 
-<!-- U-84 Π1, Π4 (Airbnb's IMG_2610): the sheet below 744, the 480 window from it. A doctor has «Δέχομαι» too. -->
+<!-- U-84 Π1, Π4 (Airbnb's IMG_2610): the sheet below 744, the 480 window from it. The doctor's mode has «Δέχομαι» too. -->
 <ActionDialog
 	bind:open
 	title={m.messages_settings({}, options)}
@@ -124,7 +127,7 @@
 				'messages-settings-email'
 			)}
 		{/if}
-		{#if doctor.data}
+		{#if side === 'doctor' && doctor.data}
 			{@render row(
 				'chatbubbles-outline',
 				m.messages_settings_accept({}, options),

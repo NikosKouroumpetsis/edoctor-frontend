@@ -2,7 +2,7 @@
 	import { cn } from '$shared/lib/utils';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import type { AppointmentCard } from '$modules/appointments/lib/list';
-	import { APPOINTMENT_DAY_TIME_SEPARATOR } from '$modules/appointments/lib/when';
+	import { APPOINTMENT_DAY_TIME_SEPARATOR } from '$shared/lib/appointment-when';
 	import DoctorPhoto from '$modules/appointments/ui/doctor-photo';
 	import StatusPill from '$modules/appointments/ui/status-pill';
 

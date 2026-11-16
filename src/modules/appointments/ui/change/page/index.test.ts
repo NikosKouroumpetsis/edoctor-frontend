@@ -227,7 +227,7 @@ describe('🔴 U-102 / U-136.2: a screen of its own, never a modal', () => {
 					}
 				}
 			});
-			const frame = document.querySelector('[data-slot="booking-change-screen"]');
+			const frame = document.querySelector('[data-slot="step-screen"]');
 			expect(frame?.tagName).toBe('SECTION');
 			expect(frame).toHaveAttribute('data-placement', 'pane');
 			// 🔴 U-167 (D-W45-56, card w45-w9): from 950 in the MIDDLE of the right column at its own widths (656 / 688 /

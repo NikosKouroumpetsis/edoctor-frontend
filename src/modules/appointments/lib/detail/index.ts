@@ -1,6 +1,13 @@
 import { m } from '$paraglide/messages.js';
 import { formatEuro } from '$shared/lib/format';
-import { officeDialNumber, officeFloorValue, officePhoneLabel } from '$shared/lib/office';
+import {
+	officeAddressIn,
+	officeAddressJoin,
+	officeAddressLine,
+	officeFloorLine,
+	officePhoneLine,
+	type PhoneLine
+} from '$shared/lib/office';
 import { clampTextLength } from '$shared/lib/text';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import type {
@@ -10,15 +17,14 @@ import type {
 	AppointmentOfficeFacts
 } from '$modules/appointments/api/appointment';
 import { APPOINTMENT_REASON_TEXT_MAX_LENGTH } from '$modules/appointments/config';
-import { bookingOfficeLine } from '$modules/appointments/lib/booking/summary';
-import { cancelReasonLabel } from '$modules/appointments/lib/cancel';
-import { relativeNameWithWord } from '$modules/appointments/lib/relatives/words';
+import { cancelReasonLabel } from '$shared/lib/appointment-reasons';
+import { relativeNameWithWord } from '$shared/lib/relative-words';
 import {
 	appointmentStatusPill,
 	canAmendAppointment,
 	isClosedAppointment,
 	type AppointmentStatusPill
-} from '$modules/appointments/lib/status';
+} from '$shared/lib/appointment-status';
 import {
 	appointmentDayTime,
 	appointmentDayTimeLabel,
@@ -26,7 +32,7 @@ import {
 	appointmentDurationLabel,
 	appointmentRelativeDayLabel,
 	appointmentShortWhenLabel
-} from '$modules/appointments/lib/when';
+} from '$shared/lib/appointment-when';
 
 /*
  * Screen 51 «Το ραντεβού» in words (record §7.2, U-135, P-W4 §4.2), each part by the rule of the application's
@@ -36,48 +42,23 @@ import {
  */
 
 /** A phone as the page shows it («210 321 0101», D-W4-36.3) and as `tel:` takes it (digits and one `+`). */
-export type AppointmentPhone = { label: string; dial: string };
+export type AppointmentPhone = PhoneLine;
 
 /**
  * The office's phone of the appointment (the current one, else the one frozen at booking, D-W4-36.3), `null` without a
- * dialable one: read as the prototype writes it («210 321 0101», `officePhoneLabel`), dialled whole («+302103210101»).
+ * dialable one: read as the prototype writes it («210 321 0101»), dialled whole («+302103210101») — the shared
+ * `officePhoneLine` (D-W51-37: the doctor's 68 reads an office the same way).
  */
 export function appointmentPhone(appointment: AppointmentFacts): AppointmentPhone | null {
-	const stored = appointment.officePhone ?? appointment.office?.phone ?? undefined;
-	const label = officePhoneLabel(stored);
-	const dial = officeDialNumber(stored);
-	return label && dial ? { label, dial } : null;
+	return officePhoneLine(appointment.officePhone ?? appointment.office?.phone);
 }
 
-/**
- * The address parts in the page's language when the office had it then, else the ones it was booked with (D-W4-36.5).
- * Review w4-w3 R1 NIT-4: one or the other WHOLE — a translation without its street or its city is not taken, so a line
- * never reads half in each language («Ermou 101, Αθήνα»). The floor is a number of no language: the booked one stands
- * in for a translation that names none.
- */
-function officeIn(office: AppointmentOfficeFacts, locale: SupportedLocale) {
-	const translated = office.translations.find(
-		(entry) => entry.language === locale && entry.street && entry.city
-	);
-	const source = translated ?? office;
-	const part = (value: string | null | undefined) => value ?? undefined;
-	return {
-		street: part(source.street),
-		streetNumber: part(source.streetNumber),
-		city: part(source.city),
-		state: part(source.state),
-		floor: source.floor ?? office.floor
-	};
-}
-
-/** «Ερμού 101, Αθήνα, Αττική»: the frozen office as the booking's card says it (`bookingOfficeLine`); `''` without one. */
+/** «Ερμού 101, Αθήνα, Αττική»: the frozen office as the booking's card says it (`officeAddressLine`); `''` without one. */
 export function appointmentOfficeLine(
 	office: AppointmentOfficeFacts | null,
 	locale: SupportedLocale
 ): string {
-	return office
-		? bookingOfficeLine({ officeId: office.officeId, ...officeIn(office, locale) })
-		: '';
+	return office ? officeAddressLine(office, locale) : '';
 }
 
 /** «Ερμού 101, Αθήνα»: the street and the city alone (screen 50's card, record §6.1); `''` without one. */
@@ -86,23 +67,16 @@ export function appointmentOfficeShortLine(
 	locale: SupportedLocale
 ): string {
 	if (!office) return '';
-	const { street, streetNumber, city } = officeIn(office, locale);
-	return bookingOfficeLine({ officeId: office.officeId, street, streetNumber, city });
+	const { street, streetNumber, city } = officeAddressIn(office, locale);
+	return officeAddressJoin({ street, streetNumber, city });
 }
 
-/**
- * 🔴 D-W4-34: the floor as the approved 51 writes it — «2ος όροφος», «Ισόγειο», «Υπόγειο» (the application's
- * `floorLine`); the words of the level stay the site's one set (`officeFloorValue`, whose bare «2ος» the doctor's
- * profile keeps). `null` without a floor.
- */
+/** 🔴 D-W4-34: the floor as the approved 51 writes it — «2ος όροφος», «Ισόγειο», «Υπόγειο» (`officeFloorLine`). */
 export function appointmentOfficeFloor(
 	office: AppointmentOfficeFacts | null,
 	locale: SupportedLocale
 ): string | null {
-	const floor = office ? officeIn(office, locale).floor : null;
-	const value = floor === null ? undefined : officeFloorValue(floor, locale);
-	if (floor === null || !value) return null;
-	return Math.trunc(floor) > 0 ? m.appointments_detail_floor({ floor: value }, { locale }) : value;
+	return office ? officeFloorLine(office, locale) : null;
 }
 
 /**

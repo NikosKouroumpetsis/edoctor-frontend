@@ -76,7 +76,11 @@ export type DoctorOnboardingProgress = {
 		dateOfBirth: string | null;
 		gender: DoctorOnboardingGender | null;
 	};
-	contactEmail: { notificationEmail: string | null; verified: boolean };
+	/**
+	 * 🔴 U-169 · D-W51-12 (w51-b1): the contact email as the SERVER hides it (`e***a@example.gr`) — the doctor never reads
+	 * it whole; a change is a new address and its code, the address kept only in this tab's draft until it is verified.
+	 */
+	contactEmail: { notificationEmailMasked: string | null; verified: boolean };
 	professional: {
 		professionalId: string | null;
 		licenseNumber: string | null;
@@ -142,6 +146,15 @@ export type DoctorOnboardingLiabilityInput = Required<
 	>
 >;
 
+/**
+ * 🔴 U-183.5 · D-W51-12 (wave 5.1, screen 64): the insurance alone — what «Επεξεργασία» of a completed registration
+ * writes on 41; the doctors' terms accepted then are never written again from here.
+ */
+export type DoctorOnboardingInsuranceInput = Omit<
+	DoctorOnboardingLiabilityInput,
+	'legalAcceptance'
+>;
+
 export type DoctorOnboardingActivationIntentInput =
 	ApiRequestBody<'saveDoctorOnboardingActivationIntent'>;
 
@@ -164,6 +177,7 @@ export type DoctorOnboardingWrite =
 	| { kind: 'service-pricing'; input: DoctorOnboardingServicePricingInput }
 	| { kind: 'calendar'; category: DoctorOnboardingCalendarCategory }
 	| { kind: 'liability'; input: DoctorOnboardingLiabilityInput }
+	| { kind: 'insurance'; input: DoctorOnboardingInsuranceInput }
 	| { kind: 'activation-intent'; input: DoctorOnboardingActivationIntentInput }
 	| { kind: 'complete'; input: DoctorOnboardingCompleteInput };
 

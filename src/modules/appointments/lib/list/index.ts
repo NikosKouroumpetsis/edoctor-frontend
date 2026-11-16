@@ -11,18 +11,15 @@ import {
 	appointmentTabOf
 } from '$modules/appointments/lib/detail';
 import type { AppointmentsTab } from '$modules/appointments/lib/paths';
-import { relativeNameWithWord } from '$modules/appointments/lib/relatives/words';
-import {
-	appointmentStatusPill,
-	type AppointmentStatusPill
-} from '$modules/appointments/lib/status';
+import { relativeNameWithWord } from '$shared/lib/relative-words';
+import { appointmentStatusPill, type AppointmentStatusPill } from '$shared/lib/appointment-status';
 import {
 	appointmentDayTime,
 	appointmentMonthKey,
 	appointmentMonthLabel,
 	appointmentRelativeDayLabel,
 	appointmentShortWhenLabel
-} from '$modules/appointments/lib/when';
+} from '$shared/lib/appointment-when';
 
 /*
  * Screen 50 «Τα ραντεβού μου» in words (record §6.1, U-134, P-W4 §4.1): its tabs, its groups, its cards and its states.

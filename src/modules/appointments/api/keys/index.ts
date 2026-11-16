@@ -35,3 +35,11 @@ export const appointmentsQueryKeys = {
 	review: (ratingId: string) => [...appointmentsQueryKeys.reviews(), ratingId] as const,
 	relatives: (patientId: string) => [...appointmentsQueryKeys.all, 'relatives', patientId] as const
 };
+
+/**
+ * 🔴 D-W51-72 (card w51-w8, round 2): the page of one cancel link — a read with NO session, so on a root of its own,
+ * outside the person's `appointments` (whose reads a guest's answer of the session forgets, `removePersonalQueries`; a
+ * module default there never reaches it). Its secret lives in this memory only, never stored.
+ */
+export const appointmentCancelLinkQueryKey = (token: string) =>
+	['appointment-cancel-link', token] as const;

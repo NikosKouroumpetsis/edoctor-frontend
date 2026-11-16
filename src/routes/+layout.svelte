@@ -2,6 +2,7 @@
 	import { QueryProvider } from '$shared/providers';
 	import BookingDraftHost from '$modules/appointments/ui/booking-draft';
 	import AuthHost from '$modules/auth/ui/host';
+	import DoctorStandingHost from '$modules/doctor-dashboard/ui/standing-host';
 	import OnboardingDraftHost from '$modules/doctor-onboarding/ui/draft-host';
 	import MessagesUnreadHost from '$modules/messages/ui/unread-host';
 	import NotificationsUnreadHost from '$modules/notifications/ui/unread-host';
@@ -23,18 +24,22 @@
 		<MessagesUnreadHost>
 			<!-- 🔴 D-W45-17 (wave 4.5, screen 63): the ONE read of «a notification is new», beside the messages' own. -->
 			<NotificationsUnreadHost>
-				<!-- 🔴 U-112.2: the booking's and the sign-up's drafts above every page, inside the session (a sign-out
-				     empties them). -->
-				<BookingDraftHost>
-					<OnboardingDraftHost>
-						<SiteFrame>
-							{#snippet popularSearches()}
-								<PopularSearches />
-							{/snippet}
-							{@render children()}
-						</SiteFrame>
-					</OnboardingDraftHost>
-				</BookingDraftHost>
+				<!-- 🔴 D-W51-10 (wave 5.1, screen 64): the ONE read of the account's doctor standing and the switch of mode,
+				     beside the dots' reads, above both frames. -->
+				<DoctorStandingHost>
+					<!-- 🔴 U-112.2: the booking's and the sign-up's drafts above every page, inside the session (a sign-out
+					     empties them). -->
+					<BookingDraftHost>
+						<OnboardingDraftHost>
+							<SiteFrame>
+								{#snippet popularSearches()}
+									<PopularSearches />
+								{/snippet}
+								{@render children()}
+							</SiteFrame>
+						</OnboardingDraftHost>
+					</BookingDraftHost>
+				</DoctorStandingHost>
 			</NotificationsUnreadHost>
 		</MessagesUnreadHost>
 	</AuthHost>

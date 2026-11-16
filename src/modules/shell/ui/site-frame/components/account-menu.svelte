@@ -19,7 +19,8 @@
 		hasNewNotifications = false,
 		onSettings,
 		onSignIn,
-		onSignOut
+		onSignOut,
+		onDoctorMode
 	}: {
 		/** The menu of a guest or a member (`buildAccountEntries`). */
 		entries: AccountEntry[];
@@ -35,6 +36,8 @@
 		/** «Σύνδεση ή εγγραφή» opens the window in place (Π2), its link the page before the scripts have run. */
 		onSignIn?: () => void;
 		onSignOut: () => void;
+		/** 🔴 Wave 5.1 · screen 64: «Λειτουργία γιατρού» — the switch of mode (the transition, then the doctor's page). */
+		onDoctorMode?: () => void;
 	} = $props();
 
 	let open = $state(false);
@@ -53,6 +56,12 @@
 
 	/** Each row by its key, for a test that opens it (`header-account-entry-notifications`). */
 	const entryTestId = (entry: AccountEntry) => `header-account-entry-${entry.key}`;
+
+	function doctorMode(event: MouseEvent) {
+		if (!onDoctorMode) return;
+		event.preventDefault();
+		onDoctorMode();
+	}
 
 	function signIn(event: MouseEvent) {
 		if (!onSignIn) return;
@@ -105,9 +114,30 @@
 	>
 		{#each entries as entry (entry.key)}
 			{#if entry.separated}
-				<DropdownMenuSeparator class="my-2" />
+				<DropdownMenuSeparator
+					class={[
+						'my-2',
+						entry.kind === 'switch' && entry.hideFrom === 'laptop' && 'laptop:hidden'
+					]}
+				/>
 			{/if}
-			{#if entry.kind === 'settings'}
+			{#if entry.kind === 'switch'}
+				<!-- 🔴 Wave 5.1 · screen 64 (`64-switch/sw.css:19-20`): the switch, 600 with its ⇄, only where the bar has no
+				     room for it (744–1127); a link to the doctor's page before the scripts have run. -->
+				<DropdownMenuItem
+					href={entry.href}
+					onclick={doctorMode}
+					data-testid={entryTestId(entry)}
+					class={[
+						itemClass,
+						'flex-row items-center justify-start gap-2.5 font-semibold',
+						entry.hideFrom === 'laptop' && 'laptop:hidden'
+					]}
+				>
+					<Ionicon name="swap-horizontal-outline" class="icon-md shrink-0" />
+					{entry.label}
+				</DropdownMenuItem>
+			{:else if entry.kind === 'settings'}
 				<DropdownMenuItem onclick={onSettings} data-testid={entryTestId(entry)} class={itemClass}
 					>{entry.label}</DropdownMenuItem
 				>

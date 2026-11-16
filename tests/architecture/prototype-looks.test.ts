@@ -59,7 +59,7 @@ const RULES: Rule[] = [
 	},
 	...[
 		[
-			'src/modules/appointments/ui/change-screen/components/change-link.svelte',
+			'src/shared/ui/molecules/change-link/change-link.svelte',
 			'«Αλλαγή» (`30-booking/booking.css:12`)'
 		],
 		['src/modules/doctor-onboarding/ui/steps/page/overview.svelte', 'the stages’ numbers (`.d-n`)'],
@@ -76,12 +76,8 @@ const RULES: Rule[] = [
 		must: [/variant="contrast"/u, /hover=\{false\}/u],
 		mustNot: [/variant="outline"/u]
 	},
-	{
-		path: 'src/modules/messages/ui/inbox/components/list-column.svelte',
-		why: '2 · the inbox’s chips keep their look (D-W4-28: «τα Μηνύματα δεν αλλάζουν όψη», U-131.4)',
-		must: [/variant="outline"/u],
-		mustNot: [/variant="contrast"/u]
-	},
+	// Rewrites Π4 / U-65.4 → U-182.3 (wave 5.1, screen 74, D-W51-85): the inbox has no chips any more, so their look
+	// (D-W4-28) has nothing left to keep; the appointments' tabs above keep theirs.
 	{
 		path: 'src/shared/ui/primitives/step-progress/step-progress.svelte',
 		why: '3 · the empty progress: the prototype’s `--line-2` (`33-doctor/doctor.css:21`)',
@@ -118,8 +114,8 @@ function prototypeLookFindings(read: (path: string) => string): string[] {
 }
 
 describe('U-129: each screen draws the shared components as its own prototype', () => {
-	it('U-129: the booking’s outlined time, the profile’s filled one, the four `--chip` / `--line-2` surfaces, one date field on 34 / 35 / 43 / 30, the sign-up’s and the register form’s ticks, the clinic of stage 2, screen 50’s dark tabs beside the inbox’s own (D-W4-28)', () => {
-		expect(RULES.length).toBe(20);
+	it('U-129: the booking’s outlined time, the profile’s filled one, the four `--chip` / `--line-2` surfaces, one date field on 34 / 35 / 43 / 30, the sign-up’s and the register form’s ticks, the clinic of stage 2, screen 50’s dark tabs (D-W4-28; the inbox’s chips went with U-182.3)', () => {
+		expect(RULES.length).toBe(19);
 		expect(prototypeLookFindings(readSource)).toEqual([]);
 	});
 
@@ -134,16 +130,14 @@ describe('U-129: each screen draws the shared components as its own prototype', 
 			if (path.endsWith('page/intro.svelte'))
 				return `${text}\nimport X from '~icons/lucide/house-plus';`;
 			if (path.endsWith('step-progress.svelte')) return text.replace('bg-line-2', 'bg-muted');
-			// D-W4-28: the appointments' tabs in the inbox's look, and the inbox's in theirs (two lines each).
+			// D-W4-28: the appointments' tabs in the inbox's look (two lines). The inbox's chips went with U-182.3.
 			if (path.endsWith('ui/list/components/column.svelte'))
 				return text.replace('variant="contrast"', 'variant="outline"');
-			if (path.endsWith('inbox/components/list-column.svelte'))
-				return text.replace('variant="outline"', 'variant="contrast"');
 			return text;
 		};
 		const findings = prototypeLookFindings(planted);
 		// The track back on `muted` is two lines: `line-2` lost, `muted` taken.
-		expect(findings).toHaveLength(11);
+		expect(findings).toHaveLength(9);
 		expect(findings.every((line) => / — \d · /u.test(line))).toBe(true);
 	});
 });

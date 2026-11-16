@@ -42,8 +42,17 @@ describe('shared/lib/navigation · readHistoryDepth (review w3-w3 R1 MINOR-5)', 
 		expect(readHistoryDepth('booking', {}, 'sveltekit:states')).toBe(0);
 	});
 	it('review w3-w4 R1 NIT-1: the flows are the page state’s own keys that count a depth — the shared code names none of them', () => {
+		// D-W51-46 (screen 69, card w51-w5): the doctor's appointment counts its step screens too (`doctorAppointment`);
+		// D-W51-73 (screen 73, card w51-w9): so does a patient's card and what it opens (`doctorPatient`).
+		// D-W51-90 (screen 75, card w51-w11): so does the 68 opened from the doctor's notifications (`doctorNotification`).
 		expectTypeOf<HistoryDepthFlow>().toEqualTypeOf<
-			'booking' | 'onboarding' | 'appointment' | 'relatives'
+			| 'booking'
+			| 'onboarding'
+			| 'appointment'
+			| 'relatives'
+			| 'doctorAppointment'
+			| 'doctorPatient'
+			| 'doctorNotification'
 		>();
 		const source = readFileSync(
 			join(projectRoot, 'src/shared/lib/navigation/stored-page-state.ts'),

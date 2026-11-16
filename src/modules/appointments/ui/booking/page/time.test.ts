@@ -60,7 +60,7 @@ describe('«Διαθεσιμότητα» of the booking (record §3.3, U-102)', 
 	it('U-104.2 / D-W3-27 / U-81.2: «Αποθήκευση» fully round; no colour under the pointer; the bar pinned below 744, in the flow from it', () => {
 		draw();
 		expect(save()).toHaveClass('rounded-full');
-		const barNode = document.querySelector('[data-slot="booking-change-bar"]') as HTMLElement;
+		const barNode = document.querySelector('[data-slot="step-screen-bar"]') as HTMLElement;
 		expect(barNode).toHaveClass('fixed', 'bottom-0', 'tablet:static');
 		for (const node of [barNode, ...barNode.querySelectorAll('*')]) {
 			expect([...node.classList].filter((name) => name.includes('hover:'))).toEqual([]);

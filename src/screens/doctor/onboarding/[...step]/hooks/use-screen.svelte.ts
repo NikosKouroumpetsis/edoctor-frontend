@@ -7,6 +7,7 @@ import { getPageLocale } from '$shared/preferences/i18n/page-locale';
 import { readOtpFailure } from '$modules/auth/lib/failures';
 import { DEFAULT_PHONE_DIAL_CODE } from '$shared/ui/molecules/phone-field/countries';
 import { parseIdentifier, readDialCode } from '$modules/auth/lib/identifier';
+import { profilePath } from '$modules/profile/lib/paths';
 import type { DoctorOnboardingContext } from '$modules/doctor-onboarding/ui/steps';
 import type { DoctorOnboardingScreenData } from '../types';
 
@@ -51,6 +52,8 @@ export function useDoctorOnboardingScreen(data: () => DoctorOnboardingScreenData
 				href,
 				helpHref: href('/help'),
 				homeHref: href('/'),
+				// 🔴 Wave 5.1 · screen 64: «‹» of the application's page goes back to the «Προφίλ» and its card.
+				profileHref: href(profilePath),
 				readCodeFailure: readOtpFailure,
 				toPhoneNumber,
 				showPhoneNumber

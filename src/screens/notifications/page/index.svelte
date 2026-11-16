@@ -23,7 +23,9 @@
      pushed page below 744, so no capsule (the frame, `NOTIFICATIONS_PAGES`). The page's server draws no person's fact
      (U-80.1 Ε6): the browser reads the list. -->
 <main data-testid="notifications-screen" class="min-h-dvh bg-card tablet:min-h-page split:min-h-0">
+	<!-- 🔴 D-W51-89: the patient's mode lists the patient's side alone (`?side=patient`, said aloud). -->
 	<NotificationInbox
+		side="patient"
 		locale={screen.locale}
 		filter={screen.address.filter}
 		links={screen.links}
