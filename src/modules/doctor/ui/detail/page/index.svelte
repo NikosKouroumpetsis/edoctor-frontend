@@ -24,7 +24,8 @@
 		knowLinks,
 		articles,
 		contact,
-		favorite
+		favorite,
+		preview = false
 	}: DoctorDetailPageProps = $props();
 
 	const onBack = useSiteBack();
@@ -68,5 +69,6 @@
 		{articles}
 		{contact}
 		{favorite}
+		{preview}
 	/>
 {/key}

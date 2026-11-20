@@ -27,7 +27,9 @@ export const notificationInboxGlyphs: Record<NotificationInboxIcon, IoniconName>
 	CALENDAR_CANCELED: 'calendar-remove-outline',
 	CHECK: 'checkmark-circle-outline',
 	SYNC: 'sync-outline',
-	BADGE: 'ribbon-outline'
+	BADGE: 'ribbon-outline',
+	// The contract of screen 85 (card w52-b9a): an article's line; the page's own glyph of a text.
+	DOCUMENT: 'document-text-outline'
 };
 
 /** A line whose glyph the server names with a word the page does not know (none of the contract's): the calendar. */

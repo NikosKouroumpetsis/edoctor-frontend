@@ -11,6 +11,7 @@ import {
 	httpSessionPatch,
 	httpSessionPost,
 	httpSessionPut,
+	httpSessionUpload,
 	requestLanguageHeaders
 } from '.';
 
@@ -289,5 +290,152 @@ describe('🔴 D-W3-39: every request says the PAGE’s language (review w3-w6 R
 		expect(requestLanguageHeaders()).toEqual({ 'Accept-Language': 'el' });
 		window.history.replaceState(null, '', '/fr/doctors');
 		expect(requestLanguageHeaders()).toEqual({ 'Accept-Language': 'el' });
+	});
+});
+
+/** A stand-in for the browser's `XMLHttpRequest`: what was asked of it, and the answer the test hands back. */
+class FakeUpload {
+	static last: FakeUpload | null = null;
+	method = '';
+	url = '';
+	withCredentials = false;
+	responseType = '';
+	headers: Record<string, string> = {};
+	sent: string | null = null;
+	status = 0;
+	responseText = '';
+	upload: { onprogress: ((event: ProgressEvent) => void) | null } = { onprogress: null };
+	onload: (() => void) | null = null;
+	onerror: (() => void) | null = null;
+	onabort: (() => void) | null = null;
+	ontimeout: (() => void) | null = null;
+
+	constructor() {
+		FakeUpload.last = this;
+	}
+	open(method: string, url: string) {
+		this.method = method;
+		this.url = url;
+	}
+	setRequestHeader(name: string, value: string) {
+		this.headers[name] = value;
+	}
+	send(body: string) {
+		this.sent = body;
+	}
+	abort() {
+		this.onabort?.();
+	}
+	progress(loaded: number, total: number, lengthComputable = true) {
+		this.upload.onprogress?.({ loaded, total, lengthComputable } as ProgressEvent);
+	}
+	answer(status: number, body: unknown) {
+		this.status = status;
+		this.responseText = typeof body === 'string' ? body : JSON.stringify(body);
+		this.onload?.();
+	}
+}
+
+describe('🔴 D-W52-38: a session write that tells how much of it has been sent (wave 5.2, a photo inside the JSON)', () => {
+	const sending = () => {
+		vi.stubGlobal('XMLHttpRequest', FakeUpload);
+		const fetchSpy = stubFetch(answer(200, { status: 'ok', data: null }));
+		return { fetchSpy, request: () => FakeUpload.last as FakeUpload };
+	};
+
+	it('D-W52-38 · U-80.1 Ε6: it carries the cookies, JSON and the page’s language, reports the fraction sent and reads the envelope’s `data` — never through `fetch`', async () => {
+		window.history.replaceState(null, '', '/en/doctor/profile/photos');
+		const { fetchSpy, request } = sending();
+		const seen: number[] = [];
+		const write = httpSessionUpload<{ id: string }>('POST', '/doctor/profile/images', {
+			body: { image: { file: 'data:image/png;base64,AAAA' } },
+			onProgress: (fraction) => seen.push(fraction)
+		});
+		const sent = request();
+		expect(sent.method).toBe('POST');
+		expect(sent.url).toMatch(/\/doctor\/profile\/images$/u);
+		expect(sent.withCredentials).toBe(true);
+		expect(sent.headers).toEqual({
+			Accept: 'application/json',
+			'Content-Type': 'application/json',
+			'Accept-Language': 'en'
+		});
+		expect(JSON.parse(sent.sent ?? '')).toEqual({ image: { file: 'data:image/png;base64,AAAA' } });
+		sent.progress(25, 100);
+		sent.progress(0, 0);
+		sent.progress(40, 100, false);
+		sent.progress(300, 100);
+		sent.answer(201, { status: 'success', data: { id: 'a' } });
+		await expect(write).resolves.toEqual({ id: 'a' });
+		expect(seen).toEqual([0.25, 1]);
+		expect(fetchSpy).not.toHaveBeenCalled();
+		window.history.replaceState(null, '', '/');
+	});
+
+	it('D-W52-38: a `PATCH` goes the same way, and a `204` resolves with nothing', async () => {
+		const { request } = sending();
+		const write = httpSessionUpload('PATCH', '/doctor/profile/images/x', { body: {} });
+		expect(request().method).toBe('PATCH');
+		request().answer(204, '');
+		await expect(write).resolves.toBeUndefined();
+	});
+
+	it('(negative) D-W52-38: a refusal keeps its status, the server’s code, its words and its plain `details` — a `401` and a `409` alike', async () => {
+		const { request } = sending();
+		const full = httpSessionUpload('POST', '/doctor/profile/images', { body: {} });
+		request().answer(409, {
+			errorCode: 'EC415',
+			errorMessage: 'Already exist: DOCTOR_IMAGE_LIMIT_REACHED',
+			details: { limit: 20 }
+		});
+		await expect(full).rejects.toMatchObject({
+			name: 'ApiError',
+			status: 409,
+			errorCode: 'EC415',
+			message: 'Already exist: DOCTOR_IMAGE_LIMIT_REACHED',
+			details: { limit: 20 }
+		});
+
+		const signedOut = httpSessionUpload('POST', '/doctor/profile/images', { body: {} });
+		request().answer(401, { errorCode: 'EC401', errorMessage: 'Unauthorized' });
+		await expect(signedOut).rejects.toMatchObject({ status: 401, errorCode: 'EC401' });
+
+		const nested = httpSessionUpload('POST', '/doctor/profile/images', { body: {} });
+		request().answer(422, { errorCode: 'EC422', details: { deep: { no: 1 } } });
+		const error = await nested.catch((reason: unknown) => reason);
+		expect(error).toBeInstanceOf(ApiError);
+		expect((error as ApiError).details).toBeUndefined();
+		expect((error as ApiError).message).toBe('Request failed with status 422');
+
+		const html = httpSessionUpload('POST', '/doctor/profile/images', { body: {} });
+		request().answer(413, '<html>too large</html>');
+		await expect(html).rejects.toMatchObject({ status: 413, errorCode: undefined });
+	});
+
+	it('(negative) D-W52-38: no network, an answer that is no JSON and an abandoned write are errors — status 0 for what never answered', async () => {
+		const { request } = sending();
+		const lost = httpSessionUpload('POST', '/doctor/profile/images', { body: {} });
+		request().onerror?.();
+		await expect(lost).rejects.toMatchObject({ status: 0, message: 'Network request failed' });
+
+		const garbled = httpSessionUpload('POST', '/doctor/profile/images', { body: {} });
+		request().answer(200, 'not json');
+		await expect(garbled).rejects.toMatchObject({ status: 200 });
+
+		const controller = new AbortController();
+		const left = httpSessionUpload('POST', '/doctor/profile/images', {
+			body: {},
+			signal: controller.signal
+		});
+		controller.abort();
+		await expect(left).rejects.toMatchObject({ status: 0, message: 'Request aborted' });
+
+		FakeUpload.last = null;
+		const never = httpSessionUpload('POST', '/doctor/profile/images', {
+			body: {},
+			signal: controller.signal
+		});
+		await expect(never).rejects.toMatchObject({ status: 0 });
+		expect(FakeUpload.last).toBeNull();
 	});
 });

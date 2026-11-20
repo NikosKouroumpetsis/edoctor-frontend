@@ -36,7 +36,6 @@ function service(id: string, extra: Partial<DoctorServiceFacts> = {}): DoctorSer
 		title: `Υπηρεσία ${id}`,
 		priceRange: { min: 40, max: 40 },
 		kind: 'other',
-		isSpecialized: false,
 		...extra
 	};
 }
@@ -88,7 +87,6 @@ const rich = () =>
 		responseMetrics: { completedVisits: 37, windowMonths: 6 },
 		services: [
 			service('a', {
-				isSpecialized: true,
 				kind: 'visit',
 				subtitle: 'Εξέταση',
 				durationInMinutes: 30,
@@ -98,7 +96,7 @@ const rich = () =>
 			}),
 			service('b', { kind: 'follow-up' }),
 			service('c', { kind: 'check-up' }),
-			service('d', { isSpecialized: true })
+			service('d')
 		]
 	});
 
@@ -169,13 +167,18 @@ describe('«Υπηρεσίες» and «Τομείς εξειδίκευσης» (
 		expect(pushState).not.toHaveBeenCalled();
 	});
 
-	it('Π4, Π5: the groups, the glyph of the kind, the row that opens in place: «Περιγραφή», never «Περιλαμβάνει»', async () => {
+	// Rewrites «Π4, Π5: the groups, the glyph of the kind, the row that opens in place…» by U-209.3 (D-W52-56 / 60): no
+	// service is a field of expertise, so Π4's groups are gone; Π5 stands.
+	it('Π5 · 🔴 D-W52-60 (U-209.3): ONE list — no «Τομείς εξειδίκευσης», no «Άλλες υπηρεσίες» — the glyph of the kind, the row that opens in place: «Περιγραφή», never «Περιλαμβάνει»', async () => {
 		const window = open(rich(), 'services');
 		expect(window).toHaveAttribute('data-section', 'services');
 		expect(within(window).getByRole('heading', { level: 2 })).toHaveTextContent('Υπηρεσίες');
-		expect(within(window).getByTestId('doctor-detail-modal-services-other')).toHaveTextContent(
-			'Άλλες υπηρεσίες'
-		);
+		const list = within(window).getByTestId('doctor-detail-modal-services-all');
+		expect(within(list).getAllByRole('button', { name: /^Υπηρεσία / })).toHaveLength(4);
+		expect(within(window).queryByTestId('doctor-detail-modal-services-other')).toBeNull();
+		expect(within(window).queryByTestId('doctor-detail-modal-services-specializations')).toBeNull();
+		expect(within(window).queryByRole('heading', { level: 3 })).toBeNull();
+		expect(window.textContent).not.toMatch(/Τομείς εξειδίκευσης|Άλλες υπηρεσίες/u);
 		expect(within(window).getByTestId('doctor-detail-priced-service-glyph-a')).toHaveAttribute(
 			'data-icon',
 			'medkit-outline'
@@ -189,6 +192,28 @@ describe('«Υπηρεσίες» and «Τομείς εξειδίκευσης» (
 			within(window).getByTestId('doctor-detail-priced-service-description-a')
 		).toHaveTextContent('Το κείμενο της υπηρεσίας.');
 		expect(window.textContent).not.toMatch(/Περιλαμβάνει/u);
+	});
+
+	// Rewrites «Π3, Π4 (screen 15): …each field with its years and visits…» and «U-72.3: a field without visits or years
+	// writes nothing, ούτε «0»» by U-209.3: «τα χρόνια και οι επισκέψεις μένουν στις υπηρεσίες».
+	it('🔴 D-W52-60 (U-209.3) · U-72.3: a service’s OWN years and visits are drawn in its open row, with the note of what the visits count; a service without them writes nothing, ούτε «0»', async () => {
+		const window = open(rich(), 'services');
+		await fireEvent.click(within(window).getByRole('button', { name: 'Υπηρεσία a' }));
+		expect(screen.getByTestId('doctor-detail-priced-service-years-a')).toHaveTextContent(
+			'12 χρόνια εμπειρίας'
+		);
+		expect(screen.getByTestId('doctor-detail-priced-service-visits-a')).toHaveTextContent(
+			'9 επισκέψεις'
+		);
+		expect(screen.getByTestId('doctor-detail-services-footnote')).toHaveTextContent(
+			/^Οι επισκέψεις μετρούν/u
+		);
+		await fireEvent.click(within(window).getByRole('button', { name: 'Υπηρεσία d' }));
+		expect(screen.queryByTestId('doctor-detail-priced-service-years-d')).toBeNull();
+		expect(screen.queryByTestId('doctor-detail-priced-service-visits-d')).toBeNull();
+		const slot = window.querySelector('[data-service-slot="d"]');
+		expect(slot?.textContent).not.toMatch(/\b0\b/u);
+		expect(window.textContent).not.toMatch(/\(6|6 μήν|μηνών/u);
 	});
 
 	it('U-70.1: καμία αναζήτηση υπηρεσιών, whatever their number', () => {
@@ -258,72 +283,101 @@ describe('«Υπηρεσίες» and «Τομείς εξειδίκευσης» (
 		expect(await screen.findByTestId('doctor-booking-card-fields')).toBeInTheDocument();
 	});
 
-	it('U-72.3 Ε3: the group’s title opens the fields in the SAME window, with «‹» and its own step in the history', async () => {
-		page.state = { doctorDetails: { section: 'services', inPlace: true } };
-		render(Harness, { props: props(rich()) });
-		const link = screen.getByTestId('doctor-detail-modal-services-to-specializations');
-		expect(link).toHaveAttribute('href', '/doctors/dr-athena-papadopoulou/details/specializations');
-		await fireEvent.click(link);
-		expect(pushState).toHaveBeenCalledWith(
-			'/doctors/dr-athena-papadopoulou/details/specializations',
-			{
-				doctorDetails: {
-					section: 'specializations',
-					inPlace: true,
-					fromServices: true,
-					servicesInPlace: true
-				}
-			}
-		);
-	});
-
-	it('U-72.3 Ε3: «‹» goes back one step, «×» closes both', async () => {
+	// Rewrites «U-72.3 Ε3: the group’s title opens the fields in the SAME window, with «‹» and its own step in the
+	// history» and «U-72.3 Ε3: «‹» goes back one step, «×» closes both» by U-209.3 (D-W52-56 / 60, task doc §6): the
+	// services hold no field of expertise, so nothing of them leads to that page.
+	it('🔴 D-W52-60 (U-209.3; it replaces U-72.3 Ε3): the services have NO way to «Τομείς εξειδίκευσης» — no title that is a link, no «‹» — and «×» of either window closes ONE step', async () => {
 		const back = vi.spyOn(history, 'back').mockImplementation(() => undefined);
 		const go = vi.spyOn(history, 'go').mockImplementation(() => undefined);
-		page.state = {
-			doctorDetails: {
-				section: 'specializations',
-				inPlace: true,
-				fromServices: true,
-				servicesInPlace: true
-			}
-		};
+		page.state = { doctorDetails: { section: 'services', inPlace: true } };
 		render(Harness, { props: props(rich()) });
-		const windows = screen.getAllByTestId('doctor-detail-modal');
-		expect(windows).toHaveLength(1);
-		await fireEvent.click(screen.getByTestId('doctor-detail-modal-back'));
-		expect(back).toHaveBeenCalledOnce();
+		const services = screen.getByTestId('doctor-detail-modal');
+		expect(screen.queryByTestId('doctor-detail-modal-services-to-specializations')).toBeNull();
+		expect(services.querySelector('a[href*="/details/specializations"]')).toBeNull();
+		expect(screen.queryByTestId('doctor-detail-modal-back')).toBeNull();
 		await fireEvent.click(screen.getByTestId('doctor-detail-modal-close'));
-		expect(go).toHaveBeenCalledWith(-2);
+		expect(back).toHaveBeenCalledOnce();
+		expect(pushState).not.toHaveBeenCalled();
+		cleanup();
+
+		page.state = { doctorDetails: { section: 'specializations', inPlace: true } };
+		render(Harness, { props: props(rich()) });
+		expect(screen.getAllByTestId('doctor-detail-modal')).toHaveLength(1);
+		expect(screen.queryByTestId('doctor-detail-modal-back')).toBeNull();
+		await fireEvent.click(screen.getByTestId('doctor-detail-modal-close'));
+		expect(back).toHaveBeenCalledTimes(2);
+		expect(go).not.toHaveBeenCalled();
 		back.mockRestore();
 		go.mockRestore();
 	});
 
-	it('Π3, Π4 (screen 15): the card’s figures, each field with its years and visits, the note', () => {
+	// Rewrites «Π3, Π4 (screen 15): the card’s figures, each field with its years and visits, the note» by U-209.3
+	// (D-W52-60): the fields are the doctor's specializations of the closed list; Π3 and the note stand.
+	it('Π3 · 🔴 D-W52-60 (screen 15): the card’s figures, the doctor’s specializations by name — never a service, nothing to press — and the note', () => {
 		const window = open(rich(), 'specializations');
 		expect(window).toHaveAttribute('data-section', 'specializations');
+		expect(within(window).getByRole('heading', { level: 2 })).toHaveTextContent(
+			'Τομείς εξειδίκευσης'
+		);
 		const stats = within(window).getByRole('list', { name: 'Με μια ματιά' });
 		expect(stats).toHaveTextContent('2');
 		expect(stats).toHaveTextContent('Επισκέψεις');
-		expect(screen.getByTestId('doctor-detail-specializations-years-a')).toHaveTextContent(
-			'12 χρόνια εμπειρίας'
-		);
-		expect(screen.getByTestId('doctor-detail-specializations-visits-a')).toHaveTextContent(
-			'9 επισκέψεις'
-		);
+		const fields = within(window).getByTestId('doctor-detail-specializations-domains');
+		expect(
+			[...fields.querySelectorAll('[data-slot="list-row-title"]')].map((row) => row.textContent)
+		).toEqual(['Εντατική θεραπεία', 'Σακχαρώδης διαβήτης']);
+		expect(
+			within(window).getByTestId('doctor-detail-specializations-domain-PR021-03')
+		).toHaveTextContent('Εντατική θεραπεία');
+		expect(fields.querySelector('a, button')).toBeNull();
+		expect(fields.textContent).not.toMatch(/Υπηρεσία|€|χρόνια εμπειρίας|επισκέψεις|Κλείστε/u);
+		expect(window.querySelector('[data-testid^="doctor-detail-specializations-book-"]')).toBeNull();
 		expect(screen.getByTestId('doctor-detail-specializations-footnote')).toHaveTextContent(
 			/Οι επισκέψεις μετρούν/u
 		);
 		expect(screen.queryByTestId('doctor-detail-modal-back')).toBeNull();
 	});
 
-	it('U-72.3: a field without visits or years writes nothing, ούτε «0»', () => {
-		open(rich(), 'specializations');
-		expect(screen.queryByTestId('doctor-detail-specializations-years-d')).toBeNull();
-		expect(screen.queryByTestId('doctor-detail-specializations-visits-d')).toBeNull();
-		expect(screen.getByTestId('doctor-detail-specializations-domain-d').textContent).not.toMatch(
-			/\b0\b/u
+	// Rewrites «U-36.2, U-72.3 Π1»'s rows of the profile by U-209.3 (D-W52-60).
+	it('🔴 D-W52-60 (screen 5): the profile’s «Τομείς εξειδίκευσης» are the specializations by name, under «Ολοκληρωμένες επισκέψεις» — no fee, nothing to press but «Εμφάνιση λεπτομερειών», which opens their page in place; without a specialization the section is gone, whatever the services', async () => {
+		render(Harness, { props: props(rich()) });
+		const section = screen.getByTestId('doctor-detail-specializations');
+		expect(within(section).getByRole('heading', { level: 2 })).toHaveTextContent(
+			'Τομείς εξειδίκευσης'
 		);
+		expect(within(section).getByTestId('doctor-detail-specializations-visits')).toHaveTextContent(
+			'Ολοκληρωμένες επισκέψεις: 37'
+		);
+		const items = within(section).getByTestId('doctor-detail-specializations-items');
+		expect(
+			[...items.querySelectorAll('[data-slot="list-row-title"]')].map((row) => row.textContent)
+		).toEqual(['Εντατική θεραπεία', 'Σακχαρώδης διαβήτης']);
+		expect(items.querySelector('a, button')).toBeNull();
+		expect(items.textContent).not.toMatch(/Υπηρεσία|€|Συνδεθείτε/u);
+		const more = within(section).getByTestId('doctor-detail-specializations-more');
+		expect(more).toHaveTextContent('Εμφάνιση λεπτομερειών');
+		expect(more).toHaveAttribute('href', '/doctors/dr-athena-papadopoulou/details/specializations');
+		await fireEvent.click(more);
+		expect(pushState).toHaveBeenCalledWith(
+			'/doctors/dr-athena-papadopoulou/details/specializations',
+			{ doctorDetails: { section: 'specializations', inPlace: true } }
+		);
+		cleanup();
+
+		// Nothing more to say on their page (no visits, no licence day): no button at all.
+		render(Harness, {
+			props: props(
+				sampleDoctorProfile({ licenseObtainedDate: undefined, responseMetrics: undefined })
+			)
+		});
+		expect(screen.getByTestId('doctor-detail-specializations-items')).toBeInTheDocument();
+		expect(screen.queryByTestId('doctor-detail-specializations-more')).toBeNull();
+		cleanup();
+
+		render(Harness, { props: props({ ...rich(), specializations: undefined }) });
+		expect(screen.queryByTestId('doctor-detail-specializations')).toBeNull();
+		expect(document.body.textContent).not.toMatch(/Τομείς εξειδίκευσης/u);
+		expect(screen.getByTestId('doctor-detail-service-cost')).toBeInTheDocument();
 	});
 
 	it('U-72.4: κανένα «(6 μήνες)» στην 15 ούτε στην ενότητα του προφίλ', () => {
@@ -341,17 +395,28 @@ describe('«Υπηρεσίες» and «Τομείς εξειδίκευσης» (
 					service('e', {
 						title: evil,
 						subtitle: evil,
-						description: `<script>alert(1)</script>${evil}`,
-						isSpecialized: true
+						description: `<script>alert(1)</script>${evil}`
 					})
-				]
+				],
+				specializations: [{ code: 'PR021-03', name: evil }]
 			}),
 			'services'
 		);
 		expect(window.querySelector('img, script')).toBeNull();
 		expect(window).toHaveTextContent(evil);
 		expect(document.querySelector('[data-testid="doctor-detail-service-cost"] img')).toBeNull();
+		// 🔴 D-W52-60: a specialization's name is the server's, and still only text — on the profile and on its page.
+		const section = screen.getByTestId('doctor-detail-specializations');
+		expect(section.querySelector('img, script')).toBeNull();
+		expect(section).toHaveTextContent(evil);
 		await tick();
+		cleanup();
+		const fields = open(
+			sampleDoctorProfile({ specializations: [{ code: 'PR021-03', name: evil }] }),
+			'specializations'
+		);
+		expect(fields.querySelector('img, script')).toBeNull();
+		expect(fields).toHaveTextContent(evil);
 	});
 });
 

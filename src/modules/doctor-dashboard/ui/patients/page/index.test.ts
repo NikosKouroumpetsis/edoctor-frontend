@@ -287,4 +287,27 @@ describe('🔴 D-W51-73 · split 1128 / 950 / 402', () => {
 			state: { doctorPatient: { depth: 1 } }
 		});
 	});
+
+	it('🔴 U-215.3: η λίστα κάτω από το λογότυπο — beside a patient’s card (from 1128) the list’s column starts 48 from the frame’s edge (D-W52-11), its right side and its ends as they were; ONE column in the middle takes none of it', async () => {
+		wideScreen(true);
+		serve({ '|': { items: [NIKOS, IOANNA], nextCursor: null } });
+		const wide = open({ view: 'card', key: { kind: 'account', id: id(2) }, step: null });
+		await settled('ready');
+		expect(split()).not.toHaveAttribute('data-solo');
+		expect(page()).toHaveClass(
+			'px-gutter-sm',
+			'laptop:max-w-none',
+			'laptop:pb-pane-inset-lg',
+			'laptop:pl-pane-inset'
+		);
+		for (const name of ['pl-pane-inset', 'split:pl-pane-inset', 'laptop:px-pane-inset'])
+			expect(page(), name).not.toHaveClass(name);
+		wide.unmount();
+		wideScreen(false);
+		open();
+		await settled('ready');
+		expect(split()).toHaveAttribute('data-solo');
+		expect(page()).toHaveClass('px-gutter-sm', 'laptop:max-w-none', 'laptop:pb-pane-inset-lg');
+		expect(page()).not.toHaveClass('laptop:pl-pane-inset');
+	});
 });

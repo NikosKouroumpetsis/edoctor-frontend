@@ -1,11 +1,15 @@
 import type { ResolvedPathname } from '$app/types';
 import { m } from '$paraglide/messages.js';
+import { readArticleText } from '$shared/lib/article-text';
 import { resolveMediaUrl } from '$shared/lib/http';
 import {
+	buildArticleRichText,
 	buildRichText,
 	extractPlainText,
 	richTextToc,
-	type RichTextDoc
+	type RichTextBlock,
+	type RichTextDoc,
+	type RichTextImageSource
 } from '$shared/lib/rich-text';
 import { clipText } from '$shared/lib/seo';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
@@ -56,6 +60,16 @@ export type ArticlePageView = {
 	image: { url: string; alt: string } | null;
 	/** The body: the text sections in their `order` (the article's `content` when it has none). */
 	body: RichTextDoc[];
+	/**
+	 * 🔴 D-W52-104: the blocks the page draws — of the closed schema (`buildArticleRichText`, a node outside the list not
+	 * drawn) when the body is the article's `content` and that is a document of it; else the tolerant reading of the
+	 * older articles (their sections, an older `content`), as before.
+	 */
+	blocks: RichTextBlock[];
+	/** Whether `blocks` are of the closed schema (an article written in the editor). */
+	closed: boolean;
+	/** 🔴 D-W52-94α: «ενημερώθηκε <ημέρα>» after an approved change; empty when it never changed. */
+	updated: string;
 	toc: { id: string; label: string }[];
 	/** «Περισσότερα άρθρα»: `[]` draws no row (none, or the list failed). */
 	related: ArticleListCard[];
@@ -79,7 +93,52 @@ export function articleBodyDocs(article: ArticlePublicView): RichTextDoc[] {
 		)
 		.map(({ section }) => section.content as RichTextDoc);
 	if (sections.length > 0) return sections;
-	return article.content && typeof article.content === 'object' ? [article.content] : [];
+	// The tolerant reader takes any tree (an editor's document is read by `buildArticleBody` first).
+	return article.content && typeof article.content === 'object'
+		? [article.content as RichTextDoc]
+		: [];
+}
+
+/**
+ * 🔴 D-W52-100: the uploads an article's text may draw, by id — the address the server gave (its large size) and its
+ * pixels; an id the server did not name is no image.
+ */
+export function articleContentImages(
+	article: Pick<ArticlePublicView, 'contentImages'>
+): (imageId: string) => RichTextImageSource | null {
+	const known = new Map<string, RichTextImageSource>();
+	for (const image of Array.isArray(article.contentImages) ? article.contentImages : []) {
+		const url =
+			image?.lgSizeUrl?.trim() || image?.mediumSizeUrl?.trim() || image?.smSizeUrl?.trim();
+		if (!image || typeof image.id !== 'string' || !url) continue;
+		const size = (value: unknown) =>
+			typeof value === 'number' && Number.isInteger(value) && value > 0 ? value : null;
+		known.set(image.id.toLowerCase(), {
+			url: resolveMediaUrl(url),
+			width: size(image.width),
+			height: size(image.height)
+		});
+	}
+	return (imageId) => known.get(imageId.toLowerCase()) ?? null;
+}
+
+/**
+ * 🔴 D-W52-104 (U-222.4): what the page draws of an article's body — the closed schema's blocks when the body is its
+ * `content` alone and that reads as a document of the closed list; the tolerant reading otherwise (older articles).
+ */
+export function buildArticleBody(article: ArticlePublicView): {
+	body: RichTextDoc[];
+	blocks: RichTextBlock[];
+	closed: boolean;
+	toc: { id: string; label: string }[];
+} {
+	const body = articleBodyDocs(article);
+	const doc =
+		body.length === 1 && body[0] === article.content ? readArticleText(article.content) : null;
+	const built = doc
+		? buildArticleRichText(doc, articleContentImages(article))
+		: buildRichText(body);
+	return { body, blocks: built.blocks, closed: doc !== null, toc: richTextToc(built.headings) };
 }
 
 /**
@@ -126,6 +185,12 @@ export function buildRelatedArticles(
 	].slice(0, RELATED_ARTICLES_SHOWN);
 }
 
+/** 🔴 D-W52-94α: «ενημερώθηκε 12 Νοε 2026» for an approved change; `''` when it never changed (or the day is unreadable). */
+function updatedLabel(revisedAt: string | null | undefined, locale: SupportedLocale): string {
+	const date = formatArticleDate(revisedAt, locale);
+	return date ? m.article_updated({ date }, { locale }) : '';
+}
+
 /** The article's page in the page's language (U-57.4). */
 export function buildArticlePage({
 	article,
@@ -138,7 +203,7 @@ export function buildArticlePage({
 	locale: SupportedLocale;
 	doctorHref: (slug: string) => ResolvedPathname;
 }): ArticlePageView {
-	const body = articleBodyDocs(article);
+	const { body, blocks, closed, toc } = buildArticleBody(article);
 	const photo =
 		article.image?.lgSizeUrl?.trim() ||
 		article.image?.mediumSizeUrl?.trim() ||
@@ -155,7 +220,10 @@ export function buildArticlePage({
 		reading: readingLabel(readingMinutes(body), locale) ?? '',
 		image: photo ? { url: resolveMediaUrl(photo), alt: article.image?.alt?.trim() ?? '' } : null,
 		body,
-		toc: richTextToc(buildRichText(body).headings),
+		blocks,
+		closed,
+		updated: updatedLabel(article.revisedAt, locale),
+		toc,
 		related: buildRelatedArticles(related, article, locale)
 	};
 }

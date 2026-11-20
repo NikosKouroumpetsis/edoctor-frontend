@@ -25,11 +25,22 @@
 		doctorMenuPath,
 		doctorTodayPath,
 		doctorPatientsPath,
+		doctorProfilePath,
+		doctorReviewsPath,
+		doctorArticlesPath,
 		isDoctorAppointmentStepPage,
+		isDoctorArticlePage,
+		isDoctorCredentialPage,
+		isDoctorLanguagesStepPage,
+		isDoctorServicePage,
 		isDoctorMenuTab,
 		isDoctorMessagesPushedPage,
 		isDoctorMessagesTab,
 		isDoctorPatientStepPage,
+		isDoctorPhotoCropPage,
+		isDoctorProfilePreviewPage,
+		isDoctorReviewStepPage,
+		isDoctorSpecializationsPickPage,
 		isDoctorTodayTab
 	} from '$modules/doctor-dashboard/lib/paths';
 	import AccountMenu from '../components/account-menu.svelte';
@@ -98,14 +109,31 @@
 	// 🔴 D-W51-46 · U-81.2: screen 69 is pushed over the tabs below 744 (its own bar at the bottom, `m-reject.png`).
 	// 🔴 D-W51-76 · U-198.2: so are «Στοιχεία ασθενή» and the join of screen 73.
 	// 🔴 D-W51-85: so are a conversation, one the doctor starts and «Προηγούμενες συνομιλίες» (the patient's way).
+	// 🔴 D-W52-26: so is «Δείτε πώς σας βλέπουν» (the public profile's own booking bar stands at the bottom).
+	// 🔴 D-W52-40: and «Προσαρμογή» of a photo (its own «Άκυρο · Αποθήκευση» at the bottom).
+	// 🔴 D-W52-59: and the choice of the specializations of screen 80 (the same bar at the bottom).
+	// 🔴 D-W52-63: and the page of one row of the biography of screen 81 (the same bar at the bottom).
+	// 🔴 D-W52-69 / 70: and the two pages of screen 82 — the choice of the languages, the four links (the same bar).
+	// 🔴 D-W52-81 / 82: and the pages under screen 83 — one service, «Νέα υπηρεσία», a new one (the same bar).
+	// 🔴 D-W52-92: and the reply to a review of screen 84 and its report (their own «Άκυρο · Αποστολή» at the bottom).
+	// 🔴 D-W52-103: and «Νέο άρθρο» and one article of screen 85 (their own «Άκυρο · Αποστολή για έλεγχο»).
 	const pushed = $derived(
 		isDoctorAppointmentStepPage(basePath) ||
 			isDoctorPatientStepPage(basePath) ||
-			isDoctorMessagesPushedPage(basePath)
+			isDoctorMessagesPushedPage(basePath) ||
+			isDoctorProfilePreviewPage(basePath) ||
+			isDoctorPhotoCropPage(basePath) ||
+			isDoctorSpecializationsPickPage(basePath) ||
+			isDoctorCredentialPage(basePath) ||
+			isDoctorLanguagesStepPage(basePath) ||
+			isDoctorServicePage(basePath) ||
+			isDoctorReviewStepPage(basePath) ||
+			isDoctorArticlePage(basePath)
 	);
 	// 🔴 D-W51-85: «Μηνύματα» is the current tab on the doctor's messages and under them.
 	const messagesCurrent = $derived(isDoctorMessagesTab(basePath));
 	// 🔴 D-W51-73: «Μενού» stays the current tab on «Οι ασθενείς μου» and what is under it (it opens inside the tab).
+	// 🔴 D-W52-22: and on «Το προφίλ μου» (screen 77), a row of the «Μενού» — never a tab of its own (U-186.2).
 	const menuCurrent = $derived(isDoctorMenuTab(basePath));
 
 	const links = $derived<DoctorFrameLink[]>([
@@ -160,7 +188,10 @@
 	const groups = $derived(buildDoctorMenuGroups(locale));
 	const rowPaths: Record<Exclude<DoctorMenuRowId, 'sign-out'>, string> = {
 		notifications: doctorFramePaths.notifications,
+		profile: doctorProfilePath,
 		patients: doctorPatientsPath,
+		reviews: doctorReviewsPath,
+		articles: doctorArticlesPath,
 		'account-settings': doctorFramePaths.accountSettings,
 		help: doctorFramePaths.help,
 		terms: doctorFramePaths.terms
@@ -178,9 +209,12 @@
 <!-- 🔴 Wave 5.1 · screen 65 (D-W51-16, U-186.2; `64-switch/sw.js:872-877, 904-913`, `65-nav`): the doctor's own frame —
      the patient's draws none here. From 744 the bar: the mark · Σήμερα · Μηνύματα in the middle · «Λειτουργία ασθενή»
      (from 1128) and the ☰ with the initial. Below 744 no bar on top (U-81.2) and the capsule Σήμερα · Μηνύματα · Μενού.
-     Never «Προφίλ», «Οι συγγενείς μου», «Ημερολόγιο» (5.3) or «Ταμείο» (the web has none) in 5.1. -->
+     Never a tab «Προφίλ», never «Οι συγγενείς μου», «Ημερολόγιο» (5.3) or «Ταμείο» (the web has none); «Το προφίλ μου»
+     (D-W52-22) is a row of the ☰ and of the page «Μενού» only.
+     🔴 U-215.3, D-W52-12 (`64-switch/sw.css:15-21`): on EVERY page the bar is the page's frame (`frame="page"`: 24 from
+     the edges, 48 from 1128, 1920 at most), its tabs in the exact middle — every side column starts under the mark. -->
 <div data-testid="doctor-frame" data-gate={gate} class="flex min-h-dvh flex-col bg-card">
-	<AppHeader showFrom="tablet">
+	<AppHeader showFrom="tablet" frame="page">
 		{#snippet brand()}
 			<BrandLink href={href(doctorTodayPath)} {locale} />
 		{/snippet}

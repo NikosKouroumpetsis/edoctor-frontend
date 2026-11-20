@@ -87,6 +87,18 @@ describe('Button', () => {
 		expect(leading.parentElement).toHaveAttribute('aria-hidden', 'true');
 	});
 
+	// 🔴 Live check 85 (19/11): the «+» of «Νέο άρθρο» was drawn in the page's dark colour on the dark fill.
+	it("🔴 U-03.1: a leading glyph wears the label's colour on a solid fill, and inherits on the others", () => {
+		const view = render(Harness, { props: { withLeading: true } });
+		expect(screen.getByTestId('leading').parentElement).toHaveClass('text-primary-foreground');
+		view.unmount();
+		render(Harness, { props: { withLeading: true, tone: 'muted' } });
+		expect(screen.getByTestId('leading').parentElement).not.toHaveClass(
+			'text-primary-foreground',
+			'text-muted-foreground'
+		);
+	});
+
 	it('U-03.1: href renders a link; disabled removes the href and leaves the tab order', () => {
 		const view = render(Button, { props: { label: 'Σύνδεση', href: '/login' } });
 		expect(screen.getByRole('link', { name: 'Σύνδεση' })).toHaveAttribute('href', '/login');

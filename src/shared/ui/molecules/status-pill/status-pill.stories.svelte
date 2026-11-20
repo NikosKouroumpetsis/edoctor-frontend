@@ -18,6 +18,7 @@
 			<StatusPill pill={{ label: 'Αίτημα', tone: 'warning' }} />
 			<StatusPill pill={{ label: 'Επιβεβαιωμένο', tone: 'success' }} />
 			<StatusPill pill={{ label: 'Ολοκληρώθηκε', tone: 'muted' }} />
+			<StatusPill pill={{ label: 'Δεν δημοσιεύτηκε', tone: 'refused' }} />
 		</div>
 	{/snippet}
 </Story>

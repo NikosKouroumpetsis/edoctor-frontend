@@ -99,4 +99,16 @@ describe('Rating', () => {
 		);
 		expect(marks).toEqual(['true', 'true', 'true', 'half', 'false']);
 	});
+
+	it('🔴 U-49 (ζωντανός έλεγχος 84, 19/11): any score is rounded to the nearest half first — 3,2 fills three, never four', () => {
+		const marksOf = (value: number) =>
+			[
+				...render(Rating, { props: { variant: 'stars', value } }).container.querySelectorAll(
+					'[data-filled]'
+				)
+			].map((node) => node.getAttribute('data-filled'));
+		expect(marksOf(3.2)).toEqual(['true', 'true', 'true', 'false', 'false']);
+		expect(marksOf(3.3)).toEqual(['true', 'true', 'true', 'half', 'false']);
+		expect(marksOf(4.8)).toEqual(['true', 'true', 'true', 'true', 'true']);
+	});
 });

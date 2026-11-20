@@ -7,8 +7,9 @@ import type {
 	NotificationInboxTargetKind
 } from './types';
 
-// The contract's words, every one of them (🔴 D-W51-90, screen 75: the doctor's glyphs and what his lines are about too);
-// a word the contract adds later reads as none (the calendar, no target) until it is named here.
+// The contract's words, every one of them (🔴 D-W51-90, screen 75: the doctor's glyphs and what his lines are about too;
+// 🔴 D-W52-88 / 91: a review of the doctor, `RATING`); a word the contract adds later reads as none (the calendar, no
+// target) until it is named here.
 const ICONS = {
 	CALENDAR: true,
 	CLOCK: true,
@@ -17,14 +18,19 @@ const ICONS = {
 	CALENDAR_CANCELED: true,
 	CHECK: true,
 	SYNC: true,
-	BADGE: true
+	BADGE: true,
+	// The contract of screen 85 (wave 5.2, card w52-b9a) names the article's glyph; its screen comes with its own card.
+	DOCUMENT: true
 } as const satisfies Record<NotificationInboxIcon, true>;
 const TARGETS = {
 	APPOINTMENT: true,
 	RATING_INVITATION: true,
 	QUESTION: true,
 	CALENDAR_CONNECTION: true,
-	DOCTOR: true
+	DOCTOR: true,
+	RATING: true,
+	// Screen 85's word (card w52-b9a): kept, but no line about an article opens anything until its screen does.
+	ARTICLE: true
 } as const satisfies Record<NotificationInboxTargetKind, true>;
 
 /** The most lines one page may bring (the server's own cap, D-W45-46) and the longest cursor it accepts back. */

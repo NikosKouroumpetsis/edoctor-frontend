@@ -37,6 +37,43 @@ describe('CheckRows (many choices; shared since D-W51-52)', () => {
 		).toBe(true);
 	});
 
+	it('🔴 D-W52-59 · U-112: a row the caller holds back stays in the list, dimmed and `aria-disabled`, and its press names nothing; the chosen rows and the free ones answer as before', async () => {
+		const onToggle = vi.fn();
+		render(CheckRows, {
+			props: {
+				label: 'Υπηρεσίες',
+				options: [
+					{ value: 'visit', label: 'Επίσκεψη' },
+					{ value: 'ecg', label: 'Ηλεκτροκαρδιογράφημα', disabled: true },
+					{ value: 'echo', label: 'Υπέρηχος καρδιάς', disabled: false }
+				],
+				values: ['visit'],
+				onToggle
+			}
+		});
+		const [chosen, held, free] = screen.getAllByRole('checkbox');
+		expect(held).toHaveAttribute('aria-disabled', 'true');
+		expect(held).toHaveAttribute('aria-checked', 'false');
+		// It is no `disabled` button: it keeps its place for the keyboard, and a reader hears why it does not answer.
+		expect(held).not.toBeDisabled();
+		expect(held.querySelector('[data-slot="check-rows-box"]')?.className).toContain('opacity-45');
+		expect(held.firstElementChild?.className).toContain('opacity-45');
+		expect(chosen).not.toHaveAttribute('aria-disabled');
+		expect(free).not.toHaveAttribute('aria-disabled');
+		expect(chosen.innerHTML).not.toContain('opacity-45');
+		expect(free.innerHTML).not.toContain('opacity-45');
+
+		await userEvent.click(held);
+		held.focus();
+		await userEvent.keyboard('{Enter}');
+		await userEvent.keyboard(' ');
+		expect(onToggle).not.toHaveBeenCalled();
+
+		await userEvent.click(chosen);
+		await userEvent.click(free);
+		expect(onToggle.mock.calls).toEqual([['visit'], ['echo']]);
+	});
+
 	it('(negative) U-65.6: a word with markup is text; U-100: no colour under the pointer', () => {
 		render(CheckRows, {
 			props: {

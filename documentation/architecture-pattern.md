@@ -966,8 +966,10 @@ Wave 1.5 · screen 5 adds the doctor's profile `/doctors/[slug]` and its windows
   `api/marketplace` `resolveSimilarDoctorsArea` — the active office's city through `resolveLocationSlug`, asked when
   cases 1 and 2 show — and `lib/similar-doctors` `buildSimilarDoctorsCriteria`: the specialty, and the area ONLY as a
   `location` by its slug; without one no «Πού» at all, U-37.2) and the cards' `useSignIn`.
-- `src/modules/doctor/api/{profile,reviews,availability,office}` — the facts (the application's mappers; the
-  services' `isSpecialized`, U-36.2; `doctor.responseMetrics` ⇒ `DoctorResponseMetricsFacts` by `buildResponseMetrics`,
+- `src/modules/doctor/api/{profile,reviews,availability,office}` — the facts (the application's mappers; 🔴 D-W52-60,
+  U-209.3: `doctor.specializations` ⇒ `DoctorSpecializationFacts[]` — the «Τομείς εξειδίκευσης» the doctor picked from
+  the closed list of the specialty, three at most, read field by field — and no mark on a service any more: a service is
+  never a field of expertise, its years and its visits stay with it; `doctor.responseMetrics` ⇒ `DoctorResponseMetricsFacts` by `buildResponseMetrics`,
   the wire's `WITHIN_HOUR`… as the design's `within-hour`…, each `null` left out, U-43; `doctor.isPatientsChoice` ⇒
   `isPatientsChoice`, only a `true`, U-45.2 — the laurels of the identity and of the reviews only then; every score
   — average, aspects' averages, a review's overall and aspects — on the 5 stars, U-49: `$shared/lib/rating-stars`
@@ -1002,8 +1004,13 @@ Wave 1.5 · screen 5 adds the doctor's profile `/doctors/[slug]` and its windows
   `MediaGallery` and `RevealingPhoto` (the application's names and props), and the new props of `TwoColumnDetail`,
   `StickyActionBar` and `MapView` (`styling-guidelines.md`).
 - Wave 2 · screens 14, 15, 16, 24 (U-70 … U-76): `details/services` and `details/specializations` are the two pages of
-  one window (`window-services.svelte`; «Τομείς εξειδίκευσης ›» is its own history step, `fromServices`), each row's
-  glyph from the backend's `kind` (never `online`, U-89.1). The biography is a page of its own,
+  one window component (`window-services.svelte`), each service row's glyph from the backend's `kind` (never `online`,
+  U-89.1). 🔴 Wave 5.2 (D-W52-60, U-209.3; it replaces U-36.2 and U-72.3): «Τομείς εξειδίκευσης» — the profile's
+  section (`specializations.svelte`, `lib/detail/build-content` `buildSpecializations`) and screen 15
+  (`buildDoctorSpecializationsPage`) — are the doctor's `specializations` by name, never services: rows with nothing to
+  press, the way to their page only when it has its card of figures. Screen 14 (`buildDoctorServicesPage`) is ONE list
+  without groups, each service with its own years and visits in its open row and a note of what the visits count; it
+  has no way to screen 15 (the stacked page, its «‹», `fromServices` and its motion are gone). The biography is a page of its own,
   `/doctors/[slug]/about` (`routes/…/about`, `screens/…/about`, the slice's `page/about.svelte`, `lib/detail/about`):
   `details/description` answers `308` to it. Below 744 it is one element shaped as a sheet by CSS (no second tree, no
   second read). The profile's last section is «Τι πρέπει να γνωρίζετε» (`know-section.svelte`, `lib/detail/know`), its
@@ -1236,6 +1243,149 @@ no-store`, `Referrer-Policy: no-referrer`, `X-Robots-Tag: noindex, nofollow` (gu
   patient's `/notifications` passes `side="patient"`). `DOCTOR_DASHBOARD_PAGES` holds `/doctor/notifications` (no bar of
   the patient's); `lib/paths` `isDoctorMenuTab` keeps «Μενού» current and the capsule there; the ☰ row and the bell of
   «Μενού» lead there (`doctorFramePaths.notifications`, the end of D-W51-18).
+- The doctor's «Το προφίλ μου» (wave 5.2, screen 77, card w52-w1; D-W52-22 … 27): two routes of the group, each with its
+  mirrored screen — `routes/doctor/(dashboard)/profile/[...path]` ⇒ `screens/doctor/profile/[...path]` ⇒ the
+  `doctor-dashboard` slice
+  `ui/profile` (the status, «Δείτε πώς σας βλέπουν», the six sections), and `…/profile/preview` ⇒
+  `screens/doctor/profile/preview`, the ONE screen that composes two modules: the dashboard's slice `ui/preview` (the
+  band and the two reads) over the public profile's own page (`doctor/ui/detail`, told it is a `preview`: no head, no bar
+  of its own on top, its windows on the page's own address). The dashboard reads the server's answer
+  (`api/profile` `getMyProfilePreview`) and the SCREEN hands in the reader of it — the `doctor` module's
+  `mapDoctorProfile` — because a module never imports another (`doctorMyProfilePreviewQuery(locale, read)`, the way
+  `similarAreaQuery` reaches the doctor's page). The row «Το προφίλ μου» is the first of the first group of «Μενού»
+  (`lib/menu`, id `profile`; the ☰ and the page alike) and never a tab (U-186.2); `DOCTOR_DASHBOARD_PAGES` holds the two
+  addresses, `lib/paths` `isDoctorMenuTab` keeps «Μενού» current on both and `isDoctorProfilePreviewPage` pushes the
+  preview over the tabs below 744. The sections are a closed register (`lib/profile` `doctorProfileSections`): a
+  section's row becomes a link the day its screen (78–83) writes its `path` there — until then it is words alone.
+- The doctor's «Φωτογραφίες» (wave 5.2, screen 78, card w52-w2; D-W52-37 … 42) and the sections' address: since the
+  first section has a page, «Το προφίλ μου» is ONE catch-all route — `routes/doctor/(dashboard)/profile/[...path]` ⇒
+  `screens/doctor/profile/[...path]` ⇒ `ui/profile` with the address `lib/paths` `readDoctorProfileAddress` read (a
+  closed list: `''` the list, `photos`, `photos/<id>/crop`; anything else a 404) — so the list, its fold and its scroll
+  stay while a section opens beside it; `profile/preview` keeps its own route. `ui/profile` composes the sections of
+  the SAME module: `ui/photos` (the grid, the queue of uploads, the order, the deletion) and `ui/crop` («Προσαρμογή», a
+  `StepScreen` in the `menu` placement). The facts are `api/images` (the list read field by field, the five writes, the
+  server's refusals as reasons), the rules `lib/photos` (the limits, the page's words for each reason, the arrow's and
+  the drag's targets). What is generic is shared: `shared/lib/image` (a picked file's checks, the cut's geometry, the
+  canvas), `shared/ui/molecules/image-cropper`, `shared/lib/http` `httpSessionUpload` (the write that tells how much of
+  it has left). `DOCTOR_DASHBOARD_PAGES` and `isDoctorMenuTab` hold the photos' two addresses; only «Προσαρμογή» is
+  pushed over the tabs below 744 (`isDoctorPhotoCropPage`). Each next section (79–83) adds its word to
+  `readDoctorProfileAddress`, its `path` to the register, its address to `DOCTOR_DASHBOARD_PAGES`, and its slice.
+  Below 744 «⋯» of a photo opens ONE sheet of the page (`ui/photos/components/menu-sheet`, the shared `BottomSheet`)
+  with the menu's own three; from 744 the small `DropdownMenu` on the photo (D-W52-37α, U-81.2): two triggers, each
+  drawn only at its widths (`tablet:hidden` / `hidden tablet:inline-flex`), the way of `ReviewToolbar`.
+- The doctor's «Ειδικότητα και εξειδικεύσεις» (wave 5.2, screen 80, card w52-w4; D-W52-59): `/doctor/profile/specialty`
+  (`lib/paths` `doctorProfileSpecialtyPath`) and the choice of the specializations, a page of its own under it
+  (`doctorProfileSpecializationsPath`, `…/specialty/specializations`; U-102: never a window) — both words of
+  `readDoctorProfileAddress` (`{ section: 'specialty', pick }`), both in `DOCTOR_DASHBOARD_PAGES`; only the choice is
+  pushed over the tabs below 744 (`isDoctorSpecializationsPickPage`). Two slices: `ui/specialty` (READ ONLY: the
+  specialty, the practice licence, the lock's words, and ONE row that opens the choice — absent for a specialty without
+  a list) and `ui/specializations` (the shared `StepScreen` and `CheckRows`: the list of the specialty as rows with
+  ticks, three at most, «Άκυρο · Αποθήκευση»). Their facts: `api/specializations` (the list, the picks, `PUT { codes }`,
+  the refusals) and `api/profile` (`sections.specialty.{ specializationsCount, hasCatalogue }`, `ADD_SPECIALIZATIONS`,
+  `doctorMyPracticeLicenceQuery`); their rules: `lib/specializations` (pure) and `config`
+  `DOCTOR_SPECIALIZATION_LIMIT`, the server's own (`tests/architecture/specialization-rules.test.ts`).
+- The doctor's «Βιογραφικό» (wave 5.2, screen 81, card w52-w5; U-210, D-W52-63): `/doctor/profile/cv`
+  (`lib/paths` `doctorProfileCvPath`) and the page of ONE row under it (`doctorProfileCvItemPath(kind, id)`:
+  `…/cv/<studies|experience|conferences>/<id>`, or `…/new` for «Προσθήκη»; U-102: never a window) — words of
+  `readDoctorProfileAddress` (`{ section: 'cv', item }`), in `DOCTOR_DASHBOARD_PAGES`; only the page of a row is pushed
+  over the tabs below 744 (`isDoctorCredentialPage`). Two slices: `ui/cv` (READS: the three groups «Σπουδές · Εμπειρία ·
+  Συνέδρια», always all three, the rows in the SERVER's order as the shared `ListRow`, «Προσθήκη» under each — «Έως 20.»
+  in its place at twenty) and `ui/credential` (the shared `StepScreen`, `TextField` and `CheckRows`: the title, the
+  organization, the years, the tick «Σε εξέλιξη» / «Εργάζομαι εδώ σήμερα», «Διαγραφή» behind the shared `ActionDialog`,
+  «Άκυρο · Αποθήκευση»); the host keys the row's page by its address, so each row gets a page of its own. Their facts:
+  `api/credentials` (`GET` / `PUT /doctor/profile/credentials`: the biography in Greek alone, the ONE save that reads
+  the biography again and sends the whole group, the refusals); their rules: `lib/cv` (pure) and `config`
+  `DOCTOR_CREDENTIAL_*`, the server's own (`tests/architecture/credential-rules.test.ts`). No choice of a language on
+  either page (U-207.3).
+- The doctor's «Κριτικές» (wave 5.2, screen 84, card w52-w8; U-218, U-219, U-220, D-W52-91 / 92): a row of «Μενού»
+  after «Οι ασθενείς μου» (`lib/menu` `reviews`), ONE route `/doctor/reviews/[...path]` under the doctor's frame
+  («Μενού» the current tab, `isDoctorMenuTab`), a closed list read by `lib/paths` `readDoctorReviewsAddress` — the list
+  `/doctor/reviews` (`?filter=unanswered`, `?review=<id>`: the review a notification or the row of 68 names) and two
+  pages of one review (U-102: never a window) `/<id>/reply` and `/<id>/report` (`doctorReviewStepPath`), pushed over
+  the tabs below 744 (`isDoctorReviewStepPage`), in `DOCTOR_DASHBOARD_PAGES`. Three slices: `ui/reviews` (ONE column of
+  720 in the middle, U-215: the summary for the doctor alone, «N νέες κριτικές ελέγχονται …», «Όλες · Χωρίς απάντηση
+  (N)», the cards with the reply in its four states, «Αναφορά», «Το ραντεβού · …» ⇒ 68; «Διαγραφή» of a reply in an
+  `ActionDialog`), `ui/reply` and `ui/report` (the shared `StepScreen` `solo`, `NoteField`, `RadioRows`). Their facts:
+  `api/reviews` (list, summary, one review, the review of one appointment, the reply `POST` / `PATCH` / `DELETE`, the
+  report, the refusals, the cache writes); their rules: `lib/reviews` (pure) and `config` `DOCTOR_REVIEW*`, the
+  server's own (`tests/architecture/review-rules.test.ts`). Screen 68 draws «Η κριτική του ασθενή ★ N · ημερομηνία ›»
+  over «Χρονολόγιο» (U-220.1, the shared `LinkCard`) and its «‹» goes back to the review it was opened from
+  (`doctorReview`). The notifications map the target `RATING` to `{ kind: 'review' }`: the doctor's screen 75 opens
+  «Κριτικές» at that review, the patient's screen 63 nothing.
+- The doctor's «Τα άρθρα μου» (wave 5.2, screen 85, card w52-w9; U-221, U-222, D-W52-102 / 103 / 104): a row of
+  «Μενού» after «Κριτικές» (`lib/menu` `articles`, the pen), ONE route `/doctor/articles/[...path]` under the doctor's
+  frame («Μενού» the current tab), a closed list read by `lib/paths` `readDoctorArticlesAddress` — the list
+  `/doctor/articles`, «Νέο άρθρο» `/new` and one article `/<id>` (`doctorArticlePath`), the two pages pushed over the
+  tabs below 744 (`isDoctorArticlePage`), in `DOCTOR_DASHBOARD_PAGES`; the screen draws one article's page in a `{#key}`
+  of its address. Slice `ui/articles` (ONE column of 720 in the middle, U-215: «+ Νέο άρθρο», the rows
+  with their state's `StatusPill` — `refused` for «Δεν δημοσιεύτηκε» — and «Εμφάνιση παλαιότερων»); facts `api/articles`
+  (list, one article, the four writes, the deletion, the upload of an image of the text, the refusals); rules
+  `lib/articles` (pure: the rows, the note over an article, the three messages, «Αποθήκευση πρόχειρου» only before the
+  first publication) and `config` `DOCTOR_ARTICLE*`, the server's own (`tests/architecture/article-rules.test.ts`).
+  Slice `ui/article` (D-W52-103), one article's page: a PAGE of 720 (U-102), the note over it, «Είδος» in rows (U-112),
+  title, short description, the cover (`components/cover`, 800 × 600 checked first), «Κείμενο» and the editor, the
+  preview in place (`components/preview`, the public renderer, `inert`), the deletion asked in the shared `ActionDialog`,
+  «Άκυρο · Αποστολή για έλεγχο» pinned below 744. 🔴 U-222.2: the editor (`components/editor`) is OUR component on Tiptap
+  and lives in this slice alone (it writes the server's schema and eDoctor's words, so it is no kit piece), loaded by
+  the page with `import()` so the list and every other page never carry Tiptap (`map-view`'s precedent): ONE sticky
+  toolbar under the top bar with «Στυλ κειμένου» and the 16 tools (B / I / U / S as letters, the others the prototype's
+  line art, `components/tool-glyph`; state = `aria-pressed`, no colour of the pointer), the
+  link / video / image words in a band under it (never a window), a table's own actions; `lib/extensions` is the
+  schema — StarterKit without code, our link (`href` alone, `https:`), quote, «Σημαντικό», list item, image (`imageId`,
+  `alt`, `caption`; never from a paste), video (`provider`, `id`; a place, never a frame), a table without merging (an image drawn by a node view: its
+  upload, or the picture's place when it is not known or does not load), and
+  a plugin that keeps the server's limits, attributes and paste (no file, no `<img>`).
+  The notifications map the target `ARTICLE` to `{ kind: 'article' }`: the doctor's screen 75 opens the article, the
+  patient's screen 63 nothing. 🔴 D-W52-104: the public article draws its body through `lib/article` `buildArticleBody`
+  — an editor's text (`content` of the closed schema, `$shared/lib/article-text` `readArticleText`) through
+  `buildArticleRichText` (every node its own block, a node outside the list not drawn, an image only by its upload's
+  address from `contentImages`), an older article as before — and `RichText` `userContent` (`nofollow ugc` links in a
+  new tab, a video only on a press); «ενημερώθηκε» after an approved change (`revisedAt`, D-W52-94α).
+- The doctor's «Υπηρεσίες και τιμές» (wave 5.2, screen 83, card w52-w7; U-212, U-214, U-217.3, D-W52-81 … 83):
+  `/doctor/profile/services` (`lib/paths` `doctorProfileServicesPath`) and three pages of their own under it (U-102:
+  never a window) — ONE service `…/services/<id>` (`doctorProfileServicePath`), «Νέα υπηρεσία» `…/services/new`
+  (`doctorProfileNewServicePath`, the catalogue of the specialty) and a new one `…/services/new/<serviceId>`
+  (`doctorProfileNewServiceItemPath`) — words of `readDoctorProfileAddress` (`{ section: 'services', page }`), in
+  `DOCTOR_DASHBOARD_PAGES`; only the three pages are pushed over the tabs below 744 (`isDoctorServicePage`). Since this
+  card every row of 77 is a link and the rail holds all six glyphs. Three slices: `ui/services` (the list in the
+  doctor's order, each row a link that is also the handle of the order — dragged with the pointer, a finger holding
+  first, or moved with ↑ / ↓ — ONE `PUT …/order` when let go, optimistic, put back on a refusal), `ui/catalogue` (READS:
+  the catalogue without what the doctor offers) and `ui/service` (the shared `StepScreen`, `TextField`, `RadioRows`,
+  `NoteField`: price, length, the doctor's own texts with the button of U-214, years; «Διαγραφή υπηρεσίας» in an
+  `ActionDialog`, never on the last one). Their facts: `api/services` (list, catalogue with `owned`, create, change,
+  delete, order, the refusals); their rules: `lib/services` (pure) and `config` `DOCTOR_SERVICE_*`, the server's own;
+  the lengths are `$shared/lib/visit-length` (`tests/architecture/service-rules.test.ts`).
+- 🔴 D-W52-75α (screen 52 «Αλλαγή ώρας» of the patient): the hours of a move are the APPOINTMENT's own — the
+  appointments module's `api/reschedule` (`GET /appointment/appointments/<id>/reschedule-slots`, four weeks of seven
+  days), composed in `screens/appointments/[...path]/hooks/use-time.svelte.ts` into the profile's picker — never the
+  public hours of one service (`resolveRescheduleServiceId` stays as the module's rule, U-30.2).
+- The doctor's «Γλώσσες και κοινωνικά δίκτυα» (wave 5.2, screen 82, card w52-w6; U-211, D-W52-69 / 70):
+  `/doctor/profile/languages` (`lib/paths` `doctorProfileLanguagesPath`) and two pages of their own under it (U-102:
+  never a window) — the choice of the languages `…/languages/spoken` (`doctorProfileSpokenLanguagesPath`) and the four
+  links `…/languages/networks` (`doctorProfileNetworksPath`) — words of `readDoctorProfileAddress`
+  (`{ section: 'languages', page }`), in `DOCTOR_DASHBOARD_PAGES`; only the two pages are pushed over the tabs below 744
+  (`isDoctorLanguagesStepPage`). Three slices: `ui/languages` (READS: two rows, «Γλώσσες που μιλάτε» and «Κοινωνικά
+  δίκτυα», each a link to its page; a kept link is WRITTEN short, never an address), `ui/spoken-languages` (the shared
+  `StepScreen`, `SearchField` and `CheckRows`: the search, «Οι γλώσσες σας» over «Όλες οι γλώσσες» — with words ONE
+  list of what they find (D-W52-69α) — ten at most, the
+  limit's sentence in `barNote`) and `ui/networks` (the shared `StepScreen` and `TextField` on `createForm`: the four
+  fields, the rule said under each). Their facts: `api/languages` (the catalogue, the doctor's languages, ONE
+  `PUT { codes }`, the refusals) and `api/links` (the four links of `GET` / `PATCH /doctor/profile/base`, nothing else
+  of it, and the per-field codes `DOCTOR_<FIELD>_LINK_<REASON>`); their rules: `lib/languages` and `lib/links` (pure;
+  the check of a link is the server's `DoctorSocialLinkPolicy`, applied before the save) and `config`
+  `DOCTOR_SPEAK_LANGUAGE_*` / `DOCTOR_LINK_*`, the server's own (`tests/architecture/language-rules.test.ts`).
+- The doctor's «Όνομα και περιγραφή» (wave 5.2, screen 79, card w52-w3; D-W52-47 … 50): `/doctor/profile/about`
+  (`lib/paths` `doctorProfileAboutPath`; `about` in `readDoctorProfileAddress`, nothing under it), the slice
+  `ui/about` — READ ONLY, placed as the photos' page (beside the list from 950, a page of its own below it, the capsule
+  kept). Its facts are `api/profile` `doctorMyProfileTextQuery` (`GET /doctor/profile/translations/el`: the name and the
+  description) and `sections.about.nameLocked` of «Το προφίλ μου». 🔴 The description is drawn by the PUBLIC page's own
+  reader — `doctor/api/profile` `extractParagraphs`, what `mapDoctorProfile` draws the patients' page with — handed in
+  by the screen as `readDescription` (`screens/doctor/profile/[...path]/hooks/use-screen`): a module never imports
+  another. Its paragraphs are text nodes, never HTML. The lock of the name reaches «Προσωπικά στοιχεία» (58) through the
+  shared `DoctorStanding.nameLocked` (the `profile` module knows no doctor module): `profile/lib/personal`
+  `buildPersonalRows(…, { nameLocked })` gives «Ονοματεπώνυμο» its `lockedNote`, the shared `EditableRow` draws it
+  without a link; the server's own refusal (`409 DOCTOR_NAME_LOCKED`) is read where the call is owned
+  (`appointments/api/patient` `readBookingProfileFailure` ⇒ `name-locked`) and says the same words.
 - The patient's facts and rules (wave 4.0, P-W4 §4.7, card W4-3) in the same module: `api/appointment` (+ the list's
   infinite read `appointmentListQuery`, the ONE scan of the upcoming `upcomingScanQuery` (D-W4-21), the change
   `changeAppointment` and `cancelAppointment` with `readAppointmentChangeFailure`, `storeAppointmentDetail`; the facts

@@ -7,6 +7,7 @@ const facts = (patch: Partial<DoctorDashboardFacts> = {}): DoctorDashboardFacts 
 	marketplace: { status: 'ACTIVE', endsAt: '2027-01-01T00:00:00.000Z' },
 	payments: { status: 'NONE', endsAt: null },
 	licensed: true,
+	nameLocked: false,
 	notice: { kind: 'EXPIRING', endsAt: '2026-12-14T22:00:00.000Z' },
 	lastMode: 'DOCTOR',
 	card: { firstName: 'Ελένη', lastName: 'Παππά', specialtyName: 'Καρδιολόγος' },
@@ -63,5 +64,31 @@ describe('the doctor standing (U-185.1, D-W51-16)', () => {
 			lastMode: 'DOCTOR',
 			card: { firstName: 'Ελένη', lastName: 'Παππά', specialtyName: 'Καρδιολόγος' }
 		});
+	});
+
+	it('🔴 D-W52-47 / D-W52-50 (U-207.1): the lock of the name is the server’s word, whatever the kind — a doctor, the till alone, a revoked licence (`pending`), a registration no longer complete; an open name says nothing of it', () => {
+		const locked = [
+			facts({ nameLocked: true }),
+			facts({
+				nameLocked: true,
+				marketplace: { status: 'NONE', endsAt: null },
+				payments: { status: 'ACTIVE', endsAt: '2027-01-01T00:00:00.000Z' }
+			}),
+			facts({ nameLocked: true, licensed: false, marketplace: { status: 'NONE', endsAt: null } }),
+			facts({ nameLocked: true, registration: 'LOCKED' })
+		];
+		expect(locked.map((entry) => toDoctorStandingFacts(entry).kind)).toEqual([
+			'doctor',
+			'payments',
+			'pending',
+			'none'
+		]);
+		for (const entry of locked) expect(toDoctorStandingFacts(entry).nameLocked).toBe(true);
+		expect(toDoctorStandingFacts(facts())).not.toHaveProperty('nameLocked');
+		expect(
+			toDoctorStandingFacts(
+				facts({ licensed: false, marketplace: { status: 'NONE', endsAt: null } })
+			)
+		).not.toHaveProperty('nameLocked');
 	});
 });

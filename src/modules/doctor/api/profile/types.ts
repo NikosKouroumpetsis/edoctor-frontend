@@ -125,8 +125,8 @@ export type DoctorAvailabilityFacts = {
 export type DoctorServiceKind = 'follow-up' | 'check-up' | 'visit' | 'other';
 
 /**
- * One bookable service. `isSpecialized` (U-36.2): the doctor marked it as a field of expertise — the
- * «Τομείς εξειδίκευσης» are these services, as the server already sends them.
+ * One bookable service. 🔴 D-W52-60 (U-209.3): a service is never a field of expertise any more (the server's old
+ * mark is gone) — its years and its visits stay with it.
  */
 export type DoctorServiceFacts = {
 	id: string;
@@ -142,8 +142,14 @@ export type DoctorServiceFacts = {
 	/** The backend's `sub`: the short line under its title. */
 	subtitle?: string;
 	durationInMinutes?: number;
-	isSpecialized: boolean;
 };
+
+/**
+ * 🔴 D-W52-60 (U-209.3, U-225): one of the doctor's «Τομείς εξειδίκευσης» — a line of the closed list of the specialty
+ * the doctor picked, named by the server in the page's language (U-122: never a name of the client's). The server
+ * sends only what is public: a title of the Government Gazette only once the team approved it.
+ */
+export type DoctorSpecializationFacts = { code: string; name: string };
 
 export type DoctorBioFacts = {
 	studies?: string[];
@@ -241,6 +247,8 @@ export type DoctorProfile = {
 	fee: DoctorFeeFacts | null;
 	availability?: DoctorAvailabilityFacts;
 	services?: DoctorServiceFacts[];
+	/** 🔴 D-W52-60: the doctor's «Τομείς εξειδίκευσης», three at most; absent with none. */
+	specializations?: DoctorSpecializationFacts[];
 	office?: DoctorOfficeFacts;
 	offices?: DoctorOfficeSummaryFacts[];
 	description?: DoctorDescriptionFacts;

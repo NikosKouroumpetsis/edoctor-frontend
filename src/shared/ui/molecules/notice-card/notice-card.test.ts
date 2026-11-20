@@ -42,6 +42,32 @@ describe('NoticeCard', () => {
 		);
 	});
 
+	it('with an `icon` the glyph stands before the words, decorative; without one the box is as it was', () => {
+		const plain = render(NoticeCard, { props: { title: 'α', testId: 'plain' } });
+		expect(screen.getByTestId('plain').querySelector('svg')).toBeNull();
+		expect(screen.getByTestId('plain').className).not.toContain('flex-row');
+		plain.unmount();
+		render(NoticeCard, {
+			props: {
+				title: 'Φαίνεστε στην αναζήτηση',
+				lines: ['Οι ασθενείς βρίσκουν το προφίλ σας.'],
+				tone: 'done',
+				icon: 'checkmark-circle-outline',
+				testId: 'status'
+			}
+		});
+		const box = screen.getByTestId('status');
+		expect(box.className).toContain('flex-row');
+		const [glyph, words] = [...box.children];
+		expect(glyph.tagName.toLowerCase()).toBe('svg');
+		expect(glyph).toHaveAttribute('aria-hidden', 'true');
+		expect(words).toHaveAttribute('data-slot', 'notice-card-words');
+		expect([...words.querySelectorAll('p')].map((p) => p.textContent)).toEqual([
+			'Φαίνεστε στην αναζήτηση',
+			'Οι ασθενείς βρίσκουν το προφίλ σας.'
+		]);
+	});
+
 	it('a part of the page says nothing aloud by itself; a notice after an action is a status', () => {
 		const quiet = render(NoticeCard, { props: { title: 'α', testId: 'quiet' } });
 		expect(screen.getByTestId('quiet')).not.toHaveAttribute('role');

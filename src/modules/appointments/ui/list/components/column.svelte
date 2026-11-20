@@ -76,13 +76,15 @@
 <!-- Screen 50 (record §6.1, U-134): the title (24 below 744, 28 from it), «Επερχόμενα / Ιστορικό» as two links that keep the
      tab in the address (D-W4-28: the chosen one filled dark, never the inbox's look), then the groups. Below 744 the end
      leaves room for the capsule; 744–949 one column of 760; from 950 the left column (24 inside), or alone in the middle
-     (U-139.1). -->
+     (U-139.1). 🔴 U-215.3 (D-W52-11, `appts.css:209`): from 1128 the left column starts under the bar's mark, 48 from the frame's edge. -->
 <div
 	data-testid="appointments-list"
 	data-view={view}
 	class={cn(
 		'mx-auto w-full max-w-content px-gutter-sm pt-6 pb-bar-bottom tablet:px-reading-gap tablet:pt-section tablet:pb-section-lg',
-		solo ? 'split:pt-section-lg' : 'split:max-w-none split:px-6 split:pt-6 split:pb-section-lg'
+		solo
+			? 'split:pt-section-lg'
+			: 'split:max-w-none split:px-6 split:pt-6 split:pb-section-lg laptop:pl-pane-inset'
 	)}
 >
 	<h1

@@ -27,6 +27,8 @@ export type DoctorStandingFacts = {
 	notice: DoctorLicenceNotice | null;
 	lastMode: DoctorMode;
 	card: DoctorNameCard | null;
+	/** U-207.1: the account's name no longer changes by the account itself (a doctor's first licence); absent is open. */
+	nameLocked?: boolean;
 };
 
 /** 🔴 D-W51-19: what this device remembered before the answer — the kind and the mode, nothing of the person. */
@@ -83,6 +85,11 @@ export class DoctorStanding {
 	);
 	readonly notice = $derived(this.facts?.notice ?? null);
 	readonly card = $derived(this.facts?.card ?? null);
+	/**
+	 * 🔴 U-207.1 (D-W52-50): the doctor's first licence locked the account's name — only once the server said so; before
+	 * the answer, and for a guest, nothing is locked (the server refuses such a write by itself).
+	 */
+	readonly nameLocked = $derived(this.facts?.nameLocked === true);
 	readonly switching = $derived.by(() => this.#source.switching?.() ?? null);
 	readonly switchFailures = $derived.by(() => this.#source.failures?.() ?? 0);
 

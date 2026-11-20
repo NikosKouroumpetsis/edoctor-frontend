@@ -1,5 +1,12 @@
 <script lang="ts" module>
 	export type NoteFieldHeight = 'note' | 'short' | 'review';
+	/** `title`: the heading of a field (16/600); `section`: a section's quiet name (`sw.css:527` `.w-slh`, 15/600 muted). */
+	export type NoteFieldLabelLook = 'title' | 'section';
+
+	const labelClasses: Record<NoteFieldLabelLook, string> = {
+		title: 'mb-3 text-body-lg font-semibold text-foreground',
+		section: 'mb-2 text-body-md font-semibold text-muted-foreground'
+	};
 
 	// Whole classes per height (Tailwind reads only written classes); `short` keeps the `Textarea`'s own `lg` (96).
 	const heightClasses: Record<NoteFieldHeight, string | undefined> = {
@@ -15,6 +22,7 @@
 	let {
 		label,
 		labelAs = 'h2',
+		labelLook = 'title',
 		placeholder,
 		value,
 		counter,
@@ -29,6 +37,8 @@
 		label: string;
 		/** The label as a heading (`h3` under a right column's `h2`), or only for a screen reader (a title says it). */
 		labelAs?: 'h2' | 'h3' | 'hidden';
+		/** How the label looks: a field's heading (default) or a section's quiet name, as the page's other sections. */
+		labelLook?: NoteFieldLabelLook;
 		placeholder: string;
 		value: string;
 		/** «0/500», the caller's words. */
@@ -61,7 +71,7 @@
 	{#if labelAs === 'hidden'}
 		<label for={id} class="sr-only">{label}</label>
 	{:else}
-		<svelte:element this={labelAs} class="mb-3 text-body-lg font-semibold text-foreground">
+		<svelte:element this={labelAs} class={labelClasses[labelLook]}>
 			<label for={id}>{label}</label>
 		</svelte:element>
 	{/if}

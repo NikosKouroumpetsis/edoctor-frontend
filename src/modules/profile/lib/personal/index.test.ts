@@ -140,6 +140,35 @@ describe('modules/profile/lib/personal · screen 58 «Προσωπικά στο�
 		]);
 	});
 
+	it('🔴 U-207 / D-W52-50: `nameLocked` gives «Ονοματεπώνυμο» — and no other row — its lock’s words; without it, or with anything but `true`, no row says a word of a lock', () => {
+		const locked = buildPersonalRows(eleni, el, { nameLocked: true });
+		expect(locked[0]).toEqual({
+			id: 'name',
+			title: 'Ονοματεπώνυμο',
+			value: 'Ελένη Παππά',
+			help: 'Όπως θα το βλέπει ο γιατρός στα ραντεβού σας.',
+			filled: true,
+			lockedNote: 'Κλείδωσε με την πρώτη σας άδεια γιατρού.'
+		});
+		expect(locked.slice(1).every((row) => !('lockedNote' in row))).toBe(true);
+		expect(locked.slice(1)).toEqual(buildPersonalRows(eleni, el).slice(1));
+		expect(buildPersonalRows(eleni, en, { nameLocked: true })[0].lockedNote).toBe(
+			'Locked with your first doctor licence.'
+		);
+		for (const locks of [undefined, {}, { nameLocked: false }, { nameLocked: 'true' as never }]) {
+			expect(
+				buildPersonalRows(eleni, el, locks).some((row) => 'lockedNote' in row),
+				JSON.stringify(locks)
+			).toBe(false);
+		}
+		// An account the server names no patient for has no row of a name: nothing to lock.
+		expect(
+			buildPersonalRows({ ...eleni, hasPatientProfile: false }, el, { nameLocked: true }).some(
+				(row) => 'lockedNote' in row
+			)
+		).toBe(false);
+	});
+
 	it('🔴 U-164.1 (negative): no row, title or help of a doctor’s in the user’s screen', () => {
 		expect(JSON.stringify(buildPersonalRows(eleni, el))).not.toMatch(/ιατρεί|ειδικότητ|ταμείο/iu);
 	});
@@ -242,6 +271,13 @@ describe('modules/profile/lib/personal · screen 58 «Προσωπικά στο�
 			'Μη έγκυρη ημερομηνία γέννησης. Επιλέξτε ημερομηνία έως σήμερα και όχι παλαιότερη από 120 χρόνια.'
 		);
 		expect(personalWriteFailureMessage('invalid', el)).toBe('Κάτι πήγε στραβά. Δοκιμάστε ξανά.');
+		// 🔴 D-W52-50: a name the server refused as locked says the locked row's own words.
+		expect(personalWriteFailureMessage('name-locked', el)).toBe(
+			'Κλείδωσε με την πρώτη σας άδεια γιατρού.'
+		);
+		expect(personalWriteFailureMessage('name-locked', en)).toBe(
+			'Locked with your first doctor licence.'
+		);
 		expect(personalWriteFailureMessage('unknown', en)).toBe('Something went wrong. Try again.');
 	});
 

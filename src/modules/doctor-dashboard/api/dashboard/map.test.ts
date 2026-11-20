@@ -9,6 +9,7 @@ const view = (patch: Partial<DoctorDashboardView> = {}): DoctorDashboardView => 
 		payments: { status: 'NONE', endsAt: null }
 	},
 	licensed: true,
+	nameLocked: true,
 	notice: null,
 	lastMode: 'DOCTOR',
 	card: { firstName: 'Ελένη', lastName: 'Παππά', specialtyName: 'Καρδιολόγος' },
@@ -16,16 +17,41 @@ const view = (patch: Partial<DoctorDashboardView> = {}): DoctorDashboardView => 
 });
 
 describe('mapDoctorDashboard (D-W51-10, U-65.6)', () => {
+	// Widened by D-W52-47 (wave 5.2, screen 79): the answer carries `nameLocked` too.
 	it('the server’s facts one to one: the registration, both licences, `licensed`, the mode and the name card', () => {
 		expect(mapDoctorDashboard(view())).toEqual({
 			registration: 'COMPLETED',
 			marketplace: { status: 'ACTIVE', endsAt: '2027-10-01T21:00:00.000Z' },
 			payments: { status: 'NONE', endsAt: null },
 			licensed: true,
+			nameLocked: true,
 			notice: null,
 			lastMode: 'DOCTOR',
 			card: { firstName: 'Ελένη', lastName: 'Παππά', specialtyName: 'Καρδιολόγος' }
 		});
+	});
+
+	it('🔴 D-W52-47 (U-207.1): `nameLocked` is only the server’s own `true`, and it is no `licensed` — a revoked licence leaves the name locked, an open registration too; anything else is an open name', () => {
+		expect(mapDoctorDashboard(view())?.nameLocked).toBe(true);
+		const revoked = mapDoctorDashboard(
+			view({
+				licensed: false,
+				licences: {
+					marketplace: { status: 'NONE', endsAt: null },
+					payments: { status: 'NONE', endsAt: null }
+				},
+				card: null
+			})
+		);
+		expect(revoked?.licensed).toBe(false);
+		expect(revoked?.nameLocked).toBe(true);
+		expect(mapDoctorDashboard(view({ registration: 'IN_PROGRESS' }))?.nameLocked).toBe(true);
+		for (const value of [false, 'true', 1, null, undefined, {}]) {
+			expect(
+				mapDoctorDashboard(view({ nameLocked: value as boolean }))?.nameLocked,
+				String(value)
+			).toBe(false);
+		}
 	});
 
 	it('U-185.2: the notice keeps its kind and its day; a broken one is none', () => {

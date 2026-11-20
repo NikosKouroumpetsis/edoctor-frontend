@@ -33,6 +33,7 @@ import type {
 	DoctorServiceFacts,
 	DoctorServiceKind,
 	DoctorSocialLinkFacts,
+	DoctorSpecializationFacts,
 	DoctorSocialLinkId
 } from './types';
 
@@ -237,6 +238,35 @@ function officeSummaries(doctor: DoctorPublicMarketplaceProfileView): DoctorOffi
 const feeOf = (price: number | null | undefined): DoctorFeeFacts | null =>
 	typeof price === 'number' && Number.isFinite(price) ? { min: price, max: price } : null;
 
+/** A line of the catalogue of specializations as the contract writes its code (`PR011-03`). */
+const SPECIALIZATION_CODE = /^PR[0-9]{3}-[0-9]{2}$/u;
+// The server shows three at most (D-W52-54); a name of the catalogue is far shorter than this bound.
+const MAX_SPECIALIZATIONS = 3;
+const MAX_SPECIALIZATION_NAME = 160;
+
+/**
+ * 🔴 D-W52-60 · U-65.6 (U-209.3, U-225): the doctor's «Τομείς εξειδίκευσης» as the server sends them — only what is
+ * public — each read field by field: a code of the contract's shape and a name that is text; anything else, or a code
+ * met twice, is left out, and the list is cut at the three the server keeps. A server that sends none (or an answer of
+ * before the list) has none.
+ */
+function specializations(list: unknown): DoctorSpecializationFacts[] {
+	if (!Array.isArray(list)) return [];
+	const seen = new Set<string>();
+	const fields: DoctorSpecializationFacts[] = [];
+	for (const entry of list) {
+		if (typeof entry !== 'object' || entry === null) continue;
+		const { code, name } = entry as { code?: unknown; name?: unknown };
+		if (typeof code !== 'string' || !SPECIALIZATION_CODE.test(code) || seen.has(code)) continue;
+		const text = typeof name === 'string' ? name.trim() : '';
+		if (!text || text.length > MAX_SPECIALIZATION_NAME) continue;
+		seen.add(code);
+		fields.push({ code, name: text });
+		if (fields.length === MAX_SPECIALIZATIONS) break;
+	}
+	return fields;
+}
+
 const SERVICE_KINDS: readonly DoctorServiceKind[] = ['follow-up', 'check-up', 'visit', 'other'];
 
 /** 🔴 U-71.2, U-89.1: the backend's kind; anything this page does not know (`online` of an old server) is `other`. */
@@ -256,9 +286,7 @@ function services(
 			id: service.doctorServiceId || service.serviceId || `service-${index}`,
 			title: service.title,
 			priceRange: feeOf(service.price),
-			kind: serviceKind(service.kind),
-			// U-36.2: the server's own mark (the application did not read it before wave 1.5).
-			isSpecialized: service.isSpecialized === true
+			kind: serviceKind(service.kind)
 		};
 		const years = positive(service.yearsOfExperience);
 		if (years) facts.yearsOfExperience = years;
@@ -336,15 +364,15 @@ const SOCIAL_LINK_IDS = [
 ] as const satisfies readonly DoctorSocialLinkId[];
 
 /**
- * Every published social profile with an address the page may open (U-35.3): `http(s)` only — a `javascript:` or
- * `data:` address from the wire never reaches an `href`.
+ * Every published social profile with an address the page may open (U-35.3): `https` only, as the server writes them
+ * (D-W52-67, app = web) — an old `http:`, a `javascript:` or `data:` address from the wire never reaches an `href`.
  */
 function socialLinks(doctor: DoctorPublicMarketplaceProfileView): DoctorSocialLinkFacts[] {
 	const links = doctor.socialLinks;
 	if (!links) return [];
 	return SOCIAL_LINK_IDS.flatMap((id) => {
 		const url = filled(links[id]);
-		return url && /^https?:\/\/[^\s]+$/iu.test(url) ? [{ id, url }] : [];
+		return url && /^https:\/\/[^\s]+$/iu.test(url) ? [{ id, url }] : [];
 	});
 }
 
@@ -418,8 +446,8 @@ function buildResponseMetrics(
 }
 
 /**
- * The profile's answer as FACTS (the application's `mapDoctorProfile`, plus every photo and the services'
- * `isSpecialized`, U-36.2). A `doctor: null` answer is the 404 (`DoctorProfileNotFoundError`): the mapper never
+ * The profile's answer as FACTS (the application's `mapDoctorProfile`, plus every photo and, 🔴 D-W52-60, the doctor's
+ * «Τομείς εξειδίκευσης» of the closed list). A `doctor: null` answer is the 404 (`DoctorProfileNotFoundError`): the mapper never
  * makes a profile up.
  */
 export function mapDoctorProfile(
@@ -464,6 +492,8 @@ export function mapDoctorProfile(
 		};
 	}
 	if (serviceFacts.length > 0) profile.services = serviceFacts;
+	const fields = specializations(doctor.specializations);
+	if (fields.length > 0) profile.specializations = fields;
 	const office = mapDoctorOfficeFacts(doctor.selectedOffice);
 	if (office) profile.office = office;
 	const offices = officeSummaries(doctor);

@@ -8,7 +8,8 @@ import type {
  * Every address screen 68 leads to, in the page's language and resolved by the screen (a module knows no route): «‹»
  * back to the list (its pill and office kept), «Μήνυμα»'s conversation (`/doctor/messages/<id>`, or one the doctor
  * starts, `/doctor/messages/new?kind=&id=`, U-193.1 — the screen builds them, the module imports no other), its step
- * screens (screen 69, D-W51-49: «Απόρριψη», «Ακύρωση ραντεβού») and the patient's card (screen 73, D-W51-73).
+ * screens (screen 69, D-W51-49: «Απόρριψη», «Ακύρωση ραντεβού»), the patient's card (screen 73, D-W51-73) and the
+ * patient's review in «Κριτικές» (screen 84, U-220.1).
  */
 export type DoctorAppointmentLinks = {
 	back: string;
@@ -18,6 +19,8 @@ export type DoctorAppointmentLinks = {
 	step: (step: DoctorAppointmentStep) => string;
 	/** 🔴 D-W51-73 (step 9): the patient's card of screen 73, which the name opens. */
 	patient: (key: DoctorPatientAddressKey) => string;
+	/** 🔴 U-220.1 · D-W52-89 (wave 5.2): «Η κριτική του ασθενή ★ N · ημερομηνία ›» ⇒ that review in «Κριτικές». */
+	review: (ratingId: string) => string;
 };
 
 /** Screen 68 «Το ραντεβού» (D-W51-36 … 39): the page's language, the appointment the address names, where it leads. */

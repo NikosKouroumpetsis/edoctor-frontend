@@ -1,32 +1,32 @@
 import { untrack } from 'svelte';
-import { useQueryClient } from '@tanstack/svelte-query';
+import { createQuery, useQueryClient } from '@tanstack/svelte-query';
+import { browser } from '$app/environment';
+import { readQueryState } from '$shared/lib/query-state';
 import { readServerNow } from '$shared/lib/server-clock';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
-import {
-	DOCTOR_AVAILABILITY_WINDOW_DAYS,
-	doctorAvailabilitySlotsQuery,
-	type DoctorOfficeAvailabilityFacts
-} from '$modules/doctor/api/availability';
+import type { DoctorOfficeAvailabilityFacts } from '$modules/doctor/api/availability';
 import {
 	buildDoctorAvailabilityModalContent,
+	type DoctorAvailabilityReadState,
 	type DoctorSelectedSlot
 } from '$modules/doctor/lib/detail';
-import { useDoctorOfficeSlots } from '$modules/doctor/ui/availability-picker';
 import type { AppointmentDetailFacts } from '$modules/appointments/api/appointment';
+import { appointmentRescheduleSlotsQuery } from '$modules/appointments/api/reschedule';
+import { appointmentsQueryKeys } from '$modules/appointments/api/keys';
 import { findOfferedSlot } from '$modules/appointments/lib/booking';
 import {
 	appointmentOfficeDay,
 	appointmentRescheduleOffice,
-	resolveRescheduleServiceId,
 	withoutAppointmentHours
 } from '$modules/appointments/lib/change';
 
 /**
  * Screen 52 «Αλλαγή ώρας» (record §8.2, P-W4 §4.3, the booking's `use-time` way): the profile's own picker on the
- * appointment's ONE office (no office to choose) for the service it is computed on (the longest active line), the
- * profile's reads and keys (D-103). Its own hour and any hour the server said was taken are not offered; the window is
- * read only while the screen is open. What the picker chose, as the instant the write sends. Another screen on the right
- * (`paneKey`) starts it again: nothing chosen there is kept.
+ * appointment's ONE office (no office to choose). 🔴 D-W52-75α (`w52-b7` §Γ3.5): its hours are the APPOINTMENT's own
+ * (`GET …/reschedule-slots`, the doctor's public rules for the visit's length, the copy of its lines) — never the public
+ * hours of one service, which a service the doctor deleted no longer has. Its own hour and any hour the server said was
+ * taken are not offered; the window is read only while the screen is open. What the picker chose, as the instant the
+ * write sends. Another screen on the right (`paneKey`) starts it again: nothing chosen there is kept.
  */
 export function useAppointmentTime(options: {
 	appointment: () => AppointmentDetailFacts | null;
@@ -39,19 +39,33 @@ export function useAppointmentTime(options: {
 	let gone = $state<string[]>([]);
 
 	const appointment = $derived(options.appointment());
-	const serviceId = $derived(
-		appointment ? resolveRescheduleServiceId(appointment.serviceLines) : ''
-	);
-	const slots = useDoctorOfficeSlots({
-		doctorId: () => appointment?.doctorId,
-		officeIds: () => (appointment ? [appointment.officeId] : []),
-		serviceId: () => serviceId || undefined
+	const appointmentId = $derived(appointment?.id ?? '');
+	const slots = createQuery(() => ({
+		...appointmentRescheduleSlotsQuery(appointmentId),
+		enabled: browser && Boolean(appointmentId)
+	}));
+	// 🔴 Every field the screen needs is READ every time (a TanStack result tells only the fields read).
+	const read = $derived({
+		data: slots.data,
+		state: readQueryState({
+			isPending: slots.isPending,
+			isError: slots.isError,
+			fetchStatus: slots.fetchStatus
+		})
+	});
+	const readState = $derived.by((): DoctorAvailabilityReadState => {
+		if (!appointmentId) return 'idle';
+		if (!browser || read.state === 'waiting') return 'waiting';
+		return read.state === 'answered' ? 'answered' : 'failed';
 	});
 	const byOffice = $derived.by((): Record<string, DoctorOfficeAvailabilityFacts> => {
-		const own = appointment ? slots.byOffice[appointment.officeId] : undefined;
+		const own = read.data;
 		if (!appointment || !own) return {};
 		return {
-			[appointment.officeId]: withoutAppointmentHours(own, [appointment.startTime, ...gone])
+			[appointment.officeId]: withoutAppointmentHours({ officeId: appointment.officeId, ...own }, [
+				appointment.startTime,
+				...gone
+			])
 		};
 	});
 	const content = $derived.by(() => {
@@ -83,7 +97,7 @@ export function useAppointmentTime(options: {
 			return content;
 		},
 		get readState() {
-			return slots.state;
+			return readState;
 		},
 		/** The appointment's own day on its office's calendar (`appt.js:323`). */
 		get initialDate() {
@@ -98,7 +112,7 @@ export function useAppointmentTime(options: {
 		get picked() {
 			return picked;
 		},
-		retry: () => slots.retry(),
+		retry: () => void slots.refetch(),
 		/** «Άλλη ώρα»: the choice goes. */
 		repick: () => {
 			staged = null;
@@ -107,14 +121,9 @@ export function useAppointmentTime(options: {
 		gone: (startTime: string) => {
 			gone = [...gone, startTime];
 			staged = null;
-			if (!appointment || !serviceId) return;
+			if (!appointmentId) return;
 			void client.invalidateQueries({
-				queryKey: doctorAvailabilitySlotsQuery({
-					doctorId: appointment.doctorId,
-					officeId: appointment.officeId,
-					doctorServiceId: serviceId,
-					days: DOCTOR_AVAILABILITY_WINDOW_DAYS
-				}).queryKey
+				queryKey: appointmentsQueryKeys.rescheduleSlots(appointmentId)
 			});
 		}
 	};

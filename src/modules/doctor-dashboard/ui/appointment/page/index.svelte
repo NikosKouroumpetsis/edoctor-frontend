@@ -6,11 +6,13 @@
 	import { EmptyState } from '$shared/ui/molecules/empty-state';
 	import { FactRow } from '$shared/ui/molecules/fact-row';
 	import { InfoBand } from '$shared/ui/molecules/info-band';
+	import { LinkCard } from '$shared/ui/molecules/link-card';
 	import { NoticeCard, type NoticeCardTone } from '$shared/ui/molecules/notice-card';
 	import { StateGlyph } from '$shared/ui/molecules/state-glyph';
 	import { StatusHeading } from '$shared/ui/molecules/status-heading';
 	import { Button } from '$shared/ui/primitives/button';
 	import { IconButton } from '$shared/ui/primitives/icon-button';
+	import { Rating } from '$shared/ui/primitives/rating';
 	import { Skeleton } from '$shared/ui/primitives/skeleton';
 	import { TextButton } from '$shared/ui/primitives/text-button';
 	import {
@@ -24,6 +26,7 @@
 		type DoctorAppointmentBlock
 	} from '$modules/doctor-dashboard/lib/detail';
 	import type { DoctorAppointmentStep } from '$modules/doctor-dashboard/lib/paths';
+	import { buildDoctorReviewCard } from '$modules/doctor-dashboard/lib/reviews';
 	import type { DoctorCardAnswer } from '$modules/doctor-dashboard/ui/card';
 	import { getDoctorAppointmentMemoryOptional } from '$modules/doctor-dashboard/ui/memory';
 	import Log from '../components/log.svelte';
@@ -98,12 +101,22 @@
 	// `page.state.doctorNotification.depth` 1), «‹» goes back to the list through the history — at every width, as the
 	// card's «‹» when something else opened it; a link alone keeps its own way back (the list of 67).
 	const fromNotifications = useHistorySteps('doctorNotification');
-	const backToList = $derived(fromNotifications.depth > 0);
+	// 🔴 D-W52-91 · U-219.2 (`sw.js` `ap-back` from `rev`): opened from a review of «Κριτικές» (one step on,
+	// `page.state.doctorReview.depth` 1), «‹» goes back to that same review through the history, at every width too.
+	const fromReviews = useHistorySteps('doctorReview');
+	const backFrom = $derived(
+		fromNotifications.depth > 0 ? 'notifications' : fromReviews.depth > 0 ? 'reviews' : null
+	);
+	const backToList = $derived(backFrom !== null);
 	function back(event: MouseEvent) {
 		if (!backToList || !isPlainClick(event)) return;
 		event.preventDefault();
-		fromNotifications.leave(links.back, 1);
+		(backFrom === 'reviews' ? fromReviews : fromNotifications).leave(links.back, 1);
 	}
+	// 🔴 U-220.1 · D-W52-89: the patient's published review of this visit, over «Χρονολόγιο».
+	const review = $derived(
+		read.review ? buildDoctorReviewCard(read.review, { visits: [], openReports: [] }, locale) : null
+	);
 	// 🔴 D-W51-49 (`sw.js:438`): «Ακύρωση ραντεβού» only with the server's `canCancel`, never for a request (refused instead).
 	const cancelShown = $derived(
 		Boolean(appointment?.actions.canCancel) && appointment?.status !== 'pending'
@@ -285,7 +298,7 @@
 		href={links.back}
 		onclick={back}
 		data-testid="doctor-appointment-back"
-		data-from={backToList ? 'notifications' : undefined}
+		data-from={backFrom ?? undefined}
 		class={backToList ? 'mb-3 flex' : 'mb-3 flex laptop:hidden'}
 	/>
 
@@ -355,6 +368,29 @@
 				testId="doctor-appointment-terms"
 				class="mt-3"
 			/>
+		{/if}
+
+		{#if review}
+			<!-- 🔴 U-220.1 (`sw.js:1130-1132` `w-aprv`): ONLY here — «Η κριτική του ασθενή ★ N · ημερομηνία ›» over
+			     «Χρονολόγιο», to that review in «Κριτικές». -->
+			<LinkCard
+				href={links.review(review.id)}
+				icon="star-outline"
+				label={m.doctor_appointment_review({}, options)}
+				name={m.doctor_appointment_review_label(
+					{ rating: review.rating, date: review.day },
+					options
+				)}
+				testId="doctor-appointment-review"
+				class="mt-4"
+			>
+				{#snippet body()}
+					<span class="flex flex-row flex-wrap items-center gap-x-2">
+						<Rating variant="stars" starSize="xs" value={review.stars} class="gap-0.5" />
+						<span class="text-body-sm font-semibold text-foreground">{review.day}</span>
+					</span>
+				{/snippet}
+			</LinkCard>
 		{/if}
 
 		{#if log.length > 0}

@@ -12,6 +12,8 @@ import {
 	doctorNewAppointmentPath,
 	doctorNewAppointmentSearch,
 	doctorPatientPath,
+	doctorReviewsPath,
+	doctorReviewsSearch,
 	doctorTodayPath
 } from '$modules/doctor-dashboard/lib/paths';
 import type { DoctorAppointmentLinks } from '$modules/doctor-dashboard/ui/appointment';
@@ -60,7 +62,9 @@ export function useDoctorAppointmentsScreen(data: () => DoctorAppointmentsScreen
 			`${href(doctorNewConversationPath)}${doctorNewConversationSearch(patient)}`,
 		step: (step) => links.step(openId, step, address.tab, address.officeId),
 		// 🔴 D-W51-73: the patient's name opens their card of screen 73.
-		patient: (key) => href(doctorPatientPath(key))
+		patient: (key) => href(doctorPatientPath(key)),
+		// 🔴 U-220.1 · D-W52-91: the patient's review opens «Κριτικές» at that review (screen 84).
+		review: (ratingId) => `${href(doctorReviewsPath)}${doctorReviewsSearch({ reviewId: ratingId })}`
 	});
 	// 🔴 D-W51-46 · D-W51-51 / 52 · D-W51-62: «‹», «Να μείνει» / «Άκυρο» and the done action of 69, 70 and 71 lead to the
 	// 68 of the same appointment, pill and office; 69's «Αλλαγή ώρας» to the 70 of it.

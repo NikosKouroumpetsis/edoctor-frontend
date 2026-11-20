@@ -23,6 +23,9 @@ export const appointmentsQueryKeys = {
 		] as const,
 	detail: (appointmentId: string) =>
 		[...appointmentsQueryKeys.all, 'detail', appointmentId] as const,
+	/** 🔴 D-W52-75α: the free hours to move ONE appointment to (screen 52 «Αλλαγή ώρας»). */
+	rescheduleSlots: (appointmentId: string) =>
+		[...appointmentsQueryKeys.all, 'reschedule-slots', appointmentId] as const,
 	/** Every list of the person: a write invalidates them together (an appointment moves between the tabs). */
 	lists: () => [...appointmentsQueryKeys.all, 'list'] as const,
 	list: (scope: 'upcoming' | 'history') => [...appointmentsQueryKeys.lists(), scope] as const,

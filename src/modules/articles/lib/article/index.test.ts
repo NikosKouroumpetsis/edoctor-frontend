@@ -4,6 +4,7 @@ import type { ArticlePublicView } from '$modules/articles/api/types';
 import {
 	RELATED_ARTICLES_SHOWN,
 	articleBodyDocs,
+	buildArticleBody,
 	buildArticleAuthor,
 	buildArticlePage,
 	buildArticleSeo,
@@ -125,5 +126,49 @@ describe('articles::lib::article', () => {
 			author: { '@type': 'Person', name: 'Dr. Athena Papadopoulou' }
 		});
 		expect(seo.alternates.map((entry) => entry.hreflang)).toEqual(['el', 'en', 'x-default']);
+	});
+
+	it('🔴 D-W52-104 (U-222.4): the editor’s text is read by the closed schema; an older text keeps the tolerant reading; a text that is not of the schema is never read as one', () => {
+		const closed = buildArticleBody(
+			base({
+				sections: [],
+				content: {
+					type: 'doc',
+					content: [
+						{ type: 'paragraph', content: [{ type: 'text', text: 'Λέξη' }] },
+						{ type: 'horizontalRule' }
+					]
+				}
+			})
+		);
+		expect(closed.closed).toBe(true);
+		expect(closed.blocks.map((block) => block.kind)).toEqual(['paragraph', 'rule']);
+		const older = buildArticleBody(base());
+		expect(older.closed).toBe(false);
+		expect(older.toc).toHaveLength(2);
+		// An unknown node in an editor-shaped text: the tolerant reading keeps its words, never its markup.
+		const unknown = buildArticleBody(
+			base({
+				sections: [],
+				content: { type: 'doc', content: [{ type: 'iframe', attrs: { src: 'https://evil.gr' } }] }
+			})
+		);
+		expect(unknown.closed).toBe(false);
+		expect(unknown.blocks).toEqual([]);
+	});
+
+	it('🔴 D-W52-94α: «ενημερώθηκε» only after an approved change', () => {
+		const view = (revisedAt: string | null) =>
+			buildArticlePage({ article: base({ revisedAt }), related: null, locale: 'el', doctorHref });
+		expect(view('2026-11-14T09:00:00.000Z').updated).toBe('ενημερώθηκε 14 Νοε 2026');
+		expect(view(null).updated).toBe('');
+		expect(
+			buildArticlePage({
+				article: base({ revisedAt: '2026-11-14T09:00:00.000Z' }),
+				related: null,
+				locale: 'en',
+				doctorHref
+			}).updated
+		).toBe('updated Nov 14, 2026');
 	});
 });

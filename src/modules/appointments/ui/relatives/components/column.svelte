@@ -63,13 +63,16 @@
      title, «Τα άτομα για τα οποία κλείνετε ραντεβού.», what was just saved, the rows and «Προσθήκη συγγενή» under them
      (asleep at 20, with its words). Its states in the application's words: a guest's «Σύνδεση», a failure with «Δοκιμάστε
      ξανά», the wait, «Δεν έχετε προσθέσει κανέναν ακόμη» with «Προσθήκη συγγενή». Below 744 the end leaves room for the
-     capsule; 744–949 one column of 760; from 950 the left column, or alone in the middle (U-139.1). -->
+     capsule; 744–949 one column of 760; from 950 the left column, or alone in the middle (U-139.1). 🔴 U-215.3
+     (D-W52-11, `appts.css:209`): from 1128 the left column starts under the bar's mark, 48 from the frame's edge. -->
 <div
 	data-testid="relatives-list"
 	data-view={view}
 	class={cn(
 		'mx-auto w-full max-w-content px-gutter-sm pt-6 pb-bar-bottom tablet:px-reading-gap tablet:pt-section tablet:pb-section-lg',
-		solo ? 'split:pt-section-lg' : 'split:max-w-none split:px-6 split:pt-6 split:pb-section-lg'
+		solo
+			? 'split:pt-section-lg'
+			: 'split:max-w-none split:px-6 split:pt-6 split:pb-section-lg laptop:pl-pane-inset'
 	)}
 >
 	<IconButton

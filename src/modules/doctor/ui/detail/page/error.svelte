@@ -11,7 +11,8 @@
 		locale,
 		backHref,
 		href = (path) => path,
-		onRetry
+		onRetry,
+		preview = false
 	}: DoctorDetailErrorProps = $props();
 
 	const onBack = useSiteBack();
@@ -33,15 +34,18 @@
 </svelte:head>
 
 {#if status === 404}
-	<TopBar
-		{locale}
-		{backHref}
-		{onBack}
-		saved={false}
-		onShare={() => {}}
-		onSave={() => {}}
-		showActions={false}
-	/>
+	<!-- D-W52-26: under the band of the doctor's own preview the phone's bar is the band's («Κλείσιμο»). -->
+	{#if !preview}
+		<TopBar
+			{locale}
+			{backHref}
+			{onBack}
+			saved={false}
+			onShare={() => {}}
+			onSave={() => {}}
+			showActions={false}
+		/>
+	{/if}
 	<StatusPage
 		oops={m.status_oops({}, options)}
 		glyph="medical-outline"

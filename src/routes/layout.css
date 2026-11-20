@@ -16,6 +16,12 @@
  * bar's «Για γιατρούς / Λειτουργία γιατρού» is right from the first paint and never changes under the eye (U-100).
  */
 @custom-variant doctor-mode (&:where([data-doctor-mode='doctor'] *));
+/*
+ * 🔴 U-215.3, D-W52-12 (wave 5.2, step 0): a page that stands on a `SplitView`. The bar reads it to take that page's
+ * frame, in CSS alone — right in the server's HTML already (no state, nothing moves after hydration), from ONE source
+ * (the template is in the page), and with `solo` too, so the bar never jumps while a list loads.
+ */
+@custom-variant split-page (body:has([data-slot='split-view']) &);
 /* A screen with a pointer that hovers (U-09.3): the photo arrows wait for the pointer there; on touch they show. */
 @custom-variant can-hover (@media (hover: hover));
 /*
@@ -256,10 +262,6 @@
 	--animate-auth-in-back: auth-in-back var(--transition-duration-standard) var(--ease-standard) both;
 	--animate-auth-out-back: auth-out-back var(--transition-duration-standard) var(--ease-standard)
 		both;
-	/* U-72.3 Ε3: a page coming into the same window, from its side (32 and a fade, 0.25 s), the other one gone. */
-	--animate-window-forward: window-forward var(--transition-duration-standard) var(--ease-standard)
-		both;
-	--animate-window-back: window-back var(--transition-duration-standard) var(--ease-standard) both;
 	/* U-73.1 Π2: the doctor's page: below 744 the application's sheet rising, from 744 a page settling (12 and a fade). */
 	--animate-sheet-rise: sheet-rise var(--transition-duration-sheet) var(--ease-sheet) both;
 	--animate-page-settle: page-settle var(--transition-duration-standard) var(--ease-standard) both;
@@ -334,20 +336,6 @@
 		70% {
 			scale: 0.95;
 			rotate: -3deg;
-		}
-	}
-
-	@keyframes window-forward {
-		from {
-			translate: --spacing(8) 0;
-			opacity: 0;
-		}
-	}
-
-	@keyframes window-back {
-		from {
-			translate: calc(--spacing(8) * -1) 0;
-			opacity: 0;
 		}
 	}
 
@@ -655,12 +643,44 @@
 	}
 }
 
-/* Wave 4.5 · screen 57 (U-167, D-W45-08, `57-settings/set.css`): from 950 the menu on the left (340, 420 from 1128), what it opened beside it. */
+/*
+ * Wave 4.5 · screen 57 (U-167, D-W45-08, `57-settings/set.css`): from 950 the menu on the left (340), what it opened
+ * beside it. 🔴 U-215.3, D-W52-13 (`set.css:35`): from 1128 its column is 30 % of the frame, never under 420.
+ */
 @utility grid-menu {
 	grid-template-columns: var(--spacing-split-menu-w) minmax(0, 1fr);
 
 	@media (width >= --theme(--breakpoint-laptop)) {
-		grid-template-columns: var(--spacing-split-menu-w-lg) minmax(0, 1fr);
+		grid-template-columns: max(var(--spacing-split-menu-w-lg), 30%) minmax(0, 1fr);
+	}
+}
+
+/*
+ * 🔴 U-215.3, D-W52-13 (`set.css:36`): the menu column's sides from 1128 — the menu of 324 in the MIDDLE of its
+ * column, never closer than 48 to its edges (62 / 68 / 140 for its rows at 1128 / 1440 / 1920).
+ */
+@utility px-menu-centred {
+	padding-inline: max(var(--spacing-pane-inset), calc((100% - var(--spacing-split-menu)) / 2));
+}
+
+/*
+ * U-216.2, D-W52-14 (`64-switch/sw.css:436, :446`): a menu that folds keeps ONE width while its column glides, so its
+ * words never set again — the 950 column less its 24 a side (292), the 324 from 1128.
+ */
+@utility w-menu-fixed {
+	width: calc(var(--spacing-split-menu-w) - --spacing(12));
+
+	@media (width >= --theme(--breakpoint-laptop)) {
+		width: var(--spacing-split-menu);
+	}
+}
+
+/* U-216.2, D-W52-14 (`sw.css:440, :448`): the folded menu's column — the rail (72, 120 from 1128) and the rest. */
+@utility grid-rail {
+	grid-template-columns: var(--spacing-split-rail) minmax(0, 1fr);
+
+	@media (width >= --theme(--breakpoint-laptop)) {
+		grid-template-columns: var(--spacing-split-rail-lg) minmax(0, 1fr);
 	}
 }
 

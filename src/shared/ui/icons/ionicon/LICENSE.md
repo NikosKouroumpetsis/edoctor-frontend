@@ -27,9 +27,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-Four glyphs Ionicons does not draw — `bone`, `brain` and `tooth-outline` (the search rows' specialty glyphs, U-21),
-and `calendar-remove-outline` (a cancelled appointment in the doctor's notifications, screen 75, as the application)
-— come from the other icon font the application already renders through the same package
+Five glyphs Ionicons does not draw — `bone`, `brain` and `tooth-outline` (the search rows' specialty glyphs, U-21),
+`calendar-remove-outline` (a cancelled appointment in the doctor's notifications, screen 75, as the application) and
+`stethoscope` (the specialty's row of «Το προφίλ μου», screen 77, the application's own name for it) — come from the other icon font the application already renders through the same package
 (`@expo/vector-icons` 15.1.1, `build/vendor/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf`); the
 outlines are used unmodified. What the package itself says, read locally on 29/10/2026:
 

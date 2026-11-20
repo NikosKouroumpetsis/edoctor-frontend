@@ -229,6 +229,13 @@ and a 50 ms grace, `isMoving`).
 | `segment`   | 180 | `cubic-bezier(0.33, 1, 0.68, 1)` (`cubicOut`)                    | `THUMB_SLIDE_DURATION_MS` + `Easing.out(Easing.cubic)`                                                                                                                                      |
 | `reveal`    | 800 | the `standard` curve (`ease-standard`), no curve of its own      | Airbnb's fade of what arrives (measured, U-14.1): the `CollapsingHero` photo and its pill once it loads (U-14.5)                                                                            |
 | `consent`   | 400 | the `standard` curve (`ease-standard`), no curve of its own      | Airbnb's consent card rising in and out (the wave record §4.5): `CookieConsent`                                                                                                             |
+| `fold`      | 320 | the `standard` curve (`ease-standard`), no curve of its own      | U-216.2 (D-W52-14, `64-switch/sw.css:431-441`): the `SplitView`'s menu column gliding to its rail and back (`transition-[grid-template-columns]`)                                           |
+| `fold-out`  | 120 | the `standard` curve (`ease-standard`), no curve of its own      | … the part that leaves (the menu on folding, the rail on opening)                                                                                                                           |
+| `fold-in`   | 200 | the `standard` curve (`ease-standard`), no curve of its own      | … the part that arrives, after its wait (`delay-fold-rail` 140, `delay-fold-menu` 120)                                                                                                      |
+
+`motion.delay` (wave 5.2) names the wait before a part of a staged motion starts; the theme makes each a
+`delay-<name>` class (`--transition-delay-*`): `fold-rail` 140 (the rail arrives after the menu left) and `fold-menu`
+120 (the menu comes back after the rail left).
 
 The modal panel's pair (`panelFade` in `index.ts`, the application's `panelStyle`): `ease-modal-panel-in` and
 `ease-modal-panel-out` are two curves each, for `transition-[translate,opacity]` — the rise on `zoom-in` /
@@ -283,7 +290,9 @@ below 744 (`avatar-2xl` 96 from it) and the note is at least `checkout-note` 104
 The phone's capsule with five tabs (D-W4-65, D-W4-73): `tab-capsule-fit` 400 is the screen from which the capsule is its
 whole 384 (`tab-capsule-w` + 8 a side) — the variant `capsule-narrow:` reads it — and `tab-label` 11 / 600 is the words'
 role under it, a role of the web alone (`platform.typography`), outside the shared scale whose smallest text stays 12.
-Screen 50's capsules «Επερχόμενα / Ιστορικό» are `chip-tab` 36 high (D-W4-66).
+Screen 50's capsules «Επερχόμενα / Ιστορικό» are `chip-tab` 36 high (D-W4-66). Screen 85's article editor writes in an
+area at least `article-editor` 300 high (`64-switch/sw.css:653`); a cover at most `cover-max` 260 and a picture of a
+text at most `figure-max` 320 (`sw.css:635`, `:668`), and the glyph of a picture that is not there `figure-glyph` 40.
 
 The patient's appointments and relatives (wave 4.0, screens 50–55, web only, the `SplitView` template; the approved
 prototype's `appt.css:227-333`, `55-relatives/appt.css:456-463`): from 950 `grid-split` sets the list `split-list-w` 420
@@ -304,6 +313,16 @@ alone from 1440) has no reader any more. The 51's wait draws the card's box
 1128), 24 a side (`pane-inset` 48 from 1128) and `section-lg` 48 under; the right column `section` 32 over
 (`reading-gap` 40 from 1128), `pane-inset` 48 a side and `pane-inset-lg` 64 under. A menu's row is 48 high with the
 `md` corner (12) from 950 and `row` 56 below it; a choice of screen 61 is `reading-row` 52 high with a 22 radio.
+
+The wide web's frame (wave 5.2 · step 0, web only; 🔴 U-215.3, U-216.2, D-W52-11 … 14, the approved prototypes'
+`57-settings/set.css:35-38` and `64-switch/sw.css:431-449`): the bar and a page with a side column stand in ONE frame,
+`max-w-wide` 1920 (the `wide` container) in the centre, 24 from its edges and `pane-inset` 48 from 1128. From 1128
+`grid-menu` sets the menu's column to `max(split-menu-w-lg 420, 30%)` and `px-menu-centred` stands the menu of
+`split-menu` 324 in its middle, never closer than `pane-inset` 48 to its edges (its rows at 62 / 68 / 140 at 1128 /
+1440 / 1920); 950–1127 as before. A menu that folds keeps ONE width while its column glides (`w-menu-fixed`:
+`split-menu-w` less 24 a side = 292, `split-menu` 324 from 1128) and folds to `grid-rail`: `split-rail` 72
+(`split-rail-lg` 120 from 1128) — the frame's inset on each side of the bar's mark (`brand-mark` 24), so the rail's
+icons stand under it. The prototype's 74 / 122 carry its 26 mark, which the web already keeps on the 4px grid as 24.
 
 «Προφίλ» (wave 4.5, screen 56, the approved prototype's `56-profile/prof.css`): the name card's circle is
 `profile-initial` 88 (web only, beside `relative-initial` 44) with the initial `display-xs` at 600; the card and

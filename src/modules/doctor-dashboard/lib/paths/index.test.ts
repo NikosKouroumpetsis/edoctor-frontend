@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+	doctorArticlePath,
+	doctorArticlesPath,
+	doctorNewArticlePath,
+	isDoctorArticlePage,
+	readDoctorArticlesAddress,
 	doctorAppointmentPath,
 	doctorAppointmentsSearch,
 	doctorAppointmentStepPath,
@@ -8,15 +13,43 @@ import {
 	doctorNewAppointmentSearch,
 	doctorPatientPath,
 	doctorPatientStepPath,
+	doctorProfileAboutPath,
+	doctorProfilePath,
+	doctorProfilePhotoCropPath,
+	doctorProfilePhotosPath,
+	doctorProfilePreviewPath,
+	doctorProfileCvItemPath,
+	doctorProfileCvPath,
+	doctorProfileLanguagesPath,
+	doctorProfileNetworksPath,
+	doctorProfileNewServiceItemPath,
+	doctorProfileNewServicePath,
+	doctorProfileServicePath,
+	doctorProfileServicesPath,
+	doctorProfileSpecializationsPath,
+	doctorProfileSpecialtyPath,
+	doctorProfileSpokenLanguagesPath,
 	isDoctorAppointmentStepPage,
+	isDoctorLanguagesStepPage,
 	isDoctorMenuTab,
 	isDoctorMessagesPushedPage,
 	isDoctorMessagesTab,
 	isDoctorPatientStepPage,
+	isDoctorPhotoCropPage,
+	isDoctorProfilePreviewPage,
 	isDoctorReasonStep,
+	isDoctorCredentialPage,
+	isDoctorServicePage,
+	isDoctorSpecializationsPickPage,
 	isDoctorTodayTab,
 	readDoctorAppointmentsAddress,
-	readDoctorPatientsAddress
+	readDoctorPatientsAddress,
+	readDoctorProfileAddress,
+	doctorReviewsPath,
+	doctorReviewsSearch,
+	doctorReviewStepPath,
+	isDoctorReviewStepPage,
+	readDoctorReviewsAddress
 } from '.';
 
 const OFFICE = '0193d000-0000-7000-8000-0000000000f2';
@@ -325,6 +358,356 @@ describe('🔴 D-W51-73 · screen 73 «Οι ασθενείς μου» in the add
 		}
 	});
 
+	it('🔴 D-W52-22 · D-W52-26 · U-81.2: «Μενού» is the current tab on «Το προφίλ μου» and its preview — the two addresses, never a look-alike; only the preview is pushed over the tabs', () => {
+		expect(doctorProfilePath).toBe('/doctor/profile');
+		expect(doctorProfilePreviewPath).toBe('/doctor/profile/preview');
+		for (const path of ['/doctor/profile', '/doctor/profile/preview']) {
+			expect(isDoctorMenuTab(path), path).toBe(true);
+			expect(isDoctorTodayTab(path), path).toBe(false);
+			expect(isDoctorMessagesTab(path), path).toBe(false);
+		}
+		for (const path of [
+			'/doctor/profiles',
+			'/doctor/profilex',
+			'/doctor/profile/previews',
+			'/doctor/profile/preview/x',
+			// Widened by D-W52-41 (screen 78): `/doctor/profile/photos` is a page now (the next case); a section whose
+			// screen is not built yet, and every look-alike of the photos' address, stay no page.
+			// Widened by D-W52-49 (screen 79): `/doctor/profile/about` is a page now (its own case below); its look-alikes not.
+			// Widened by D-W52-81 (screen 83): `/doctor/profile/services` is a page now (its own case below); its look-alikes not.
+			'/doctor/profile/abouts',
+			'/doctor/profile/about/x',
+			'/doctor/profile/servicesx',
+			'/doctor/profile/services/x',
+			'/doctor/profile/photosx',
+			'/doctor/profile/photo',
+			'/profile',
+			'/profile/preview'
+		]) {
+			expect(isDoctorMenuTab(path), path).toBe(false);
+			expect(isDoctorProfilePreviewPage(path), path).toBe(false);
+		}
+		expect(isDoctorProfilePreviewPage('/doctor/profile/preview')).toBe(true);
+		expect(isDoctorProfilePreviewPage('/doctor/profile')).toBe(false);
+	});
+
+	it('🔴 D-W52-41 · D-W52-40 · U-65.6: «Φωτογραφίες» is `/doctor/profile/photos` and one photo’s «Προσαρμογή» `/doctor/profile/photos/<id>/crop` — a closed list inside the tab «Μενού»; only «Προσαρμογή» is pushed over the tabs', () => {
+		expect(doctorProfilePhotosPath).toBe('/doctor/profile/photos');
+		expect(doctorProfilePhotoCropPath(ID)).toBe(`/doctor/profile/photos/${ID}/crop`);
+		expect(readDoctorProfileAddress(undefined)).toEqual({ section: null });
+		expect(readDoctorProfileAddress('')).toEqual({ section: null });
+		expect(readDoctorProfileAddress('photos')).toEqual({ section: 'photos', cropId: null });
+		expect(readDoctorProfileAddress(`photos/${ID}/crop`)).toEqual({
+			section: 'photos',
+			cropId: ID
+		});
+		for (const path of ['/doctor/profile/photos', `/doctor/profile/photos/${ID}/crop`]) {
+			expect(isDoctorMenuTab(path), path).toBe(true);
+			expect(isDoctorTodayTab(path), path).toBe(false);
+			expect(isDoctorMessagesTab(path), path).toBe(false);
+			expect(isDoctorProfilePreviewPage(path), path).toBe(false);
+		}
+		expect(isDoctorPhotoCropPage(`/doctor/profile/photos/${ID}/crop`)).toBe(true);
+		for (const path of ['/doctor/profile', '/doctor/profile/photos', '/doctor/profile/preview']) {
+			expect(isDoctorPhotoCropPage(path), path).toBe(false);
+		}
+	});
+
+	it('🔴 D-W52-49 · U-65.6: «Όνομα και περιγραφή» is `/doctor/profile/about` — one address with nothing under it, inside the tab «Μενού», never pushed over the tabs', () => {
+		expect(doctorProfileAboutPath).toBe('/doctor/profile/about');
+		expect(readDoctorProfileAddress('about')).toEqual({ section: 'about' });
+		expect(isDoctorMenuTab('/doctor/profile/about')).toBe(true);
+		expect(isDoctorTodayTab('/doctor/profile/about')).toBe(false);
+		expect(isDoctorMessagesTab('/doctor/profile/about')).toBe(false);
+		// The page keeps the capsule below 744 (`79-about/shots/m-full.png`): it is no pushed page.
+		expect(isDoctorProfilePreviewPage('/doctor/profile/about')).toBe(false);
+		expect(isDoctorPhotoCropPage('/doctor/profile/about')).toBe(false);
+		for (const rest of [
+			'about/',
+			'about/edit',
+			`about/${ID}`,
+			'About',
+			'abouts',
+			'about/../photos'
+		]) {
+			expect(readDoctorProfileAddress(rest), rest).toBeUndefined();
+			expect(isDoctorMenuTab(`/doctor/profile/${rest}`), rest).toBe(false);
+		}
+	});
+
+	it('🔴 D-W52-59 · U-65.6: «Ειδικότητα και εξειδικεύσεις» is `/doctor/profile/specialty` and the choice `/doctor/profile/specialty/specializations` — a closed list, inside the tab «Μενού»; only the choice is pushed over the tabs (its own bar at the bottom)', () => {
+		expect(doctorProfileSpecialtyPath).toBe('/doctor/profile/specialty');
+		expect(doctorProfileSpecializationsPath).toBe('/doctor/profile/specialty/specializations');
+		expect(readDoctorProfileAddress('specialty')).toEqual({ section: 'specialty', pick: false });
+		expect(readDoctorProfileAddress('specialty/specializations')).toEqual({
+			section: 'specialty',
+			pick: true
+		});
+		for (const path of [doctorProfileSpecialtyPath, doctorProfileSpecializationsPath]) {
+			expect(isDoctorMenuTab(path), path).toBe(true);
+			expect(isDoctorTodayTab(path), path).toBe(false);
+			expect(isDoctorMessagesTab(path), path).toBe(false);
+			expect(isDoctorProfilePreviewPage(path), path).toBe(false);
+			expect(isDoctorPhotoCropPage(path), path).toBe(false);
+		}
+		// Screen 80 keeps the capsule below 744 (`80-spec/shots/m-full.png`); the choice has none (`m-pick.png`).
+		expect(isDoctorSpecializationsPickPage(doctorProfileSpecialtyPath)).toBe(false);
+		expect(isDoctorSpecializationsPickPage(doctorProfileSpecializationsPath)).toBe(true);
+		for (const path of ['/doctor/profile', '/doctor/profile/photos', '/doctor/profile/about']) {
+			expect(isDoctorSpecializationsPickPage(path), path).toBe(false);
+		}
+		expect(isDoctorSpecializationsPickPage('/profile/specialty/specializations')).toBe(false);
+		for (const rest of [
+			'specialty/',
+			'specialty/edit',
+			'specialty/specialization',
+			'specialty/specializationsx',
+			'specialty/Specializations',
+			'specialty/specializations/',
+			'specialty/specializations/PR011-01',
+			'specialty/specializations/../photos',
+			'specialty//specializations',
+			'Specialty',
+			'specialties',
+			'specialty%2Fspecializations',
+			'specialty/<script>'
+		]) {
+			expect(readDoctorProfileAddress(rest), rest).toBeUndefined();
+			expect(isDoctorMenuTab(`/doctor/profile/${rest}`), rest).toBe(false);
+			expect(isDoctorSpecializationsPickPage(`/doctor/profile/${rest}`), rest).toBe(false);
+		}
+	});
+
+	it('🔴 U-210 · D-W52-63 · U-65.6: «Βιογραφικό» is `/doctor/profile/cv` and ONE row of it `/doctor/profile/cv/<group>/<id>` or `…/<group>/new` — a closed list, inside the tab «Μενού»; only the page of a row is pushed over the tabs (its own bar at the bottom)', () => {
+		expect(doctorProfileCvPath).toBe('/doctor/profile/cv');
+		expect(doctorProfileCvItemPath('STUDY', null)).toBe('/doctor/profile/cv/studies/new');
+		expect(doctorProfileCvItemPath('WORK', ID)).toBe(`/doctor/profile/cv/experience/${ID}`);
+		expect(doctorProfileCvItemPath('CONFERENCE', ID)).toBe(`/doctor/profile/cv/conferences/${ID}`);
+		expect(readDoctorProfileAddress('cv')).toEqual({ section: 'cv', item: null });
+		expect(readDoctorProfileAddress('cv/studies/new')).toEqual({
+			section: 'cv',
+			item: { kind: 'STUDY', id: null }
+		});
+		expect(readDoctorProfileAddress(`cv/experience/${ID}`)).toEqual({
+			section: 'cv',
+			item: { kind: 'WORK', id: ID }
+		});
+		expect(readDoctorProfileAddress(`cv/conferences/${ID}`)).toEqual({
+			section: 'cv',
+			item: { kind: 'CONFERENCE', id: ID }
+		});
+		const pages = [
+			doctorProfileCvPath,
+			doctorProfileCvItemPath('STUDY', null),
+			doctorProfileCvItemPath('WORK', ID),
+			doctorProfileCvItemPath('CONFERENCE', ID)
+		];
+		for (const path of pages) {
+			expect(isDoctorMenuTab(path), path).toBe(true);
+			expect(isDoctorTodayTab(path), path).toBe(false);
+			expect(isDoctorMessagesTab(path), path).toBe(false);
+			expect(isDoctorProfilePreviewPage(path), path).toBe(false);
+			expect(isDoctorPhotoCropPage(path), path).toBe(false);
+			expect(isDoctorSpecializationsPickPage(path), path).toBe(false);
+			// Screen 81 keeps the capsule below 744 (`81-cv/shots/m-full.png`); the page of a row has none (`m-edit.png`).
+			expect(isDoctorCredentialPage(path), path).toBe(path !== doctorProfileCvPath);
+		}
+		for (const path of ['/doctor/profile', '/doctor/profile/photos', '/doctor/profile/specialty']) {
+			expect(isDoctorCredentialPage(path), path).toBe(false);
+		}
+		expect(isDoctorCredentialPage(`/profile/cv/experience/${ID}`)).toBe(false);
+		for (const rest of [
+			'cv/',
+			'cv/new',
+			'cv/studies',
+			'cv/studies/',
+			'cv/study/new',
+			'cv/STUDY/new',
+			'cv/Studies/new',
+			'cv/work/new',
+			'cv/experience/New',
+			'cv/experience/1',
+			'cv/experience/new/',
+			'cv/experience/new/x',
+			`cv/experience/${ID}/`,
+			`cv/experience/${ID}/edit`,
+			`cv/${ID}`,
+			`cv/experiencex/${ID}`,
+			`cv/experience/${ID}x`,
+			'cv/experience/../photos',
+			'cv//new',
+			`cv/experience%2F${ID}`,
+			'cv/experience/<script>',
+			'CV',
+			'cvs'
+		]) {
+			expect(readDoctorProfileAddress(rest), rest).toBeUndefined();
+			expect(isDoctorMenuTab(`/doctor/profile/${rest}`), rest).toBe(false);
+			expect(isDoctorCredentialPage(`/doctor/profile/${rest}`), rest).toBe(false);
+		}
+	});
+
+	it('🔴 U-211 · D-W52-69 / 70 · U-65.6: «Γλώσσες και κοινωνικά δίκτυα» is `/doctor/profile/languages`, the choice of the languages `…/languages/spoken` and the four links `…/languages/networks` — a closed list, inside the tab «Μενού»; only the two pages under 82 are pushed over the tabs (their own bar at the bottom)', () => {
+		expect(doctorProfileLanguagesPath).toBe('/doctor/profile/languages');
+		expect(doctorProfileSpokenLanguagesPath).toBe('/doctor/profile/languages/spoken');
+		expect(doctorProfileNetworksPath).toBe('/doctor/profile/languages/networks');
+		expect(readDoctorProfileAddress('languages')).toEqual({ section: 'languages', page: null });
+		expect(readDoctorProfileAddress('languages/spoken')).toEqual({
+			section: 'languages',
+			page: 'spoken'
+		});
+		expect(readDoctorProfileAddress('languages/networks')).toEqual({
+			section: 'languages',
+			page: 'networks'
+		});
+		for (const path of [
+			doctorProfileLanguagesPath,
+			doctorProfileSpokenLanguagesPath,
+			doctorProfileNetworksPath
+		]) {
+			expect(isDoctorMenuTab(path), path).toBe(true);
+			expect(isDoctorTodayTab(path), path).toBe(false);
+			expect(isDoctorMessagesTab(path), path).toBe(false);
+			expect(isDoctorProfilePreviewPage(path), path).toBe(false);
+			expect(isDoctorPhotoCropPage(path), path).toBe(false);
+			expect(isDoctorSpecializationsPickPage(path), path).toBe(false);
+			expect(isDoctorCredentialPage(path), path).toBe(false);
+			// Screen 82 keeps the capsule below 744 (`82-langs/shots/m-full.png`); its two pages have none (`m-pick.png`, `m-soc.png`).
+			expect(isDoctorLanguagesStepPage(path), path).toBe(path !== doctorProfileLanguagesPath);
+		}
+		for (const path of [
+			'/doctor/profile',
+			'/doctor/profile/photos',
+			'/doctor/profile/specialty/specializations',
+			'/doctor/profile/cv/studies/new'
+		]) {
+			expect(isDoctorLanguagesStepPage(path), path).toBe(false);
+		}
+		expect(isDoctorLanguagesStepPage('/profile/languages/spoken')).toBe(false);
+		for (const rest of [
+			'languages/',
+			'languagesx',
+			'Languages',
+			'language',
+			'language/spoken',
+			'languages/Spoken',
+			'languages/spokenx',
+			'languages/spoken/',
+			'languages/spoken/SL001',
+			'languages/networks/',
+			'languages/networks/facebook',
+			'languages/network',
+			'languages/social',
+			'languages/links',
+			'languages/edit',
+			'languages/../photos',
+			'languages//spoken',
+			'languages%2Fspoken',
+			'languages/<script>',
+			'networks',
+			'spoken'
+		]) {
+			expect(readDoctorProfileAddress(rest), rest).toBeUndefined();
+			expect(isDoctorMenuTab(`/doctor/profile/${rest}`), rest).toBe(false);
+			expect(isDoctorLanguagesStepPage(`/doctor/profile/${rest}`), rest).toBe(false);
+		}
+	});
+
+	// Widened by D-W52-49 (screen 79): `about` left the list (it is a page now, the case above); its look-alikes joined.
+	// Widened by D-W52-59 (screen 80): `specialty` left the list (a page now, the case below); its look-alikes joined.
+	// Widened by D-W52-63 (screen 81): `cv` left the list (a page now, the case above); its look-alikes joined.
+	// Widened by D-W52-69 / 70 (screen 82): `languages` left the list (a page now, the case above); its look-alikes joined.
+	// Widened by D-W52-81 / 82 (screen 83): `services` left the list (a page now, the case below); its look-alikes joined.
+	it('🔴 D-W52-41 · U-65.6 (negative): anything else under «Το προφίλ μου» is no page — another section’s word, a look-alike, an id that is not the server’s, a slash more, a step that is not «Προσαρμογή»', () => {
+		for (const rest of [
+			'aboutx',
+			'about/x',
+			'specialtyx',
+			'specialty/x',
+			'specializations',
+			'cvx',
+			'cv/x',
+			'credentials',
+			'languagesx',
+			'languages/x',
+			'speak-languages',
+			'servicesx',
+			'services/x',
+			'service',
+			'preview',
+			'photosx',
+			'Photos',
+			'photos/',
+			`photos/${ID}`,
+			`photos/${ID}/`,
+			`photos/${ID}/crop/`,
+			`photos/${ID}/crop/x`,
+			`photos/${ID}/cropx`,
+			`photos/${ID}/delete`,
+			'photos/x/crop',
+			'photos/../crop',
+			'photos//crop',
+			`photos/${ID}%2Fcrop`,
+			'photos/<script>/crop'
+		]) {
+			expect(readDoctorProfileAddress(rest), rest).toBeUndefined();
+			expect(isDoctorMenuTab(`/doctor/profile/${rest}`), rest).toBe(rest === 'preview');
+			expect(isDoctorPhotoCropPage(`/doctor/profile/${rest}`), rest).toBe(false);
+		}
+		expect(isDoctorPhotoCropPage(`/profile/photos/${ID}/crop`)).toBe(false);
+		expect(isDoctorMenuTab(`/profile/photos`)).toBe(false);
+	});
+
+	it('🔴 D-W52-81 / 82 · U-65.6: «Υπηρεσίες και τιμές» is `/doctor/profile/services`, one service `…/services/<id>`, «Νέα υπηρεσία» `…/services/new` and a new one `…/services/new/<id>` — a closed list inside the tab «Μενού»; only the three pages under it are pushed over the tabs', () => {
+		expect(doctorProfileServicesPath).toBe('/doctor/profile/services');
+		expect(doctorProfileServicePath(ID)).toBe(`/doctor/profile/services/${ID}`);
+		expect(doctorProfileNewServicePath).toBe('/doctor/profile/services/new');
+		expect(doctorProfileNewServiceItemPath(ID)).toBe(`/doctor/profile/services/new/${ID}`);
+		expect(readDoctorProfileAddress('services')).toEqual({ section: 'services', page: null });
+		expect(readDoctorProfileAddress(`services/${ID}`)).toEqual({
+			section: 'services',
+			page: { view: 'service', id: ID }
+		});
+		expect(readDoctorProfileAddress('services/new')).toEqual({
+			section: 'services',
+			page: { view: 'catalogue' }
+		});
+		expect(readDoctorProfileAddress(`services/new/${ID}`)).toEqual({
+			section: 'services',
+			page: { view: 'new', serviceId: ID }
+		});
+		for (const path of [
+			'/doctor/profile/services',
+			`/doctor/profile/services/${ID}`,
+			'/doctor/profile/services/new',
+			`/doctor/profile/services/new/${ID}`
+		]) {
+			expect(isDoctorMenuTab(path), path).toBe(true);
+			expect(isDoctorServicePage(path), path).toBe(path !== '/doctor/profile/services');
+		}
+		// U-65.6 (negative): a look-alike, an id that is not the server's, a slash more, a word under a service.
+		for (const rest of [
+			'services/',
+			'Services',
+			'services/x',
+			'services/new/x',
+			`services/new/${ID}/`,
+			`services/new/${ID}/x`,
+			`services/${ID}/`,
+			`services/${ID}/edit`,
+			`services/${ID}/delete`,
+			'services/../new',
+			`services/${ID}%2Fedit`,
+			'services/<script>',
+			'services/news'
+		]) {
+			expect(readDoctorProfileAddress(rest), rest).toBeUndefined();
+			expect(isDoctorServicePage(`/doctor/profile/${rest}`), rest).toBe(false);
+			expect(isDoctorMenuTab(`/doctor/profile/${rest}`), rest).toBe(false);
+		}
+		expect(isDoctorServicePage(`/profile/services/${ID}`)).toBe(false);
+	});
+
 	it('🔴 D-W51-73: «Νέο ραντεβού» of a card is screen 72 alone, `?from=patient` with the patient chosen — never without one', () => {
 		expect(
 			doctorNewAppointmentSearch({ from: 'patient', patient: { kind: 'account', id: ID } })
@@ -386,6 +769,113 @@ describe('🔴 D-W51-85 · the doctor’s «Μηνύματα» in the frame (scr
 		for (const path of ['/doctor/messagesx', '/messages', '/doctor', '/doctor/menu']) {
 			expect(isDoctorMessagesTab(path), path).toBe(false);
 			expect(isDoctorMessagesPushedPage(path), path).toBe(false);
+		}
+	});
+});
+
+describe('🔴 D-W52-91 / 92 · screen 84 «Κριτικές» in the address', () => {
+	const ID = '0193d000-0000-7000-8000-0000000000c4';
+	const reviews = (rest: string | undefined, search = '') =>
+		readDoctorReviewsAddress(rest, new URLSearchParams(search));
+
+	it('D-W52-91 / 92: `/doctor/reviews` the list (`?filter=unanswered`, `?review=<id>`), `/<id>/reply` and `/<id>/report` the two pages of one review', () => {
+		expect(doctorReviewsPath).toBe('/doctor/reviews');
+		expect(doctorReviewStepPath(ID, 'reply')).toBe(`/doctor/reviews/${ID}/reply`);
+		expect(doctorReviewStepPath(ID, 'report')).toBe(`/doctor/reviews/${ID}/report`);
+		expect(reviews('')).toEqual({ view: 'list', filter: 'all', reviewId: null });
+		expect(reviews(undefined, `filter=unanswered&review=${ID}`)).toEqual({
+			view: 'list',
+			filter: 'unanswered',
+			reviewId: ID
+		});
+		expect(reviews(`${ID}/reply`)).toEqual({ view: 'reply', reviewId: ID });
+		expect(reviews(`${ID}/report`)).toEqual({ view: 'report', reviewId: ID });
+		expect(doctorReviewsSearch({})).toBe('');
+		expect(doctorReviewsSearch({ filter: 'all', reviewId: null })).toBe('');
+		expect(doctorReviewsSearch({ filter: 'unanswered' })).toBe('?filter=unanswered');
+		expect(doctorReviewsSearch({ reviewId: ID })).toBe(`?review=${ID}`);
+	});
+
+	it('🔴 D-W52-91 / U-65.6 (negative): another word, a capital, a slash more, an id that is not the server’s is no page; a choice or a review out of the closed words reads none', () => {
+		for (const rest of [
+			ID,
+			`${ID}/Reply`,
+			`${ID}/reply/x`,
+			`${ID}/delete`,
+			`x/reply`,
+			`${ID}//reply`
+		]) {
+			expect(reviews(rest), rest).toBeUndefined();
+		}
+		expect(reviews('', 'filter=UNANSWERED&review=x')).toEqual({
+			view: 'list',
+			filter: 'all',
+			reviewId: null
+		});
+	});
+
+	it('🔴 D-W52-91 · D-W52-92 · U-81.2: inside the tab «Μενού» (a row of it); only the reply and the report are pushed over the tabs — never the list or a look-alike', () => {
+		for (const path of [
+			'/doctor/reviews',
+			`/doctor/reviews/${ID}/reply`,
+			`/doctor/reviews/${ID}/report`
+		]) {
+			expect(isDoctorMenuTab(path), path).toBe(true);
+			expect(isDoctorTodayTab(path), path).toBe(false);
+		}
+		expect(isDoctorReviewStepPage('/doctor/reviews')).toBe(false);
+		expect(isDoctorReviewStepPage(`/doctor/reviews/${ID}/reply`)).toBe(true);
+		expect(isDoctorReviewStepPage(`/doctor/reviews/${ID}/report`)).toBe(true);
+		for (const path of [
+			'/doctor/reviewsx',
+			'/doctor/review',
+			'/reviews',
+			`/doctor/reviews/${ID}`,
+			`/doctor/reviews/${ID}/reply/x`,
+			'/doctor/reviews/x/reply'
+		]) {
+			expect(isDoctorMenuTab(path), path).toBe(false);
+			expect(isDoctorReviewStepPage(path), path).toBe(false);
+		}
+	});
+});
+
+describe('🔴 D-W52-102 / 103 · screen 85 «Τα άρθρα μου» in the address', () => {
+	const ID = '0193d000-0000-7000-8000-0000000000b5';
+
+	it('D-W52-102 / 103: `/doctor/articles` the list, `/new` a new article, `/<id>` one article', () => {
+		expect(doctorArticlesPath).toBe('/doctor/articles');
+		expect(doctorNewArticlePath).toBe('/doctor/articles/new');
+		expect(doctorArticlePath(ID)).toBe(`/doctor/articles/${ID}`);
+		expect(readDoctorArticlesAddress('')).toEqual({ view: 'list' });
+		expect(readDoctorArticlesAddress(undefined)).toEqual({ view: 'list' });
+		expect(readDoctorArticlesAddress('new')).toEqual({ view: 'new' });
+		expect(readDoctorArticlesAddress(ID)).toEqual({ view: 'article', articleId: ID });
+	});
+
+	it('🔴 D-W52-102 / U-65.6 (negative): another word, a capital, a slash more, an id that is not the server’s is no page', () => {
+		for (const rest of ['New', 'x', `${ID}/x`, `${ID}/`, 'new/x', '%3Cscript%3E', '1']) {
+			expect(readDoctorArticlesAddress(rest), rest).toBeUndefined();
+		}
+	});
+
+	it('🔴 D-W52-102 / 103 · U-81.2: inside the tab «Μενού» (a row of it); only «Νέο άρθρο» and one article are pushed over the tabs — never the list or a look-alike', () => {
+		for (const path of ['/doctor/articles', '/doctor/articles/new', `/doctor/articles/${ID}`]) {
+			expect(isDoctorMenuTab(path), path).toBe(true);
+			expect(isDoctorTodayTab(path), path).toBe(false);
+		}
+		expect(isDoctorArticlePage('/doctor/articles')).toBe(false);
+		expect(isDoctorArticlePage('/doctor/articles/new')).toBe(true);
+		expect(isDoctorArticlePage(`/doctor/articles/${ID}`)).toBe(true);
+		for (const path of [
+			'/doctor/articlesx',
+			'/doctor/article',
+			'/articles',
+			'/doctor/articles/x',
+			`/doctor/articles/${ID}/x`
+		]) {
+			expect(isDoctorMenuTab(path), path).toBe(false);
+			expect(isDoctorArticlePage(path), path).toBe(false);
 		}
 	});
 });

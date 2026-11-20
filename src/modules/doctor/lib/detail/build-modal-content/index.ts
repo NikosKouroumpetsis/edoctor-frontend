@@ -22,24 +22,25 @@ import {
 	reviewTopicLabel,
 	wholeYearsSince
 } from '../labels';
-import { buildPricedService, buildPricedServices } from '../priced-services';
+import { buildPricedService } from '../priced-services';
 import { buildDoctorReviewBuckets } from '../review-rating-distribution';
 import { buildDoctorReviewSortOptions } from '../review-sorting';
 import type {
 	DoctorOfficePage,
 	DoctorReviewListCard,
 	DoctorReviewsModalContent,
-	DoctorServicesGroup,
 	DoctorServicesPage,
+	DoctorServicesPageRow,
 	DoctorSpecializationsPage,
 	DoctorSpecializationStat
 } from '../types';
 import { buildDoctorWeeklyHours } from '../weekly-hours';
 
 /**
- * 🔴 U-70 (screen 14): EVERY service, the same fee rule. Π4: the fields of expertise first under their name (which
- * leads to their page, U-72.3 Ε3), then «Άλλες υπηρεσίες»; a doctor without any has no titles at all. U-38: no service,
- * no page.
+ * 🔴 U-70 (screen 14): EVERY service in the backend's order, the same fee rule. 🔴 D-W52-60 (U-209.3; it replaces Π4's
+ * groups and U-72.3 Ε3): no service is a field of expertise any more, so the page is ONE list without titles and has
+ * no way to «Τομείς εξειδίκευσης»; each service keeps its own years and visits (a service without them says nothing,
+ * never «0»), and the note says what the visits count only when one shows. U-38: no service, no page.
  */
 export function buildDoctorServicesPage(
 	doctor: DoctorProfile,
@@ -47,44 +48,53 @@ export function buildDoctorServicesPage(
 ): DoctorServicesPage | null {
 	const services = doctor.services ?? [];
 	if (services.length === 0) return null;
-	const special = services.filter((service) => service.isSpecialized);
-	const others = services.filter((service) => !service.isSpecialized);
-	const rows = (list: typeof services) => buildPricedServices(list, doctor.pricingVisible, locale);
-	const groups: DoctorServicesGroup[] =
-		special.length === 0
-			? [{ id: 'all', services: rows(others) }]
-			: [
-					{
-						id: 'specializations',
-						title: m.doctor_section_expertise({}, { locale }),
-						services: rows(special)
-					},
-					...(others.length > 0
-						? [
-								{
-									id: 'other' as const,
-									title: m.doctor_services_other({}, { locale }),
-									services: rows(others)
-								}
-							]
-						: [])
-				];
+	const options = { locale };
+	const number = (value: number) => formatDecimal(value, locale, 0);
+	const rows: DoctorServicesPageRow[] = services.map((service) => ({
+		...buildPricedService(service, doctor.pricingVisible, locale),
+		...(service.yearsOfExperience
+			? {
+					years: {
+						value: number(service.yearsOfExperience),
+						label:
+							service.yearsOfExperience === 1
+								? m.doctor_meet_years_one({}, options)
+								: m.doctor_meet_years_other({}, options)
+					}
+				}
+			: {}),
+		...(service.completedVisits
+			? {
+					visits: {
+						value: number(service.completedVisits),
+						label:
+							service.completedVisits === 1
+								? m.doctor_specializations_visits_one({}, options)
+								: m.doctor_specializations_visits_other({}, options)
+					}
+				}
+			: {})
+	}));
 	const [only] = services;
 	return {
-		title: m.doctor_section_services({}, { locale }),
-		notice: m.doctor_service_cost_notice({}, { locale }),
-		descriptionLabel: m.doctor_service_description_label({}, { locale }),
-		readMoreLabel: m.doctor_services_read_more({}, { locale }),
-		bookLabel: m.doctor_services_book({}, { locale }),
-		groups,
+		title: m.doctor_section_services({}, options),
+		notice: m.doctor_service_cost_notice({}, options),
+		descriptionLabel: m.doctor_service_description_label({}, options),
+		readMoreLabel: m.doctor_services_read_more({}, options),
+		bookLabel: m.doctor_services_book({}, options),
+		services: rows,
+		...(rows.some((row) => row.visits)
+			? { footnote: m.doctor_specializations_foot_visits({}, options) }
+			: {}),
 		...(services.length === 1 && only ? { soloId: only.id } : {})
 	};
 }
 
 /**
- * 🔴 U-72 (screen 15): the services the server marks as fields of expertise, each with its years and its visits (a
- * service without visits says nothing, never «0»). Π3: the card's figures; 🔴 U-72.4: no period anywhere, the window is
- * written in the Terms. Each sentence of the note only with its number. U-38: none, no page.
+ * 🔴 U-72 (screen 15), 🔴 D-W52-60 (U-209.3, U-225): the specializations the doctor picked from the closed list of the
+ * specialty, by name — never services. Π3: the card's figures (how many fields, the doctor's visits, the years from the
+ * licence); 🔴 U-72.4: no period anywhere, the window is written in the Terms. Each sentence of the note only with its
+ * number. U-38: none, no page.
  */
 export function buildDoctorSpecializationsPage({
 	doctor,
@@ -96,13 +106,13 @@ export function buildDoctorSpecializationsPage({
 	now: number;
 }): DoctorSpecializationsPage | null {
 	const options = { locale };
-	const special = (doctor.services ?? []).filter((service) => service.isSpecialized);
-	if (special.length === 0) return null;
+	const fields = doctor.specializations ?? [];
+	if (fields.length === 0) return null;
 	const number = (value: number) => formatDecimal(value, locale, 0);
 	const visits = doctor.responseMetrics?.completedVisits;
 	const years = wholeYearsSince(doctor.licenseObtainedDate, now);
 	const domainsLabel =
-		special.length === 1
+		fields.length === 1
 			? m.doctor_specializations_stat_domains_one({}, options)
 			: m.doctor_specializations_stat_domains_other({}, options);
 	const yearsLabel =
@@ -112,9 +122,9 @@ export function buildDoctorSpecializationsPage({
 	const cells: DoctorSpecializationStat[] = [
 		{
 			id: 'domains',
-			value: number(special.length),
+			value: number(fields.length),
 			label: domainsLabel,
-			accessibleLabel: `${number(special.length)} ${domainsLabel}`
+			accessibleLabel: `${number(fields.length)} ${domainsLabel}`
 		},
 		...(visits
 			? [
@@ -141,45 +151,19 @@ export function buildDoctorSpecializationsPage({
 			: [])
 	];
 	const stats = cells.length > 1 ? cells : [];
-	const domains = special.map((service) => ({
-		...buildPricedService(service, doctor.pricingVisible, locale),
-		...(service.yearsOfExperience
-			? {
-					years: {
-						value: number(service.yearsOfExperience),
-						label:
-							service.yearsOfExperience === 1
-								? m.doctor_meet_years_one({}, options)
-								: m.doctor_meet_years_other({}, options)
-					}
-				}
-			: {}),
-		...(service.completedVisits
-			? {
-					visits: {
-						value: number(service.completedVisits),
-						label:
-							service.completedVisits === 1
-								? m.doctor_specializations_visits_one({}, options)
-								: m.doctor_specializations_visits_other({}, options)
-					}
-				}
-			: {})
-	}));
-	const sayVisits = stats.some((cell) => cell.id === 'visits') || domains.some((d) => d.visits);
-	const sayYears = stats.some((cell) => cell.id === 'years');
 	const footnote = [
-		...(sayVisits ? [m.doctor_specializations_foot_visits({}, options)] : []),
-		...(sayYears ? [m.doctor_specializations_foot_years({}, options)] : [])
+		...(stats.some((cell) => cell.id === 'visits')
+			? [m.doctor_specializations_foot_visits({}, options)]
+			: []),
+		...(stats.some((cell) => cell.id === 'years')
+			? [m.doctor_specializations_foot_years({}, options)]
+			: [])
 	].join(' ');
 	return {
 		title: m.doctor_section_expertise({}, options),
 		statsLabel: m.doctor_specializations_stats_label({}, options),
 		stats,
-		domains,
-		readMoreLabel: m.doctor_services_read_more({}, options),
-		bookLabel: m.doctor_services_book({}, options),
-		backLabel: m.doctor_specializations_back({}, options),
+		domains: fields.map(({ code, name }) => ({ id: code, title: name })),
 		...(footnote ? { footnote } : {})
 	};
 }

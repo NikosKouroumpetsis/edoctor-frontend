@@ -1,6 +1,7 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { SplitView } from '$shared/ui/templates/split-view';
+	import { Ionicon, type IoniconName } from '$shared/ui/icons/ionicon';
+	import { SplitView, SplitViewFoldButton } from '$shared/ui/templates/split-view';
 
 	const rows = [
 		'Πρώτη γραμμή',
@@ -9,6 +10,8 @@
 		'Τέταρτη γραμμή',
 		'Πέμπτη γραμμή'
 	];
+
+	const railIcons: IoniconName[] = ['apps-outline', 'archive-outline', 'list-outline'];
 
 	// D-W4-52 (the inbox's two columns): below 950 the list, or what it opened; from 950 both, each scrolling on its own;
 	// U-139.1: nothing for the right ⇒ one column in the middle.
@@ -73,6 +76,46 @@
 	{/each}
 {/snippet}
 
+<!-- A menu that folds (U-216.2): its title and the fold button in one row, the rows under them. -->
+{#snippet foldingMenu()}
+	<div class="mb-4 flex flex-row items-center gap-3">
+		<h1 class="text-heading-md font-semibold text-foreground">Μενού</h1>
+		<SplitViewFoldButton label="Σύμπτυξη του μενού" class="ml-auto" />
+	</div>
+	<ul class="flex flex-col">
+		{#each rows as row, index (row)}
+			<li
+				class={index === 0
+					? 'flex min-h-touch items-center rounded-md bg-chip px-3.5 text-body-md font-semibold text-foreground'
+					: 'flex min-h-touch items-center rounded-md px-3.5 text-body-md text-foreground'}
+			>
+				{row}
+			</li>
+		{/each}
+	</ul>
+{/snippet}
+
+<!-- … and its rail: the button that opens it again, then one icon for each section (the chosen one on `bg-chip`). -->
+{#snippet foldedRail()}
+	<SplitViewFoldButton label="Άνοιγμα του μενού" />
+	<ul class="flex flex-col gap-2">
+		{#each railIcons as icon, index (icon)}
+			<li>
+				<a
+					href="#section"
+					aria-label={rows[index]}
+					aria-current={index === 0 ? 'page' : undefined}
+					class={index === 0
+						? 'grid size-touch place-items-center rounded-md bg-chip text-foreground'
+						: 'grid size-touch place-items-center rounded-md text-foreground'}
+				>
+					<Ionicon name={icon} class="icon-md" />
+				</a>
+			</li>
+		{/each}
+	</ul>
+{/snippet}
+
 <Story name="List And Pane" globals={{ viewport: { value: 'z1440' } }}>
 	{#snippet template()}
 		<SplitView list={column}>{@render detail()}</SplitView>
@@ -115,6 +158,32 @@
 <Story name="Menu And Centred Pane At 950" globals={{ viewport: { value: 'z950' } }}>
 	{#snippet template()}
 		<SplitView list={menu} widths="menu" centred>{@render section()}</SplitView>
+	{/snippet}
+</Story>
+
+<!-- 🔴 U-215.3 (D-W52-11, D-W52-13): the page's frame — at 1920 the menu's column is 30 % of it (576) and the menu of
+     324 stands in the middle of that column; wider than 1920 the whole stays 1920, centred. -->
+<Story name="Menu, Wide Frame" globals={{ viewport: { value: 'z1920' } }}>
+	{#snippet template()}
+		<SplitView list={menu} widths="menu" centred>{@render section()}</SplitView>
+	{/snippet}
+</Story>
+
+<!-- U-216.2 (D-W52-14): the menu folds to a rail of its icons and opens again — the column glides, the menu leaves
+     before the rail arrives, the section re-centres in the room it gets. Press the button. -->
+<Story name="Menu, Folding" globals={{ viewport: { value: 'z1440' } }}>
+	{#snippet template()}
+		<SplitView list={foldingMenu} rail={foldedRail} widths="menu" centred>
+			{@render section()}
+		</SplitView>
+	{/snippet}
+</Story>
+
+<Story name="Menu, Folding, Folded At 950" globals={{ viewport: { value: 'z950' } }}>
+	{#snippet template()}
+		<SplitView list={foldingMenu} rail={foldedRail} folded widths="menu" centred>
+			{@render section()}
+		</SplitView>
 	{/snippet}
 </Story>
 

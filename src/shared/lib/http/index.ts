@@ -239,21 +239,23 @@ function readDetails(value: unknown): ApiErrorDetails | undefined {
 	return plain ? (Object.fromEntries(entries) as ApiErrorDetails) : undefined;
 }
 
+type Refusal = { code?: string; message?: string; details?: ApiErrorDetails };
+
+/** The `{ errorCode, errorMessage, details }` of a refusal's parsed body, each only in the shape the contract writes. */
+function refusalOf(body: unknown): Refusal {
+	if (typeof body !== 'object' || body === null) return {};
+	const { errorCode, errorMessage, details } = body as Record<string, unknown>;
+	return {
+		code: typeof errorCode === 'string' ? errorCode : undefined,
+		message: typeof errorMessage === 'string' ? errorMessage.trim() : undefined,
+		details: readDetails(details)
+	};
+}
+
 /** The `{ errorCode, errorMessage, details }` a refusal carries, when it carries it. */
-async function readRefusal(
-	response: Response
-): Promise<{ code?: string; message?: string; details?: ApiErrorDetails }> {
+async function readRefusal(response: Response): Promise<Refusal> {
 	try {
-		const body = (await response.json()) as {
-			errorCode?: unknown;
-			errorMessage?: unknown;
-			details?: unknown;
-		};
-		return {
-			code: typeof body?.errorCode === 'string' ? body.errorCode : undefined,
-			message: typeof body?.errorMessage === 'string' ? body.errorMessage.trim() : undefined,
-			details: readDetails(body?.details)
-		};
+		return refusalOf(await response.json());
 	} catch {
 		return {};
 	}
@@ -266,7 +268,7 @@ const PERSONAL_CACHE: RequestCache = 'no-store';
 
 /**
  * 🔴 U-80.1 Ε6: the ONE way a request of the browser carries the API's cookies (`credentials: 'include'`), only for
- * the session and for what is personal (`httpSessionGet`, `Post`, `Put`, `Delete`, `File`); every public read stays
+ * the session and for what is personal (`httpSessionGet`, `Post`, `Put`, `Delete`, `File`, `Upload`); every public read stays
  * anonymous, on the page's server too (`readEnvelope`, `credentials: 'omit'`). So these calls are made from the browser.
  */
 async function sessionRequest<T>(
@@ -340,6 +342,102 @@ export function httpSessionDelete<T = void>(
 	options: HttpSessionOptions = {}
 ): Promise<T> {
 	return sessionRequest<T>('DELETE', path, options);
+}
+
+export type HttpSessionUploadOptions = {
+	/** The JSON body of the write (a file travels inside it, as the API reads it). */
+	body: unknown;
+	signal?: AbortSignal;
+	/** How much of the body has left the browser, `0…1`; never called while the browser cannot tell. */
+	onProgress?: (fraction: number) => void;
+};
+
+/**
+ * 🔴 D-W52-38 (wave 5.2, a photo inside the JSON): a session write that TELLS how much of its body has been sent. `fetch`
+ * cannot, so this one call goes through `XMLHttpRequest` — under the same rules as every session call (U-80.1 Ε6): the
+ * API's cookies, the page's language, JSON in and out, the envelope's `data`, a refusal with its status, its code and
+ * its `details` (a `401` reaches the caller as every other call's does), a lost or abandoned request as status `0`. A
+ * write is never kept by the browser's HTTP cache, so D-W4-60 holds without a word of it.
+ */
+export function httpSessionUpload<T>(
+	method: 'POST' | 'PATCH',
+	path: string,
+	options: HttpSessionUploadOptions
+): Promise<T> {
+	const url = buildUrl(path);
+	const { signal, onProgress } = options;
+
+	return new Promise<T>((resolve, reject) => {
+		if (signal?.aborted) {
+			reject(new ApiError('Request aborted', 0, url));
+			return;
+		}
+
+		const request = new XMLHttpRequest();
+		const abort = () => request.abort();
+		const lost = (reason: string) => () => {
+			signal?.removeEventListener('abort', abort);
+			reject(new ApiError(reason, 0, url));
+		};
+
+		request.open(method, url);
+		request.withCredentials = true;
+		request.responseType = 'text';
+		const headers: Record<string, string> = {
+			Accept: 'application/json',
+			'Content-Type': 'application/json',
+			...requestLanguageHeaders()
+		};
+		for (const [name, value] of Object.entries(headers)) request.setRequestHeader(name, value);
+
+		if (onProgress) {
+			request.upload.onprogress = (event) => {
+				if (event.lengthComputable && event.total > 0) {
+					onProgress(Math.min(1, Math.max(0, event.loaded / event.total)));
+				}
+			};
+		}
+		request.onerror = lost('Network request failed');
+		request.ontimeout = lost('Network request failed');
+		request.onabort = lost('Request aborted');
+		request.onload = () => {
+			signal?.removeEventListener('abort', abort);
+			const { status } = request;
+			let body: unknown;
+			let readable = true;
+			try {
+				body = JSON.parse(request.responseText);
+			} catch {
+				readable = false;
+			}
+
+			if (status < 200 || status >= 300) {
+				const refusal = refusalOf(body);
+				reject(
+					new ApiError(
+						refusal.message || `Request failed with status ${status}`,
+						status,
+						url,
+						refusal.code,
+						refusal.details
+					)
+				);
+				return;
+			}
+			if (status === 204) {
+				resolve(undefined as T);
+				return;
+			}
+			if (!readable || typeof body !== 'object' || body === null) {
+				reject(new ApiError('Response was not valid JSON', status, url));
+				return;
+			}
+			resolve((body as ApiEnvelope<T>).data);
+		};
+
+		signal?.addEventListener('abort', abort, { once: true });
+		request.send(JSON.stringify(options.body));
+	});
 }
 
 /**

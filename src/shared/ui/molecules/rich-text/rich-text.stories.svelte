@@ -1,6 +1,6 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import type { RichTextDoc } from '$shared/lib/rich-text';
+	import { buildArticleRichText, type RichTextDoc } from '$shared/lib/rich-text';
 	import { RichText } from '$shared/ui/molecules/rich-text';
 
 	// The three shapes the backend sends (tiptap, slate, the seed's plain `{ type, text }`), in Greek.
@@ -83,6 +83,82 @@
 		]
 	};
 
+	// 🔴 D-W52-104: an article of the closed schema — every node and mark once (an image only with its upload's address).
+	const IMAGE = '0199aaaa-0000-7000-8000-000000000001';
+	const SAMPLE_PIXELS = 160;
+	const closed = buildArticleRichText(
+		{
+			type: 'doc',
+			content: [
+				{ type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Οι τιμές' }] },
+				{
+					type: 'paragraph',
+					content: [
+						{ type: 'text', text: 'Υπογράμμιση', marks: [{ type: 'underline' }] },
+						{ type: 'text', text: ', ' },
+						{ type: 'text', text: 'διαγραφή', marks: [{ type: 'strike' }] },
+						{ type: 'text', text: ', ' },
+						{ type: 'text', text: 'επισήμανση', marks: [{ type: 'highlight' }] },
+						{ type: 'hardBreak' },
+						{
+							type: 'text',
+							text: 'σύνδεσμος',
+							marks: [{ type: 'link', attrs: { href: 'https://example.org' } }]
+						}
+					]
+				},
+				{
+					type: 'blockquote',
+					content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ένα παράθεμα.' }] }]
+				},
+				{
+					type: 'callout',
+					content: [
+						{ type: 'paragraph', content: [{ type: 'text', text: 'Σημαντικό: ένα πλαίσιο.' }] }
+					]
+				},
+				{ type: 'horizontalRule' },
+				{ type: 'image', attrs: { imageId: IMAGE, alt: 'Δείγμα', caption: 'Μια λεζάντα.' } },
+				{ type: 'video', attrs: { provider: 'youtube', id: 'dQw4w9WgXcQ' } },
+				{
+					type: 'table',
+					content: [
+						{
+							type: 'tableRow',
+							content: [
+								{
+									type: 'tableHeader',
+									content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Στήλη' }] }]
+								},
+								{
+									type: 'tableHeader',
+									content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Τιμή' }] }]
+								}
+							]
+						},
+						{
+							type: 'tableRow',
+							content: [
+								{
+									type: 'tableCell',
+									content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Α' }] }]
+								},
+								{
+									type: 'tableCell',
+									content: [{ type: 'paragraph', content: [{ type: 'text', text: '120' }] }]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		(id) =>
+			id === IMAGE
+				? { url: '/doctor-placeholder.svg', width: SAMPLE_PIXELS, height: SAMPLE_PIXELS }
+				: null
+	).blocks;
+
 	const { Story } = defineMeta({
 		title: 'Molecules/RichText',
 		component: RichText,
@@ -112,5 +188,13 @@
 <Story name="Plain lines">
 	{#snippet template()}
 		<div class="w-full max-w-content"><RichText document={plain} /></div>
+	{/snippet}
+</Story>
+
+<Story name="Article of the closed schema">
+	{#snippet template()}
+		<div class="w-full max-w-content">
+			<RichText blocks={closed} variant="article" userContent />
+		</div>
 	{/snippet}
 </Story>

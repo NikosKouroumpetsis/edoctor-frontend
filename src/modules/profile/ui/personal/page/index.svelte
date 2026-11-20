@@ -36,7 +36,8 @@
      «Ακύρωση» on the right; closing a row drops whatever was typed in it. 🔴 U-168: the email, the mobile, the ΑΜΚΑ and
      the ΑΦΜ are printed exactly as the SERVER hides them and their fields open EMPTY; nothing typed reaches an address,
      a storage, a cache or a log. An account the server names no patient for reads the rows that have a source. Under
-     the rows, the two boxes. -->
+     the rows, the two boxes. 🔴 D-W52-50 (U-207.1): for a doctor whose first licence locked the name, «Ονοματεπώνυμο» has
+     no «Επεξεργασία» and says «Κλείδωσε με την πρώτη σας άδεια γιατρού.» under the name. -->
 <div data-testid="personal-details" data-view={personal.view}>
 	{#if personal.view === 'loading'}
 		<Skeleton label={m.profile_account_settings_sections_personal({}, options)} />
@@ -59,6 +60,7 @@
 				title={row.title}
 				value={row.value ?? undefined}
 				help={open && codeStep ? undefined : (row.help ?? undefined)}
+				lockedNote={row.lockedNote}
 				actionLabel={row.filled
 					? m.profile_personal_edit({}, options)
 					: m.profile_personal_add({}, options)}

@@ -15,7 +15,11 @@ export function standingKindOf(
 	return facts.marketplace.status === 'NONE' ? 'payments' : 'doctor';
 }
 
-/** What every page reads of the answer (`DoctorStanding`): the kind, the notice, the mode in force, the name card. */
+/**
+ * What every page reads of the answer (`DoctorStanding`): the kind, the notice, the mode in force, the name card — and
+ * 🔴 D-W52-47 / D-W52-50 `nameLocked` once the first licence locked the name, as the server said it and whatever the kind
+ * (a revoked licence is `pending` here and its name stays locked): «Προσωπικά στοιχεία» (58) reads it.
+ */
 export function toDoctorStandingFacts(facts: DoctorDashboardFacts): DoctorStandingFacts {
 	const kind = standingKindOf(facts);
 	return {
@@ -23,6 +27,8 @@ export function toDoctorStandingFacts(facts: DoctorDashboardFacts): DoctorStandi
 		notice: kind === 'doctor' ? facts.notice : null,
 		// D-W51-11: the doctor's mode only where it exists (the server says so too; a broken answer never opens it).
 		lastMode: kind === 'doctor' ? facts.lastMode : 'PATIENT',
-		card: kind === 'doctor' ? facts.card : null
+		card: kind === 'doctor' ? facts.card : null,
+		// Said only when it holds (the shared facts read its absence as an open name).
+		...(facts.nameLocked ? { nameLocked: true } : {})
 	};
 }

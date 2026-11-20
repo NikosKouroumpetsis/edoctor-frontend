@@ -250,6 +250,307 @@ describe('the doctor’s frame (wave 5.1 · screen 65, D-W51-16)', () => {
 		}
 	});
 
+	it('🔴 U-186.2 · D-W52-22 · D-W52-26: «Το προφίλ μου» is no tab — it opens inside the tab «Μενού» (the capsule keeps «Σήμερα · Μηνύματα · Μενού», «Μενού» current, no bar link current); «Δείτε πώς σας βλέπουν» is pushed over the tabs (no capsule); a look-alike path is no page of it', () => {
+		const draw = () =>
+			render(Harness, {
+				props: {
+					session: sessionOf('member'),
+					standing: standingOf('doctor').standing,
+					inbox: new InboxBadge({ count: () => 0 }),
+					notifications: new NotificationBadge({ count: () => 0 }),
+					children
+				}
+			});
+		visit('/doctor/profile');
+		const profile = draw();
+		const [bar, bottom] = screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' });
+		expect(
+			within(bar)
+				.getAllByRole('link')
+				.map((link) => link.textContent?.trim())
+		).toEqual(['Σήμερα', 'Μηνύματα']);
+		expect(within(bar).queryByRole('link', { current: 'page' })).toBeNull();
+		expect(
+			within(bottom)
+				.getAllByRole('link')
+				.map((link) => link.textContent?.replace(/\s+/gu, ' ').trim())
+		).toEqual(['Σήμερα', 'Μηνύματα', 'Μενού']);
+		expect(within(bottom).getByRole('link', { name: /Μενού/u })).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+		profile.unmount();
+		visit('/doctor/profile/preview');
+		const preview = draw();
+		expect(screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' })).toHaveLength(1);
+		preview.unmount();
+		for (const path of ['/doctor/profiles', '/doctor/profile/previews', '/profile']) {
+			visit(path);
+			const view = draw();
+			expect(within(capsule()).getByRole('link', { name: /Μενού/u }), path).not.toHaveAttribute(
+				'aria-current'
+			);
+			view.unmount();
+		}
+	});
+
+	it('🔴 D-W52-41 · D-W52-40 · U-81.2: «Φωτογραφίες» opens inside the tab «Μενού» and keeps the capsule (`78-photos/shots/m-full.png`); one photo’s «Προσαρμογή» is pushed over the tabs (its own «Άκυρο · Αποθήκευση» at the bottom); a look-alike path is no page of either', () => {
+		const ID = '0193d000-0000-7000-8000-000000000004';
+		const draw = () =>
+			render(Harness, {
+				props: {
+					session: sessionOf('member'),
+					standing: standingOf('doctor').standing,
+					inbox: new InboxBadge({ count: () => 0 }),
+					notifications: new NotificationBadge({ count: () => 0 }),
+					children
+				}
+			});
+		visit('/doctor/profile/photos');
+		const photos = draw();
+		const [bar, bottom] = screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' });
+		expect(within(bar).queryByRole('link', { current: 'page' })).toBeNull();
+		expect(within(bottom).getByRole('link', { name: /Μενού/u })).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+		photos.unmount();
+		visit(`/doctor/profile/photos/${ID}/crop`);
+		const crop = draw();
+		expect(screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' })).toHaveLength(1);
+		crop.unmount();
+		// Widened by D-W52-49 (screen 79): `/doctor/profile/about` is a page of the tab now (the case below); its
+		// look-alikes and a section without its screen yet joined the list in its place.
+		for (const path of [
+			'/doctor/profile/photosx',
+			`/doctor/profile/photos/${ID}`,
+			'/doctor/profile/photos/x/crop',
+			'/doctor/profile/abouts',
+			'/doctor/profile/about/x',
+			// Widened by D-W52-81 / 82 (screen 83): `/doctor/profile/services` and the pages under it are pages of the tab now.
+			'/doctor/profile/servicesx',
+			'/doctor/profile/services/x',
+			'/doctor/profile/services/new/x',
+			// Widened by D-W52-59 (screen 80): `/doctor/profile/specialty` and the choice are pages of the tab now.
+			'/doctor/profile/specialtyx',
+			'/doctor/profile/specialty/x',
+			'/doctor/profile/specialty/specializations/x',
+			// Widened by D-W52-63 (screen 81): `/doctor/profile/cv` and the page of a row are pages of the tab now.
+			'/doctor/profile/cvx',
+			'/doctor/profile/cv/new',
+			'/doctor/profile/cv/work/new',
+			'/doctor/profile/cv/experience/1',
+			// Widened by D-W52-69 / 70 (screen 82): `/doctor/profile/languages` and its two pages are pages of the tab now.
+			'/doctor/profile/languagesx',
+			'/doctor/profile/languages/x',
+			'/doctor/profile/languages/spoken/x'
+		]) {
+			visit(path);
+			const view = draw();
+			expect(screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' }), path).toHaveLength(2);
+			expect(within(capsule()).getByRole('link', { name: /Μενού/u }), path).not.toHaveAttribute(
+				'aria-current'
+			);
+			view.unmount();
+		}
+	});
+
+	it('🔴 D-W52-49 · U-81.2: «Όνομα και περιγραφή» opens inside the tab «Μενού» and keeps the capsule below 744 (`79-about/shots/m-full.png`) — a page that is read, never pushed over the tabs', () => {
+		visit('/doctor/profile/about');
+		render(Harness, {
+			props: {
+				session: sessionOf('member'),
+				standing: standingOf('doctor').standing,
+				inbox: new InboxBadge({ count: () => 0 }),
+				notifications: new NotificationBadge({ count: () => 0 }),
+				children
+			}
+		});
+		const [bar, bottom] = screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' });
+		expect(within(bar).queryByRole('link', { current: 'page' })).toBeNull();
+		expect(within(bottom).getByRole('link', { name: /Μενού/u })).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+	});
+
+	it('🔴 D-W52-59 · U-81.2: «Ειδικότητα και εξειδικεύσεις» opens inside the tab «Μενού» and keeps the capsule below 744 (`80-spec/shots/m-full.png`); the choice of the specializations is pushed over the tabs — no capsule, its own «Άκυρο · Αποθήκευση» at the bottom (`m-pick.png`)', () => {
+		const draw = () =>
+			render(Harness, {
+				props: {
+					session: sessionOf('member'),
+					standing: standingOf('doctor').standing,
+					inbox: new InboxBadge({ count: () => 0 }),
+					notifications: new NotificationBadge({ count: () => 0 }),
+					children
+				}
+			});
+		visit('/doctor/profile/specialty');
+		const specialty = draw();
+		const [bar, bottom] = screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' });
+		expect(within(bar).queryByRole('link', { current: 'page' })).toBeNull();
+		expect(within(bottom).getByRole('link', { name: /Μενού/u })).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+		specialty.unmount();
+		visit('/doctor/profile/specialty/specializations');
+		draw();
+		expect(screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' })).toHaveLength(1);
+	});
+
+	it('🔴 U-210 · D-W52-63 · U-81.2: «Βιογραφικό» opens inside the tab «Μενού» and keeps the capsule below 744 (`81-cv/shots/m-full.png`); the page of ONE row — a row that exists or a new one — is pushed over the tabs: no capsule, its own «Άκυρο · Αποθήκευση» at the bottom (`m-edit.png`, `m-new.png`)', () => {
+		const ROW = '0193d000-0000-7000-8000-00000000c004';
+		const draw = () =>
+			render(Harness, {
+				props: {
+					session: sessionOf('member'),
+					standing: standingOf('doctor').standing,
+					inbox: new InboxBadge({ count: () => 0 }),
+					notifications: new NotificationBadge({ count: () => 0 }),
+					children
+				}
+			});
+		visit('/doctor/profile/cv');
+		const cv = draw();
+		const [bar, bottom] = screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' });
+		expect(within(bar).queryByRole('link', { current: 'page' })).toBeNull();
+		expect(within(bottom).getByRole('link', { name: /Μενού/u })).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+		cv.unmount();
+		for (const path of [
+			`/doctor/profile/cv/experience/${ROW}`,
+			'/doctor/profile/cv/studies/new',
+			'/doctor/profile/cv/conferences/new'
+		]) {
+			visit(path);
+			const view = draw();
+			expect(screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' }), path).toHaveLength(1);
+			view.unmount();
+		}
+	});
+
+	it('🔴 U-211 · D-W52-69 / 70 · U-81.2: «Γλώσσες και κοινωνικά δίκτυα» opens inside the tab «Μενού» and keeps the capsule below 744 (`82-langs/shots/m-full.png`); the choice of the languages and the four links are pushed over the tabs — no capsule, their own «Άκυρο · Αποθήκευση» at the bottom (`m-pick.png`, `m-soc.png`)', () => {
+		const draw = () =>
+			render(Harness, {
+				props: {
+					session: sessionOf('member'),
+					standing: standingOf('doctor').standing,
+					inbox: new InboxBadge({ count: () => 0 }),
+					notifications: new NotificationBadge({ count: () => 0 }),
+					children
+				}
+			});
+		visit('/doctor/profile/languages');
+		const languages = draw();
+		const [bar, bottom] = screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' });
+		expect(within(bar).queryByRole('link', { current: 'page' })).toBeNull();
+		expect(within(bottom).getByRole('link', { name: /Μενού/u })).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+		languages.unmount();
+		for (const path of ['/doctor/profile/languages/spoken', '/doctor/profile/languages/networks']) {
+			visit(path);
+			const view = draw();
+			expect(screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' }), path).toHaveLength(1);
+			view.unmount();
+		}
+	});
+
+	it('🔴 U-212 · D-W52-81 / 82 · U-81.2: «Υπηρεσίες και τιμές» opens inside the tab «Μενού» and keeps the capsule below 744 (`83-services/shots/m-full.png`); one service, «Νέα υπηρεσία» and a new one are pushed over the tabs — no capsule, their own bar at the bottom (`m-edit.png`, `m-pick.png`, `m-new.png`)', () => {
+		const ID = '0193d000-0000-7000-8000-000000000083';
+		const draw = () =>
+			render(Harness, {
+				props: {
+					session: sessionOf('member'),
+					standing: standingOf('doctor').standing,
+					inbox: new InboxBadge({ count: () => 0 }),
+					notifications: new NotificationBadge({ count: () => 0 }),
+					children
+				}
+			});
+		visit('/doctor/profile/services');
+		const services = draw();
+		const [bar, bottom] = screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' });
+		expect(within(bar).queryByRole('link', { current: 'page' })).toBeNull();
+		expect(within(bottom).getByRole('link', { name: /Μενού/u })).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+		services.unmount();
+		for (const path of [
+			`/doctor/profile/services/${ID}`,
+			'/doctor/profile/services/new',
+			`/doctor/profile/services/new/${ID}`
+		]) {
+			visit(path);
+			const view = draw();
+			expect(screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' }), path).toHaveLength(1);
+			view.unmount();
+		}
+	});
+
+	it('🔴 D-W52-91 / 92 · U-81.2: «Κριτικές» opens inside the tab «Μενού» and keeps the capsule below 744 (`84-reviews/shots/m-full.png`); the reply to a review and its report are pushed over the tabs — no capsule, their own bar at the bottom', () => {
+		const ID = '0193d000-0000-7000-8000-000000000084';
+		const draw = () =>
+			render(Harness, {
+				props: {
+					session: sessionOf('member'),
+					standing: standingOf('doctor').standing,
+					inbox: new InboxBadge({ count: () => 0 }),
+					notifications: new NotificationBadge({ count: () => 0 }),
+					children
+				}
+			});
+		visit('/doctor/reviews');
+		const reviews = draw();
+		const [bar, bottom] = screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' });
+		expect(within(bar).queryByRole('link', { current: 'page' })).toBeNull();
+		expect(within(bottom).getByRole('link', { name: /Μενού/u })).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+		reviews.unmount();
+		for (const path of [`/doctor/reviews/${ID}/reply`, `/doctor/reviews/${ID}/report`]) {
+			visit(path);
+			const view = draw();
+			expect(screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' }), path).toHaveLength(1);
+			view.unmount();
+		}
+	});
+
+	it('🔴 D-W52-102 / 103 · U-81.2: «Τα άρθρα μου» opens inside the tab «Μενού» and keeps the capsule below 744 (`85-articles/shots/m-full.png`); «Νέο άρθρο» and one article are pushed over the tabs — no capsule, their own bar at the bottom', () => {
+		const ID = '0193d000-0000-7000-8000-000000000085';
+		const draw = () =>
+			render(Harness, {
+				props: {
+					session: sessionOf('member'),
+					standing: standingOf('doctor').standing,
+					inbox: new InboxBadge({ count: () => 0 }),
+					notifications: new NotificationBadge({ count: () => 0 }),
+					children
+				}
+			});
+		visit('/doctor/articles');
+		const articles = draw();
+		const [bar, bottom] = screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' });
+		expect(within(bar).queryByRole('link', { current: 'page' })).toBeNull();
+		expect(within(bottom).getByRole('link', { name: /Μενού/u })).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+		articles.unmount();
+		for (const path of ['/doctor/articles/new', `/doctor/articles/${ID}`]) {
+			visit(path);
+			const view = draw();
+			expect(screen.getAllByRole('navigation', { name: 'Καρτέλες γιατρού' }), path).toHaveLength(1);
+			view.unmount();
+		}
+	});
+
 	it('🔴 D-W51-85 · U-81.2: the doctor’s messages are the tab «Μηνύματα» — current in the bar and the capsule on the list and under it; a conversation, one the doctor starts and the archive are pushed over the tabs (no capsule, `m-thread.png`); a look-alike path is no page of it', () => {
 		const ID = '0193d000-0000-7000-8000-000000000001';
 		const draw = () =>
@@ -309,7 +610,10 @@ describe('the doctor’s frame (wave 5.1 · screen 65, D-W51-16)', () => {
 		}
 	});
 
-	it('screen 76 (5.1): the ☰ — Ειδοποιήσεις (its dot) · Οι ασθενείς μου · Ρυθμίσεις λογαριασμού · Κέντρο βοήθειας · Όροι γιατρών · Λειτουργία ασθενή (744–1127) · Αποσύνδεση', async () => {
+	// Rewritten by D-W52-22 (wave 5.2, card w52-w1; task doc §6): «Το προφίλ μου» before «Οι ασθενείς μου».
+	// Widened by D-W52-91 (wave 5.2, card w52-w8; task doc §1.3): «Κριτικές» after «Οι ασθενείς μου».
+	// Widened by D-W52-102 (wave 5.2, card w52-w9): «Τα άρθρα μου» after «Κριτικές».
+	it('screen 76 (5.1) · 🔴 D-W52-22 · D-W52-91 · D-W52-102: the ☰ — Ειδοποιήσεις (its dot) · Το προφίλ μου · Οι ασθενείς μου · Κριτικές · Τα άρθρα μου · Ρυθμίσεις λογαριασμού · Κέντρο βοήθειας · Όροι γιατρών · Λειτουργία ασθενή (744–1127) · Αποσύνδεση', async () => {
 		const user = userEvent.setup();
 		drawFrame({ fresh: 1 });
 		expect(screen.getByTestId('doctor-account-dot')).toBeInTheDocument();
@@ -323,8 +627,11 @@ describe('the doctor’s frame (wave 5.1 · screen 65, D-W51-16)', () => {
 			// Rewrites «Ειδοποιήσεις ⇒ `/notifications`» (D-W51-18, the transition) by D-W51-89 (step 11, screen 75): the
 			// doctor's own list.
 			['Ειδοποιήσεις', '/doctor/notifications'],
+			['Το προφίλ μου', '/doctor/profile'],
 			// D-W51-73 (card w51-w9): «Οι ασθενείς μου», since step 9 (D-W51-04).
 			['Οι ασθενείς μου', '/doctor/patients'],
+			['Κριτικές', '/doctor/reviews'],
+			['Τα άρθρα μου', '/doctor/articles'],
 			['Ρυθμίσεις λογαριασμού', '/profile/account-settings'],
 			['Κέντρο βοήθειας', '/help'],
 			['Όροι γιατρών', '/legal/doctor-marketplace-terms'],
@@ -388,5 +695,41 @@ describe('the doctor’s frame (wave 5.1 · screen 65, D-W51-16)', () => {
 			'Δεν μπορέσαμε να φορτώσουμε τη σελίδα.'
 		);
 		expect(screen.getByRole('button', { name: 'Δοκιμάστε ξανά' })).toBeInTheDocument();
+	});
+
+	it('🔴 U-215.3 / D-W52-12: η μπάρα του γιατρού είναι πάντα το πλαίσιο της σελίδας — on every page of his (with a side column or not) 24 from the edges and 48 from 1128, 1920 at most, the tabs in the exact middle from 1128; the tabs’ own gap as it was', () => {
+		for (const path of ['/doctor', '/doctor/appointments', '/doctor/patients', '/doctor/menu']) {
+			visit(path);
+			const view = render(Harness, {
+				props: {
+					session: sessionOf('member'),
+					standing: standingOf('doctor').standing,
+					inbox: new InboxBadge({ count: () => 0 }),
+					notifications: new NotificationBadge({ count: () => 0 }),
+					children
+				}
+			});
+			const banner = screen.getByRole('banner');
+			expect(banner, path).toHaveAttribute('data-frame', 'page');
+			const content = banner.querySelector('[data-slot="app-header-content"]') as HTMLElement;
+			expect(content, path).toHaveClass(
+				'mx-auto',
+				'tablet:max-w-wide',
+				'tablet:px-6',
+				'laptop:px-pane-inset'
+			);
+			const navBox = banner.querySelector('[data-slot="app-header-nav"]') as HTMLElement;
+			expect(navBox, path).toHaveClass(
+				'laptop:absolute',
+				'laptop:left-1/2',
+				'laptop:-translate-x-1/2'
+			);
+			// Never waiting for a `SplitView` in the page: «Σήμερα» has none and its bar is the same.
+			expect(content.className + navBox.className, path).not.toMatch(/split-page:/u);
+			const tabs = within(banner).getByRole('navigation', { name: 'Καρτέλες γιατρού' });
+			expect(navBox).toContainElement(tabs);
+			expect(tabs).toHaveClass('justify-center', 'gap-6');
+			view.unmount();
+		}
 	});
 });

@@ -124,16 +124,20 @@ export type DoctorPricedService = {
 	descriptionBody?: string;
 };
 
+/** One of the doctor's «Τομείς εξειδίκευσης»: the catalogue's code and its name as the server wrote it. */
+export type DoctorSpecializationItem = { id: string; title: string };
+
 /**
- * «Τομείς εξειδίκευσης» of the profile (U-36.2, U-72.3 Π1): the first three as rows and the way to their page; the
- * visits line only once the backend sends it.
+ * 🔴 D-W52-60 (U-209.3; it replaces U-36.2 / U-72.3 Π1): «Τομείς εξειδίκευσης» of the profile — the specializations the
+ * doctor picked from the closed list of the specialty (three at most, all of them shown), never services. The visits
+ * line only once the backend sends it; `moreLabel` only when their page has more to say (its figures).
  */
 export type DoctorDetailSpecializations = {
 	title: string;
 	/** U-36.1 / U-72.4: «Ολοκληρωμένες επισκέψεις: 523» — `null` until the backend sends the count. */
 	completedVisits: string | null;
-	items: DoctorPricedService[];
-	moreLabel: string;
+	items: DoctorSpecializationItem[];
+	moreLabel: string | null;
 };
 
 /** «Υπηρεσίες» of the profile (U-70.2 Ε3, Π7): the first three as rows; `moreLabel` only when the page has more to say. */
@@ -144,21 +148,28 @@ export type DoctorDetailServiceCost = {
 	moreLabel: string | null;
 };
 
-/** One group of the page «Υπηρεσίες» (Π4): only with a field of expertise do they have titles. */
-export type DoctorServicesGroup = {
-	id: 'specializations' | 'other' | 'all';
-	title?: string;
-	services: DoctorPricedService[];
+/**
+ * One service of the page «Υπηρεσίες». 🔴 D-W52-60 (U-209.3): its years and its visits stay WITH the service (they were
+ * drawn on the fields of expertise while those were services), each only with a number above zero.
+ */
+export type DoctorServicesPageRow = DoctorPricedService & {
+	years?: { value: string; label: string };
+	visits?: { value: string; label: string };
 };
 
-/** 🔴 U-70 (screen 14): the page of every service. */
+/**
+ * 🔴 U-70 (screen 14): the page of every service, in the backend's order. 🔴 D-W52-60: one list — no service is a field
+ * of expertise any more, so the page has no groups and no way to «Τομείς εξειδίκευσης».
+ */
 export type DoctorServicesPage = {
 	title: string;
 	notice: string;
 	descriptionLabel: string;
 	readMoreLabel: string;
 	bookLabel: string;
-	groups: DoctorServicesGroup[];
+	services: DoctorServicesPageRow[];
+	/** What the visits count, only when a service shows its own. */
+	footnote?: string;
 	/** Π8: a single service is already open, there is no choice to make. */
 	soloId?: string;
 };
@@ -171,22 +182,16 @@ export type DoctorSpecializationStat = {
 	accessibleLabel: string;
 };
 
-/** A field of expertise (Π4): a service with its years and its visits, each only with a number above zero. */
-export type DoctorSpecializationDomain = DoctorPricedService & {
-	years?: { value: string; label: string };
-	visits?: { value: string; label: string };
-};
-
-/** 🔴 U-72 (screen 15): the page of the fields of expertise. */
+/**
+ * 🔴 U-72 (screen 15), 🔴 D-W52-60 (U-209.3): the page of the fields of expertise — the card's figures and the
+ * specializations the doctor picked, by name.
+ */
 export type DoctorSpecializationsPage = {
 	title: string;
 	statsLabel: string;
 	/** Never one cell alone: the list already says how many there are. */
 	stats: DoctorSpecializationStat[];
-	domains: DoctorSpecializationDomain[];
-	readMoreLabel: string;
-	bookLabel: string;
-	backLabel: string;
+	domains: DoctorSpecializationItem[];
 	footnote?: string;
 };
 

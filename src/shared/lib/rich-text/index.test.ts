@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+	buildArticleRichText,
 	buildRichText,
 	richTextBlocksText,
 	richTextToc,
@@ -155,5 +156,140 @@ describe('shared::lib::rich-text', () => {
 		expect(ids('double--dash')).toEqual(['ακυρωση']);
 		expect(ids('-start')).toEqual(['ακυρωση']);
 		expect(ids('a'.repeat(81))).toEqual(['ακυρωση']);
+	});
+});
+
+describe('shared::lib::rich-text · the closed schema of an article (D-W52-104)', () => {
+	const IMAGE = '0199aaaa-0000-7000-8000-000000000001';
+	const images = (id: string) =>
+		id === IMAGE ? { url: 'https://cdn.example.org/l.webp', width: 1200, height: 800 } : null;
+	const text = (words: string, marks?: { type: string; attrs?: Record<string, unknown> }[]) => ({
+		type: 'text',
+		text: words,
+		...(marks ? { marks } : {})
+	});
+	const para = (...content: ReturnType<typeof text>[] | { type: string }[]) => ({
+		type: 'paragraph',
+		content
+	});
+
+	it('🔴 D-W52-104: every node of the list has its own block — heading 2 / 3, lists (with `start`), quote, «Σημαντικό», rule, image, video, table', () => {
+		const { blocks, headings } = buildArticleRichText(
+			{
+				type: 'doc',
+				content: [
+					{ type: 'heading', attrs: { level: 2 }, content: [text('Οι τιμές')] },
+					{ type: 'heading', attrs: { level: 3 }, content: [text('Στο σπίτι')] },
+					para(text('Λέξη')),
+					{
+						type: 'orderedList',
+						attrs: { start: 3, type: null },
+						content: [{ type: 'listItem', content: [para(text('Τρίτο'))] }]
+					},
+					{ type: 'blockquote', content: [para(text('Παράθεμα'))] },
+					{ type: 'callout', content: [para(text('Σημαντικό'))] },
+					{ type: 'horizontalRule' },
+					{ type: 'image', attrs: { imageId: IMAGE, alt: 'Πιεσόμετρο', caption: 'Λεζάντα' } },
+					{ type: 'video', attrs: { provider: 'youtube', id: 'dQw4w9WgXcQ' } },
+					{
+						type: 'table',
+						content: [
+							{
+								type: 'tableRow',
+								content: [
+									{ type: 'tableHeader', content: [para(text('Τιμή'))] },
+									{ type: 'tableCell', content: [para(text('120'))] }
+								]
+							}
+						]
+					}
+				]
+			},
+			images
+		);
+		expect(blocks.map((block) => block.kind)).toEqual([
+			'heading',
+			'heading',
+			'paragraph',
+			'list',
+			'quote',
+			'callout',
+			'rule',
+			'image',
+			'video',
+			'table'
+		]);
+		expect(headings.map((heading) => [heading.id, heading.level])).toEqual([
+			['οι-τιμες', 2],
+			['στο-σπιτι', 3]
+		]);
+		expect(blocks[3]).toMatchObject({ kind: 'list', ordered: true, start: 3 });
+		expect(blocks[7]).toMatchObject({
+			kind: 'image',
+			url: 'https://cdn.example.org/l.webp',
+			alt: 'Πιεσόμετρο',
+			caption: 'Λεζάντα',
+			width: 1200
+		});
+		expect(blocks[8]).toMatchObject({
+			kind: 'video',
+			name: 'YouTube',
+			embedUrl: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0'
+		});
+		const table = blocks[9];
+		expect(table.kind === 'table' && table.rows[0].cells.map((cell) => cell.header)).toEqual([
+			true,
+			false
+		]);
+		expect(richTextBlocksText(blocks)).toContain('Παράθεμα');
+	});
+
+	it('🔴 D-W52-104: every mark — bold, italic, underline, strike, highlight, an `https:` link — and a line break', () => {
+		const { blocks } = buildArticleRichText(
+			{
+				type: 'doc',
+				content: [
+					para(
+						text('Α', [{ type: 'bold' }, { type: 'italic' }]),
+						text('Β', [{ type: 'underline' }, { type: 'strike' }, { type: 'highlight' }]),
+						{ type: 'hardBreak' },
+						text('ΕΟΔΥ', [{ type: 'link', attrs: { href: 'https://eody.gov.gr/' } }])
+					)
+				]
+			},
+			images
+		);
+		const [block] = blocks;
+		if (block.kind !== 'paragraph') throw new Error('not a paragraph');
+		const runs = block.spans.flatMap((span) => span.runs);
+		expect(runs[0]).toMatchObject({ text: 'Α', bold: true, italic: true });
+		expect(runs[1]).toMatchObject({ text: 'Β', underline: true, strike: true, highlight: true });
+		expect(runs[2]).toMatchObject({ break: true });
+		expect(block.spans.at(-1)?.link).toEqual({ href: 'https://eody.gov.gr/', external: true });
+	});
+
+	it('🔴 D-W52-104 (negative): a node outside the list is NOT drawn — neither it nor its words; a non-https link is words; an unknown image or a broken video is nothing', () => {
+		const { blocks } = buildArticleRichText(
+			{
+				type: 'doc',
+				content: [
+					{ type: 'iframe', content: [text('<script>alert(1)</script>')] },
+					{ type: 'script', content: [text('alert(1)')] },
+					para(text('Πατήστε', [{ type: 'link', attrs: { href: 'javascript:alert(1)' } }])),
+					para(text('http', [{ type: 'link', attrs: { href: 'http://evil.gr' } }])),
+					{ type: 'image', attrs: { imageId: '0199aaaa-0000-7000-8000-0000000000ff', alt: 'x' } },
+					{ type: 'video', attrs: { provider: 'youtube', id: '"><img onerror=x>' } },
+					{ type: 'video', attrs: { provider: 'evil', id: 'dQw4w9WgXcQ' } }
+				]
+			},
+			images
+		);
+		expect(blocks.map((block) => block.kind)).toEqual(['paragraph', 'paragraph']);
+		expect(richTextBlocksText(blocks)).toBe('Πατήστε http');
+		expect(
+			blocks.every(
+				(block) => block.kind === 'paragraph' && block.spans.every((span) => span.link === null)
+			)
+		).toBe(true);
 	});
 });

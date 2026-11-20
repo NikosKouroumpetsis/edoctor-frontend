@@ -81,11 +81,16 @@ export const DOCTOR_ONBOARDING_PAYMENT_OPTIONS: readonly DoctorOnboardingPayment
 	'UNEMPLOYMENT_CARD'
 ];
 
-/** 39 · the price in whole euros, 1 to 9999 (four digits), and the visit's lengths the server takes, 30 first. */
+/**
+ * 39 · the price in whole euros, 1 to 9999 (four digits), and the visit's lengths the server takes, 30 first.
+ * 🔴 D-W52-83 (U-212.4): the lengths are D-W52-10's ONE list — the sign-up's first service and every service of «Υπηρεσίες
+ * και τιμές» (83) — up to two hours: the same as `$shared/lib/visit-length` and the server's, guarded by
+ * `tests/architecture/service-rules.test.ts`.
+ */
 export const DOCTOR_ONBOARDING_PRICE_MAX = 9999;
 export const DOCTOR_ONBOARDING_PRICE_DIGITS = 4;
 export const DOCTOR_ONBOARDING_DURATIONS = [
-	15, 20, 30, 45, 60
+	15, 20, 30, 45, 60, 75, 90, 105, 120
 ] as const satisfies readonly DoctorOnboardingDuration[];
 export const DOCTOR_ONBOARDING_DEFAULT_DURATION = 30 satisfies DoctorOnboardingDuration;
 

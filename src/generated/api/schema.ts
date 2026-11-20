@@ -174,6 +174,111 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/article/public/articles/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one published article by its slug. */
+        get: operations["getPublicArticle"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/article/me/articles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List one page of the articles of the session doctor (requires a DOCTOR session). */
+        get: operations["listMyArticles"];
+        put?: never;
+        /** Save a new article of the session doctor as a draft (requires a DOCTOR session). */
+        post: operations["createMyArticleDraft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/article/me/articles/{articleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one article of the session doctor with every field of its page (requires a DOCTOR session). */
+        get: operations["getMyArticle"];
+        /** Save an article of the session doctor that was never published (requires a DOCTOR session). */
+        put: operations["saveMyArticleDraft"];
+        post?: never;
+        /** Delete an article of the session doctor (requires a DOCTOR session). */
+        delete: operations["deleteMyArticle"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/article/me/articles/images": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload one image for the text of an article of the session doctor (requires a DOCTOR session). */
+        post: operations["uploadMyArticleImage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/article/me/articles/submission": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a new article of the session doctor for review (requires a DOCTOR session). */
+        post: operations["submitMyNewArticle"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/article/me/articles/{articleId}/submission": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send an article of the session doctor, or a change of a published one, for review (requires a DOCTOR session). */
+        post: operations["submitMyArticle"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/availability/public/slots": {
         parameters: {
             query?: never;
@@ -1196,7 +1301,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Read the free hours of the doctor to move one appointment to (requires a DOCTOR or backoffice session). */
+        /** Read the free hours to move one appointment to — the doctor's own for the doctor side, the public ones for its patient (requires a session). */
         get: operations["listAppointmentRescheduleSlots"];
         put?: never;
         post?: never;
@@ -1489,6 +1594,25 @@ export interface paths {
         put?: never;
         /** Answer one rating as its doctor (requires a DOCTOR session). */
         post: operations["replyToRating"];
+        /** Delete the reply of the doctor to one of its reviews (requires a DOCTOR session). */
+        delete: operations["deleteRatingReply"];
+        options?: never;
+        head?: never;
+        /** Change the reply of the doctor to one of its reviews (requires a DOCTOR session). */
+        patch: operations["changeRatingReply"];
+        trace?: never;
+    };
+    "/appointment-rating/ratings/{ratingId}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report one of its published reviews to the team, as its doctor (requires a DOCTOR session). */
+        post: operations["reportRating"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2254,6 +2378,216 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/doctor/me/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read «Το προφίλ μου» of the session doctor: visibility, sections, open helpers (requires a DOCTOR session). */
+        get: operations["getDoctorMyProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/me/profile/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the public page of the session doctor as patients see it, also while hidden (requires a DOCTOR session). */
+        get: operations["getDoctorMyProfilePreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/me/reviews/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the summary of the reviews of the session doctor, also while hidden (requires a DOCTOR session). */
+        get: operations["getDoctorMyReviewsSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/profile/images": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the profile images of a doctor in their order (requires a DOCTOR or backoffice session). */
+        get: operations["listDoctorProfileImages"];
+        put?: never;
+        /** Upload one profile image of a doctor (requires a DOCTOR or backoffice session). */
+        post: operations["createDoctorProfileImage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/profile/images/{imageId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one profile image of a doctor (requires a DOCTOR or backoffice session). */
+        get: operations["getDoctorProfileImage"];
+        put?: never;
+        post?: never;
+        /** Delete one profile image of a doctor (requires a DOCTOR or backoffice session). */
+        delete: operations["deleteDoctorProfileImage"];
+        options?: never;
+        head?: never;
+        /** Replace the file of one profile image of a doctor, in place (requires a DOCTOR or backoffice session). */
+        patch: operations["updateDoctorProfileImage"];
+        trace?: never;
+    };
+    "/doctor/profile/images/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set the whole order of the profile images of a doctor in one write (requires a DOCTOR or backoffice session). */
+        put: operations["reorderDoctorProfileImages"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/profile/translations/{language}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the name and the description of the public page of a doctor in one language (requires a DOCTOR or backoffice session). */
+        get: operations["getDoctorProfileTranslation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/profile/specializations/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the specializations the specialty of a doctor may pick from (requires a DOCTOR or backoffice session). */
+        get: operations["listDoctorSpecializationOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/profile/specializations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the specializations a doctor picked, each with where it stands (requires a DOCTOR or backoffice session). */
+        get: operations["listDoctorSpecializations"];
+        /** Replace the specializations of a doctor with up to three of the list of the specialty (requires a DOCTOR or backoffice session). */
+        put: operations["replaceDoctorSpecializations"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/public/speak-languages/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the catalogue of the languages a doctor may speak. */
+        get: operations["listSpeakLanguageOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/profile/speak-languages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the languages a doctor speaks (requires a DOCTOR or backoffice session). */
+        get: operations["listDoctorSpeakLanguages"];
+        /** Replace the languages a doctor speaks with up to ten of the catalogue (requires a DOCTOR or backoffice session). */
+        put: operations["replaceDoctorSpeakLanguages"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor/profile/credentials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the biography of a doctor: studies, positions and conferences (requires a DOCTOR or backoffice session). */
+        get: operations["listDoctorCredentials"];
+        /** Replace one whole group of the biography of a doctor (requires a DOCTOR or backoffice session). */
+        put: operations["replaceDoctorCredentials"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/location/address-search/suggestions": {
         parameters: {
             query?: never;
@@ -2305,6 +2639,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/doctor-service/allowed-services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the services the specialty of the signed-in doctor allows, with the texts eDoctor suggests (requires a DOCTOR session). */
+        get: operations["listAllowedDoctorServices"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/doctor-service/doctor-services": {
         parameters: {
             query?: never;
@@ -2315,8 +2666,63 @@ export interface paths {
         /** List the doctor services the account reaches, each titled in the language of the request (requires a session). */
         get: operations["listDoctorServices"];
         put?: never;
+        /** Add one service of the specialty to a doctor, at the end of the doctor's order (requires a DOCTOR or backoffice session). */
+        post: operations["createDoctorService"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor-service/doctor-services/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set the whole order of the services of the signed-in doctor in one write (requires a DOCTOR session). */
+        put: operations["reorderDoctorServices"];
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/doctor-service/doctor-services/{doctorServiceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one service of a doctor (requires a DOCTOR or backoffice session). */
+        get: operations["getDoctorService"];
+        put?: never;
+        post?: never;
+        /** Delete one service of a doctor (requires a DOCTOR or backoffice session). */
+        delete: operations["deleteDoctorService"];
+        options?: never;
+        head?: never;
+        /** Change the price, the visit length, the years and the texts of one service of a doctor (requires a DOCTOR or backoffice session). */
+        patch: operations["updateDoctorService"];
+        trace?: never;
+    };
+    "/doctor-service/doctor-services/{doctorServiceId}/translations/{language}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Write the subtitle and the description of one service of a doctor in one language (requires a DOCTOR or backoffice session). */
+        put: operations["saveDoctorServiceTranslation"];
+        post?: never;
+        /** Remove the texts of one language from a service of a doctor (requires a DOCTOR or backoffice session). */
+        delete: operations["deleteDoctorServiceTranslation"];
         options?: never;
         head?: never;
         patch?: never;
@@ -3891,7 +4297,7 @@ export interface components {
             pricingVisible: boolean;
             language: components["schemas"]["ILanguage"];
         };
-        /** @description The public profile of a doctor. U-73: `studies`, `workExperience` and `conferences` are deprecated copies of the texts of `credentials`, which also holds the years and the organization: a client reads `credentials`. */
+        /** @description The public profile of a doctor. U-73: `studies`, `workExperience` and `conferences` are deprecated copies of the texts of `credentials`, which also holds the years and the organization: a client reads `credentials`. D-W52-56 (U-209.3): `specializations` are the approved picks of the doctor from the list of the specialty, at most three. */
         DoctorPublicMarketplaceProfileView: {
             doctorId: string;
             slug: string;
@@ -3915,6 +4321,7 @@ export interface components {
             services: components["schemas"]["DoctorPublicMarketplaceProfileServiceView"][];
             images: components["schemas"]["DoctorImagePublicView"][];
             speakLanguages: components["schemas"]["DoctorSpeakLanguagePublicView"][];
+            specializations: components["schemas"]["DoctorPublicMarketplaceSpecializationView"][];
             rating: components["schemas"]["DoctorPublicMarketplaceProfileRatingView"];
             reviewsPreview: components["schemas"]["DoctorPublicMarketplaceReviewPreviewView"][];
             availability: {
@@ -3977,7 +4384,6 @@ export interface components {
             description: unknown;
             durationInMinutes: number | null;
             price: number | null;
-            isSpecialized: boolean;
             yearsOfExperience: number | null;
             kind: components["schemas"]["DoctorServiceKind"];
             completedVisitCount: number | null;
@@ -4004,6 +4410,11 @@ export interface components {
             name: string;
             normalized: string;
             slug: string;
+        };
+        /** @description D-W52-56: a specialization on the public page, an approved pick in the language of the page. */
+        DoctorPublicMarketplaceSpecializationView: {
+            code: string;
+            name: string;
         };
         /** @description The rating of a profile, all on the 0–5 stars (U-49): `average` over `count` approved ratings and `aspectAverages`. */
         DoctorPublicMarketplaceProfileRatingView: {
@@ -4159,12 +4570,13 @@ export interface components {
         };
         /** @description The `data` of `GET /article/public/articles`. */
         ArticlePublicCardListView: components["schemas"]["ArticlePublicCardView"][];
-        /** @description U-92.1: an article of a public list, a card: the body, the sections and the SEO fields travel only by slug. */
+        /** @description U-92.1: an article of a public list, a card: the body, the sections and the SEO fields travel only by slug. D-W52-94α: `publishedAt` is the first publication, `revisedAt` the last approved change (`null` when it never changed). */
         ArticlePublicCardView: {
             id: string;
             slug: string;
             type: components["schemas"]["IArticleType"];
             publishedAt: string | null;
+            revisedAt: string | null;
             language: components["schemas"]["ILanguage"];
             title: string;
             shortDescription: unknown;
@@ -4197,6 +4609,258 @@ export interface components {
         ArticleAppliedServiceView: {
             id: string;
             name: string;
+        };
+        /** @description The public article. D-W52-94α: `revisedAt` is the last approved change; D-W52-100: `contentImages` the uploads the published text names by `imageId`, so a renderer never builds an address itself. */
+        ArticlePublicView: {
+            id: string;
+            slug: string;
+            type: components["schemas"]["IArticleType"];
+            publishedAt: string | null;
+            revisedAt: string | null;
+            language: components["schemas"]["ILanguage"];
+            availableLanguages: components["schemas"]["ILanguage"][];
+            title: string;
+            shortDescription: unknown;
+            content: unknown;
+            metaTitle: string | null;
+            metaDescription: string | null;
+            metaKeywords: string[];
+            canonicalUrl: string | null;
+            sections: components["schemas"]["ArticlePublicSectionView"][];
+            image: components["schemas"]["ArticlePublicImageView"] | null;
+            contentImages: components["schemas"]["ArticleContentImageView"][];
+            authors: components["schemas"]["ArticlePublicAuthorView"][];
+        };
+        /** @description The public (guest) views are an allow-list: one localized translation, published content only, `authorizedAt` as the public `publishedAt`; the editorial columns (`status`, `authorizedBy`, …) never reach a guest. */
+        ArticlePublicSectionView: {
+            id: string;
+            type: components["schemas"]["IArticleSectionType"];
+            order: number;
+            content: unknown | null;
+        };
+        /** @enum {string} */
+        IArticleSectionType: "text" | "image" | "video" | "other";
+        /** @description D-W52-100: an image uploaded for the text of an article, its three sizes and the size of the large one. */
+        ArticleContentImageView: {
+            id: string;
+            smSizeUrl: string;
+            mediumSizeUrl: string;
+            lgSizeUrl: string;
+            width: number;
+            height: number;
+        };
+        /** @description D-W52-96: one page of «Τα άρθρα μου», newest first; `nextCursor` names the next page, `total` counts every article. */
+        ArticleDoctorListPageView: {
+            items: components["schemas"]["ArticleDoctorListItemView"][];
+            nextCursor: string | null;
+            total: number;
+        };
+        /** @description D-W52-96: one row of «Τα άρθρα μου»: no body; with a change of a published article, its title, kind and cover. */
+        ArticleDoctorListItemView: {
+            id: string;
+            status: components["schemas"]["IArticleStatus"];
+            type: components["schemas"]["IArticleType"];
+            title: string;
+            imageUrl: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            submittedAt: string | null;
+            publishedAt: string | null;
+            rejectedAt: string | null;
+            rejectionReason: string | null;
+            hasPendingRevision: boolean;
+            revision: components["schemas"]["ArticleDoctorRevisionView"] | null;
+        };
+        /**
+         * @description D-W52-93: the one state of an article; only PUBLISHED is read by the public routes.
+         * @enum {string}
+         */
+        IArticleStatus: "DRAFT" | "IN_REVIEW" | "PUBLISHED" | "REJECTED";
+        /** @description D-W52-94: the doctor's change of a published article, as its doctor reads it; `rejectedAt` only for a rejected one. */
+        ArticleDoctorRevisionView: {
+            status: components["schemas"]["IArticleRevisionStatus"];
+            /** Format: date-time */
+            submittedAt: string;
+            rejectedAt: string | null;
+            rejectionReason: string | null;
+        };
+        /**
+         * @description D-W52-94: the state of the one change a doctor sent for a published article.
+         * @enum {string}
+         */
+        IArticleRevisionStatus: "IN_REVIEW" | "REJECTED";
+        /** @description D-W52-96: one article of the doctor with every field of its page. With a change of a published article, the fields are the change's, so the doctor goes on from there; `publicSlug` names the public page only while it is published. */
+        ArticleDoctorView: {
+            id: string;
+            publicSlug: string | null;
+            status: components["schemas"]["IArticleStatus"];
+            type: components["schemas"]["IArticleType"];
+            title: string;
+            shortDescription: string | null;
+            content: components["schemas"]["ArticleContentDoc"] | null;
+            contentImages: components["schemas"]["ArticleContentImageView"][];
+            image: components["schemas"]["ArticleDoctorImageView"] | null;
+            readingMinutes: number | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            submittedAt: string | null;
+            publishedAt: string | null;
+            revisedAt: string | null;
+            rejectedAt: string | null;
+            rejectionReason: string | null;
+            hasPendingRevision: boolean;
+            revision: components["schemas"]["ArticleDoctorRevisionView"] | null;
+        };
+        /** @description D-W52-99 (U-222.2, U-222.4): the text of an article, the closed schema its editor writes and the server checks. */
+        ArticleContentDoc: {
+            /** @constant */
+            type: "doc";
+            content: components["schemas"]["ArticleContentBlock"][];
+        };
+        ArticleContentBlock: components["schemas"]["ArticleContentParagraph"] | components["schemas"]["ArticleContentHeading"] | components["schemas"]["ArticleContentBulletList"] | components["schemas"]["ArticleContentOrderedList"] | components["schemas"]["ArticleContentBlockquote"] | components["schemas"]["ArticleContentCallout"] | components["schemas"]["ArticleContentHorizontalRule"] | components["schemas"]["ArticleContentImageNode"] | components["schemas"]["ArticleContentVideo"] | components["schemas"]["ArticleContentTable"];
+        ArticleContentParagraph: {
+            /** @constant */
+            type: "paragraph";
+            content?: components["schemas"]["ArticleContentInline"][];
+        };
+        ArticleContentInline: components["schemas"]["ArticleContentText"] | components["schemas"]["ArticleContentHardBreak"];
+        ArticleContentText: {
+            /** @constant */
+            type: "text";
+            text: string;
+            marks?: components["schemas"]["ArticleContentMark"][];
+        };
+        /** @description D-W52-99: a mark of the closed schema of an article's text; `link` carries only an `https:` address. */
+        ArticleContentMark: {
+            /** @constant */
+            type: "bold";
+        } | {
+            /** @constant */
+            type: "italic";
+        } | {
+            /** @constant */
+            type: "underline";
+        } | {
+            /** @constant */
+            type: "strike";
+        } | {
+            /** @constant */
+            type: "highlight";
+        } | {
+            /** @constant */
+            type: "link";
+            attrs: {
+                href: string;
+            };
+        };
+        ArticleContentHardBreak: {
+            /** @constant */
+            type: "hardBreak";
+            marks?: components["schemas"]["ArticleContentMark"][];
+        };
+        /** @description D-W52-99: «Επικεφαλίδα» is level 2, «Υποεπικεφαλίδα» level 3; the page title is the only level 1. */
+        ArticleContentHeading: {
+            /** @constant */
+            type: "heading";
+            attrs: {
+                /** @enum {number} */
+                level: 2 | 3;
+            };
+            content?: components["schemas"]["ArticleContentInline"][];
+        };
+        ArticleContentBulletList: {
+            /** @constant */
+            type: "bulletList";
+            content: components["schemas"]["ArticleContentListItem"][];
+        };
+        /** @description A list item opens with a paragraph; lists nest inside it. */
+        ArticleContentListItem: {
+            /** @constant */
+            type: "listItem";
+            content: components["schemas"]["ArticleContentFlowBlock"][];
+        };
+        /** @description What a quote, a «Σημαντικό» box, a table cell and a list item hold: paragraphs and lists. */
+        ArticleContentFlowBlock: components["schemas"]["ArticleContentParagraph"] | components["schemas"]["ArticleContentBulletList"] | components["schemas"]["ArticleContentOrderedList"];
+        /** @description `start` is 1 to 999; `type` is the attribute the editor's ordered list always writes, never anything but `null`. */
+        ArticleContentOrderedList: {
+            /** @constant */
+            type: "orderedList";
+            attrs: {
+                start: number;
+                type: null;
+            };
+            content: components["schemas"]["ArticleContentListItem"][];
+        };
+        ArticleContentBlockquote: {
+            /** @constant */
+            type: "blockquote";
+            content: components["schemas"]["ArticleContentFlowBlock"][];
+        };
+        ArticleContentCallout: {
+            /** @constant */
+            type: "callout";
+            content: components["schemas"]["ArticleContentFlowBlock"][];
+        };
+        ArticleContentHorizontalRule: {
+            /** @constant */
+            type: "horizontalRule";
+        };
+        /** @description D-W52-100: an uploaded image of the article by its id (never an address); `alt` 1–300, `caption` up to 300 or `null`. */
+        ArticleContentImageNode: {
+            /** @constant */
+            type: "image";
+            attrs: {
+                imageId: string;
+                alt: string;
+                caption: string | null;
+            };
+        };
+        /** @description D-W52-99: a video by its provider and id (YouTube 11 characters, Vimeo 6–12 digits); the renderer builds the frame. */
+        ArticleContentVideo: {
+            /** @constant */
+            type: "video";
+            attrs: {
+                /** @enum {string} */
+                provider: "youtube" | "vimeo";
+                id: string;
+            };
+        };
+        ArticleContentTable: {
+            /** @constant */
+            type: "table";
+            content: components["schemas"]["ArticleContentTableRow"][];
+        };
+        ArticleContentTableRow: {
+            /** @constant */
+            type: "tableRow";
+            content: components["schemas"]["ArticleContentTableCell"][];
+        };
+        ArticleContentTableCell: {
+            /** @enum {string} */
+            type: "tableCell" | "tableHeader";
+            attrs: components["schemas"]["ArticleContentTableCellAttrs"];
+            content: components["schemas"]["ArticleContentFlowBlock"][];
+        };
+        /** @description The cell attributes the editor's table always writes; a merged or resized cell is never accepted. */
+        ArticleContentTableCellAttrs: {
+            /** @constant */
+            colspan: 1;
+            /** @constant */
+            rowspan: 1;
+            colwidth: null;
+        };
+        ArticleDoctorImageView: {
+            smSizeUrl: string;
+            mediumSizeUrl: string;
+            lgSizeUrl: string;
+        };
+        /** @description D-W52-95: what «Διαγραφή άρθρου» answers: the id of the article that is gone. */
+        ArticleDoctorDeletedView: {
+            id: string;
         };
         AvailabilityPublicSlotsView: {
             doctorId: string;
@@ -5205,12 +5869,69 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        /** @description One page of the rating list (D-47/D-58): newest first, `nextCursor` opens the next page, `total` is the whole set. */
+        /** @description One page of the rating list (D-47/D-58): newest first, `nextCursor` opens the next page, `total` is the whole set. The doctor side only (D-W52-84 / D-W52-87) adds `visits`, one per visit of the page, and `openReports`. */
         AppointmentRatingListPageView: {
-            items: components["schemas"]["AppointmentRatingResponseView"][];
+            items: components["schemas"]["AppointmentRatingListItemView"][];
             nextCursor: string | null;
             total: number;
+            visits?: components["schemas"]["AppointmentRatingVisitView"][];
+            openReports?: components["schemas"]["AppointmentRatingOpenReportView"][];
         };
+        /** @description D-W52-86α: a rating of the list, the response view; on the doctor side alone it also carries `replyRejectionReason`, the reason the team gave for rejecting its reply — only while that reply is REJECTED, `null` in every other state. */
+        AppointmentRatingListItemView: {
+            replyRejectionReason?: string | null;
+            id: string;
+            appointmentId: string;
+            doctorId: string;
+            patientId: string;
+            patientName: string | null;
+            patientInitial: string | null;
+            overallRating: number;
+            comment: string | null;
+            ratingModerationStatus: components["schemas"]["RatingModerationStatus"];
+            ratingModerationNote: string | null;
+            ratingModeratedAt: string | null;
+            ratingModeratedByUserId: string | null;
+            doctorReply: string | null;
+            doctorReplyAt: string | null;
+            replyModerationStatus: components["schemas"]["ReplyModerationStatus"];
+            replyModerationNote: string | null;
+            replyModeratedAt: string | null;
+            replyModeratedByUserId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            aspect?: components["schemas"]["RatingAspectView"] | null;
+        };
+        /** @description D-W52-84 (U-219.4): the visit a review of the doctor names — its start, the IANA zone of its office, its active services. */
+        AppointmentRatingVisitView: {
+            appointmentId: string;
+            /** Format: date-time */
+            startTime: string;
+            officeTimeZone: string;
+            serviceTitles: string[];
+        };
+        /** @description D-W52-87: a review of the page its doctor reported, and since when the team examines it. */
+        AppointmentRatingOpenReportView: {
+            ratingId: string;
+            /** Format: date-time */
+            reportedAt: string;
+        };
+        /** @description D-W52-87: a report as its doctor reads it back; the decision of the team is never published. */
+        AppointmentRatingReportView: {
+            id: string;
+            ratingId: string;
+            reason: components["schemas"]["RatingReportReason"];
+            text: string | null;
+            status: components["schemas"]["RatingReportStatus"];
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @enum {string} */
+        RatingReportReason: "NOT_MY_PATIENT" | "OFFENSIVE" | "PERSONAL_DATA" | "NOT_ABOUT_VISIT" | "OTHER";
+        /** @enum {string} */
+        RatingReportStatus: "OPEN" | "CLOSED";
         DoctorNotificationSettingsView: {
             doctorId: string;
             smsPatientConfirmed: boolean;
@@ -5325,15 +6046,15 @@ export interface components {
             target: components["schemas"]["NotificationInboxTargetView"];
         };
         /** @enum {string} */
-        NotificationInboxKind: "APPOINTMENT_REQUESTED" | "APPOINTMENT_CONFIRMED" | "APPOINTMENT_REJECTED" | "APPOINTMENT_EXPIRED" | "APPOINTMENT_RESCHEDULED" | "APPOINTMENT_CANCELED_BY_PATIENT" | "APPOINTMENT_CANCELED_BY_DOCTOR" | "APPOINTMENT_NO_SHOW" | "APPOINTMENT_REMINDER" | "RATING_INVITATION" | "RATING_PUBLISHED" | "RATING_NOT_PUBLISHED" | "RATING_REPLY_PUBLISHED" | "QUESTION_ANSWERED" | "QUESTION_REJECTED" | "APPOINTMENT_OUTCOME_PROMPT" | "RATING_RECEIVED" | "CALENDAR_CONFLICT" | "CALENDAR_SYNC_FAILING" | "LICENSE_EXPIRING" | "LICENSE_EXPIRED";
+        NotificationInboxKind: "APPOINTMENT_REQUESTED" | "APPOINTMENT_CONFIRMED" | "APPOINTMENT_REJECTED" | "APPOINTMENT_EXPIRED" | "APPOINTMENT_RESCHEDULED" | "APPOINTMENT_CANCELED_BY_PATIENT" | "APPOINTMENT_CANCELED_BY_DOCTOR" | "APPOINTMENT_NO_SHOW" | "APPOINTMENT_REMINDER" | "RATING_INVITATION" | "RATING_PUBLISHED" | "RATING_NOT_PUBLISHED" | "RATING_REPLY_PUBLISHED" | "QUESTION_ANSWERED" | "QUESTION_REJECTED" | "APPOINTMENT_OUTCOME_PROMPT" | "RATING_RECEIVED" | "RATING_REPLY_REJECTED" | "CALENDAR_CONFLICT" | "CALENDAR_SYNC_FAILING" | "LICENSE_EXPIRING" | "LICENSE_EXPIRED" | "ARTICLE_PUBLISHED" | "ARTICLE_NOT_PUBLISHED";
         /** @enum {string} */
-        NotificationInboxIcon: "CALENDAR" | "CLOCK" | "STAR" | "QUESTION" | "CALENDAR_CANCELED" | "CHECK" | "SYNC" | "BADGE";
+        NotificationInboxIcon: "CALENDAR" | "CLOCK" | "STAR" | "QUESTION" | "CALENDAR_CANCELED" | "CHECK" | "SYNC" | "BADGE" | "DOCUMENT";
         NotificationInboxTargetView: {
             kind: components["schemas"]["NotificationInboxTargetKind"];
             id: string;
         };
         /** @enum {string} */
-        NotificationInboxTargetKind: "APPOINTMENT" | "RATING_INVITATION" | "QUESTION" | "CALENDAR_CONNECTION" | "DOCTOR";
+        NotificationInboxTargetKind: "APPOINTMENT" | "RATING_INVITATION" | "QUESTION" | "CALENDAR_CONNECTION" | "DOCTOR" | "RATING" | "ARTICLE";
         NotificationInboxUnreadCountView: {
             unreadCount: number;
         };
@@ -5618,7 +6339,7 @@ export interface components {
             message?: string;
         };
         /** @enum {string} */
-        DoctorActivationSuggestionCode: "ADD_PROFILE_IMAGE" | "ADD_BIO" | "ADD_STUDIES" | "ADD_WORK_EXPERIENCE" | "ADD_QUALIFICATIONS" | "ADD_SPEAK_LANGUAGES" | "ADD_SERVICE_DESCRIPTIONS" | "VERIFY_LOGIN_PHONE";
+        DoctorActivationSuggestionCode: "ADD_PROFILE_IMAGE" | "ADD_BIO" | "ADD_SPECIALIZATIONS" | "ADD_STUDIES" | "ADD_WORK_EXPERIENCE" | "ADD_QUALIFICATIONS" | "ADD_SPEAK_LANGUAGES" | "ADD_SERVICE_DESCRIPTIONS" | "VERIFY_LOGIN_PHONE";
         DoctorProfileOfficeListResponseView: components["schemas"]["DoctorProfileOfficeView"][];
         DoctorProfileOfficeView: {
             doctorOffice: components["schemas"]["DoctorOfficeView"];
@@ -5771,7 +6492,7 @@ export interface components {
         DoctorNotificationEmailCodeSentView: {
             success: boolean;
         };
-        /** @description D-W51-10 (U-185.1, U-185.3): «who am I as a doctor», for every signed-in account: the registration, the two licences, whether the doctor mode exists (`licensed`), the expiry notice, the mode in force and the name card (licensed only). */
+        /** @description D-W51-10 (U-185.1, U-185.3): «who am I as a doctor», for every signed-in account: the registration, the two licences, whether the doctor mode exists (`licensed`), the expiry notice, the mode in force and the name card (licensed only). D-W52-47: `nameLocked` holds once the doctor took a first licence (U-207.1), whatever became of that licence. */
         DoctorDashboardView: {
             registration: components["schemas"]["DoctorOnboardingState"];
             licences: {
@@ -5779,6 +6500,7 @@ export interface components {
                 payments: components["schemas"]["DoctorDashboardLicenceView"];
             };
             licensed: boolean;
+            nameLocked: boolean;
             notice: components["schemas"]["DoctorDashboardNoticeView"] | null;
             lastMode: components["schemas"]["DoctorDashboardMode"];
             card: components["schemas"]["DoctorDashboardCardView"] | null;
@@ -5807,6 +6529,172 @@ export interface components {
             firstName: string | null;
             lastName: string | null;
             specialtyName: string | null;
+        };
+        /** @description D-W52-17 (U-205): `GET /doctor/me/profile`, the doctor of the session and no other: the public id and slug, the visibility, the six sections and the helpers still open. No email, phone, AMKA or tax number. */
+        DoctorMyProfileView: {
+            doctorId: string;
+            slug: string | null;
+            visibility: components["schemas"]["DoctorMyProfileVisibilityView"];
+            sections: components["schemas"]["DoctorMyProfileSectionsView"];
+            missing: components["schemas"]["DoctorMyProfileMissingCode"][];
+        };
+        /** @description D-W52-17: whether the search shows the doctor now, by the five conditions of the public readers, and the one reason if not. */
+        DoctorMyProfileVisibilityView: {
+            visible: boolean;
+            reason: components["schemas"]["DoctorProfileHiddenReason"] | null;
+            licenceEndedAt: string | null;
+        };
+        /** @enum {string} */
+        DoctorProfileHiddenReason: "LICENCE_EXPIRED" | "NOT_VERIFIED" | "NO_MARKETPLACE_LICENCE" | "INCOMPLETE";
+        /** @description D-W52-17: what each of the six sections of «Το προφίλ μου» holds: facts and counts only, the clients build every text. D-W52-57: `specialty` also counts the doctor's specializations, in any status, and says whether the specialty has a list. */
+        DoctorMyProfileSectionsView: {
+            photos: {
+                count: number;
+            };
+            about: {
+                fullName: string | null;
+                hasDescription: boolean;
+                nameLocked: boolean;
+            };
+            specialty: {
+                name: string | null;
+                specializationsCount: number;
+                hasCatalogue: boolean;
+            };
+            cv: {
+                studies: number;
+                positions: number;
+                conferences: number;
+            };
+            languages: {
+                names: string[];
+                socialCount: number;
+            };
+            services: {
+                count: number;
+                minPrice: number | null;
+                samePrice: boolean;
+            };
+        };
+        /** @enum {string} */
+        DoctorMyProfileMissingCode: "ADD_PROFILE_IMAGE" | "ADD_SPECIALIZATIONS" | "ADD_STUDIES" | "ADD_WORK_EXPERIENCE" | "ADD_SPEAK_LANGUAGES";
+        DoctorMyReviewsSummaryView: {
+            pendingCount: number;
+            count: number;
+            average: number | null;
+            distribution: {
+                /** @enum {number} */
+                star: 1 | 2 | 3 | 4 | 5;
+                count: number;
+            }[];
+            aspectAverages: components["schemas"]["DoctorPublicMarketplaceProfileRatingAspectAverages"] | null;
+            topics: {
+                topic: components["schemas"]["ReviewTopic"];
+                count: number;
+            }[];
+        };
+        /** @description D-W52-36: the images of a doctor in their order, the first one the main image. */
+        DoctorProfileImageListResponseView: components["schemas"]["DoctorImageViewExt"][];
+        DoctorImageViewExt: {
+            translations?: components["schemas"]["DoctorImageTranslationView"][];
+            id: string;
+            doctorId: string;
+            smSizeUrl: string;
+            mediumSizeUrl: string;
+            lgSizeUrl: string;
+            priority: number | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @description D-W52-36: one image of a doctor, `null` when the doctor has no image of that id. */
+        DoctorProfileImageResponseView: components["schemas"]["DoctorImageViewExt"] | null;
+        /** @description D-W52-47 / D-W52-48: the texts of one language of the public page, as its doctor reads them on «Όνομα και περιγραφή»; `null` when the page has no text in that language. */
+        DoctorProfileTranslationResponseView: components["schemas"]["DoctorTranslationView"] | null;
+        DoctorTranslationView: {
+            id: string;
+            doctorId: string;
+            language: string;
+            slug: string;
+            fullName: string;
+            normalizedFullName: string;
+            transliteration: string;
+            description: unknown;
+            studies: string[];
+            workExperience: string[];
+            conferences: string[];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @description `GET /doctor/profile/specializations/options`: empty for a specialty without a sourced list. */
+        DoctorSpecializationOptionListView: components["schemas"]["DoctorSpecializationOptionView"][];
+        /** @description D-W52-54: one line of the list of the doctor's specialty, named in the language of the request. */
+        DoctorSpecializationOptionView: {
+            code: string;
+            name: string;
+            kind: components["schemas"]["SpecializationKind"];
+        };
+        /**
+         * @description U-225: what one line of the catalogue is. A `SOCIETY_AREA` is a field a scientific society names and shows at once; a `FEK_TITLE` is a title of the Government Gazette earned by training and exams, shown only after the team approves it.
+         * @enum {string}
+         */
+        SpecializationKind: "SOCIETY_AREA" | "FEK_TITLE";
+        /** @description `GET` and `PUT /doctor/profile/specializations`: the picks of the doctor, in the order of the catalogue. */
+        DoctorSpecializationListView: components["schemas"]["DoctorSpecializationView"][];
+        /** @description D-W52-54 / D-W52-56α: one pick of a doctor: the line of the catalogue and where the pick stands. */
+        DoctorSpecializationView: {
+            status: components["schemas"]["DoctorSpecializationStatus"];
+            code: string;
+            name: string;
+            kind: components["schemas"]["SpecializationKind"];
+        };
+        /**
+         * @description D-W52-56α (U-225): where a pick stands. A field of a society is `APPROVED` from the start; a title of the Gazette waits as `PENDING` for the team, which answers `APPROVED` or `REJECTED`. Only `APPROVED` is public.
+         * @enum {string}
+         */
+        DoctorSpecializationStatus: "APPROVED" | "PENDING" | "REJECTED";
+        /** @description D-W52-68: the whole catalogue of languages, in the order of its codes. */
+        DoctorSpeakLanguageOptionListView: components["schemas"]["DoctorSpeakLanguageCatalogueOptionView"][];
+        /** @description D-W52-64: a line of the catalogue of languages as the picker reads it, with the ISO 639 code of the language. */
+        DoctorSpeakLanguageCatalogueOptionView: {
+            iso: string;
+            code: string;
+            name: string;
+            normalized: string;
+            slug: string;
+        };
+        /** @description D-W52-66 / D-W52-68: the languages of a doctor, Greek first and then by name in the language of the request. */
+        DoctorSpeakLanguageListView: components["schemas"]["DoctorSpeakLanguageView"][];
+        DoctorSpeakLanguageView: {
+            code: string;
+            name: string;
+            normalized: string;
+            slug: string;
+            id: string;
+            doctorId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        /** @description `GET` and `PUT /doctor/profile/credentials` (D-W52-61): every row of the doctor, «STUDY», «WORK», «CONFERENCE» in turn, each group as the public page orders it: the current first, then the latest year, the rows without a year last. */
+        DoctorCredentialListView: components["schemas"]["DoctorCredentialView"][];
+        /** @description U-73: one row of a doctor's biography with every language it has; `position` is where it was written in its group, from 0. */
+        DoctorCredentialView: {
+            id: string;
+            kind: components["schemas"]["DoctorCredentialKind"];
+            startYear: number | null;
+            endYear: number | null;
+            isCurrent: boolean;
+            position: number;
+            translations: {
+                language: components["schemas"]["ILanguage"];
+                title: string;
+                organization: string | null;
+            }[];
         };
         /** @description The suggestions of one typed text, at most five, and the session token (UUIDv4) every next call of the same search sends back; a new search starts without one and receives a new token. */
         AddressSearchSuggestionsResponseView: {
@@ -5844,11 +6732,18 @@ export interface components {
             transliteration: string;
             normalizedName: string;
         };
-        /** @description D-W51-44: the list of `GET /doctor-service/doctor-services`, the services «Υπηρεσίες και κόστος» ticks from. */
-        DoctorServiceListResponseView: components["schemas"]["DoctorServiceListItemView"][];
-        /** @description D-W51-44: one row of the list of doctor services, titled by its base service in the language of the request. */
-        DoctorServiceListItemView: {
+        /** @description D-W52-79: the list of `GET /doctor-service/allowed-services`. */
+        DoctorAllowedServiceListResponseView: components["schemas"]["DoctorAllowedServiceView"][];
+        /** @description D-W52-79 (U-214): one service the specialty of the doctor allows. `suggestedSubtitle` / `suggestedDescription` are the Greek texts of eDoctor for the button «Συμπλήρωση με την πρόταση του eDoctor», never a stored text of the doctor. */
+        DoctorAllowedServiceView: {
+            id: string;
             title: string;
+            suggestedSubtitle: string | null;
+            suggestedDescription: string | null;
+            durationInMinutes: number;
+            owned: boolean;
+        };
+        DoctorServiceViewExt: {
             translations?: components["schemas"]["DoctorServiceTranslationView"][];
             catalogue?: components["schemas"]["CatalogueView"] | null;
             id: string;
@@ -5874,6 +6769,23 @@ export interface components {
         };
         /** @enum {string} */
         ICatalogueCategory: "REGULAR" | "REDUCED" | "SECONDARY" | "SECONDARY_REDUCED" | "PROMOTION" | "PROMOTION_REDUCED";
+        /** @description D-W51-44: the list of `GET /doctor-service/doctor-services`, the services «Υπηρεσίες και κόστος» ticks from. */
+        DoctorServiceListResponseView: components["schemas"]["DoctorServiceListItemView"][];
+        /** @description D-W51-44: one row of the list of doctor services, titled by its base service in the language of the request. */
+        DoctorServiceListItemView: {
+            title: string;
+            translations?: components["schemas"]["DoctorServiceTranslationView"][];
+            catalogue?: components["schemas"]["CatalogueView"] | null;
+            id: string;
+            doctorId: string;
+            serviceId: string;
+            price: number;
+            amount: number | null;
+            customDurationInMinutes: number;
+            isSpecialized: boolean;
+            yearsOfexperience: number | null;
+            catalogueId: string | null;
+        };
         ErpCartView: {
             id: string;
             doctorId: string;
@@ -8117,7 +9029,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Full public marketplace doctor profile for the selected office, with the response metrics of the last six months. */
+            /** @description Full public marketplace doctor profile for the selected office, with the response metrics of the last six months. D-W52-56 (U-209.3, U-225): `specializations` are the «Τομείς εξειδίκευσης» of the page — at most three `{ code, name }` the doctor picked from the closed list of the specialty, named in the language of the page; a field of a scientific society shows at once, a title of the Government Gazette only after the team approved it, and a pick that waits or was rejected never appears. A doctor without picks, or of a specialty without a list, answers `[]`. The services no longer carry `isSpecialized`; years of experience and visits stay on each service. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8246,7 +9158,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Cards of the published articles, newest publication first. The body, the sections and the SEO fields travel only with `GET /article/public/articles/{slug}`. `doctorId` keeps the articles of one doctor: an unknown or hidden doctor answers [] and a total of 0. `readingMinutes` is null when there is no time to show. */
+            /** @description Cards of the published articles, newest publication first (the first publication: an approved change never moves an article up, D-W52-94α — `revisedAt` says when it changed last). The body, the sections and the SEO fields travel only with `GET /article/public/articles/{slug}`. `doctorId` keeps the articles of one doctor: an unknown or hidden doctor answers [] and a total of 0. `readingMinutes` is null when there is no time to show. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -8258,6 +9170,323 @@ export interface operations {
                         message: string;
                         data: components["schemas"]["ArticlePublicCardListView"];
                         meta: components["schemas"]["ArticlePublicListMetaView"];
+                    };
+                };
+            };
+        };
+    };
+    getPublicArticle: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The published article in the language asked (else Greek, else English): `publishedAt` its first publication, `revisedAt` its last approved change (D-W52-94α), the SEO the server wrote, the cover, the authors. `content` is the closed schema `ArticleContentDoc` (D-W52-99) for every text written since the editor; an article nobody wrote again keeps its older rich text, which `sections` (type `text`, in `order`) complete. An `image` node names its upload by `imageId`: `contentImages` holds those images, only the ones the published text names, with the size of the large one. A slug that is not published answers 404. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ArticlePublicView"];
+                    };
+                };
+            };
+        };
+    };
+    listMyArticles: {
+        parameters: {
+            query?: {
+                limit?: string;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description D-W52-96 «Τα άρθρα μου»: the articles the doctor of the session alone authors, every state, newest first; never a body. Each row carries `status`, `hasPendingRevision` («Η αλλαγή σας ελέγχεται») and the `revision` (with the reason of a refused change), the small cover `imageUrl`, `title`, `type` and the dates — with a change of a published article, its title, kind and cover. `limit` 1–50 (20 by default), `cursor` the opaque `nextCursor` of the previous page (422 for anything else); `total` counts every article. Never cached (`no-store`). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ArticleDoctorListPageView"];
+                    };
+                };
+            };
+        };
+    };
+    createMyArticleDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    language?: "el" | "en";
+                    /** @enum {string} */
+                    type?: "ARTICLE" | "HEALTH_ADVICE";
+                    title?: string;
+                    shortDescription?: string | null;
+                    /** @description D-W52-99: the text as `ArticleContentDoc` (see the schema of the answer): the closed list of nodes, marks and attributes; anything else answers 422 `ARTICLE_CONTENT_REFUSED`. */
+                    content?: Record<string, never> | null;
+                    image?: {
+                        file: string;
+                        fileName?: string;
+                    } | null;
+                };
+            };
+        };
+        responses: {
+            /** @description 201. D-W52-95 «Αποθήκευση πρόχειρου»: a `DRAFT` only its doctor sees. It needs a `title`: without one it answers 422 with `details: { title: "REQUIRED" }`. A doctor keeps at most 50 articles before their first publication (drafts, in review, not published): the 51st answers 409 `ARTICLE_UNPUBLISHED_LIMIT_REACHED` with `details.limit`. The body is the whole form: `type` (`ARTICLE` or `HEALTH_ADVICE`, left out keeps the kind, a new article is an `ARTICLE`), `title` at most 200 characters, `shortDescription` at most 300, `content` (below), and `image` — a new cover (`file` a data URI of JPEG, PNG or WebP of at most 10 MB, checked by its bytes, at least 800 × 600 (422 `IMAGE_TOO_SMALL` with the sizes), written again without EXIF / GPS in three sizes), `null` to remove it, left out to keep it. The body of a write is at most 15 MB. Titles and short descriptions are plain text: a control character or half a UTF-16 pair answers 422, bidi and zero-width characters are dropped, NFC. D-W52-01 (U-207.3): a doctor writes Greek alone — a `language` other than `el` answers 422 with `DOCTOR_WRITES_GREEK_ONLY` in the message. The slug, the SEO fields (`metaTitle`, `metaDescription`, `canonicalUrl`, `readingMinutes`), the author and the state are the server's: any of them in the body, like any unknown key, answers 422 and nothing is written. Only the doctor who alone authors an article reaches it; another's or an unknown id answers the one 403 (D-107). Rate limited per IP under the `article-write` class (429 past it). D-W52-99: `content` is the editor's document, `ArticleContentDoc` (the schema of `content` in the answer), or `null` / a document without a block for no text. The closed list — nodes `doc`, `paragraph`, `text`, `hardBreak`, `heading` (`level` 2 or 3), `bulletList`, `orderedList` (`start` 1–999, `type` null), `listItem` (a paragraph first, then paragraphs and lists), `blockquote` and `callout` («Σημαντικό», paragraphs and lists), `horizontalRule`, `image` (`imageId` of an upload of `uploadMyArticleImage`, `alt` 1–300, `caption` up to 300 or null), `video` (`provider` `youtube` with an 11-character id, or `vimeo` with 6–12 digits), `table` / `tableRow` / `tableHeader` / `tableCell` (`colspan` 1, `rowspan` 1, `colwidth` null; a cell holds paragraphs and lists); marks `bold`, `italic`, `underline`, `strike`, `highlight` (no colour) and `link` (`href` only: `https:`, at most 2000, no user or password, no backslash or white space). Limits: 50,000 characters of text (code points), 5,000 nodes, depth 10, 20 images, 5 videos, 10 tables, 1,000,000 characters of JSON. Text is stored NFC with bidi controls removed; a NUL, another control character or half a UTF-16 pair is refused (a tab or line break becomes a space). The server checks it twice — its own walk without recursion, then ProseMirror with the same schema — and stores the canonical form. Anything else answers 422 `Validation Error: ARTICLE_CONTENT_REFUSED` with `details.content` the reason (`NOT_A_DOCUMENT`, `FORBIDDEN_KEY` for `__proto__` / `constructor` / `prototype`, `UNKNOWN_KEY`, `UNKNOWN_NODE`, `UNKNOWN_MARK`, `UNKNOWN_ATTRIBUTE`, `INVALID_ATTRIBUTE`, `INVALID_TEXT`, `INVALID_LINK`, `LINK_NOT_HTTPS`, `INVALID_VIDEO`, `INVALID_STRUCTURE`, `TOO_DEEP`, `TOO_MANY_NODES`, `TOO_MANY_CHARACTERS`, `TOO_MANY_IMAGES`, `TOO_MANY_VIDEOS`, `TOO_MANY_TABLES`, `TOO_LARGE`, and `IMAGE_NOT_FOUND` for an image that is not an upload of the doctor or of this article) and `details.limit` the bound that was passed; the answer never repeats the text, and no text is ever logged. D-W52-100: an upload the text no longer names goes when the write is saved. The article as its page reads it (`ArticleDoctorView`): `status` (`DRAFT`, `IN_REVIEW`, `PUBLISHED`, `REJECTED`), the dates of its life (`createdAt`, `updatedAt`, `submittedAt`, `publishedAt` the first publication, `revisedAt` the last approved change, `rejectedAt`), `content` always the closed schema (an older text is read into it, with its old text sections), `contentImages` the uploads of the article (sizes and the size of the large one), `rejectionReason` (what the team wrote, for a refused article only), `publicSlug` (the public page, while published), and `revision`: the doctor's change of a published article (`IN_REVIEW`, or `REJECTED` with its `rejectedAt` and `rejectionReason`), `hasPendingRevision` while it waits. With a change, `type`, `title`, `shortDescription`, `content` and `image` are the change's, so the doctor goes on from there; the public page keeps the published text until the team approves it (U-222.1). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ArticleDoctorView"];
+                    };
+                };
+            };
+        };
+    };
+    getMyArticle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                articleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description D-W52-96. The article as its page reads it (`ArticleDoctorView`): `status` (`DRAFT`, `IN_REVIEW`, `PUBLISHED`, `REJECTED`), the dates of its life (`createdAt`, `updatedAt`, `submittedAt`, `publishedAt` the first publication, `revisedAt` the last approved change, `rejectedAt`), `content` always the closed schema (an older text is read into it, with its old text sections), `contentImages` the uploads of the article (sizes and the size of the large one), `rejectionReason` (what the team wrote, for a refused article only), `publicSlug` (the public page, while published), and `revision`: the doctor's change of a published article (`IN_REVIEW`, or `REJECTED` with its `rejectedAt` and `rejectionReason`), `hasPendingRevision` while it waits. With a change, `type`, `title`, `shortDescription`, `content` and `image` are the change's, so the doctor goes on from there; the public page keeps the published text until the team approves it (U-222.1). Another doctor's or an unknown id answers the one 403 (D-107). Never cached (`no-store`). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ArticleDoctorView"];
+                    };
+                };
+            };
+        };
+    };
+    saveMyArticleDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                articleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    language?: "el" | "en";
+                    /** @enum {string} */
+                    type?: "ARTICLE" | "HEALTH_ADVICE";
+                    title?: string;
+                    shortDescription?: string | null;
+                    /** @description D-W52-99: the text as `ArticleContentDoc` (see the schema of the answer): the closed list of nodes, marks and attributes; anything else answers 422 `ARTICLE_CONTENT_REFUSED`. */
+                    content?: Record<string, never> | null;
+                    image?: {
+                        file: string;
+                        fileName?: string;
+                    } | null;
+                };
+            };
+        };
+        responses: {
+            /** @description D-W52-95 «Αποθήκευση πρόχειρου»: only a `DRAFT` or a `REJECTED` article, which keeps its state (a refused one keeps the team's reason until it is sent again); an article in review or published answers 409, and a published one changes only through `submitMyArticle`. A `title` is needed (422 with `details`). The body is the whole form: `type` (`ARTICLE` or `HEALTH_ADVICE`, left out keeps the kind, a new article is an `ARTICLE`), `title` at most 200 characters, `shortDescription` at most 300, `content` (below), and `image` — a new cover (`file` a data URI of JPEG, PNG or WebP of at most 10 MB, checked by its bytes, at least 800 × 600 (422 `IMAGE_TOO_SMALL` with the sizes), written again without EXIF / GPS in three sizes), `null` to remove it, left out to keep it. The body of a write is at most 15 MB. Titles and short descriptions are plain text: a control character or half a UTF-16 pair answers 422, bidi and zero-width characters are dropped, NFC. D-W52-01 (U-207.3): a doctor writes Greek alone — a `language` other than `el` answers 422 with `DOCTOR_WRITES_GREEK_ONLY` in the message. The slug, the SEO fields (`metaTitle`, `metaDescription`, `canonicalUrl`, `readingMinutes`), the author and the state are the server's: any of them in the body, like any unknown key, answers 422 and nothing is written. Only the doctor who alone authors an article reaches it; another's or an unknown id answers the one 403 (D-107). Rate limited per IP under the `article-write` class (429 past it). D-W52-99: `content` is the editor's document, `ArticleContentDoc` (the schema of `content` in the answer), or `null` / a document without a block for no text. The closed list — nodes `doc`, `paragraph`, `text`, `hardBreak`, `heading` (`level` 2 or 3), `bulletList`, `orderedList` (`start` 1–999, `type` null), `listItem` (a paragraph first, then paragraphs and lists), `blockquote` and `callout` («Σημαντικό», paragraphs and lists), `horizontalRule`, `image` (`imageId` of an upload of `uploadMyArticleImage`, `alt` 1–300, `caption` up to 300 or null), `video` (`provider` `youtube` with an 11-character id, or `vimeo` with 6–12 digits), `table` / `tableRow` / `tableHeader` / `tableCell` (`colspan` 1, `rowspan` 1, `colwidth` null; a cell holds paragraphs and lists); marks `bold`, `italic`, `underline`, `strike`, `highlight` (no colour) and `link` (`href` only: `https:`, at most 2000, no user or password, no backslash or white space). Limits: 50,000 characters of text (code points), 5,000 nodes, depth 10, 20 images, 5 videos, 10 tables, 1,000,000 characters of JSON. Text is stored NFC with bidi controls removed; a NUL, another control character or half a UTF-16 pair is refused (a tab or line break becomes a space). The server checks it twice — its own walk without recursion, then ProseMirror with the same schema — and stores the canonical form. Anything else answers 422 `Validation Error: ARTICLE_CONTENT_REFUSED` with `details.content` the reason (`NOT_A_DOCUMENT`, `FORBIDDEN_KEY` for `__proto__` / `constructor` / `prototype`, `UNKNOWN_KEY`, `UNKNOWN_NODE`, `UNKNOWN_MARK`, `UNKNOWN_ATTRIBUTE`, `INVALID_ATTRIBUTE`, `INVALID_TEXT`, `INVALID_LINK`, `LINK_NOT_HTTPS`, `INVALID_VIDEO`, `INVALID_STRUCTURE`, `TOO_DEEP`, `TOO_MANY_NODES`, `TOO_MANY_CHARACTERS`, `TOO_MANY_IMAGES`, `TOO_MANY_VIDEOS`, `TOO_MANY_TABLES`, `TOO_LARGE`, and `IMAGE_NOT_FOUND` for an image that is not an upload of the doctor or of this article) and `details.limit` the bound that was passed; the answer never repeats the text, and no text is ever logged. D-W52-100: an upload the text no longer names goes when the write is saved. The article as its page reads it (`ArticleDoctorView`): `status` (`DRAFT`, `IN_REVIEW`, `PUBLISHED`, `REJECTED`), the dates of its life (`createdAt`, `updatedAt`, `submittedAt`, `publishedAt` the first publication, `revisedAt` the last approved change, `rejectedAt`), `content` always the closed schema (an older text is read into it, with its old text sections), `contentImages` the uploads of the article (sizes and the size of the large one), `rejectionReason` (what the team wrote, for a refused article only), `publicSlug` (the public page, while published), and `revision`: the doctor's change of a published article (`IN_REVIEW`, or `REJECTED` with its `rejectedAt` and `rejectionReason`), `hasPendingRevision` while it waits. With a change, `type`, `title`, `shortDescription`, `content` and `image` are the change's, so the doctor goes on from there; the public page keeps the published text until the team approves it (U-222.1). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ArticleDoctorView"];
+                    };
+                };
+            };
+        };
+    };
+    deleteMyArticle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                articleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description D-W52-95 «Διαγραφή άρθρου»: the article goes in every state, with its change and the files of their covers; a published one leaves the public pages at once («Δεν επανέρχεται»). Answers its `id`. Another doctor's or an unknown id answers the one 403 (D-107). Rate limited per IP under the `article-write` class (429 past it). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ArticleDoctorDeletedView"];
+                    };
+                };
+            };
+        };
+    };
+    uploadMyArticleImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    image: {
+                        file: string;
+                        fileName?: string;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description 201. D-W52-100 «Εικόνα» of the editor: `image.file` a data URI of JPEG, PNG or WebP of at most 10 MB (body at most 15 MB, 413 past it); its type is read from its first bytes (422 when it lies), at least 200 × 200 (422 `IMAGE_TOO_SMALL` with `details` of the sizes), at most 40 million pixels, written again by the server without EXIF / GPS in three sizes that keep the whole picture (`smSizeUrl` within 200 × 200, `mediumSizeUrl` 800 × 600, `lgSizeUrl` 1200 × 900, never enlarged; `width` / `height` of the large one). Answers its `id`, which an `image` node of `content` names (`attrs.imageId`, with `alt` and `caption`); no address is ever stored in the text. The image waits for the write of this doctor that uses it — then it is the article's; one no saved text uses goes after a day, and at most 20 wait at once (409 `ARTICLE_IMAGE_PENDING_LIMIT_REACHED` with `details.limit`). An image of another doctor, or of another article, in a text answers 422 `ARTICLE_CONTENT_REFUSED` / `IMAGE_NOT_FOUND`. Rate limited per IP under the `article-write` class (429 past it). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ArticleContentImageView"];
+                    };
+                };
+            };
+        };
+    };
+    submitMyNewArticle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    language?: "el" | "en";
+                    /** @enum {string} */
+                    type?: "ARTICLE" | "HEALTH_ADVICE";
+                    title?: string;
+                    shortDescription?: string | null;
+                    /** @description D-W52-99: the text as `ArticleContentDoc` (see the schema of the answer): the closed list of nodes, marks and attributes; anything else answers 422 `ARTICLE_CONTENT_REFUSED`. */
+                    content?: Record<string, never> | null;
+                    image?: {
+                        file: string;
+                        fileName?: string;
+                    } | null;
+                };
+            };
+        };
+        responses: {
+            /** @description 201. D-W52-95 «Αποστολή για έλεγχο» of a new article: it is `IN_REVIEW` at once and the team is to decide it. It needs `title`, `shortDescription` and a `content` with words: each missing one is named in `details` of the 422 (`{ title, shortDescription, content: "REQUIRED" }`). The limit of 50 unpublished articles holds (409). The body is the whole form: `type` (`ARTICLE` or `HEALTH_ADVICE`, left out keeps the kind, a new article is an `ARTICLE`), `title` at most 200 characters, `shortDescription` at most 300, `content` (below), and `image` — a new cover (`file` a data URI of JPEG, PNG or WebP of at most 10 MB, checked by its bytes, at least 800 × 600 (422 `IMAGE_TOO_SMALL` with the sizes), written again without EXIF / GPS in three sizes), `null` to remove it, left out to keep it. The body of a write is at most 15 MB. Titles and short descriptions are plain text: a control character or half a UTF-16 pair answers 422, bidi and zero-width characters are dropped, NFC. D-W52-01 (U-207.3): a doctor writes Greek alone — a `language` other than `el` answers 422 with `DOCTOR_WRITES_GREEK_ONLY` in the message. The slug, the SEO fields (`metaTitle`, `metaDescription`, `canonicalUrl`, `readingMinutes`), the author and the state are the server's: any of them in the body, like any unknown key, answers 422 and nothing is written. Only the doctor who alone authors an article reaches it; another's or an unknown id answers the one 403 (D-107). Rate limited per IP under the `article-write` class (429 past it). D-W52-99: `content` is the editor's document, `ArticleContentDoc` (the schema of `content` in the answer), or `null` / a document without a block for no text. The closed list — nodes `doc`, `paragraph`, `text`, `hardBreak`, `heading` (`level` 2 or 3), `bulletList`, `orderedList` (`start` 1–999, `type` null), `listItem` (a paragraph first, then paragraphs and lists), `blockquote` and `callout` («Σημαντικό», paragraphs and lists), `horizontalRule`, `image` (`imageId` of an upload of `uploadMyArticleImage`, `alt` 1–300, `caption` up to 300 or null), `video` (`provider` `youtube` with an 11-character id, or `vimeo` with 6–12 digits), `table` / `tableRow` / `tableHeader` / `tableCell` (`colspan` 1, `rowspan` 1, `colwidth` null; a cell holds paragraphs and lists); marks `bold`, `italic`, `underline`, `strike`, `highlight` (no colour) and `link` (`href` only: `https:`, at most 2000, no user or password, no backslash or white space). Limits: 50,000 characters of text (code points), 5,000 nodes, depth 10, 20 images, 5 videos, 10 tables, 1,000,000 characters of JSON. Text is stored NFC with bidi controls removed; a NUL, another control character or half a UTF-16 pair is refused (a tab or line break becomes a space). The server checks it twice — its own walk without recursion, then ProseMirror with the same schema — and stores the canonical form. Anything else answers 422 `Validation Error: ARTICLE_CONTENT_REFUSED` with `details.content` the reason (`NOT_A_DOCUMENT`, `FORBIDDEN_KEY` for `__proto__` / `constructor` / `prototype`, `UNKNOWN_KEY`, `UNKNOWN_NODE`, `UNKNOWN_MARK`, `UNKNOWN_ATTRIBUTE`, `INVALID_ATTRIBUTE`, `INVALID_TEXT`, `INVALID_LINK`, `LINK_NOT_HTTPS`, `INVALID_VIDEO`, `INVALID_STRUCTURE`, `TOO_DEEP`, `TOO_MANY_NODES`, `TOO_MANY_CHARACTERS`, `TOO_MANY_IMAGES`, `TOO_MANY_VIDEOS`, `TOO_MANY_TABLES`, `TOO_LARGE`, and `IMAGE_NOT_FOUND` for an image that is not an upload of the doctor or of this article) and `details.limit` the bound that was passed; the answer never repeats the text, and no text is ever logged. D-W52-100: an upload the text no longer names goes when the write is saved. The article as its page reads it (`ArticleDoctorView`): `status` (`DRAFT`, `IN_REVIEW`, `PUBLISHED`, `REJECTED`), the dates of its life (`createdAt`, `updatedAt`, `submittedAt`, `publishedAt` the first publication, `revisedAt` the last approved change, `rejectedAt`), `content` always the closed schema (an older text is read into it, with its old text sections), `contentImages` the uploads of the article (sizes and the size of the large one), `rejectionReason` (what the team wrote, for a refused article only), `publicSlug` (the public page, while published), and `revision`: the doctor's change of a published article (`IN_REVIEW`, or `REJECTED` with its `rejectedAt` and `rejectionReason`), `hasPendingRevision` while it waits. With a change, `type`, `title`, `shortDescription`, `content` and `image` are the change's, so the doctor goes on from there; the public page keeps the published text until the team approves it (U-222.1). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ArticleDoctorView"];
+                    };
+                };
+            };
+        };
+    };
+    submitMyArticle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                articleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    language?: "el" | "en";
+                    /** @enum {string} */
+                    type?: "ARTICLE" | "HEALTH_ADVICE";
+                    title?: string;
+                    shortDescription?: string | null;
+                    /** @description D-W52-99: the text as `ArticleContentDoc` (see the schema of the answer): the closed list of nodes, marks and attributes; anything else answers 422 `ARTICLE_CONTENT_REFUSED`. */
+                    content?: Record<string, never> | null;
+                    image?: {
+                        file: string;
+                        fileName?: string;
+                    } | null;
+                };
+            };
+        };
+        responses: {
+            /** @description D-W52-95 «Αποστολή για έλεγχο»: a `DRAFT`, a `REJECTED` or an `IN_REVIEW` article goes (back) to the team with this text — the review starts again, the reason of a refusal goes. D-W52-94 (U-222.1): a `PUBLISHED` article stays public as it is and the text becomes its one change, `revision` `IN_REVIEW` (an open or refused change is replaced); the team's approval replaces the published text, a refusal keeps it with the reason. It needs `title`, `shortDescription` and a `content` with words (422 with `details`); an article whose state changed meanwhile answers 409. The body is the whole form: `type` (`ARTICLE` or `HEALTH_ADVICE`, left out keeps the kind, a new article is an `ARTICLE`), `title` at most 200 characters, `shortDescription` at most 300, `content` (below), and `image` — a new cover (`file` a data URI of JPEG, PNG or WebP of at most 10 MB, checked by its bytes, at least 800 × 600 (422 `IMAGE_TOO_SMALL` with the sizes), written again without EXIF / GPS in three sizes), `null` to remove it, left out to keep it. The body of a write is at most 15 MB. Titles and short descriptions are plain text: a control character or half a UTF-16 pair answers 422, bidi and zero-width characters are dropped, NFC. D-W52-01 (U-207.3): a doctor writes Greek alone — a `language` other than `el` answers 422 with `DOCTOR_WRITES_GREEK_ONLY` in the message. The slug, the SEO fields (`metaTitle`, `metaDescription`, `canonicalUrl`, `readingMinutes`), the author and the state are the server's: any of them in the body, like any unknown key, answers 422 and nothing is written. Only the doctor who alone authors an article reaches it; another's or an unknown id answers the one 403 (D-107). Rate limited per IP under the `article-write` class (429 past it). D-W52-99: `content` is the editor's document, `ArticleContentDoc` (the schema of `content` in the answer), or `null` / a document without a block for no text. The closed list — nodes `doc`, `paragraph`, `text`, `hardBreak`, `heading` (`level` 2 or 3), `bulletList`, `orderedList` (`start` 1–999, `type` null), `listItem` (a paragraph first, then paragraphs and lists), `blockquote` and `callout` («Σημαντικό», paragraphs and lists), `horizontalRule`, `image` (`imageId` of an upload of `uploadMyArticleImage`, `alt` 1–300, `caption` up to 300 or null), `video` (`provider` `youtube` with an 11-character id, or `vimeo` with 6–12 digits), `table` / `tableRow` / `tableHeader` / `tableCell` (`colspan` 1, `rowspan` 1, `colwidth` null; a cell holds paragraphs and lists); marks `bold`, `italic`, `underline`, `strike`, `highlight` (no colour) and `link` (`href` only: `https:`, at most 2000, no user or password, no backslash or white space). Limits: 50,000 characters of text (code points), 5,000 nodes, depth 10, 20 images, 5 videos, 10 tables, 1,000,000 characters of JSON. Text is stored NFC with bidi controls removed; a NUL, another control character or half a UTF-16 pair is refused (a tab or line break becomes a space). The server checks it twice — its own walk without recursion, then ProseMirror with the same schema — and stores the canonical form. Anything else answers 422 `Validation Error: ARTICLE_CONTENT_REFUSED` with `details.content` the reason (`NOT_A_DOCUMENT`, `FORBIDDEN_KEY` for `__proto__` / `constructor` / `prototype`, `UNKNOWN_KEY`, `UNKNOWN_NODE`, `UNKNOWN_MARK`, `UNKNOWN_ATTRIBUTE`, `INVALID_ATTRIBUTE`, `INVALID_TEXT`, `INVALID_LINK`, `LINK_NOT_HTTPS`, `INVALID_VIDEO`, `INVALID_STRUCTURE`, `TOO_DEEP`, `TOO_MANY_NODES`, `TOO_MANY_CHARACTERS`, `TOO_MANY_IMAGES`, `TOO_MANY_VIDEOS`, `TOO_MANY_TABLES`, `TOO_LARGE`, and `IMAGE_NOT_FOUND` for an image that is not an upload of the doctor or of this article) and `details.limit` the bound that was passed; the answer never repeats the text, and no text is ever logged. D-W52-100: an upload the text no longer names goes when the write is saved. The article as its page reads it (`ArticleDoctorView`): `status` (`DRAFT`, `IN_REVIEW`, `PUBLISHED`, `REJECTED`), the dates of its life (`createdAt`, `updatedAt`, `submittedAt`, `publishedAt` the first publication, `revisedAt` the last approved change, `rejectedAt`), `content` always the closed schema (an older text is read into it, with its old text sections), `contentImages` the uploads of the article (sizes and the size of the large one), `rejectionReason` (what the team wrote, for a refused article only), `publicSlug` (the public page, while published), and `revision`: the doctor's change of a published article (`IN_REVIEW`, or `REJECTED` with its `rejectedAt` and `rejectionReason`), `hasPendingRevision` while it waits. With a change, `type`, `title`, `shortDescription`, `content` and `image` are the change's, so the doctor goes on from there; the public page keeps the published text until the team approves it (U-222.1). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["ArticleDoctorView"];
                     };
                 };
             };
@@ -9433,7 +10662,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description D-74: the booking prerequisites of D-05 that live on the user profile. Every field is optional and at least one must be sent; an omitted one is left untouched, and a name is merged with the stored one, so `firstName` alone is refused with 422 when no surname is on file. The body is the patient row in its self view (`amkaMasked` / `afmMasked`, no whole identifier), unchanged: read the effect back from GET /appointment/booking-readiness or GET /patient/me. A `dateOfBirth` after today, or further back than 120 years, is refused with 422 (a baby born today passes). A caller without a patient profile is refused with 403 EC017. */
+            /** @description D-74: the booking prerequisites of D-05 that live on the user profile. Every field is optional and at least one must be sent; an omitted one is left untouched, and a name is merged with the stored one, so `firstName` alone is refused with 422 when no surname is on file. The body is the patient row in its self view (`amkaMasked` / `afmMasked`, no whole identifier), unchanged: read the effect back from GET /appointment/booking-readiness or GET /patient/me. A `dateOfBirth` after today, or further back than 120 years, is refused with 422 (a baby born today passes). A caller without a patient profile is refused with 403 EC017. D-W52-44: for an account whose doctor took a first licence (`nameLocked` of `getDoctorDashboard`) names that differ from the stored ones answer 409 with `DOCTOR_NAME_LOCKED` in the message and `details.field` (`firstName`, `lastName` or `fullName`), and nothing is written — not the date of birth of the same call either; the same names pass. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10622,7 +11851,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description D-W51-41 (U-189.1): the real free hours of the doctor of this appointment, to move it to at its own office: the weekly schedule of that office with its exceptions, inside the availability window and the running marketplace licence (never on or after the UTC day the licence ends), without the hours of every other appointment that blocks and of the busy hours of the external calendar, and never an hour that has passed on the server clock (D-118). The appointment itself is not busy. Unlike `/availability/public/slots`, neither the minimum notice nor the booking horizon of the patient applies, nor the switches for online bookings of the doctor and of the office. `durationMinutes` is the longest active service of the appointment, and every slot lasts it. `date` (YYYY-MM-DD, a day the calendar has) is the first day, the server's «today» when absent; `days` (1 to 7, default 1) how many; every day of them inside the availability window and the licence is listed with its slots, possibly none. `timezone` is the IANA zone of the office. Every listed `startTime` is accepted by `rescheduleAppointment` at the moment of the read. Only the doctor side of the appointment reads it — its doctor and the backoffice of its tenant: everyone else gets the one 403 of `getAppointment`, the account that is the patient of the visit a 403 too, and a visit that is not pending or booked the 403 `only a pending or booked appointment can be moved.`; an unknown query key, a malformed or impossible day or `days` out of range answer 422. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
+            /** @description D-W51-41 (U-189.1): the real free hours of the doctor of this appointment, to move it to at its own office: the weekly schedule of that office with its exceptions, inside the availability window and the running marketplace licence (never on or after the UTC day the licence ends), without the hours of every other appointment that blocks and of the busy hours of the external calendar, and never an hour that has passed on the server clock (D-118). The appointment itself is not busy. Unlike `/availability/public/slots`, neither the minimum notice nor the booking horizon of the patient applies, nor the switches for online bookings of the doctor and of the office. `durationMinutes` is the longest active service of the appointment, and every slot lasts it. `date` (YYYY-MM-DD, a day the calendar has) is the first day, the server's «today» when absent; `days` (1 to 7, default 1) how many; every day of them inside the availability window and the licence is listed with its slots, possibly none. `timezone` is the IANA zone of the office. Every listed `startTime` is accepted by `rescheduleAppointment` of the doctor side at the moment of the read. D-W52-75α: the account that is the patient of the visit reads it too, by the rules of `/availability/public/slots` — the weekly schedule with its exceptions, the availability window, the running licence, the switches for online bookings, the minimum notice and the booking horizon of the patient, every other appointment and the busy hours of the external calendar — for the same `durationMinutes` (the copy its lines keep, so a service the doctor deleted since still has hours), the appointment itself not busy; the patient's move may still refuse an hour inside its cancellation cutoff. Everyone else gets the one 403 of `getAppointment` (a foreign or unknown appointment alike, D-107), and a visit that is not pending or booked the 403 `only a pending or booked appointment can be moved.`; an unknown query key, a malformed or impossible day or `days` out of range answer 422. Not rate limited, like `/availability/public/slots`. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10879,7 +12108,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description D-W51-44 («Υπηρεσίες και κόστος»): the appointment after ONE write of its services and its final price, as `getAppointment` answers it. `services` (1 to 10, each `doctorServiceId` once, `quantity` 1 to 50) becomes the whole active set; every one must be a service of the doctor of the appointment that still exists and the doctor's profession may offer (422 otherwise). The server decides the VAT of every line as the booking does — the rate already frozen on the appointment's own line of that service, else the booking's default — so a body with a VAT rate, a net or a VAT amount answers 422. The visit lasts as long as its longest service; when that makes it longer and it would then fall on another appointment of the doctor that blocks or on a busy hour of the external calendar, the answer is 409 `CHARGES_DO_NOT_FIT` with `details`: `durationMinutes` (how long the visit would last), `overlapMinutes` (how many of its minutes fall on the first one) and `nextStartTime` (when that one starts), and nothing is written. `finalTotalAmount` (optional, in euros, 0 to 99999999 in whole cents — a third decimal answers 422, it is never rounded) is the price the patient sees: the server splits it into net and VAT by the rates of the lines, to the cent, and stamps it as the doctor's own price (`priceOverriddenAt`, `priceOverrideReason` = `reason`). Without it, or equal to the total of the services, the final amounts are the services' own and any earlier price of the doctor is cleared. `reason` (optional) holds 1 to 500 characters and no NUL character. The audit gains a `SERVICES_REPLACED` line, and a `PRICE_OVERRIDDEN` one when the doctor's price is set; the patient gets no message. Only the doctor side of the appointment writes it — its doctor and the backoffice of its tenant: everyone else gets the one 403 of `getAppointment`, the account that is the patient of the visit a 403 too; only while `actions.canEditCharges` (pending, booked, checked in) — 403 `service edit is not allowed in current status.` otherwise, and a final price after completion 422 `cannot override final price after completion.`. A write that finds the appointment closed in the meantime answers its 403; one that finds it changed but still open answers 409. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
+            /** @description D-W51-44 («Υπηρεσίες και κόστος»): the appointment after ONE write of its services and its final price, as `getAppointment` answers it. `services` (1 to 10, each `doctorServiceId` once, `quantity` 1 to 50) becomes the whole active set; every one must be a service of the doctor of the appointment that still exists and the doctor's profession may offer (422 otherwise) — or, D-W52-75, a service the doctor has deleted since that is still an active line of this appointment: it stays, priced from the copy the line keeps (title, length, unit price), and once it is left out it cannot be added again. The server decides the VAT of every line as the booking does — the rate already frozen on the appointment's own line of that service, else the booking's default — so a body with a VAT rate, a net or a VAT amount answers 422. The visit lasts as long as its longest service; when that makes it longer and it would then fall on another appointment of the doctor that blocks or on a busy hour of the external calendar, the answer is 409 `CHARGES_DO_NOT_FIT` with `details`: `durationMinutes` (how long the visit would last), `overlapMinutes` (how many of its minutes fall on the first one) and `nextStartTime` (when that one starts), and nothing is written. `finalTotalAmount` (optional, in euros, 0 to 99999999 in whole cents — a third decimal answers 422, it is never rounded) is the price the patient sees: the server splits it into net and VAT by the rates of the lines, to the cent, and stamps it as the doctor's own price (`priceOverriddenAt`, `priceOverrideReason` = `reason`). Without it, or equal to the total of the services, the final amounts are the services' own and any earlier price of the doctor is cleared. `reason` (optional) holds 1 to 500 characters and no NUL character. The audit gains a `SERVICES_REPLACED` line, and a `PRICE_OVERRIDDEN` one when the doctor's price is set; the patient gets no message. Only the doctor side of the appointment writes it — its doctor and the backoffice of its tenant: everyone else gets the one 403 of `getAppointment`, the account that is the patient of the visit a 403 too; only while `actions.canEditCharges` (pending, booked, checked in) — 403 `service edit is not allowed in current status.` otherwise, and a final price after completion 422 `cannot override final price after completion.`. A write that finds the appointment closed in the meantime answers its 403; one that finds it changed but still open answers 409. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11117,7 +12346,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One page ordered newest first (`createdAt desc, id desc`). `limit` defaults to the page size and is refused (422) past the maximum; `cursor` is the opaque `nextCursor` of the previous page, refused (422) when it is not one; `total` is the whole matched set and does not change between pages. `as` (optional, `patient` or `doctor`) names the side an account that is both a doctor and a patient reads: without it a doctor account reads the ratings it received, every other app account the ratings it wrote and the backoffice every rating of its tenant; `as=patient` lists the ratings its own patient profile wrote; `as=doctor` from an account that is no doctor answers 403 and `as` from the backoffice 422. The patient side reads a doctor reply only once it is approved — a pending or rejected reply reads as `NONE`, with no trace in `updatedAt` — and `replyModerationStatus` filters on that visible status. Moderation notes reach the backoffice only, and a moderator id only the moderator. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
+            /** @description One page ordered newest first (`createdAt desc, id desc`). D-W52-84 (U-219.1 Ε1 Α): the doctor side reads its published (`APPROVED`) reviews only — any other `ratingModerationStatus` answers an empty page — and its `replyModerationStatus=NONE` («Χωρίς απάντηση») matches a review with no reply or a rejected one; its page also carries `visits`, one per visit of the page — `startTime`, the IANA `officeTimeZone` the day and hour are printed in, and the titles of its active services (`serviceTitles`) — read in one call for the page, and `openReports`, the reviews of the page it reported that the team still examines (`reportedAt`); the other sides carry neither. `limit` defaults to the page size and is refused (422) past the maximum; `cursor` is the opaque `nextCursor` of the previous page, refused (422) when it is not one; `total` is the whole matched set and does not change between pages. `as` (optional, `patient` or `doctor`) names the side an account that is both a doctor and a patient reads: without it a doctor account reads the ratings it received, every other app account the ratings it wrote and the backoffice every rating of its tenant; `as=patient` lists the ratings its own patient profile wrote; `as=doctor` from an account that is no doctor answers 403 and `as` from the backoffice 422. The patient side reads a doctor reply only once it is approved — a pending or rejected reply reads as `NONE`, with no trace in `updatedAt` — and `replyModerationStatus` filters on that visible status. Moderation notes reach the backoffice only, with one exception (D-W52-86α): each item of the doctor side carries `replyRejectionReason`, the reason the team gave for rejecting its reply, only while that reply is `REJECTED` and `null` in every other state; the note of the review itself never reaches the doctor. A moderator id reaches only the moderator. On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11144,7 +12373,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One rating, read on the side the rating gives the account: its doctor reads it as the doctor (its reply with the moderation status), the holder of its patient profile as the patient (a reply only once approved — until then `updatedAt` is the last change of the rating or its moderation, never of the reply), the backoffice every rating of its tenant. No rating response names the tenant. A rating that does not exist, one of another tenant and an account on neither side answer the one 403 `rating is not accessible to this account.` On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
+            /** @description One rating, read on the side the rating gives the account: its doctor reads it as the doctor (its reply with the moderation status) once it is published (D-W52-84: a review that waits or was rejected answers the one 403 to its doctor), the holder of its patient profile as the patient (a reply only once approved — until then `updatedAt` is the last change of the rating or its moderation, never of the reply), the backoffice every rating of its tenant. No rating response names the tenant. A rating that does not exist, one of another tenant and an account on neither side answer the one 403 `rating is not accessible to this account.` On the doctor side (the account is the doctor of the record, or reads the doctor side of a list) a doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5); the same account on the patient side and the backoffice are not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11177,7 +12406,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The rating with the one reply of its doctor, waiting for moderation (`replyModerationStatus` `PENDING`); the patient and the public read it only once approved. An account acting as a doctor — `DOCTOR` as its primary or a secondary role — answers its own ratings only: a rating that does not exist, one of another doctor and one of another tenant answer the one 403 `rating is not accessible to this account.`; a second reply answers 409, also when two replies race. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            /** @description The rating with the new reply of its doctor, waiting for moderation (`replyModerationStatus` `PENDING`); the patient and the public read it only once approved. D-W52-86: a review takes a reply only while it is published — otherwise 409 `rating is not published.` — and a new reply only with none or after the team rejected the last one; a live reply answers 409, also when two writes race. `reply` is 1–2000 characters after it is cleaned as plain text (control, zero-width and bidi characters removed), with no NUL and no angle bracket (422). An account acting as a doctor — `DOCTOR` as its primary or a secondary role — answers its own ratings only: a rating that does not exist, one of another doctor and one of another tenant answer the one 403 `rating is not accessible to this account.`. Past the shared `doctor-profile-write` budget the write answers 429. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -11188,6 +12417,101 @@ export interface operations {
                         status: "success" | "error";
                         message: string;
                         data: components["schemas"]["AppointmentRatingResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    deleteRatingReply: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ratingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description D-W52-86 (U-219.1 Ε2 Α): the rating without a reply (`replyModerationStatus` `NONE`); the reply leaves the public page at once and a new one may follow at any time. A rating with no reply answers 409 `Doctor reply does not exist for this rating.`, a review that is not published 409; the other refusals are those of `replyToRating`. Past the shared `doctor-profile-write` budget the write answers 429. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentRatingResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    changeRatingReply: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ratingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    reply: string;
+                };
+            };
+        };
+        responses: {
+            /** @description D-W52-86 (U-219.1 Ε2 Α): the rating with the changed reply, waiting for moderation again (`PENDING`): until the team approves it the patient and the public read no reply. Only a pending or published reply changes — none, or a rejected one, answers 409 `Doctor reply does not exist for this rating.` (a rejected reply takes a new one with `replyToRating`) — and only on a published review (409 otherwise). The text and the refusals are those of `replyToRating`. Past the shared `doctor-profile-write` budget the write answers 429. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentRatingResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    reportRating: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ratingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    reason: "NOT_MY_PATIENT" | "OFFENSIVE" | "PERSONAL_DATA" | "NOT_ABOUT_VISIT" | "OTHER";
+                    text?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description D-W52-87 (U-219.1 Ε3 Α): the report, `OPEN` until the team closes it; the review stays published while the team examines it. `reason` is one of the five of the report page (`RatingReportReason`), `text` is optional, at most 1000 characters after it is cleaned as plain text, with no NUL (422). A review takes ONE open report: a second one answers 409 `An open report already exists for this rating.`, also when two reports race; a review that is not published answers 409 `rating is not published.`. A rating that does not exist, one of another doctor and one of another tenant answer the one 403 `rating is not accessible to this account.`. Past the shared `doctor-profile-write` budget the write answers 429. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["AppointmentRatingReportView"];
                     };
                 };
             };
@@ -12444,7 +13768,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The updated base profile. Each booking policy field is validated against the configured range and refused with 422 outside it. The contact email reads as in the GET: masked, and whole only for the backoffice changing another account. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            /** @description The updated base profile. Each booking policy field is validated against the configured range and refused with 422 outside it. The contact email reads as in the GET: masked, and whole only for the backoffice changing another account. D-W52-52: `licenseNumber` is at most 50 characters and stored as plain text on one line (longer answers 422). D-W52-51 (U-209.2): once the doctor took a first licence (`nameLocked` of `getDoctorDashboard`) the specialty and the practice licence are locked for the doctor, as the name is: a `licenseNumber` or a `licenseObtainedDate` that differs from the stored one answers 409 with `DOCTOR_NAME_LOCKED` in the message and `details.field` (`licenseNumber` or `licenseObtainedDate`), and nothing of the call is written; the same value passes, and the backoffice is never locked. D-W52-67 (U-211): `website`, `facebook`, `instagram` and `linkedin` are each a link or `null` (clears it), stored trimmed and otherwise as typed. Every link is `https://` only, at most 2000 characters, with no name or password inside (`user:pass@`) and no space, backslash or hidden character; `facebook` must be on `facebook.com`, a name under it, or `fb.com`; `instagram` on `instagram.com` or `www.instagram.com`; `linkedin` on `linkedin.com` or a name under it; `website` on a public name with a dot — no IP address (v4 or v6), no `localhost`, nothing under `.local`. The host is the one a URL parser reads, never a search in the text, so `https://evil.com/facebook.com` and `https://facebook.com.evil.com` are refused. A refused link answers 422 and nothing of the call is written; the message names every refused field with a code `DOCTOR_<FIELD>_LINK_<REASON>` (`FIELD`: `WEBSITE`, `FACEBOOK`, `INSTAGRAM`, `LINKEDIN`; `REASON`: `NOT_A_LINK`, `NOT_HTTPS`, `HAS_CREDENTIALS`, `NOT_OF_NETWORK` for the three networks, `NOT_A_PUBLIC_HOST` for the website), for example `DOCTOR_FACEBOOK_LINK_NOT_OF_NETWORK`; a text longer than 2000 characters is refused by the request schema with the plain 422. Rate limited per IP under the `doctor-profile-write` class, the one budget of every write of the profile (429 beyond it). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -12600,7 +13924,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. The names are stored in `language`, else in the language of the stored names, else in the language of the request (`?lang`, then `Accept-Language`), else `el`; the account's `locale` follows it. `DOCTOR_UNDER_MINIMUM_AGE` refuses a date of birth under 18, `DOCTOR_ONBOARDING_NOT_STARTED` a registration that never started. */
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. The names are stored in `language`, else in the language of the stored names, else in the language of the request (`?lang`, then `Accept-Language`), else `el`; the account's `locale` follows it. `DOCTOR_UNDER_MINIMUM_AGE` refuses a date of birth under 18, `DOCTOR_ONBOARDING_NOT_STARTED` a registration that never started. D-W52-44: once the doctor took a first licence the names are locked for the doctor (`nameLocked` of `getDoctorDashboard`): names that differ from the stored ones answer 409 with `DOCTOR_NAME_LOCKED` in the message and `details.field` (`firstName`, `lastName` or `fullName`) and nothing is written; the same names pass, so gender and date of birth still change. The backoffice is never locked. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -12729,7 +14053,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. */
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. D-W52-51 (U-209.2): once the doctor took a first licence (`nameLocked` of `getDoctorDashboard`) the specialty and the practice licence are locked for the doctor, as the name is: another `professionalId` answers 409 with `DOCTOR_NAME_LOCKED` in the message and `details.field` = `professionalId`, and nothing is written; the same one passes, and the backoffice is never locked. D-W52-55: when the specialty changes, the specializations that are not of the new list and the services the new specialty does not allow are removed in the same call. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -12764,7 +14088,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. A licence date is a day between 1950-01-01 and today. */
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. A licence date is a day between 1950-01-01 and today; the number is at most 50 characters, stored as plain text. D-W52-51 (U-209.2): once the doctor took a first licence (`nameLocked` of `getDoctorDashboard`) the specialty and the practice licence are locked for the doctor, as the name is: a number or a date that differs from the stored one answers 409 with `DOCTOR_NAME_LOCKED` in the message and `details.field` (`licenseNumber` or `licenseObtainedDate`), and nothing is written; the same value passes, and the backoffice is never locked. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -12852,7 +14176,7 @@ export interface operations {
             content: {
                 "application/json": {
                     price: number;
-                    customDurationInMinutes?: (15 | 20 | 30 | 45 | 60) | null;
+                    customDurationInMinutes?: (15 | 20 | 30 | 45 | 60 | 75 | 90 | 105 | 120) | null;
                     language?: ("el" | "en") | null;
                     subtitle?: string | null;
                     description?: string | null;
@@ -12860,7 +14184,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. The price is a whole number of euros from 1 to 9999; the length is one of 15, 20, 30, 45 or 60 minutes, or `null` for the default. */
+            /** @description The saved registration after the write, the same `DoctorOnboardingProgressView` the progress read answers (the clients open `missing[0]`). Rate limited per IP under the `onboarding` class, one budget for every registration write (429 past it). A refusal answers 422 with its marker in the message. The price is a whole number of euros from 1 to 9999; the length is one of 15, 20, 30, 45, 60, 75, 90, 105 or 120 minutes (D-W52-76, the one list of every service), or `null` for the default. D-W52-78 (U-212.2): a doctor writes Greek alone — a `language` other than `el` answers 422 with `DOCTOR_WRITES_GREEK_ONLY` in the message and nothing is written; a `subtitle` or `description` is stored as Greek, and a body with no text keeps the language of the account. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -13037,7 +14361,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The standing of the session's own account (no other account can be named): `registration` (`NOT_STARTED`, `IN_PROGRESS`, `LOCKED`, `COMPLETED`), the `marketplace` and `payments` licences (`NONE`, `ACTIVE` with the end of the farthest active, `EXPIRED` with the latest end; a pending, rejected or revoked licence reads `NONE`), `licensed` (a completed registration and either licence, an expired one included: only then the clients show the doctor mode), `notice` (`EXPIRING` from 30 platform days before the end unless a later licence renews it, `EXPIRED` after it; of the marketplace licence, else of the payments one), `lastMode` (the stored mode in force: a stored `DOCTOR` without a marketplace licence reads `PATIENT`) and `card` (first and last name of the profile and the specialty of the catalogue in the request language, only when licensed). It carries no email, tax number or other account field. Never cached (`no-store`). A query parameter answers 422. */
+            /** @description The standing of the session's own account (no other account can be named): `registration` (`NOT_STARTED`, `IN_PROGRESS`, `LOCKED`, `COMPLETED`), the `marketplace` and `payments` licences (`NONE`, `ACTIVE` with the end of the farthest active, `EXPIRED` with the latest end; a pending, rejected or revoked licence reads `NONE`), `licensed` (a completed registration and either licence, an expired one included: only then the clients show the doctor mode), `notice` (`EXPIRING` from 30 platform days before the end unless a later licence renews it, `EXPIRED` after it; of the marketplace licence, else of the payments one), `nameLocked` (D-W52-47: true once the doctor took a first licence — a marketplace or payments one that was verified, or revoked after it, and has started — and for ever after, also when it ended or was revoked; the clients then show the name without a change, and every write of the names by the account itself answers 409 with `DOCTOR_NAME_LOCKED` in the message and `details.field`), `lastMode` (the stored mode in force: a stored `DOCTOR` without a marketplace licence reads `PATIENT`) and `card` (first and last name of the profile and the specialty of the catalogue in the request language, only when licensed). It carries no email, tax number or other account field. Never cached (`no-store`). A query parameter answers 422. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -13069,7 +14393,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The new dashboard view, the same `DoctorDashboardView` the read answers. `PATIENT` is always taken; `DOCTOR` only by a licensed account with a marketplace licence, else 403 with `DOCTOR_MODE_NOT_ALLOWED` in the message (a payments-only licence opens the till, which is a screen and not a mode). Any other mode or any other field answers 422. The standing of the session's own account (no other account can be named): `registration` (`NOT_STARTED`, `IN_PROGRESS`, `LOCKED`, `COMPLETED`), the `marketplace` and `payments` licences (`NONE`, `ACTIVE` with the end of the farthest active, `EXPIRED` with the latest end; a pending, rejected or revoked licence reads `NONE`), `licensed` (a completed registration and either licence, an expired one included: only then the clients show the doctor mode), `notice` (`EXPIRING` from 30 platform days before the end unless a later licence renews it, `EXPIRED` after it; of the marketplace licence, else of the payments one), `lastMode` (the stored mode in force: a stored `DOCTOR` without a marketplace licence reads `PATIENT`) and `card` (first and last name of the profile and the specialty of the catalogue in the request language, only when licensed). It carries no email, tax number or other account field. Never cached (`no-store`). */
+            /** @description The new dashboard view, the same `DoctorDashboardView` the read answers. `PATIENT` is always taken; `DOCTOR` only by a licensed account with a marketplace licence, else 403 with `DOCTOR_MODE_NOT_ALLOWED` in the message (a payments-only licence opens the till, which is a screen and not a mode). Any other mode or any other field answers 422. The standing of the session's own account (no other account can be named): `registration` (`NOT_STARTED`, `IN_PROGRESS`, `LOCKED`, `COMPLETED`), the `marketplace` and `payments` licences (`NONE`, `ACTIVE` with the end of the farthest active, `EXPIRED` with the latest end; a pending, rejected or revoked licence reads `NONE`), `licensed` (a completed registration and either licence, an expired one included: only then the clients show the doctor mode), `notice` (`EXPIRING` from 30 platform days before the end unless a later licence renews it, `EXPIRED` after it; of the marketplace licence, else of the payments one), `nameLocked` (D-W52-47: true once the doctor took a first licence — a marketplace or payments one that was verified, or revoked after it, and has started — and for ever after, also when it ended or was revoked; the clients then show the name without a change, and every write of the names by the account itself answers 409 with `DOCTOR_NAME_LOCKED` in the message and `details.field`), `lastMode` (the stored mode in force: a stored `DOCTOR` without a marketplace licence reads `PATIENT`) and `card` (first and last name of the profile and the specialty of the catalogue in the request language, only when licensed). It carries no email, tax number or other account field. Never cached (`no-store`). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -13080,6 +14404,577 @@ export interface operations {
                         status: "success" | "error";
                         message: string;
                         data: components["schemas"]["DoctorDashboardView"];
+                    };
+                };
+            };
+        };
+    };
+    getDoctorMyProfile: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The doctor of the session and no other (nothing in the request names a doctor; any key but `lang` / `language` answers 422; an account without the DOCTOR role is refused with 403). `doctorId` and the `slug` of the public page in the request language (else Greek). `visibility.visible` holds exactly when the public profile answers this doctor: the team check, a marketplace licence active now, a profile text, a specialty with a name and an office with coordinates and a text. Otherwise `visibility.reason` is one of, by priority: `LICENCE_EXPIRED` (a marketplace licence ended; `licenceEndedAt` carries the end, else it is `null`), `NOT_VERIFIED`, `NO_MARKETPLACE_LICENCE`, `INCOMPLETE` (a text, the specialty or the office is missing). `sections` are facts only, the client builds every text: `photos.count`; `about.fullName`, `hasDescription` and `nameLocked` (D-W52-47: the first licence locked the name, as `getDoctorDashboard` reads it); `specialty.name` from the catalogue, `specialty.specializationsCount` (D-W52-57: the specializations of the doctor in any status, 0 to 3) and `specialty.hasCatalogue` (whether the specialty has a list to pick from: without one the clients show no specializations at all); `cv` counts of studies, positions and conferences; `languages.names` from the catalogue in the request language, in its order, and `socialCount` of the filled links; `services.count`, `minPrice` in euros and `samePrice` over the services the public page lists. `missing` holds the open helpers of the readiness among `ADD_PROFILE_IMAGE`, `ADD_SPECIALIZATIONS` (the specialty has a list and the doctor picked none), `ADD_STUDIES`, `ADD_WORK_EXPERIENCE`, `ADD_SPEAK_LANGUAGES`. It carries no email, phone, AMKA or tax number. Never cached (`no-store`). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorMyProfileView"];
+                    };
+                };
+            };
+        };
+    };
+    getDoctorMyProfilePreview: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description U-224: the same `DoctorPublicMarketplaceProfileResponseView` the public profile answers, for the doctor of the session and no other (nothing in the request names a doctor or an office; any key but `lang` / `language` answers 422; an account without the DOCTOR role is refused with 403). It reads exactly as the public profile except that it does not ask for the team check or an active marketplace licence, so a doctor the search hides still reads the page; for a doctor the search shows the two answers are the same. The doctor is the viewer, so `pricingVisible` is true; the office is the default one. `doctor` is `null` when the page cannot be drawn (no profile text, no specialty with a name, or no office with coordinates and a text), as the public profile answers a doctor it does not show. Never cached (`no-store`). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorPublicMarketplaceProfileResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    getDoctorMyReviewsSummary: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description D-W52-85 (screen 84): the totals of the published reviews of the doctor of the session and no other, composed exactly as `getPublicMarketplaceReviewsSummary` answers them — `count`, `average` and `aspectAverages` on the 0–5 stars, the five bars of `distribution` from 5 down (always all five) and the six `topics` with the codes of the public page — but also while the search hides the doctor, and with `pendingCount`, how many reviews wait for moderation (the line «N νέες κριτικές ελέγχονται…»). Nothing in the request names a doctor; any key but `lang` / `language` answers 422; an account without the DOCTOR role is refused with 403. Never cached (`no-store`). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorMyReviewsSummaryView"];
+                    };
+                };
+            };
+        };
+    };
+    listDoctorProfileImages: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every image of the doctor by `priority`, the first one the main image; at most 20 (D-W52-29). Each one is: A `DoctorImageViewExt`: the three stored sizes of the image, every one a centre crop of the upload (`smSizeUrl` 200 × 200, `mediumSizeUrl` 800 × 600, `lgSizeUrl` 1200 × 900, all webp), `priority` (its position, 0 for the main image) and `translations`, the `alt` texts the server writes itself in Greek and English: «{name}, φωτογραφία {position}» and «{name}, photo {position}», the position from 1 and the name of the doctor in that language, else the Greek one (D-W52-33). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorProfileImageListResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    createDoctorProfileImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    image: {
+                        file: string;
+                        fileName?: string;
+                    };
+                    priority?: number;
+                    translations?: {
+                        /** @enum {string} */
+                        language: "el" | "en";
+                        alt?: string;
+                        metaDescription?: string;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description The stored image, placed last in the order (the first image of a doctor is the main one). `image.file` is a base64 data URI of a JPG, PNG or WebP, at most 10 MB after decoding and 40 million pixels, its type read from the content too (422 otherwise). An image a doctor uploads is at least 800 pixels wide and 600 high after the EXIF rotation: a smaller one answers 422 with `IMAGE_TOO_SMALL` in the message and `details` `minWidth`, `minHeight`, `width`, `height` (D-W52-30). A doctor holds at most 20 images, the backoffice included: the next one answers 409 with `DOCTOR_IMAGE_LIMIT_REACHED` in the message and `details.limit`, and nothing is stored (D-W52-29). `priority` is accepted and not read: the order is `reorderDoctorProfileImages`. `translations` is optional and not read from a doctor account; from the backoffice it is stored, and its `alt` is then rewritten like every other. A doctor account writes its own images and never names another account; the backoffice names the doctor with `tenantUserId`. Rate limited per IP under the `doctor-profile-write` class, one budget for every write of the profile (429 past it). A `DoctorImageViewExt`: the three stored sizes of the image, every one a centre crop of the upload (`smSizeUrl` 200 × 200, `mediumSizeUrl` 800 × 600, `lgSizeUrl` 1200 × 900, all webp), `priority` (its position, 0 for the main image) and `translations`, the `alt` texts the server writes itself in Greek and English: «{name}, φωτογραφία {position}» and «{name}, photo {position}», the position from 1 and the name of the doctor in that language, else the Greek one (D-W52-33). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorImageViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    getDoctorProfileImage: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                imageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The image, or `null` when the doctor has no image of that id — an image of another doctor reads the same (U-65.6). A `DoctorImageViewExt`: the three stored sizes of the image, every one a centre crop of the upload (`smSizeUrl` 200 × 200, `mediumSizeUrl` 800 × 600, `lgSizeUrl` 1200 × 900, all webp), `priority` (its position, 0 for the main image) and `translations`, the `alt` texts the server writes itself in Greek and English: «{name}, φωτογραφία {position}» and «{name}, photo {position}», the position from 1 and the name of the doctor in that language, else the Greek one (D-W52-33). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorProfileImageResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    deleteDoctorProfileImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                imageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The image that was deleted, as it read before. In the same write the images that stay take positions 0 … n−1 and their `alt` texts again, so after the main image goes the next one is the main image (D-W52-34); read the list for the new order. The stored files are removed after the write. An image that is not the doctor's answers 404. A doctor account writes its own images and never names another account; the backoffice names the doctor with `tenantUserId`. Rate limited per IP under the `doctor-profile-write` class, one budget for every write of the profile (429 past it). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorImageViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    updateDoctorProfileImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                imageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    image?: {
+                        file: string;
+                        fileName?: string;
+                    };
+                    priority?: number;
+                };
+            };
+        };
+        responses: {
+            /** @description D-W52-35 («Προσαρμογή»): the same image — same id, same position, same texts — with three new sizes from `image`; the files it replaces are removed after the write. `image.file` is a base64 data URI of a JPG, PNG or WebP, at most 10 MB after decoding and 40 million pixels, its type read from the content too (422 otherwise). An image a doctor uploads is at least 800 pixels wide and 600 high after the EXIF rotation: a smaller one answers 422 with `IMAGE_TOO_SMALL` in the message and `details` `minWidth`, `minHeight`, `width`, `height` (D-W52-30). `priority` is read only from the backoffice: from a doctor account it is not read, so a body with nothing else answers 422, and the order is `reorderDoctorProfileImages`. An image that is not the doctor's answers 404. A doctor account writes its own images and never names another account; the backoffice names the doctor with `tenantUserId`. Rate limited per IP under the `doctor-profile-write` class, one budget for every write of the profile (429 past it). A `DoctorImageViewExt`: the three stored sizes of the image, every one a centre crop of the upload (`smSizeUrl` 200 × 200, `mediumSizeUrl` 800 × 600, `lgSizeUrl` 1200 × 900, all webp), `priority` (its position, 0 for the main image) and `translations`, the `alt` texts the server writes itself in Greek and English: «{name}, φωτογραφία {position}» and «{name}, photo {position}», the position from 1 and the name of the doctor in that language, else the Greek one (D-W52-33). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorImageViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    reorderDoctorProfileImages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    imageIds: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description D-W52-31: every image of the doctor in the new order, as the list answers it. `imageIds` is exactly the images of the doctor, each once, in the order wanted: the first becomes the main image («Κάντε την κύρια» is this call with that image first). One transaction writes `priority` 0 … n−1 and the `alt` texts of every image. An id of no image of the doctor answers 404 (U-65.6); a missing image answers 422 with `DOCTOR_IMAGE_ORDER_MISMATCH` in the message, a repeated id or more than 20 ids 422, and nothing is written. A doctor account writes its own images and never names another account; the backoffice names the doctor with `tenantUserId`. Rate limited per IP under the `doctor-profile-write` class, one budget for every write of the profile (429 past it). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorProfileImageListResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    getDoctorProfileTranslation: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path: {
+                language: "el" | "en";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The texts of the public page in `language` (`el` or `en`), or `null` when the page has none in it. A doctor account reads its own and never names another account; the backoffice names the doctor with `tenantUserId`. `fullName` is the public name and `slug` the address of the page, both written by the server. `description` is what the patients read: `{ "blocks": [{ "type": "paragraph", "children": [{ "text": "…" }] }] }`, each `text` plain text and never HTML, drawn by the renderer of the public page; `{}` while nothing is written yet. D-W52-48 (U-207.2): only the backoffice writes the description, and after the first licence only the backoffice changes the name (`nameLocked` of `getDoctorDashboard`). `studies`, `workExperience` and `conferences` are the biography of that language as plain lists. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorProfileTranslationResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    listDoctorSpecializationOptions: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The closed list of the doctor's present specialty, in the order of the catalogue. A specialty without a sourced list answers `[]`: then there is nothing to pick, and a save with any code is refused. One specialty holds lines of one kind only. Each line is `code` (the catalogue id of the specialty and a number, `PR011-03`), `name` in the language of the request (`lang`, then `Accept-Language`, else Greek) and `kind`: `SOCIETY_AREA` (a field a scientific society names) or `FEK_TITLE` (a title of the Government Gazette, earned by training and exams, which the team of eDoctor checks). A doctor account reads and writes its own and never names another account; the backoffice names the doctor with `tenantUserId`. Never cached (`no-store`). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorSpecializationOptionListView"];
+                    };
+                };
+            };
+        };
+    };
+    listDoctorSpecializations: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The picks of the doctor, at most three, in the order of the catalogue, each with `status`: `APPROVED` (the patients read it), `PENDING` (a title of the Gazette the team has not answered yet: «Ελέγχεται») or `REJECTED` (the team did not approve it: «Δεν εγκρίθηκε»; it stays until the doctor takes it away, and still counts towards the three). Each line is `code` (the catalogue id of the specialty and a number, `PR011-03`), `name` in the language of the request (`lang`, then `Accept-Language`, else Greek) and `kind`: `SOCIETY_AREA` (a field a scientific society names) or `FEK_TITLE` (a title of the Government Gazette, earned by training and exams, which the team of eDoctor checks). A doctor account reads and writes its own and never names another account; the backoffice names the doctor with `tenantUserId`. Never cached (`no-store`). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorSpecializationListView"];
+                    };
+                };
+            };
+        };
+    };
+    replaceDoctorSpecializations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    codes: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description The picks after the save, as `listDoctorSpecializations` answers them. `codes` becomes the whole of the doctor's picks: at most three, none twice, each of the list of the doctor's present specialty; `[]` takes them all away. More than three, a repeated code, a code out of shape or any other field answers 422; a code of another specialty, an unknown code, or any code for a specialty without a list answers 422 with `DOCTOR_SPECIALIZATION_NOT_OF_SPECIALTY` in the message; in every case nothing is written. A code the doctor already holds keeps its status, so an approved title never waits again and a rejected one stays rejected until a save leaves it out (sent again later, it waits anew). A new `SOCIETY_AREA` is `APPROVED` at once; a new `FEK_TITLE` is `PENDING` until the team answers. Rate limited per IP under the `doctor-profile-write` class, one budget for every write of the profile (429 past it). Each line is `code` (the catalogue id of the specialty and a number, `PR011-03`), `name` in the language of the request (`lang`, then `Accept-Language`, else Greek) and `kind`: `SOCIETY_AREA` (a field a scientific society names) or `FEK_TITLE` (a title of the Government Gazette, earned by training and exams, which the team of eDoctor checks). A doctor account reads and writes its own and never names another account; the backoffice names the doctor with `tenantUserId`. Never cached (`no-store`). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorSpecializationListView"];
+                    };
+                };
+            };
+        };
+    };
+    listSpeakLanguageOptions: {
+        parameters: {
+            query?: {
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The whole catalogue (D-W52-64): the living languages of ISO 639-1 named by Unicode CLDR, and the Greek Sign Language. Each line is `code` (`SL001` Greek, `SL002` English, `SL003` German, the rest in the order of the ISO code; a code never changes), `iso` (the ISO 639 code, `gss` for the Greek Sign Language), `name`, `normalized` and `slug`. `name` is in the language of the request (`lang`, then `Accept-Language`); `normalized` is that name in lower case without accents, the text a search inside the word compares with (the client folds what the doctor types the same way); `slug` is the name in Latin letters. The order is the order of the codes, not the order of a picker: a picker shows Greek first and then the rest by `name`. Public, the same for every caller. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorSpeakLanguageOptionListView"];
+                    };
+                };
+            };
+        };
+    };
+    listDoctorSpeakLanguages: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+                lang?: "el" | "en";
+                language?: "el" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The languages of the doctor, at most ten, Greek first and then by `name` in the language of the request. Each line is the row (`id`, `doctorId`, `createdAt`, `updatedAt`) with `code`, `name`, `normalized` and `slug` of the catalogue. `name` is in the language of the request (`lang`, then `Accept-Language`); `normalized` is that name in lower case without accents, the text a search inside the word compares with (the client folds what the doctor types the same way); `slug` is the name in Latin letters. A doctor account reads its own and never names another account; the backoffice names the doctor with `tenantUserId`. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorSpeakLanguageListView"];
+                    };
+                };
+            };
+        };
+    };
+    replaceDoctorSpeakLanguages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    codes: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description The languages after the save, as `listDoctorSpeakLanguages` answers them. `codes` becomes the whole of the doctor's languages: at most ten, none twice, each a code of the catalogue; `[]` takes them all away. More than ten, a repeated code, a code out of shape or any other field answers 422; a code of the right shape that the catalogue does not hold answers 422 with `DOCTOR_SPEAK_LANGUAGE_NOT_IN_CATALOGUE` in the message; in every case nothing is written, not the valid codes beside it either. The rows are stored Greek first and then by Greek name, the order the public page shows; a save rewrites them, so the `id` of a row does not survive it. Rate limited per IP under the `doctor-profile-write` class (429 beyond it). Never cached (`no-store`). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorSpeakLanguageListView"];
+                    };
+                };
+            };
+        };
+    };
+    listDoctorCredentials: {
+        parameters: {
+            query?: {
+                tenantUserId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every row of the biography of the doctor, a `DoctorCredentialView` each: `kind` (`STUDY` «Σπουδές», `WORK` «Εμπειρία», `CONFERENCE` «Συνέδρια»), `startYear` and `endYear` (a year or `null`), `isCurrent` («σήμερα»: «Εργάζομαι εδώ σήμερα» of a position, «Σε εξέλιξη» of studies), `position` (where the row was written in its group, from 0) and `translations`, one per language with `title` and `organization` (`null` when none). The order is the server's and the clients keep it (U-210.1, no dragging): the three groups in turn, `STUDY`, `WORK`, `CONFERENCE`, and inside each the order of the public page — the current rows first, then the latest year (`endYear`, else `startYear`), then the latest `startYear`, then the written order, and the rows without any year last. So the doctor reads the lines as the patients read them, whatever `position` says. Every text is plain text and never HTML. A doctor account reads and writes its own and never names another account; the backoffice names the doctor with `tenantUserId`. Any query key but `tenantUserId` answers 422. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorCredentialListView"];
+                    };
+                };
+            };
+        };
+    };
+    replaceDoctorCredentials: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    tenantUserId?: string;
+                    /** @enum {string} */
+                    kind: "STUDY" | "WORK" | "CONFERENCE";
+                    items: {
+                        startYear?: number | null;
+                        endYear?: number | null;
+                        isCurrent?: boolean;
+                        translations: {
+                            /** @enum {string} */
+                            language: "el" | "en";
+                            title: string;
+                            organization?: string | null;
+                        }[];
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description The whole biography after the save, as `listDoctorCredentials` answers it. `items` becomes the whole of the group `kind` and the other two groups are not touched; `[]` empties the group. A save sends every row of the group again, from the last answer of the server, with the one change. Limits: at most 20 items a group; `title` 1 to 300 characters and `organization` 1 to 200 or `null`, stored as plain text (control, zero-width and bidi characters removed; a title with nothing left is refused); a year is an integer from 1950 to next year on the server clock; `endYear` needs `startYear` and is not before it; `isCurrent` needs `startYear`, excludes `endYear` and is not for a `CONFERENCE`; each language once an item. D-W52-61 (U-207.3): a doctor writes Greek alone — every `translations[].language` of a doctor's save is `el`, and any other language answers 422 with `DOCTOR_WRITES_GREEK_ONLY` in the message; the backoffice writes every language the page of the doctor has a text in. Past a limit, with an unknown field or with a language the page has no text in the save answers 422; in every case nothing is written. Rate limited per IP under the `doctor-profile-write` class, one budget for every write of the profile (429 past it). Every row of the biography of the doctor, a `DoctorCredentialView` each: `kind` (`STUDY` «Σπουδές», `WORK` «Εμπειρία», `CONFERENCE` «Συνέδρια»), `startYear` and `endYear` (a year or `null`), `isCurrent` («σήμερα»: «Εργάζομαι εδώ σήμερα» of a position, «Σε εξέλιξη» of studies), `position` (where the row was written in its group, from 0) and `translations`, one per language with `title` and `organization` (`null` when none). The order is the server's and the clients keep it (U-210.1, no dragging): the three groups in turn, `STUDY`, `WORK`, `CONFERENCE`, and inside each the order of the public page — the current rows first, then the latest year (`endYear`, else `startYear`), then the latest `startYear`, then the written order, and the rows without any year last. So the doctor reads the lines as the patients read them, whatever `position` says. Every text is plain text and never HTML. A doctor account reads and writes its own and never names another account; the backoffice names the doctor with `tenantUserId`. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorCredentialListView"];
                     };
                 };
             };
@@ -13174,6 +15069,31 @@ export interface operations {
             };
         };
     };
+    listAllowedDoctorServices: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description D-W52-79 (U-214, screen 83): the catalogue «Προσθήκη υπηρεσίας» picks from — every service open to all doctors and every one restricted to the specialty of the doctor of the session. `id` is the `serviceId` a create sends; `title` is its title in the language of the request (`Accept-Language` or `lang`, English when it names none), else the Greek one, else the service's own name; `durationInMinutes` is its usual length as a doctor may pick it — the first of 15, 20, 30, 45, 60, 75, 90, 105, 120 that holds the catalogue's own length; `owned` says the doctor already has it, so the picker leaves it out and the page of an owned service still finds its suggestion here. `suggestedSubtitle` and `suggestedDescription` are the Greek texts of eDoctor (`null` when the catalogue has none), ONLY for the button «Συμπλήρωση με την πρόταση του eDoctor»: they are never stored for the doctor and never shown to a patient until the doctor saves them as its own. No price is suggested (U-217.3): a new service starts with an empty price the client asks for before the save. A doctor without a specialty answers 422; any account that is not a doctor 403. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorAllowedServiceListResponseView"];
+                    };
+                };
+            };
+        };
+    };
     listDoctorServices: {
         parameters: {
             query?: never;
@@ -13183,7 +15103,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description D-W51-44: the services «Υπηρεσίες και κόστος» ticks from — every one with its `price` in euros, `customDurationInMinutes`, its catalogue and its own texts (`translations`), and `title`: the title of its base service in the language of the request (`Accept-Language` or `lang`, English when it names none), else the base service's own name. An account acting as a doctor reads only its own services, the doctor of the session — nothing in the request names another doctor, and a query key is ignored; `ADMIN` reads every doctor's, `SEMI_ADMIN` and `SUPPORT` those of their tenant; a patient is refused with 403. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            /** @description D-W51-44: the services «Υπηρεσίες και κόστος» ticks from — every one with its `price` in euros, `customDurationInMinutes`, its catalogue and its own texts (`translations`), and `title`: the title of its base service in the language of the request (`Accept-Language` or `lang`, English when it names none), else the base service's own name. An account acting as a doctor reads only its own services, the doctor of the session — nothing in the request names another doctor, and a query key is ignored; `ADMIN` reads every doctor's, `SEMI_ADMIN` and `SUPPORT` those of their tenant; a patient is refused with 403. D-W52-73: the services of one doctor come in the doctor's own order (`reorderDoctorServices`), the order of the public page; a list of several doctors groups them by doctor. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -13194,6 +15114,250 @@ export interface operations {
                         status: "success" | "error";
                         message: string;
                         data: components["schemas"]["DoctorServiceListResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    createDoctorService: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    doctorId: string;
+                    /** Format: uuid */
+                    serviceId: string;
+                    price: number;
+                    amount?: number;
+                    /** @enum {integer} */
+                    customDurationInMinutes: 15 | 20 | 30 | 45 | 60 | 75 | 90 | 105 | 120;
+                    yearsOfexperience?: number | null;
+                    /** Format: uuid */
+                    catalogueId?: string;
+                    translations: {
+                        /** @enum {string} */
+                        language: "el" | "en";
+                        subtitle?: string | null;
+                        description?: string | null;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description D-W52-72 / D-W52-73 (screen 83): the new service, placed last in the order of its doctor and in the regular catalogue of that doctor, which is made when it is missing. `doctorId` is the doctor of the session for a doctor account (`doctorId` of `getDoctorMyProfile`; another doctor answers 403) and `serviceId` one of `listAllowedDoctorServices` (any other answers 422). `price` is required: a new service has no price until the doctor writes one, and 0 is refused. `translations` holds at least one item; a new service with no text of its own sends `[{ "language": "el" }]`. A service the doctor already offers at the regular price answers 409. The service as stored: `price` in euros, `customDurationInMinutes`, its own texts (`translations`, a subtitle and a description a language, each `null` when the doctor wrote none — the public page then shows none, U-214) and its catalogue. Its place in the order is its place in `listDoctorServices`. D-W52-71: the limits of the registration hold on every write — `price` whole euros from 1 to 9999, `customDurationInMinutes` one of 15, 20, 30, 45, 60, 75, 90, 105, 120, `subtitle` at most 120 characters and `description` at most 1000, stored as plain text (control, zero-width and bidi characters removed; `null` or an empty text clears it), `yearsOfexperience` whole years from 0 to 70 and never over the whole years since the doctor obtained the licence (`null` clears them); past a limit or with an unknown field the write answers 422 and nothing is written. D-W52-72 (U-212.3): one price a service — an account acting as a doctor sends no `amount` (422) and no `catalogueId` but its own regular one (another of its own answers 422, a foreign or unknown one 403); the backoffice may name both. D-W52-78 (U-212.2): a doctor writes Greek alone — every `translations[].language` and the `language` of a text route is `el`, any other answers 422 with `DOCTOR_WRITES_GREEK_ONLY` in the message; the backoffice writes every language. A service that is not the account's answers 403, an unknown id alike (D-107). Rate limited per IP under the `doctor-profile-write` class, one budget for every write of the profile (429 past it). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorServiceViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    reorderDoctorServices: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    ids: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description D-W52-73 (screen 83): every service of the doctor in the new order, as `listDoctorServices` answers it. `ids` is exactly the services of the doctor of the session, each once, in the order wanted; one transaction writes the places 0 … n−1, and the public page and the lists of the doctor follow. An id of no service of the doctor answers 404 (U-65.6); a missing service answers 422 with `DOCTOR_SERVICE_ORDER_MISMATCH` in the message, a repeated id or more than 200 ids 422; in every case nothing is written. Only an account acting as a doctor orders, its own services: any other account answers 403. Rate limited per IP under the `doctor-profile-write` class, one budget for every write of the profile (429 past it). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorServiceListResponseView"];
+                    };
+                };
+            };
+        };
+    };
+    getDoctorService: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doctorServiceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The service as stored: `price` in euros, `customDurationInMinutes`, its own texts (`translations`, a subtitle and a description a language, each `null` when the doctor wrote none — the public page then shows none, U-214) and its catalogue. Its place in the order is its place in `listDoctorServices`. A doctor reads only its own service: one of another doctor and an unknown id answer the same 403 (D-107). `SEMI_ADMIN` and `SUPPORT` read those of their tenant; `ADMIN` every one, and `data: null` for an unknown id. A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorServiceViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    deleteDoctorService: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doctorServiceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The service that was deleted, as it read before; its texts go with it. D-W52-74 (U-212.1): a doctor never deletes the only service it has left — 409 with `DOCTOR_SERVICE_LAST_ONE` in the message, and nothing is deleted; the backoffice is not held by it. D-W52-75: the appointments already booked keep the service — each line holds its own copy of the title, the length and the price, the doctor still moves the visit, the patient too by the public rules of the hour, and «Υπηρεσίες και κόστος» (`editAppointmentCharges`) keeps the line from that copy; a deleted service is only never added to a visit again. A service that is not the account's answers 403, an unknown id alike (D-107; 404 for `ADMIN`). Rate limited per IP under the `doctor-profile-write` class, one budget for every write of the profile (429 past it). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorServiceViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    updateDoctorService: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doctorServiceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    doctorId?: string;
+                    /** Format: uuid */
+                    serviceId?: string;
+                    price?: number;
+                    amount?: number;
+                    /** @enum {integer} */
+                    customDurationInMinutes?: 15 | 20 | 30 | 45 | 60 | 75 | 90 | 105 | 120;
+                    yearsOfexperience?: number | null;
+                    /** Format: uuid */
+                    catalogueId?: string;
+                    translations?: {
+                        /** @enum {string} */
+                        language: "el" | "en";
+                        subtitle?: string | null;
+                        description?: string | null;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description Screen 83 «Αποθήκευση»: the service after the write. Every field is optional and an absent one is not touched; a body with none answers 422. `translations` writes the text of each language it names and leaves the other languages as they are, so the page of the doctor saves price, length, years and `[{ "language": "el", "subtitle": …, "description": … }]` in this one call. The new price holds for new appointments: a line of an appointment keeps the copy it was booked with. The service as stored: `price` in euros, `customDurationInMinutes`, its own texts (`translations`, a subtitle and a description a language, each `null` when the doctor wrote none — the public page then shows none, U-214) and its catalogue. Its place in the order is its place in `listDoctorServices`. D-W52-71: the limits of the registration hold on every write — `price` whole euros from 1 to 9999, `customDurationInMinutes` one of 15, 20, 30, 45, 60, 75, 90, 105, 120, `subtitle` at most 120 characters and `description` at most 1000, stored as plain text (control, zero-width and bidi characters removed; `null` or an empty text clears it), `yearsOfexperience` whole years from 0 to 70 and never over the whole years since the doctor obtained the licence (`null` clears them); past a limit or with an unknown field the write answers 422 and nothing is written. D-W52-72 (U-212.3): one price a service — an account acting as a doctor sends no `amount` (422) and no `catalogueId` but its own regular one (another of its own answers 422, a foreign or unknown one 403); the backoffice may name both. D-W52-78 (U-212.2): a doctor writes Greek alone — every `translations[].language` and the `language` of a text route is `el`, any other answers 422 with `DOCTOR_WRITES_GREEK_ONLY` in the message; the backoffice writes every language. A service that is not the account's answers 403, an unknown id alike (D-107). Rate limited per IP under the `doctor-profile-write` class, one budget for every write of the profile (429 past it). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorServiceViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    saveDoctorServiceTranslation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doctorServiceId: string;
+                language: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    subtitle?: string | null;
+                    description?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The service after the write. The body is the whole text of that language: a field left out, `null` or empty is stored as none, so an empty body clears both (U-214: empty stays empty, for the patients too). `language` is `el` or `en`. The service as stored: `price` in euros, `customDurationInMinutes`, its own texts (`translations`, a subtitle and a description a language, each `null` when the doctor wrote none — the public page then shows none, U-214) and its catalogue. Its place in the order is its place in `listDoctorServices`. D-W52-71: the limits of the registration hold on every write — `price` whole euros from 1 to 9999, `customDurationInMinutes` one of 15, 20, 30, 45, 60, 75, 90, 105, 120, `subtitle` at most 120 characters and `description` at most 1000, stored as plain text (control, zero-width and bidi characters removed; `null` or an empty text clears it), `yearsOfexperience` whole years from 0 to 70 and never over the whole years since the doctor obtained the licence (`null` clears them); past a limit or with an unknown field the write answers 422 and nothing is written. D-W52-72 (U-212.3): one price a service — an account acting as a doctor sends no `amount` (422) and no `catalogueId` but its own regular one (another of its own answers 422, a foreign or unknown one 403); the backoffice may name both. D-W52-78 (U-212.2): a doctor writes Greek alone — every `translations[].language` and the `language` of a text route is `el`, any other answers 422 with `DOCTOR_WRITES_GREEK_ONLY` in the message; the backoffice writes every language. A service that is not the account's answers 403, an unknown id alike (D-107). Rate limited per IP under the `doctor-profile-write` class, one budget for every write of the profile (429 past it). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorServiceViewExt"];
+                    };
+                };
+            };
+        };
+    };
+    deleteDoctorServiceTranslation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doctorServiceId: string;
+                language: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The service without the texts of that language. A service keeps the row of at least one language: removing the last one answers 422 — to clear the Greek texts, save them empty with `saveDoctorServiceTranslation`. The service as stored: `price` in euros, `customDurationInMinutes`, its own texts (`translations`, a subtitle and a description a language, each `null` when the doctor wrote none — the public page then shows none, U-214) and its catalogue. Its place in the order is its place in `listDoctorServices`. A service that is not the account's answers 403, an unknown id alike (D-107). Rate limited per IP under the `doctor-profile-write` class, one budget for every write of the profile (429 past it). A doctor account without a licence is refused with 403 «Doctor licence is required before …» (U-183.5: until a completed registration holds a marketplace or payments licence, an expired one included, the doctor changes only the fields of the registration); the backoffice is not. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "success" | "error";
+                        message: string;
+                        data: components["schemas"]["DoctorServiceViewExt"];
                     };
                 };
             };

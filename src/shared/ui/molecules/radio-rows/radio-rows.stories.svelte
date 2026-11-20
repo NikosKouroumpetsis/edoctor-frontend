@@ -39,6 +39,19 @@
 />
 
 <Story
+	name="With A Note Under The Label"
+	args={{
+		label: 'Είδος',
+		value: 'ARTICLE',
+		notePlace: 'under',
+		options: [
+			{ value: 'ARTICLE', label: 'Άρθρο', note: 'Εξηγεί ένα θέμα υγείας, με υπότιτλους.' },
+			{ value: 'ADVICE', label: 'Συμβουλή υγείας', note: 'Σύντομες, πρακτικές οδηγίες.' }
+		]
+	}}
+/>
+
+<Story
 	name="With A Detail"
 	args={{
 		label: 'Ιατρείο',

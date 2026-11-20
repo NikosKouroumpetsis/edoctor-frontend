@@ -185,6 +185,43 @@ describe('the doctor’s profile page', () => {
 		expect(JSON.parse(jsonLd?.textContent ?? '{}')).toMatchObject({ '@type': 'Physician' });
 	});
 
+	it('🔴 D-W52-26 (U-224): as its own doctor’s preview the page is personal — no head of the public profile (no canonical, no alternate, no Open Graph, no JSON-LD), no bar of its own on top (the phone’s «‹ · share · heart», the sections’ bar); the page itself is as it is', async () => {
+		const profile = sampleDoctorProfile();
+		const publicPage = render(Harness, { props: props(profile) });
+		expect(document.head.querySelector('link[rel="canonical"]')).not.toBeNull();
+		expect(screen.getByTestId('doctor-detail-sticky-header')).toBeInTheDocument();
+		expect(screen.getByTestId('doctor-detail-section-bar')).toBeInTheDocument();
+		const sections = document.querySelectorAll('[data-section]').length;
+		expect(sections).toBeGreaterThan(0);
+		publicPage.unmount();
+		document.head.innerHTML = '';
+		document.title = '';
+		render(Harness, { props: props(profile, { preview: true, signedIn: false }) });
+		expect(document.head.querySelector('link[rel="canonical"]')).toBeNull();
+		expect(document.head.querySelector('link[rel="alternate"]')).toBeNull();
+		expect(document.head.querySelector('meta[property^="og:"]')).toBeNull();
+		expect(document.head.querySelector('script[type="application/ld+json"]')).toBeNull();
+		expect(document.title).toBe('');
+		expect(screen.queryByTestId('doctor-detail-sticky-header')).toBeNull();
+		expect(screen.queryByTestId('doctor-detail-back')).toBeNull();
+		expect(screen.queryByTestId('doctor-detail-section-bar')).toBeNull();
+		// The page under the band is the public one: its ONE h1, its sections, its booking card.
+		expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(profile.name ?? '');
+		expect(document.querySelectorAll('[data-section]')).toHaveLength(sections);
+		expect(screen.getByTestId('doctor-detail-columns')).toBeInTheDocument();
+	});
+
+	it('🔴 D-W52-26 (U-224): the preview’s windows open on the page’s OWN address — the history’s state alone, never the public address (the site’s frames read the address; a doctor the search hides has none)', async () => {
+		render(Harness, { props: props(sampleDoctorProfile(), { preview: true }) });
+		await waitFor(() => expect(screen.getByTestId('doctor-booking-cta')).toBeInTheDocument());
+		await fireEvent.click(screen.getByTestId('doctor-booking-cta'));
+		expect(onSignIn).not.toHaveBeenCalled();
+		const [address, state] = vi.mocked(pushState).mock.calls.at(-1) ?? [];
+		expect(address).toBe('');
+		expect(state).toMatchObject({ doctorDetails: { section: 'availability', inPlace: true } });
+		// Outside the preview the same press writes the window's public address (U-104.3, above).
+	});
+
 	it('U-34.3 (app = web): the sections in the application’s order, each only with data', () => {
 		render(Harness, { props: props(sampleDoctorProfile()) });
 		const ids = [...document.querySelectorAll('[data-section]')].map((node) =>
@@ -472,6 +509,8 @@ describe('the doctor’s profile page', () => {
 					reviewChips: [],
 					reviewSnippets: [],
 					services: [],
+					// D-W52-60: «Τομείς εξειδίκευσης» come from the doctor's specializations now, so «nothing» has none either.
+					specializations: [],
 					office: undefined,
 					offices: [],
 					description: undefined,
@@ -540,6 +579,23 @@ describe('the doctor’s profile page', () => {
 			'content',
 			'noindex'
 		);
+	});
+
+	it('🔴 D-W52-26 (U-224): the «δεν βρέθηκε» of the doctor’s own preview has no phone bar of its own (the band’s «Κλείσιμο» is its way back); the public one keeps its «‹»', () => {
+		const publicPage = render(ErrorPage, {
+			props: { status: 404, locale: 'el', backHref: '/doctors', onRetry }
+		});
+		expect(screen.getByTestId('doctor-detail-back')).toBeInTheDocument();
+		publicPage.unmount();
+		render(ErrorPage, {
+			props: { status: 404, locale: 'el', backHref: '/doctors', onRetry, preview: true }
+		});
+		expect(screen.queryByTestId('doctor-detail-sticky-header')).toBeNull();
+		expect(screen.queryByTestId('doctor-detail-back')).toBeNull();
+		expect(screen.getByTestId('doctor-detail-error-page')).toHaveTextContent(
+			'Ο γιατρός δεν βρέθηκε'
+		);
+		expect(document.head.querySelector('link[rel="canonical"]')).toBeNull();
 	});
 
 	it('U-34.2: without touch, share opens the web’s window with «Αντιγραφή συνδέσμου»', async () => {

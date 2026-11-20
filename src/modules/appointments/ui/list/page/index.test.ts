@@ -525,4 +525,24 @@ describe('screen 50 · «Τα ραντεβού μου» (record §6.1, U-134)', 
 		expect(html).not.toMatch(/map|maplibre/iu);
 		expect(html).not.toMatch(/hover:(bg|shadow|border|text)/u);
 	});
+
+	it('🔴 U-215.3: η λίστα κάτω από το λογότυπο — beside what it opened, the list’s column starts 48 from the frame’s edge from 1128 (D-W52-11; 24 at 950–1127, its right side as it was); alone in the middle (U-139.1) nothing changes', () => {
+		const beside = draw({ openId: A1, paneEmpty: false, list: listOf([visit()]) });
+		expect(split()).not.toHaveAttribute('data-solo');
+		const column = screen.getByTestId('appointments-list');
+		expect(column).toHaveClass(
+			'split:max-w-none',
+			'split:px-6',
+			'split:pt-6',
+			'split:pb-section-lg',
+			'laptop:pl-pane-inset'
+		);
+		for (const name of ['pl-pane-inset', 'split:pl-pane-inset', 'laptop:px-pane-inset'])
+			expect(column, name).not.toHaveClass(name);
+		beside.unmount();
+		draw({ list: listOf([]) });
+		expect(split()).toHaveAttribute('data-solo');
+		expect(screen.getByTestId('appointments-list')).toHaveClass('split:pt-section-lg');
+		expect(screen.getByTestId('appointments-list').className).not.toMatch(/pane-inset|split:px-6/u);
+	});
 });

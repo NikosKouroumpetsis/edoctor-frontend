@@ -243,6 +243,9 @@
 	--spacing-split-list-w-lg: 460px;
 	--spacing-split-menu-w: 340px;
 	--spacing-split-menu-w-lg: 420px;
+	--spacing-split-menu: 324px;
+	--spacing-split-rail: 72px;
+	--spacing-split-rail-lg: 120px;
 	--spacing-split-solo: 640px;
 	--spacing-pane-column: 640px;
 	--spacing-split-sub: 656px;
@@ -258,6 +261,10 @@
 	--spacing-inbox-glyph: 44px;
 	--spacing-chip-tab: 36px;
 	--spacing-tab-capsule-fit: 400px;
+	--spacing-article-editor: 300px;
+	--spacing-cover-max: 260px;
+	--spacing-figure-max: 320px;
+	--spacing-figure-glyph: 40px;
 	--spacing-sheet-sm: 60dvh;
 	--spacing-sheet-md: 70dvh;
 	--spacing-sheet-lg: 85dvh;
@@ -300,6 +307,11 @@
 	--transition-duration-segment: 180ms;
 	--transition-duration-reveal: 800ms;
 	--transition-duration-consent: 400ms;
+	--transition-duration-fold: 320ms;
+	--transition-duration-fold-out: 120ms;
+	--transition-duration-fold-in: 200ms;
+	--transition-delay-fold-rail: 140ms;
+	--transition-delay-fold-menu: 120ms;
 	--ease-standard: cubic-bezier(0.2, 0, 0, 1);
 	--ease-sheet: cubic-bezier(0.16, 1, 0.3, 1);
 	--ease-accordion: cubic-bezier(0.45, 0, 0.55, 1);

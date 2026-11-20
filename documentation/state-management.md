@@ -468,6 +468,11 @@ lastMethod }` for «Καλωσορίσατε και πάλι»; the tab keeps on
   licence, U-183.5) · `doctor` (a licence of the marketplace, an expired one too, U-185.1) · `payments` (the till's alone:
   no doctor mode on the web in 5.1, D-W51-16) — the notice, the mode in force and the name card. None of the patient's
   frame, the «Προφίλ», the sign-up or the doctor's frame imports another module (the `NotificationBadge` way).
+- **`nameLocked`** (D-W52-47 / D-W52-50, U-207.1): the same read says whether the doctor's first licence locked the
+  account's name — the server's own `true`, whatever the kind (a revoked licence is `pending` and its name stays
+  locked). `DoctorStanding.nameLocked` is `false` before the answer and for a guest: the server refuses such a write by
+  itself (`409 DOCTOR_NAME_LOCKED`). «Προσωπικά στοιχεία» (58) reads it: the row «Ονοματεπώνυμο» has no «Επεξεργασία»;
+  a lock that arrives while the row is open closes it; a `409` asks the standing again (`standing.retry()`).
 - **The switch** (U-185.3): `standing.switchTo(mode)` draws the shared `ModeTransition` for about a second, keeps the
   mode on the server and opens that mode's page (`/doctor`, the home); a refusal moves nobody and the site's frame says
   so (`switchFailures`, the sign-out's way).
@@ -479,7 +484,9 @@ lastMethod }` for «Καλωσορίσατε και πάλι»; the tab keeps on
   doctor's mode opens `/doctor`. After a sign-in the host makes the same decision on the home, once.
 - **The doctor's frame** is a route group of its own (`src/routes/doctor/(dashboard)/+layout.svelte`): the patient's
   frame draws no bar, capsule or footer on `/doctor` and `/doctor/menu`, and the group's gate waits for the answer —
-  a guest signs in, anyone without a marketplace licence goes home.
+  a guest signs in, anyone without a marketplace licence goes home. Every page of the group is named in the closed
+  list `site-frame/lib/frame` `DOCTOR_DASHBOARD_PAGES` (since wave 5.2 `/doctor/profile` and `/doctor/profile/preview`
+  too): a path that is not there draws the patient's bar over the doctor's.
 
 ## The doctor's «Σήμερα» (wave 5.1, screen 66)
 
@@ -653,6 +660,242 @@ record`, `id` a uuid) and a record's `/edit` («Στοιχεία ασθενή»)
   back to the card, which says «Αποθηκεύτηκε.» / «Οι καρτέλες ενώθηκαν.». `422` names its fields under them, `409`
   «δεν αλλάζει πια» / «δεν είναι πια δυνατή», `404` gone, `429` / a lost request its words, `401` the sign-in.
 
+## The doctor's «Το προφίλ μου» (wave 5.2, screen 77)
+
+- **The addresses** (D-W52-22, D-W52-23, D-W52-26): `/doctor/profile` (from the first row of «Μενού»; «Μενού» stays the
+  current tab) and `/doctor/profile/preview` («Δείτε πώς σας βλέπουν», a page of its own, pushed over the tabs below
+  744); since screen 78 also `/doctor/profile/photos` and `/doctor/profile/photos/<id>/crop` (the next section). Every
+  other path is a 404 in the site's frame. All are personal pages (`noindex`, no canonical, no alternate) and read
+  nothing on the server — the cookies live on the API.
+- **The reads** (personal, under ONE root `doctorDashboardQueryKeys.profile()`, so a section's write of screens 78–83
+  reads both again): `doctorMyProfileQuery(locale)` — `GET /doctor/me/profile`, asked again whenever the page comes back
+  to the front — and `doctorMyProfilePreviewQuery(locale, read)` — `GET /doctor/me/profile/preview`, anew at each
+  opening, never again by itself while it is read. Nothing in either request names a doctor. `mapDoctorMyProfile` reads
+  the answer field by field (U-65.6: an unknown reason or helper left out, a broken count 0, an oversized name none, an
+  answer without a server id a failed read); the preview's cache keeps the FACTS the screen's reader made, never the wire.
+- **What the page says** is built from the facts alone by pure rules (`lib/profile`): `buildDoctorProfileRows` (what each
+  section holds — only what is not zero, each count in its own number, «από» only when the prices differ — and what it
+  lacks, from the four helpers the server keeps for this page) and `buildDoctorProfileStatus` (D-W52-25: the green note
+  of a doctor the search shows; the orange one with the team's check, or with the day the licence ended; for a missing
+  marketplace licence or a profile the search cannot draw the title and no reason — none is made up — and, D-W52-25α,
+  the counter only while a section asks for something: «Το προφίλ σας είναι πλήρες.» is never written under «Δεν
+  φαίνεστε» there, as in the application).
+- **The states**: the wait draws no fact; a read without an answer says so with «Δοκιμάστε ξανά»; a `401` ends the
+  session (`session.expire`); the server's `doctor: null` of the preview draws what the public page draws for a doctor it
+  cannot show, under the same band.
+- **From 950** (D-W52-41, since screen 78) the page is a `SplitView` of the menu's widths with the section in the middle
+  of its right column (U-167): the list's own address shows the FIRST section that has a page beside it (in place, the
+  address stays the list's — the settings' way, the one width read in JS), its row the current one on the grey pill.
+  The menu folds to a rail (D-W52-14; `folded` is the page's own state, kept while the one route lives): the button and
+  the glyph of every section that HAS a page, with the dot where something is missing. No «‹» from 950 (U-217). Below
+  950 the list is the page, and a section is a page of its own at its own address with «‹» back to the list (U-102).
+- **«Δείτε πώς σας βλέπουν» is only to look at** (D-W52-26α): what stands under the band — the public page, or its «δεν
+  βρέθηκε» — is one `inert` body for every doctor: no press, no focus, no window, no page left, nothing sent; the page
+  scrolls with the document and «Κλείσιμο» of the band is the one control. The band's line has three forms: the search
+  shows the doctor; it does not yet; it does not while the licence has ended.
+
+## The doctor's «Ειδικότητα και εξειδικεύσεις» (wave 5.2, screen 80)
+
+- **Screen 80 reads and writes nothing** (U-209, D-W52-59). Three reads of the session's own doctor, all under the
+  profile's root: `doctorMyProfileQuery(locale)` — the list's own read, observed with `refetchOnMount: false` — for the
+  specialty's name, `hasCatalogue` and the lock (`sections.about.nameLocked`, the name's own rule, D-W52-51);
+  `doctorMyPracticeLicenceQuery()` — `GET /doctor/profile/base`, of which the cache keeps ONLY
+  `{ number, obtainedDay }` (never the email, the phone or a policy of the bookings); and, only when `hasCatalogue`,
+  `doctorSpecializationsQuery(locale)` with `refetchOnWindowFocus: 'always'`: the team's answer on a title of the
+  Gazette («Ελέγχεται» ⇒ shown, or «Δεν εγκρίθηκε») shows without a reload. A specialty without a list asks for no
+  specializations and draws none.
+- **The choice** (D-W52-54): `doctorSpecializationOptionsQuery(locale)` and `doctorSpecializationsQuery(locale)`, never
+  asked again by themselves while the page is worked on. The choice is the page's own rune (`draft`, `null` until the
+  first press: until then the choice IS the saved picks) — never a copy of the answer — and only codes the list still
+  holds count. «Αποθήκευση» is ONE `PUT { codes }` of the whole set behind the write's own gate; nothing is shown as
+  saved before the server answers (no optimistic change). Done ⇒ the answer is put in the picks' cache, the profile's
+  root is invalidated («Το προφίλ μου», the preview, the lists), «Αποθηκεύτηκε.», and the page closes. At three the
+  limit's sentence is the shared `StepScreen`'s `barNote` (D-W52-59α): over «Άκυρο · Αποθήκευση», always in sight
+  under a list of up to seventeen rows, announced when it comes; under the list stays «N από 3».
+- **Refusals** (`readDoctorSpecializationsFailure`): `422` past three or out of shape ⇒ the limit's own sentence;
+  `422` with `DOCTOR_SPECIALIZATION_NOT_OF_SPECIALTY` ⇒ «Ο κατάλογος άλλαξε…» — with these and a `409` the profile's
+  root is read again, and a code the new list lost leaves the choice; `429` ⇒ «Πολλές προσπάθειες…»; anything else ⇒
+  the change was not saved. The choice stays. A `401` ends the session.
+- **U-65.6**: `mapDoctorSpecializationOptions` leaves out a line that is no line of the catalogue (it cannot be
+  picked); `mapDoctorSpecializations` answers `null` — a failed read — for ANY broken pick, because a save replaces the
+  whole set and a pick must never be dropped in silence. `kind` and `status` are the contract's enums, never guessed.
+
+## The doctor's «Βιογραφικό» (wave 5.2, screen 81)
+
+- **Screen 81 reads and writes nothing** (U-210, D-W52-63). ONE read of the session's own doctor,
+  `doctorCredentialsQuery()` — `GET /doctor/profile/credentials`, one key whatever the page's language
+  (`doctorDashboardQueryKeys.profileCredentials()`, under the profile's root) — with
+  `refetchOnWindowFocus: 'always'`: a row saved in another tab, or by the team, shows without a reload. The cache keeps
+  FACTS in GREEK alone (U-207.3: `title`, `organization`, the years, «σήμερα», `position`), never the wire and never
+  another language. The order is the answer's own: the clients do not sort (U-210.1).
+- **The page of one row** observes the same read and settles what it is by the FIRST answer (the row as the server
+  keeps it, a new one, `missing`, `full`): a read that comes back later never writes over what is typed. Its fields
+  live in the shared `createForm`; the rules are closures over the form's own values (an end needs a start, «σήμερα»
+  needs one too) that speak only after the first «Αποθήκευση», then at every change.
+- **A save is the whole group, from the server's LAST answer** (D-W52-63): `changeDoctorCredentialGroup(kind, change)`
+  reads the biography AGAIN, hands the fresh rows of the group (in their written order, `position`) to the pure
+  `change` of `lib/cv` (`doctorCredentialSaved` / `doctorCredentialRemoved`), and sends what it answers in ONE `PUT`,
+  each row with its Greek text alone. Never from the cache: a row saved elsewhere meanwhile is not written over. Nothing
+  is sent when the read fails, the row is `gone`, or the group already holds twenty (`full`). No optimistic change:
+  done ⇒ the answer is put in the cache, the profile's root is invalidated («Το προφίλ μου» of 77 follows),
+  «Αποθηκεύτηκε.» / «Διαγράφηκε.», and the page closes.
+- **Refusals** (`readDoctorCredentialsFailure`): `422` ⇒ «Η αλλαγή δεν αποθηκεύτηκε. Ελέγξτε τον τίτλο και τα έτη…»;
+  `429` ⇒ «Πολλές προσπάθειες…»; `409`, `403`, anything else ⇒ the change was not saved; `gone` / `full` ⇒ the page has
+  nothing left to offer and says so with one way back. What was typed stays. A `401` ends the session. A row deleted
+  elsewhere while its deletion was asked is deleted: that is what was asked.
+- **U-65.6**: `mapDoctorCredentials` answers `null` — a failed read — for ANY broken row, because a save replaces a
+  whole group and a row must never be dropped in silence. The one row it leaves out is a row WITHOUT a Greek text (the
+  backoffice wrote it in another language): the doctor's page has no words to show or send for it, and a save of its
+  group keeps Greek alone (D-W52-61α).
+
+## The doctor's «Κριτικές» (wave 5.2, screen 84)
+
+- **Reads** (D-W52-84 / 85 / 89), all under `doctorDashboardQueryKeys.reviews()`, personal, in the browser only:
+  `doctorReviewsListQuery(filter)` — the doctor's PUBLISHED reviews (`as=doctor`, `APPROVED`), page after page by the
+  server's cursor, for «Όλες» (`reviewList('all')`) and «Χωρίς απάντηση» (`reviewList('unanswered')`,
+  `replyModerationStatus=NONE`; its first page's `total` is the N of the choice, read on the list's page too);
+  `doctorReviewsSummaryQuery(locale)` — the summary for the doctor alone with `pendingCount`; `doctorReviewQuery(id)` —
+  one review as the server keeps it NOW (the reply and the report pages, `staleTime: 0`); and
+  `doctorAppointmentReviewQuery(appointmentId)` — the list's own filter (`appointmentId` + `APPROVED` + `limit=1`): the
+  row of 68 (only for a completed visit) and «Το ραντεβού: …» / the report state of the two pages.
+- **The review an address names** (`?review=<id>`, D-W52-91): the list reads its next pages by itself until the review
+  is there (at most `DOCTOR_REVIEWS_FIND_PAGES_MAX`), then the page goes to its card once per address.
+- **The reply** (D-W52-86): the page's mode — a NEW reply (`POST`, after none or after a rejected one) or the CHANGE of
+  the one there (`PATCH`, its words in the field) — is settled by the FIRST answer of `doctorReviewQuery`; a `409` of a
+  reply that changed in the meantime reads it again and the page becomes what it now is, keeping what is typed.
+  «Διαγραφή» (`DELETE`) is asked first in an `ActionDialog` on the list.
+- **The report** (D-W52-87): one of the five reasons (rune state holds the word, never an `api/` type) and up to 1000
+  words; a review already reported (its `openReports`) or a `409` of an open report shows the card's own sentence.
+- **Every write that ends** writes the server's answer into every list held (`keepDoctorReview`,
+  `keepDoctorReviewReported` in `api/reviews/cache.ts`), so the card the doctor goes back to already says it, then
+  invalidates `reviews()`. A refusal says why and what was typed stays; a `401` ends the session.
+- **History** (`App.PageState.doctorReview`): a reply, a report and the 68 opened from a card are one step on
+  (`useHistorySteps('doctorReview')`); their «‹», «Άκυρο» and done action go back that step to the same review, a link
+  alone to `/doctor/reviews?review=<id>`.
+- **U-65.6**: `mapDoctorReviewsPage` keeps ONLY what the server gave (a review out of the contract stays out, each id
+  once, a visit only with an IANA zone, the reports only with a server id); of the team's notes only 🔴 D-W52-86α
+  `replyRejectionReason`, as text and only for a `REJECTED` reply (the card's «Η ομάδα του eDoctor δεν την ενέκρινε:
+  <λόγος> …», the sentence alone without one) — never the review's own note.
+
+## The doctor's «Τα άρθρα μου» (wave 5.2, screen 85)
+
+- **Reads** (D-W52-96), under `doctorDashboardQueryKeys.articles()`, personal, in the browser only:
+  `doctorArticlesListQuery()` — the doctor's articles newest first, page after page by the server's cursor (no body); and
+  `doctorArticleQuery(id)` — one article as the server keeps it NOW (`staleTime: 0`), for its page.
+- **Writes** (D-W52-95): `writeDoctorArticle(id | null, 'save' | 'send', draft)` — ONE call each («Αποθήκευση
+  πρόχειρου» `POST` / `PUT`, «Αποστολή για έλεγχο» `POST …/submission` / `POST …/<id>/submission`), the whole form in
+  Greek alone (`language: 'el'`), never a slug, an SEO field, an author or a state; `deleteDoctorArticle`;
+  `uploadDoctorArticleImage` (an image of the text, base64 in the JSON). Each that ends invalidates `articles()`.
+- **One article's page** (D-W52-103): `ui/article` `useDoctorArticle` reads `doctorArticleQuery(id)` (a new one reads
+  nothing) and seeds its form ONCE from the answer — the kind, the title, the short description, the text (the editor's
+  JSON, kept by the hook) and the uploads of the text (id ⇒ address, then each new upload). The cover is `undefined`
+  (kept), `null` (removed) or a new `data:` text. A write first says the page's three messages (`doctorArticleErrors`),
+  then sends the text cleaned as the server stores it (`cleanArticleTextDoc`, nothing to send ⇒ `null`); done ⇒ a toast,
+  `articles()` invalidated and the list. The editor's own state (selection, history) is Tiptap's, inside the editor.
+- **U-65.6**: `mapDoctorArticlesPage` keeps ONLY what the server gave (a row out of the contract stays out, each id once);
+  the team's reason only for a refused article or a refused change; an article's `content` only as a document of the
+  closed schema (`readArticleText`) — anything else is no text, never drawn as one.
+
+## The doctor's «Υπηρεσίες και τιμές» (wave 5.2, screen 83)
+
+- **Reads** (D-W52-73 / 79): `doctorServicesListQuery(locale)` — the services of the session's own doctor in the
+  doctor's order (`profileServices(locale)`) — and `doctorAllowedServicesQuery(locale)` — the catalogue of the specialty
+  with `owned` and eDoctor's Greek texts (`profileServiceOptions(locale)`); both under the profile's root, never asked
+  again by themselves while the page is worked on. The page of one service also reads the practice licence (the most
+  years, on the server's clock) and, for a new one, `GET /doctor/me/profile` (its `doctorId`).
+- **The order** (D-W52-81): the drag's order lives in the slice's `useDoctorServiceDrag` while a row is lifted; the new
+  order is written into the cache at once, ONE `PUT …/order` carries it (presses meanwhile become the next call), a
+  refusal puts the last server answer back and reads the list again.
+- **One service** (D-W52-82): the form is the shared `createForm` (values only); the rules (price 1–9999, years up to
+  the licence's) speak once «Αποθήκευση» was pressed. 🔴 U-214.4: a field holds the doctor's own text — a new one starts
+  EMPTY — and only `suggest()` (the button) copies eDoctor's into both; 🔴 U-217.3: a new one has NO price. «Αποθήκευση»
+  is ONE `PATCH` (a stored one) or `POST` (a new one, Greek alone, never `amount`).
+- **Every write that ends** invalidates `profile()` (77, the list, the catalogue) and `servicesAll()` (screens 70 / 72).
+- **U-65.6**: `mapDoctorServices` answers a failed read for ANY broken row (the order is written back whole);
+  `mapDoctorAllowedServices` leaves out a line out of the contract.
+
+## The doctor's «Γλώσσες και κοινωνικά δίκτυα» (wave 5.2, screen 82)
+
+- **Screen 82 reads and writes nothing** (U-211, D-W52-69 / 70). Two reads of the session's own doctor, under the
+  profile's root, both with `refetchOnWindowFocus: 'always'` (a change made in another tab shows without a reload):
+  `doctorLanguagesQuery(locale)` — `GET /doctor/profile/speak-languages`, named in the page's language — and
+  `doctorLinksQuery()` — `GET /doctor/profile/base`, of which the cache keeps ONLY the four links (never the email, the
+  licence or a policy of the bookings), one key whatever the language.
+- **The choice of the languages** (D-W52-66 / 69): `doctorLanguageOptionsQuery(locale)` (the public catalogue) and
+  `doctorLanguagesQuery(locale)`, never asked again by themselves while the page is worked on. The choice is the page's
+  own rune (`draft`, `null` until the first press), never a copy of the answer; only codes the catalogue still holds
+  count. The search is the page's own words (`query`, at most 60): every word folded (no accents, `ς` as `σ`) and
+  found INSIDE the catalogue's `normalized`. No words: «Οι γλώσσες σας» are the saved ones, as the page opened (no row
+  jumps while it is pressed; a language chosen on the page stays ticked under «Όλες οι γλώσσες»). Words (D-W52-69α,
+  `sw.js` `slPickPage`): ONE list without a heading of every language they find, the chosen ones ticked among them; a
+  chosen one they do not find is out of sight, and «N από 10» still counts it. Greek first, then `Intl.Collator` of the
+  page's language — the same at every width. «Αποθήκευση» is ONE `PUT { codes }` of the whole
+  set behind the write's own gate; nothing is shown as saved before the server answers. Done ⇒ the answer is put in the
+  languages' cache, the profile's root is invalidated, «Αποθηκεύτηκε.», and the page closes. At ten the limit's
+  sentence is the shared `StepScreen`'s `barNote` (D-W52-59α); under the lists stays «N από 10».
+- **The four links** (D-W52-67 / 70): the fields live in the shared `createForm`, opened ONCE by the first answer (a
+  read that comes back later never writes over what is typed). The rule is the server's own (`lib/links`
+  `doctorLinkRefusal`): only `https`, at most 2000, no name or password inside, the host as `new URL()` reads it and
+  typed as that very name, each network on its own names, a website on a public name. It speaks only after the first
+  «Αποθήκευση», then at every change; «Αποθήκευση» sends nothing while a field is refused, else the four fields in ONE
+  `PATCH` (`https://` added where no scheme was typed, `null` for an empty one).
+- **Refusals**: languages (`readDoctorLanguagesFailure`) — `422` ⇒ the limit's sentence; `422` with
+  `DOCTOR_SPEAK_LANGUAGE_NOT_IN_CATALOGUE` ⇒ «Ο κατάλογος άλλαξε…», with it, any other `422` and a `409` the profile's
+  root is read again; `429` ⇒ «Πολλές προσπάθειες…»; anything else ⇒ the change was not saved. Links
+  (`readDoctorLinksFailure`) — each `DOCTOR_<FIELD>_LINK_<REASON>` of a `422` is said under ITS field in the page's
+  words for as long as the field holds the link that was refused (the page's own memory, `DoctorNetworksRefused`: the
+  link and the form's key, never the answer); a refusal that names no field is said over the buttons. What was chosen
+  or typed stays. A `401` ends the session.
+- **U-65.6**: `mapDoctorLanguageOptions` leaves out a line that is no line of the catalogue (it cannot be picked);
+  `mapDoctorLanguages` and `mapDoctorLinks` answer a failed read for ANY broken row or link, because a save replaces
+  the whole set and nothing must be dropped in silence. A kept link is text on screen 82, never an `href`.
+
+## The doctor's «Όνομα και περιγραφή» (wave 5.2, screen 79)
+
+- **Read only** (U-207, D-W52-49): the page has no write. Its own read is `doctorMyProfileTextQuery(read)` —
+  `GET /doctor/profile/translations/el` of the session's own doctor (Greek whatever the page's language, D-W52-01; the
+  backoffice's `tenantUserId` is never sent), under the profile's root (`doctorDashboardQueryKeys.profileText()`),
+  asked again when the page comes back to the front (what the team wrote shows without a reload). `read` is the public
+  page's reader of a description, handed in by the screen; the cache keeps FACTS — `{ fullName, paragraphs }`, plain
+  text, bounded — never the wire. `null` (no text in that language) is an answer; anything else that is no record is a
+  failed read.
+- **The lock's words** under the name are written only for `sections.about.nameLocked === true` of
+  `doctorMyProfileQuery(locale)` — the list's own read, observed a second time by the page with `refetchOnMount: false`
+  (it asks only when nobody has yet; opening the page beside a list that holds the answer asks nothing).
+- A `401` ends the session once; `403` / `404` are answers that are not asked again by themselves.
+
+## The doctor's «Φωτογραφίες» (wave 5.2, screen 78)
+
+- **The read** (D-W52-36): `doctorProfileImagesQuery()` — `GET /doctor/profile/images` of the session's own doctor, one
+  list whatever the language, under the profile's root (`doctorDashboardQueryKeys.profileImages()`), never asked again
+  by itself while the page is worked on. `mapDoctorProfileImages` reads it field by field (U-65.6: an entry without a
+  server id left out, an address that is no address none — only a path of the API's host or an `http(s)` address — the
+  words plain text of the server's bound); the order is the server's, the first is the main one.
+- **Every write that ends invalidates the profile's root**: the photos, «Το προφίλ μου» (the row of 77) and the preview
+  are read again. What the answer already tells is put in the cache first (the new photo last, the cut in its place,
+  the order as the server keeps it), so the page never waits for the read to show it.
+- **Ανέβασμα** (D-W52-28 / 29 / 38): the picked files are checked on the device before a byte leaves (`shared/lib/image`
+  `checkImageFile` with `lib/photos` `DOCTOR_PHOTO_FILE_RULES`: JPG / PNG / WebP, 10 MB, 800 × 600 by
+  `createImageBitmap`) and the ones that pass are sent ONE at a time, each as a base64 `data:` text inside the JSON
+  (`httpSessionUpload`, which tells the fraction sent: the tile's ring). Never more than fit under the 20. A file the
+  check refused is named with its reason and takes no place; one the server refused for what it IS says the same words
+  and has «×» alone; any other failure says «Δεν ανέβηκε» with «Ξανά». The queue is the hook's rune state (ids, status,
+  fraction — never an API answer); the `File`s live beside it, outside rune state. Leaving the page stops the queue
+  after the photo that is on its way.
+- **Σειρά** (D-W52-31 / 39): the new order is written to the cache at once and sent in ONE `PUT order`; orders asked
+  while a call is away become one more call (the last one wanted). A refusal puts the photos back as the server last
+  kept them, says so on the page and in the `aria-live` line, and the list is read again. A drag (`use-drag`, pointer
+  events; a finger holds first) keeps the order it would leave in its own state and hands it over once, at the end.
+- **Διαγραφή** (D-W52-34): always asked in the shared `ActionDialog`; a photo the server no longer has (`404`) just
+  leaves the list.
+- **«Προσαρμογή»** (D-W52-35 / 40): the photo is found in the same cached list; the picture cut is the LARGEST size the
+  server keeps (1200 × 900 — it keeps no original), loaded with CORS (`loadImage`) so the canvas can be read back. The
+  cut (`imageCropRect`: 4:3, at least 800 × 600 of the picture's own pixels, never more than they are) is drawn as a
+  JPEG on the device and sent with `PATCH` in the photo's place. The picture's pixels are the browser's read of a file,
+  kept in the hook's state; the element the canvas draws is never state.
+- **The gates of the writes**: the library tells of a write that began only a timer later, so «Αποθήκευση» and
+  «Διαγραφή» keep their own flag (`saving`, `deleting`) — a second press in between sends nothing.
+
 ## The page of the cancel link (wave 5.1, `/a/<token>`, D-W51-72)
 
 - **The address**: `/a/<token>` — no session, the logo alone in the frame, no footer, no tabs. The token is read
@@ -724,6 +967,13 @@ failed one says «Δοκιμάστε ξανά» and asks again only what failed 
 page waits (the times are the browser's). The open window is the page's history state (`page.state.doctorDetails`,
 shallow routing), else the `details/<section>` route's own section with the address's hints. «Σήμερα / Αύριο» is the
 server's clock (`recordServerNow`, D-118), drawn again at Greek midnight (`msUntilNextPlatformDay`, S-34.1).
+
+The same page is what the doctor previews (wave 5.2, D-W52-26: `/doctor/profile/preview`): with `preview` it writes no
+head of the public profile, draws neither the phone's top bar nor the sections' bar (the holder's band has the top), and
+every step of a window — open, move, close — keeps the page's OWN address (`pushState('', …)`): the open window is the
+history state alone. The public address is never written there, because the site's frames read the address and a doctor
+the search does not show has no public address. Its facts are the preview's read, handed in by the screen as the same
+`load` shape; nothing else about the page changes.
 
 ## The text pages and the lists (wave 1.5, screens 6–10)
 

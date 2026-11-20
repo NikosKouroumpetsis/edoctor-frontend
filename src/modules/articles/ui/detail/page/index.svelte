@@ -32,7 +32,8 @@
 	const seo = $derived(buildArticleSeo({ article, locale, canonicalUrl, alternateUrls }));
 	let shareOpen = $state(false);
 	// «ημέρα · N΄ ανάγνωσης» after «Από <γιατρός>» — the « · » written as words, never cut at a block's edge (MINOR-1).
-	const metaTail = $derived([view.date, view.reading].filter(Boolean).join(' · '));
+	// 🔴 D-W52-94α: «ενημερώθηκε …» after the first publication's day, when an approved change came after it.
+	const metaTail = $derived([view.date, view.updated, view.reading].filter(Boolean).join(' · '));
 
 	// U-34.2 (app = web): a phone with touch shares through the system; elsewhere the web's window.
 	function share() {
@@ -143,7 +144,15 @@
 	{onAnchor}
 	testId="article-page"
 >
-	<RichText document={view.body} variant="article" {internalHref} testId="article-body" />
+	<!-- 🔴 D-W52-104 (U-222.4): the blocks already read (the closed schema's, or the older articles'), every link of the
+	     doctor's text in a new tab with `rel="nofollow ugc noopener noreferrer"`. -->
+	<RichText
+		blocks={view.blocks}
+		variant="article"
+		userContent
+		{internalHref}
+		testId="article-body"
+	/>
 </DocumentPage>
 
 <ShareWindow

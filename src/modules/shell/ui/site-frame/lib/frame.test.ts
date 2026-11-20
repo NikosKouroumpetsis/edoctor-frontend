@@ -91,6 +91,65 @@ describe('the frame’s rules per page', () => {
 			'/doctor/messagesx',
 			'/doctor/notificationsx',
 			'/doctor/notifications/x',
+			// D-W52-22 / D-W52-26 (wave 5.2, screen 77): the two addresses alone — nothing under them yet.
+			'/doctor/profiles',
+			'/doctor/profilex',
+			'/doctor/profile/x',
+			'/doctor/profile/previews',
+			'/doctor/profile/preview/x',
+			// D-W52-41 (wave 5.2, screen 78): the photos' two addresses alone — never a look-alike, a slash more or less.
+			'/doctor/profile/photosx',
+			'/doctor/profile/photo',
+			'/doctor/profile/photos/x',
+			'/doctor/profile/photos/x/cropx',
+			'/doctor/profile/photos/x/crop/y',
+			'/doctor/profile/photos//crop',
+			// Widened by D-W52-49 (wave 5.2, screen 79): `/doctor/profile/about` is the doctor's frame now (below); its
+			// look-alikes and a section without its screen yet keep the site's.
+			'/doctor/profile/abouts',
+			'/doctor/profile/about/x',
+			// Widened by D-W52-81 / 82 (wave 5.2, screen 83): `/doctor/profile/services` and the pages under it are the
+			// doctor's frame now (below); their look-alikes keep the site's.
+			'/doctor/profile/servicesx',
+			'/doctor/profile/service',
+			'/doctor/profile/services/x/y',
+			'/doctor/profile/services/new/x/y',
+			// Widened by D-W52-59 (wave 5.2, screen 80): `/doctor/profile/specialty` and the choice under it are the
+			// doctor's frame now (below); their look-alikes keep the site's.
+			'/doctor/profile/specialtyx',
+			'/doctor/profile/specialty/x',
+			'/doctor/profile/specialty/specializations/x',
+			'/doctor/profile/specializations',
+			// Widened by D-W52-63 (wave 5.2, screen 81): `/doctor/profile/cv` and one row under it are the doctor's
+			// frame now (below); their look-alikes keep the site's.
+			'/doctor/profile/cvx',
+			'/doctor/profile/cv/x',
+			'/doctor/profile/cv/new',
+			'/doctor/profile/cv/studies',
+			'/doctor/profile/cv/work/new',
+			'/doctor/profile/cv/experience/new/x',
+			'/doctor/profile/credentials',
+			// Widened by D-W52-69 / 70 (wave 5.2, screen 82): `/doctor/profile/languages` and its two pages are the
+			// doctor's frame now (below); their look-alikes keep the site's.
+			'/doctor/profile/languagesx',
+			'/doctor/profile/languages/x',
+			'/doctor/profile/languages/spokenx',
+			'/doctor/profile/languages/spoken/x',
+			'/doctor/profile/languages/networks/facebook',
+			'/doctor/profile/speak-languages',
+			// Widened by D-W52-91 / 92 (wave 5.2, screen 84): `/doctor/reviews` and the two pages of a review are the
+			// doctor's frame now (below); their look-alikes keep the site's.
+			'/doctor/reviewsx',
+			'/doctor/review',
+			'/doctor/reviews/x',
+			'/doctor/reviews/x/replyx',
+			'/doctor/reviews/x/reply/y',
+			'/doctor/reviews/x/delete',
+			// Widened by D-W52-102 / 103 (wave 5.2, screen 85): `/doctor/articles` and one article are the doctor's frame
+			// now (below); their look-alikes keep the site's.
+			'/doctor/articlesx',
+			'/doctor/article',
+			'/doctor/articles/x/y',
 			'/plans'
 		]) {
 			expect(frameHeaderOf(path), path).toBe('site');
@@ -626,7 +685,8 @@ describe('the frame’s rules per page', () => {
 		// Widened by D-W51-73 (step 9, screen 73, live 15/11): «Οι ασθενείς μου» and what is under it too.
 		// Widened by D-W51-85 (step 10, screen 74): the doctor's messages and what is under them too.
 		// Widened by D-W51-89 (step 11, screen 75): the doctor's notifications too (else two bars, as `/doctor/patients` live).
-		it('D-W51-16 · D-W51-31 · D-W51-73 · D-W51-85 · D-W51-89: `/doctor`, `/doctor/menu`, `/doctor/appointments…`, `/doctor/patients…`, `/doctor/messages…` and `/doctor/notifications` are the doctor’s frame — no bar, capsule or footer of the patient’s; 🔴 U-61.1 / U-61.2: an error page there is inside the site’s whole frame', () => {
+		// Widened by D-W52-22 / D-W52-26 (wave 5.2, screen 77): «Το προφίλ μου» and «Δείτε πώς σας βλέπουν» too.
+		it('D-W51-16 · D-W51-31 · D-W51-73 · D-W51-85 · D-W51-89 · 🔴 D-W52-22: `/doctor`, `/doctor/menu`, `/doctor/appointments…`, `/doctor/patients…`, `/doctor/messages…`, `/doctor/notifications`, `/doctor/profile` and `/doctor/profile/preview` are the doctor’s frame — no bar, capsule or footer of the patient’s; 🔴 U-61.1 / U-61.2: an error page there is inside the site’s whole frame', () => {
 			for (const path of [
 				'/doctor',
 				'/doctor/',
@@ -642,7 +702,50 @@ describe('the frame’s rules per page', () => {
 				'/doctor/messages/archive',
 				'/doctor/messages/new',
 				'/doctor/notifications',
-				'/doctor/notifications/'
+				'/doctor/notifications/',
+				'/doctor/profile',
+				'/doctor/profile/',
+				'/doctor/profile/preview',
+				'/doctor/profile/preview/',
+				// Widened by D-W52-41 (wave 5.2, screen 78): «Φωτογραφίες» and one photo's «Προσαρμογή» too.
+				'/doctor/profile/photos',
+				'/doctor/profile/photos/',
+				'/doctor/profile/photos/0193d000-0000-7000-8000-000000000004/crop',
+				// Widened by D-W52-49 (wave 5.2, screen 79): «Όνομα και περιγραφή» too.
+				'/doctor/profile/about',
+				'/doctor/profile/about/',
+				// Widened by D-W52-59 (wave 5.2, screen 80): «Ειδικότητα και εξειδικεύσεις» and the choice too.
+				'/doctor/profile/specialty',
+				'/doctor/profile/specialty/',
+				'/doctor/profile/specialty/specializations',
+				'/doctor/profile/specialty/specializations/',
+				// Widened by D-W52-63 (wave 5.2, screen 81): «Βιογραφικό» and the page of one row too.
+				'/doctor/profile/cv',
+				'/doctor/profile/cv/',
+				'/doctor/profile/cv/studies/new',
+				'/doctor/profile/cv/experience/0193d000-0000-7000-8000-000000000005',
+				'/doctor/profile/cv/conferences/new/',
+				// Widened by D-W52-69 / 70 (wave 5.2, screen 82): «Γλώσσες και κοινωνικά δίκτυα» and its two pages too.
+				'/doctor/profile/languages',
+				'/doctor/profile/languages/',
+				'/doctor/profile/languages/spoken',
+				'/doctor/profile/languages/networks/',
+				// Widened by D-W52-81 / 82 (wave 5.2, screen 83): «Υπηρεσίες και τιμές» and the pages under it too.
+				'/doctor/profile/services',
+				'/doctor/profile/services/',
+				'/doctor/profile/services/0193d000-0000-7000-8000-000000000083',
+				'/doctor/profile/services/new',
+				'/doctor/profile/services/new/0193d000-0000-7000-8000-000000000083/',
+				// Widened by D-W52-91 / 92 (wave 5.2, screen 84): «Κριτικές» and the reply to a review and its report too.
+				'/doctor/reviews',
+				'/doctor/reviews/',
+				'/doctor/reviews/0193d000-0000-7000-8000-000000000084/reply',
+				'/doctor/reviews/0193d000-0000-7000-8000-000000000084/report/',
+				// Widened by D-W52-102 / 103 (wave 5.2, screen 85): «Τα άρθρα μου», «Νέο άρθρο» and one article too.
+				'/doctor/articles',
+				'/doctor/articles/',
+				'/doctor/articles/new',
+				'/doctor/articles/0193d000-0000-7000-8000-000000000085/'
 			]) {
 				expect(frameHeaderOf(path), path).toBe('none');
 				expect(showsBottomNav(path), path).toBe(false);

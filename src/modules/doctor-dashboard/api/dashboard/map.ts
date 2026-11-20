@@ -27,7 +27,9 @@ function licenceOf(value: unknown): DoctorDashboardLicence {
 /**
  * U-65.6: the answer read field by field — an unknown state, a broken licence or an oversized name is no fact; an answer
  * that is no dashboard is `null` (a failed read). `licensed` is the server's, never recomputed (U-185.1), yet a
- * registration that is not complete is never licensed whatever a broken answer says.
+ * registration that is not complete is never licensed whatever a broken answer says. 🔴 D-W52-47: `nameLocked` is only
+ * the server's own `true` (it is no `licensed`: a revoked licence leaves the name locked); the server refuses the write
+ * of a locked name by itself, so a broken answer opens nothing.
  */
 export function mapDoctorDashboard(
 	view: DoctorDashboardView | null | undefined
@@ -45,6 +47,7 @@ export function mapDoctorDashboard(
 		marketplace: licenceOf(licences.marketplace),
 		payments: licenceOf(licences.payments),
 		licensed: view.licensed === true && registration === 'COMPLETED',
+		nameLocked: view.nameLocked === true,
 		notice: noticeKind && noticeEnd ? { kind: noticeKind, endsAt: noticeEnd } : null,
 		lastMode: view.lastMode === 'DOCTOR' ? 'DOCTOR' : 'PATIENT',
 		card: card

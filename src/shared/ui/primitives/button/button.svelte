@@ -200,7 +200,9 @@
 		<Spinner size="sm" tone={buttonSpinnerTones[tone]} />
 	{:else if leading}
 		<span class="flex flex-row items-center gap-3">
-			<span class="pointer-events-none inline-flex" aria-hidden="true">{@render leading()}</span>
+			<span class={cn('pointer-events-none inline-flex', toneLabelClasses[tone])} aria-hidden="true"
+				>{@render leading()}</span
+			>
 			<span class={labelClasses}>{shown}</span>
 		</span>
 	{:else}

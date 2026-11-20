@@ -95,6 +95,8 @@
 	const starClass = $derived(starSize === 'xs' ? 'icon-xs' : 'icon-sm');
 
 	const stars = $derived(Array.from({ length: Math.max(0, Math.round(max)) }, (_, index) => index));
+	// U-49: the row draws whole and half stars only, so any score is first rounded to the nearest half (3,2 ⇒ 3).
+	const shown = $derived(Math.round((value ?? 0) * 2) / 2);
 	const named = $derived(Boolean(ariaLabel));
 </script>
 
@@ -135,7 +137,7 @@
 		<Ionicon name="star" class="icon-sm text-rating" />
 	{:else}
 		{#each stars as index (index)}
-			{@const half = (value ?? 0) >= index + 0.5 && (value ?? 0) < index + 1}
+			{@const half = shown >= index + 0.5 && shown < index + 1}
 			{#if half}
 				<!-- U-49: half a star — the empty star, and the coloured one cut in the middle over it. -->
 				<span data-filled="half" class={cn('relative inline-flex', starClass)}>
@@ -147,8 +149,8 @@
 			{:else}
 				<Ionicon
 					name="star"
-					data-filled={index < (value ?? 0) ? 'true' : 'false'}
-					class={cn(starClass, index < (value ?? 0) ? 'text-rating' : 'text-muted-foreground/24')}
+					data-filled={index < shown ? 'true' : 'false'}
+					class={cn(starClass, index < shown ? 'text-rating' : 'text-muted-foreground/24')}
 				/>
 			{/if}
 		{/each}

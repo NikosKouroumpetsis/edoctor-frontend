@@ -12,6 +12,10 @@ import {
 	TODAY_NOW
 } from '$modules/doctor-dashboard/api/appointments/doctor-appointment.sample';
 import { doctorDashboardQueryKeys } from '$modules/doctor-dashboard/api/keys';
+import {
+	sampleReviewId,
+	sampleReviewRow
+} from '$modules/doctor-dashboard/api/reviews/reviews.sample';
 import { DoctorAppointmentMemory } from '$modules/doctor-dashboard/ui/memory';
 import Harness from './appointment.harness.svelte';
 
@@ -26,7 +30,13 @@ const ID = '0193d000-0000-7000-8000-0000000000a2';
 const NBSP = ' ';
 
 let calls: { method: string; url: URL; body: unknown }[] = [];
-let answer: { read: Detail | null; status?: number; write?: { status: number; body?: Detail } };
+let answer: {
+	read: Detail | null;
+	status?: number;
+	write?: { status: number; body?: Detail };
+	/** 🔴 D-W52-89: the doctor's list of one appointment's review (none by default). */
+	review?: unknown;
+};
 
 const envelope = (data: unknown, status = 200) =>
 	new Response(
@@ -45,6 +55,11 @@ function serve(next: typeof answer) {
 			const url = new URL(String(input));
 			const method = init?.method ?? 'GET';
 			calls.push({ method, url, body: init?.body ? JSON.parse(String(init.body)) : null });
+			if (url.pathname.endsWith('/appointment-rating/ratings')) {
+				return envelope(
+					answer.review ?? { items: [], nextCursor: null, total: 0, visits: [], openReports: [] }
+				);
+			}
 			if (method === 'POST') {
 				const write = answer.write ?? { status: 200 };
 				return envelope(write.body ?? answer.read, write.status);
@@ -60,7 +75,8 @@ const links = {
 	newConversation: (patient: { kind: string; id: string }) =>
 		`/doctor/messages/new?kind=${patient.kind}&id=${patient.id}`,
 	step: (step: string) => `/doctor/appointments/${ID}/${step}?tab=history`,
-	patient: (key: { kind: string; id: string }) => `/doctor/patients/${key.kind}/${key.id}`
+	patient: (key: { kind: string; id: string }) => `/doctor/patients/${key.kind}/${key.id}`,
+	review: (ratingId: string) => `/doctor/reviews?review=${ratingId}`
 };
 
 function open(appointmentId = ID, memory: DoctorAppointmentMemory | null = null) {
@@ -887,5 +903,78 @@ describe('🔴 screen 71 · the outcome’s blocks on the 68 (D-W51-61, card w51
 		expect(card).toHaveTextContent('Διορθώθηκε σε «Δεν ήρθε».');
 		expect(card).toHaveTextContent('Ο ασθενής ενημερώθηκε· η πρόσκληση για κριτική ακυρώθηκε.');
 		expect(screen.queryByTestId('doctor-appointment-correction')).toBeNull();
+	});
+});
+
+describe('🔴 U-220.1 · D-W52-89 / 91 · screen 68 and the patient’s review (wave 5.2)', () => {
+	const completed = () =>
+		doctorAppointmentDetailRow({
+			status: 'completed',
+			startTime: '2026-11-11T08:00:00.000Z',
+			outcomeSource: 'DOCTOR',
+			actions: { canCancel: false, canReschedule: false }
+		});
+
+	it('🔴 U-220.1: a completed visit with a published review — «Η κριτική του ασθενή ★ N · ημερομηνία ›» over «Χρονολόγιο», to that review in «Κριτικές»; read by the list’s own filter (`appointmentId` + `APPROVED` + `limit=1`)', async () => {
+		serve({
+			read: completed(),
+			review: { items: [sampleReviewRow(1, { stars: 4.5 })], nextCursor: null, total: 1 }
+		});
+		open();
+		await ready();
+		const row = await screen.findByTestId('doctor-appointment-review');
+		expect(row).toHaveAttribute('href', `/doctor/reviews?review=${sampleReviewId(1)}`);
+		expect(row).toHaveTextContent('Η κριτική του ασθενή');
+		expect(row).toHaveTextContent('13 Νοεμβρίου 2026');
+		expect(row).toHaveAccessibleName('Η κριτική του ασθενή: 4,5 από 5 αστέρια, 13 Νοεμβρίου 2026');
+		// Over «Χρονολόγιο», in the page's order.
+		const log = screen.getByRole('heading', { name: 'Χρονολόγιο' });
+		expect(row.compareDocumentPosition(log) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+		const reviewRead = gets().find((call) =>
+			call.url.pathname.endsWith('/appointment-rating/ratings')
+		);
+		expect(Object.fromEntries(reviewRead?.url.searchParams ?? [])).toEqual({
+			as: 'doctor',
+			appointmentId: ID,
+			ratingModerationStatus: 'APPROVED',
+			limit: '1'
+		});
+	});
+
+	it('(negative) no published review: no row; a visit not completed asks for none at all (U-217: one place only)', async () => {
+		serve({ read: completed() });
+		const first = open();
+		await ready();
+		await waitFor(() =>
+			expect(gets().some((call) => call.url.pathname.endsWith('/appointment-rating/ratings'))).toBe(
+				true
+			)
+		);
+		expect(screen.queryByTestId('doctor-appointment-review')).toBeNull();
+		first.view.unmount();
+		serve({ read: doctorAppointmentDetailRow() });
+		open();
+		await ready();
+		expect(gets().some((call) => call.url.pathname.includes('appointment-rating'))).toBe(false);
+		expect(screen.queryByTestId('doctor-appointment-review')).toBeNull();
+	});
+
+	it('🔴 U-219.2 · D-W52-91: opened from a review of «Κριτικές» (`doctorReview` depth 1), «‹» goes back ONE step to that same review — at every width', async () => {
+		serve({ read: completed() });
+		const go = vi.spyOn(history, 'go').mockImplementation(() => undefined);
+		appPage.state = { doctorReview: { depth: 1 } };
+		try {
+			open();
+			await ready();
+			const back = screen.getByTestId('doctor-appointment-back');
+			expect(back).toHaveAttribute('data-from', 'reviews');
+			expect(back.className).not.toContain('laptop:hidden');
+			await userEvent.click(back);
+			expect(go).toHaveBeenCalledWith(-1);
+			expect(vi.mocked(goto)).not.toHaveBeenCalled();
+		} finally {
+			appPage.state = {};
+			go.mockRestore();
+		}
 	});
 });

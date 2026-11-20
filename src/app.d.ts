@@ -21,10 +21,6 @@ declare global {
 				service?: string;
 				/** Opened from the page (its own history entry): closing it goes back one step. */
 				inPlace?: boolean;
-				/** U-72.3 Ε3: in the window of the services, one step on: «‹» goes back to them, «×» closes both. */
-				fromServices?: boolean;
-				/** Whether those services were opened from the page, so «×» has two steps to go back. */
-				servicesInPlace?: boolean;
 			} | null;
 			/**
 			 * Wave 3 (U-102): a booking «Αλλαγή» screen opened from screen 30 (`depth` 1) or from another one of them
@@ -65,6 +61,12 @@ declare global {
 			 * `depth` 1): its «‹» goes back that step, to the list — a link alone keeps the 68's own way back.
 			 */
 			doctorNotification?: { depth: number };
+			/**
+			 * Wave 5.2 (D-W52-91 / 92, U-219.2): the reply to a review, its report, or the appointment it names (68) opened
+			 * from «Κριτικές» (screen 84, `depth` 1): «‹», «Άκυρο» and the done action go back that step, to the same review —
+			 * a link alone keeps each page's own way back.
+			 */
+			doctorReview?: { depth: number };
 		}
 		// interface Platform {}
 	}

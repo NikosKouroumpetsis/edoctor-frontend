@@ -337,10 +337,22 @@ const ONBOARDING_PAGES = /^\/doctor\/onboarding(?:\/.+)?$/u;
  * (D-W51-31): «Ραντεβού» (`/doctor/appointments`) and every page under it too; screen 73 (D-W51-73): «Οι ασθενείς μου»
  * (`/doctor/patients`) and every page under it (live 15/11: it drew the patient's header over the doctor's); screen 74
  * (D-W51-85): the doctor's messages (`/doctor/messages`) and every page under them; screen 75 (D-W51-89): the doctor's
- * notifications (`/doctor/notifications`).
+ * notifications (`/doctor/notifications`). 🔴 Wave 5.2 · screen 77 (D-W52-22, D-W52-26): «Το προφίλ μου»
+ * (`/doctor/profile`) and «Δείτε πώς σας βλέπουν» (`/doctor/profile/preview`); 🔴 screen 78 (D-W52-41): «Φωτογραφίες»
+ * (`/doctor/profile/photos`) and one photo's «Προσαρμογή» (`/doctor/profile/photos/<id>/crop`); 🔴 screen 79 (D-W52-49):
+ * «Όνομα και περιγραφή» (`/doctor/profile/about`); 🔴 screen 80 (D-W52-59): «Ειδικότητα και εξειδικεύσεις»
+ * (`/doctor/profile/specialty`) and the choice of the specializations (`…/specialty/specializations`); 🔴 screen 81
+ * (D-W52-63): «Βιογραφικό» (`/doctor/profile/cv`) and one row of it (`…/cv/<group>/<id>`, `…/cv/<group>/new`); 🔴 screen
+ * 82 (D-W52-69 / 70): «Γλώσσες και κοινωνικά δίκτυα» (`/doctor/profile/languages`), the choice of the languages
+ * (`…/languages/spoken`) and the four links (`…/languages/networks`); 🔴 screen 83 (D-W52-81 / 82): «Υπηρεσίες και τιμές»
+ * (`/doctor/profile/services`), one service (`…/services/<id>`), «Νέα υπηρεσία» (`…/services/new`) and a new one
+ * (`…/services/new/<id>`); 🔴 screen 84 (D-W52-91 / 92): «Κριτικές» (`/doctor/reviews`) and the reply to one review and
+ * its report (`…/reviews/<id>/reply|report`); 🔴 screen 85 (D-W52-102 / 103): «Τα άρθρα μου» (`/doctor/articles`),
+ * «Νέο άρθρο» (`…/articles/new`) and one article (`…/articles/<id>`) — a closed list, each section's page joins it with
+ * its card.
  */
 const DOCTOR_DASHBOARD_PAGES =
-	/^\/doctor(?:\/menu|\/notifications|\/(?:appointments|patients|messages)(?:\/.+)?)?$/u;
+	/^\/doctor(?:\/menu|\/notifications|\/profile(?:\/preview|\/about|\/specialty(?:\/specializations)?|\/cv(?:\/(?:studies|experience|conferences)\/[^/]+)?|\/languages(?:\/(?:spoken|networks))?|\/services(?:\/new(?:\/[^/]+)?|\/[^/]+)?|\/photos(?:\/[^/]+\/crop)?)?|\/reviews(?:\/[^/]+\/(?:reply|report))?|\/articles(?:\/[^/]+)?|\/(?:appointments|patients|messages)(?:\/.+)?)?$/u;
 
 /**
  * 🔴 Wave 5.1 · D-W51-72 (U-198.1): the cancel link's page (`/a/<token>`), screen 53 for a patient without an account —

@@ -36,5 +36,13 @@ export type BookingProfilePatch = ApiRequestBody<'patchPatientMeProfile'>;
  */
 export type PatientIdentifiersPatch = ApiRequestBody<'upsertPatientMe'>;
 
-/** Why that write was refused: the date of birth (`422`), the session (`401`), a field, else. */
-export type BookingProfileFailure = 'birth-date' | 'session' | 'invalid' | 'unknown';
+/**
+ * Why that write was refused: the date of birth (`422`), the session (`401`), a field, a name the doctor's first licence
+ * locked (`409 DOCTOR_NAME_LOCKED`, D-W52-44), else.
+ */
+export type BookingProfileFailure =
+	| 'birth-date'
+	| 'session'
+	| 'invalid'
+	| 'name-locked'
+	| 'unknown';

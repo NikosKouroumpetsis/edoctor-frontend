@@ -41,7 +41,6 @@ const SERVICES = [
 	customDurationInMinutes: minutes,
 	price,
 	amount: null,
-	isSpecialized: false,
 	yearsOfexperience: null,
 	catalogueId: null,
 	translations: [],

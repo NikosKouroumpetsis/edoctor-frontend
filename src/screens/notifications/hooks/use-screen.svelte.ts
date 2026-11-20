@@ -14,7 +14,9 @@ import type { NotificationsScreenData } from '../types';
  * Wave 4.5 · screen 63 (D-W45-49): the choice the route names, the page's language, and every address the list leads
  * to — resolved here, in the page's language (a module knows no route, and never another module's). 🔴 D-W45-45: what
  * a line opens is THIS screen's to say — an appointment its own page (screen 51), a review's invitation the visit's
- * review (screen 54); a choice is the address's `?filter=`, a fixed word and nothing of a person (U-65.6).
+ * review (screen 54); a choice is the address's `?filter=`, a fixed word and nothing of a person (U-65.6). 🔴 D-W52-91:
+ * a review the DOCTOR received is never the patient's to open (his side's line only): nothing here; 🔴 D-W52-102 nor an
+ * article of the doctor.
  */
 export function useNotificationsScreen(data: () => NotificationsScreenData) {
 	const locale = $derived<SupportedLocale>(getPageLocale(page.url));
@@ -24,7 +26,9 @@ export function useNotificationsScreen(data: () => NotificationsScreenData) {
 		settings: href(settingsSectionPath('notifications')),
 		filter: (filter) => `${href(notificationsPath)}${notificationsSearch(filter)}`,
 		target: (target) =>
-			href(target.kind === 'appointment' ? appointmentPath(target.id) : ratingPath(target.id)),
+			target.kind === 'review' || target.kind === 'article'
+				? null
+				: href(target.kind === 'appointment' ? appointmentPath(target.id) : ratingPath(target.id)),
 		open: null
 	});
 

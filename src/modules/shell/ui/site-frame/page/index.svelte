@@ -184,8 +184,10 @@
 	{/snippet}
 </AppShell>
 
+<!-- 🔴 U-215.3, D-W52-12 (`50-appointments/appts.css:198-209`): on a page that stands on a `SplitView` the bar takes
+     the page's frame from 950 (`frame="split-page"`, CSS alone), so the mark is over the side column; elsewhere the 1024. -->
 {#snippet siteHeader()}
-	<AppHeader showFrom="tablet" compactOn={dock.pillShown}>
+	<AppHeader showFrom="tablet" frame="split-page" compactOn={dock.pillShown}>
 		{#snippet brand()}
 			<BrandLink href={localizedHref('/')} {messageOptions} />
 		{/snippet}

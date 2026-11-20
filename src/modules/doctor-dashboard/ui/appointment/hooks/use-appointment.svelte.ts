@@ -5,6 +5,7 @@ import { readServerNow } from '$shared/lib/server-clock';
 import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 import { doctorAppointmentQuery } from '$modules/doctor-dashboard/api/appointments';
 import { doctorDashboardQueryKeys } from '$modules/doctor-dashboard/api/keys';
+import { doctorAppointmentReviewQuery } from '$modules/doctor-dashboard/api/reviews';
 import { useDoctorDesk, type DoctorCardAnswer } from '$modules/doctor-dashboard/ui/card';
 import type { DoctorAppointmentState } from '../types';
 
@@ -33,6 +34,14 @@ export function useDoctorAppointment(options: {
 		locale: options.locale,
 		requests: () => ({ read: undefined, shown: [] })
 	});
+
+	// 🔴 U-220.1 · D-W52-89: the published review of a completed visit — the list's own filter, no route of its own.
+	const completed = $derived(read.data?.status === 'completed');
+	const reviewRead = createQuery(() => ({
+		...doctorAppointmentReviewQuery(options.appointmentId()),
+		enabled: completed
+	}));
+	const review = $derived(completed ? (reviewRead.data?.items[0] ?? null) : null);
 
 	const missing = $derived(
 		(read.error instanceof ApiError && [403, 404].includes(read.error.status)) ||
@@ -77,6 +86,10 @@ export function useDoctorAppointment(options: {
 		},
 		get appointment() {
 			return appointment;
+		},
+		/** 🔴 U-220.1: the patient's published review of this visit, `null` for none (or not read yet). */
+		get review() {
+			return review;
 		},
 		/** The server's «now», drawn again on the desk's clocks. */
 		get now() {

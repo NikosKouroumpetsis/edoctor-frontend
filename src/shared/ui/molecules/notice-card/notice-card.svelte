@@ -13,9 +13,11 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { cn } from '$shared/lib/utils';
+	import { Ionicon, type IoniconName } from '$shared/ui/icons/ionicon';
 
 	let {
 		tone = 'warm',
+		icon,
 		title,
 		lines = [],
 		detail,
@@ -25,6 +27,8 @@
 		class: className
 	}: {
 		tone?: NoticeCardTone;
+		/** A 24 glyph before the words, at the height of the sentence (a status: «✓», «!»); none by default. */
+		icon?: IoniconName;
 		/** The notice's one sentence (500). */
 		title: string;
 		/** What it means, each on its own line (13, muted). */
@@ -40,19 +44,7 @@
 	} = $props();
 </script>
 
-<!-- A notice in a page (the approved `appt.css:132-136` `.a-note`, wave 4; screen 64's licence notice, wave 5): its
-     sentence, then its lines, then at most one way on. Every word a text node, never HTML. -->
-<div
-	data-slot="notice-card"
-	data-tone={tone}
-	data-testid={testId}
-	{role}
-	class={cn(
-		'rounded-md border px-3.5 py-3 text-body-sm text-foreground',
-		toneClasses[tone],
-		className
-	)}
->
+{#snippet words()}
 	<p class="font-medium">{title}</p>
 	{#each lines as line, index (index)}
 		<p class="mt-1 text-label-lg font-normal text-muted-foreground">{line}</p>
@@ -62,5 +54,28 @@
 	{/if}
 	{#if action}
 		<div class="mt-3">{@render action()}</div>
+	{/if}
+{/snippet}
+
+<!-- A notice in a page (the approved `appt.css:132-136` `.a-note`, wave 4; screen 64's licence notice, wave 5): its
+     sentence, then its lines, then at most one way on. With an `icon` (screen 77's status, `sw.css` `.w-pst`) the glyph
+     stands before the words, 12 away. Every word a text node, never HTML. -->
+<div
+	data-slot="notice-card"
+	data-tone={tone}
+	data-testid={testId}
+	{role}
+	class={cn(
+		'rounded-md border px-3.5 py-3 text-body-sm text-foreground',
+		icon && 'flex flex-row items-start gap-3',
+		toneClasses[tone],
+		className
+	)}
+>
+	{#if icon}
+		<Ionicon name={icon} class="icon-lg shrink-0" />
+		<div data-slot="notice-card-words" class="min-w-0 flex-1">{@render words()}</div>
+	{:else}
+		{@render words()}
 	{/if}
 </div>

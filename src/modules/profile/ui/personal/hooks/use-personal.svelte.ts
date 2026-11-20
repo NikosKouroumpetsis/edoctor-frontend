@@ -1,5 +1,6 @@
 import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 import { browser } from '$app/environment';
+import { getDoctorStandingOptional } from '$shared/state/doctor-standing';
 import { getSessionOptional } from '$shared/state/session';
 import { getToastsOptional } from '$shared/ui/molecules/toast';
 import { profileQueryKeys } from '$modules/profile/api/keys';
@@ -23,11 +24,14 @@ import type { PersonalPageProps } from '../types';
  * Screen 58 (record §5.3): who the page reads — the session's own facts of the person (the names and the server's
  * masks) and the account's gender and date of birth (`GET /user/me`) — which ONE row is open, and what each row's
  * write is. A write answers why it was refused, or `null`; a session that ended opens the sign-in (U-84). 🔴 U-168:
- * nothing a person types is kept here — it lives in the open row's own form and goes with it.
+ * nothing a person types is kept here — it lives in the open row's own form and goes with it. 🔴 D-W52-50 (U-207.1):
+ * the account's doctor standing (the site's one read, shared) says whether a first licence locked the name — the row
+ * then has no «Επεξεργασία»; and if the server refuses a name as locked all the same, the standing is asked again.
  */
 export function usePersonal(props: () => PersonalPageProps) {
 	const session = getSessionOptional();
 	const toasts = getToastsOptional();
+	const standing = getDoctorStandingOptional();
 	const client = useQueryClient();
 	const account = createQuery(() => ({
 		...accountPersonQuery(),
@@ -51,7 +55,19 @@ export function usePersonal(props: () => PersonalPageProps) {
 			maskedAfm: member.maskedAfm ?? null
 		};
 	});
-	const rows = $derived(person ? buildPersonalRows(person, { locale: props().locale }) : []);
+	const nameLocked = $derived(standing?.nameLocked === true);
+	// D-W52-50: a device that remembers a doctor waits for the standing's answer, so the name's «Επεξεργασία» never shows
+	// and then goes; an outage of that read does not hold the page (the server refuses a locked name by itself).
+	const standingPending = $derived(
+		standing != null && !standing.known && !standing.failed && standing.kind !== 'none'
+	);
+	const rows = $derived(
+		person ? buildPersonalRows(person, { locale: props().locale }, { nameLocked }) : []
+	);
+	// The lock arrived while the name was open (the standing's answer, or the server's refusal): the row closes on it.
+	$effect(() => {
+		if (nameLocked && openRow === 'name') openRow = null;
+	});
 	const failed = $derived(
 		!person && (account.isError || (props().offline === true && account.data === undefined))
 	);
@@ -72,7 +88,7 @@ export function usePersonal(props: () => PersonalPageProps) {
 
 	return {
 		get view(): 'loading' | 'failed' | 'ready' {
-			return person ? 'ready' : failed ? 'failed' : 'loading';
+			return person && !standingPending ? 'ready' : failed ? 'failed' : 'loading';
 		},
 		get person() {
 			return person;
@@ -84,6 +100,7 @@ export function usePersonal(props: () => PersonalPageProps) {
 			return openRow;
 		},
 		setOpen(row: PersonalRowId, open: boolean) {
+			if (open && row === 'name' && nameLocked) return;
 			if (open) openRow = row;
 			else if (openRow === row) openRow = null;
 		},
@@ -108,8 +125,15 @@ export function usePersonal(props: () => PersonalPageProps) {
 			if (openRow === row) openRow = null;
 			toasts?.show({ message });
 		},
-		saveName: (patch: { firstName: string; lastName: string }) =>
-			write(() => props().ports.saveProfile(patch), props().ports.writeFailureOf),
+		async saveName(patch: { firstName: string; lastName: string }) {
+			const failure = await write(
+				() => props().ports.saveProfile(patch),
+				props().ports.writeFailureOf
+			);
+			// 🔴 D-W52-50: the server says the name is locked — the standing is read again, and the row shows its lock.
+			if (failure === 'name-locked') standing?.retry();
+			return failure;
+		},
 		/** A patient's day of birth is the patient's own write; an account without that profile writes its own. */
 		saveBirthDate(day: string) {
 			const dateOfBirth = toBirthDateInstant(day);

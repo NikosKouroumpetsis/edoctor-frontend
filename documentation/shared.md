@@ -178,6 +178,8 @@ Wave 4.0 (the patient's appointments, screens 50–55) adds:
 - `primitives/chip`'s `size="tab"` (D-W4-66, screen 50's «Επερχόμενα / Ιστορικό»): 36 high, 14 (`min-h-chip-tab`), the
   web's own third size beside the application's 32 and 40.
 - `templates/split-view`'s `solo` column is white to the screen's end from 950 too (`split:min-h-page`, D-W4-66).
+  Wave 5.2 (screen 77): a `solo` list that opens nothing yet hands in no right column at all (`children` is optional);
+  the pane stays in the page, empty and hidden.
 - `molecules/phone-field-inline`'s `autocomplete` (default `tel-national`): a relative's mobile says `off`, as every
   other field of a person who is not the reader (security review of the web, NIT-1).
 - `lib/http`'s `sessionRequest` and `httpSessionFile` ask with `cache: 'no-store'` (🔴 D-W4-60): a personal answer is
@@ -200,8 +202,9 @@ Wave 4.5 (the account, screens 56–63) adds:
   `tests/architecture/messages-privacy.test.ts` reads it there). The server's answer reaches only a module's `api/`,
   which maps it: no wire type leaves an `api/` (W-4).
 - `templates/split-view`'s `widths="menu"` and `centred` (🔴 U-167, D-W45-08, screen 57): `menu` is a menu of sections
-  on the left, 340 from 950 and 420 from 1128 (`grid-menu`), which the template also insets from 950 (32 over, 24 a
-  side, 48 under; 40 over and 48 a side from 1128) — a list of the other widths insets itself, as before. `centred`
+  on the left, 340 from 950 and, from 1128, 30 % of the frame and never under 420 (`grid-menu`; 🔴 U-215.3, wave 5.2),
+  which the template also insets from 950 (32 over, 24 a side, 48 under; from 1128 40 over and the menu of 324 in the
+  middle of its column, `px-menu-centred`) — a list of the other widths insets itself, as before. `centred`
   puts what the right column shows in a box of at most 640 (`split-solo`) in the MIDDLE of that column, inside the
   column's own inset (32 over, 40 from 1128; 48 a side; 64 under) — never against the line between the columns. The
   default is `false`: the messages fill their column (Airbnb's), and the appointments and the relatives (wave 4.0) keep
@@ -216,7 +219,9 @@ Wave 4.5 (the account, screens 56–63) adds:
   (`aria-disabled`). The focus goes to the first thing in the content when it opens and back to the action's link
   when it closes, however it closed (its link, Escape, the caller after a choice). Every word is the caller's and a
   text node (U-65.6); no colour under the pointer (U-100). Read by screen 61 («Γλώσσα και θέμα»); the 58 and the 59
-  put their fields and «Αποθήκευση» in it.
+  put their fields and «Αποθήκευση» in it. `lockedNote` (D-W52-50): the row no longer changes here — it has no link
+  and never opens (whatever the caller binds), and under what it holds a lock glyph with the caller's reason (14
+  muted); `data-locked`, `<testId>-locked`. The 58's «Ονοματεπώνυμο» of a doctor whose first licence locked the name.
 - `icons/ionicon`: `shield-outline` joins the glyphs (the application's «Σύνδεση και ασφάλεια»), extracted from the
   same font by the same script as the others; so does `log-out-outline` (screen 56's «Αποσύνδεση» row), and
   `laptop-outline` and `tablet-portrait-outline` (screen 59's devices, beside `phone-portrait-outline`);
@@ -269,7 +274,8 @@ Wave 5.1 (the doctor's dashboard, card w51-w2, screen 66 «Σήμερα», D-W51
 - `molecules/button-stack` (`ButtonStack`): 1–3 answers one under the other at EVERY width (🔴 U-190.1), round, the
   whole width, 48 high, the outlined ones in their order and the `emphasis` (dark) one LAST whatever its place
   (🔴 U-189.1); `loading` swaps a button's words for the busy indicator and refuses its presses.
-- `molecules/status-pill` (`StatusPill`): a state's pill (warm, green, neutral; the approved `.a-st`); the patient's
+- `molecules/status-pill` (`StatusPill`): a state's pill (warm, green, neutral; the approved `.a-st`; 🔴 D-W52-102
+  `refused` in the accent's outline, `sw.css` `.a-st.no`); the patient's
   `modules/appointments/ui/status-pill` draws it with the patient's words.
 - `molecules/pill-tabs`: `variant="solid"` — Airbnb's «Σήμερα · Επερχόμενα» (the chip's fill, the chosen one filled
   dark with light words and a shadow; no hover colour); `outline` stays the default.
@@ -309,7 +315,11 @@ unchanged):
   `ChangeFrame`, which is now its patient wrapper with the booking's words and test ids): a step screen of its own
   (U-102) — «←» / «‹» (`backIcon`), the title, the content, «Άκυρο / action» pinned below 744 and in the flow from it
   (`cancelLabel: null` one way on, `bar: false` none), a `footer`. `placement`: `page` · `pane` (the 50's split from 950) · `solo` · `centred` (the right column of `SplitView from="laptop" centred`: `solo` below 1128, the split's 640
-  centre from it). `data-slot="step-screen"` / `"step-screen-bar"`.
+  centre from it). `data-slot="step-screen"` / `"step-screen-bar"`. `barNote` (D-W52-59α): a line that must ALWAYS be
+  in sight — a limit a long content reached — in the bar over «Άκυρο / action», inside an `aria-live="polite"` place
+  (`data-slot="step-screen-bar-note"`) that is there before its words (`''` keeps it ready and empty, left out there
+  is none); while it has words the bar holds the bottom of the screen from 744 too (`tablet:sticky`, `data-noted`) and
+  below 744 the content ends a line higher (`step-screen-note-room`). The muted line of the kit, text alone.
 - `molecules/radio-rows` (`RadioRows`, moved): one choice as whole rows (U-112), `frame` `phone` | `always`.
 - `molecules/note-field` (`NoteField`, moved): the words with «n/max» under them; `maxLength` is the caller's (no
   default of a feature's), `height` `note` | `short` | `review`, `data-slot="note-field"`.
@@ -318,12 +328,40 @@ unchanged):
   word, the strong line, the muted lines (empty ones left out). The patient's `ChangeContext` draws it with the
   doctor's photo.
 - `molecules/bullet-list` (`BulletList`): «Τι θα γίνει», short muted lines with their dot.
-- `molecules/notice-card`: `detail` — a last line of the caller's own (words with a `tel:` link inside).
+- `lib/article-text` (wave 5.2 · screen 85, D-W52-99 / 103 / 104): the closed schema of an article's text as the server
+  checks it — `ARTICLE_TEXT_LIMITS`, `articleLinkIssue` (`https:` only), `readArticleVideoUrl` (YouTube / Vimeo ⇒ provider
+  and id), `articleVideoEmbedUrl` (the ONE frame template: `youtube-nocookie.com`, Vimeo `dnt`), `articleTextStats` /
+  `articleTextOverLimit`, `readArticleText` (a strict reading with a stack: a document of the schema, else `null`),
+  `cleanArticleTextDoc` (an editor's document as the server stores it: each text cleaned, only the schema's keys,
+  nothing to send ⇒ `null`).
+- `lib/rich-text` `buildArticleRichText(doc, images)` and `molecules/rich-text` (D-W52-104): the blocks of the closed
+  schema — underline, strike, highlight, line breaks, a quote, «Σημαντικό», a rule, an uploaded image with its caption,
+  a video (`rich-text-video.svelte`: no frame until pressed, then one sandboxed frame), a table; a node outside the list
+  is not drawn. `RichText` `userContent`: an outside link opens in a new tab with `rel="nofollow ugc noopener
+noreferrer"`. A picture that does not load leaves its place (`data-slot="rich-text-image-missing"`, 16:9 on `muted`,
+  at most `figure-max` 320, the `Picture` glyph, named by its words; the caption stays). The tolerant reader of the CMS
+  texts is unchanged.
+- `icons/picture` (`Picture`, wave 5.2 · screen 85, round 2): the article prototype's picture (`64-switch/sw.js:679`,
+  `AR_PIC`), path for path — 40 (`figure-glyph`) at the 1.4 stroke, in the text's colour; `PICTURE_GLYPH` its lines for
+  a caller that draws without Svelte (the editor's own node).
+- `molecules/radio-rows` `notePlace="under"` (screen 85, `sw.css:627-628` `.w-arkind`): an option's note on its own
+  line under the label, 13 muted, 2 apart (`after`, the default, keeps it beside the label).
+- `molecules/note-field` `labelLook="section"` (screen 85, `sw.css:527` `.w-slh`): the label as a section's quiet name,
+  15/600 muted (`title`, the default, keeps the field's 16/600 heading).
+- `molecules/link-card` (`LinkCard`, wave 5.2 · screen 84): a framed link to what a card is about — a muted glyph, the
+  small word over a strong line (`title`, or the caller's `body` snippet: stars and a day), «›»; `name` says the whole
+  link aloud, `onclick` lets the caller take a plain press over (a step of its history). Used by a review's «Το
+  ραντεβού · …» and by the row «Η κριτική του ασθενή» of screen 68. No colour under the pointer (U-100).
+- `molecules/notice-card`: `detail` — a last line of the caller's own (words with a `tel:` link inside); `icon`
+  (wave 5.2, screen 77's status) — a 24 glyph before the words, decorative, none by default.
 - `molecules/button-stack`: an action's `href` makes it a link in the same look (its `onPress(event)` first: a caller
   may take the plain press over); `disabled` / `loading` lock it.
 - `lib/navigation`: `useHistorySteps(flow)` — the step screens' history (`open(href, depth)`, `leave(fallback)`: back
   the steps it was opened with, else replace with the page it belongs to); `useAppointmentSteps` is its patient
   wrapper. `App.PageState.doctorAppointment` counts the doctor's 69.
+- `lib/visit-length` (🔴 D-W52-10, U-212.4): `VISIT_LENGTHS` — 15, 20, then every quarter to two hours, the ONE list of
+  the sign-up and of a doctor's services — `isVisitLength`, and `formatVisitLength(minutes, locale, 'long' | 'short')`:
+  under an hour in minutes, from one hour in hours («1 ώρα και 30 λεπτά» / «1 ώρα 30′», «2 ώρες»).
 - `lib/appointment-when`: `appointmentDayMonthLabel` («22 Οκτωβρίου»); `lib/relative-words`: `relativeGenderLabel`.
 
 Wave 5.1 · screen 70 «Αλλαγή ώρας» / «Υπηρεσίες και κόστος» (card w51-w6, D-W51-51 / 52; every word and test id the
@@ -334,7 +372,9 @@ caller's):
   (same classes, `appointment-time-diff`); the 70 draws «Ήταν / Νέα ώρα» and «Διάρκεια · Σύνολο υπηρεσιών» with it.
 - `molecules/check-rows` (`CheckRows`): MANY choices as whole rows (U-112, never tiles) — the words over a muted line,
   the dark box with its tick on the right (the checkbox primitive's `foreground` tone), `role="checkbox"` rows in a
-  `group`; a press names the row's value, the caller keeps what is chosen.
+  `group`; a press names the row's value, the caller keeps what is chosen. An option's `disabled` (D-W52-59: a limit
+  the caller keeps is reached, screen 80's three) holds its row back: dimmed, `aria-disabled` — never the `disabled`
+  attribute, so it keeps its place in the keyboard's order — and its press names nothing.
 - `molecules/amount-field` (`AmountField`): an amount with its sign (the caller's «€»), `inputmode="decimal"`, the
   caller's `maxLength`, its own `error` under it (`role="alert"`, the field red); the caller reads the text.
 - `molecules/action-offer` (`ActionOffer`, moved from `modules/appointments/ui/cancel/components/offer`): «Θέλετε
@@ -386,6 +426,64 @@ Everything under `src/shared/ui` is generic (U-02.1, guarded by
 come from the caller as props, a Paraglide key is only `common_*` or the
 component's own name (`date_of_birth_field_*`, `image_uploader_*`), and the
 product's frame lives in `src/modules/shell`.
+
+Wave 5.2 · screen 78, a picture picked and cut on the device (card w52-w2; D-W52-06, D-W52-38, D-W52-40 — what the
+doctor's photos use first and the articles' cover and pictures after them):
+
+- `lib/image` (no page's word, nobody's picture): `checkImageFile(file, rules, measure?)` — a picked file against its
+  `ImageFileRules` in the order that costs least (the type the browser names, the weight, then the pixels by
+  `measureImageFile` = `createImageBitmap`, the camera's rotation applied); the first failure is the answer (`type` |
+  `size` | `dimensions`), a file that cannot be read as a picture is not of the types, a browser that cannot measure
+  leaves the pixels to the server. `readAsDataUri` (the `data:` text a JSON body carries). The cut:
+  `maxImageCropZoom`, `imageCropRect`, `clampImageCrop`, `panImageCrop` over an `ImageCrop` (`zoom`, and the cut's
+  middle as fractions of the picture) and `ImageCropRules` (`aspect`, the least pixels) — pure, whole pixels, always
+  inside the picture, never under the least; `null` zoom for a picture too small to cut. `loadImage(url)` (with
+  `crossOrigin = 'anonymous'`, or the canvas could never be read back) and `cutImageToJpeg(image, rect)` (a canvas of
+  exactly the cut's pixels).
+- `molecules/image-cropper` (`ImageCropper`; `src`, `source`, `rules`, `bind:crop`, `label`, `describedBy`,
+  `zoomLabel`, `disabled`, `testId`): a frame of the cut's shape that shows exactly what is kept — the picture placed
+  by percentages of the cut, so no size of the screen is read — dragged to move it (the arrows too) and the kit's
+  `Slider` to go in (`+` / `−` on the frame too). One control named by the caller; no colour under the pointer.
+  `data-slot="image-cropper"`, `"image-cropper-frame"` (`data-dragging`), `"image-cropper-image"`.
+- `lib/http` `httpSessionUpload(method, path, { body, signal, onProgress })`: the session write that tells how much of
+  its body has been sent — `XMLHttpRequest`, because `fetch` cannot — under the rules of every session call: the
+  cookies, the page's language, JSON in and out, the envelope's `data`, a refusal with its status, code and `details`,
+  a lost or abandoned request as status 0.
+- `templates/step-screen`: the placement `menu` — the right column of a MENU of sections that splits from 950 and
+  centres what a section opens (`SplitView widths="menu" centred`): the `solo` column below 950, from 950 the split's
+  own box and the section's smaller title; with `besideList` no «‹» there. `subtitleId` gives the subtitle an id for a
+  control it describes.
+
+Wave 5.2 · step 0, the wide web's layout (card w52-w0; 🔴 U-215.3, U-216.2, D-W52-11 … 14 — ONE frame for the bar and
+the page):
+
+- `templates/split-view`: from its zone (`split:` or `laptop:`, by `from`) the root stands in the page's frame —
+  `w-full max-w-wide mx-auto`, 1920 at most and centred beyond it — with `solo` too. A list's own column starts under
+  the bar's mark: its caller gives it `laptop:pl-pane-inset` (48 from 1128; 24 at 950–1127) only where it stands
+  beside what it opened, never in the one column (`solo`, below the zone).
+- `templates/split-view`'s menu from 1128: the column is `max(420, 30 %)` of the frame and the menu of 324
+  (`split-menu`) stands in its middle, never closer than 48 to its edges (`laptop:px-menu-centred`); 950–1127 as before
+  (340, 24 a side).
+- `templates/split-view`'s fold (`widths="menu"` only): `rail?: Snippet` is what the menu folds to — a rail of icons
+  the caller draws — and `bind:folded` its state. With a `rail` the column glides between `grid-menu` and `grid-rail`
+  (72, 120 from 1128: the frame's inset on each side of the bar's mark) in 0.32 s, the menu (ONE width while it
+  glides: 292, 324 from 1128, `w-menu-fixed`) leaves in 0.12 s before the rail arrives (0.2 s after 0.14 s), and back
+  (the menu 0.2 s after 0.12 s) — CSS transitions on the root's `data-folded` alone, whatever the device's motion
+  setting. The menu and the rail are both always in the page (`data-slot="split-view-menu"`, `"split-view-rail"`), each
+  scrolling on its own, the hidden one `inert`; pressing changes only the state (no class changes, nothing is drawn
+  again). Below the zone, and with `solo`, there is no rail and no button and the state is not read: every class of
+  the fold waits for the zone, and `inert` follows the rail's own box (a `ResizeObserver` on it — the zone itself is
+  never read in JS), so a screen turned narrower keeps its menu live.
+- `SplitViewFoldButton` (same folder; `label`, `class`): the button of the fold — the caller puts one in the menu
+  (beside its title) and one in the rail, each with its own name («Σύμπτυξη του μενού», «Άνοιγμα του μενού»). A real
+  `<button>` of 48 with `aria-expanded`, `data-slot="split-view-fold"`, no colour under the pointer (U-100); it reads
+  the template's context and draws nothing outside a `SplitView` whose menu folds. After a press the template moves
+  the focus to the button of the part that shows.
+- `organisms/app-header`: `frame?: 'box' | 'page' | 'split-page'` (`AppHeaderFrame`, `data-frame`). `box` (the default)
+  is apple.com's 1024 in the middle. `page` is always the page's frame: from 744 `max-w-wide`, 24 a side and 48 from
+  1128, where the navigation stands in the exact middle (out of the row, as `compact`). `split-page` takes that frame
+  from 950 only on a page that stands on a `SplitView` — the `split-page:` variant of `layout.css`
+  (`body:has([data-slot='split-view']) &`), CSS alone: right in the server's HTML, one source, and with `solo` too.
 
 ## Provider access
 

@@ -45,6 +45,7 @@ describe('shared/lib/navigation · readHistoryDepth (review w3-w3 R1 MINOR-5)', 
 		// D-W51-46 (screen 69, card w51-w5): the doctor's appointment counts its step screens too (`doctorAppointment`);
 		// D-W51-73 (screen 73, card w51-w9): so does a patient's card and what it opens (`doctorPatient`).
 		// D-W51-90 (screen 75, card w51-w11): so does the 68 opened from the doctor's notifications (`doctorNotification`).
+		// D-W52-91 / 92 (screen 84, card w52-w8): so do a reply, a report and the 68 opened from «Κριτικές» (`doctorReview`).
 		expectTypeOf<HistoryDepthFlow>().toEqualTypeOf<
 			| 'booking'
 			| 'onboarding'
@@ -53,6 +54,7 @@ describe('shared/lib/navigation · readHistoryDepth (review w3-w3 R1 MINOR-5)', 
 			| 'doctorAppointment'
 			| 'doctorPatient'
 			| 'doctorNotification'
+			| 'doctorReview'
 		>();
 		const source = readFileSync(
 			join(projectRoot, 'src/shared/lib/navigation/stored-page-state.ts'),

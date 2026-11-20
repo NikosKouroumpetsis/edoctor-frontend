@@ -9,7 +9,13 @@
 	import { ModePill } from '$shared/ui/molecules/mode-pill';
 	import { NameCard } from '$shared/ui/molecules/name-card';
 	import { buildDoctorMenuGroups, type DoctorMenuRowId } from '$modules/doctor-dashboard/lib/menu';
-	import { doctorFramePaths, doctorPatientsPath } from '$modules/doctor-dashboard/lib/paths';
+	import {
+		doctorFramePaths,
+		doctorPatientsPath,
+		doctorProfilePath,
+		doctorReviewsPath,
+		doctorArticlesPath
+	} from '$modules/doctor-dashboard/lib/paths';
 	import type { DoctorMenuProps } from '../types';
 
 	let { locale, headerAction }: DoctorMenuProps = $props();
@@ -27,7 +33,10 @@
 	);
 	const rowPaths: Record<Exclude<DoctorMenuRowId, 'sign-out'>, string> = {
 		notifications: doctorFramePaths.notifications,
+		profile: doctorProfilePath,
 		patients: doctorPatientsPath,
+		reviews: doctorReviewsPath,
+		articles: doctorArticlesPath,
 		'account-settings': doctorFramePaths.accountSettings,
 		help: doctorFramePaths.help,
 		terms: doctorFramePaths.terms
@@ -60,7 +69,7 @@
 <!-- 🔴 Screen 76 as 5.1 ships it on the web (D-W51-04, `76-menu` `?stage=51`, `m-51`): the «Προφίλ» of screen 56 for the
      doctor — «Μενού» with the bell, the name card with the specialty of the catalogue (U-122; NOT pressed, U-164.1), the rows of the doctor's ☰
      and, below 744, the pill «Λειτουργία ασθενή». From 744 the same page in the middle of the screen (U-167). Never «Οι
-     συγγενείς μου» (U-186.1). -->
+     συγγενείς μου» (U-186.1). 🔴 D-W52-22: «Το προφίλ μου» (screen 77) is the first row of the first group. -->
 <main
 	data-testid="doctor-menu"
 	class="min-h-page px-gutter-sm pt-3 pb-results-list-end tablet:pt-section tablet:pb-pane-inset-lg"

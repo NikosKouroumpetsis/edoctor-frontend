@@ -651,7 +651,8 @@ words; the web's own idiom only where the platform needs it, e.g. an `aria-label
 
 - `AppHeader` (organism) — `brand`, `nav`, `compact` + `compactOn` (the page's small search pill takes the links'
   place: the links fade out, the pill grows in from 92 %, 0.25 s on the standard curve; the hidden one is `inert`),
-  `actions`, `showFrom` (`tablet` | `none`).
+  `actions`, `showFrom` (`tablet` | `none`), `frame` (`box` | `page` | `split-page`, 🔴 U-215.3: the 1024 box, the
+  page's frame always, or the page's frame beside a `SplitView` — see «The page's frame» under «Responsive UI»).
 - `BottomNav` (organism) — the glass capsule; `items` (`href` link or `onclick` button, `icon` / `activeIcon`,
   `current`), `hideFrom` (default `tablet`).
 - `SiteFooter` (organism) — `popular` (a snippet over the columns), `columns`, `actions` (the row above the rights
@@ -768,6 +769,17 @@ Breakpoints (mobile-first; base styles target the 375px phone design):
   80 % `backdrop-blur-bar backdrop-saturate-180`, the hairline only once the page scrolls (`data-scrolled`), its
   content in the 1024 box with 22 a side (`max-w-bar-content px-5.5`). The footer reserves the capsule's room
   until 744 (`pb-bar-bottom tablet:pb-0`). The language and the theme live only in the «Ρυθμίσεις» dialog (U-16.1).
+- **The page's frame** (🔴 U-215.3, wave 5.2 · step 0): a page with a side column and its bar share ONE frame — as
+  wide as the page, 1920 at most (`max-w-wide`) and centred beyond it, 24 from its edges and 48 from 1128 — so the
+  mark stands right over the column. The `SplitView` takes it from its zone (`solo` too). The doctor's bar takes it on
+  every page (`AppHeader frame="page"`, its tabs in the exact middle from 1128). The patient's bar takes it from 950
+  only on a page that has a `SplitView` (`frame="split-page"`), and there its links stand together in the middle, 12
+  apart: the variant `split-page:` (`@custom-variant split-page (body:has([data-slot='split-view']) &)` in
+  `layout.css`) decides in CSS alone — never a list of routes, never state — and stacks with the zones
+  (`split:split-page:max-w-wide`, `laptop:split-page:px-pane-inset`). Every other page keeps the 1024 box. A list
+  beside what it opened starts under the mark (`laptop:pl-pane-inset`); a menu's column is `max(420, 30 %)` with the
+  menu of 324 in its middle (`laptop:px-menu-centred`), and folds to a rail only where its caller gives one
+  (`SplitView` `rail`, `SplitViewFoldButton`; «Το προφίλ μου»). No «‹» on the wide web (U-217.1).
 
 - The layout kit (wave 0, dyad 2) switches with the zone **only through CSS** —
   the zone prefixes and the container names, never `innerWidth`, a width

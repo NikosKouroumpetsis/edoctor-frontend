@@ -75,6 +75,50 @@ describe('SiteFrame (eDoctor frame on the generic shell)', () => {
 		expect(screen.getByRole('heading', { level: 1, name: 'Σελίδα' })).toBeInTheDocument();
 	});
 
+	it('🔴 U-215.3 / D-W52-12: η μπάρα του ασθενή παίρνει το πλαίσιο της σελίδας μόνο σε σελίδα με πλάγια στήλη — the same HTML on every page, the `split-page:` variant decides from 950 (the 1024 box elsewhere); there the links stand together in the middle, 12 apart, and `justify-around` stays for every other page', () => {
+		for (const path of ['/', '/appointments', '/profile/account-settings', '/en/messages']) {
+			visit(path);
+			const view = renderFrame();
+			const banner = screen.getByRole('banner');
+			expect(banner, path).toHaveAttribute('data-frame', 'split-page');
+			const content = banner.querySelector('[data-slot="app-header-content"]') as HTMLElement;
+			// The box of today, and the frame only behind the variant, from 950 (24) and from 1128 (48).
+			expect(content, path).toHaveClass(
+				'mx-auto',
+				'max-w-bar-content',
+				'px-5.5',
+				'split:split-page:max-w-wide',
+				'split:split-page:px-6',
+				'laptop:split-page:px-pane-inset'
+			);
+			for (const name of ['max-w-wide', 'tablet:max-w-wide', 'split:max-w-wide', 'laptop:absolute'])
+				expect(content, `${path} ${name}`).not.toHaveClass(name);
+			const navBox = banner.querySelector('[data-slot="app-header-nav"]') as HTMLElement;
+			expect(navBox.className, path).not.toMatch(/absolute/u);
+			const primary = within(banner).getByRole('navigation');
+			expect(primary, path).toHaveClass(
+				'flex-1',
+				'justify-around',
+				'px-6',
+				'split:split-page:justify-center',
+				'split:split-page:gap-3'
+			);
+			for (const name of ['justify-center', 'gap-3', 'split:justify-center', 'split:gap-3'])
+				expect(primary, `${path} ${name}`).not.toHaveClass(name);
+			view.unmount();
+		}
+	});
+
+	it('D-W52-12 · D-W52-16: the booking’s bar of the mark alone keeps the 1024 box — no frame of the page', () => {
+		visit('/doctors/dr-athena/booking/time');
+		renderFrame();
+		const banner = screen.getByRole('banner');
+		expect(banner).toHaveAttribute('data-frame', 'box');
+		const content = banner.querySelector('[data-slot="app-header-content"]') as HTMLElement;
+		expect(content).toHaveClass('max-w-bar-content', 'px-5.5');
+		expect(content.className).not.toMatch(/split-page:|max-w-wide/u);
+	});
+
 	// Rewrites «renders the page inside the header, footer and bottom bar» (a «Σύνδεση» link and the theme button in
 	// the bar): U-17.2/U-17.5 put sign-in in the ☰ menu, U-16.1/U-17.4 the theme and the language in «Ρυθμίσεις».
 	it('U-16.8: renders the page inside apple.com’s bar (from 744), the footer and the capsule of the Greek site', () => {

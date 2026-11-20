@@ -358,6 +358,46 @@ In place:
   `appointment-rules.test.ts` (the rating's weights and formula, the stars of a grade (`toRatingStars`), the comment's
   bound and symbols, the patient's five cancel reasons, the relatives' 20 and the scan's page of 100
   (`listPageSizeMax`), read from the backend). One planted negative per rule.
+- `tests/architecture/specialization-rules.test.ts` (wave 5.2, «U-209.3 · D-W52-54», «U-209.3 · D-W52-56 / 60») — the
+  web's limit of three specializations is the backend's `DOCTOR_SPECIALIZATION_LIMIT`, the web reads a catalogue code
+  exactly as the backend's `SPECIALIZATION_CODE_PATTERN` does (vectors on both sides of it), and no source file of
+  `src/` writes `isSpecialized` (the generated contract alone still does). One planted negative per rule.
+- `tests/architecture/credential-rules.test.ts` (wave 5.2, «U-210 / D-W52-63», «U-207.3 / D-W52-61») — the web's
+  bounds of the biography (twenty rows a group, a title of 300, an organization of 200, the first year 1950) are the
+  backend's `DOCTOR_CREDENTIAL_*`, the last year is «next year on the platform's calendar» as the backend reads it, a
+  save of the doctor carries ONE text a row, `el`, and no file of the two pages offers a language to write in. One
+  planted negative per rule.
+- `tests/architecture/service-rules.test.ts` (wave 5.2, «U-212.4 / U-213.1 / D-W52-10 / D-W52-83», «U-212.1 / D-W52-71»,
+  «U-217.3 / U-214.4 / D-W52-78») — ONE list of visit lengths: the backend's `DOCTOR_SERVICE_VISIT_DURATIONS`,
+  `$shared/lib/visit-length` and the sign-up's `DOCTOR_ONBOARDING_DURATIONS`; the price, the texts and the years are the
+  backend's bounds; a new service starts with NO price and EMPTY texts, eDoctor's texts reach a field only through the
+  button's `suggest()`, a save is Greek alone and never names `amount`, and no file of the three pages offers a
+  language. One planted negative per rule.
+- `tests/architecture/article-rules.test.ts` (wave 5.2, «U-222 / D-W52-99 … 104») — the text's limits (50.000
+  characters, 5.000 nodes, depth 10, 20 images, 5 videos, 10 tables, the link's 2000) are the backend's
+  `ArticleContentPolicy.LIMITS`, the form's bounds (title 200, short description 300, a cover 800 × 600, an image of the
+  text 200 × 200) its schema's and `ArticleImagePolicy`'s; «Τα άρθρα μου» is a row of «Μενού» in the ☰ and on the page;
+  a write sends Greek alone and never a slug, an SEO field or a state; the web has ONE frame — the renderer's video,
+  sandboxed, behind a press, from the fixed template (YouTube without cookies); a link of the doctor's text is
+  `nofollow ugc`; no file of the articles or of their renderer draws markup; the editor's schema (`getSchema` of
+  `ui/article/lib/extensions`) IS the backend's `ArticleContentPolicy.SCHEMA` — the same 17 nodes with their content and
+  attributes and the same six marks; Tiptap is imported by screen 85's editor alone, and the editor reaches no first
+  bundle (only the article page's `import()`). One planted negative per rule. The
+  editor's own tests (`ui/article/lib/extensions.test.ts`, jsdom with `Range` boxes stubbed) pass a document with every
+  tool through `readArticleText`, paste `javascript:` / `http:` links and `<img onerror>` (nothing runs, nothing kept)
+  and refuse a change past a limit.
+- `tests/architecture/review-rules.test.ts` (wave 5.2, «U-218 / U-219 / U-220 · D-W52-84 … 92») — the bounds of a
+  reply (2000) and of a report (1000) are the backend's `APPOINTMENT_RATING_*_MAX_LENGTH`, the page the list asks fits
+  its `listPageSizeMax`, the five reasons are its `RatingReportReason` in order; every read of the list asks the
+  doctor's side and `APPROVED` only; «Κριτικές» is a row of «Μενού» in the ☰ and on the page and both lead to
+  `/doctor/reviews`; the review's row of an appointment is on screen 68 alone; the reply and the report are pages (no
+  dialog or sheet), offer no language and no file of the screen draws markup. One planted negative per rule.
+- `tests/architecture/language-rules.test.ts` (wave 5.2, «U-211 / D-W52-64 / 66 / 67 / 69 / 70») — the web's limit of
+  ten languages, the code of Greek and the pattern of a catalogue code are the backend's (`DOCTOR_SPEAK_LANGUAGE_LIMIT`,
+  `SPEAK_LANGUAGE_GREEK_CODE`, `SPEAK_LANGUAGE_CODE_PATTERN`); the four fields, the longest link, the names of each
+  network, the reasons of a refusal and the patterns the check of a link is made of are the backend's
+  `DoctorSocialLinkPolicy`, character for character; and on the pages of screen 82 a kept link is text — no `href` but
+  the page's own addresses, nothing opened in another tab. One planted negative per rule.
 - `tests/architecture/one-word-reviews.test.ts` (wave 4.5, «U-173: καμία "αξιολογ…" στο `messages/el.json`», D-W45-53,
   D-W45-54) — ONE word for what a patient writes about a visit, «κριτική / κριτικές» (“review”): no key of the Greek
   catalog and no string of `src/` (components, stories, helpers; comments are not read) says the old word, in any case

@@ -28,6 +28,20 @@ describe('NoteField (the words under a reason, a note, a review; shared since D-
 		expect(document.querySelector('[data-slot="note-field"]')).not.toBeNull();
 	});
 
+	it('wave 5.2 · screen 85: the label as a field’s heading by default; `labelLook="section"` a section’s quiet name (`sw.css:527` `.w-slh`, 15/600 muted)', () => {
+		const { unmount } = render(NoteField, { props });
+		expect(screen.getByRole('heading', { level: 3 })).toHaveClass(
+			'text-body-lg',
+			'font-semibold',
+			'text-foreground'
+		);
+		unmount();
+		render(NoteField, { props: { ...props, labelLook: 'section' } });
+		const heading = screen.getByRole('heading', { level: 3 });
+		expect(heading).toHaveClass('text-body-md', 'font-semibold', 'text-muted-foreground');
+		expect(heading).not.toHaveClass('text-foreground');
+	});
+
 	it('the heights: `short` the textarea’s own 96, `note` 104, `review` 136', () => {
 		const { unmount } = render(NoteField, { props });
 		expect(screen.getByTestId('field')).not.toHaveClass('min-h-checkout-note');

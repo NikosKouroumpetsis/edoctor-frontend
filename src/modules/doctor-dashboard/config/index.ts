@@ -83,3 +83,89 @@ export const DOCTOR_NEW_PATIENT_EMAIL_MAX_LENGTH = 254;
  */
 export const DOCTOR_PATIENTS_LIST_LIMIT = 20;
 export const DOCTOR_PATIENT_APPOINTMENTS_LIMIT = 10;
+
+/**
+ * 🔴 U-209.3 · D-W52-54 (screen 80): a doctor picks at most three specializations of the list of the specialty (the
+ * server's own `DOCTOR_SPECIALIZATION_LIMIT`; a fourth is refused there too); guarded by
+ * `tests/architecture/specialization-rules.test.ts`.
+ */
+export const DOCTOR_SPECIALIZATION_LIMIT = 3;
+
+/**
+ * 🔴 U-210 · D-W52-63 (screen 81): the bounds of one group of the biography, the server's own
+ * (`DOCTOR_CREDENTIAL_MAX_ITEMS`, `…_TITLE_MAX`, `…_ORGANIZATION_MAX`, `…_MIN_YEAR`; a year runs to next year on the
+ * platform's calendar) — said before a save and checked there again; guarded by
+ * `tests/architecture/credential-rules.test.ts`.
+ */
+export const DOCTOR_CREDENTIAL_LIMIT = 20;
+export const DOCTOR_CREDENTIAL_TITLE_MAX_LENGTH = 300;
+export const DOCTOR_CREDENTIAL_ORGANIZATION_MAX_LENGTH = 200;
+export const DOCTOR_CREDENTIAL_MIN_YEAR = 1950;
+
+/**
+ * 🔴 U-211 · D-W52-66 / 69 (screen 82): a doctor speaks at most ten languages of the catalogue (the server's own
+ * `DOCTOR_SPEAK_LANGUAGE_LIMIT`; an eleventh is refused there too), Greek (`SPEAK_LANGUAGE_GREEK_CODE`) stands first in
+ * every list, and the search of the catalogue takes a few words at most; guarded by
+ * `tests/architecture/language-rules.test.ts`.
+ */
+export const DOCTOR_SPEAK_LANGUAGE_LIMIT = 10;
+export const DOCTOR_SPEAK_LANGUAGE_GREEK_CODE = 'SL001';
+export const DOCTOR_LANGUAGE_SEARCH_MAX_LENGTH = 60;
+
+/**
+ * 🔴 U-211 · D-W52-67 / 70 (screen 82): the four links of the doctor's page — the longest link a field keeps (the
+ * server's own `DOCTOR_SOCIAL_LINK_MAX_LENGTH`) and the names of each network: a name itself and, where `subdomains`
+ * is set, every name under it (the server's own `NETWORK_HOSTS`); guarded by
+ * `tests/architecture/language-rules.test.ts`.
+ */
+export const DOCTOR_LINK_MAX_LENGTH = 2000;
+export const DOCTOR_LINK_NETWORK_HOSTS = {
+	facebook: [
+		{ host: 'facebook.com', subdomains: true },
+		{ host: 'fb.com', subdomains: false }
+	],
+	instagram: [
+		{ host: 'instagram.com', subdomains: false },
+		{ host: 'www.instagram.com', subdomains: false }
+	],
+	linkedin: [{ host: 'linkedin.com', subdomains: true }]
+} as const satisfies Record<string, readonly { host: string; subdomains: boolean }[]>;
+
+/**
+ * 🔴 U-212 · D-W52-71 / 82 (screen 83): the bounds of one service, the server's own (`DOCTOR_SERVICE_PRICE_MAX`,
+ * `…_SUBTITLE_MAX_LENGTH`, `…_DESCRIPTION_MAX_LENGTH`, `DOCTOR_SERVICE_YEARS_OF_EXPERIENCE_MAX`; the years never past
+ * those of the practice licence) — whole euros from 1, four digits; said before a save and checked there again; guarded
+ * by `tests/architecture/service-rules.test.ts`. The lengths are D-W52-10's ONE list, `$shared/lib/visit-length`.
+ */
+export const DOCTOR_SERVICE_PRICE_MAX = 9999;
+export const DOCTOR_SERVICE_PRICE_DIGITS = 4;
+export const DOCTOR_SERVICE_SUBTITLE_MAX_LENGTH = 120;
+export const DOCTOR_SERVICE_DESCRIPTION_MAX_LENGTH = 1000;
+export const DOCTOR_SERVICE_YEARS_MAX = 70;
+export const DOCTOR_SERVICE_YEARS_DIGITS = 2;
+
+/**
+ * 🔴 U-218 · D-W52-91 / 92 (screen 84): the doctor's reviews — a page of the list (the server's default, 100 at most),
+ * the longest reply and the longest words of a report (the server's own `APPOINTMENT_RATING_REPLY_MAX_LENGTH` /
+ * `…_REPORT_TEXT_MAX_LENGTH`), and how many pages at most the list reads by itself to find the review an address names
+ * (a notification, the row of 68); guarded by `tests/architecture/review-rules.test.ts`.
+ */
+export const DOCTOR_REVIEWS_PAGE_LIMIT = 20;
+export const DOCTOR_REVIEW_REPLY_MAX_LENGTH = 2000;
+export const DOCTOR_REVIEW_REPORT_TEXT_MAX_LENGTH = 1000;
+export const DOCTOR_REVIEWS_FIND_PAGES_MAX = 25;
+
+/**
+ * 🔴 U-221 / U-222 · D-W52-102 / 103 (screen 85): «Τα άρθρα μου» — a page of the list (the server's default; 50 at most),
+ * the title and the short description (the server's 200 / 300), and the pictures the page takes before a byte leaves:
+ * JPG, PNG or WebP of at most 10 MB, a cover of at least 800 × 600 (`IMAGE_TOO_SMALL`), an image of the text of at least
+ * 200 × 200 (`ArticleImagePolicy.CONTENT_MIN_DIMENSIONS`); guarded by `tests/architecture/article-rules.test.ts`.
+ */
+export const DOCTOR_ARTICLES_PAGE_LIMIT = 20;
+export const DOCTOR_ARTICLE_TITLE_MAX_LENGTH = 200;
+export const DOCTOR_ARTICLE_SHORT_DESCRIPTION_MAX_LENGTH = 300;
+export const DOCTOR_ARTICLE_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
+export const DOCTOR_ARTICLE_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
+export const DOCTOR_ARTICLE_COVER_LEAST_ACROSS = 800;
+export const DOCTOR_ARTICLE_COVER_LEAST_DOWN = 600;
+export const DOCTOR_ARTICLE_IMAGE_LEAST_PIXELS = 200;

@@ -61,6 +61,19 @@ describe('DoctorStanding (D-W51-10, D-W51-19)', () => {
 		expect(standing.card).toBeNull();
 	});
 
+	it('🔴 U-207.1 (D-W52-50): the name is locked only once the answer says so — whatever the kind; never before the answer (whatever the device remembered), never for a guest, never for facts that say nothing of it', () => {
+		for (const kind of ['none', 'pending', 'doctor', 'payments'] as const) {
+			expect(standingOf(facts({ kind, nameLocked: true })).standing.nameLocked, kind).toBe(true);
+		}
+		expect(standingOf(facts()).standing.nameLocked).toBe(false);
+		expect(standingOf(facts({ nameLocked: false })).standing.nameLocked).toBe(false);
+		expect(standingOf(facts({ nameLocked: 'true' as never })).standing.nameLocked).toBe(false);
+		expect(standingOf(undefined, { kind: 'doctor', lastMode: 'DOCTOR' }).standing.nameLocked).toBe(
+			false
+		);
+		expect(standingOf(null).standing.nameLocked).toBe(false);
+	});
+
 	it('the switch is the source’s one write', async () => {
 		const { standing, switchTo } = standingOf(facts());
 		expect(await standing.switchTo('PATIENT')).toBe(true);

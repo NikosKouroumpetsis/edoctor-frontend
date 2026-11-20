@@ -1,6 +1,9 @@
 <script lang="ts" module>
-	/** Waiting warm, kept green, every other state neutral (the approved `.a-st`, `appt.css:98-102`). */
-	export type StatusPillTone = 'warning' | 'success' | 'muted';
+	/**
+	 * Waiting warm, kept green, every other state neutral (the approved `.a-st`, `appt.css:98-102`); 🔴 D-W52-102: refused
+	 * in the accent's outline (`sw.css:624` `.a-st.no`, «Δεν δημοσιεύτηκε» of screen 85).
+	 */
+	export type StatusPillTone = 'warning' | 'success' | 'muted' | 'refused';
 
 	/** One state as a pill: the caller's words, already localized, and the tone they are read in. */
 	export type StatusPillValue = { label: string; tone: StatusPillTone };
@@ -9,7 +12,8 @@
 	const toneClasses: Record<StatusPillTone, string> = {
 		warning: 'border-warning/40 bg-warning/10 text-foreground',
 		success: 'border-success/40 bg-success/10 text-success-text',
-		muted: 'border-line-2 bg-chip text-foreground'
+		muted: 'border-line-2 bg-chip text-foreground',
+		refused: 'border-accent bg-transparent text-accent'
 	};
 </script>
 

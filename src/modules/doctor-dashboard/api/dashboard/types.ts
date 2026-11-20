@@ -21,6 +21,8 @@ export type DoctorDashboardFacts = {
 	marketplace: DoctorDashboardLicence;
 	payments: DoctorDashboardLicence;
 	licensed: boolean;
+	/** 🔴 D-W52-47 (U-207.1): the first licence locked the name, whatever became of that licence since. */
+	nameLocked: boolean;
 	notice: { kind: 'EXPIRING' | 'EXPIRED'; endsAt: string } | null;
 	lastMode: DoctorDashboardMode;
 	card: { firstName: string | null; lastName: string | null; specialtyName: string | null } | null;

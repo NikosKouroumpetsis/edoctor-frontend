@@ -1,6 +1,8 @@
 <script lang="ts" module>
 	/** `phone`: framed below 744 only (a panel's rows); `always`: framed at every width (`.a-radios`). */
 	export type RadioRowsFrame = 'phone' | 'always';
+	/** `after`: a row's note after its label, on its line; `under`: on a line of its own under it. */
+	export type RadioRowsNotePlace = 'after' | 'under';
 
 	const frameClasses: Record<RadioRowsFrame, string> = {
 		phone: 'rounded-md border border-border px-4 tablet:rounded-none tablet:border-0 tablet:px-0',
@@ -19,6 +21,7 @@
 		options,
 		onChange,
 		frame = 'phone',
+		notePlace = 'after',
 		testId
 	}: {
 		/** The heading that names the group (one of the two names). */
@@ -34,6 +37,11 @@
 		options: { value: string; label: string; note?: string; detail?: string }[];
 		onChange: (value: string) => void;
 		frame?: RadioRowsFrame;
+		/**
+		 * Where a row's note stands: after its label (`after`, the default), or under it (`under`, `sw.css:627-628`
+		 * `.w-arkind`: the label as it is, the note 13/18 muted on its own line, 2 apart).
+		 */
+		notePlace?: RadioRowsNotePlace;
 		testId?: string;
 	} = $props();
 
@@ -54,7 +62,8 @@
 <!-- `appt.css:282-288` (the wave 4 reasons and choices; shared since D-W51-50): ONE choice as rows of the whole width
      (56), the radio on the right (24, the chosen one dark with its dot), a thin line between rows, framed in the 12
      corner; a row's quiet note after its label (D-W51-62, 12 muted); a row with a detail (D-W51-70, `sw.css:255-257`) of
-     64, its label 15/600 and the detail 13 muted under it. The arrows move the choice. No colour under the pointer
+     64, its label 15/600 and the detail 13 muted under it; a note under its label (`notePlace="under"`, `sw.css:627`). The
+     arrows move the choice. No colour under the pointer
      (U-100). Every word a text node (U-65.6). -->
 <div
 	bind:this={group}
@@ -89,6 +98,13 @@
 					<small
 						data-slot="radio-rows-detail"
 						class="mt-0.5 text-label-lg font-normal text-muted-foreground">{option.detail}</small
+					>
+				</span>
+			{:else if option.note && notePlace === 'under'}
+				<span class="flex min-w-0 flex-col gap-0.5 py-2.5">
+					<span>{option.label}</span>
+					<small data-slot="radio-rows-note" class="text-label-lg font-normal text-muted-foreground"
+						>{option.note}</small
 					>
 				</span>
 			{:else if option.note}

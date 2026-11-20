@@ -65,7 +65,8 @@
 		knowLinks,
 		articles,
 		contact,
-		favorite
+		favorite,
+		preview = false
 	}: {
 		profile: DoctorProfile;
 		serverNow: number;
@@ -89,6 +90,8 @@
 		contact?: Snippet;
 		/** U-85: the profile's hearts, composed by the screen. */
 		favorite?: DoctorFavorite;
+		/** D-W52-26: the doctor's own preview — no head, no bar of its own on top, the windows on the page's own address. */
+		preview?: boolean;
 	} = $props();
 
 	// 🔴 D-118 / S-34.1: «Σήμερα / Αύριο» on the server's clock; the page draws itself again at Greek midnight.
@@ -115,7 +118,8 @@
 		kept: () => kept,
 		localize: (path) => localize(path),
 		similarHref: (search, area) => similarHref(search, area),
-		similarAreaQuery: (city) => similarAreaQuery(city)
+		similarAreaQuery: (city) => similarAreaQuery(city),
+		ownAddress: () => preview
 	});
 
 	const options = $derived({ locale });
@@ -240,9 +244,13 @@
 	});
 </script>
 
-<SeoHead {seo} />
+<!-- 🔴 D-W52-26: the doctor's own preview is a personal page under its holder's band — it writes no head of the public
+     profile and puts no bar of its own over that band. -->
+{#if !preview}
+	<SeoHead {seo} />
 
-<TopBar {locale} {backHref} {onBack} {saved} {pop} onShare={share} onSave={save} />
+	<TopBar {locale} {backHref} {onBack} {saved} {pop} onShare={share} onSave={save} />
+{/if}
 
 <div
 	data-testid="doctor-detail-profile-page"
@@ -290,10 +298,7 @@
 					<Specializations
 						content={content.specializations}
 						moreHref={detail.detailsHref('specializations')}
-						rowHref={(focus) => detail.detailsHref('specializations', { focus })}
 						onOpenMore={(event) => open('specializations', {}, event)}
-						onOpenRow={(focus, event) => open('specializations', { focus }, event)}
-						{onSignIn}
 					/>
 				{/if}
 				{#if detail.availabilitySection}
@@ -410,16 +415,18 @@
 	onRetry={detail.retryAvailability}
 />
 
-<SectionBar
-	{links}
-	{activeId}
-	shown={barShown}
-	{buyShown}
-	{booking}
-	{locale}
-	onBook={book}
-	{onSignIn}
-/>
+{#if !preview}
+	<SectionBar
+		{links}
+		{activeId}
+		shown={barShown}
+		{buyShown}
+		{booking}
+		{locale}
+		onBook={book}
+		{onSignIn}
+	/>
+{/if}
 
 <DetailWindow
 	{detail}

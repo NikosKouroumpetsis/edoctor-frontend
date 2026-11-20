@@ -21,7 +21,7 @@
 			placement: 'solo'
 		},
 		argTypes: {
-			placement: { control: 'inline-radio', options: ['page', 'pane', 'solo', 'centred'] }
+			placement: { control: 'inline-radio', options: ['page', 'pane', 'solo', 'centred', 'menu'] }
 		}
 	});
 </script>
@@ -55,6 +55,42 @@
 		<StepScreen {...args} backHref={null} cancelLabel={null} placement="page">
 			<p class="text-body-md text-muted-foreground">
 				Μια σελίδα που ανοίγει μόνη της, από έναν σύνδεσμο.
+			</p>
+		</StepScreen>
+	{/snippet}
+</Story>
+
+<Story name="A Line Always In Sight">
+	{#snippet template(args)}
+		<StepScreen
+			{...args}
+			title="Εξειδικεύσεις"
+			cancelLabel="Άκυρο"
+			saveLabel="Αποθήκευση"
+			barNote="Διαλέξατε 3. Για να διαλέξετε άλλη, βγάλτε μία."
+		>
+			<div class="flex flex-col gap-3">
+				{#each Array.from({ length: 17 }, (_, index) => index + 1) as row (row)}
+					<p class="min-h-control-xl text-body-md text-muted-foreground">Γραμμή {row} από 17</p>
+				{/each}
+			</div>
+		</StepScreen>
+	{/snippet}
+</Story>
+
+<Story name="Beside A Menu Of Sections">
+	{#snippet template(args)}
+		<StepScreen
+			{...args}
+			title="Προσαρμογή"
+			subtitle="Σύρετε για να διαλέξετε τι φαίνεται."
+			cancelLabel="Άκυρο"
+			saveLabel="Αποθήκευση"
+			placement="menu"
+			besideList
+		>
+			<p class="text-body-md text-muted-foreground">
+				Ό,τι ανοίγει μια ενότητα δίπλα στο μενού της.
 			</p>
 		</StepScreen>
 	{/snippet}

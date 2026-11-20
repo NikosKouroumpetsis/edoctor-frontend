@@ -6,6 +6,7 @@
 	import { breakpoints } from '$shared/design/tokens';
 	import { isPlainClick, useHistorySteps } from '$shared/lib/navigation';
 	import { nearEnd } from '$shared/lib/near-end';
+	import { cn } from '$shared/lib/utils';
 	import { EmptyState } from '$shared/ui/molecules/empty-state';
 	import { StateGlyph } from '$shared/ui/molecules/state-glyph';
 	import { Chip } from '$shared/ui/primitives/chip';
@@ -186,13 +187,17 @@
      office in the address (D-W4-28: the chosen one filled dark; «Αιτήματα» with its number), the office filter with more
      than one office — then the pill's groups with screen 66's card, which opens screen 68 (D-W51-36). From 1128 the
      list's own column (32 over, 24 a side, 64 under, `.l-col`). «+» beside the title opens 72 (D-W51-69, step 8),
-     «Αλλαγή» 70 (D-W51-32); a request's «Απόρριψη» opens 69 beside the list (D-W51-49). -->
+     «Αλλαγή» 70 (D-W51-32); a request's «Απόρριψη» opens 69 beside the list (D-W51-49). 🔴 U-215.3 (D-W52-11,
+     `sw.css:171`): beside what it opened the column starts under the bar's mark, 48 from the frame's edge. -->
 {#snippet column()}
 	<main
 		data-testid="doctor-appointments"
 		data-view={book.view}
 		data-tab={book.tab}
-		class="mx-auto flex w-full max-w-content flex-col px-gutter-sm pt-3 pb-section tablet:pt-section laptop:max-w-none laptop:pb-pane-inset-lg"
+		class={cn(
+			'mx-auto flex w-full max-w-content flex-col px-gutter-sm pt-3 pb-section tablet:pt-section laptop:max-w-none laptop:pb-pane-inset-lg',
+			!solo && 'laptop:pl-pane-inset'
+		)}
 	>
 		<IconButton
 			icon="chevron-back"

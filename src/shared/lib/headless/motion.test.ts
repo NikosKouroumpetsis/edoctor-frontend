@@ -57,7 +57,11 @@ describe('motion of the kit (U-09.8, U-12)', () => {
 			// U-14.1: Airbnb's fade of what arrives, on the `standard` curve.
 			reveal: 800,
 			// U-16.5: Airbnb's consent card rising in and out (§4.5), on the `standard` curve.
-			consent: 400
+			consent: 400,
+			// U-216.2 · D-W52-14: the menu column folding to its rail and back, what leaves it and what arrives.
+			fold: 320,
+			'fold-out': 120,
+			'fold-in': 200
 		});
 		expect(cubicBezierCss('standard')).toBe('cubic-bezier(0.2, 0, 0, 1)');
 		const css = tokensToCss();

@@ -109,8 +109,14 @@ function valueOf(
  * Επεξεργασία», or «Δεν έχει δοθεί · Προσθήκη». An account the server names no patient for reads only the rows that
  * have a source — the date of birth and the gender (`GET /user/me`), the email and the mobile (the two challenges) —
  * and of those two the page says no value at all: it cannot know one, and «Δεν έχει δοθεί» might be a lie.
+ * 🔴 D-W52-50 (U-207.1): for an account whose doctor took a first licence (`nameLocked`, the server's own word)
+ * «Ονοματεπώνυμο» has no «Επεξεργασία» and says «Κλείδωσε με την πρώτη σας άδεια γιατρού.»; every other row is as it was.
  */
-export function buildPersonalRows(person: PersonalPerson, options: MessageOptions): PersonalRow[] {
+export function buildPersonalRows(
+	person: PersonalPerson,
+	options: MessageOptions,
+	locks: { nameLocked?: boolean } = {}
+): PersonalRow[] {
 	return personalRows
 		.filter((id) => person.hasPatientProfile || !patientOnlyRows.includes(id))
 		.map((id) => {
@@ -121,7 +127,10 @@ export function buildPersonalRows(person: PersonalPerson, options: MessageOption
 				title: titles[id](options),
 				value: unknown ? null : (value ?? m.profile_personal_none({}, options)),
 				help: helps[id]?.(options) ?? null,
-				filled: unknown || value !== null
+				filled: unknown || value !== null,
+				...(id === 'name' && locks.nameLocked === true
+					? { lockedNote: m.profile_personal_name_locked({}, options) }
+					: {})
 			};
 		});
 }
@@ -177,12 +186,16 @@ export function personalIdLabel(
 		: m.profile_personal_afm_label({}, options);
 }
 
-/** The words of a refused write; `null` for the session (the sign-in opens over the page). */
+/**
+ * The words of a refused write; `null` for the session (the sign-in opens over the page). 🔴 D-W52-50: a name the
+ * server refused as locked says the locked row's own words.
+ */
 export function personalWriteFailureMessage(
 	failure: PersonalWriteFailure,
 	options: MessageOptions
 ): string | null {
 	if (failure === 'session') return null;
+	if (failure === 'name-locked') return m.profile_personal_name_locked({}, options);
 	if (failure === 'birth-date') return m.profile_personal_dob_error({}, options);
 	return m.profile_personal_errors_unknown({}, options);
 }

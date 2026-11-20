@@ -2,6 +2,7 @@
 	import { tick } from 'svelte';
 	import { m } from '$paraglide/messages.js';
 	import { readServerNow } from '$shared/lib/server-clock';
+	import { cn } from '$shared/lib/utils';
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { Banner } from '$shared/ui/molecules/banner';
@@ -100,10 +101,15 @@
 {/snippet}
 
 <!-- U-84 Π1: the list of the application's tab below 744; from 744 the same, under the site's bar (from 950 beside the
-     conversation). Below 744 the end of the page leaves room for the capsule. -->
+     conversation). Below 744 the end of the page leaves room for the capsule. 🔴 U-215.3 (D-W52-11, `sw.css:365`):
+     beside the conversation the list starts under the bar's mark from 1128, 48 from the frame's edge (the archive, a
+     page of its own, as it was). -->
 <div
 	data-testid={archive ? 'messages-archive' : 'messages-list'}
-	class="mx-auto w-full max-w-content px-6 pt-6 pb-bar-bottom tablet:px-profile-gutter tablet:pt-section tablet:pb-section-lg split:max-w-none split:pt-6 split:pr-4 split:pb-section split:pl-6"
+	class={cn(
+		'mx-auto w-full max-w-content px-6 pt-6 pb-bar-bottom tablet:px-profile-gutter tablet:pt-section tablet:pb-section-lg split:max-w-none split:pt-6 split:pr-4 split:pb-section split:pl-6',
+		!archive && 'laptop:pl-pane-inset'
+	)}
 >
 	{#if archive}
 		<IconButton

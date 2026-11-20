@@ -213,6 +213,20 @@ describe('modules/notifications/lib/inbox · what a press opens (D-W45-45, D-W45
 		).toBeNull();
 	});
 
+	it('🔴 D-W52-88 / 91 (screen 84): `RATING` ⇒ the doctor’s review in «Κριτικές» — the id, never an address', () => {
+		expect(notificationTargetOf({ kind: 'RATING', id: SAMPLE_IDS.appointment })).toEqual({
+			kind: 'review',
+			id: SAMPLE_IDS.appointment
+		});
+	});
+
+	it('🔴 D-W52-98 / 102 (screen 85): `ARTICLE` ⇒ the doctor’s article — the id, never an address', () => {
+		expect(notificationTargetOf({ kind: 'ARTICLE', id: SAMPLE_IDS.appointment })).toEqual({
+			kind: 'article',
+			id: SAMPLE_IDS.appointment
+		});
+	});
+
 	it('🔴 D-W51-90 (screen 75): the calendar’s connection and the doctor (a licence) open NOTHING on the web in 5.1 — no «Σύνδεση ημερολογίου», no «Λογαριασμός γιατρού» (D-W51-04): the press only reads the line', () => {
 		expect(
 			notificationTargetOf({ kind: 'CALENDAR_CONNECTION', id: SAMPLE_IDS.appointment })

@@ -154,6 +154,44 @@ describe('EditableRow (D-W45-09)', () => {
 		);
 	});
 
+	it('`lockedNote`: the row is only read — the title, what it holds, and under it the lock with the caller’s reason (14 muted); no link opens it', () => {
+		render(Harness, { props: { value: 'Η τιμή σήμερα', lockedNote: 'Ο λόγος που δεν αλλάζει.' } });
+		expect(row()).toHaveAttribute('data-locked');
+		expect(row()).toHaveAttribute('data-state', 'closed');
+		expect(row().querySelector('[data-slot="editable-row-value"]')).toHaveTextContent(
+			'Η τιμή σήμερα'
+		);
+		const note = screen.getByTestId('row-locked');
+		expect(note).toHaveTextContent('Ο λόγος που δεν αλλάζει.');
+		expect(note).toHaveClass('text-body-sm', 'text-muted-foreground');
+		expect(note.querySelector('svg')).not.toBeNull();
+		expect(within(row()).queryByRole('button')).toBeNull();
+		expect(row().querySelector('[data-slot="editable-row-action"]')).toBeNull();
+		// A row that is not locked says nothing of a lock.
+		expect(other()).not.toHaveAttribute('data-locked');
+		expect(other().querySelector('[data-slot="editable-row-locked"]')).toBeNull();
+	});
+
+	it('(negative) a locked row never opens — not for a caller that still binds it open, not by the keyboard; its content is not in the page', async () => {
+		const onOpenChange = vi.fn();
+		render(Harness, {
+			props: { open: true, value: 'Η τιμή σήμερα', lockedNote: 'Ο λόγος.', onOpenChange }
+		});
+		expect(row()).toHaveAttribute('data-state', 'closed');
+		expect(within(row()).queryByRole('textbox')).toBeNull();
+		expect(row().querySelector('[data-slot="editable-row-close"]')).toBeNull();
+		await userEvent.setup().keyboard('{Tab}{Enter}{Escape}');
+		expect(within(row()).queryByRole('textbox')).toBeNull();
+		expect(onOpenChange).not.toHaveBeenCalled();
+	});
+
+	it('🔴 U-65.6 (negative): the reason of a lock is a text node — markup in it is shown as written', () => {
+		render(Harness, { props: { lockedNote: '<img src=x onerror=alert(1)>' } });
+		const note = screen.getByTestId('row-locked');
+		expect(note).toHaveTextContent('<img src=x onerror=alert(1)>');
+		expect(note.querySelector('img')).toBeNull();
+	});
+
 	it('it does not take the focus at its first paint, even open', () => {
 		render(Harness, { props: { open: true } });
 		expect(document.body).toHaveFocus();

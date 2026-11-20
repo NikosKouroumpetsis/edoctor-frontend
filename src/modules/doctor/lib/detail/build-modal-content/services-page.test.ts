@@ -8,35 +8,80 @@ const service = (id: string, extra: Partial<DoctorServiceFacts> = {}): DoctorSer
 	title: id,
 	priceRange: null,
 	kind: 'other',
-	isSpecialized: false,
 	...extra
 });
 
+/** Three lines of a closed list, as the server names them (the catalogue's own). */
+const FIELDS = [
+	{ code: 'PR021-01', name: 'Επείγουσα ιατρική' },
+	{ code: 'PR021-03', name: 'Εντατική θεραπεία' },
+	{ code: 'PR021-04', name: 'Σακχαρώδης διαβήτης' }
+];
+
 describe('buildDoctorServicesPage (U-70, screen 14)', () => {
-	it('Π4: the fields of expertise first under their name, then «Άλλες υπηρεσίες», each in the backend’s order', () => {
+	// Rewrites «Π4: the fields of expertise first under their name, then «Άλλες υπηρεσίες»…» and «Π4: no field of
+	// expertise, no titles; only fields, no «Άλλες»» by U-209.3 (D-W52-56 / 60): no service is a field of expertise.
+	it('🔴 D-W52-60 (U-209.3): ONE list of every service in the backend’s order — no group, no title, nothing of «Τομείς εξειδίκευσης» — whatever the doctor’s specializations', () => {
 		const page = buildDoctorServicesPage(sampleDoctorProfile(), 'el');
 		expect(page?.title).toBe('Υπηρεσίες');
-		expect(page?.groups.map((group) => [group.id, group.title])).toEqual([
-			['specializations', 'Τομείς εξειδίκευσης'],
-			['other', 'Άλλες υπηρεσίες']
-		]);
-		expect(page?.groups[0]?.services.map((row) => row.id)).toEqual(['svc-1', 'svc-2']);
-	});
-
-	it('Π4: no field of expertise, no titles; only fields, no «Άλλες»', () => {
-		const none = buildDoctorServicesPage(
-			sampleDoctorProfile({ services: [service('a'), service('b')] }),
+		expect(page?.services.map((row) => row.id)).toEqual(['svc-1', 'svc-2', 'svc-3']);
+		expect(page).not.toHaveProperty('groups');
+		expect(JSON.stringify(page)).not.toMatch(/Τομείς εξειδίκευσης|Άλλες υπηρεσίες/u);
+		const without = buildDoctorServicesPage(
+			sampleDoctorProfile({ specializations: undefined }),
 			'el'
 		);
-		expect(none?.groups).toHaveLength(1);
-		expect(none?.groups[0]?.title).toBeUndefined();
-		const only = buildDoctorServicesPage(
+		expect(without).toEqual(page);
+	});
+
+	// Rewrites «only the fields of expertise, each with its years and its visits, and the words in the singular» (it
+	// stood on screen 15) by U-209.3: «τα χρόνια και οι επισκέψεις μένουν στις υπηρεσίες».
+	it('🔴 D-W52-60 (U-209.3): each service keeps its OWN years and visits, the words in the singular', () => {
+		const page = buildDoctorServicesPage(
 			sampleDoctorProfile({
-				services: [service('a', { isSpecialized: true }), service('b', { isSpecialized: true })]
+				services: [
+					service('a', { yearsOfExperience: 13, completedVisits: 21 }),
+					service('b', { yearsOfExperience: 1, completedVisits: 1 }),
+					service('c')
+				]
 			}),
 			'el'
 		);
-		expect(only?.groups.map((group) => group.id)).toEqual(['specializations']);
+		const [many, one] = page?.services ?? [];
+		expect(many?.years).toEqual({ value: '13', label: 'χρόνια εμπειρίας' });
+		expect(many?.visits).toEqual({ value: '21', label: 'επισκέψεις' });
+		expect(one?.years).toEqual({ value: '1', label: 'χρόνος εμπειρίας' });
+		expect(one?.visits).toEqual({ value: '1', label: 'επίσκεψη' });
+	});
+
+	it('U-72.3: a service without visits or years says nothing, never «0»', () => {
+		const page = buildDoctorServicesPage(
+			sampleDoctorProfile({ services: [service('a', { yearsOfExperience: 2 }), service('c')] }),
+			'el'
+		);
+		const [, plain] = page?.services ?? [];
+		expect(plain).not.toHaveProperty('years');
+		expect(plain).not.toHaveProperty('visits');
+		expect(JSON.stringify(plain)).not.toMatch(/"0"/u);
+	});
+
+	it('Π4: the note says what the visits count only when a service shows its own; U-72.4: κανένα «(6 μήνες)»', () => {
+		const withVisits = (locale: 'el' | 'en') =>
+			buildDoctorServicesPage(
+				sampleDoctorProfile({ services: [service('a', { completedVisits: 4 }), service('b')] }),
+				locale
+			);
+		expect(withVisits('el')?.footnote).toMatch(/^Οι επισκέψεις μετρούν/u);
+		expect(withVisits('el')?.footnote).not.toMatch(/Τα χρόνια εμπειρίας/u);
+		expect(JSON.stringify(withVisits('el'))).not.toMatch(/6 μήν|\(6|μηνών/u);
+		expect(JSON.stringify(withVisits('en'))).not.toMatch(/6 month|\(6/u);
+		expect(
+			buildDoctorServicesPage(
+				sampleDoctorProfile({ services: [service('a', { yearsOfExperience: 4 })] }),
+				'el'
+			)
+		).not.toHaveProperty('footnote');
+		expect(buildDoctorServicesPage(sampleDoctorProfile(), 'el')).not.toHaveProperty('footnote');
 	});
 
 	it('Π8: a single service is already open; none has no page (U-38)', () => {
@@ -53,10 +98,11 @@ describe('buildDoctorSpecializationsPage (U-72, screen 15)', () => {
 		sampleDoctorProfile({
 			licenseObtainedDate: '2013-06-15',
 			responseMetrics: { completedVisits: 37, windowMonths: 6 },
+			specializations: FIELDS,
 			services: [
-				service('a', { isSpecialized: true, yearsOfExperience: 13, completedVisits: 21 }),
-				service('b', { isSpecialized: true, yearsOfExperience: 1, completedVisits: 1 }),
-				service('c', { isSpecialized: true }),
+				service('a', { yearsOfExperience: 13, completedVisits: 21 }),
+				service('b', { yearsOfExperience: 1, completedVisits: 1 }),
+				service('c'),
 				service('d')
 			],
 			...extra
@@ -64,20 +110,18 @@ describe('buildDoctorSpecializationsPage (U-72, screen 15)', () => {
 	const build = (extra = {}) =>
 		buildDoctorSpecializationsPage({ doctor: doctor(extra), locale: 'el', now: SAMPLE_NOW });
 
-	it('only the fields of expertise, each with its years and its visits, and the words in the singular', () => {
+	// Rewrites «only the fields of expertise, each with its years and its visits…» by U-209.3 (D-W52-60): the fields
+	// are the doctor's specializations of the closed list, never services.
+	it('🔴 D-W52-60 (U-209.3, U-225): the fields of expertise are the doctor’s specializations as the server names them, in its order — never a service, and nothing of a service on them (no fee, no years, no visits, no «Κλείστε…»)', () => {
 		const page = build();
-		expect(page?.domains.map((domain) => domain.id)).toEqual(['a', 'b', 'c']);
-		expect(page?.domains[0]?.years).toEqual({ value: '13', label: 'χρόνια εμπειρίας' });
-		expect(page?.domains[0]?.visits).toEqual({ value: '21', label: 'επισκέψεις' });
-		expect(page?.domains[1]?.years).toEqual({ value: '1', label: 'χρόνος εμπειρίας' });
-		expect(page?.domains[1]?.visits).toEqual({ value: '1', label: 'επίσκεψη' });
-	});
-
-	it('U-72.3: a service without visits or years says nothing, never «0»', () => {
-		const [, , plain] = build()?.domains ?? [];
-		expect(plain).not.toHaveProperty('years');
-		expect(plain).not.toHaveProperty('visits');
-		expect(JSON.stringify(plain)).not.toMatch(/"0"/u);
+		expect(page?.domains).toEqual([
+			{ id: 'PR021-01', title: 'Επείγουσα ιατρική' },
+			{ id: 'PR021-03', title: 'Εντατική θεραπεία' },
+			{ id: 'PR021-04', title: 'Σακχαρώδης διαβήτης' }
+		]);
+		expect(page).not.toHaveProperty('bookLabel');
+		expect(page).not.toHaveProperty('readMoreLabel');
+		expect(page).not.toHaveProperty('backLabel');
 	});
 
 	it('Π3: the card’s figures: how many fields, the doctor’s visits, the years from the licence', () => {
@@ -87,6 +131,13 @@ describe('buildDoctorSpecializationsPage (U-72, screen 15)', () => {
 			['years', '13', 'Χρόνια εμπειρίας']
 		]);
 		expect(build()?.stats[1]?.accessibleLabel).toBe('37 ολοκληρωμένες επισκέψεις');
+		expect(
+			build({ specializations: FIELDS.slice(0, 1) })?.stats.map(({ id, value, label }) => [
+				id,
+				value,
+				label
+			])[0]
+		).toEqual(['domains', '1', 'Τομέας εξειδίκευσης']);
 	});
 
 	it('Π3 / Π6: a figure the server does not have is no cell, and never one cell alone', () => {
@@ -104,12 +155,9 @@ describe('buildDoctorSpecializationsPage (U-72, screen 15)', () => {
 		const noYears = build({ licenseObtainedDate: undefined })?.footnote;
 		expect(noYears).toMatch(/Οι επισκέψεις μετρούν/u);
 		expect(noYears).not.toMatch(/Τα χρόνια εμπειρίας/u);
+		// A service's own visits are the services' page's to explain (D-W52-60), never this page's.
 		expect(
-			build({
-				responseMetrics: undefined,
-				licenseObtainedDate: undefined,
-				services: [service('a', { isSpecialized: true })]
-			})?.footnote
+			build({ responseMetrics: undefined, licenseObtainedDate: undefined })?.footnote
 		).toBeUndefined();
 	});
 
@@ -120,7 +168,9 @@ describe('buildDoctorSpecializationsPage (U-72, screen 15)', () => {
 		expect(words('en')).not.toMatch(/6 month|\(6/u);
 	});
 
-	it('U-38: no field of expertise, no page', () => {
-		expect(build({ services: [service('d')] })).toBeNull();
+	// Rewrites «U-38: no field of expertise, no page» by U-209.3: marked services no longer make a field.
+	it('U-38 · 🔴 D-W52-60: no specialization, no page — whatever the services', () => {
+		expect(build({ specializations: undefined })).toBeNull();
+		expect(build({ specializations: [] })).toBeNull();
 	});
 });

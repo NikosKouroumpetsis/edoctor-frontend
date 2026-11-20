@@ -3,6 +3,7 @@ import { formatCalendarDay } from '$shared/lib/calendar-day';
 import { withDoctorTitle } from '$shared/lib/text';
 import { PLATFORM_TIME_ZONE } from '$shared/config/time-zone';
 import { zonedDay } from '$shared/lib/format';
+import { formatVisitLength } from '$shared/lib/visit-length';
 import type {
 	DoctorOnboardingCalendarCategory,
 	DoctorOnboardingPaymentOption,
@@ -225,12 +226,8 @@ export function buildDoctorApplicationSections(
 		NONE: () => m.doctor_onboarding_calendar_none({}, options)
 	};
 	const minutes = progress.servicePricing.customDurationInMinutes;
-	const duration =
-		minutes === null
-			? null
-			: minutes === 1
-				? m.doctor_onboarding_price_duration_option_one({ minutes }, options)
-				: m.doctor_onboarding_price_duration_option_other({ minutes }, options);
+	// 🔴 D-W52-83 (D-W52-10): from one hour the length is written in hours, as the step's own pills.
+	const duration = minutes === null ? null : formatVisitLength(minutes, locale);
 	const price = progress.servicePricing.price;
 	const liability = progress.liability;
 	const expiry = formatDay(liability.liabilityInsuranceExpiresAt, locale);

@@ -182,6 +182,33 @@ describe('the person as the booking reads them (GET /patient/me)', () => {
 		expect(readBookingProfileFailure(refusal(503, 'down'))).toBe('unknown');
 		expect(readBookingProfileFailure(new Error('offline'))).toBe('unknown');
 	});
+
+	it('🔴 D-W52-44 / D-W52-50: the `409` that names `DOCTOR_NAME_LOCKED` is the locked name — the code as a whole word of the message, whatever `details.field` says; any other `409`, and the code under another status, are not', () => {
+		const refusal = (status: number, message: string, details?: Record<string, string>) =>
+			new ApiError(message, status, '/patient/me/profile', 'EC415', details);
+		for (const field of ['firstName', 'lastName', 'fullName', undefined]) {
+			expect(
+				readBookingProfileFailure(
+					refusal(409, 'Already exist: DOCTOR_NAME_LOCKED', field ? { field } : undefined)
+				),
+				String(field)
+			).toBe('name-locked');
+		}
+		expect(readBookingProfileFailure(refusal(409, 'Already exist: something else'))).toBe(
+			'unknown'
+		);
+		expect(readBookingProfileFailure(refusal(409, 'Already exist: DOCTOR_NAME_LOCKEDX'))).toBe(
+			'unknown'
+		);
+		expect(readBookingProfileFailure(refusal(409, 'already exist: doctor_name_locked'))).toBe(
+			'unknown'
+		);
+		expect(readBookingProfileFailure(refusal(422, 'DOCTOR_NAME_LOCKED'))).toBe('invalid');
+		expect(readBookingProfileFailure(refusal(401, 'DOCTOR_NAME_LOCKED'))).toBe('session');
+		expect(readBookingProfileFailure(refusal(403, 'Forbidden: DOCTOR_NAME_LOCKED'))).toBe(
+			'unknown'
+		);
+	});
 });
 
 describe('wave 4.5 · screen 58: the person’s own ΑΜΚΑ / ΑΦΜ (`PUT /patient/me`, D-W45-10)', () => {

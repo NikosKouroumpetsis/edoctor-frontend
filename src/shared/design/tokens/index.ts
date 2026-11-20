@@ -183,6 +183,13 @@ export const platform = {
 		// menu column from 950 (340, 420 from 1128) — what it opens is centred in what is left, at most `split-solo` wide.
 		'split-menu-w': 340,
 		'split-menu-w-lg': 420,
+		// Wave 5.2 · step 0 (U-215.3, D-W52-13 / 14; `57-settings/set.css:35-38`, `64-switch/sw.css:431-449`): the menu
+		// itself, 324 in the middle of its column from 1128 (the column `max(420, 30%)`, `grid-menu`), and the rail the
+		// menu folds to — the frame's inset on each side of the bar's mark, so its icons stand under it: 24 + 24 + 24,
+		// and 48 + 24 + 48 from 1128 (the prototype's 74 / 122 carry its 26 mark, off the grid as `brand-mark` says).
+		'split-menu': 324,
+		'split-rail': 72,
+		'split-rail-lg': 120,
 		'split-solo': 640,
 		'pane-column': 640,
 		'split-sub': 656,
@@ -210,7 +217,14 @@ export const platform = {
 		'chip-tab': 36,
 		// 🔴 D-W4-65: the screen from which the capsule is its whole 384 (`tab-capsule-w` + 8 a side) — as at 402, where five
 		// tabs fit as equal shares at 12; narrower, the capsule shrinks with the screen and packs them (`capsule-narrow`).
-		'tab-capsule-fit': 400
+		'tab-capsule-fit': 400,
+		// Wave 5.2 · screen 85 (`64-switch/sw.css:653` `.w-aredit`): the article editor's writing area, at least 300 high.
+		'article-editor': 300,
+		// … and its pictures (`sw.css:635`, `:668` `.w-arcover`, `.w-arpic`): a cover at most 260 high, a picture of a
+		// text at most 320, and the 40 glyph of a picture that is not there (`sw.js:681` `sv(AR_PIC, 40, 1.4)`).
+		'cover-max': 260,
+		'figure-max': 320,
+		'figure-glyph': 40
 	},
 	// 🔴 D-W4-65 (the approved prototype's `.a-tabs.web button`, `54-rating/appt.css:66`): the ONE text role the web has
 	// outside the shared scale — the capsule's words when FIVE tabs share a capsule narrower than its 384, 11/600. The shared
@@ -251,8 +265,10 @@ export const platform = {
  * `SegmentedControl`'s `THUMB_SLIDE_DURATION_MS` + `out(cubic)`. Every other motion is Airbnb's
  * 0.25 s `cubic-bezier(0.2, 0, 0, 1)` (`standard`); `reveal` is Airbnb's fade of what arrives (0.8 s on that same
  * curve, measured, U-14.1): a photo that loads goes 0 ⇒ 1 on `duration-reveal ease-standard`; `consent` is Airbnb's
- * consent card rising in and out (0.4 s on that curve, the wave record §4.5). They play whatever
- * the device's motion setting (U-12.1).
+ * consent card rising in and out (0.4 s on that curve, the wave record §4.5). `fold` is the `SplitView`'s menu
+ * column gliding to its rail and back (U-216.2, D-W52-14, `64-switch/sw.css:431-441`: 0.32 s on `standard`), `fold-out`
+ * what leaves it (0.12 s) and `fold-in` what arrives (0.2 s), after `delay`'s wait: the rail 0.14 s, the menu 0.12 s
+ * (`delay-<name>` classes). They play whatever the device's motion setting (U-12.1).
  */
 export const motion = {
 	duration: {
@@ -263,7 +279,14 @@ export const motion = {
 		label: 200,
 		segment: 180,
 		reveal: 800,
-		consent: 400
+		consent: 400,
+		fold: 320,
+		'fold-out': 120,
+		'fold-in': 200
+	},
+	delay: {
+		'fold-rail': 140,
+		'fold-menu': 120
 	},
 	easing: {
 		standard: [0.2, 0, 0, 1],

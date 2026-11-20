@@ -47,8 +47,6 @@ export type DoctorKeptBooking = { slot: DoctorSelectedSlot; serviceId: string | 
 export type DoctorDetailWindow = {
 	section: DoctorDetailSection;
 	hints: DoctorDetailHints;
-	/** U-72.3 Ε3: «Τομείς εξειδίκευσης» reached from the services, in the same window. */
-	fromServices?: boolean;
 } | null;
 
 export type DoctorDetailStateOptions = {
@@ -72,6 +70,12 @@ export type DoctorDetailStateOptions = {
 	similarHref: (search: DoctorSimilarSearch, area: DoctorSimilarArea | null) => ResolvedPathname;
 	/** The read that turns the active office's city into the catalogue's area (the screen's, `resolveLocationSlug`). */
 	similarAreaQuery: DoctorSimilarAreaQuery;
+	/**
+	 * 🔴 D-W52-26 (U-224): the doctor's own preview — a window opens, moves and closes on the page's OWN address (the
+	 * history's state alone), never on the public one: the site's frames read the address, and a doctor the search does
+	 * not show has no public address at all.
+	 */
+	ownAddress?: () => boolean;
 };
 
 /**
@@ -171,12 +175,8 @@ export class DoctorDetailState {
 		const state = page.state?.doctorDetails;
 		if (state !== undefined) {
 			if (!state || !isDoctorDetailSection(state.section)) return null;
-			const { section, focus, office, date, service, fromServices } = state;
-			return {
-				section,
-				hints: { focus, office, date, service },
-				...(fromServices ? { fromServices } : {})
-			};
+			const { section, focus, office, date, service } = state;
+			return { section, hints: { focus, office, date, service } };
 		}
 		const section = this.#options.routeSection();
 		return section ? { section, hints: readDoctorDetailHints(page.url.searchParams) } : null;
@@ -337,10 +337,10 @@ export class DoctorDetailState {
 		});
 	}
 
-	/** 🔴 U-70 (screen 14): every service, in its groups. */
+	/** 🔴 U-70 (screen 14): every service, one list (D-W52-60). */
 	readonly servicesPage = $derived.by(() => buildDoctorServicesPage(this.profile, this.locale));
 
-	/** 🔴 U-72 (screen 15): the fields of expertise. */
+	/** 🔴 U-72 (screen 15), D-W52-60: the fields of expertise — the specializations the doctor picked. */
 	readonly specializationsPage = $derived.by(() =>
 		buildDoctorSpecializationsPage({ doctor: this.profile, locale: this.locale, now: this.now })
 	);
@@ -403,9 +403,23 @@ export class DoctorDetailState {
 		return this.#options.localize(doctorProfilePath(this.profile.doctorSlug));
 	}
 
+	/**
+	 * A step of a window in the history: on its own address, resolved — or, in the doctor's own preview (`ownAddress`),
+	 * on the page's address as it is (SvelteKit's `''`): there the open window is the history's state alone.
+	 */
+	#push(path: string, state: App.PageState) {
+		if (this.#options.ownAddress?.()) pushState('', state);
+		else pushState(resolve(path as Pathname), state);
+	}
+
+	#replace(path: string, state: App.PageState) {
+		if (this.#options.ownAddress?.()) replaceState('', state);
+		else replaceState(resolve(path as Pathname), state);
+	}
+
 	/** Opens a window in place: its own address in the history (shallow routing), so «πίσω» closes it. */
 	openWindow = (section: DoctorDetailSection, hints: DoctorDetailHints = {}) => {
-		pushState(resolve(this.#detailsPath(section, hints) as Pathname), {
+		this.#push(this.#detailsPath(section, hints), {
 			doctorDetails: { section, ...hints, inPlace: true }
 		});
 	};
@@ -418,39 +432,14 @@ export class DoctorDetailState {
 		this.chooseService(serviceId);
 		const state = page.state?.doctorDetails;
 		const hints = { service: serviceId };
-		replaceState(resolve(this.#detailsPath('availability', hints) as Pathname), {
+		this.#replace(this.#detailsPath('availability', hints), {
 			doctorDetails: {
 				section: 'availability',
 				...hints,
-				inPlace: state?.inPlace === true,
-				...(state?.fromServices
-					? { fromServices: true, servicesInPlace: state.servicesInPlace === true }
-					: {})
+				inPlace: state?.inPlace === true
 			}
 		});
 	};
-
-	/**
-	 * 🔴 U-72.3 Ε3: «Τομείς εξειδίκευσης ›» of the services: the next page of the SAME window, with its own address and its
-	 * own step in the history, so that the browser's «back» is its «‹». A press in a new tab keeps the link.
-	 */
-	openSpecializations = (event?: MouseEvent) => {
-		if (event) {
-			if (event.defaultPrevented || event.button !== 0) return;
-			if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-			event.preventDefault();
-		}
-		pushState(resolve(this.#detailsPath('specializations') as Pathname), {
-			doctorDetails: {
-				section: 'specializations',
-				inPlace: true,
-				fromServices: true,
-				servicesInPlace: page.state?.doctorDetails?.inPlace === true
-			}
-		});
-	};
-
-	backToServices = () => history.back();
 
 	/**
 	 * The viewer moved to another photo (its place, from 0: the application's `focus`): its address follows in place,
@@ -459,7 +448,7 @@ export class DoctorDetailState {
 	showPhoto = (index: number) => {
 		const inPlace = page.state?.doctorDetails?.inPlace === true;
 		const focus = String(index);
-		replaceState(resolve(this.#detailsPath('photos', { focus }) as Pathname), {
+		this.#replace(this.#detailsPath('photos', { focus }), {
 			doctorDetails: { section: 'photos', focus, inPlace }
 		});
 	};
@@ -470,10 +459,8 @@ export class DoctorDetailState {
 	 */
 	closeWindow = () => {
 		const state = page.state?.doctorDetails;
-		// U-72.3 Ε3: «×» closes the services and the fields of expertise together.
-		if (state?.fromServices && state.servicesInPlace) history.go(-2);
-		else if (state?.inPlace && !state.fromServices) history.back();
-		else replaceState(resolve(this.#profilePath as Pathname), { doctorDetails: null });
+		if (state?.inPlace) history.back();
+		else this.#replace(this.#profilePath, { doctorDetails: null });
 	};
 
 	/**
@@ -483,7 +470,7 @@ export class DoctorDetailState {
 	showOffice = (officeId: string) => {
 		this.chosenOfficeId = officeId;
 		const inPlace = page.state?.doctorDetails?.inPlace === true;
-		replaceState(resolve(this.#detailsPath('location', { office: officeId }) as Pathname), {
+		this.#replace(this.#detailsPath('location', { office: officeId }), {
 			doctorDetails: { section: 'location', office: officeId, inPlace }
 		});
 	};

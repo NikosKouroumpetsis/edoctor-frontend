@@ -174,7 +174,8 @@ const noHover = (root: Element) => {
 };
 
 describe('39 · «Πόσο κοστίζει η απλή επίσκεψη;» (record §6.4)', () => {
-	it('the big «€ 0», 30 minutes first; digits only, 1 to 9999; «Επόμενο» writes `service-pricing` and opens the calendar', async () => {
+	// Rewrites the sign-up's list of lengths (up to 60) by U-212.4 / D-W52-83 (task doc §6): D-W52-10's nine, in hours from 60.
+	it('🔴 D-W52-83 (U-212.4): the big «€ 0», 30 minutes first, the lengths 15 to 2 hours; digits only, 1 to 9999; «Επόμενο» writes `service-pricing` and opens the calendar', async () => {
 		const { handle } = draw('price', { depth: 7 });
 		await ready();
 		const price = screen.getByRole('textbox', { name: 'Τιμή σε ευρώ' });
@@ -186,7 +187,17 @@ describe('39 · «Πόσο κοστίζει η απλή επίσκεψη;» (rec
 			within(lengths)
 				.getAllByRole('radio')
 				.map((pill) => pill.textContent?.trim())
-		).toEqual(['15 λεπτά', '20 λεπτά', '30 λεπτά', '45 λεπτά', '60 λεπτά']);
+		).toEqual([
+			'15 λεπτά',
+			'20 λεπτά',
+			'30 λεπτά',
+			'45 λεπτά',
+			'1 ώρα',
+			'1 ώρα και 15 λεπτά',
+			'1 ώρα και 30 λεπτά',
+			'1 ώρα και 45 λεπτά',
+			'2 ώρες'
+		]);
 		expect(within(lengths).getByRole('radio', { name: '30 λεπτά' })).toHaveAttribute(
 			'aria-checked',
 			'true'

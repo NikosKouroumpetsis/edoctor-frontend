@@ -96,6 +96,25 @@ const reviewView = {
 	}
 };
 
+/** A week of the appointment's free hours (`AppointmentRescheduleSlotsView`): 09:00 and 12:00 Athens on each day. */
+const rescheduleWeek = (date: string) => ({
+	appointmentId: A1,
+	timezone: 'Europe/Athens',
+	durationMinutes: 30,
+	slotsByDate: Array.from({ length: 7 }, (_, index) => {
+		const day = new Date(Date.parse(`${date}T00:00:00.000Z`) + index * 86_400_000)
+			.toISOString()
+			.slice(0, 10);
+		return {
+			date: day,
+			slots: [
+				{ startTime: `${day}T07:00:00.000Z`, endTime: `${day}T07:30:00.000Z` },
+				{ startTime: `${day}T10:00:00.000Z`, endTime: `${day}T10:30:00.000Z` }
+			]
+		};
+	})
+});
+
 const json = (data: unknown, status = 200) =>
 	new Response(JSON.stringify({ status: 'success', message: '', data }), {
 		status,
@@ -158,6 +177,11 @@ beforeEach(() => {
 			if (path.startsWith('/appointment/appointments?')) {
 				const items = history && path.includes('scope=history') ? history : upcoming;
 				return json({ items, nextCursor: null, total: items.length });
+			}
+			// 🔴 D-W52-75α: the appointment's own free hours — a week from `date` (the server's «today» without one).
+			if (/^\/appointment\/appointments\/[^/?]+\/reschedule-slots/u.test(path)) {
+				const url = new URL(input);
+				return json(rescheduleWeek(url.searchParams.get('date') ?? '2026-11-10'));
 			}
 			if (path.startsWith('/appointment/appointments/')) {
 				const id = path.slice('/appointment/appointments/'.length);
@@ -503,19 +527,59 @@ describe('screens/appointments/[...path] · screens 52 + 53 composed (U-136.2, U
 	const at = (step: 'time' | 'for-whom' | 'note' | 'cancel'): AppointmentsScreenData => ({
 		address: { view: 'appointment', appointmentId: A1, step }
 	});
-	const slotCalls = () => calls.filter((call) => call.url.includes('/availability/public/slots'));
+	const slotCalls = () => calls.filter((call) => call.url.includes('/reschedule-slots'));
+	const publicSlotCalls = () =>
+		calls.filter((call) => call.url.includes('/availability/public/slots'));
+	const slotOffered = (startTime: string) =>
+		document.querySelector(`[data-testid$="slot-${startTime}"]`);
 
-	it('«Αλλαγή ώρας»: the doctor’s window of the appointment’s ONE office, for its service, read anonymously — and nothing else of the doctor’s', async () => {
+	// Rewrites «the doctor’s window … for its service, read anonymously» by D-W52-75α (`w52-b7` §Γ3.5): the hours are the
+	// appointment's own, read with the session, never the public hours of one service.
+	it('🔴 D-W52-75α: «Αλλαγή ώρας» reads the APPOINTMENT’s own free hours (`…/<id>/reschedule-slots`, with the session) — four weeks from the server’s «today», never the public hours of a service — and nothing else of the doctor’s', async () => {
 		visit(`/appointments/${A1}/time`);
 		draw(at('time'));
 		expect(await screen.findByTestId('appointment-change-time')).toBeInTheDocument();
-		await waitFor(() => expect(slotCalls()).toHaveLength(1));
-		const slots = new URL(slotCalls()[0].url).searchParams;
-		expect(slots.get('officeId')).toBe('off-ermou');
-		expect(slots.get('doctorServiceId')).toBe('svc-simple');
-		expect(slots.get('doctorId')).toBe('doc-maria');
-		expect(slotCalls()[0].credentials).not.toBe('include');
+		await waitFor(() => expect(slotCalls()).toHaveLength(4));
+		expect(
+			slotCalls().map((call) => new URL(call.url).pathname.replace(/^.*\/api\/v1/u, ''))
+		).toEqual(Array.from({ length: 4 }, () => `/appointment/appointments/${A1}/reschedule-slots`));
+		expect(slotCalls().map((call) => new URL(call.url).searchParams.get('date'))).toEqual([
+			null,
+			'2026-11-17',
+			'2026-11-24',
+			'2026-12-01'
+		]);
+		expect(slotCalls().every((call) => new URL(call.url).searchParams.get('days') === '7')).toBe(
+			true
+		);
+		expect(slotCalls().every((call) => call.credentials === 'include')).toBe(true);
+		expect(publicSlotCalls()).toHaveLength(0);
+		// Its own hour (10:30 UTC) is never offered; the others of its day are.
+		await waitFor(() => expect(slotOffered('2026-11-12T07:00:00.000Z')).not.toBeNull());
+		expect(slotOffered('2026-11-12T10:00:00.000Z')).not.toBeNull();
 		expect(screen.queryByRole('dialog')).toBeNull();
+	});
+
+	it('🔴 D-W52-75α: an appointment whose service the doctor deleted still moves — its hours come from the appointment (the copy of its line), never from a service', async () => {
+		detail = {
+			...view(A1, {
+				serviceLines: [
+					{
+						doctorServiceId: null,
+						isActive: true,
+						serviceTitleSnapshot: 'Απλή επίσκεψη',
+						durationInMinutesSnapshot: 30,
+						lineGrossAmount: 140
+					}
+				]
+			}),
+			actions: { canCancel: true, canReschedule: true, cancellationCutoffHours: 24 }
+		};
+		visit(`/appointments/${A1}/time`);
+		draw(at('time'));
+		expect(await screen.findByTestId('appointment-change-time')).toBeInTheDocument();
+		await waitFor(() => expect(slotOffered('2026-11-12T07:00:00.000Z')).not.toBeNull());
+		expect(publicSlotCalls()).toHaveLength(0);
 	});
 
 	it('the 51 opens no window of slots (D-103: nothing read for nobody to see)', async () => {

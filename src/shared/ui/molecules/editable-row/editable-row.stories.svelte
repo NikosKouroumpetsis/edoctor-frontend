@@ -59,6 +59,21 @@
 	{/snippet}
 </Story>
 
+<!-- A row that no longer changes here: no link, and under what it holds the lock with the caller's reason. -->
+<Story name="Locked">
+	{#snippet template()}
+		<EditableRow
+			title="Τίτλος"
+			value="Η τιμή σήμερα"
+			lockedNote="Ο λόγος που δεν αλλάζει πια από εδώ."
+			actionLabel="Αλλαγή"
+			closeLabel="Κλείσιμο"
+		>
+			{@render content()}
+		</EditableRow>
+	{/snippet}
+</Story>
+
 <Story name="Without A Value">
 	{#snippet template()}
 		<EditableRow title="Τίτλος" actionLabel="Προσθήκη" closeLabel="Ακύρωση">

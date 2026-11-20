@@ -30,4 +30,9 @@
 	}}
 />
 
+<Story
+	name="Section Label"
+	args={{ labelLook: 'section', labelAs: 'h2', label: 'Σύντομη περιγραφή' }}
+/>
+
 <Story name="Refused" args={{ error: 'Το κείμενο είναι πολύ μεγάλο.', height: 'note' }} />

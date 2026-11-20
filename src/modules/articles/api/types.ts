@@ -1,3 +1,4 @@
+import type { ArticleTextDoc } from '$shared/lib/article-text';
 import type { RichTextDoc, RichTextNode } from '$shared/lib/rich-text';
 
 /**
@@ -41,7 +42,11 @@ export type ArticlePublicView = {
 	availableLanguages?: string[] | null;
 	title: string;
 	shortDescription?: ArticleRichTextDoc | null;
-	content?: ArticleRichTextDoc | null;
+	/**
+	 * The body: an older article's tolerant document, or 🔴 D-W52-99 the editor's document of the closed schema
+	 * (`ArticleTextDoc`, read strictly by `$shared/lib/article-text`).
+	 */
+	content?: ArticleRichTextDoc | ArticleTextDoc | null;
 	sections?: ArticleSectionView[] | null;
 	authors?: ArticleAuthorView[] | null;
 	metaTitle?: string | null;
@@ -49,6 +54,13 @@ export type ArticlePublicView = {
 	canonicalUrl?: string | null;
 	/** When the backoffice published it (`authorizedAt`), ISO; `null` when unknown. */
 	publishedAt?: string | null;
+	/** 🔴 D-W52-94α: the last approved change of a published article, ISO; `null` when it never changed. */
+	revisedAt?: string | null;
+	/**
+	 * 🔴 D-W52-100: the uploads the published text names by `imageId` — the renderer never builds an image's address
+	 * itself; an id not among them is not drawn.
+	 */
+	contentImages?: ArticleContentImageView[] | null;
 	/**
 	 * 🔴 U-92: the server's reading time, in whole minutes: the lists' cards carry no body (`null` ⇒ no time shown). An
 	 * article opened by its slug still counts its own text.
@@ -60,6 +72,16 @@ export type ArticlePublicView = {
 		lgSizeUrl?: string | null;
 		alt?: string | null;
 	} | null;
+};
+
+/** D-W52-100: one uploaded image of an article's text, its three sizes and the size of the large one. */
+export type ArticleContentImageView = {
+	id?: string | null;
+	smSizeUrl?: string | null;
+	mediumSizeUrl?: string | null;
+	lgSizeUrl?: string | null;
+	width?: number | null;
+	height?: number | null;
 };
 
 export type ArticlesFeedData = ArticlePublicView[];

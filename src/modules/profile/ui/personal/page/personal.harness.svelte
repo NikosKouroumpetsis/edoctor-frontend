@@ -3,6 +3,11 @@
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import type { SupportedLocale } from '$shared/preferences/i18n/locales';
 	import {
+		DoctorStanding,
+		setDoctorStanding,
+		type DoctorStandingKind
+	} from '$shared/state/doctor-standing';
+	import {
 		Session,
 		setSession,
 		type SessionMember,
@@ -18,6 +23,7 @@
 		client,
 		locale = 'el',
 		offline = false,
+		doctor,
 		onReady
 	}: {
 		/** Who the session names: the names and the SERVER's masks. */
@@ -27,11 +33,28 @@
 		client: QueryClient;
 		locale?: SupportedLocale;
 		offline?: boolean;
+		/**
+		 * The account's doctor standing as the site's root gives it (D-W52-50): its kind and whether the first licence
+		 * locked the name; `known: false` while the server has not answered. None: the page stands without a standing.
+		 */
+		doctor?: {
+			kind?: DoctorStandingKind;
+			nameLocked?: boolean;
+			known?: boolean;
+			/** What this device remembered before the answer (D-W51-19); none by default. */
+			hint?: DoctorStandingKind;
+			/** The standing's read got no answer (an outage). */
+			failed?: boolean;
+		};
 		onReady?: (handle: {
 			session: Session;
 			status: () => SessionStatus;
 			/** The session's read answers again (what a refresh brings back). */
 			answer: (next: SessionMember) => void;
+			/** The standing's read answers: the name is locked, or open. */
+			lockName: (locked: boolean) => void;
+			/** How often the page asked for the standing again. */
+			standingRetries: () => number;
 		}) => void;
 	} = $props();
 
@@ -50,7 +73,45 @@
 	});
 	setSession(session);
 	const toasts = setToasts(new ToastState());
-	untrack(() => onReady?.({ session, status: () => status, answer: (next) => (current = next) }));
+	let nameLocked = $state(untrack(() => doctor?.nameLocked === true));
+	let standingKnown = $state(untrack(() => doctor?.known !== false));
+	let standingRetries = 0;
+	untrack(() => {
+		if (!doctor) return;
+		const kind = doctor.kind ?? 'doctor';
+		setDoctorStanding(
+			new DoctorStanding({
+				facts: () =>
+					standingKnown
+						? {
+								kind,
+								notice: null,
+								lastMode: 'PATIENT',
+								card: null,
+								...(nameLocked ? { nameLocked } : {})
+							}
+						: undefined,
+				hint: () => (doctor.hint ? { kind: doctor.hint, lastMode: 'DOCTOR' } : null),
+				failed: () => doctor.failed === true,
+				retry: () => {
+					standingRetries += 1;
+				},
+				switchTo: async () => false
+			})
+		);
+	});
+	untrack(() =>
+		onReady?.({
+			session,
+			status: () => status,
+			answer: (next) => (current = next),
+			lockName: (locked) => {
+				standingKnown = true;
+				nameLocked = locked;
+			},
+			standingRetries: () => standingRetries
+		})
+	);
 </script>
 
 <!-- Tests only: «Προσωπικά στοιχεία» under a session, a client and the frame's toast, as the site's root composes them.

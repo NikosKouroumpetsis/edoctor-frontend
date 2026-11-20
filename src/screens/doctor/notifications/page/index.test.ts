@@ -94,6 +94,8 @@ const hrefOf = (testId: string) => screen.getByTestId(testId).getAttribute('href
 const posts = () => calls.filter((call) => call.method === 'POST');
 const ALL = { address: { filter: 'all' as const } };
 const appointment = (id: string) => `/doctor/appointments/${id}`;
+const review = (id: string) => `/doctor/reviews?review=${id}`;
+const ARTICLE_ID = '0193d000-0000-7000-8000-0000000000b4';
 
 describe('🔴 D-W51-89 · screens/doctor/notifications · the doctor’s list of his own side', () => {
 	it('D-W51-89: the list of the doctor’s mode — the list and the count asked with `side=doctor`, its own title, `noindex`, inside its `main`', async () => {
@@ -154,22 +156,98 @@ describe('🔴 D-W51-89 · screens/doctor/notifications · the doctor’s list o
 });
 
 describe('🔴 D-W51-90 · each line ⇒ where it leads', () => {
-	it('D-W51-90: an appointment’s line opens his 68 (`/doctor/appointments/<id>`) — «Νέα κριτική» too (the 5.2 «κριτικές σας» is not here yet)', async () => {
+	// Rewrites «… «Νέα κριτική» too (the 5.2 «κριτικές σας» is not here yet)» by D-W52-88 / 91 (wave 5.2, card w52-w8;
+	// the card: «ειδοποιήσεις με στόχο RATING ⇒ η κριτική»): a review's line opens «Κριτικές» at that review (screen 84).
+	it('D-W51-90 · 🔴 D-W52-91: an appointment’s line opens his 68 (`/doctor/appointments/<id>`); «Νέα κριτική» (`RATING`) opens «Κριτικές» at that review (`/doctor/reviews?review=<id>`)', async () => {
 		draw('/doctor/notifications?filter=all', ALL);
 		await shown('rows');
 		for (const [line, target] of [
 			[DOCTOR_SAMPLE_IDS.request, DOCTOR_SAMPLE_IDS.requestAppointment],
 			[DOCTOR_SAMPLE_IDS.outcome, DOCTOR_SAMPLE_IDS.outcomeAppointment],
-			[DOCTOR_SAMPLE_IDS.canceled, DOCTOR_SAMPLE_IDS.canceledAppointment],
-			[DOCTOR_SAMPLE_IDS.review, DOCTOR_SAMPLE_IDS.reviewAppointment]
+			[DOCTOR_SAMPLE_IDS.canceled, DOCTOR_SAMPLE_IDS.canceledAppointment]
 		]) {
 			expect(row(line).tagName, line).toBe('A');
 			expect(row(line)).toHaveAttribute('href', appointment(target));
 		}
+		expect(row(DOCTOR_SAMPLE_IDS.review).tagName).toBe('A');
+		expect(row(DOCTOR_SAMPLE_IDS.review)).toHaveAttribute(
+			'href',
+			review(DOCTOR_SAMPLE_IDS.reviewRating)
+		);
 		// Never the patient's screens (51, 54).
 		for (const link of document.querySelectorAll('[data-testid^="notifications-row-"][href]')) {
-			expect(link.getAttribute('href')).toMatch(/^\/doctor\/appointments\//u);
+			expect(link.getAttribute('href')).toMatch(/^\/doctor\/(appointments\/|reviews\?review=)/u);
 		}
+	});
+
+	it('🔴 D-W52-86 / 91: «Η απάντησή σας δεν δημοσιεύτηκε» (`RATING_REPLY_REJECTED`, `RATING`) opens the same review; (negative) a review’s line with an id that is not the server’s, or a target the page does not know, opens nothing', async () => {
+		store = [
+			...store,
+			{
+				...store[3],
+				id: '018f3c1e-0000-7000-8000-000000000d07',
+				kind: 'RATING_REPLY_REJECTED',
+				title: 'Η απάντησή σας δεν δημοσιεύτηκε',
+				target: { kind: 'RATING', id: DOCTOR_SAMPLE_IDS.reviewRating }
+			},
+			{
+				...store[3],
+				id: '018f3c1e-0000-7000-8000-000000000d08',
+				target: { kind: 'RATING', id: '<script>' } as never
+			},
+			{
+				...store[3],
+				id: '018f3c1e-0000-7000-8000-000000000d09',
+				target: { kind: 'REVIEW', id: DOCTOR_SAMPLE_IDS.reviewRating } as never
+			}
+		];
+		draw('/doctor/notifications?filter=all', ALL);
+		await shown('rows');
+		expect(row('018f3c1e-0000-7000-8000-000000000d07')).toHaveAttribute(
+			'href',
+			review(DOCTOR_SAMPLE_IDS.reviewRating)
+		);
+		for (const id of [
+			'018f3c1e-0000-7000-8000-000000000d08',
+			'018f3c1e-0000-7000-8000-000000000d09'
+		]) {
+			expect(row(id), id).not.toHaveAttribute('href');
+		}
+		expect(document.body.innerHTML).not.toContain('<script>');
+	});
+
+	it('🔴 D-W52-98 / 102: «Το άρθρο σας δημοσιεύτηκε / δεν δημοσιεύτηκε» (`ARTICLE`) opens that article (`/doctor/articles/<id>`); (negative) an id that is not the server’s opens nothing', async () => {
+		store = [
+			...store,
+			{
+				...store[3],
+				id: '018f3c1e-0000-7000-8000-000000000d11',
+				kind: 'ARTICLE_NOT_PUBLISHED',
+				title: 'Το άρθρο σας δεν δημοσιεύτηκε',
+				body: '«Χοληστερίνη» · δείτε τι γράφει η ομάδα του eDoctor',
+				icon: 'DOCUMENT',
+				target: { kind: 'ARTICLE', id: ARTICLE_ID }
+			},
+			{
+				...store[3],
+				id: '018f3c1e-0000-7000-8000-000000000d12',
+				kind: 'ARTICLE_PUBLISHED',
+				title: 'Το άρθρο σας δημοσιεύτηκε',
+				icon: 'DOCUMENT',
+				target: { kind: 'ARTICLE', id: '<img src=x>' } as never
+			}
+		];
+		draw('/doctor/notifications?filter=all', ALL);
+		await shown('rows');
+		expect(row('018f3c1e-0000-7000-8000-000000000d11')).toHaveAttribute(
+			'href',
+			`/doctor/articles/${ARTICLE_ID}`
+		);
+		expect(row('018f3c1e-0000-7000-8000-000000000d11')).toHaveTextContent(
+			'Το άρθρο σας δεν δημοσιεύτηκε'
+		);
+		expect(row('018f3c1e-0000-7000-8000-000000000d12')).not.toHaveAttribute('href');
+		expect(document.body.innerHTML).not.toContain('<img src=x>');
 	});
 
 	it('D-W51-90: the glyph of each kind of line — a calendar, a visit to settle, a cancelled one, a star, the sync, the licence', async () => {
@@ -233,11 +311,12 @@ describe('🔴 D-W51-90 · each line ⇒ where it leads', () => {
 		expect(posts()[0]?.path).toBe(`/inbox/me/${DOCTOR_SAMPLE_IDS.request}/read`);
 	});
 
-	it('the same for «Νέα κριτική» (read already: no request), and (negative) a new tab keeps the link’s own way — nothing taken over', async () => {
+	// Rewritten by D-W52-91 (card w52-w8): «Νέα κριτική» opens «Κριτικές» at that review, the same way one step on.
+	it('the same for «Νέα κριτική» — «Κριτικές» at that review (read already: no request), and (negative) a new tab keeps the link’s own way — nothing taken over', async () => {
 		draw('/doctor/notifications?filter=all', ALL);
 		await shown('rows');
 		await fireEvent.click(row(DOCTOR_SAMPLE_IDS.review));
-		expect(vi.mocked(goto)).toHaveBeenCalledWith(appointment(DOCTOR_SAMPLE_IDS.reviewAppointment), {
+		expect(vi.mocked(goto)).toHaveBeenCalledWith(review(DOCTOR_SAMPLE_IDS.reviewRating), {
 			state: { doctorNotification: { depth: 1 } }
 		});
 		expect(posts()).toHaveLength(0);

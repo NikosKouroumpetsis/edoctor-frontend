@@ -124,10 +124,15 @@ export type PersonalRow = {
 	value: string | null;
 	help: string | null;
 	filled: boolean;
+	/** 🔴 D-W52-50 (U-207.1): the row no longer changes here — why, in the page's words; absent for a row that does. */
+	lockedNote?: string;
 };
 
-/** Why a write of the person's own details was refused: the session, the date of birth, a value, else. */
-export type PersonalWriteFailure = 'session' | 'birth-date' | 'invalid' | 'unknown';
+/**
+ * Why a write of the person's own details was refused: the session, the date of birth, a value, 🔴 D-W52-50 a name the
+ * doctor's first licence locked (`409 DOCTOR_NAME_LOCKED`), else.
+ */
+export type PersonalWriteFailure = 'session' | 'birth-date' | 'invalid' | 'name-locked' | 'unknown';
 
 /**
  * Why a step of a challenge (the sign-in email's, the mobile's) was refused: the value is another account's, 🔴 D-W45-16

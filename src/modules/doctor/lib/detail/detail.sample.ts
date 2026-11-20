@@ -46,24 +46,26 @@ export function sampleDoctorProfile(overrides: Partial<DoctorProfile> = {}): Doc
 				id: 'svc-1',
 				title: 'Simple visit',
 				priceRange: { min: 40, max: 40 },
-				kind: 'visit',
-				isSpecialized: true
+				kind: 'visit'
 			},
 			{
 				id: 'svc-2',
 				title: 'Chronic follow-up',
 				priceRange: { min: 60, max: 60 },
 				subtitle: 'Παρακολούθηση χρόνιων νοσημάτων.',
-				kind: 'follow-up',
-				isSpecialized: true
+				kind: 'follow-up'
 			},
 			{
 				id: 'svc-3',
 				title: 'Vaccination',
 				priceRange: { min: 25, max: 25 },
-				kind: 'other',
-				isSpecialized: false
+				kind: 'other'
 			}
+		],
+		// D-W52-60: two lines of the specialty's closed list, as the server names them (U-122: the catalogue's own).
+		specializations: [
+			{ code: 'PR021-03', name: 'Εντατική θεραπεία' },
+			{ code: 'PR021-04', name: 'Σακχαρώδης διαβήτης' }
 		],
 		office: {
 			officeId: 'off-1',

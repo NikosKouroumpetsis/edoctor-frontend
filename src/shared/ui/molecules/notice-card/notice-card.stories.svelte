@@ -40,6 +40,25 @@
 	{/snippet}
 </Story>
 
+<Story name="With an icon">
+	{#snippet template()}
+		<div class="grid w-full max-w-form gap-3">
+			<NoticeCard
+				tone="done"
+				icon="checkmark-circle-outline"
+				title="Αποθηκεύτηκε."
+				lines={['Η αλλαγή φαίνεται αμέσως.']}
+			/>
+			<NoticeCard
+				tone="warm"
+				icon="alert-circle-outline"
+				title="Κάτι λείπει ακόμη."
+				lines={['Συμπληρώστε το για να συνεχίσετε.']}
+			/>
+		</div>
+	{/snippet}
+</Story>
+
 <Story name="With a number to call">
 	{#snippet template()}
 		<div class="w-full max-w-form">

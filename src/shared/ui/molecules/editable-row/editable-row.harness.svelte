@@ -6,6 +6,7 @@
 		dimmed = false,
 		value,
 		help,
+		lockedNote,
 		onOpenChange,
 		onReady
 	}: {
@@ -13,6 +14,7 @@
 		dimmed?: boolean;
 		value?: string;
 		help?: string;
+		lockedNote?: string;
 		onOpenChange?: (open: boolean) => void;
 		/** The caller's hand on the row: what a choice does (it closes the row itself). */
 		onReady?: (handle: { close: () => void }) => void;
@@ -29,6 +31,7 @@
 	title="Τίτλος"
 	{value}
 	{help}
+	{lockedNote}
 	actionLabel="Αλλαγή"
 	closeLabel="Κλείσιμο"
 	bind:open={isOpen}

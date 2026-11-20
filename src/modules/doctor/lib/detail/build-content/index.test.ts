@@ -89,33 +89,36 @@ describe('lib/detail build-content', () => {
 		expect(section?.about).toEqual({ leadTitle: 'Σχετικά με τον γιατρό', leadBody: 'Μόνο ένα.' });
 	});
 
-	it('U-36.2, U-72.3 Π1 (app = web): «Τομείς εξειδίκευσης» are the services marked `isSpecialized`, with their own line and the way to their page; the visits line waits for the backend (U-36.1)', () => {
-		const specializations = buildSpecializations(sampleDoctorProfile(), 'el');
-		expect(
-			specializations?.items.map(({ id, title, subtitle }) => ({ id, title, subtitle }))
-		).toEqual([
-			{ id: 'svc-1', title: 'Simple visit', subtitle: undefined },
-			{ id: 'svc-2', title: 'Chronic follow-up', subtitle: 'Παρακολούθηση χρόνιων νοσημάτων.' }
+	// Rewrites «U-36.2, U-72.3 Π1 (app = web): «Τομείς εξειδίκευσης» are the services marked `isSpecialized`…» by
+	// U-209.3 (D-W52-56 / 60): the fields are the doctor's specializations of the closed list.
+	it('🔴 D-W52-60 (U-209.3, U-225; app = web): «Τομείς εξειδίκευσης» are the specializations the server sends, by name and in its order — never a service; the visits line waits for the backend (U-36.1)', () => {
+		const specializations = buildSpecializations(sampleDoctorProfile(), 'el', SAMPLE_NOW);
+		expect(specializations?.title).toBe('Τομείς εξειδίκευσης');
+		expect(specializations?.items).toEqual([
+			{ id: 'PR021-03', title: 'Εντατική θεραπεία' },
+			{ id: 'PR021-04', title: 'Σακχαρώδης διαβήτης' }
 		]);
-		expect(specializations?.moreLabel).toBe('Εμφάνιση λεπτομερειών');
+		expect(JSON.stringify(specializations)).not.toMatch(/Simple visit|Chronic follow-up|svc-/u);
 		expect(specializations?.completedVisits).toBeNull();
 		expect(
-			buildSpecializations(sampleDoctorProfile({ responseMetrics: { completedVisits: 523 } }), 'el')
-				?.completedVisits
+			buildSpecializations(
+				sampleDoctorProfile({ responseMetrics: { completedVisits: 523 } }),
+				'el',
+				SAMPLE_NOW
+			)?.completedVisits
 		).toBe('Ολοκληρωμένες επισκέψεις: 523');
 	});
 
-	it('U-72.3 Π1: past three fields, three rows and «Εμφάνιση όλων των N τομέων»', () => {
-		const special = ['a', 'b', 'c', 'd'].map((id) => ({
-			id,
-			title: id,
-			priceRange: null,
-			kind: 'other' as const,
-			isSpecialized: true
-		}));
-		const content = buildSpecializations(sampleDoctorProfile({ services: special }), 'el');
-		expect(content?.items).toHaveLength(3);
-		expect(content?.moreLabel).toBe('Εμφάνιση όλων των 4 τομέων');
+	// Rewrites «U-72.3 Π1: past three fields, three rows and «Εμφάνιση όλων των N τομέων»» by U-209.3: three at most,
+	// all shown; the way to their page only when it has more to say (Π7's rule).
+	it('🔴 D-W52-60 · Π7: «Εμφάνιση λεπτομερειών» only when the page has its figures (the visits, or the years of the licence); never «Εμφάνιση όλων…»', () => {
+		const build = (extra = {}) =>
+			buildSpecializations(sampleDoctorProfile(extra), 'el', SAMPLE_NOW);
+		expect(build()?.moreLabel).toBe('Εμφάνιση λεπτομερειών');
+		expect(
+			build({ licenseObtainedDate: undefined, responseMetrics: { completedVisits: 4 } })?.moreLabel
+		).toBe('Εμφάνιση λεπτομερειών');
+		expect(build({ licenseObtainedDate: undefined })?.moreLabel).toBeNull();
 	});
 
 	it('U-70.2 Ε3, Π7: the section is «Υπηρεσίες», three rows, and its button only leads somewhere new', () => {
@@ -123,8 +126,7 @@ describe('lib/detail build-content', () => {
 			id,
 			title: id,
 			priceRange: null,
-			kind: 'other' as const,
-			isSpecialized: false
+			kind: 'other' as const
 		}));
 		const none = buildServiceCost(sampleDoctorProfile({ services: plain }), 'el');
 		expect(none?.title).toBe('Υπηρεσίες');
@@ -173,12 +175,14 @@ describe('lib/detail build-content', () => {
 		]);
 	});
 
-	it('U-36.2 (app = web): no service marked — no section', () => {
-		const doctor = sampleDoctorProfile();
-		const plain = sampleDoctorProfile({
-			services: doctor.services?.map((service) => ({ ...service, isSpecialized: false }))
-		});
-		expect(buildSpecializations(plain, 'el')).toBeUndefined();
+	// Rewrites «U-36.2 (app = web): no service marked — no section» by U-209.3 (D-W52-60).
+	it('🔴 D-W52-60 (app = web): no specialization — no section, whatever the services', () => {
+		expect(
+			buildSpecializations(sampleDoctorProfile({ specializations: undefined }), 'el', SAMPLE_NOW)
+		).toBeUndefined();
+		expect(
+			buildSpecializations(sampleDoctorProfile({ specializations: [] }), 'el', SAMPLE_NOW)
+		).toBeUndefined();
 	});
 
 	it('U-34.4 / U-38.1 (app = web): the cost of a guest is «Συνδεθείτε για κόστος», a member’s the amount; no services — no section', () => {
@@ -213,6 +217,8 @@ describe('lib/detail build-content', () => {
 				reviewChips: [],
 				reviewSnippets: [],
 				services: [],
+				// D-W52-60: «Τομείς εξειδίκευσης» come from the doctor's specializations now, so «nothing» has none either.
+				specializations: [],
 				office: undefined,
 				offices: [],
 				description: undefined,

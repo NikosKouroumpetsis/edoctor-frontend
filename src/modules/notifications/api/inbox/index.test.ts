@@ -109,7 +109,8 @@ describe('modules/notifications/api/inbox · the answer as facts (W-4, U-65.6)',
 		expect(Object.keys(page.items[0] ?? {})).not.toContain('kind');
 	});
 
-	it('🔴 D-W51-90 (screen 75, `w51-b11` §6): the doctor’s words of the contract are kept — the glyphs of a cancellation, a visit to settle, the calendar, the licence; the calendar’s connection and the doctor as what a line is about', () => {
+	// Widened by D-W52-88 / 91 (wave 5.2, card w52-w8; `w52-b8` §5): «Νέα κριτική» names the review itself (`RATING`).
+	it('🔴 D-W51-90 (screen 75, `w51-b11` §6) · D-W52-88: the doctor’s words of the contract are kept — the glyphs of a cancellation, a visit to settle, the calendar, the licence; the calendar’s connection, the doctor and a review as what a line is about', () => {
 		const page = mapNotificationInboxPage(sampleInboxPage(sampleDoctorInboxItems()));
 		expect(page.items.map((entry) => entry.icon)).toEqual([
 			'CALENDAR',
@@ -123,10 +124,11 @@ describe('modules/notifications/api/inbox · the answer as facts (W-4, U-65.6)',
 			'APPOINTMENT',
 			'APPOINTMENT',
 			'APPOINTMENT',
-			'APPOINTMENT',
+			'RATING',
 			'CALENDAR_CONNECTION',
 			'DOCTOR'
 		]);
+		expect(page.items[3]?.target).toEqual({ kind: 'RATING', id: DOCTOR_SAMPLE_IDS.reviewRating });
 		expect(page.items[4]?.target).toEqual({
 			kind: 'CALENDAR_CONNECTION',
 			id: DOCTOR_SAMPLE_IDS.connection

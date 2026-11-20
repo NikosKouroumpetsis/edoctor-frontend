@@ -154,4 +154,61 @@ describe('articles::ui::detail', () => {
 		render(ArticleDetail, { props: props() });
 		expect(container.querySelector('[data-slot="document-page-footer"]')).toBeNull();
 	});
+
+	it('🔴 D-W52-104 / D-W52-94α: an article written in the editor — its closed blocks drawn (a link `nofollow ugc` in a new tab, a video only on a press), «ενημερώθηκε» after an approved change', () => {
+		const IMAGE = '0199aaaa-0000-7000-8000-000000000001';
+		const { container } = render(ArticleDetail, {
+			props: props({
+				article: article({
+					sections: [],
+					revisedAt: '2026-11-14T09:00:00.000Z',
+					contentImages: [
+						{
+							id: IMAGE,
+							smSizeUrl: 'https://cdn.example.org/s.webp',
+							mediumSizeUrl: 'https://cdn.example.org/m.webp',
+							lgSizeUrl: 'https://cdn.example.org/l.webp',
+							width: 1200,
+							height: 800
+						}
+					],
+					content: {
+						type: 'doc',
+						content: [
+							{
+								type: 'heading',
+								attrs: { level: 2 },
+								content: [{ type: 'text', text: 'Οι τιμές' }]
+							},
+							{
+								type: 'paragraph',
+								content: [
+									{
+										type: 'text',
+										text: 'ΕΟΔΥ',
+										marks: [{ type: 'link', attrs: { href: 'https://eody.gov.gr/' } }]
+									}
+								]
+							},
+							{ type: 'image', attrs: { imageId: IMAGE, alt: 'Πιεσόμετρο', caption: null } },
+							{ type: 'video', attrs: { provider: 'vimeo', id: '76979871' } }
+						]
+					}
+				})
+			})
+		});
+		const body = screen.getByTestId('article-body');
+		expect(within(body).getByRole('heading', { level: 2 })).toHaveAttribute('id', 'οι-τιμες');
+		expect(within(body).getByRole('link', { name: 'ΕΟΔΥ' })).toHaveAttribute(
+			'rel',
+			'nofollow ugc noopener noreferrer'
+		);
+		expect(body.querySelector('img')).toHaveAttribute('src', 'https://cdn.example.org/l.webp');
+		expect(body.querySelector('iframe')).toBeNull();
+		expect(within(body).getByTestId('rich-text-video-play')).toBeInTheDocument();
+		const meta = container.querySelector('[data-slot="document-page-meta"]') as HTMLElement;
+		expect(meta.textContent?.replace(/[ \t\n]+/gu, ' ')).toContain(
+			'10 Ιουλ 2026 · ενημερώθηκε 14 Νοε 2026'
+		);
+	});
 });

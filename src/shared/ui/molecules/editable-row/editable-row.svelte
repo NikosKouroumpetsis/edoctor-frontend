@@ -12,6 +12,7 @@
 	import { untrack, type Snippet } from 'svelte';
 	import { getFocusableElements, useId } from '$shared/lib/headless';
 	import { cn } from '$shared/lib/utils';
+	import { Ionicon } from '$shared/ui/icons/ionicon';
 	import { TextButton } from '$shared/ui/primitives/text-button';
 
 	let {
@@ -20,6 +21,7 @@
 		actionLabel,
 		closeLabel,
 		help,
+		lockedNote,
 		open = $bindable(false),
 		dimmed = false,
 		titleAs = 'h2',
@@ -38,6 +40,11 @@
 		closeLabel: string;
 		/** A line under the title while open. */
 		help?: string;
+		/**
+		 * The row no longer changes here: it has no link and never opens, and this line under what it holds says why,
+		 * beside a lock.
+		 */
+		lockedNote?: string;
 		open?: boolean;
 		/** Another row is open: this one fades and takes no press. */
 		dimmed?: boolean;
@@ -56,17 +63,21 @@
 	let action = $state<HTMLElement | null>(null);
 	let body = $state<HTMLDivElement | null>(null);
 
+	const locked = $derived(Boolean(lockedNote));
+	// A locked row is drawn closed whatever the caller still binds.
+	const shown = $derived(open && !locked);
+
 	function set(next: boolean) {
-		if (next === open || (next && dimmed)) return;
+		if (next === open || (next && (dimmed || locked))) return;
 		open = next;
 		onOpenChange?.(next);
 	}
 
 	// The focus follows the row: into the first thing it opened, and back onto its link once it closes — however it
 	// closed (its own link, Escape, or the caller after a choice). Never at the first paint.
-	let wasOpen = untrack(() => open);
+	let wasOpen = untrack(() => shown);
 	$effect(() => {
-		const now = open;
+		const now = shown;
 		if (now === wasOpen) return;
 		wasOpen = now;
 		if (now) (body ? getFocusableElements(body)[0] : null)?.focus();
@@ -74,7 +85,7 @@
 	});
 
 	function onkeydown(event: KeyboardEvent) {
-		if (!open || event.key !== 'Escape' || event.defaultPrevented) return;
+		if (!shown || event.key !== 'Escape' || event.defaultPrevented) return;
 		event.preventDefault();
 		event.stopPropagation();
 		set(false);
@@ -90,27 +101,29 @@
 <!-- A row that is edited in its place: closed, the title over what it holds now and the link that opens it; open, the
      title, the link that closes it, a line of help and the caller's own content, which comes in with a short move
      (always, in CSS). The other rows of its list fade meanwhile (`dimmed`). Escape closes; no colour under the pointer.
+     A row with a `lockedNote` is only read: the title, what it holds, and the lock with the caller's reason — no link.
      Every word is the caller's and a text node. -->
 <!-- The group only hears Escape from what it holds (its link, the caller's fields): it is no target of its own. -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
 	role="group"
 	aria-labelledby={titleId}
-	aria-describedby={open && help ? helpId : undefined}
+	aria-describedby={shown && help ? helpId : undefined}
 	data-slot="editable-row"
-	data-state={open ? 'open' : 'closed'}
+	data-state={shown ? 'open' : 'closed'}
 	data-dimmed={dimmed || undefined}
+	data-locked={locked || undefined}
 	data-testid={testId}
 	class={cn(
 		'border-b border-line pt-5 transition-opacity duration-standard ease-standard',
-		open ? 'pb-6' : 'pb-5',
+		shown ? 'pb-6' : 'pb-5',
 		dimmed && 'pointer-events-none opacity-35',
 		className
 	)}
 	{onkeydown}
 >
 	<div class="flex flex-row items-start justify-between gap-4">
-		{#if open}
+		{#if shown}
 			{@render heading()}
 			<TextButton
 				label={closeLabel}
@@ -135,25 +148,37 @@
 						{value}
 					</p>
 				{/if}
+				{#if lockedNote}
+					<p
+						data-slot="editable-row-locked"
+						data-testid={testId ? `${testId}-locked` : undefined}
+						class="mt-1 flex flex-row items-start gap-1.5 text-body-sm text-muted-foreground"
+					>
+						<Ionicon name="lock-closed-outline" class="mt-0.5 icon-sm shrink-0" />
+						<span>{lockedNote}</span>
+					</p>
+				{/if}
 			</div>
-			<TextButton
-				bind:ref={action}
-				label={actionLabel}
-				underline
-				tone="foreground"
-				textClass={linkTextClass}
-				aria-describedby={titleId}
-				aria-expanded="false"
-				aria-disabled={dimmed || undefined}
-				tabindex={dimmed ? -1 : undefined}
-				data-slot="editable-row-action"
-				data-testid={testId ? `${testId}-action` : undefined}
-				class={linkClass}
-				onclick={() => set(true)}
-			/>
+			{#if !locked}
+				<TextButton
+					bind:ref={action}
+					label={actionLabel}
+					underline
+					tone="foreground"
+					textClass={linkTextClass}
+					aria-describedby={titleId}
+					aria-expanded="false"
+					aria-disabled={dimmed || undefined}
+					tabindex={dimmed ? -1 : undefined}
+					data-slot="editable-row-action"
+					data-testid={testId ? `${testId}-action` : undefined}
+					class={linkClass}
+					onclick={() => set(true)}
+				/>
+			{/if}
 		{/if}
 	</div>
-	{#if open}
+	{#if shown}
 		{#if help}
 			<p
 				id={helpId}

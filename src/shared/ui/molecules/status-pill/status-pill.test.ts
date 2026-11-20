@@ -4,7 +4,13 @@ import StatusPill from './status-pill.svelte';
 
 describe('StatusPill (D-W51-27: the one pill of a state, shared)', () => {
 	it('the words as a text node, in the tone’s tint — warm, green, neutral (no hex, no HTML)', () => {
-		const tones = { warning: 'bg-warning/10', success: 'bg-success/10', muted: 'bg-chip' } as const;
+		// 🔴 D-W52-102: «Δεν δημοσιεύτηκε» of screen 85 in the accent's outline (`sw.css:624`).
+		const tones = {
+			warning: 'bg-warning/10',
+			success: 'bg-success/10',
+			muted: 'bg-chip',
+			refused: 'border-accent'
+		} as const;
 		for (const [tone, tint] of Object.entries(tones)) {
 			const view = render(StatusPill, {
 				props: {

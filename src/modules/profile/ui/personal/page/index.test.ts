@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { QueryClient } from '@tanstack/svelte-query';
 import type { Session, SessionMember, SessionStatus } from '$shared/state/session';
@@ -76,6 +76,15 @@ type Handle = {
 	session: Session;
 	status: () => SessionStatus;
 	answer: (next: SessionMember) => void;
+	lockName: (locked: boolean) => void;
+	standingRetries: () => number;
+};
+type Doctor = {
+	kind?: 'none' | 'pending' | 'doctor' | 'payments';
+	nameLocked?: boolean;
+	known?: boolean;
+	hint?: 'none' | 'pending' | 'doctor' | 'payments';
+	failed?: boolean;
 };
 
 let ports: ReturnType<typeof makePorts>;
@@ -111,7 +120,12 @@ afterEach(() => {
 });
 
 async function draw(
-	options: { member?: SessionMember; locale?: 'el' | 'en'; offline?: boolean } = {}
+	options: {
+		member?: SessionMember;
+		locale?: 'el' | 'en';
+		offline?: boolean;
+		doctor?: Doctor;
+	} = {}
 ) {
 	let handle: Handle | undefined;
 	render(Harness, {
@@ -121,6 +135,7 @@ async function draw(
 			client,
 			locale: options.locale ?? 'el',
 			offline: options.offline ?? false,
+			doctor: options.doctor,
 			onReady: (found: Handle) => (handle = found)
 		}
 	});
@@ -369,6 +384,147 @@ describe('profile/ui/personal · «Ονοματεπώνυμο», «Ημερομ�
 		await user().click(screen.getByTestId('personal-save'));
 		await waitFor(() => expect(handle().session.flowOpen).toBe(true));
 		expect(handle().status()).toBe('guest');
+	});
+
+	it('🔴 U-207 / D-W52-50: for a doctor whose first licence locked the name, «Ονοματεπώνυμο» has no «Επεξεργασία» and says «Κλείδωσε με την πρώτη σας άδεια γιατρού.» under the name, with the lock — whatever became of the licence (the till alone, a revoked one); every other row is as it was', async () => {
+		for (const kind of ['doctor', 'payments', 'pending', 'none'] as const) {
+			const view = render(Harness, {
+				props: { member: ELENI, ports, client, doctor: { kind, nameLocked: true } }
+			});
+			await waitFor(() =>
+				expect(screen.getByTestId('personal-details')).toHaveAttribute('data-view', 'ready')
+			);
+			const name = row('name');
+			expect(name, kind).toHaveAttribute('data-locked');
+			expect(name).toHaveAttribute('data-state', 'closed');
+			expect(name).toHaveTextContent('Ελένη Παππά');
+			const note = screen.getByTestId('personal-row-name-locked');
+			expect(note.textContent?.trim()).toBe('Κλείδωσε με την πρώτη σας άδεια γιατρού.');
+			expect(note.querySelector('svg')).not.toBeNull();
+			expect(screen.queryByTestId('personal-row-name-action')).toBeNull();
+			expect(within(name).queryByRole('button')).toBeNull();
+			expect(name).not.toHaveTextContent('Επεξεργασία');
+			// The other six keep their link, and open as before.
+			for (const id of ['dob', 'gender', 'email', 'phone', 'amka', 'afm']) {
+				expect(row(id), id).not.toHaveAttribute('data-locked');
+				expect(action(id), id).toBeInTheDocument();
+			}
+			await user().click(action('gender'));
+			expect(row('gender')).toHaveAttribute('data-state', 'open');
+			expect(ports.saveProfile).not.toHaveBeenCalled();
+			view.unmount();
+		}
+	});
+
+	it('🔴 U-207 / D-W52-50 (negative): the name stays open — «Επεξεργασία», no lock, no word of a licence — for an account that is no doctor, a doctor before the first licence (`nameLocked: false`), and a page without a standing at all', async () => {
+		const cases: (Doctor | undefined)[] = [
+			undefined,
+			{ kind: 'none', nameLocked: false },
+			{ kind: 'pending', nameLocked: false },
+			{ kind: 'doctor', nameLocked: false }
+		];
+		for (const doctor of cases) {
+			const view = render(Harness, { props: { member: ELENI, ports, client, doctor } });
+			await waitFor(() =>
+				expect(screen.getByTestId('personal-details')).toHaveAttribute('data-view', 'ready')
+			);
+			expect(row('name')).not.toHaveAttribute('data-locked');
+			expect(screen.queryByTestId('personal-row-name-locked')).toBeNull();
+			expect(action('name')).toHaveTextContent('Επεξεργασία');
+			expect(screen.getByTestId('personal-details')).not.toHaveTextContent(/Κλείδωσε|άδεια/u);
+			await user().click(action('name'));
+			expect(row('name')).toHaveAttribute('data-state', 'open');
+			expect(input('personal-first-name-input').value).toBe('Ελένη');
+			view.unmount();
+		}
+	});
+
+	it('🔴 D-W52-44 / D-W52-50: if the server refuses the name as locked all the same (`409 DOCTOR_NAME_LOCKED`), the row says the SAME words — «Κλείδωσε με την πρώτη σας άδεια γιατρού.» — nothing is kept, the standing is asked again, and once it says so the row closes into its lock', async () => {
+		ports.saveProfile.mockRejectedValueOnce(refused('name-locked'));
+		// The standing has not said «locked» yet (an answer older than the licence): the row is still open to a change.
+		const handle = await draw({ doctor: { kind: 'doctor', nameLocked: false } });
+		await open('name');
+		await user().clear(input('personal-last-name-input'));
+		await user().type(input('personal-last-name-input'), 'Γεωργίου');
+		await user().click(screen.getByTestId('personal-save'));
+		const failure = await screen.findByTestId('personal-failure');
+		expect(failure.textContent?.trim()).toBe('Κλείδωσε με την πρώτη σας άδεια γιατρού.');
+		expect(failure).toHaveAttribute('role', 'alert');
+		expect(ports.saveProfile).toHaveBeenCalledExactlyOnceWith({
+			firstName: 'Ελένη',
+			lastName: 'Γεωργίου'
+		});
+		// Nothing was saved: no read is asked again, no «Οι αλλαγές αποθηκεύτηκαν.», the session stands.
+		expect(ports.refresh).not.toHaveBeenCalled();
+		expect(screen.queryByText('Οι αλλαγές αποθηκεύτηκαν.')).toBeNull();
+		expect(handle().status()).toBe('member');
+		expect(handle().standingRetries()).toBe(1);
+		// The standing's new answer: the row closes on the name on file, with the lock and the same words.
+		handle().lockName(true);
+		await waitFor(() => expect(row('name')).toHaveAttribute('data-locked'));
+		expect(row('name')).toHaveAttribute('data-state', 'closed');
+		expect(row('name')).toHaveTextContent('Ελένη Παππά');
+		expect(row('name')).not.toHaveTextContent('Γεωργίου');
+		expect(screen.getByTestId('personal-row-name-locked')).toHaveTextContent(
+			'Κλείδωσε με την πρώτη σας άδεια γιατρού.'
+		);
+		expect(screen.queryByTestId('personal-save')).toBeNull();
+		// No other row is left faded behind a row that closed by itself.
+		for (const id of ['dob', 'gender', 'email', 'phone', 'amka', 'afm']) {
+			expect(row(id), id).not.toHaveAttribute('data-dimmed');
+		}
+		expect(ports.saveProfile).toHaveBeenCalledTimes(1);
+	});
+
+	it('🔴 D-W52-50 (negative): the lock that arrives while the name is open (the standing answers late) closes the row and drops what was typed — nothing is sent; in English the same', async () => {
+		const handle = await draw({ doctor: { known: false }, locale: 'en' });
+		await open('name');
+		await user().type(input('personal-first-name-input'), 'x');
+		handle().lockName(true);
+		await waitFor(() => expect(row('name')).toHaveAttribute('data-locked'));
+		expect(screen.queryByTestId('personal-first-name-input')).toBeNull();
+		expect(screen.getByTestId('personal-row-name-locked')).toHaveTextContent(
+			'Locked with your first doctor licence.'
+		);
+		expect(ports.saveProfile).not.toHaveBeenCalled();
+		expect(writes()).toEqual([]);
+	});
+
+	it('🔴 D-W52-50: a device that remembers a doctor waits for the standing — no «Επεξεργασία» of the name shows and then goes; the answer draws the rows, locked or open', async () => {
+		const locked = await draw({ doctor: { known: false, hint: 'doctor' } });
+		await waitFor(() => expect(calls.some((call) => call.method === 'GET')).toBe(true));
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		expect(screen.getByTestId('personal-details')).toHaveAttribute('data-view', 'loading');
+		expect(screen.queryByTestId('personal-row-name-action')).toBeNull();
+		locked().lockName(true);
+		await waitFor(() =>
+			expect(screen.getByTestId('personal-details')).toHaveAttribute('data-view', 'ready')
+		);
+		expect(row('name')).toHaveAttribute('data-locked');
+		expect(screen.queryByTestId('personal-row-name-action')).toBeNull();
+		cleanup();
+
+		const open = await draw({ doctor: { known: false, hint: 'doctor' } });
+		open().lockName(false);
+		await waitFor(() =>
+			expect(screen.getByTestId('personal-details')).toHaveAttribute('data-view', 'ready')
+		);
+		expect(row('name')).not.toHaveAttribute('data-locked');
+		expect(action('name')).toHaveTextContent('Επεξεργασία');
+	});
+
+	it('🔴 D-W52-50 (negative): the wait is for a remembered doctor only — a device that remembers none, and a standing read that got no answer, draw the rows at once', async () => {
+		for (const doctor of [
+			{ known: false, hint: 'none' as const },
+			{ known: false, hint: 'doctor' as const, failed: true }
+		]) {
+			await draw({ doctor });
+			await waitFor(() =>
+				expect(screen.getByTestId('personal-details')).toHaveAttribute('data-view', 'ready')
+			);
+			expect(action('name')).toHaveTextContent('Επεξεργασία');
+			cleanup();
+		}
 	});
 
 	it('the date of birth: the kit’s ONE date field, saved as the day’s instant through the patient’s own write; the server’s 120 years are said under the field', async () => {

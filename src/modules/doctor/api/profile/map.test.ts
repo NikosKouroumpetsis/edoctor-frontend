@@ -28,7 +28,7 @@ const base = {
 		}
 	],
 	services: [
-		{ doctorServiceId: 'svc-1', title: 'Simple visit', price: null, isSpecialized: true },
+		{ doctorServiceId: 'svc-1', title: 'Simple visit', price: null },
 		{ doctorServiceId: 'svc-2', title: 'Vaccination', price: null }
 	],
 	socialLinks: {
@@ -47,20 +47,64 @@ const base = {
 };
 
 describe('api/profile map', () => {
-	it('U-36.2 (app = web): a service carries the server’s `isSpecialized` mark (absent ⇒ false)', () => {
-		const profile = mapDoctorProfile(answer(base), { slug: 'dr-athena', lang: 'el' });
-		expect(profile.services?.map((service) => [service.id, service.isSpecialized])).toEqual([
-			['svc-1', true],
-			['svc-2', false]
+	// Rewrites «U-36.2 (app = web): a service carries the server’s `isSpecialized` mark (absent ⇒ false)» by U-209.3
+	// (D-W52-56 / 60): the mark is gone from the contract, the fields come from the closed list.
+	it('🔴 D-W52-60 (U-209.3, app = web): no service is a field of expertise — an old server’s `isSpecialized` is not read — and the doctor’s «Τομείς εξειδίκευσης» are the `specializations` the server sends, in its order', () => {
+		const marked = {
+			...base,
+			services: [
+				{ doctorServiceId: 'svc-1', title: 'Simple visit', price: null, isSpecialized: true }
+			],
+			specializations: [
+				{ code: 'PR021-03', name: ' Εντατική θεραπεία ' },
+				{ code: 'PR021-04', name: 'Σακχαρώδης διαβήτης' }
+			]
+		};
+		const profile = mapDoctorProfile(answer(marked), { slug: 'dr-athena', lang: 'el' });
+		expect(profile.services?.[0]).not.toHaveProperty('isSpecialized');
+		expect(profile.specializations).toEqual([
+			{ code: 'PR021-03', name: 'Εντατική θεραπεία' },
+			{ code: 'PR021-04', name: 'Σακχαρώδης διαβήτης' }
 		]);
+		// None sent (or an answer of before the list): no fields at all, never a guess from the services.
+		expect(mapDoctorProfile(answer(base), { slug: 'dr-athena', lang: 'el' })).not.toHaveProperty(
+			'specializations'
+		);
 	});
 
-	it('U-35.3: only `http(s)` links reach an `href` — a `javascript:` or `data:` address from the wire is dropped', () => {
+	it('🔴 D-W52-60 · U-65.6 (negative): a line that is no line of the catalogue is left out — a code out of shape, no name, a name too long, one twice, no object — markup stays text, and the list is cut at the server’s three', () => {
+		const lines = (specializations: unknown) =>
+			mapDoctorProfile(answer({ ...base, specializations }), {
+				slug: 'dr-athena',
+				lang: 'el'
+			}).specializations;
+		expect(
+			lines([
+				{ code: 'PR021-03', name: '<img src=x onerror=alert(1)>' },
+				{ code: 'pr021-03', name: 'πεζά' },
+				{ code: 'PR021-3', name: 'κοντός' },
+				{ code: "PR021-04'; DROP", name: 'κώδικας' },
+				{ code: 'PR021-05', name: '   ' },
+				{ code: 'PR021-06', name: 'x'.repeat(161) },
+				{ code: 'PR021-07' },
+				{ code: 7, name: 'αριθμός' },
+				{ code: 'PR021-03', name: 'δεύτερη φορά' },
+				null,
+				'PR021-08'
+			])
+		).toEqual([{ code: 'PR021-03', name: '<img src=x onerror=alert(1)>' }]);
+		expect(
+			lines(['01', '02', '03', '04', '05'].map((n) => ({ code: `PR021-${n}`, name: n })))
+		).toHaveLength(3);
+		for (const broken of [undefined, null, 'x', 7, {}, { 0: { code: 'PR021-01', name: 'x' } }]) {
+			expect(lines(broken)).toBeUndefined();
+		}
+	});
+
+	// Widened by D-W52-67 (app = web, closing list of 5.2): `https` only, as the server writes and the app reads.
+	it('U-35.3 · D-W52-67: only `https` links reach an `href` — an old `http:`, a `javascript:` or `data:` address from the wire is dropped', () => {
 		const profile = mapDoctorProfile(answer(base), { slug: 'dr-athena', lang: 'el' });
-		expect(profile.socialLinks).toEqual([
-			{ id: 'website', url: 'https://athena.example' },
-			{ id: 'linkedin', url: 'http://linkedin.example/in/athena' }
-		]);
+		expect(profile.socialLinks).toEqual([{ id: 'website', url: 'https://athena.example' }]);
 	});
 
 	it('U-41.1 / U-42.1: every photo with its three sizes and its words; the description’s paragraphs, blank ones dropped', () => {

@@ -111,6 +111,7 @@ export const DOCTOR_SAMPLE_IDS = {
 	outcomeAppointment: '018f3c1e-0000-7000-8000-000000000da2',
 	canceledAppointment: '018f3c1e-0000-7000-8000-000000000da3',
 	reviewAppointment: '018f3c1e-0000-7000-8000-000000000da4',
+	reviewRating: '018f3c1e-0000-7000-8000-000000000db4',
 	connection: '018f3c1e-0000-7000-8000-000000000dc1',
 	doctor: '018f3c1e-0000-7000-8000-000000000dd1'
 } as const;
@@ -157,7 +158,8 @@ export function sampleDoctorInboxItems(): SampleInboxItem[] {
 			body: 'Κατερίνα Λαμπράκη · για την επίσκεψη της 9 Νοεμβρίου',
 			occurredAt: '2026-11-11T09:00:00.000Z',
 			read: true,
-			target: { kind: 'APPOINTMENT', id: DOCTOR_SAMPLE_IDS.reviewAppointment }
+			// 🔴 D-W52-88: the line of a published review names the review itself (`w52-b8` §5).
+			target: { kind: 'RATING', id: DOCTOR_SAMPLE_IDS.reviewRating }
 		}),
 		item({
 			id: DOCTOR_SAMPLE_IDS.sync,

@@ -42,7 +42,8 @@ import { appointmentDayTimeLabel, appointmentShortWhenLabel } from '$shared/lib/
 /**
  * The service the slots are read for (the application's `resolveRescheduleServiceId`, _source: backend
  * `commands/appointment/Command.ts` — a patch recomputes the visit from the LONGEST ACTIVE line): a line the doctor
- * removed (D-71) is history the server ignores. `''` without an active line.
+ * removed (D-71) is history the server ignores. `''` without an active line. 🔴 D-W52-75α: screen 52 no longer reads
+ * the hours of a service (they are the appointment's own, `api/reschedule`); kept as the module's rule (U-30.2).
  */
 export function resolveRescheduleServiceId(
 	serviceLines: readonly Pick<

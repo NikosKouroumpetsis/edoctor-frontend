@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages.js';
+	import { formatVisitLength } from '$shared/lib/visit-length';
 	import { ChipGroup } from '$shared/ui/molecules/chip-group';
 	import { Chip } from '$shared/ui/primitives/chip';
 	import { DOCTOR_ONBOARDING_DURATIONS } from '$modules/doctor-onboarding/config';
@@ -19,11 +20,8 @@
 	const input = $derived(toDoctorServicePricingInput(values));
 	const durationHeading = $props.id();
 
-	/** «15 λεπτά», «1 λεπτό» (the booking's words, what the patient then reads). */
-	const minutesOf = (minutes: number) =>
-		minutes === 1
-			? m.doctor_onboarding_price_duration_option_one({ minutes }, options)
-			: m.doctor_onboarding_price_duration_option_other({ minutes }, options);
+	/** 🔴 D-W52-83 (D-W52-10): «45 λεπτά», and from one hour in hours — «1 ώρα», «1 ώρα και 30 λεπτά», «2 ώρες». */
+	const minutesOf = (minutes: number) => formatVisitLength(minutes, props.locale);
 
 	/** «Επόμενο» (record §6.4): `service-pricing`, whole euros and the visit's length; then its edits go. */
 	async function commit(): Promise<boolean> {
@@ -39,8 +37,8 @@
 </script>
 
 <!-- 39 · «Πόσο κοστίζει η απλή επίσκεψη;» (record §6.4): the big «€ __» in the middle, digits only, 1 to 9999, and the
-     visit's length as pills that wrap (15 / 20 / 30 / 45 / 60, 30 first), the chosen one ringed. No colour under the
-     pointer (U-100). -->
+     visit's length as pills that wrap (🔴 D-W52-83: D-W52-10's list, 15 to 2 hours — from one hour in hours — 30 first),
+     the chosen one ringed. No colour under the pointer (U-100). -->
 <Frame
 	{controller}
 	context={props}

@@ -1,6 +1,7 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { AppHeader } from '$shared/ui/organisms/app-header';
+	import { SplitView } from '$shared/ui/templates/split-view';
 	import { Ionicon } from '$shared/ui/icons/ionicon';
 
 	const { Story } = defineMeta({
@@ -58,6 +59,50 @@
 <Story name="Compact" globals={at('z1128')}>
 	{#snippet template()}
 		<AppHeader {brand} {nav} {compact} compactOn {actions} />
+	{/snippet}
+</Story>
+
+{#snippet sideColumn()}
+	<div class="p-gutter-sm split:pl-6 laptop:pl-pane-inset">
+		<h1 class="text-heading-md font-semibold text-foreground">Λίστα</h1>
+		<p class="mt-3 text-body-md text-muted-foreground">Η λίστα ξεκινά κάτω από το σήμα.</p>
+	</div>
+{/snippet}
+
+<!-- U-215.3 (D-W52-12), `frame="box"`: the default, apple.com's 1024 in the middle whatever the page. -->
+<Story name="Frame: Box" globals={at('z1920')}>
+	{#snippet template()}
+		<AppHeader {brand} {nav} {actions} frame="box" />
+	{/snippet}
+</Story>
+
+<!-- `frame="page"`: always the page's frame — 24 from the edges, 48 from 1128, the links in the exact middle. -->
+<Story name="Frame: Page" globals={at('z1920')}>
+	{#snippet template()}
+		<AppHeader {brand} {nav} {actions} frame="page" />
+	{/snippet}
+</Story>
+
+<Story name="Frame: Page At 950" globals={at('z950')}>
+	{#snippet template()}
+		<AppHeader {brand} {nav} {actions} frame="page" />
+	{/snippet}
+</Story>
+
+<!-- `frame="split-page"`: the page's frame because the page stands on a `SplitView` — the mark over the side column. -->
+<Story name="Frame: Split Page, With A Side Column" globals={at('z1920')}>
+	{#snippet template()}
+		<AppHeader {brand} {nav} {actions} frame="split-page" />
+		<SplitView list={sideColumn}>
+			<p class="p-gutter-sm text-body-md text-foreground">Ό,τι άνοιξε η λίστα.</p>
+		</SplitView>
+	{/snippet}
+</Story>
+
+<!-- … and without one, the same bar is the 1024 box. -->
+<Story name="Frame: Split Page, Without A Side Column" globals={at('z1920')}>
+	{#snippet template()}
+		<AppHeader {brand} {nav} {actions} frame="split-page" />
 	{/snippet}
 </Story>
 

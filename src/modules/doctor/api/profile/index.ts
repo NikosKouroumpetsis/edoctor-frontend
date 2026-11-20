@@ -45,5 +45,6 @@ export type {
 	DoctorServiceKind,
 	DoctorSocialLinkFacts,
 	DoctorSocialLinkId,
+	DoctorSpecializationFacts,
 	DoctorWeekday
 } from './types';

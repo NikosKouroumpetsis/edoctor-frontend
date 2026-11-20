@@ -95,10 +95,17 @@ function findOverlayIssues(files: SourceFile[]): string[] {
 const WIDE_ZONES = ['split', 'laptop', 'desktop', 'wide'];
 const AGAINST_THE_LIST = /^m[xlrse]-0$/u;
 const ONE_SIDED_INSET = /^p[lrse]-pane-inset(?:-\w+)?$/u;
+// 🔴 U-215.3 · D-W52-11: the LEFT columns (the lists themselves) stand under the logo, 48 from 1128 — the rule is the right's.
+const LIST_COLUMNS = [
+	'src/modules/appointments/ui/list/components/column.svelte',
+	'src/modules/appointments/ui/relatives/components/column.svelte'
+];
 
 function findPinnedColumnIssues(files: SourceFile[]): string[] {
 	return files.flatMap((file) => {
-		const scanned = CHANGE_SCREENS.test(file.path) || file.path === STEP_SCREEN;
+		const scanned =
+			(CHANGE_SCREENS.test(file.path) || file.path === STEP_SCREEN) &&
+			!LIST_COLUMNS.includes(file.path);
 		if (!scanned || /\.(?:test|stories)\./u.test(file.path)) return [];
 		const found: string[] = [];
 		for (const { line, tokens } of classStrings(file.text)) {
@@ -384,6 +391,11 @@ describe('🔴 U-167: η δεξιά στήλη των σελίδων του 4.0 
 				planted(
 					'src/modules/articles/ui/detail/page/index.svelte',
 					'<div class="laptop:mx-0"></div>'
+				),
+				// U-215.3 · D-W52-11: the list on the left takes the logo's 48 alone — not this rule's.
+				planted(
+					'src/modules/appointments/ui/list/components/column.svelte',
+					"const column = 'split:px-6 laptop:pl-pane-inset';"
 				)
 			])
 		).toEqual([

@@ -5,8 +5,7 @@ const facts = {
 	id: 'svc-1',
 	title: 'Επίσκεψη',
 	kind: 'visit' as const,
-	priceRange: { min: 40, max: 40 },
-	isSpecialized: false
+	priceRange: { min: 40, max: 40 }
 };
 
 describe('lib/detail priced-services (U-70)', () => {

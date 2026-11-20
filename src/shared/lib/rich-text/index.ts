@@ -1,3 +1,13 @@
+import {
+	articleLinkIssue,
+	articleVideoEmbedUrl,
+	articleVideoName,
+	cleanArticleTextRun,
+	type ArticleTextDoc,
+	type ArticleTextNode,
+	type ArticleVideoProvider
+} from '$shared/lib/article-text';
+
 /**
  * A node of a backend rich-text document, deliberately tolerant (the application's `shared/lib/rich-text`): every
  * field optional, both child spellings (`content`, `children`). Three shapes arrive: tiptap (`{ type: 'paragraph',
@@ -44,7 +54,19 @@ export type RichTextInput =
 /** A link the renderer may draw: http(s) opens a new tab (`external`), `mailto:`, `tel:` and `/…` stay. */
 export type RichTextLink = { href: string; external: boolean };
 
-export type RichTextRun = { text: string; bold: boolean; italic: boolean };
+/**
+ * A run of words with one look. 🔴 D-W52-104: an article of the closed schema also underlines, strikes and highlights,
+ * and breaks a line (`break`, its words empty); the tolerant reader leaves those unset.
+ */
+export type RichTextRun = {
+	text: string;
+	bold: boolean;
+	italic: boolean;
+	underline?: boolean;
+	strike?: boolean;
+	highlight?: boolean;
+	break?: boolean;
+};
 
 /** Runs that share one link (or none): the renderer draws a span as one `<a>` or as plain words. */
 export type RichTextSpan = { link: RichTextLink | null; runs: RichTextRun[] };
@@ -52,6 +74,14 @@ export type RichTextSpan = { link: RichTextLink | null; runs: RichTextRun[] };
 export type RichTextHeadingLevel = 2 | 3 | 4;
 
 export type RichTextListItem = { key: string; blocks: RichTextBlock[] };
+
+/** One cell of a table (🔴 D-W52-104): a header cell or a plain one, with its paragraphs and lists. */
+export type RichTextTableCell = { key: string; header: boolean; blocks: RichTextBlock[] };
+
+export type RichTextTableRow = { key: string; cells: RichTextTableCell[] };
+
+/** The address an uploaded image of an article's text is served from, and its size when the server gave it. */
+export type RichTextImageSource = { url: string; width: number | null; height: number | null };
 
 /** The allowlist (U-57.4, common v2 §B): paragraph, heading 2–4, a list (bullets or numbers) of items. Nothing else is drawn. */
 export type RichTextBlock =
@@ -69,7 +99,27 @@ export type RichTextBlock =
 			/** The popular question's place (`attrs.popularRank`, a whole number from 1), when the CMS orders them. */
 			popularRank: number | null;
 	  }
-	| { kind: 'list'; key: string; ordered: boolean; items: RichTextListItem[] };
+	| { kind: 'list'; key: string; ordered: boolean; start?: number; items: RichTextListItem[] }
+	/** 🔴 D-W52-104: the blocks only an article of the closed schema has. */
+	| { kind: 'quote' | 'callout'; key: string; blocks: RichTextBlock[] }
+	| { kind: 'rule'; key: string }
+	| {
+			kind: 'image';
+			key: string;
+			url: string;
+			alt: string;
+			caption: string | null;
+			width: number | null;
+			height: number | null;
+	  }
+	| {
+			kind: 'video';
+			key: string;
+			provider: ArticleVideoProvider;
+			name: string;
+			embedUrl: string;
+	  }
+	| { kind: 'table'; key: string; rows: RichTextTableRow[] };
 
 export type RichTextHeading = { id: string; label: string; level: RichTextHeadingLevel };
 
@@ -340,6 +390,192 @@ export function buildRichText(input: RichTextInput): RichTextContent {
 	return { blocks, headings: builder.headings };
 }
 
+type ClosedStyle = Omit<RichTextRun, 'text' | 'break'> & { link: RichTextLink | null };
+
+/** 🔴 D-W52-104: the look of a text node of the closed schema — its known marks; an unknown mark changes nothing. */
+function closedStyleOf(node: ArticleTextNode): ClosedStyle {
+	const style: ClosedStyle = {
+		bold: false,
+		italic: false,
+		underline: false,
+		strike: false,
+		highlight: false,
+		link: null
+	};
+	for (const mark of Array.isArray(node.marks) ? node.marks : []) {
+		if (mark?.type === 'bold') style.bold = true;
+		else if (mark?.type === 'italic') style.italic = true;
+		else if (mark?.type === 'underline') style.underline = true;
+		else if (mark?.type === 'strike') style.strike = true;
+		else if (mark?.type === 'highlight') style.highlight = true;
+		else if (mark?.type === 'link' && articleLinkIssue(mark.attrs?.href) === null)
+			style.link = { href: String(mark.attrs?.href), external: true };
+	}
+	return style;
+}
+
+const sameLook = (a: RichTextRun, b: Omit<RichTextRun, 'text'>) =>
+	!a.break &&
+	!b.break &&
+	a.bold === b.bold &&
+	a.italic === b.italic &&
+	Boolean(a.underline) === Boolean(b.underline) &&
+	Boolean(a.strike) === Boolean(b.strike) &&
+	Boolean(a.highlight) === Boolean(b.highlight);
+
+/** The spans of one paragraph or heading of the closed schema: text and line breaks, grouped by link; `[]` without words. */
+function closedSpansOf(node: ArticleTextNode): RichTextSpan[] {
+	const spans: RichTextSpan[] = [];
+	for (const child of Array.isArray(node.content) ? node.content : []) {
+		if (child?.type !== 'text' && child?.type !== 'hardBreak') continue;
+		const { link, ...look } = closedStyleOf(child);
+		const run: RichTextRun =
+			child.type === 'hardBreak'
+				? { ...look, text: '', break: true }
+				: { ...look, text: cleanArticleTextRun(typeof child.text === 'string' ? child.text : '') };
+		if (!run.break && !run.text) continue;
+		const last = spans.at(-1);
+		const target =
+			last && (last.link?.href ?? null) === (link?.href ?? null) ? last : { link, runs: [] };
+		if (target !== last) spans.push(target);
+		const previous = target.runs.at(-1);
+		if (previous && sameLook(previous, run)) previous.text += run.text;
+		else target.runs.push(run);
+	}
+	return spans.some((span) => span.runs.some((run) => run.text.trim())) ? spans : [];
+}
+
+/**
+ * 🔴 D-W52-104 (U-222.4): the blocks of an article of the closed schema — every node of the list with its own block, a
+ * node outside the list NOT drawn (neither it nor its words), a link only with an `https:` address, an image only when
+ * the article names its upload (`images`), a video only of its provider's pattern. Headings share the ids of the ToC.
+ */
+export function buildArticleRichText(
+	doc: ArticleTextDoc,
+	images: (imageId: string) => RichTextImageSource | null
+): RichTextContent {
+	const builder: Builder = { used: new Set(), next: 0, headings: [] };
+	const flow = (nodes: ArticleTextNode[] | undefined): RichTextBlock[] => {
+		const blocks: RichTextBlock[] = [];
+		for (const node of Array.isArray(nodes) ? nodes : []) {
+			const block = closedBlockOf(node, builder, images, flow);
+			if (block) blocks.push(block);
+		}
+		return blocks;
+	};
+	return { blocks: flow(doc.content), headings: builder.headings };
+}
+
+function closedBlockOf(
+	node: ArticleTextNode,
+	builder: Builder,
+	images: (imageId: string) => RichTextImageSource | null,
+	flow: (nodes: ArticleTextNode[] | undefined) => RichTextBlock[]
+): RichTextBlock | null {
+	switch (node?.type) {
+		case 'paragraph': {
+			const spans = closedSpansOf(node);
+			return spans.length ? { kind: 'paragraph', key: keyOf(builder), spans } : null;
+		}
+		case 'heading': {
+			const text = spansText(closedSpansOf(node)).trim();
+			const level = node.attrs?.level === 3 ? 3 : 2;
+			if (!text) return null;
+			const id = claimId(builder, slugifyHeading(text));
+			builder.headings.push({ id, label: text, level });
+			return {
+				kind: 'heading',
+				key: keyOf(builder),
+				level,
+				id,
+				text,
+				label: null,
+				popular: false,
+				popularRank: null
+			};
+		}
+		case 'bulletList':
+		case 'orderedList': {
+			const items = (Array.isArray(node.content) ? node.content : [])
+				.filter((item) => item?.type === 'listItem')
+				.map((item) => ({ key: keyOf(builder), blocks: flow(item.content) }))
+				.filter((item) => item.blocks.length > 0);
+			if (!items.length) return null;
+			const start = node.attrs?.start;
+			return {
+				kind: 'list',
+				key: keyOf(builder),
+				ordered: node.type === 'orderedList',
+				...(node.type === 'orderedList' && Number.isInteger(start) && (start as number) > 1
+					? { start: start as number }
+					: {}),
+				items
+			};
+		}
+		case 'blockquote':
+		case 'callout': {
+			const blocks = flow(node.content);
+			return blocks.length
+				? { kind: node.type === 'blockquote' ? 'quote' : 'callout', key: keyOf(builder), blocks }
+				: null;
+		}
+		case 'horizontalRule':
+			return { kind: 'rule', key: keyOf(builder) };
+		case 'image': {
+			const imageId = typeof node.attrs?.imageId === 'string' ? node.attrs.imageId : '';
+			const source = imageId ? images(imageId) : null;
+			if (!source) return null;
+			const alt = typeof node.attrs?.alt === 'string' ? cleanArticleTextRun(node.attrs.alt) : '';
+			const caption =
+				typeof node.attrs?.caption === 'string'
+					? cleanArticleTextRun(node.attrs.caption).trim()
+					: '';
+			return {
+				kind: 'image',
+				key: keyOf(builder),
+				url: source.url,
+				alt,
+				caption: caption || null,
+				width: source.width,
+				height: source.height
+			};
+		}
+		case 'video': {
+			const provider = node.attrs?.provider;
+			const id = node.attrs?.id;
+			if ((provider !== 'youtube' && provider !== 'vimeo') || typeof id !== 'string') return null;
+			const embedUrl = articleVideoEmbedUrl({ provider, id });
+			return embedUrl
+				? {
+						kind: 'video',
+						key: keyOf(builder),
+						provider,
+						name: articleVideoName(provider),
+						embedUrl
+					}
+				: null;
+		}
+		case 'table': {
+			const rows = (Array.isArray(node.content) ? node.content : [])
+				.filter((row) => row?.type === 'tableRow')
+				.map((row) => ({
+					key: keyOf(builder),
+					cells: (Array.isArray(row.content) ? row.content : [])
+						.filter((cell) => cell?.type === 'tableCell' || cell?.type === 'tableHeader')
+						.map((cell) => ({
+							key: keyOf(builder),
+							header: cell.type === 'tableHeader',
+							blocks: flow(cell.content)
+						}))
+				}))
+				.filter((row) => row.cells.length > 0);
+			return rows.length ? { kind: 'table', key: keyOf(builder), rows } : null;
+		}
+		default:
+			return null;
+	}
+}
+
 /** «Σε αυτό το άρθρο»: the headings of one level (the body's first, 2), in order, with the body's ids. */
 export function richTextToc(
 	headings: readonly RichTextHeading[],
@@ -357,7 +593,10 @@ export function richTextBlocksText(blocks: readonly RichTextBlock[]): string {
 		for (const block of list) {
 			if (block.kind === 'heading') parts.push(block.text);
 			else if (block.kind === 'paragraph') parts.push(spansText(block.spans));
-			else for (const item of block.items) walk(item.blocks);
+			else if (block.kind === 'list') for (const item of block.items) walk(item.blocks);
+			else if (block.kind === 'quote' || block.kind === 'callout') walk(block.blocks);
+			else if (block.kind === 'table')
+				for (const row of block.rows) for (const cell of row.cells) walk(cell.blocks);
 		}
 	};
 	walk(blocks);

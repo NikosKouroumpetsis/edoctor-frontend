@@ -92,6 +92,29 @@ describe('RadioRows (U-112: one choice as rows, never tiles; shared since D-W51-
 		expect(other.textContent?.trim()).toBe('Δεν ήρθε');
 	});
 
+	it('wave 5.2 · screen 85 (`sw.css:627-628` `.w-arkind`): with `notePlace="under"` the note stands on its own line under the label — 13 muted, 2 apart — part of its name', () => {
+		render(RadioRows, {
+			props: {
+				label: 'Είδος',
+				value: 'a',
+				notePlace: 'under',
+				options: [
+					{ value: 'a', label: 'Άρθρο', note: 'Εξηγεί ένα θέμα υγείας.' },
+					{ value: 'b', label: 'Συμβουλή' }
+				],
+				onChange: vi.fn()
+			}
+		});
+		const [first, second] = screen.getAllByRole('radio');
+		expect(first).toHaveAccessibleName('Άρθρο Εξηγεί ένα θέμα υγείας.');
+		const note = first.querySelector('[data-slot="radio-rows-note"]');
+		expect(note).toHaveClass('text-label-lg', 'font-normal', 'text-muted-foreground');
+		expect(note?.className).not.toContain('ms-1.5');
+		expect(note?.parentElement).toHaveClass('flex-col', 'gap-0.5');
+		expect(note?.previousElementSibling).toHaveTextContent('Άρθρο');
+		expect(second.querySelector('[data-slot="radio-rows-note"]')).toBeNull();
+	});
+
 	it('(negative, U-65.6) a note is text, never HTML', () => {
 		render(RadioRows, {
 			props: {

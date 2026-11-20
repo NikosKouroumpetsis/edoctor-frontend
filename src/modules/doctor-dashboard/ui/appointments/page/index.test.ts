@@ -701,6 +701,29 @@ describe('🔴 the guards of the contract', () => {
 		expect(cardOf('r1').querySelector('img, b')).toBeNull();
 		expect(cardOf('r1')).toHaveTextContent('«<img src=x onerror=alert(1)><b>βήχας</b>»');
 	});
+
+	it('🔴 U-215.3: η λίστα κάτω από το λογότυπο — beside the appointment it opened (from 1128) the list’s column starts 48 from the frame’s edge (D-W52-11), its right side and its ends as they were; ONE column in the middle takes none of it', async () => {
+		wideScreen(true);
+		serve(FULL);
+		const wide = open(appointmentAt('u2'), 'the 68');
+		await ready();
+		expect(split()).not.toHaveAttribute('data-solo');
+		expect(page()).toHaveClass(
+			'px-gutter-sm',
+			'laptop:max-w-none',
+			'laptop:pb-pane-inset-lg',
+			'laptop:pl-pane-inset'
+		);
+		for (const name of ['pl-pane-inset', 'split:pl-pane-inset', 'laptop:px-pane-inset'])
+			expect(page(), name).not.toHaveClass(name);
+		wide.view.unmount();
+		wideScreen(false);
+		open();
+		await ready();
+		expect(split()).toHaveAttribute('data-solo');
+		expect(page()).toHaveClass('px-gutter-sm', 'laptop:max-w-none', 'laptop:pb-pane-inset-lg');
+		expect(page()).not.toHaveClass('laptop:pl-pane-inset');
+	});
 });
 
 describe('🔴 D-W51-25 · the same one tap as «Σήμερα»', () => {

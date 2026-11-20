@@ -143,8 +143,10 @@ export function notificationWhen(
 }
 
 /**
- * 🔴 D-W45-45 / D-W45-59: what a press opens. `APPOINTMENT` the appointment's screen (51; the doctor's 68, D-W51-90 —
- * a new review's line too), `RATING_INVITATION` the visit's review (54). `QUESTION` — no «οι ερωτήσεις μου» exists on
+ * 🔴 D-W45-45 / D-W45-59: what a press opens. `APPOINTMENT` the appointment's screen (51; the doctor's 68, D-W51-90),
+ * `RATING_INVITATION` the visit's review (54), 🔴 D-W52-88 / 91 `RATING` the doctor's review in «Κριτικές» (84: «Νέα
+ * κριτική» and «Η απάντησή σας δεν δημοσιεύτηκε»), 🔴 D-W52-102 `ARTICLE` the doctor's article (85: «Το άρθρο σας
+ * δημοσιεύτηκε / δεν δημοσιεύτηκε»). `QUESTION` — no «οι ερωτήσεις μου» exists on
  * the site — `CALENDAR_CONNECTION` and `DOCTOR` — the web has no «Σύνδεση ημερολογίου» and no «Λογαριασμός γιατρού» in
  * 5.1 (D-W51-04, D-W51-90) — and a kind the page does not know open NOTHING: the press only reads the line.
  */
@@ -153,6 +155,8 @@ export function notificationTargetOf(
 ): NotificationTarget | null {
 	if (target?.kind === 'APPOINTMENT') return { kind: 'appointment', id: target.id };
 	if (target?.kind === 'RATING_INVITATION') return { kind: 'rating', id: target.id };
+	if (target?.kind === 'RATING') return { kind: 'review', id: target.id };
+	if (target?.kind === 'ARTICLE') return { kind: 'article', id: target.id };
 	return null;
 }
 

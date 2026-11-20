@@ -510,6 +510,33 @@ describe('the messages’ page (U-84, screens 18 + 21)', () => {
 		expect(screen.queryByTestId('messages-settings')).toBeNull();
 	});
 
+	it('🔴 U-215.3: η λίστα κάτω από το λογότυπο — beside the conversation the list starts 48 from the frame’s edge from 1128 (D-W52-11; 24 at 950–1127, 16 on its right as it was), on the doctor’s side too; the archive, a page of its own, takes none of it', async () => {
+		for (const side of ['patient', 'doctor'] as const) {
+			draw({ side });
+			await screen.findAllByTestId('messages-row');
+			const column = screen.getByTestId('messages-list');
+			expect(column.closest('[data-slot="split-view-list"]')).not.toBeNull();
+			expect(column, side).toHaveClass(
+				'split:max-w-none',
+				'split:pt-6',
+				'split:pr-4',
+				'split:pb-section',
+				'split:pl-6',
+				'laptop:pl-pane-inset'
+			);
+			for (const name of ['pl-pane-inset', 'split:pl-pane-inset', 'laptop:px-pane-inset'])
+				expect(column, `${side} ${name}`).not.toHaveClass(name);
+			cleanup();
+		}
+		list = [];
+		draw({ archive: true });
+		await screen.findByTestId('messages-archive-empty');
+		const archive = screen.getByTestId('messages-archive');
+		expect(archive.closest('[data-slot="split-view"]')).toBeNull();
+		expect(archive).toHaveClass('split:pl-6');
+		expect(archive.className).not.toMatch(/pane-inset/u);
+	});
+
 	it('Π1: from 950 the newest conversation opens beside the list, in place of the list’s address', async () => {
 		vi.stubGlobal(
 			'matchMedia',

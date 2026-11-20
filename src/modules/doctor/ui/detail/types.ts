@@ -81,6 +81,13 @@ export type DoctorDetailPageProps = {
 	contact?: Snippet;
 	/** Without it (a doctor the read names no id for, a slice alone) a heart only asks for the sign-in. */
 	favorite?: DoctorFavorite;
+	/**
+	 * 🔴 D-W52-26 (U-224): the page as its own doctor previews it, under a band of the page that holds it («Δείτε πώς σας
+	 * βλέπουν»). A personal page: no head of the public profile (title, description, canonical, alternates, Open Graph,
+	 * JSON-LD — the holder writes its own, `noindex`), no bar of its own over that band (the phone's «‹ · share · heart»,
+	 * the sections' bar from 744), and its windows open on the page's OWN address, never the public one.
+	 */
+	preview?: boolean;
 };
 
 /** 🔴 U-73 (screen 16): the doctor's own page: the route's load, the page's language, the site's addresses. */
@@ -111,4 +118,9 @@ export type DoctorDetailErrorProps = {
 	href?: (path: string) => string;
 	/** «Δοκιμάστε ξανά» of a failed read: the route's load again. */
 	onRetry: () => void;
+	/**
+	 * 🔴 D-W52-26 (U-224): the «δεν βρέθηκε» of the doctor's own preview, under its holder's band — no phone bar of its own
+	 * over that band (its «‹» is the band's «Κλείσιμο»).
+	 */
+	preview?: boolean;
 };

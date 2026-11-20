@@ -6,6 +6,7 @@
 	import { breakpoints } from '$shared/design/tokens';
 	import { isPlainClick, useHistorySteps } from '$shared/lib/navigation';
 	import { nearEnd } from '$shared/lib/near-end';
+	import { cn } from '$shared/lib/utils';
 	import { EmptyState } from '$shared/ui/molecules/empty-state';
 	import { InlineNotice } from '$shared/ui/molecules/inline-notice';
 	import { PersonRows, type PersonRow } from '$shared/ui/molecules/person-rows';
@@ -113,12 +114,16 @@
 <!-- 🔴 D-W51-74 (`64-switch/sw.js:704-712` `ptsPage`, `sw.css:261-265`): «‹» to «Μενού» below 744, the title and its line,
      the search (40 at most, quiet a moment; U-65.6), the 55's rows one under the other (U-112) — the next visit or the
      visits, «Το κλείνει: …», «Χωρίς λογαριασμό eDoctor» — and «Οι υπόλοιποι φορτώνουν καθώς κυλάτε.» while the server
-     has more; with nobody yet «Δεν έχετε ακόμη ασθενείς» and «Νέο ραντεβού». Every word a text node. -->
+     has more; with nobody yet «Δεν έχετε ακόμη ασθενείς» and «Νέο ραντεβού». Every word a text node. 🔴 U-215.3
+     (D-W52-11, `sw.css:171`): beside a patient's card the column starts under the bar's mark, 48 from the frame's edge. -->
 {#snippet column()}
 	<main
 		data-testid="doctor-patients"
 		data-view={list.view}
-		class="mx-auto flex w-full max-w-content flex-col px-gutter-sm pt-3 pb-section tablet:pt-section laptop:max-w-none laptop:pb-pane-inset-lg"
+		class={cn(
+			'mx-auto flex w-full max-w-content flex-col px-gutter-sm pt-3 pb-section tablet:pt-section laptop:max-w-none laptop:pb-pane-inset-lg',
+			!solo && 'laptop:pl-pane-inset'
+		)}
 	>
 		<IconButton
 			icon="chevron-back"

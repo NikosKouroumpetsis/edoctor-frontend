@@ -102,6 +102,10 @@ export function tokensToCss(): string {
 	for (const [name, value] of Object.entries(motion.duration)) {
 		lines.push(`\t--transition-duration-${name}: ${value}ms;`);
 	}
+	// D-W52-14: `delay-<name>`, the wait before a part of a staged motion starts (Tailwind's `--transition-delay-*`).
+	for (const [name, value] of Object.entries(motion.delay)) {
+		lines.push(`\t--transition-delay-${name}: ${value}ms;`);
+	}
 	for (const name of Object.keys(motion.easing) as MotionEasing[]) {
 		lines.push(`\t--ease-${name}: ${cubicBezierCss(name)};`);
 	}

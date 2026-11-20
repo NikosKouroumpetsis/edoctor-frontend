@@ -69,9 +69,14 @@ export type NotificationFilterChoice = {
 
 /**
  * 🔴 D-W45-45 / D-W45-59: what a press opens, in the page's own words — the appointment's screen (51) or the visit's
- * review (54). A line about a question, or about a kind the page does not know, opens nothing (no such screen yet).
+ * review (54); 🔴 D-W52-91: a review the doctor received (`review`, screen 84); 🔴 D-W52-102: an article of the doctor
+ * (`article`, screen 85). A line about a question, or about a kind the page does not know, opens nothing (no such
+ * screen yet).
  */
-export type NotificationTarget = { kind: 'appointment' | 'rating'; id: string };
+export type NotificationTarget = {
+	kind: 'appointment' | 'rating' | 'review' | 'article';
+	id: string;
+};
 
 /** One line as its row draws it: the server's words (cut to a line's most), when it came, and whether it is new. */
 export type NotificationRow = {

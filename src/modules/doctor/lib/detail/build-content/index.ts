@@ -281,28 +281,26 @@ export function buildProfessionalSection(
 }
 
 /**
- * 🔴 U-36.2, U-72.3 Π1 (app = web): «Τομείς εξειδίκευσης» are the services the server marks `isSpecialized`; none ⇒ no
- * section. The first three as rows, and the way to their page: «Εμφάνιση όλων των N τομέων» past three, else «Εμφάνιση
- * λεπτομερειών», since the page always has more (the fee, the duration, «Κλείστε…»).
+ * 🔴 D-W52-60 (U-209.3, U-225; it replaces U-36.2 / U-72.3 Π1, app = web): «Τομείς εξειδίκευσης» are the
+ * specializations the doctor picked from the closed list of the specialty, as the server sends them — three at most,
+ * every one a row by its name; never a service. None ⇒ no section. «Εμφάνιση λεπτομερειών» only when their page has
+ * more to say: its card of figures stands only with the visits or the years (the button only leads somewhere new, Π7).
  */
 export function buildSpecializations(
 	doctor: DoctorProfile,
-	locale: SupportedLocale
+	locale: SupportedLocale,
+	now: number
 ): DoctorDetailSpecializations | undefined {
-	const domains = (doctor.services ?? []).filter((service) => service.isSpecialized);
-	if (domains.length === 0) return undefined;
+	const fields = doctor.specializations ?? [];
+	if (fields.length === 0) return undefined;
+	const pageHasFigures =
+		Boolean(doctor.responseMetrics?.completedVisits) ||
+		wholeYearsSince(doctor.licenseObtainedDate, now) !== undefined;
 	return {
 		title: m.doctor_section_expertise({}, { locale }),
 		completedVisits: buildDoctorCompletedVisits(doctor.responseMetrics, locale),
-		items: buildPricedServices(
-			domains.slice(0, DOCTOR_SERVICE_COST_LIMIT),
-			doctor.pricingVisible,
-			locale
-		),
-		moreLabel:
-			domains.length > DOCTOR_SERVICE_COST_LIMIT
-				? m.doctor_specializations_show_all({ count: domains.length }, { locale })
-				: m.doctor_services_show_details({}, { locale })
+		items: fields.map(({ code, name }) => ({ id: code, title: name })),
+		moreLabel: pageHasFigures ? m.doctor_services_show_details({}, { locale }) : null
 	};
 }
 
@@ -570,7 +568,7 @@ export function buildDoctorDetailContent({
 }: BuildArgs & { confirmationMode?: DoctorConfirmationMode }): DoctorDetailContent {
 	const summary = buildSummary(doctor, locale, now, confirmationMode);
 	const professional = buildProfessionalSection(doctor, locale, now);
-	const specializations = buildSpecializations(doctor, locale);
+	const specializations = buildSpecializations(doctor, locale, now);
 	const serviceCost = buildServiceCost(doctor, locale);
 	const reviews = buildReviews(doctor, locale);
 	const bio = buildBio(doctor, locale);

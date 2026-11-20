@@ -13,11 +13,12 @@
 </script>
 
 <!-- apple.com's links, spread over the bar's middle: «Γιατροί · Κλινικές · Άρθρα υγείας», and from 1128 «Κέντρο
-     βοήθειας · Για γιατρούς» (Airbnb's rule: below, the ☰ menu has them). -->
+     βοήθειας · Για γιατρούς» (Airbnb's rule: below, the ☰ menu has them). 🔴 U-215.3, D-W52-12 (`appts.css:203`): on a
+     page with a `SplitView` the bar is the page's frame from 950, and there they stand together in its middle, 12 apart. -->
 <nav
 	aria-label={m.primary_navigation({}, messageOptions)}
 	data-slot="primary-nav"
-	class="flex flex-1 flex-row items-center justify-around px-6"
+	class="flex flex-1 flex-row items-center justify-around px-6 split:split-page:justify-center split:split-page:gap-3"
 >
 	<a href={href('/doctors')} class={[linkClass, 'inline-flex']}
 		>{m.nav_doctors({}, messageOptions)}</a

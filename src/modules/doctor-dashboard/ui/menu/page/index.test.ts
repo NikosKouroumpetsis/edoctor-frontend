@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/svelte';
+import { render, screen, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { DoctorStanding } from '$shared/state/doctor-standing';
 import { NotificationBadge } from '$shared/state/notification-badge';
@@ -42,7 +42,10 @@ describe('«Μενού» of the doctor as 5.1 ships it on the web (D-W51-04, scr
 
 	// Round 2 (U-81.2, `76-menu` m-51): the page's rows are the «Προφίλ»'s at 402 — no «Ειδοποιήσεις» (the bell at the
 	// title has it), «Βρείτε βοήθεια» for the help; the ☰ from 744 keeps both (the frame's tests).
-	it('D-W51-04 · round 2: the rows — Ρυθμίσεις λογαριασμού · Βρείτε βοήθεια · Όροι γιατρών · Αποσύνδεση; U-186.2 (negative): no «Οι συγγενείς μου», no «Ρυθμίσεις ιατρείου», no row «Ειδοποιήσεις»', () => {
+	// Rewritten by D-W52-22 (wave 5.2, card w52-w1; task doc §6): «Το προφίλ μου» is the first row, a link to screen 77.
+	// Widened by D-W52-91 (wave 5.2, card w52-w8; task doc §1.3): «Κριτικές», a link to screen 84, after «Οι ασθενείς μου».
+	// Widened by D-W52-102 (wave 5.2, card w52-w9): «Τα άρθρα μου», a link to screen 85, after «Κριτικές».
+	it('D-W51-04 · round 2 · 🔴 D-W52-22 · D-W52-91 · D-W52-102: the rows — Το προφίλ μου · Οι ασθενείς μου · Κριτικές · Τα άρθρα μου · Ρυθμίσεις λογαριασμού · Βρείτε βοήθεια · Όροι γιατρών · Αποσύνδεση; U-186.2 (negative): no «Οι συγγενείς μου», no «Ρυθμίσεις ιατρείου», no row «Ειδοποιήσεις»', () => {
 		drawMenu();
 		const page = screen.getByTestId('doctor-menu');
 		expect(
@@ -51,14 +54,21 @@ describe('«Μενού» of the doctor as 5.1 ships it on the web (D-W51-04, scr
 				row.getAttribute('href')
 			])
 		).toEqual([
-			// D-W51-73 (card w51-w9): «Οι ασθενείς μου» first, since step 9 (D-W51-04).
+			['Το προφίλ μου', '/doctor/profile'],
+			// D-W51-73 (card w51-w9): «Οι ασθενείς μου», since step 9 (D-W51-04).
 			['Οι ασθενείς μου', '/doctor/patients'],
+			['Κριτικές', '/doctor/reviews'],
+			['Τα άρθρα μου', '/doctor/articles'],
 			['Ρυθμίσεις λογαριασμού', '/profile/account-settings'],
 			['Βρείτε βοήθεια', '/help'],
 			['Όροι γιατρών', '/legal/doctor-marketplace-terms'],
 			['Αποσύνδεση', null]
 		]);
-		expect(page).not.toHaveTextContent(/συγγενείς|Ρυθμίσεις ιατρείου|Ταμείο|Το προφίλ μου/u);
+		expect(page).not.toHaveTextContent(/συγγενείς|Ρυθμίσεις ιατρείου|Ταμείο/u);
+		// U-186.2: the one row with the word — its first group's first row; the name card above it is never pressed.
+		const first = within(screen.getByTestId('doctor-menu-group-0')).getAllByRole('link')[0];
+		expect(first).toHaveAttribute('data-testid', 'doctor-menu-profile');
+		expect(first).toHaveTextContent('Το προφίλ μου');
 	});
 
 	it('round 2: «Μενού» and, at the end of its title row, what the screen hands in (the bell of screen 63)', () => {
